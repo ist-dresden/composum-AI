@@ -17,4 +17,8 @@
 		Reactor for Composum ChatGPT Integration Backend modules.
 	</description>
 
+	<modules>
+		<module>base</module>
+	</modules>
+
 </project>

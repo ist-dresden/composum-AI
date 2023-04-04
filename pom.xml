@@ -27,7 +27,7 @@
 
 	<modules>
 		<module>backend</module>
-		<module>frontend</module>
+		<module>composum</module>
 	</modules>
 
 </project>
