@@ -26,27 +26,13 @@ There are a number of ways ChatGPT's services could be valuable in a CMS. Those 
 
 We will start with simple services and build on that.
 
-## Project structure (Planned)
-
-### backend : general "under the hood" services
-
-- base : contains the basic strategies for ChatGPT API access and services building on that, and is intended to be
-  agnostic to the underlying platform - that is, no Apache Sling dependencies.
-- bundle : an OSGI bundle for the deployment and configuration of the basic module within Apache Sling -
-  should be deployable on plain Apache Sling, Composum Platform and AEM
-
-### composum : everything that's needed for integration into Composum Pages
-
-- ui.core : OSGI bundle providing the code to integrate with Composum Pages
-- ui.apps : /libs content for integration with Composum Pages
-- all : A single "uber"-package deploying everything necessary for integration into Composum Pages
-
-### aem (planned)
-
-- all : A single "uber"-package deploying everything necessary for integration into AEM
-
-## More documentation
+## More project documentation
 
 [Next steps](./NextSteps.md) contains a sketch of the next steps to be taken.
+
+[Architecture](./Architecture.md) contains a description of the chosen project architecture and records 
+architectural decisions.
+
+[Project structure](./ProjectStructure.md) describes the module structure of the project.
 
 [ChatGPT API Analysis](./ChatGPTAPI.md) contains a discussion of the ChatGPT API wrt. our project.
