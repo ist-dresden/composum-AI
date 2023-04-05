@@ -19,15 +19,27 @@
 		Reactor for Composum ChatGPT Integration, a set of modules to provide ChatGPT services for CMS like Composum
 		Pages or AEM
 	</description>
+	<url>https://github.com/ist-dresden/composum-chatgpt-integration</url>
+
+	<modules>
+		<module>backend</module>
+		<module>composum</module>
+	</modules>
 
 	<properties>
 		<composum.pages.version>1.5.0</composum.pages.version>
 		<composum.platform.version>1.7.0</composum.platform.version>
 	</properties>
 
-	<modules>
-		<module>backend</module>
-		<module>composum</module>
-	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.theokanning.openai-gpt3-java</groupId>
+				<artifactId>api</artifactId>
+				<version>0.12.0</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 </project>
