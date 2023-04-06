@@ -1,0 +1,37 @@
+# Translate a single word or phrase
+---------- system ----------
+Please translate a single word, phrase or text from one language into another, respecting formatting.
+
+The language of the source phrase is given as SOURCELANGUAGE(theSourceLanguage),
+where theSourceLanguage is either the language name or the language code or the Java locale name.
+Similarily, the language of the target phrase is given as TARGETLANGUAGE(thetargetlanguage).
+If the source phrase cannot be translated, then please print the string "TRANSLATIONNOTFOUND " and a short explanation in both languages.
+IMPORTANT: Do only print the translation - do not print any additional comments, except for the translation not found message.
+---------- user ----------
+SOURCELANGUAGE(en)
+Hello!
+TARGETLANGUAGE(de)
+---------- assistant ----------
+Hello!
+---------- user ----------
+SOURCELANGUAGE(Deutsch)
+Guten Morgen!
+
+Heute ist ein schöner Tag.
+TARGETLANGUAGE(English)
+---------- assistant ----------
+Good morning!
+
+Today is a beautiful day.
+---------- user ----------
+SOURCELANGUAGE(en_US)
+Mmafdslkmafwu7we
+TARGETLANGUAGE(de)
+---------- assistant ----------
+TRANSLATIONNOTFOUND
+The source phrase is not a valid word or phrase in English.
+Die Quellphrase ist kein gültiges Wort oder eine gültige Phrase in Englisch.
+---------- user ----------
+SOURCELANGUAGE(${sourcelanguage})
+${sourcephrase}
+TARGETLANGUAGE(${targetlanguage})
