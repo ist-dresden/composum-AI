@@ -1,4 +1,4 @@
-package com.composum.chatgpt.base.impl.service.chat;
+package com.composum.chatgpt.base.service.chat.impl;
 
 import java.io.IOException;
 import java.net.URI;
@@ -8,7 +8,6 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,7 +25,7 @@ import com.composum.chatgpt.base.impl.RateLimiter;
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.chatgpt.base.service.chat.GPTChatMessage;
 import com.composum.chatgpt.base.service.chat.GPTChatRequest;
-import com.composum.chatgpt.base.service.chat.GPTException;
+import com.composum.chatgpt.base.service.GPTException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
@@ -126,6 +125,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.debug("Response {} from GPT: {}", id, choices.get(0).getMessage());
             return choices.get(0).getMessage().getContent();
         } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
             LOG.error("Error while calling GPT", e);
             throw new GPTException("Error while calling GPT", e);
         }

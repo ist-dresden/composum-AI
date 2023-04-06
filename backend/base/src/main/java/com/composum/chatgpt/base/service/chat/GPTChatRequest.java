@@ -2,7 +2,6 @@ package com.composum.chatgpt.base.service.chat;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A request to ChatGPT.

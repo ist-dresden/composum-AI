@@ -1,0 +1,9 @@
+# A template for a chat, consisting of a couple of messages
+---------- system ----------
+The system message telling what to do
+---------- user ----------
+perhaps an user message as example what to expect
+---------- assistant ----------
+perhaps an assistant message as example what to expect
+---------- user ----------
+the user message

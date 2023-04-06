@@ -1,0 +1,9 @@
+# comment to ignore
+---------- system ----------
+system message content
+---------- user ----------
+user message template
+---------- assistant ----------
+assistant message template
+---------- user ----------
+data with placeholder ${this} or ${that}

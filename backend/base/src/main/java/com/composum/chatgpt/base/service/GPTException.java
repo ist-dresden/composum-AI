@@ -1,4 +1,4 @@
-package com.composum.chatgpt.base.service.chat;
+package com.composum.chatgpt.base.service;
 
 /**
  * Any kind of error when accessing GPT.
