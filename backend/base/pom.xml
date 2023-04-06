@@ -22,9 +22,14 @@
 			<groupId>com.theokanning.openai-gpt3-java</groupId>
 			<artifactId>api</artifactId>
 		</dependency>
+		<!--		<dependency>-->
+		<!--			<groupId>org.apache.httpcomponents</groupId>-->
+		<!--			<artifactId>httpclient-osgi</artifactId>-->
+		<!--		</dependency>-->
+
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient-osgi</artifactId>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<!-- Logging -->
@@ -37,6 +42,16 @@
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
+		</dependency>
+
+		<!-- OSGi, Felix -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
 		</dependency>
 
 		<!-- JUnit -->
