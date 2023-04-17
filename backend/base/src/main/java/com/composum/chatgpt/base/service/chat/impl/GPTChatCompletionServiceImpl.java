@@ -92,6 +92,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
                     .model(defaultModel)
                     .messages(messages)
+                    .maxTokens(request.getMaxTokens())
                     .build();
             String jsonRequest = mapper.writeValueAsString(externalRequest);
 

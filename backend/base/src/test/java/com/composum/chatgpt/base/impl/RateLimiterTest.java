@@ -139,7 +139,9 @@ public class RateLimiterTest {
         ec.checkThat(time, is(startTime + 360000L));
     }
 
-    /** Test that if we have a limit of 10 requests in 100 seconds, and we get 10 requests evenly spaced out over one minute, that we do never have a waiting time. */
+    /**
+     * Test that if we have a limit of 10 requests in 100 seconds, and we get 10 requests evenly spaced out over one minute, that we do never have a waiting time.
+     */
     @Test
     public void testEvenlySpacedRequestsDontWait() {
         limiter = new RateLimiterWithTestSetup(null, 10, 100, TimeUnit.SECONDS);
@@ -163,7 +165,7 @@ public class RateLimiterTest {
         long duration = time - startTime;
         double realrate = requestcount * 1.0 / TimeUnit.MILLISECONDS.toSeconds(duration); // requests per second
         double expectedRate = 10.0 / 100.0;
-        System.out.printf("Real rate: %.2f, expected rate: %.2f%n", realrate, expectedRate);
+        // System.out.printf("Real rate: %.2f, expected rate: %.2f%n", realrate, expectedRate);
         long minimumDuration = TimeUnit.SECONDS.toMillis(1000 / 10 * 100);
         ec.checkThat("Actually taken " + duration, duration > minimumDuration, is(true));
         // the real rate should be below the expected rate, but above 95% of it (statistical fluctuations)

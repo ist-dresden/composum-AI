@@ -39,6 +39,9 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         GPTChatRequest request = new GPTChatRequest();
         List<GPTChatMessage> messages = template.getMessages(Map.of("sourcelanguage", sourceLanguage, "sourcephrase", text, "targetlanguage", targetLanguage));
         request.addMessages(messages);
+        // set request.setMaxTokens to about 2 times the number of words in the text to translate
+        // since that seems a likely limit for the translation
+        request.setMaxTokens(2 * text.split("\\s+").length);
         String response = chatCompletionService.getSingleChatCompletion(request);
         return response;
     }

@@ -9,6 +9,7 @@ import java.util.List;
 public class GPTChatRequest {
 
     private final ArrayList<GPTChatMessage> messages = new ArrayList<>();
+    private Integer maxTokens;
 
     /**
      * Builder style adding of messages.
@@ -37,10 +38,22 @@ public class GPTChatRequest {
         return messages;
     }
 
+    /** Optionally, sets the maximum number of tokens (approx. 0.75 words). */
+    public GPTChatRequest setMaxTokens(Integer maxTokens) {
+        this.maxTokens = maxTokens;
+        return this;
+    }
+
+    /** Optionally the maximum number of tokens (approx. 0.75 words). */
+    public Integer getMaxTokens() {
+        return maxTokens;
+    }
+
     @Override
     public String toString() {
         return "GPTChatRequest{" +
                 "messages=" + messages +
+                ", maxTokens=" + maxTokens +
                 '}';
     }
 
