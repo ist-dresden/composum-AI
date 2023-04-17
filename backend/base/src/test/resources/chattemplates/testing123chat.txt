@@ -7,3 +7,4 @@ user message template
 assistant message template
 ---------- user ----------
 data with placeholder ${this} or ${that}
+---------- assistant ----------

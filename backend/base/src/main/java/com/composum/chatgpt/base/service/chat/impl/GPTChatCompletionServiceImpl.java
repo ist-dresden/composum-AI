@@ -71,7 +71,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 .connectTimeout(Duration.ofSeconds(20)).build();
         this.apiKey = config.openAiApiKey().trim();
         mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     @Deactivate

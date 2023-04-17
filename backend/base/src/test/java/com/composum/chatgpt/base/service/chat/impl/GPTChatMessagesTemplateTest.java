@@ -35,7 +35,7 @@ public class GPTChatMessagesTemplateTest {
     public void getMessages() {
         GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE);
         List<GPTChatMessage> result = template.getMessages(Map.of("this", "thisvalue", "that", "that value"));
-        assertEquals("Actual result: " + result, 4, result.size());
+        assertEquals("Actual result: " + result, 5, result.size());
         // just compare the tostring values of the messages with the expected values
         assertEquals("GPTChatMessage{role=system, text='system message content'}", result.get(0).toString());
         assertEquals("GPTChatMessage{role=user, text='user message template'}", result.get(1).toString());
@@ -46,12 +46,12 @@ public class GPTChatMessagesTemplateTest {
 
     @Test
     public void testGetMessages() {
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, "testing123chat");
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE);
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("this", "foo");
         placeholders.put("that", "bar");
         List<GPTChatMessage> messages = template.getMessages(placeholders);
-        assertEquals(4, messages.size());
+        assertEquals(5, messages.size());
         assertEquals(GPTMessageRole.SYSTEM, messages.get(0).getRole());
         assertEquals("system message content", messages.get(0).getContent());
         assertEquals(GPTMessageRole.USER, messages.get(1).getRole());
@@ -60,11 +60,13 @@ public class GPTChatMessagesTemplateTest {
         assertEquals("assistant message template", messages.get(2).getContent());
         assertEquals(GPTMessageRole.USER, messages.get(3).getRole());
         assertEquals("data with placeholder foo or bar", messages.get(3).getContent());
+        assertEquals(GPTMessageRole.ASSISTANT, messages.get(4).getRole());
+        assertEquals("", messages.get(4).getContent());
     }
 
     @Test(expected = GPTException.class)
     public void testGetMessages_missingPlaceholder() {
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, "testing123chat");
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE);
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("this", "foo");
         template.getMessages(placeholders);

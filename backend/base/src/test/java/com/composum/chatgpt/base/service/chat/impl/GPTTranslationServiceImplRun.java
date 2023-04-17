@@ -15,9 +15,8 @@ import com.composum.chatgpt.base.service.chat.GPTMessageRole;
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
  * we don't do that as an JUnit test.
  */
-public class GPTTranslationServiceImplRun {
+public class GPTTranslationServiceImplRun extends AbstractGPTRunner {
 
-    private GPTChatCompletionServiceImpl chatCompletionService;
     private GPTTranslationServiceImpl translationService;
     private RateLimiter rateLimiter;
 
@@ -46,32 +45,11 @@ public class GPTTranslationServiceImplRun {
         System.out.printf("%n%ntranslation of '%s' from %s to %s: %s%n%n", text, from, to, result);
     }
 
-    private void setup() throws IOException {
-        chatCompletionService = new GPTChatCompletionServiceImpl();
+    protected void setup() throws IOException {
+        super.setup();
         translationService = new GPTTranslationServiceImpl();
         translationService.chatCompletionService = chatCompletionService;
         rateLimiter = new RateLimiter(null, 3, 1, TimeUnit.MINUTES);
-
-        // read key from file ~/.openaiapi
-        Path filePath = Paths.get(System.getProperty("user.home"), ".openaiapi");
-        String apiKey = Files.readString(filePath);
-
-        chatCompletionService.activate(new GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig() {
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                throw new UnsupportedOperationException("Not implemented yet: .annotationType");
-            }
-
-            @Override
-            public String openAiApiKey() {
-                return apiKey;
-            }
-
-            @Override
-            public String defaultModel() {
-                return "gpt-3.5-turbo";
-            }
-        });
     }
 
 }
