@@ -20,3 +20,9 @@ Just a rough sketch of the first steps for now.
 - implement suggestions for page description and keywords (= categories) in pages
 - implement ChatGPT dialog that can be called from basic text components, and gives the user the possibility to
   prompt ChatGPT
+
+## Possible improvements later
+
+- use streaming responses https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.
+  ipynb to improve user experience. https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format
+- perhaps use moderation api to check for troublesome user messages and troublesome responses
