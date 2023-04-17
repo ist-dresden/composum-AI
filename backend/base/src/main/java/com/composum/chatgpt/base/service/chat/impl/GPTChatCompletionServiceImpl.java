@@ -63,7 +63,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     private final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
+    /** Limiter that maps the financial reasons to limit. */
     protected RateLimiter limiter;
+
+    protected volatile long lastGptLimiterCreationTime;
+
+    /** If set, this tells the limits of ChatGPT API itself. */
+    protected volatile RateLimiter gptLimiter;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config) {
@@ -88,7 +94,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Override
     public String getSingleChatCompletion(GPTChatRequest request) {
         checkEnabled();
-        limiter.waitForLimit();
+        waitForLimit();
         try {
             String jsonRequest = createJsonRequest(request);
 
@@ -118,6 +124,19 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             Thread.currentThread().interrupt();
             LOG.error("Error while calling GPT", e);
             throw new GPTException("Error while calling GPT", e);
+        }
+    }
+
+    protected void waitForLimit() {
+        limiter.waitForLimit();
+        if (gptLimiter != null && lastGptLimiterCreationTime < System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)) {
+            LOG.info("Resetting GPT limiter because it is older than a day");
+            lastGptLimiterCreationTime = 0;
+            gptLimiter = null;
+        }
+        RateLimiter mygptlimiter = gptLimiter;
+        if (mygptlimiter != null) {
+            mygptlimiter.waitForLimit();
         }
     }
 
@@ -155,6 +174,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         if (body != null) {
             Matcher matcher = PATTERN_TRY_AGAIN.matcher(body);
             if (matcher.find()) {
+                if (gptLimiter == null) {
+                    gptLimiter = RateLimiter.of(body);
+                    lastGptLimiterCreationTime = System.currentTimeMillis();
+                }
                 return Long.parseLong(matcher.group(1)) * 1000;
             }
         }

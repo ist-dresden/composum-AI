@@ -1,6 +1,8 @@
 package com.composum.chatgpt.base.impl;
 
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -113,6 +115,24 @@ public class RateLimiter {
     protected void sleep(long delay) throws InterruptedException {
         LOG.info("Sleeping for {} ms because of {} requests limit {} in {}", delay, requestCount, limit, period);
         Thread.sleep(delay);
+    }
+
+    protected static final Pattern PATTERN_LIMIT_ERROR = Pattern.compile("Limit: (\\d+) / min.");
+
+    /**
+     * Tries to find something like "Limit: 3 / min." in errorbody and returns a RateLimiter for that.
+     */
+    @Nullable
+    public static RateLimiter of(String errorbody) {
+        Matcher matcher = PATTERN_LIMIT_ERROR.matcher(errorbody);
+        if (matcher.find()) {
+            String limitString = matcher.group(1);
+            int limit = Integer.parseInt(limitString);
+            LOG.info("Found limit {} per minute in errorbody", limit);
+            return new RateLimiter(null, limit, 1, TimeUnit.MINUTES);
+        } else {
+            return null;
+        }
     }
 
 }
