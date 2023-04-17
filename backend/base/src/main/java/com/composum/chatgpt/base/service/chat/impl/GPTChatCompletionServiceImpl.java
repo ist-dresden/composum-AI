@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -27,6 +30,7 @@ import com.composum.chatgpt.base.service.chat.GPTChatMessage;
 import com.composum.chatgpt.base.service.chat.GPTChatRequest;
 import com.composum.chatgpt.base.service.GPTException;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
@@ -48,6 +52,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
     protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
+    protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
 
     private String apiKey;
     private String defaultModel;
@@ -56,7 +61,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     private ObjectMapper mapper;
 
-    private final AtomicInteger requestCounter = new AtomicInteger(0);
+    private final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
     protected RateLimiter limiter;
 
@@ -85,18 +90,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         checkEnabled();
         limiter.waitForLimit();
         try {
-            List<ChatMessage> messages = new ArrayList<>();
-            for (GPTChatMessage message : request.getMessages()) {
-                messages.add(new ChatMessage(message.getRole().toString(), message.getContent()));
-            }
-            ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
-                    .model(defaultModel)
-                    .messages(messages)
-                    .maxTokens(request.getMaxTokens())
-                    .build();
-            String jsonRequest = mapper.writeValueAsString(externalRequest);
+            String jsonRequest = createJsonRequest(request);
 
-            int id = requestCounter.incrementAndGet(); // to easily correlate log messages
+            long id = requestCounter.incrementAndGet(); // to easily correlate log messages
             LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -107,22 +103,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            // if response is a 200-ish code, we are good
-            // FIXME(hps,06.04.23) if response is a 429, we should retry after the given time
-            if (response.statusCode() != 200) {
-                LOG.error("Got error response from GPT: {} {}", response.statusCode(), response.body());
-                throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + response.body());
-            }
+            HttpResponse<String> response = performCall(httpRequest);
+
             ChatCompletionResult result = mapper.readValue(response.body(), ChatCompletionResult.class);
-            // log result.usage
-            LOG.debug("Response {} usage {}", id, result.getUsage());
             List<ChatCompletionChoice> choices = result.getChoices();
             if (choices.isEmpty()) {
                 LOG.error("Got empty response from GPT: {}", response.body());
                 throw new GPTException("Got empty response from GPT: " + response.body());
             }
-            LOG.debug("Response {} finish reason: {}", id, choices.get(0).getFinishReason());
+            LOG.debug("Response {} usage {} , finish reason {}", id, result.getUsage(), choices.get(0).getFinishReason());
             LOG.debug("Response {} from GPT: {}", id, choices.get(0).getMessage());
             return choices.get(0).getMessage().getContent();
         } catch (IOException | InterruptedException e) {
@@ -132,7 +121,61 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    private void checkEnabled() {
+    protected HttpResponse<String> performCall(HttpRequest httpRequest) throws IOException, InterruptedException {
+        HttpResponse<String> response = null;
+        long delay = 2000;
+        long trynumber = 1;
+
+        while (trynumber < 5) {
+            response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) return response;
+            if (response.statusCode() != 429) {
+                LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), response.body());
+                throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + response.body());
+            }
+
+            trynumber = trynumber + 1;
+            delay = recalculateDelay(response, delay);
+            // that normally shouldn't happen except in tests because of rate limiting, so we log a warning
+            LOG.warn("Got 429 response from GPT, waiting {} ms: {}", delay, response.body());
+            Thread.sleep(delay);
+        }
+
+        LOG.error("Got too many 429 responses from GPT, giving up.", response.body());
+        throw new GPTException("Got too many 429 responses from GPT: " + response.body());
+    }
+
+    /**
+     * If the response body contains a string like "Please try again in 20s." (number varies)
+     * we return a value of that many seconds, otherwise just use iterative doubling.
+     */
+    protected long recalculateDelay(HttpResponse<String> response, long delay) {
+        String body = response.body();
+        if (body != null) {
+            Matcher matcher = PATTERN_TRY_AGAIN.matcher(body);
+            if (matcher.find()) {
+                return Long.parseLong(matcher.group(1)) * 1000;
+            }
+        }
+        return delay * 2;
+    }
+
+    protected String createJsonRequest(GPTChatRequest request) throws JsonProcessingException {
+        List<ChatMessage> messages = new ArrayList<>();
+        for (GPTChatMessage message : request.getMessages()) {
+            messages.add(new ChatMessage(message.getRole().toString(), message.getContent()));
+        }
+        ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
+                .model(defaultModel)
+                .messages(messages)
+                .maxTokens(request.getMaxTokens())
+                .build();
+        String jsonRequest = mapper.writeValueAsString(externalRequest);
+        return jsonRequest;
+    }
+
+    protected void checkEnabled() {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("No API key configured for the GPT chat completion service. Please configure the service.");
         }
