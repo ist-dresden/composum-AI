@@ -66,13 +66,19 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     private final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
-    /** Limiter that maps the financial reasons to limit. */
+    /**
+     * Limiter that maps the financial reasons to limit.
+     */
     protected RateLimiter limiter;
 
     protected volatile long lastGptLimiterCreationTime;
 
-    /** If set, this tells the limits of ChatGPT API itself. */
+    /**
+     * If set, this tells the limits of ChatGPT API itself.
+     */
     protected volatile RateLimiter gptLimiter;
+
+    protected volatile GPTChatCompletionServiceConfig config;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config) {
@@ -82,7 +88,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
         this.defaultModel = config.defaultModel().trim();
         httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(20)).build();
+                .connectTimeout(Duration.ofSeconds(config.connectionTimeout()))
+                .build();
+        this.config = config;
         this.apiKey = config.openAiApiKey().trim();
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -108,7 +116,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     .uri(URI.create(CHAT_COMPLETION_URL))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + apiKey)
-                    .timeout(Duration.ofSeconds(20))
+                    .timeout(Duration.ofSeconds(config.requestTimeout()))
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                     .build();
 
@@ -241,6 +249,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is gpt-3.5-turbo. Please consider the varying prices https://openai.com/pricing .", defaultValue = "gpt-3.5-turbo")
         String defaultModel();
+
+        @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "20")
+        int connectionTimeout();
+
+        @AttributeDefinition(name = "Request timeout in seconds", defaultValue = "60")
+        int requestTimeout();
     }
 
 }

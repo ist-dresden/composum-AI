@@ -31,6 +31,16 @@ public abstract class AbstractGPTRunner {
             public String defaultModel() {
                 return "gpt-3.5-turbo";
             }
+
+            @Override
+            public int requestTimeout() {
+                return 60;
+            }
+
+            @Override
+            public int connectionTimeout() {
+                return 20;
+            }
         });
     }
 

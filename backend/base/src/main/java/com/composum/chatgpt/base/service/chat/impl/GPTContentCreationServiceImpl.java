@@ -16,6 +16,7 @@ import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.chatgpt.base.service.chat.GPTChatMessage;
 import com.composum.chatgpt.base.service.chat.GPTChatRequest;
 import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
+import com.composum.chatgpt.base.service.chat.GPTMessageRole;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements generating keywords.
@@ -82,6 +83,34 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         List<GPTChatMessage> messages = template.getMessages(placeholders);
         request.addMessages(messages);
         String response = chatCompletionService.getSingleChatCompletion(request);
-        return response.trim();
+        return response;
+    }
+
+    @Nonnull
+    @Override
+    public String executePrompt(@Nullable String prompt, int maxwords) {
+        if (prompt == null || prompt.isBlank()) {
+            return "";
+        }
+        GPTChatRequest request = new GPTChatRequest();
+        int maxtokens = 200;
+        if (maxwords > 0) {
+            maxtokens = maxwords * 4 / 3;
+        }
+        request.setMaxTokens(maxtokens);
+        request.addMessage(GPTMessageRole.USER, prompt);
+        String response = chatCompletionService.getSingleChatCompletion(request);
+        return response;
+    }
+
+    @Nonnull
+    @Override
+    public String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxwords) {
+        LOG.error("GPTContentCreationServiceImpl.executePromptOnText");
+        if (0 == 0)
+            throw new UnsupportedOperationException("Not implemented yet: GPTContentCreationServiceImpl.executePromptOnText");
+        // FIXME hps 18.04.23 implement GPTContentCreationServiceImpl.executePromptOnText
+        String result = null;
+        return result;
     }
 }
