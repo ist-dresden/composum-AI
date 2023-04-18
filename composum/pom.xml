@@ -9,7 +9,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-integration-frontend</artifactId>
+	<artifactId>composum-chatgpt-integration-composum</artifactId>
 	<packaging>pom</packaging>
 
 	<name>Composum ChatGPT Integration::Frontend</name>
