@@ -30,9 +30,11 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
      * Template for {@link GPTChatMessagesTemplate} to generate keywords from a text. Has placeholder
      * ${text} .
      */
-    public static final String KEYWORD_TEMPLATE = "makekeywords";
+    public static final String TEMPLATE_MAKEKEYWORDS = "makekeywords";
 
-    public static final String DESCRIPTION_TEMPLATE = "makedescription";
+    public static final String TEMPLATE_MAKEDESCRIPTION = "makedescription";
+
+    public static final String TEMPLATE_PROMPTONTEXT = "promptontext";
 
     public static final String PLACEHOLDER_TEXT = "text";
 
@@ -52,7 +54,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, KEYWORD_TEMPLATE);
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE_MAKEKEYWORDS);
         GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText));
@@ -68,7 +70,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (text == null || text.isBlank()) {
             return "";
         }
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, DESCRIPTION_TEMPLATE);
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE_MAKEDESCRIPTION);
         GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
         int maxtokens = 150;
@@ -106,11 +108,18 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Nonnull
     @Override
     public String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxwords) {
-        LOG.error("GPTContentCreationServiceImpl.executePromptOnText");
-        if (0 == 0)
-            throw new UnsupportedOperationException("Not implemented yet: GPTContentCreationServiceImpl.executePromptOnText");
-        // FIXME hps 18.04.23 implement GPTContentCreationServiceImpl.executePromptOnText
-        String result = null;
-        return result;
+        if (prompt == null || prompt.isBlank()) {
+            return "";
+        }
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE_PROMPTONTEXT);
+        GPTChatRequest request = new GPTChatRequest();
+        String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
+        int maxtokens = maxwords > 0 ? maxwords * 4/3 : 200;
+        request.setMaxTokens(maxtokens);
+        List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
+        request.addMessages(messages);
+        String response = chatCompletionService.getSingleChatCompletion(request);
+        return response;
     }
+
 }
