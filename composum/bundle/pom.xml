@@ -24,6 +24,42 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!--		&lt;!&ndash; Composum Pages &ndash;&gt;-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.composum.pages</groupId>-->
+		<!--			<artifactId>composum-pages-commons-bundle</artifactId>-->
+		<!--			<version>${composum.pages.version}</version>-->
+		<!--		</dependency>-->
+
+		<!--		&lt;!&ndash; Composum Platform &ndash;&gt;-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.composum.platform</groupId>-->
+		<!--			<artifactId>composum-platform-models-bundle</artifactId>-->
+		<!--			<version>${composum.platform.version}</version>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.composum.platform</groupId>-->
+		<!--			<artifactId>composum-platform-commons-bundle</artifactId>-->
+		<!--			<version>${composum.platform.version}</version>-->
+		<!--		</dependency>-->
+
+		<!-- Composum Core -->
+		<dependency>
+			<groupId>com.composum.nodes</groupId>
+			<artifactId>composum-nodes-commons</artifactId>
+			<version>${composum.nodes.version}</version>
+		</dependency>
+
+		<!-- Sling, JCR -->
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+		</dependency>
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -44,6 +80,12 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.cmpn</artifactId>
+		</dependency>
+
+		<!-- Web Application API -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 
 		<!-- JUnit -->
