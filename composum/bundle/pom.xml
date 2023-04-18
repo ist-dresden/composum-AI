@@ -9,24 +9,19 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-integration-backend-base</artifactId>
+	<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Composum ChatGPT Integration::Backend::Base</name>
+	<name>Composum ChatGPT Integration::Composum::Bundle</name>
 	<description>
-		Basic functionality for ChatGPT integration, somewhat platform agnostic
+		Composum specific bundle for ChatGPT integration
 	</description>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.theokanning.openai-gpt3-java</groupId>
-			<artifactId>api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<groupId>com.composum.chatgpt</groupId>
+			<artifactId>composum-chatgpt-integration-backend-base</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- Logging -->
@@ -83,11 +78,8 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							com.composum.chatgpt.base.*
+							com.composum.chatgpt.composum.*
 						</Export-Package>
-						<Embed-Dependency>
-							api*;groupId=com.theokanning.openai-gpt3-java
-						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -97,30 +89,13 @@
 	<profiles>
 
 		<profile>
-			<id>uploadBundle</id>
-			<activation>
-				<property>
-					<name>upload.bundle</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.sling</groupId>
-						<artifactId>sling-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>install-bundle</id>
-								<phase>install</phase>
-								<goals>
-									<goal>install</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
+			<id>installBundle</id>
+		</profile>
+		<profile>
+			<id>installPackage</id>
+		</profile>
+		<profile>
+			<id>installTestContent</id>
 		</profile>
 
 	</profiles>

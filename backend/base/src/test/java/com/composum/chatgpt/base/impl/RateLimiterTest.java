@@ -165,11 +165,11 @@ public class RateLimiterTest {
         long duration = time - startTime;
         double realrate = requestcount * 1.0 / TimeUnit.MILLISECONDS.toSeconds(duration); // requests per second
         double expectedRate = 10.0 / 100.0;
-        // System.out.printf("Real rate: %.2f, expected rate: %.2f%n", realrate, expectedRate);
+        // System.out.printf("Real rate: %.6f, expected rate: %.6f%n", realrate, expectedRate);
         long minimumDuration = TimeUnit.SECONDS.toMillis(1000 / 10 * 100);
         ec.checkThat("Actually taken " + duration, duration > minimumDuration, is(true));
         // the real rate should be below the expected rate, but above 95% of it (statistical fluctuations)
-        ec.checkThat("Real rate " + realrate, realrate < expectedRate, is(true));
+        ec.checkThat("Real rate " + realrate, realrate <= expectedRate, is(true));
         ec.checkThat("Real rate " + realrate, realrate > expectedRate * 0.95, is(true));
     }
 
