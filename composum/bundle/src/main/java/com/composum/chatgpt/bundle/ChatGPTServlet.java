@@ -1,6 +1,7 @@
 package com.composum.chatgpt.bundle;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
@@ -16,6 +17,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
+import com.composum.chatgpt.base.service.chat.GPTChatRequest;
+import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
+import com.composum.chatgpt.base.service.chat.GPTMessageRole;
+import com.composum.chatgpt.base.service.chat.GPTTranslationService;
 import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.servlet.AbstractServiceServlet;
 import com.composum.sling.core.servlet.ServletOperation;
@@ -34,6 +40,15 @@ import com.composum.sling.core.servlet.ServletOperationSet;
 public class ChatGPTServlet extends AbstractServiceServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChatGPTServlet.class);
+
+    @Reference
+    protected GPTChatCompletionService chatService;
+
+    @Reference
+    protected GPTTranslationService translationService;
+
+    @Reference
+    protected GPTContentCreationService contentCreationService;
 
     public enum Extension {json}
 
@@ -61,8 +76,15 @@ public class ChatGPTServlet extends AbstractServiceServlet {
         @Override
         public void doIt(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response, @Nonnull ResourceHandle resource) throws IOException, ServletException {
             response.setContentType("text/plain");
-            response.getWriter().write("Hello World!");
-
+            try (PrintWriter writer = response.getWriter()) {
+                writer.write("Hello World!");
+                writer.write("Trying to access ChatGPT...");
+                writer.flush();
+                GPTChatRequest chatrequest = new GPTChatRequest();
+                chatrequest.addMessage(GPTMessageRole.USER, "Hi!");
+                String chatresponse = chatService.getSingleChatCompletion(chatrequest);
+                writer.write("ChatGPT says: " + chatresponse);
+            }
         }
     }
 

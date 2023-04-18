@@ -120,7 +120,7 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							com.composum.chatgpt.composum.*
+							com.composum.chatgpt.bundle.*
 						</Export-Package>
 					</instructions>
 				</configuration>
