@@ -10,13 +10,12 @@ import com.composum.chatgpt.base.impl.RateLimiter;
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
  * we don't do that as an JUnit test.
  */
-public class RunGPTKeywordServiceImpl extends AbstractGPTRunner {
+public class RunGPTCreateKeywordsImpl extends AbstractGPTRunner {
 
-    private GPTKeywordServiceImpl keywordService;
-    private RateLimiter rateLimiter;
+    private GPTContentCreationServiceImpl service;
 
     public static void main(String[] args) throws Exception {
-        RunGPTKeywordServiceImpl instance = new RunGPTKeywordServiceImpl();
+        RunGPTCreateKeywordsImpl instance = new RunGPTCreateKeywordsImpl();
         instance.setup();
         instance.run();
     }
@@ -28,17 +27,15 @@ public class RunGPTKeywordServiceImpl extends AbstractGPTRunner {
     }
 
     private void printKeywordsFor(String text) {
-        rateLimiter.waitForLimit();
-        List<String> result = keywordService.generateKeywords(text);
+        List<String> result = service.generateKeywords(text);
         // print parameters and result
         System.out.printf("%n%nkeywords for '%s': %s%n%n", text, result);
     }
 
     protected void setup() throws IOException {
         super.setup();
-        keywordService = new GPTKeywordServiceImpl();
-        keywordService.chatCompletionService = chatCompletionService;
-        rateLimiter = new RateLimiter(null, 3, 1, TimeUnit.MINUTES);
+        service = new GPTContentCreationServiceImpl();
+        service.chatCompletionService = chatCompletionService;
     }
 
 }

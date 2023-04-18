@@ -1,6 +1,6 @@
 # Suggest keywords for a page
 ---------- system ----------
-Please create a number of suggestions for keywords for a page, usable for search engine optimization (SEO).
+Please create a number of suggestions for keywords for a text given by the user, usable for search engine optimization (SEO).
 ---------- user ----------
 
 

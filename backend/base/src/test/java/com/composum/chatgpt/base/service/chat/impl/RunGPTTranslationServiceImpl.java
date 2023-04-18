@@ -12,7 +12,6 @@ import com.composum.chatgpt.base.impl.RateLimiter;
 public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
 
     private GPTTranslationServiceImpl translationService;
-    private RateLimiter rateLimiter;
 
     public static void main(String[] args) throws Exception {
         RunGPTTranslationServiceImpl instance = new RunGPTTranslationServiceImpl();
@@ -33,7 +32,6 @@ public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
     }
 
     private void doTranslation(String text, String from, String to) {
-        rateLimiter.waitForLimit();
         String result = translationService.singleTranslation(text, from, to);
         // print parameters and result
         System.out.printf("%n%ntranslation of '%s' from %s to %s: %s%n%n", text, from, to, result);
@@ -43,7 +41,6 @@ public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
         super.setup();
         translationService = new GPTTranslationServiceImpl();
         translationService.chatCompletionService = chatCompletionService;
-        rateLimiter = new RateLimiter(null, 3, 1, TimeUnit.MINUTES);
     }
 
 }

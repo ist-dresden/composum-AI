@@ -1,5 +1,6 @@
 package com.composum.chatgpt.base.service.chat.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,15 +15,15 @@ import org.slf4j.LoggerFactory;
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.chatgpt.base.service.chat.GPTChatMessage;
 import com.composum.chatgpt.base.service.chat.GPTChatRequest;
-import com.composum.chatgpt.base.service.chat.GPTKeywordService;
+import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements generating keywords.
  */
-@Component(service = GPTKeywordService.class)
-public class GPTKeywordServiceImpl implements GPTKeywordService {
+@Component(service = GPTContentCreationService.class)
+public class GPTContentCreationServiceImpl implements GPTContentCreationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GPTKeywordServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GPTContentCreationServiceImpl.class);
 
     /**
      * Template for {@link GPTChatMessagesTemplate} to generate keywords from a text. Has placeholder
@@ -30,7 +31,11 @@ public class GPTKeywordServiceImpl implements GPTKeywordService {
      */
     public static final String KEYWORD_TEMPLATE = "makekeywords";
 
+    public static final String DESCRIPTION_TEMPLATE = "makedescription";
+
     public static final String PLACEHOLDER_TEXT = "text";
+
+    public static final String PLACEHOLDER_WORDCOUNTLIMIT = "wordcountlimit";
 
     /**
      * To respect limits of ChatGPT we replace in texts longer than this many words we replace the middle with [...]
@@ -56,4 +61,27 @@ public class GPTKeywordServiceImpl implements GPTKeywordService {
         return List.of(response.trim().split("\\s*\n\\s*"));
     }
 
+    @Nonnull
+    @Override
+    public String generateDescription(@Nullable String text, int maxwords) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, DESCRIPTION_TEMPLATE);
+        GPTChatRequest request = new GPTChatRequest();
+        String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
+        int maxtokens = 150;
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(PLACEHOLDER_TEXT, shortenedText);
+        placeholders.put(PLACEHOLDER_WORDCOUNTLIMIT, "");
+        if (maxwords > 0) {
+            maxtokens = maxwords * 2 + 30; // give a limit to prevent accidents, but give some leeway
+            placeholders.put(PLACEHOLDER_WORDCOUNTLIMIT, " Use at most " + maxwords + " words. ");
+        }
+        request.setMaxTokens(maxtokens);
+        List<GPTChatMessage> messages = template.getMessages(placeholders);
+        request.addMessages(messages);
+        String response = chatCompletionService.getSingleChatCompletion(request);
+        return response.trim();
+    }
 }
