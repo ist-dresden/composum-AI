@@ -2,14 +2,18 @@ package com.composum.chatgpt.base.service.chat.impl;
 
 import static org.junit.Assert.*;
 
+import java.net.http.HttpResponse;
+
 import org.junit.Test;
 
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 
-/** Tests for some methods of {@link GPTChatCompletionService}. */
+/**
+ * Tests for some methods of {@link GPTChatCompletionService}.
+ */
 public class GPTChatCompletionServiceImplTest {
 
-    protected GPTChatCompletionService service = new GPTChatCompletionServiceImpl();
+    protected GPTChatCompletionServiceImpl service = new GPTChatCompletionServiceImpl();
 
     @Test
     public void testShortenShortText() {
@@ -58,6 +62,22 @@ public class GPTChatCompletionServiceImplTest {
         String text = "This is a text with even number of words.";
         String shortenedText = service.shorten(text, 4);
         assertEquals("This is ... words.", shortenedText);
+    }
+
+    @Test
+    public void testRecalculateDelayWhenBodyContainsTryAgainIn() {
+        String body = "The request could not be completed. Please try again in 27s. bla bla bla";
+        long delay = 1000L;
+        long actualDelay = service.recalculateDelay(body, delay);
+        assertEquals(27000L, actualDelay);
+    }
+
+    @Test
+    public void testRecalculateDelayWhenBodyDoesNotContainTryAgainIn() {
+        String body = "The response is successful.";
+        long delay = 1000L;
+        long actualDelay = service.recalculateDelay(body, delay);
+        assertEquals(2000L, actualDelay);
     }
 
 }
