@@ -7,10 +7,10 @@ import com.composum.chatgpt.base.service.chat.GPTMessageRole;
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
  * we don't do that as an JUnit test.
  */
-public class GPTChatCompletionServiceImplRun extends AbstractGPTRunner {
+public class RunGPTChatCompletionServiceImpl extends AbstractGPTRunner {
 
     public static void main(String[] args) throws Exception {
-        GPTChatCompletionServiceImplRun instance = new GPTChatCompletionServiceImplRun();
+        RunGPTChatCompletionServiceImpl instance = new RunGPTChatCompletionServiceImpl();
         instance.setup();
         instance.run();
     }

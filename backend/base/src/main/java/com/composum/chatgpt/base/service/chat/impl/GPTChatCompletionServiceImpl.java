@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -204,6 +207,31 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
+    @Override
+    @Nonnull
+    public String shorten(@Nullable String text, int maxwords) {
+        if (text == null) {
+            return "";
+        }
+        String[] words = text.split("\\s+");
+        if (words.length > maxwords) {
+            int middle = words.length / 2;
+            int start = maxwords / 2;
+            int end = words.length - (maxwords - 1) / 2;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < start; i++) {
+                sb.append(words[i]).append(" ");
+            }
+            sb.append("...");
+            for (int i = end; i < words.length; i++) {
+                sb.append(" ").append(words[i]);
+            }
+            return sb.toString();
+        } else {
+            return text;
+        }
+    }
+
 
     @ObjectClassDefinition(name = "GPT Chat Completion Service",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
@@ -215,4 +243,5 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is gpt-3.5-turbo. Please consider the varying prices https://openai.com/pricing .", defaultValue = "gpt-3.5-turbo")
         String defaultModel();
     }
+
 }

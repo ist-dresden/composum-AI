@@ -48,38 +48,12 @@ public class GPTKeywordServiceImpl implements GPTKeywordService {
         }
         GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, KEYWORD_TEMPLATE);
         GPTChatRequest request = new GPTChatRequest();
-        String shortenedText = shorten(text, MAXWORDS);
+        String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText));
         request.addMessages(messages);
         request.setMaxTokens(50); // pretty arbitrary limit for now, needs testing.
         String response = chatCompletionService.getSingleChatCompletion(request);
         return List.of(response.trim().split("\\s*\n\\s*"));
-    }
-
-    /**
-     * In texts longer than this many words we replace the middle with ... since ChatGPT can only process a limited
-     * number of words / tokens and in the introduction or summary there is probably the most information about the text.
-     * The output has then maxwords words, including the ... marker.
-     */
-    @Nonnull
-    protected String shorten(@Nullable String text, int maxwords) {
-        String[] words = text.split("\\s+");
-        if (words.length > maxwords) {
-            int middle = words.length / 2;
-            int start = maxwords / 2;
-            int end = words.length - (maxwords - 1) / 2;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < start; i++) {
-                sb.append(words[i]).append(" ");
-            }
-            sb.append("...");
-            for (int i = end; i < words.length; i++) {
-                sb.append(" ").append(words[i]);
-            }
-            return sb.toString();
-        } else {
-            return text;
-        }
     }
 
 }

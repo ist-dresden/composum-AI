@@ -4,10 +4,12 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-/** Tests for {@link GPTKeywordServiceImpl}. */
-public class GPTKeywordServiceImplTest {
+import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 
-    protected GPTKeywordServiceImpl service = new GPTKeywordServiceImpl();
+/** Tests for some methods of {@link GPTChatCompletionService}. */
+public class GPTChatCompletionServiceImplTest {
+
+    protected GPTChatCompletionService service = new GPTChatCompletionServiceImpl();
 
     @Test
     public void testShortenShortText() {

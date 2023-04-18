@@ -1,27 +1,21 @@
 package com.composum.chatgpt.base.service.chat.impl;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 import com.composum.chatgpt.base.impl.RateLimiter;
-import com.composum.chatgpt.base.service.chat.GPTChatRequest;
-import com.composum.chatgpt.base.service.chat.GPTMessageRole;
 
 /**
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
  * we don't do that as an JUnit test.
  */
-public class GPTTranslationServiceImplRun extends AbstractGPTRunner {
+public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
 
     private GPTTranslationServiceImpl translationService;
     private RateLimiter rateLimiter;
 
     public static void main(String[] args) throws Exception {
-        GPTTranslationServiceImplRun instance = new GPTTranslationServiceImplRun();
+        RunGPTTranslationServiceImpl instance = new RunGPTTranslationServiceImpl();
         instance.setup();
         instance.run();
     }
