@@ -20,6 +20,19 @@
 - implement ChatGPT dialog that can be called from basic text components, and gives the user the possibility to
   prompt ChatGPT
 
+## Caching
+
+It seems sensible to cache some kinds of requests to ChatGPT, since, first, they cost a little money, and second,
+they are slow. At least translation requests might easily get repeated, and some requests might at least involuntarily
+be repeated by the user. However, that is dependent on whether I'm using AEM or Composum. So we'd want to define a
+service interface in the backend, and provide an implementation in the Composum implementation (based on the 
+existing platform cache) / AEM implementation. 
+Annoyingly this seems to require two additional bundles with basically one class each, to avoid circular dependencies: 
+one defining the cache interface in backend, one to implement it in Composum / AEM.
+Possibly idea that would provide some (though very little) additional benefit: separate backend into an api and impl 
+bundle? Or use a small translation cache in a HashMap anyway, since that seems the only service where repeated 
+requests are likely?
+
 ## Possible improvements later
 
 - use streaming responses https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.
