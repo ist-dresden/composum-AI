@@ -44,6 +44,47 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChatGPTServlet.class);
 
+    /**
+     * Parameter to transmit a text on which ChatGPT is to operate - not as instructions but as data.
+     */
+    public static final String PARAMETER_TEXT = "text";
+
+    /**
+     * Parameter to transmit a prompt on which ChatGPT is to operate - that is, the instructions.
+     */
+    public static final String PARAMETER_PROMPT = "prompt";
+
+    /**
+     * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
+     */
+    public static final String PARAMETER_MAXWORDS = "maxwords";
+
+    /**
+     * Key for {@link Status#data(String)} - toplevel key in the servlet result.
+     */
+    public static final String RESULTKEY = "result";
+
+    /**
+     * Key in the result that transmits the generated description.
+     */
+    public static final String RESULTKEY_DESCRIPTIION = "description";
+
+    /**
+     * Key in the result that transmits the generated list of keywords.
+     */
+    public static final String RESULTKEY_KEYWORDS = "keywords";
+
+    /**
+     * Key in the result that transmits the generated text.
+     */
+    public static final String RESULTKEY_TEXT = "text";
+
+    /**
+     * Key in the result that transmits a list of translations (currently only one, but might be extended later.)
+     */
+    public static final String RESULTKEY_TRANSLATION = "translation";
+
+
     @Reference
     protected GPTChatCompletionService chatService;
 
@@ -129,12 +170,12 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String text = status.getRequiredParameter("text", null, "No text to translate");
-            String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No source language");
-            String targetLanguage = status.getRequiredParameter("targetLanguage", null, "No target language");
+            String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text to translate");
+            String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No sourceLanguage given");
+            String targetLanguage = status.getRequiredParameter("targetLanguage", null, "No targetLanguage given");
             if (status.isValid()) {
                 String translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
-                status.data("result").put("translation", List.of(translation));
+                status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
             }
         }
 
@@ -148,10 +189,10 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String text = status.getRequiredParameter("text", null, "No text given");
+            String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             if (status.isValid()) {
                 List<String> result = contentCreationService.generateKeywords(text);
-                status.data("result").put("keywords", result);
+                status.data(RESULTKEY).put(RESULTKEY_KEYWORDS, result);
             }
         }
 
@@ -166,11 +207,11 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String text = status.getRequiredParameter("text", null, "No text given");
-            Integer maxwords = getOptionalInt(status, request, "maxwords");
+            String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
+            Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
                 String result = contentCreationService.generateDescription(text, maxwords != null ? maxwords : -1);
-                status.data("result").put("description", result);
+                status.data(RESULTKEY).put(RESULTKEY_DESCRIPTIION, result);
             }
         }
 
@@ -186,11 +227,11 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String prompt = status.getRequiredParameter("prompt", null, "No prompt given");
-            Integer maxwords = getOptionalInt(status, request, "maxwords");
+            String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
+            Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
                 String result = contentCreationService.executePrompt(prompt, maxwords != null ? maxwords : -1);
-                status.data("result").put("text", result);
+                status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
         }
 
@@ -206,12 +247,12 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String prompt = status.getRequiredParameter("prompt", null, "No prompt given");
-            String text = status.getRequiredParameter("text", null, "No text given");
-            Integer maxwords = getOptionalInt(status, request, "maxwords");
+            String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
+            String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
+            Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
                 String result = contentCreationService.executePromptOnText(prompt, text, maxwords != null ? maxwords : -1);
-                status.data("result").put("text", result);
+                status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
         }
 
