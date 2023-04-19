@@ -241,7 +241,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @ObjectClassDefinition(name = "GPT Chat Completion Service",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
-    public static @interface GPTChatCompletionServiceConfig {
+    public @interface GPTChatCompletionServiceConfig {
 
         @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, the ")
         String openAiApiKey();

@@ -37,7 +37,7 @@ public class GPTChatMessage {
     @Override
     public String toString() {
         return "GPTChatMessage{" +
-                "role=" + role.toString() +
+                "role=" + role +
                 ", text='" + content + '\'' +
                 '}';
     }

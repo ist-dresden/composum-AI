@@ -57,11 +57,11 @@ public class RateLimiterTest {
 
     @Test
     public void testRateLimiting() {
-        ec.checkThat(time, is(startTime + 0L));
+        ec.checkThat(time, is(startTime));
         // the first five requests should not be limited
         for (int i = 0; i < 6; i++) {
             limiter.waitForLimit();
-            ec.checkThat("On request " + i, time, is(startTime + 0L));
+            ec.checkThat("On request " + i, time, is(startTime));
         }
         // the rest should spread out over the remaining two minutes.
         limiter.waitForLimit();
@@ -85,11 +85,11 @@ public class RateLimiterTest {
 
     @Test
     public void testRateLimitingWithWait() {
-        ec.checkThat(time, is(startTime + 0L));
+        ec.checkThat(time, is(startTime));
         // the first five requests should not be limited
         for (int i = 0; i < 5; i++) {
             limiter.waitForLimit();
-            ec.checkThat("On request " + i, time, is(startTime + 0L));
+            ec.checkThat("On request " + i, time, is(startTime));
         }
         waitFor(90);
         // since we've waited a while, we can do a spike without being limited now.
@@ -119,7 +119,7 @@ public class RateLimiterTest {
         limiter = new RateLimiterWithTestSetup(limiter, 20, 1, TimeUnit.HOURS);
         for (int i = 0; i < 6; i++) {
             limiter.waitForLimit();
-            ec.checkThat("On request " + i, time, is(startTime + 0L));
+            ec.checkThat("On request " + i, time, is(startTime));
         }
         // the rest should spread out over the remaining two minutes, as the parent limiter says
         limiter.waitForLimit();
