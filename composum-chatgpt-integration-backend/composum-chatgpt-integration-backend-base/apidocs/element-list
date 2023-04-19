@@ -1,0 +1,5 @@
+com.composum.chatgpt.base
+com.composum.chatgpt.base.impl
+com.composum.chatgpt.base.service
+com.composum.chatgpt.base.service.chat
+com.composum.chatgpt.base.service.chat.impl
