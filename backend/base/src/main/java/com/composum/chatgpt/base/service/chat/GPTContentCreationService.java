@@ -5,6 +5,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.composum.chatgpt.base.service.GPTException;
+
 /**
  * Service to generate content (keywords / descriptions from a text, and so forth.)
  */
@@ -17,7 +19,7 @@ public interface GPTContentCreationService {
      * @return A list of generated keywords, possibly empty.
      */
     @Nonnull
-    List<String> generateKeywords(@Nullable String text);
+    List<String> generateKeywords(@Nullable String text) throws GPTException;
 
     /**
      * Generates a description from the given text.
@@ -27,7 +29,7 @@ public interface GPTContentCreationService {
      * @return A generated description, possibly empty.
      */
     @Nonnull
-    String generateDescription(@Nullable String text, int maxwords);
+    String generateDescription(@Nullable String text, int maxwords) throws GPTException;
 
     /**
      * Executes a given prompt from the user using ChatGPT.
@@ -36,7 +38,7 @@ public interface GPTContentCreationService {
      * @param maxwords used to hard limit text length - not used as an explicit instruction to ChatGPT, just to set maxtokens to 4/3 of that.
      */
     @Nonnull
-    String executePrompt(@Nullable String prompt, int maxwords);
+    String executePrompt(@Nullable String prompt, int maxwords) throws GPTException;
 
     /**
      * Executes a given prompt from the user using ChatGPT, using the given text as context.
@@ -46,6 +48,6 @@ public interface GPTContentCreationService {
      * @param maxwords used to hard limit text length - not used as an explicit instruction to ChatGPT, just to set maxtokens to 4/3 of that.
      */
     @Nonnull
-    String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxwords);
+    String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxwords) throws GPTException;
 
 }

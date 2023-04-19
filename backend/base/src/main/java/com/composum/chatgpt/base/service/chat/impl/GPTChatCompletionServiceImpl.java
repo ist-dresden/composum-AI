@@ -102,7 +102,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
-    public String getSingleChatCompletion(GPTChatRequest request) {
+    public String getSingleChatCompletion(GPTChatRequest request) throws GPTException {
         checkEnabled();
         waitForLimit();
         try {

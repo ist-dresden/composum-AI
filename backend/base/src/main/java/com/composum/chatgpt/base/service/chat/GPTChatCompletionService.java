@@ -3,6 +3,8 @@ package com.composum.chatgpt.base.service.chat;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.composum.chatgpt.base.service.GPTException;
+
 /**
  * Raw abstraction of the ChatGPT chat interface, with only the details that are needed.
  * <p>
@@ -14,7 +16,7 @@ public interface GPTChatCompletionService {
     /**
      * The simplest case: give some messages and get a single response.
      */
-    String getSingleChatCompletion(GPTChatRequest request);
+    String getSingleChatCompletion(GPTChatRequest request) throws GPTException;
 
     /**
      * Helper method to shorten texts by taking out the middle if too long.
@@ -26,5 +28,5 @@ public interface GPTChatCompletionService {
      * @param maxwords the maximum number of words in the output
      */
     @Nonnull
-    String shorten(@Nullable String text, int maxwords);
+    String shorten(@Nullable String text, int maxwords) throws GPTException;
 }

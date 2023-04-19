@@ -2,10 +2,12 @@ package com.composum.chatgpt.bundle;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -17,6 +19,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.chatgpt.base.service.GPTException;
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.chatgpt.base.service.chat.GPTChatRequest;
 import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
@@ -26,6 +29,7 @@ import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.servlet.AbstractServiceServlet;
 import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
+import com.composum.sling.core.servlet.Status;
 
 /**
  * Servlet providing the various services from the backend as servlet.
@@ -52,7 +56,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
     public enum Extension {json}
 
-    public enum Operation {hello}
+    public enum Operation {hello, translate}
 
     protected final ServletOperationSet<Extension, Operation> operations = new ServletOperationSet<>(Extension.json);
 
@@ -64,13 +68,47 @@ public class ChatGPTServlet extends AbstractServiceServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.json, Operation.hello,
-                new HelloOperation());
+        // FIXME(hps,19.04.23) only use POST later, but for now, GET is easier to test
+        for (ServletOperationSet.Method method : List.of(ServletOperationSet.Method.GET, ServletOperationSet.Method.POST)) {
+            operations.setOperation(method, Extension.json, Operation.hello,
+                    new HelloOperation());
+            operations.setOperation(method, Extension.json, Operation.translate,
+                    new TranslateOperation());
+        }
+    }
+
+    /**
+     * Servlet representation of {@link GPTTranslationService}, specifically {@link GPTTranslationService#singleTranslation(String, String, String)}
+     * with argument text, sourceLanguage, targetLanguage .
+     * Input are the parameters text, sourceLanguage, targetLanguage, output is a list "translation" containing the translation as (currently) a single string.
+     * We use a list since it might be sensible to create multiple translation variants in the future.
+     */
+    public class TranslateOperation implements ServletOperation {
+        @Override
+        public void doIt(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response, @Nonnull ResourceHandle resource) throws IOException {
+            Status status = new Status(request, response, LOG);
+
+            String text = status.getRequiredParameter("text", null, "No text to translate");
+            String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No source language");
+            String targetLanguage = status.getRequiredParameter("targetLanguage", null, "No target language");
+
+            try {
+                String translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
+                status.data("result").put("translation", translation);
+            } catch (GPTException e) {
+                status.error("Error accessing ChatGPT", e);
+                status.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+
+            status.sendJson();
+        }
+
     }
 
     /**
      * A quick hello world, http://localhost:9090/bin/cpm/platform/chatgpt/servlet.hello.json
      */
+    // FIXME(hps,19.04.23) remove later
     public class HelloOperation implements ServletOperation {
 
         @Override
@@ -87,6 +125,5 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             }
         }
     }
-
 
 }
