@@ -1,8 +1,6 @@
 package com.composum.chatgpt.base.service.chat.impl;
 
-import static org.junit.Assert.*;
-
-import java.net.http.HttpResponse;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

@@ -1,7 +1,5 @@
 package com.composum.chatgpt.base.service.chat.impl;
 
-import java.net.http.HttpClient;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -11,23 +9,18 @@ import javax.annotation.Nullable;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.chatgpt.base.impl.RateLimiter;
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.chatgpt.base.service.chat.GPTChatMessage;
 import com.composum.chatgpt.base.service.chat.GPTChatRequest;
 import com.composum.chatgpt.base.service.chat.GPTTranslationService;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Maps;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements translation.

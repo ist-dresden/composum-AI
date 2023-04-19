@@ -84,7 +84,7 @@ public class RateLimiter {
                 long earliestRequestTime = nextResetTime - safetyTime;
                 long delay = 0;
                 if (now < earliestRequestTime) {
-                   delay = earliestRequestTime - now;
+                    delay = earliestRequestTime - now;
                 }
                 try {
                     sleep(delay);

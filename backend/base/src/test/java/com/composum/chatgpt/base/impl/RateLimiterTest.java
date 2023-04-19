@@ -2,10 +2,8 @@ package com.composum.chatgpt.base.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

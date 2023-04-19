@@ -38,13 +38,17 @@ public class GPTChatRequest {
         return messages;
     }
 
-    /** Optionally, sets the maximum number of tokens (approx. 0.75 words). */
+    /**
+     * Optionally, sets the maximum number of tokens (approx. 0.75 words).
+     */
     public GPTChatRequest setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
         return this;
     }
 
-    /** Optionally the maximum number of tokens (approx. 0.75 words). */
+    /**
+     * Optionally the maximum number of tokens (approx. 0.75 words).
+     */
     public Integer getMaxTokens() {
         return maxTokens;
     }

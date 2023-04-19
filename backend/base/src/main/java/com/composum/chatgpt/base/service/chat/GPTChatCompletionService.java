@@ -22,7 +22,7 @@ public interface GPTChatCompletionService {
      * number of words / tokens and in the introduction or summary there is probably the most information about the text.
      * The output has then maxwords words, including the ... marker.
      *
-     * @param text the text to shorten
+     * @param text     the text to shorten
      * @param maxwords the maximum number of words in the output
      */
     @Nonnull

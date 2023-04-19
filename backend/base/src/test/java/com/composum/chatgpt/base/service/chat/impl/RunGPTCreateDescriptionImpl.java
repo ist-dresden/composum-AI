@@ -1,7 +1,6 @@
 package com.composum.chatgpt.base.service.chat.impl;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
