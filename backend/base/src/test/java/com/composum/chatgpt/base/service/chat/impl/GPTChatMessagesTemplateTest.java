@@ -32,7 +32,7 @@ public class GPTChatMessagesTemplateTest {
      */
     @Test
     public void getMessages() {
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE);
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
         List<GPTChatMessage> result = template.getMessages(Map.of("this", "thisvalue", "that", "that value"));
         assertEquals("Actual result: " + result, 5, result.size());
         // just compare the tostring values of the messages with the expected values
@@ -45,7 +45,7 @@ public class GPTChatMessagesTemplateTest {
 
     @Test
     public void testGetMessages() {
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE);
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("this", "foo");
         placeholders.put("that", "bar");
@@ -65,7 +65,7 @@ public class GPTChatMessagesTemplateTest {
 
     @Test(expected = GPTException.class)
     public void testGetMessages_missingPlaceholder() {
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE);
+        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("this", "foo");
         template.getMessages(placeholders);
@@ -73,6 +73,6 @@ public class GPTChatMessagesTemplateTest {
 
     @Test(expected = GPTException.class)
     public void testGetMessagesWithNonexistentTemplate() {
-        new GPTChatMessagesTemplate(null, "nonexistent-template");
+        new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), "nonexistent-template");
     }
 }

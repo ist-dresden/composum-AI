@@ -7,7 +7,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
@@ -16,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -79,8 +82,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected volatile GPTChatCompletionServiceConfig config;
 
+    private BundleContext bundleContext;
+
+    private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
+
     @Activate
-    public void activate(GPTChatCompletionServiceConfig config) {
+    public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         // since it costs a bit of money and there are remote limits, we do limit it somewhat, especially for the case of errors.
         RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
         RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
@@ -93,12 +100,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.apiKey = config.openAiApiKey().trim();
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        this.bundleContext = bundleContext;
+        templates.clear(); // bundleContext changed, after all.
     }
 
     @Deactivate
     public void deactivate() {
         httpClient = null;
         apiKey = null;
+        templates.clear();
     }
 
     @Override
@@ -211,6 +221,22 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("No API key configured for the GPT chat completion service. Please configure the service.");
         }
+    }
+
+    @Nonnull
+    @Override
+    public GPTChatMessagesTemplate getTemplate(@Nonnull String templateName) throws GPTException {
+        GPTChatMessagesTemplate result = templates.get(templateName);
+        if (result == null) {
+            try {
+                // first try to access the normal classloader way - works in tests and possibly somewhere else.
+                result = new GPTChatMessagesTemplate(GPTChatCompletionServiceImpl.class.getClassLoader(), templateName);
+            } catch (GPTException e) {
+                result = new GPTChatMessagesTemplate(bundleContext.getBundle(), templateName);
+            }
+            templates.put(templateName, result);
+        }
+        return result;
     }
 
     @Override

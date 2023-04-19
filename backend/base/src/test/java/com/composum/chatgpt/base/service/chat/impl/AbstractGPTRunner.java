@@ -41,7 +41,7 @@ public abstract class AbstractGPTRunner {
             public int connectionTimeout() {
                 return 20;
             }
-        });
+        }, null);
     }
 
 }

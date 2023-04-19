@@ -54,7 +54,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE_MAKEKEYWORDS);
+        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_MAKEKEYWORDS);
         GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText));
@@ -70,7 +70,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (text == null || text.isBlank()) {
             return "";
         }
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE_MAKEDESCRIPTION);
+        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_MAKEDESCRIPTION);
         GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
         int maxtokens = 150;
@@ -111,7 +111,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (prompt == null || prompt.isBlank()) {
             return "";
         }
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, TEMPLATE_PROMPTONTEXT);
+        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_PROMPTONTEXT);
         GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
         int maxtokens = maxwords > 0 ? maxwords * 4 / 3 : 200;

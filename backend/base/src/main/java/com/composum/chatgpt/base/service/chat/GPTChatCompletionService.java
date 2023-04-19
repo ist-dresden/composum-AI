@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.composum.chatgpt.base.service.GPTException;
+import com.composum.chatgpt.base.service.chat.impl.GPTChatMessagesTemplate;
 
 /**
  * Raw abstraction of the ChatGPT chat interface, with only the details that are needed.
@@ -17,6 +18,15 @@ public interface GPTChatCompletionService {
      * The simplest case: give some messages and get a single response.
      */
     String getSingleChatCompletion(GPTChatRequest request) throws GPTException;
+
+    /**
+     * Retrieves a (usually cached) chat template with that name. Mostly for backend internal use.
+     * The templates are retrieved from the bundle resources at "chattemplates/", and are cached.
+     *
+     * @param templateName the name of the template to retrieve, e.g. "singleTranslation" .
+     */
+    @Nonnull
+    GPTChatMessagesTemplate getTemplate(@Nonnull String templateName) throws GPTException;
 
     /**
      * Helper method to shorten texts by taking out the middle if too long.

@@ -34,13 +34,12 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      * Template for {@link GPTChatMessagesTemplate} to translate a single word or phrase. Has placeholders
      * ${sourcelanguage} ${sourcephrase} and ${targetlanguage}.
      */
-    public static final String SINGLETRANSLATION_TEMPLATE = "singleTranslation";
+    public static final String TEMPLATE_SINGLETRANSLATION = "singletranslation";
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
 
     protected Cache<List<String>, String> cache;
-
 
     @Activate
     public void activate(GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig config) {
@@ -77,7 +76,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         }
 
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(null, SINGLETRANSLATION_TEMPLATE);
+        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
         List<GPTChatMessage> messages = template.getMessages(Map.of("sourcelanguage", sourceLanguage, "sourcephrase", text, "targetlanguage", targetLanguage));
         request.addMessages(messages);

@@ -83,6 +83,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
      * Input are the parameters text, sourceLanguage, targetLanguage, output is a list "translation" containing the translation as (currently) a single string.
      * We use a list since it might be sensible to create multiple translation variants in the future.
      */
+    // http://localhost:9090/bin/cpm/platform/chatgpt/servlet.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
     public class TranslateOperation implements ServletOperation {
         @Override
         public void doIt(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response, @Nonnull ResourceHandle resource) throws IOException {

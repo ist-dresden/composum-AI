@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,21 +46,50 @@ public class GPTChatMessagesTemplate {
 
     private final String templateName;
 
-    public GPTChatMessagesTemplate(@Nullable ClassLoader classLoader, @Nonnull String name) {
+    public GPTChatMessagesTemplate(InputStream stream, @Nonnull String name) throws GPTException {
+        if (stream == null) {
+            throw new GPTException("Could not find template " + name);
+        }
         this.templateName = name;
-        ClassLoader loader = classLoader != null ? classLoader : getClass().getClassLoader();
-        String templatePath = TEMPLATEDIR + name + TEMPLATESUFFIX;
-        try (InputStream stream = loader.getResourceAsStream(templatePath);
-             InputStreamReader in = new InputStreamReader(stream, StandardCharsets.UTF_8);
+        try (InputStream instream = stream; // to always close it
+             InputStreamReader in = new InputStreamReader(instream, StandardCharsets.UTF_8);
              BufferedReader buf = new BufferedReader(in)) {
             Iterator<String> lineiterator = buf.lines()
                     .dropWhile((line) -> line.startsWith("#"))
                     .iterator();
             List<List<String>> blocks = getMessageLineBlocks(lineiterator);
-            processBlocks(templatePath, blocks);
+            processBlocks(blocks);
         } catch (IOException | NullPointerException e) {
-            LOG.error("Error reading template {}", name, e);
-            throw new GPTException("Internal error reading chat template");
+            throw new GPTException("Internal error (1) reading chat template " + name, e);
+        }
+    }
+
+    public GPTChatMessagesTemplate(@Nullable ClassLoader classLoader, @Nonnull String name) throws GPTException {
+        this(getGetTemplateStreamFromClassloader(classLoader, name), name);
+    }
+
+    protected static InputStream getGetTemplateStreamFromClassloader(@Nullable ClassLoader classLoader, @Nonnull String name) {
+        try {
+            ClassLoader loader = classLoader != null ? classLoader : GPTChatMessagesTemplate.class.getClassLoader();
+            String templatePath = TEMPLATEDIR + name + TEMPLATESUFFIX;
+            InputStream stream = loader.getResourceAsStream(templatePath);
+            return stream;
+        } catch (RuntimeException e) {
+            throw new GPTException("Internal error (2) reading chat template " + name, e);
+        }
+    }
+
+    public GPTChatMessagesTemplate(@Nonnull Bundle bundle, @Nonnull String templateName) throws GPTException {
+        this(getGetTemplateStreamFromBundle(bundle, templateName), templateName);
+    }
+
+    protected static InputStream getGetTemplateStreamFromBundle(Bundle bundle, String templateName) {
+        try {
+            String templatePath = TEMPLATEDIR + templateName + TEMPLATESUFFIX;
+            InputStream stream = bundle.getResource(templatePath).openStream();
+            return stream;
+        } catch (IOException | RuntimeException e) {
+            throw new GPTException("Internal error (3) reading chat template " + templateName, e);
         }
     }
 
@@ -81,11 +111,11 @@ public class GPTChatMessagesTemplate {
         return blocks;
     }
 
-    protected void processBlocks(String templatePath, List<List<String>> blocks) {
+    protected void processBlocks(List<List<String>> blocks) {
         for (List<String> b : blocks) {
             Matcher matcher = MESSAGE_SEPARATOR.matcher(b.get(0));
             if (!matcher.matches()) { // impossible
-                LOG.error("Bug in template parsing of template {}", templatePath);
+                LOG.error("Bug in template parsing of template {}", templateName);
                 throw new GPTException("Bug in template parsing of template.");
             }
             String role = matcher.group("role");
