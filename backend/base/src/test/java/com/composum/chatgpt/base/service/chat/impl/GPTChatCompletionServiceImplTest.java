@@ -78,4 +78,18 @@ public class GPTChatCompletionServiceImplTest {
         assertEquals(2000L, actualDelay);
     }
 
+    @Test
+    public void testMarkdownToHTML() {
+        String markdown = "This is a **bold** text.";
+        String html = service.markdownToHtml(markdown);
+        assertEquals("<p>This is a <strong>bold</strong> text.</p>\n", html);
+    }
+
+    @Test
+    public void testHTMLToMarkdown() {
+        String html = "This is a <strong>bold</strong> text.";
+        String markdown = service.htmlToMarkdown(html);
+        assertEquals("This is a **bold** text.\n", markdown);
+    }
+
 }

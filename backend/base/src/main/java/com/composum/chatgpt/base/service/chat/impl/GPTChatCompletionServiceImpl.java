@@ -41,6 +41,10 @@ import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Document;
 
 /**
  * Implements the actual access to the ChatGPT chat API.
@@ -264,6 +268,19 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
+    @Override
+    public String markdownToHtml(String markdown) {
+        // FIXME(hps,20.04.23) not threadsafe, so not shared - if we need it regularily this should be cached.
+        Parser parser = Parser.builder().build();
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        Document document = parser.parse(markdown);
+        return renderer.render(document);
+    }
+
+    @Override
+    public String htmlToMarkdown(String html) {
+        return FlexmarkHtmlConverter.builder().build().convert(html);
+    }
 
     @ObjectClassDefinition(name = "GPT Chat Completion Service",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")

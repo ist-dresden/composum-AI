@@ -20,6 +20,9 @@
 - implement ChatGPT dialog that can be called from basic text components, and gives the user the possibility to
   prompt ChatGPT
 
+### Structure
+- markdown rendering: check component structure. -> necessary for keywords etc.
+
 ## Caching
 
 It seems sensible to cache some kinds of requests to ChatGPT, since, first, they cost a little money, and second,

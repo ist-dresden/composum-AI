@@ -39,4 +39,14 @@ public interface GPTChatCompletionService {
      */
     @Nonnull
     String shorten(@Nullable String text, int maxwords) throws GPTException;
+
+    /**
+     * Helper for preprocessing HTML so that it can easily read by ChatGPT.
+     */
+    String htmlToMarkdown(String html);
+
+    /**
+     * Opposite of {@link #markdownToHtml(String)}.
+     */
+    String markdownToHtml(String markdown);
 }

@@ -33,6 +33,20 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 
+		<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.pegdown/pegdown &ndash;&gt;-->
+		<!--		<dependency>-->
+		<!--		    <groupId>org.pegdown</groupId>-->
+		<!--		    <artifactId>pegdown</artifactId>-->
+		<!--		    <version>1.6.0</version>-->
+		<!--		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/com.vladsch.flexmark/flexmark-html2md-converter -->
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-html2md-converter</artifactId>
+			<version>0.64.0</version>
+		</dependency>
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
