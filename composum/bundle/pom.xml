@@ -50,6 +50,12 @@
 			<version>${composum.nodes.version}</version>
 		</dependency>
 
+		<!-- Other libraries -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
 		<!-- Sling, JCR -->
 		<dependency>
 			<groupId>org.apache.sling</groupId>
@@ -58,6 +64,10 @@
 		<dependency>
 			<groupId>javax.jcr</groupId>
 			<artifactId>jcr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-commons</artifactId>
 		</dependency>
 
 		<!-- Logging -->

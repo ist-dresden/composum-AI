@@ -41,10 +41,6 @@ import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.ast.Document;
 
 /**
  * Implements the actual access to the ChatGPT chat API.
@@ -271,15 +267,17 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Override
     public String markdownToHtml(String markdown) {
         // FIXME(hps,20.04.23) not threadsafe, so not shared - if we need it regularily this should be cached.
-        Parser parser = Parser.builder().build();
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
-        Document document = parser.parse(markdown);
-        return renderer.render(document);
+//        Parser parser = Parser.builder().build();
+//        HtmlRenderer renderer = HtmlRenderer.builder().build();
+//        Document document = parser.parse(markdown);
+//        return renderer.render(document);
+        throw new UnsupportedOperationException("Not implemented yet."); // FIXME hps 20.04.23 not implemented
     }
 
     @Override
     public String htmlToMarkdown(String html) {
-        return FlexmarkHtmlConverter.builder().build().convert(html);
+        // return FlexmarkHtmlConverter.builder().build().convert(html);
+        throw new UnsupportedOperationException("Not implemented yet."); // FIXME hps 20.04.23 not implemented
     }
 
     @ObjectClassDefinition(name = "GPT Chat Completion Service",

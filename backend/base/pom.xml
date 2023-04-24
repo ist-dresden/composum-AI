@@ -40,12 +40,12 @@
 		<!--		    <version>1.6.0</version>-->
 		<!--		</dependency>-->
 
-		<!-- https://mvnrepository.com/artifact/com.vladsch.flexmark/flexmark-html2md-converter -->
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-html2md-converter</artifactId>
-			<version>0.64.0</version>
-		</dependency>
+		<!--		&lt;!&ndash; https://mvnrepository.com/artifact/com.vladsch.flexmark/flexmark-html2md-converter &ndash;&gt;-->
+		<!--		<dependency>-->
+		<!--		    <groupId>com.vladsch.flexmark</groupId>-->
+		<!--		    <artifactId>flexmark-html2md-converter</artifactId>-->
+		<!--		    <version>0.64.0</version>-->
+		<!--		</dependency>-->
 
 		<!-- Logging -->
 		<dependency>

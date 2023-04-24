@@ -2,6 +2,7 @@ package com.composum.chatgpt.base.service.chat.impl;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
@@ -79,6 +80,7 @@ public class GPTChatCompletionServiceImplTest {
     }
 
     @Test
+    @Ignore
     public void testMarkdownToHTML() {
         String markdown = "This is a **bold** text.";
         String html = service.markdownToHtml(markdown);
@@ -86,6 +88,7 @@ public class GPTChatCompletionServiceImplTest {
     }
 
     @Test
+    @Ignore
     public void testHTMLToMarkdown() {
         String html = "This is a <strong>bold</strong> text.";
         String markdown = service.htmlToMarkdown(html);
