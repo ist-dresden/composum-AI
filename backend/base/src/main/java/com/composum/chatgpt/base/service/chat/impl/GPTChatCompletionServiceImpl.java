@@ -1,6 +1,7 @@
 package com.composum.chatgpt.base.service.chat.impl;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,6 +19,9 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
+import org.eclipse.mylyn.wikitext.parser.MarkupParser;
+import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -271,13 +275,52 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 //        HtmlRenderer renderer = HtmlRenderer.builder().build();
 //        Document document = parser.parse(markdown);
 //        return renderer.render(document);
-        throw new UnsupportedOperationException("Not implemented yet."); // FIXME hps 20.04.23 not implemented
+        StringWriter writer = new StringWriter();
+        HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer, true);
+        MarkupParser parser = new MarkupParser(new MarkdownLanguage());
+        parser.setBuilder(builder);
+        parser.parse(markdown, false);
+        return writer.toString();
     }
 
     @Override
     public String htmlToMarkdown(String html) {
-        // return FlexmarkHtmlConverter.builder().build().convert(html);
-        throw new UnsupportedOperationException("Not implemented yet."); // FIXME hps 20.04.23 not implemented
+        if (html == null) {
+            return "";
+        }
+//        html = html.replaceAll("<a\\s+href=\"([^\"]+)\">([^<]+)</a>", "[$2]($1)");
+//
+//        // Replace <strong> and <b> tags with bold markdown
+//        html = html.replaceAll("<(strong|b)>(.*?)</\\1>", "**$2**");
+//
+//        // Replace <code> tags with inline code markdown
+//        html = html.replaceAll("<code>(.*?)</code>", "`$1`");
+//
+//        // Replace <em> and <i> tags with italic markdown
+//        html = html.replaceAll("<(em|i)>(.*?)</\\1>", "_$2_");
+//
+//        // Replace <p> tags with a blank line and add margin
+//        html = html.replaceAll("<p>(.*?)</p>", "\n\n$1");
+//
+//        // Replace <br> tags with a line break
+//        html = html.replaceAll("<br>", "\n");
+//
+//        // Replace <u> tags with underline markdown
+//        html = html.replaceAll("<u>(.*?)</u>", "<u>$1</u>");
+//
+//        // Replace <ul> tags with list markdown
+//        html = html.replaceAll("<ul>(.*?)</ul>", "\n$1");
+//
+//        // Replace <li> tags with list item markdown
+//        html = html.replaceAll("<li>(.*?)</li>", "\n- $1");
+//
+//        // Replace <ol> tags with ordered list markdown
+//        html = html.replaceAll("<ol>(.*?)</ol>", "\n$1");
+//
+//        // Replace nested <li> tags with nested list item markdown
+//        html = html.replaceAll("</li>\n<li>", "\n    - ");
+//
+        return new HtmlToMarkdownConverter().convert(html);
     }
 
     @ObjectClassDefinition(name = "GPT Chat Completion Service",

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
@@ -25,9 +26,11 @@ import org.apache.sling.api.servlets.ServletResolverConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.sling.core.util.ResourceUtil;
 
 /**
@@ -47,6 +50,14 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);
 
+    /**
+     * Pattern that matches an opening html tag and captures the tag name.
+     */
+    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(\\w+)(\\s+[^>]*)?>");
+
+    @Reference
+    protected GPTChatCompletionService chatCompletionService;
+
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         RequestPathInfo info = request.getRequestPathInfo();
@@ -55,10 +66,7 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         response.setContentType("text/plain");
         try (Writer w = response.getWriter();
              PrintWriter out = new PrintWriter(w)) {
-            out.println("Page content in markdown syntax for " + path + ":\n");
             traverseTreeAndPrintMarkdown(resource, out);
-            out.println("Attributes with HTML:");
-            out.println(htmltags);
         }
     }
 
@@ -66,12 +74,12 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
             "jcr:title", "## ",
             "title", "## ",
             "subtitle", "### "
-            // , "code", "```"
+            // , "code", "```" handled in extra method
     );
 
     public static final List<String> TEXT_ATTRIBUTES = List.of(
             "jcr:title", "title", "subtitle", "linkTitle", "jcr:description", "text",
-            /* "code", */ "copyright", // code component. code is handled separately to create the markdown code block
+            /* "code", */ "copyright", // code component; code is handled in extra method
             "defaultValue", "exampleCode", "suffix", "exampleResult", "footer" // for servlet component
     );
 
@@ -96,10 +104,8 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
                 String value = resource.getValueMap().get(attributename, String.class);
                 if (value != null) {
                     String prefix = ATTRIBUTE_TO_MARKDOWN_PREFIX.getOrDefault(attributename, "");
-                    out.println(prefix + value);
-                    if (htmltagpattern.matcher(value).find()) {
-                        htmltags.add(attributename);
-                    }
+                    String markdown = getMarkdown(value);
+                    out.println(prefix + markdown);
                     printEmptyLine = true;
                 }
             }
@@ -112,24 +118,43 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         if (!wasHandledAsTable) {
             resource.getChildren().forEach(child -> traverseTreeAndPrintMarkdown(child, out));
         }
+        if (wasHandledAsPage) {
+            String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
+            out.println("\nEnd of content of page " + path + "\n");
+        }
+    }
+
+    @Nonnull
+    protected String getMarkdown(@Nullable String value) {
+        String markdown;
+        if (value == null) {
+            markdown = "";
+        } else if (PATTERN_HTML_TAG.matcher(value).find()) {
+            markdown = chatCompletionService.htmlToMarkdown(value).trim();
+        } else {
+            markdown = value.trim();
+        }
+        return markdown;
     }
 
     protected boolean pageHandling(Resource resource, PrintWriter out) {
         boolean isPage = ResourceUtil.isResourceType(resource, "composum/pages/components/page");
         if (isPage) {
+            String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
+            out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
+
             String title = resource.getValueMap().get("jcr:title", String.class);
             String description = resource.getValueMap().get("jcr:description", String.class);
             List<String> categories = resource.getValueMap().get("category", List.class);
             if (StringUtils.isNotBlank(title)) {
-                out.println("# " + title);
+                out.println("# " + getMarkdown(title));
             }
             if (categories != null && !categories.isEmpty()) {
                 out.println("Categories: " + categories.stream().collect(Collectors.joining(", ")));
             }
             if (StringUtils.isNotBlank(description)) {
-                out.println(description);
+                out.println(getMarkdown(description));
             }
-            out.println();
         }
         return isPage;
     }
@@ -137,9 +162,9 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
     protected void handleCodeblock(Resource resource, PrintWriter out) {
         String code = resource.getValueMap().get("code", String.class);
         if (StringUtils.isNotBlank(code)) {
-            out.println("```");
-            out.println(code);
-            out.println("```");
+            out.println("```\n");
+            out.println(code.trim());
+            out.println("\n```\n");
         }
     }
 
@@ -148,7 +173,7 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         if (isTable) {
             String title = resource.getValueMap().get("title", String.class);
             if (StringUtils.isNotBlank(title)) {
-                out.println("#### " + title);
+                out.println("#### " + getMarkdown(title));
             }
             // for each child of type "row" we print a line with the values of the children of type "cell"
             StreamSupport.stream(resource.getChildren().spliterator(), true)
@@ -158,7 +183,7 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
                         StreamSupport.stream(row.getChildren().spliterator(), true)
                                 .filter(cell -> ResourceUtil.isResourceType(cell, "composum/pages/components/composed/table/cell"))
                                 .map(cell -> cell.getValueMap().get("text", String.class))
-                                .forEach(text -> out.print(StringUtils.trimToEmpty(text) + " | "));
+                                .forEach(text -> out.print(getMarkdown(text) + " | "));
                         out.println(" |");
                     });
             out.println();
@@ -181,11 +206,6 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
     // debugging code; remove after it works.
 
     protected Set<String> htmltags = new HashSet<>();
-
-    /**
-     * Pattern that matches an opening html tag and captures the tag name.
-     */
-    protected Pattern htmltagpattern = Pattern.compile("<\\s*(\\w+)(\\s+[^>]*)?>");
 
     /**
      * This is debugging code we needed to gather information for the implementation; we keep it around for now.
@@ -218,7 +238,7 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
     }
 
     protected void captureHtmlTags(String value) {
-        htmltagpattern.matcher(value).results()
+        PATTERN_HTML_TAG.matcher(value).results()
                 .map(matchResult -> matchResult.group(1))
                 .forEach(htmltags::add);
         // -> found: [ext, a, sly, strong, code, em, language, type, p, br, div, path, u, ul, attributes, li, ol]

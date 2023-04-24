@@ -43,7 +43,8 @@ public interface GPTChatCompletionService {
     /**
      * Helper for preprocessing HTML so that it can easily read by ChatGPT.
      */
-    String htmlToMarkdown(String html);
+    @Nonnull
+    String htmlToMarkdown(@Nullable String html);
 
     /**
      * Opposite of {@link #markdownToHtml(String)}.
