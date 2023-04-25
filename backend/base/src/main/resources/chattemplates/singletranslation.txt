@@ -1,5 +1,5 @@
 # Translate a single word or phrase
----------- user ----------
+---------- system ----------
 Please translate a single word, phrase or text from one language into another, respecting formatting.
 
 The language of the source phrase is given as SOURCELANGUAGE(theSourceLanguage),
@@ -16,7 +16,7 @@ SOURCELANGUAGE(en)
 Hello!
 TARGETLANGUAGE(de)
 ---------- assistant ----------
-Hello!
+Hallo!
 ---------- user ----------
 SOURCELANGUAGE(Deutsch)
 Guten Morgen!
