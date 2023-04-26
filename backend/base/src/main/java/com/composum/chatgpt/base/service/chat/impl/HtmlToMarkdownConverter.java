@@ -28,8 +28,10 @@ public class HtmlToMarkdownConverter {
     private StringBuilder sb = new StringBuilder();
 
     public String convert(String html) {
-        Document doc = Jsoup.parseBodyFragment(html);
-        convertElement(doc.body());
+        if (html != null) {
+            Document doc = Jsoup.parseBodyFragment(html);
+            convertElement(doc.body());
+        }
         return sb.toString();
     }
 
@@ -77,7 +79,7 @@ public class HtmlToMarkdownConverter {
 
             case "pre":
                 sb.append("```\n");
-                convertChildren(element);
+                sb.append(element.html());
                 sb.append("\n```\n");
                 break;
 
