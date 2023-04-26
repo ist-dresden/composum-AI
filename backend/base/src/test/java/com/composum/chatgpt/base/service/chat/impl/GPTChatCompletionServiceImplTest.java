@@ -96,7 +96,7 @@ public class GPTChatCompletionServiceImplTest {
                 + "<p>A paragraph with <code>code fragment</code>.</p>"
                 + "<ul><li>Item 1</li><li>Item 2</li></ul>"
                 + "<ol><li>Item 1</li><li>Item 2</li></ol>"
-                + "<pre>\na code block\nwith several lines\n</pre>";
+                + "<pre>\na code block with several lines\n</pre>";
         String expected = "This is a **test**.\n" +
                 "\n" +
                 "Another paragraph with a [link](http://example.com).\n" +
@@ -114,7 +114,7 @@ public class GPTChatCompletionServiceImplTest {
                 "2. Item 2\n" +
                 "\n" +
                 "```\n" +
-                "a code block with several lines \n" +
+                "a code block with several lines\n" +
                 "```\n";
         String result = service.htmlToMarkdown(html);
         assertEquals(expected, result);

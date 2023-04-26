@@ -18,7 +18,20 @@ right side of the description.
 <!-- START RENDERINFO: /libs/composum/pages/commons/widget/richtext @ sling-post : /content/ist/composum/home/jcr:content -->
 label : /libs/composum/pages/commons/widget/label.jsp
 <i class="fa fa-language"></i><i class="fa fa-magic"></i><i class="fa fa-tags"></i>
+### Buttons for text field / text area / category filling
 
+#### text field and text area
+translation and content creation always(?) available
+
+#### category
+only for pages dialog category!
+
+### Widget extension:
+label.jsp gets sling:call to labelextension.jsp .
+labelextension calls a service (PagesExtensionService) that has PagesExtensions registered, and that would return 
+the JSP path to call.
+
+PagesExtensionService -> AbstractModel (pages) .
 
 ## Possible Icons
 
