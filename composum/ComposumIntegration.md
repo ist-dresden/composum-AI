@@ -6,8 +6,8 @@ State: in execution; this just preliminary.
 
 ## Location of integration
 
-Over a widget we have at the left a title and at the right a description. The integration could be icons at the 
-right side of the description.
+Over a widget we have at the left a title and at the right a description (hint). We will add buttons at the right of 
+the hint.
 
 ### Example: page description
 
@@ -45,3 +45,12 @@ https://icons.getbootstrap.com/icons/pencil-square/ <i class="bi bi-pencil-squar
 perhaps https://icons.getbootstrap.com/icons/chat-dots-fill/
 ! https://icons.getbootstrap.com/icons/magic/ <i class="bi bi-magic"></i>
 ! https://fontawesome.com/v4/icon/magic <i class="fa fa-magic" aria-hidden="true"></i>
+
+## CSS
+
+Location widgets definitions in Pages:
+pages/commons/package/src/main/content/jcr_root/libs/composum/pages/commons/css/widgets.scss
+in category:composum.components.widgets[css:/libs/composum/nodes/commons/components/clientlibs/components]
+
+## Javascript
+category:composum.components.widgets[js:/libs/composum/nodes/commons/components/clientlibs/components]

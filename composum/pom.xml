@@ -20,7 +20,7 @@
 	<properties>
 		<composum.nodes.version>4.2.1</composum.nodes.version>
 		<composum.platform.version>1.7.0</composum.platform.version>
-		<composum.pages.version>1.5.0</composum.pages.version>
+		<composum.pages.version>1.5.1-SNAPSHOT</composum.pages.version>
 	</properties>
 
 	<modules>

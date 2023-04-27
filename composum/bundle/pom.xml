@@ -43,11 +43,16 @@
 		<!--			<version>${composum.platform.version}</version>-->
 		<!--		</dependency>-->
 
-		<!-- Composum Core -->
+		<!-- Composum -->
 		<dependency>
 			<groupId>com.composum.nodes</groupId>
 			<artifactId>composum-nodes-commons</artifactId>
 			<version>${composum.nodes.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.composum.pages</groupId>
+			<artifactId>composum-pages-commons-bundle</artifactId>
+			<version>${composum.pages.version}</version>
 		</dependency>
 
 		<!-- Other libraries -->
@@ -94,8 +99,20 @@
 
 		<!-- Web Application API -->
 		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-atinject_1.0_spec</artifactId>
 		</dependency>
 
 		<!-- JUnit -->
