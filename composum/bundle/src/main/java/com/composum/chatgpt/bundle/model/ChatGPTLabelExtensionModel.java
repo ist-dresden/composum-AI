@@ -46,6 +46,13 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     }
 
     /**
+     * If anything at all is visible. If not, we don't want to ouput any styled wrapper divs etc.
+     */
+    public boolean isVisible() {
+        return isTranslateButtonVisible() || isContentCreationButtonVisible() || isPageCategoriesButtonVisible();
+    }
+
+    /**
      * The translation button is visible only for widgettypes textfield, textarea, richtext, and only if there are texts in other languages than the current one, and if i18n="true" and multi="false".
      */
     public boolean isTranslateButtonVisible() {

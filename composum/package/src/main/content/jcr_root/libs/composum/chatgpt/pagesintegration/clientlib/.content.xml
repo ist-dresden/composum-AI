@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        jcr:primaryType="sling:Folder"
+        sling:resourceType="composum/nodes/commons/clientlib"
+        jcr:description="clientlib for the ChatGPT extension to Pages"
+        category="[composum.components.widgets]"
+        order="{Long}100">
+    <css jcr:primaryType="sling:OrderedFolder"
+            embed="[
+                    composum/chatgpt/pagesintegration/css/widgetextensions.css
+                ]"/>
+    <js jcr:primaryType="sling:OrderedFolder"
+            embed="[
+                    composum/chatgpt/pagesintegration/js/chatgpt.js
+                ]">
+    </js>
+</jcr:root>

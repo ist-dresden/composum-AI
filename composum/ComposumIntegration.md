@@ -54,3 +54,8 @@ in category:composum.components.widgets[css:/libs/composum/nodes/commons/compone
 
 ## Javascript
 category:composum.components.widgets[js:/libs/composum/nodes/commons/components/clientlibs/components]
+
+# To review with Ralf
+
+- handling of variables / mixins?
+- Review pages integration on pages side

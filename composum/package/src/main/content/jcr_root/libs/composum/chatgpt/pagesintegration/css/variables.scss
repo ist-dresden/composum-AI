@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+$screen-size-xs: 624px;
+
+$bootstrap-default-color: #333;
+$bootstrap-default-bg: #fff;
+
+$bootstrap-link-color: #337ab7;
+$bootstrap-link-focus: #23527c;
+
+$bootstrap-bg-primary: #337ab7;
+$bootstrap-bg-success: #dff0d8;
+$bootstrap-bg-warning: #fcf8e3;
+$bootstrap-bg-danger: #e4b9b9;
+$bootstrap-bg-info: #d9edf7;
+
+$bootstrap-color-primary: #337ab7;
+$bootstrap-color-success: #3c763d;
+$bootstrap-color-warning: #8a6d3b;
+$bootstrap-color-danger: #a94442;
+$bootstrap-color-info: #337ab7;
+$bootstrap-color-mute: #777;
+$bootstrap-btn-menu-active-bg: #e6e6e6;
+
+$bootstrap-spacing-v: 10px;
+$bootstrap-spacing-h: 15px;
+
+$default-font-family: 'robotolight', sans-serif;
+$default-font-size: 15px;
+$hint-font-size: $default-font-size - 2;
+
+$edit-label-font-family: $default-font-family;
+$edit-label-font-size: $default-font-size;
+$edit-hint-font-family: 'roboto_condensedlight', sans-serif;
+$edit-hint-font-size: $default-font-size - 2;
+$edit-hint-color: $bootstrap-color-mute;
+
+$dialog-default-font-size: $default-font-size;
+$dialog-label-font-size: $dialog-default-font-size;
+$dialog-input-font-size: $dialog-default-font-size;

@@ -5,12 +5,20 @@
 <%@taglib prefix="cpp" uri="http://sling.composum.com/cppl/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
-<cpp:model var="model" type="com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel">
+<cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel" test="${model.visible}">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel"--%>
-    <c:if test="${model.translateButtonVisible}"><span
-            class="${widgetCSS}_chatgptaction widget-chatgptaction action-translate fa fa-language"></span></c:if>
-    <c:if test="${model.contentCreationButtonVisible}"><span
-            class="${widgetCSS}_chatgptaction widget-chatgptaction action-create fa fa-magic"></span></c:if>
-    <c:if test="${model.pageCategoriesButtonVisible}"><span
-            class="${widgetCSS}_chatgptaction widget-chatgptaction action-pagecategories fa fa-tags"></span></c:if>
-</cpp:model>
+    <div class="labelextension-wrapper">
+        <c:if test="${model.translateButtonVisible}"><span
+                class="widget-chatgptaction action-translate fa fa-language"
+                title="Create a translation with ChatGPT"
+        ></span></c:if>
+        <c:if test="${model.contentCreationButtonVisible}"><span
+                class="widget-chatgptaction action-create fa fa-magic"
+                title="Create content with ChatGPT"
+        ></span></c:if>
+        <c:if test="${model.pageCategoriesButtonVisible}"><span
+                class="widget-chatgptaction action-pagecategories fa fa-tags"
+                title="Suggest categories with ChatGPT"
+        ></span></c:if>
+    </div>
+</cpp:element>

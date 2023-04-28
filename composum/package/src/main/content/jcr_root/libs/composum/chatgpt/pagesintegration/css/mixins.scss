@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+@mixin font($family, $size) {
+    font-family: $family, sans-serif;
+    font-size: $size;
+    font-weight: normal;
+    font-style: normal;
+    text-decoration: none;
+}
+
+@mixin default-font {
+    @include font('robotolight', $default-font-size);
+}
+
+@mixin dialog-font {
+    @include font('robotolight', $dialog-default-font-size);
+}
+
+@mixin dialog-label-font {
+    @include font('robotomedium', $dialog-label-font-size);
+}
+
+@mixin dialog-input-font {
+    @include font('robotolight', $dialog-input-font-size);
+}
+
+@mixin edit-label-font {
+    font-family: $edit-label-font-family;
+    font-size: $edit-label-font-size;
+}
+
+@mixin edit-hint-font {
+    font-family: $edit-hint-font-family;
+    font-size: $edit-hint-font-size;
+}
+
+@mixin screen-size-xs-max {
+    @media (max-width: #{$screen-size-xs - 1px}) {
+        @content;
+    }
+}

@@ -1,0 +1,18 @@
+@charset "UTF-8";
+
+@import "variables";
+@import "mixins";
+
+/** The chatgpt icons in the widget label */
+.composum-chatgpt-pagesintegration-widgetextensions-labelextension {
+
+    .labelextension-wrapper {
+        float: right;
+        margin-left: 5px;
+    }
+
+    .widget-chatgptaction {
+
+    }
+
+}
