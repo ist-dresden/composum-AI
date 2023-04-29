@@ -4,7 +4,7 @@
         sling:resourceType="composum/nodes/commons/clientlib"
         jcr:description="clientlib for the ChatGPT extension to Pages"
         category="[composum.components.widgets]"
-        order="{Long}100">
+        order="{Long}1000">
     <css jcr:primaryType="sling:OrderedFolder"
             embed="[
                     composum/chatgpt/pagesintegration/css/widgetextensions.css

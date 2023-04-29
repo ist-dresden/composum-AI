@@ -54,6 +54,10 @@ in category:composum.components.widgets[css:/libs/composum/nodes/commons/compone
 
 ## Javascript
 category:composum.components.widgets[js:/libs/composum/nodes/commons/components/clientlibs/components]
+relevant: pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/js/dialogs.js declares many 
+dialogs. We need integration into create dialog, too - at least for content creation; translation doesn't matter 
+(would be inactive, anyway). Base class: ElementDialog, covers everything. Binding of actions seems usually done in 
+initView .
 
 # To review with Ralf
 
