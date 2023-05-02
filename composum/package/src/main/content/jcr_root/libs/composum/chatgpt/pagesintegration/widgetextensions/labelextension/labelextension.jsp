@@ -11,14 +11,17 @@
         <c:if test="${model.translateButtonVisible}"><span
                 class="widget-chatgptaction action-translate fa fa-language"
                 title="Create a translation with ChatGPT"
+                data-path="${model.path}" data-property="${model.property}"
         ></span></c:if>
         <c:if test="${model.contentCreationButtonVisible}"><span
                 class="widget-chatgptaction action-create fa fa-magic"
                 title="Create content with ChatGPT"
+                data-path="${model.path}" data-property="${model.property}"
         ></span></c:if>
         <c:if test="${model.pageCategoriesButtonVisible}"><span
                 class="widget-chatgptaction action-pagecategories fa fa-tags"
                 title="Suggest categories with ChatGPT"
+                data-path="${model.path}" data-property="${model.property}"
         ></span></c:if>
     </div>
 </cpp:element>

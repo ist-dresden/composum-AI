@@ -81,4 +81,11 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
         return visible;
     }
 
+    /**
+     * The property of the current resource which the widget edits.
+     */
+    public String getProperty() {
+        return widget.getProperty();
+    }
+
 }

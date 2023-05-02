@@ -165,7 +165,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
      * a list containing the translation as (currently) a single string.
      * We use a list since it might be sensible to create multiple translation variants in the future, if requested.
      */
-    // http://localhost:9090/bin/cpm/platform/chatgpt/servlet.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
+    // http://localhost:9090/bin/cpm/platform/chatgpt/authoring.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
     public class TranslateOperation extends AbstractGPTServletOperation {
 
         @Override
