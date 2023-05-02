@@ -13,23 +13,58 @@
 
     window.composum.pages.dialogs.const.dialogplugins.push(window.composum.chatgpt);
 
-    (function (chatgpt, dialogs, pages, core) {
+    (function (chatgpt, dialogs, pages, core, components) {
         'use strict';
 
         chatgpt.const = {
             url: {
                 authoring: '/bin/cpm/platform/chatgpt/authoring',
                 markdown: '/bin/cpm/platform/chatgpt/approximated.markdown',
+                translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html'
             }
         };
 
         chatgpt.dialogInitializeView = function (dialog, $element) {
             console.log('chatgpt.dialogInitializeView', dialog, $element);
+            let $translationButtons = $element.find('.widget-chatgptaction.action-translate');
+            $translationButtons.click(chatgpt.openTranslateDialog);
             // alert('chatgpt.dialogInitializeView' + dialog + $element);
         }
 
-        dialogs.registerDialogPlugin({dialogInitializeView: chatgpt.dialogInitializeView});
+        /**
+         * Dialog for translation
+         * @param options{path,propertyName}
+         */
+        // as example see replication.PublishDialog
+        chatgpt.TranslationDialog = components.LoadedDialog.extend({
 
-    })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core);
+            initialize: function (options) {
+                components.LoadedDialog.prototype.initialize.call(this, options);
+                // save option values, initialize variables for the elements, bind listeners.
+                this.refresh();
+            },
+
+            /**
+             * @listens status: adjusts the button states
+             */
+            refresh: function () {
+            },
+
+            abort: function (event) {
+                event.preventDefault();
+                console.error('abort');
+                return false;
+            }
+        });
+
+        chatgpt.openTranslateDialog = function (event) {
+            var url = chatgpt.const.url.translationDialog + '/content/ist/composum/home/platform/_jcr_content/_jcr_description';
+            debugger;
+            core.openFormDialog(url, chatgpt.TranslationDialog, {
+                // todo collect path and property
+            }); // todo other parameters? initview, callback?
+        }
+
+    })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);
