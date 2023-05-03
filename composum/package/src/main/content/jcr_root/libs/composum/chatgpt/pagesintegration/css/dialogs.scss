@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+@import "variables";
+@import "mixins";
+
+.composum-chatgpt-pagesintegration-dialogs-translate {
+
+    z-index: $chatgpt-layer;
+
+    .modal-content {
+        @include dialog-input-font;
+
+        label {
+            @include dialog-label-font;
+        }
+    }
+}

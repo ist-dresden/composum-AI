@@ -7,7 +7,8 @@
         order="{Long}1000">
     <css jcr:primaryType="sling:OrderedFolder"
             embed="[
-                    composum/chatgpt/pagesintegration/css/widgetextensions.css
+                    composum/chatgpt/pagesintegration/css/widgetextensions.css,
+                    composum/chatgpt/pagesintegration/css/dialogs.css
                 ]"/>
     <js jcr:primaryType="sling:OrderedFolder"
             embed="[

@@ -105,7 +105,8 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							javax.annotation.*;version="[1,4)",
+							javax.annotation;version="[1,4)",
+							!javax.annotation.meta,
 							*
 						</Import-Package>
 						<Export-Package>
