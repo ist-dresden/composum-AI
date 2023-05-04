@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cpp="http://sling.composum.com/pages/1.0"
+        xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+        jcr:primaryType="cpp:Page">
+    <jcr:content
+            jcr:primaryType="cpp:PageContent"
+            sling:resourceType="composum/pages/components/page"
+            jcr:description="&lt;p>english &lt;em>description&lt;/em>&lt;/p>"
+            jcr:title="english title"
+            subtitle="english subtitle"
+            template="ist/website/templates/page/content">
+        <main
+                jcr:primaryType="cpp:Container"
+                sling:resourceType="composum/pages/components/container/parsys">
+            <text
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/pages/components/element/text"
+                    text="englischer text"
+                    title="englischer subtitel">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            text="deutscher text"
+                            title="deutscher subtitel"/>
+                </i18n>
+            </text>
+        </main>
+        <navigation
+                jcr:primaryType="nt:unstructured"
+                title="english navtitle"/>
+        <style
+                jcr:primaryType="nt:unstructured"/>
+        <i18n
+                jcr:primaryType="nt:unstructured">
+            <de
+                    jcr:primaryType="nt:unstructured"
+                    jcr:description="deutsche beschreibung"
+                    jcr:title="deutscher titel"
+                    subtitle="deutscher subtitel">
+                <navigation
+                        jcr:primaryType="nt:unstructured"
+                        title="deutscher navtitle"/>
+            </de>
+        </i18n>
+    </jcr:content>
+</jcr:root>
