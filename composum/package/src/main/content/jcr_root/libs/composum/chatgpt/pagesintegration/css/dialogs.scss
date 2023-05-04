@@ -14,4 +14,10 @@
             @include dialog-label-font;
         }
     }
+
+    .language-select {
+        float: left;
+        margin-right: 10px;
+    }
+
 }

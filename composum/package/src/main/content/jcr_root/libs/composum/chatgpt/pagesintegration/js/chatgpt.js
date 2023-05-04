@@ -59,7 +59,6 @@
 
         chatgpt.openTranslateDialog = function (event) {
             var url = chatgpt.const.url.translationDialog + '/content/ist/composum/home/platform/_jcr_content/_jcr_description';
-            debugger;
             core.openFormDialog(url, chatgpt.TranslationDialog, {
                 // todo collect path and property
             }); // todo other parameters? initview, callback?
