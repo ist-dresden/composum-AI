@@ -1,5 +1,9 @@
 package com.composum.chatgpt.bundle;
 
+import static org.apache.commons.lang3.StringUtils.isAnyBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -12,9 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.ServletResolverConstants;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -24,11 +31,14 @@ import com.composum.chatgpt.base.service.GPTException;
 import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
 import com.composum.chatgpt.base.service.chat.GPTTranslationService;
+import com.composum.chatgpt.bundle.model.ChatGPTTranslationDialogModel;
+import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.servlet.AbstractServiceServlet;
 import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.servlet.Status;
+import com.composum.sling.core.util.XSS;
 
 /**
  * Servlet providing the various services from the backend as servlet, which are useable for the authors.
@@ -58,6 +68,16 @@ public class ChatGPTServlet extends AbstractServiceServlet {
      * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
      */
     public static final String PARAMETER_MAXWORDS = "maxwords";
+
+    /**
+     * The path to a resource, given as parameter.
+     */
+    public static final String PARAMETER_PATH = "path";
+
+    /**
+     * Property name, given as parameter.
+     */
+    public static final String PARAMETER_PROPERTY = "property";
 
     /**
      * Key for {@link Status#data(String)} - toplevel key in the servlet result.
@@ -94,6 +114,8 @@ public class ChatGPTServlet extends AbstractServiceServlet {
     @Reference
     protected GPTContentCreationService contentCreationService;
 
+    protected BundleContext bundleContext;
+
     public enum Extension {json}
 
     public enum Operation {translate, keywords, description, prompt}
@@ -119,6 +141,11 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             operations.setOperation(method, Extension.json, Operation.prompt,
                     new PromptOperation());
         }
+    }
+
+    @Activate
+    public void activate(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
     protected abstract class AbstractGPTServletOperation implements ServletOperation {
@@ -170,9 +197,40 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text to translate");
+            String text = XSS.filter(request.getParameter(PARAMETER_TEXT));
+            String path = request.getParameter(PARAMETER_PATH);
+            if (isBlank(path)) {
+                path = request.getRequestPathInfo().getSuffix();
+            }
+            String property = request.getParameter(PARAMETER_PROPERTY);
+            if (isBlank(text) && isAnyBlank(path, property)) {
+                status.error("No text or path *and* property given");
+            }
             String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No sourceLanguage given");
-            String targetLanguage = status.getRequiredParameter("targetLanguage", null, "No targetLanguage given");
+            String targetLanguage = request.getParameter("targetLanguage");
+            if (isNoneBlank(path, property)) {
+                Resource propertyResource = request.getResourceResolver().getResource(path + '/' + property);
+                if (propertyResource == null) {
+                    status.error("No resource found at " + path + '/' + property);
+                } else {
+                    BeanContext context = new BeanContext.Servlet(getServletContext(), bundleContext, request, response);
+                    ChatGPTTranslationDialogModel model = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
+                    if (model == null) {
+                        status.error("Could not read from " + path + '/' + property);
+                    } else {
+                        text = model.getValueForLanguage(sourceLanguage);
+                        if (isBlank(text)) {
+                            status.error("No text found for language " + sourceLanguage + " at " + path + '/' + property);
+                        }
+                        if (isBlank(targetLanguage)) {
+                            targetLanguage = model.getLanguageKey(); // pages default
+                        }
+                    }
+                }
+            }
+            if (isBlank(targetLanguage)) {
+                status.error("No targetLanguage given, and it could not be determined from context.");
+            }
             if (status.isValid()) {
                 String translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
                 status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));

@@ -14,6 +14,7 @@
                 <input name="_charset_" type="hidden" value="UTF-8"/>
                 <input name="path" type="hidden" value="${model.path}"/>
                 <input name="property" type="hidden" value="${model.propertyName}"/>
+                <input name="property" type="hidden" value="${model.fieldType}"/>
 
                 <div class="modal-header">
                     <button type="button" class="close fa fa-close" data-dismiss="modal" aria-label="Close"></button>
@@ -22,8 +23,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="messages">
-                        <div class="alert">path: ${model.path}</div>
-                        <div class="alert">path: ${model.propertyEditHandle}</div>
+                        <div class="alert"></div>
                     </div>
 
                     <div class="panel panel-default">
@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary accept" data-dismiss="modal">Accept</button>
+                    <button type="button" class="btn btn-primary accept">Accept</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </form>

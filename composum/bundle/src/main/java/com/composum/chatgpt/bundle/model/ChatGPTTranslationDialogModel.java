@@ -3,6 +3,8 @@ package com.composum.chatgpt.bundle.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.Nullable;
@@ -70,6 +72,16 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
         PropertyEditHandle<String> handle = makePropertyEditHandle(othercontext);
         String value = handle.getValue();
         return value;
+    }
+
+    @javax.annotation.Nullable
+    public String getValueForLanguage(@Nonnull String languageKey) {
+        for (Language language : getLanguages()) {
+            if (language.getLanguageKey().equals(languageKey)) {
+                return getValueForLanguage(language);
+            }
+        }
+        return null;
     }
 
     /**
