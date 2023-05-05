@@ -37,9 +37,8 @@
                                     <div class="source-language form-group">
                                         <div class="language-select">
                                             <label class="composum-pages-edit-widget_option">
-                                                <input class="language-select-radio" type="radio" name="sourceLanguage"
-                                                       value="${source.languageKey}"
-                                                       checked="checked">
+                                                <input class="language-select-radio ${model.singleSourceClass}" type="radio" name="sourceLanguage"
+                                                       value="${source.languageKey}">
                                                 <span class="label-text">${source.languageName}:</span></label>
                                         </div>
                                         <cpn:text value="${source.text}" type="${model.fieldType}"/>

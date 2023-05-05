@@ -58,7 +58,11 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     public boolean isTranslateButtonVisible() {
         boolean visible = valid && widget.isI18n() && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
-        // FIXME(hps,27.04.23) check whether there are actually things to translate
+        if (visible) {
+            Resource propertyResource = getResource().getChild(widget.getPropertyName());
+            ChatGPTTranslationDialogModel translationmodel = context.withResource(getResource().getChild(widget.getPropertyName())).adaptTo(ChatGPTTranslationDialogModel.class);
+            visible = translationmodel.isTranslationPossible();
+        }
         return visible;
     }
 
@@ -68,6 +72,7 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     public boolean isContentCreationButtonVisible() {
         boolean visible = valid && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "codearea", "richtext").contains(widget.getWidgetType());
+        visible = visible && !widget.getPropertyName().startsWith("style/category."); // not sensible for content creation.
         return visible;
     }
 

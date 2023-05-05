@@ -41,20 +41,12 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
     public List<Source> getSources() {
         if (sources == null) {
             List<Source> newSources = new ArrayList<>();
+            String valueInDefaultLanguage = getValueForLanguage(getLanguages().getDefaultLanguage());
             for (Language language : getLanguages()) {
                 if (!language.equals(getLanguage())) {
-                    BeanContext othercontext = new BeanContext.Wrapper(context.withLocale(language.getLocale())) {
-                        @Override
-                        public <T> T getAttribute(String name, Class<T> T) {
-                            if (PagesConstants.RA_STICKY_LOCALE.equals(name)) {
-                                return (T) language.getLocale();
-                            }
-                            return super.getAttribute(name, T);
-                        }
-                    };
-                    PropertyEditHandle<String> handle = makePropertyEditHandle(othercontext);
-                    String value = handle.getValue();
-                    if (StringUtils.isNotBlank(value)) {
+                    String value = getValueForLanguage(language);
+                    // check whether there actually is a text for that language and that it's not just taken from the default language.
+                    if (StringUtils.isNotBlank(value) && !value.equals(valueInDefaultLanguage)) {
                         Source source = new Source(language.getLanguageKey(), language.getName(), value);
                         newSources.add(source);
                     }
@@ -63,6 +55,28 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
             sources = newSources;
         }
         return sources;
+    }
+
+    protected String getValueForLanguage(Language language) {
+        BeanContext othercontext = new BeanContext.Wrapper(context.withLocale(language.getLocale())) {
+            @Override
+            public <T> T getAttribute(String name, Class<T> T) {
+                if (PagesConstants.RA_STICKY_LOCALE.equals(name)) {
+                    return (T) language.getLocale();
+                }
+                return super.getAttribute(name, T);
+            }
+        };
+        PropertyEditHandle<String> handle = makePropertyEditHandle(othercontext);
+        String value = handle.getValue();
+        return value;
+    }
+
+    /**
+     * Returns "singlesource" if there is only one source language, so that we can hide the checkbox.
+     */
+    public String getSingleSourceClass() {
+        return getSources().size() > 1 ? "" : "singlesource";
     }
 
     /**
@@ -133,6 +147,10 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
     public String getFieldType() {
         // FIXME(hps,05.05.23) somehow determine this.
         return "rich";
+    }
+
+    public boolean isTranslationPossible() {
+        return !getSources().isEmpty();
     }
 
     /**
