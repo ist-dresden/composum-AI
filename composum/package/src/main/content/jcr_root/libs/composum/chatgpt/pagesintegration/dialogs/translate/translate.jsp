@@ -38,11 +38,11 @@
                                         <div class="language-select">
                                             <label class="composum-pages-edit-widget_option">
                                                 <input class="language-select-radio" type="radio" name="sourceLanguage"
-                                                       value="${source.languagekey}"
+                                                       value="${source.languageKey}"
                                                        checked="checked">
-                                                <span class="label-text">${source.languagename}:</span></label>
+                                                <span class="label-text">${source.languageName}:</span></label>
                                         </div>
-                                        <cpn:text value="${source.text}" type="${source.type}"/>
+                                        <cpn:text value="${source.text}" type="${model.fieldType}"/>
                                     </div>
                                 </c:forEach>
                             </div>
@@ -55,12 +55,8 @@
                                       i18n="true">Translated text</cpn:text>
                         </div>
                         <div class="panel-body translations">
-                            <div class="fa-3x">
-                                <i class="fas fa-spinner fa-spin"></i>
-                            </div>
-                            <div class="translation form-group">
-                                <p>This is the translation.</p>
-                            </div>
+                            <div class="loading-curtain"><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
+                            <div class="translation form-group" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
