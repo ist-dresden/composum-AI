@@ -28,7 +28,6 @@
             console.log('chatgpt.dialogInitializeView', dialog, $element);
             let $translationButtons = $element.find('.widget-chatgptaction.action-translate');
             $translationButtons.click(chatgpt.openTranslateDialog);
-            // alert('chatgpt.dialogInitializeView' + dialog + $element);
         }
 
         /**
@@ -44,13 +43,14 @@
                 this.$propertyfield = this.$el.find('input[name="property"]');
                 this.$el.on('shown.bs.modal', _.bind(this.onShown, this));
                 this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
-                this.$el.find('.btn-primary.accept').click(_.bind(this.save, this));
+                this.$el.find('.btn-primary.accept').click(_.bind(this.accept, this));
                 this.$form = this.$el.find('form');
                 this.$translation = this.$el.find('.translation');
                 this.$languageSelects = this.$el.find('.language-select-radio')
                 this.$languageSelects.on('change', _.bind(this.languageChanged, this));
                 this.$alert = this.$el.find('.alert');
                 this.$spinner = this.$el.find('.loading-curtain');
+                this.$outputfield = options.outputfield;
 
                 if (this.$languageSelects.length == 1) {
                     this.translate(this.$languageSelects.first().val());
@@ -67,9 +67,11 @@
                 console.log('onShown', arguments);
             },
 
-            save: function (event) {
+            accept: function (event) {
                 event.preventDefault();
-                console.log('save', arguments);
+                console.log('accept', arguments);
+                this.$outputfield.val(this.$translation.text());
+                this.destroy();
                 return false;
             },
 
@@ -136,16 +138,23 @@
         });
 
         chatgpt.openTranslateDialog = function (event) {
-            var path = $(event.target).data('path');
-            var property = $(event.target).data('property');
+            let $target = $(event.target);
+            var path = $target.data('path');
+            var property = $target.data('property');
             var url = chatgpt.const.url.translationDialog + core.encodePath(path + '/' + property);
-            core.openFormDialog(url, chatgpt.TranslationDialog, {},
-                function () {
-                    console.log('initview', arguments);
-                }, function () {
-                    console.log('callback', arguments);
-                }
-            ); // TODO other parameters? initview, callback?
+            core.openFormDialog(url, chatgpt.TranslationDialog, {outputfield: chatgpt.searchInput($target)});
+        }
+
+        /** Looks for the actual text input or textarea that belongs to the labelextension. */
+        chatgpt.searchInput = function ($labelextension) {
+            // $labelextension is jquery wrapped. We lok for the ancestor that is a div.form-group and search for a text input or textarea there.
+            var $formgroup = $labelextension.closest('div.form-group');
+            var $input = $formgroup.find('input[type="text"],textarea');
+            if ($input.length == 1) {
+                return $input;
+            } else {
+                console.log('searchInput: no input found', $labelextension);
+            }
         }
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
