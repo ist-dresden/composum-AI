@@ -3,6 +3,7 @@ package com.composum.chatgpt.bundle.model;
 import java.util.List;
 
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.SyntheticResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +61,11 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
         if (visible) {
             Resource propertyResource = getResource().getChild(widget.getPropertyName());
-            ChatGPTTranslationDialogModel translationmodel = context.withResource(getResource().getChild(widget.getPropertyName())).adaptTo(ChatGPTTranslationDialogModel.class);
-            visible = translationmodel.isTranslationPossible();
+            if (propertyResource == null) {
+                propertyResource = new SyntheticResource(getResource().getResourceResolver(), getPath() + '/' + widget.getPropertyName(), "nt:unstructured");
+            }
+            ChatGPTTranslationDialogModel translationmodel = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
+            visible = translationmodel != null && translationmodel.isTranslationPossible();
         }
         return visible;
     }
