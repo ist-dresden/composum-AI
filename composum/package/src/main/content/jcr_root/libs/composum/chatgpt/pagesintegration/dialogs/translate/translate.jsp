@@ -2,6 +2,7 @@
 <%@taglib prefix="sling" uri="http://sling.apache.org/taglibs/sling/1.2" %>
 <%@taglib prefix="cpn" uri="http://sling.composum.com/cpnl/1.0" %>
 <%@taglib prefix="cpp" uri="http://sling.composum.com/cppl/1.0" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTTranslationDialogModel"
              cssBase="composum-chatgpt-pagesintegration-dialogs-translate"
@@ -32,32 +33,18 @@
                         </div>
                         <div class="panel-body">
                             <div class="source-languages">
-                                <div class="source-language form-group">
-                                    <div class="language-select">
-                                        <label class="composum-pages-edit-widget_option">
-                                            <input class="language-select-radio" type="radio" name="sourceLanguage"
-                                                   value="en"
-                                                   checked="checked">
-                                            <span class="label-text">english:</span></label>
+                                <c:forEach var="source" items="${model.sources}">
+                                    <div class="source-language form-group">
+                                        <div class="language-select">
+                                            <label class="composum-pages-edit-widget_option">
+                                                <input class="language-select-radio" type="radio" name="sourceLanguage"
+                                                       value="${source.languagekey}"
+                                                       checked="checked">
+                                                <span class="label-text">${source.languagename}:</span></label>
+                                        </div>
+                                        <cpn:text value="${source.text}" type="${source.type}"/>
                                     </div>
-                                    <p>This is the text to translate. It can actually be pretty long, longer,
-                                        loooooonger, longest, expecially if it's from a richtext. Let's have a really
-                                        really long text, to see what happens here. Probably we
-                                        have to cut it off sometimes. Also, it can be <u>richtext</u> and <em>have</em>
-                                        <i>HTML</i>.</p>
-                                    <p>It can also have several paragraphs. Also long ones.</p>
-                                </div>
-                            </div>
-                            <div class="source-languages">
-                                <div class="source-language form-group">
-                                    <div class="language-select">
-                                        <label class="composum-pages-edit-widget_option">
-                                            <input class="language-select-radio" type="radio" name="sourceLanguage" value="fr"
-                                                   checked="checked">
-                                            <span class="label-text">french:</span></label>
-                                    </div>
-                                    <p>Voici le texte à traduire</p>
-                                </div>
+                                </c:forEach>
                             </div>
                         </div>
                     </div>
@@ -68,6 +55,9 @@
                                       i18n="true">Translated text</cpn:text>
                         </div>
                         <div class="panel-body translations">
+                            <div class="fa-3x">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
                             <div class="translation form-group">
                                 <p>This is the translation.</p>
                             </div>
