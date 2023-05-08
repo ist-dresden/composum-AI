@@ -63,3 +63,6 @@ initView .
 
 - handling of variables / mixins?
 - Review pages integration on pages side
+
+
+PropertyHandle: ?? in chatgpt propertyName="title" , propertyPath="i18n/es/title"? What about english?

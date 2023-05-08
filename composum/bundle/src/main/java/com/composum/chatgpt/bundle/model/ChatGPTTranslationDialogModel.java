@@ -58,8 +58,9 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
             for (Language language : getLanguages()) {
                 if (!language.equals(getLanguage())) {
                     String value = getValueForLanguage(language);
+                    boolean isDefaultLanguage = language.equals(getLanguages().getDefaultLanguage());
                     // check whether there actually is a text for that language and that it's not just taken from the default language.
-                    if (StringUtils.isNotBlank(value) && !value.equals(valueInDefaultLanguage)) {
+                    if (StringUtils.isNotBlank(value) && (isDefaultLanguage || !value.equals(valueInDefaultLanguage))) {
                         Source source = new Source(language.getLanguageKey(), language.getName(), value);
                         newSources.add(source);
                     }
@@ -80,7 +81,7 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
                 return super.getAttribute(name, T);
             }
         };
-        PropertyEditHandle<String> handle = makePropertyEditHandle(othercontext);
+        PropertyEditHandle<String> handle = makePropertyEditHandle(othercontext, propertyName);
         String value = handle.getValue();
         return value;
     }
@@ -114,10 +115,10 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
         super.initialize(context, resource);
     }
 
-    protected PropertyEditHandle<String> makePropertyEditHandle(BeanContext context) {
+    protected PropertyEditHandle<String> makePropertyEditHandle(BeanContext context, String propertyI18nPath) {
         Objects.requireNonNull(getPropertyI18nPath());
         PropertyEditHandle<String> handle = new PropertyEditHandle(String.class);
-        handle.setProperty(propertyName, getPropertyI18nPath(), true);
+        handle.setProperty(propertyName, propertyI18nPath, true);
         // FIXME(hps,04.05.23) how to determine that?
         handle.setMultiValue(false);
         handle.initialize(context, this.resource);
@@ -158,7 +159,7 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
      */
     public PropertyEditHandle<String> getPropertyEditHandle() {
         if (handle == null) {
-            handle = makePropertyEditHandle(context);
+            handle = makePropertyEditHandle(context, getPropertyI18nPath());
         }
         return handle;
     }

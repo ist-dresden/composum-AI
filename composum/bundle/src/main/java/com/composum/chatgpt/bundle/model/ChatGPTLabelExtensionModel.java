@@ -60,9 +60,9 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
         boolean visible = valid && widget.isI18n() && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
         if (visible) {
-            Resource propertyResource = getResource().getChild(widget.getPropertyName());
+            Resource propertyResource = getResource().getChild(widget.getProperty());
             if (propertyResource == null) {
-                propertyResource = new SyntheticResource(getResource().getResourceResolver(), getPath() + '/' + widget.getPropertyName(), "nt:unstructured");
+                propertyResource = new SyntheticResource(getResource().getResourceResolver(), getPath() + '/' + widget.getProperty(), "nt:unstructured");
             }
             ChatGPTTranslationDialogModel translationmodel = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
             translationmodel.setPropertyI18nPath(getPropertyI18nPath());
