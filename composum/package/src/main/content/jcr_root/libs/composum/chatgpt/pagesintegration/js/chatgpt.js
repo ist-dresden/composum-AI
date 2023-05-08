@@ -41,16 +41,18 @@
                 components.LoadedDialog.prototype.initialize.call(this, options);
                 this.$pathfield = this.$el.find('input[name="path"]');
                 this.$propertyfield = this.$el.find('input[name="property"]');
-                this.$el.on('shown.bs.modal', _.bind(this.onShown, this));
-                this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
-                this.$el.find('.btn-primary.accept').click(_.bind(this.accept, this));
+                this.$accept = this.$el.find('.btn-primary.accept');
                 this.$form = this.$el.find('form');
                 this.$translation = this.$el.find('.translation');
                 this.$languageSelects = this.$el.find('.language-select-radio')
-                this.$languageSelects.on('change', _.bind(this.languageChanged, this));
                 this.$alert = this.$el.find('.alert');
                 this.$spinner = this.$el.find('.loading-curtain');
                 this.$outputfield = options.outputfield;
+
+                this.$el.on('shown.bs.modal', _.bind(this.onShown, this));
+                this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
+                this.$accept.click(_.bind(this.accept, this));
+                this.$languageSelects.on('change', _.bind(this.languageChanged, this));
 
                 if (this.$languageSelects.length == 1) {
                     this.translate(this.$languageSelects.first().val());
@@ -80,29 +82,22 @@
             },
 
             abort: function (event) {
-                // TODO abort the request if still running
-                event.preventDefault();
                 console.error('abort', arguments);
+                event.preventDefault();
+                this.abortRunningCalls();
                 return false;
             },
 
             translate(language) {
                 var that = this;
 
-                function abortRunningCalls() {
-                    if (that.runningxhr) {
-                        that.runningxhr.abort();
-                        that.runningxhr = undefined;
-                    }
-                }
-
                 function consumeXhr(xhr) {
-                    abortRunningCalls();
+                    that.abortRunningCalls();
                     that.runningxhr = xhr;
                 }
 
                 console.log('translate', arguments);
-                // ajaxPost: function (url, data, config, onSuccess, onError, onComplete)
+                this.setTranslating();
                 let url = chatgpt.const.url.authoring + ".translate.json";
                 core.ajaxPost(url, {
                         sourceLanguage: language,
@@ -110,19 +105,34 @@
                         property: this.$propertyfield.val()
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.onTranslation, this), _.bind(this.onError, this));
-                this.$spinner.show();
-                this.$translation.hide();
+            },
+
+            abortRunningCalls: function () {
+                if (this.runningxhr) {
+                    this.runningxhr.abort();
+                    this.runningxhr = undefined;
+                }
             },
 
             onTranslation: function (status) {
                 // TODO handle text and HTML differently
                 if (status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.translation) {
                     this.$translation.html(status.data.result.translation[0]);
-                    this.$alert.hide();
-                    this.$spinner.hide();
-                    this.$translation.show();
+                    this.setTranslated();
                 } else {
                     onError(null, status);
+                }
+            },
+
+            setTranslated: function () {
+                this.$alert.hide();
+                this.$spinner.hide();
+                if (this.$translation.text()) {
+                    this.$translation.show();
+                    this.$accept.prop('disabled', false);
+                } else {
+                    this.$translation.hide();
+                    this.$accept.prop('disabled', true);
                 }
             },
 
@@ -133,6 +143,14 @@
                 this.$alert.show();
                 this.$spinner.hide();
                 this.$translation.hide();
+                this.$accept.prop('disabled', true);
+            },
+
+            setTranslating: function () {
+                this.$alert.hide();
+                this.$spinner.show();
+                this.$translation.hide();
+                this.$accept.prop('disabled', true);
             }
 
         });

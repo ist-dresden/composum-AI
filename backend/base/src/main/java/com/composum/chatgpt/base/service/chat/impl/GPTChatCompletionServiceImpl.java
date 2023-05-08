@@ -170,12 +170,17 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         long trynumber = 1;
 
         while (trynumber < 5) {
-            response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            try {
+                response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() == 200) return response;
-            if (response.statusCode() != 429) {
-                LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), response.body());
-                throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + response.body());
+                if (response.statusCode() == 200) return response;
+                if (response.statusCode() != 429) {
+                    LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), response.body());
+                    throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + response.body());
+                }
+            } catch (IOException e) {
+                LOG.error("Error while calling GPT", e);
+                // do retry.
             }
 
             trynumber = trynumber + 1;

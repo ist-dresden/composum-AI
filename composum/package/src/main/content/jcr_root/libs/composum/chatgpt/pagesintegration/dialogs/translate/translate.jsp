@@ -23,7 +23,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="messages">
-                        <div class="alert"></div>
+                        <div class="alert" style="display: none;"></div>
                     </div>
 
                     <div class="panel panel-default">
@@ -37,7 +37,8 @@
                                     <div class="source-language form-group">
                                         <div class="language-select">
                                             <label class="composum-pages-edit-widget_option">
-                                                <input class="language-select-radio ${model.singleSourceClass}" type="radio" name="sourceLanguage"
+                                                <input class="language-select-radio ${model.singleSourceClass}"
+                                                       type="radio" name="sourceLanguage"
                                                        value="${source.languageKey}">
                                                 <span class="label-text">${source.languageName}:</span></label>
                                         </div>
@@ -54,13 +55,14 @@
                                       i18n="true">Translated text</cpn:text>
                         </div>
                         <div class="panel-body translations">
-                            <div class="loading-curtain"><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
+                            <div class="loading-curtain" style="display: none;"><i
+                                    class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
                             <div class="translation form-group" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary accept">Accept</button>
+                    <button type="button" class="btn btn-primary accept" disabled>Accept</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
