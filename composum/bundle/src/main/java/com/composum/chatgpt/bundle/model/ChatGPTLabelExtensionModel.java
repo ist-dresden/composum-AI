@@ -65,6 +65,7 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
                 propertyResource = new SyntheticResource(getResource().getResourceResolver(), getPath() + '/' + widget.getPropertyName(), "nt:unstructured");
             }
             ChatGPTTranslationDialogModel translationmodel = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
+            translationmodel.setPropertyI18nPath(getPropertyI18nPath());
             visible = translationmodel != null && translationmodel.isTranslationPossible();
         }
         return visible;
@@ -91,10 +92,17 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     }
 
     /**
-     * The property of the current resource which the widget edits.
+     * The property of the current resource which the widget edits, for instance "jcr:title", "title", "text".
      */
     public String getProperty() {
         return widget.getProperty();
+    }
+
+    /**
+     * The path where the property is actually saved according to our i18n method, e.g. "i18n/de/text".
+     */
+    public String getPropertyI18nPath() {
+        return widget.getPropertyName();
     }
 
 }

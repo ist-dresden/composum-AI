@@ -2,6 +2,7 @@ package com.composum.chatgpt.bundle.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -21,19 +22,29 @@ import com.composum.sling.core.BeanContext;
 public class ChatGPTTranslationDialogModel extends AbstractModel {
 
     /**
-     * The name of the property for which the translation dialog is opened.
+     * The name of the property for which the translation dialog is opened, e.g. "jcr:title", "title", "text", ...
      */
     protected String propertyName;
+
+
+    /**
+     * The path where the property is actually saved according to our i18n method, e.g. "i18n/de/text".
+     */
+    protected String propertyI18nPath;
 
     /**
      * The property edit handle for the property.
      */
-    protected PropertyEditHandle<String> propertyEditHandle;
+    protected PropertyEditHandle<String> handle;
 
     /**
      * The sources for translation.
      */
     protected List<Source> sources;
+
+    public void setPropertyI18nPath(String propertyI18nPath) {
+        this.propertyI18nPath = propertyI18nPath;
+    }
 
     /**
      * Returns the list of sources.
@@ -101,12 +112,12 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
     public void initialize(BeanContext context, Resource resource) {
         propertyName = resource.getName();
         super.initialize(context, resource);
-        propertyEditHandle = makePropertyEditHandle(context);
     }
 
     protected PropertyEditHandle<String> makePropertyEditHandle(BeanContext context) {
+        Objects.requireNonNull(getPropertyI18nPath());
         PropertyEditHandle<String> handle = new PropertyEditHandle(String.class);
-        handle.setProperty(propertyName, propertyName, true);
+        handle.setProperty(propertyName, getPropertyI18nPath(), true);
         // FIXME(hps,04.05.23) how to determine that?
         handle.setMultiValue(false);
         handle.initialize(context, this.resource);
@@ -115,6 +126,13 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
         // locale=en_US, languages="en", "de", !multivalue
         // or: /content/ist/software/home/test/jcr:content , propertyName = propertyPath = jcr:title
         return handle;
+    }
+
+    protected String getPropertyI18nPath() {
+        if (propertyI18nPath == null) {
+            propertyI18nPath = context.getRequest().getParameter("propertypath");
+        }
+        return propertyI18nPath;
     }
 
     /**
@@ -139,7 +157,10 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
      * @return The property edit handle.
      */
     public PropertyEditHandle<String> getPropertyEditHandle() {
-        return propertyEditHandle;
+        if (handle == null) {
+            handle = makePropertyEditHandle(context);
+        }
+        return handle;
     }
 
     /**

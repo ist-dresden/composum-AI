@@ -141,7 +141,8 @@
             let $target = $(event.target);
             var path = $target.data('path');
             var property = $target.data('property');
-            var url = chatgpt.const.url.translationDialog + core.encodePath(path + '/' + property);
+            var propertypath = $target.data('propertypath');
+            var url = chatgpt.const.url.translationDialog + core.encodePath(path + '/' + property) + "?propertypath=" + encodeURIComponent(propertypath);
             core.openFormDialog(url, chatgpt.TranslationDialog, {outputfield: chatgpt.searchInput($target)});
         }
 
