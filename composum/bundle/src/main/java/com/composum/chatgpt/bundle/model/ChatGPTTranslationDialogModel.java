@@ -116,7 +116,7 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
     }
 
     protected PropertyEditHandle<String> makePropertyEditHandle(BeanContext context, String propertyI18nPath) {
-        Objects.requireNonNull(getPropertyI18nPath());
+        Objects.requireNonNull(propertyI18nPath);
         PropertyEditHandle<String> handle = new PropertyEditHandle(String.class);
         handle.setProperty(propertyName, propertyI18nPath, true);
         // FIXME(hps,04.05.23) how to determine that?

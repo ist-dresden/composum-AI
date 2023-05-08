@@ -129,7 +129,7 @@
             onError: function (xhr, status) {
                 console.error('onError', arguments);
                 // TODO sensible handling of errors
-                this.$alert.text(xhr + " / " + status);
+                this.$alert.text(xhr.status + " " + xhr.statusText + " : " + xhr.responseText + " / " + status);
                 this.$alert.show();
                 this.$spinner.hide();
                 this.$translation.hide();
