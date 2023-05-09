@@ -77,7 +77,7 @@
                 } else {
                     this.$outputfield.val(this.$translation.text());
                 }
-                this.destroy();
+                this.$el.modal('hide');
                 return false;
             },
 

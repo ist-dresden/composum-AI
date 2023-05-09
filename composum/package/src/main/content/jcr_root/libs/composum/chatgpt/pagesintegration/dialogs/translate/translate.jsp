@@ -62,7 +62,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary accept" disabled>Accept</button>
+                    <button type="button" class="btn btn-primary accept" data-dismiss="modal" disabled>Accept</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
