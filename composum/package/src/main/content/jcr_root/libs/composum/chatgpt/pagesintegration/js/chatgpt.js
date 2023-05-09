@@ -72,7 +72,11 @@
             accept: function (event) {
                 event.preventDefault();
                 console.log('accept', arguments);
-                this.$outputfield.val(this.$translation.text());
+                if (this.$outputfield.hasClass('trumbowyg-textarea')) {
+                    this.$outputfield.trumbowyg('html', this.$translation.html());
+                } else {
+                    this.$outputfield.val(this.$translation.text());
+                }
                 this.destroy();
                 return false;
             },
@@ -115,7 +119,6 @@
             },
 
             onTranslation: function (status) {
-                // TODO handle text and HTML differently
                 if (status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.translation) {
                     this.$translation.html(status.data.result.translation[0]);
                     this.setTranslated();
@@ -167,14 +170,12 @@
 
         /** Looks for the actual text input or textarea that belongs to the labelextension. */
         chatgpt.searchInput = function ($labelextension) {
-            // $labelextension is jquery wrapped. We lok for the ancestor that is a div.form-group and search for a text input or textarea there.
             var $formgroup = $labelextension.closest('div.form-group');
             var $input = $formgroup.find('input[type="text"],textarea');
-            if ($input.length == 1) {
+            if ($input.length === 1) {
                 return $input;
-            } else {
-                console.log('searchInput: no input found', $labelextension);
             }
+            console.error('BUG! searchInput: no input found', $labelextension);
         }
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
