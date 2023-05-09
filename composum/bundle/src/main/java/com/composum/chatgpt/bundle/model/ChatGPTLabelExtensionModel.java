@@ -65,7 +65,9 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
                 propertyResource = new SyntheticResource(getResource().getResourceResolver(), getPath() + '/' + widget.getProperty(), "nt:unstructured");
             }
             ChatGPTTranslationDialogModel translationmodel = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
-            translationmodel.setPropertyI18nPath(getPropertyI18nPath());
+            if (translationmodel != null) {
+                translationmodel.setPropertyI18nPath(getPropertyI18nPath());
+            }
             visible = translationmodel != null && translationmodel.isTranslationPossible();
         }
         return visible;
