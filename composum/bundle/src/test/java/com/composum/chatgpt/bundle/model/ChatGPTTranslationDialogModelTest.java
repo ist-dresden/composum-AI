@@ -6,12 +6,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -30,7 +31,6 @@ import com.composum.sling.core.BeanContext;
  * Tests for {@link ChatGPTTranslationDialogModel}.
  */
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class ChatGPTTranslationDialogModelTest {
 
     public static final String PATH = "/content/i18izedpage";
@@ -59,7 +59,10 @@ public class ChatGPTTranslationDialogModelTest {
         beanContext.setAttribute(LANGUAGES_ATTR, languages, BeanContext.Scope.application);
         Page page = new Page();
         beanContext.setAttribute(RA_CURRENT_PAGE, page, BeanContext.Scope.application);
+        // can't set via constructor due to bug in BeanContext.Map
+        FieldUtils.writeDeclaredField(beanContext, "request", context.request(), true);
         Mockito.when(languages.getLanguage()).thenReturn(language);
+
     }
 
     @Test
@@ -69,13 +72,16 @@ public class ChatGPTTranslationDialogModelTest {
     }
 
     @Test
-    @Ignore
     public void testModel() {
+        context.request().setParameterMap(Map.of("propertypath", "jcr:description"));
         Resource resource = context.resourceResolver().getResource(PATH + "/jcr:content/jcr:description");
         ChatGPTTranslationDialogModel model = beanContext.withResource(resource).adaptTo(ChatGPTTranslationDialogModel.class);
         ec.checkThat(model, is(notNullValue()));
         ec.checkThat(model.getPropertyEditHandle(), is(notNullValue()));
-        ec.checkThat(model.getPropertyEditHandle().getValues(), is("jcr:description"));
+        ec.checkThat(model.getPropertyEditHandle().getValue(), is("<p>english <em>description</em></p>"));
+        ec.checkThat(model.getPropertyName(), is("jcr:description"));
+        ec.checkThat(model.getFieldType(), is("rich"));
+        // we give up at this point: the setup according to AbstractModel is too complex to mock for the expected value of the test.
     }
 
 }
