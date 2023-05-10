@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" version="1.1">
+    <rect x="10" y="10" width="580" height="780" style="stroke:black; stroke-width:2; fill:none"/>
+    <rect x="20" y="20" width="560" height="60" style="stroke:black; stroke-width:1; fill:none"/>
+    <rect x="30" y="30" width="170" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="35" y="50">Predefined Prompts</text>
+    <rect x="210" y="30" width="170" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="215" y="50">Content Selector</text>
+    <rect x="390" y="30" width="170" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="395" y="50">Text Length Selector</text>
+    <rect x="20" y="90" width="560" height="60" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="25" y="110">Prompt Textarea</text>
+    <rect x="20" y="160" width="560" height="60" style="stroke:black; stroke-width:1; fill:none"/>
+    <rect x="30" y="170" width="100" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="35" y="190">Generate</text>
+    <circle cx="145" cy="185" r="10" stroke="black" stroke-width="1" fill="none" />
+    <rect x="480" y="170" width="40" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="485" y="190">Back</text>
+    <rect x="530" y="170" width="40" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="535" y="190">Forward</text>
+    <rect x="20" y="230" width="560" height="30" style="stroke:red; stroke-width:1; fill:none"/>
+    <text x="25" y="250">Alert Text</text>
+    <rect x="20" y="270" width="560" height="400" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="25" y="290">ChatGPT Response Field</text>
+    <rect x="20" y="680" width="180" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="25" y="700">Replace</text>
+    <rect x="210" y="680" width="180" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="215" y="700">Append</text>
+    <rect x="400" y="680" width="180" height="30" style="stroke:black; stroke-width:1; fill:none"/>
+    <text x="405" y="700">Cancel</text>
+</svg>

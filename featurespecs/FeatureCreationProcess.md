@@ -34,6 +34,33 @@ your feature documentation. A good idea is giving it examples of what you want, 
 5. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog
    elements. Probably it'll take some turns fixing parts of the spec until the list seems right. Recheck with "Please
    check whether there are missing dialog elements, and whether these dialog elements fit the usage in the use cases."
+6. Have ChatGPT render suggestions for the dialog layout.
+
+### Some specific prompts
+
+#### Dialog layout
+
+These prompts can help to get a visual overview; the SVG variant is quite useable to quickly display a design idea. 
+The SVG seems to need several tries to get it right.
+
+> Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation.
+> Buttons should be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown.
+> Drop down lists can be rendered like [\/Predefined].
+> Text fields, Text areas should be shown with a description what is in there, spaces rendered as _, and with more _
+> showing the full space they occupy. (For text areas that will be several lines.)
+> Otherwise the dialog should look as closely as ascii art can make it to the fully implemented dialog.
+> The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
+> No explanation is necessary, please render just a drawing of the dialog in a ascii art code block.
+
+> Please create a code block with a SVG representation of the dialog, that could be rendered by a browser to display
+> a suggestion for the dialog.
+> The dialog should have a frame, the subgroups also should have a frame.
+> The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
+> The text fields and text areas should be rendered as a frame, with a descriptive text shown inside.
+> Render buttons and drop down lists with a frame, and indicate with a suitable symbol the drop down list.
+> No explanation is necessary, please render just a drawing of the dialog in a SVG code block.
+> Please output only the svg tag and the svg elements, insert no comments into the SVG text, and take care to create a 
+> valid SVG including the xmlns declaration.
 
 ## Other things you could have ChatGPT check
 

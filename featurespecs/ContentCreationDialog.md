@@ -81,9 +81,9 @@ To support the dialog design let's see some typical user workflows. Here are som
 Given these workflows, the content creation dialog could have the following elements:
 
 - **Prompt Field:** A text field where the user can write a custom prompt for ChatGPT. It should be a text area that
-  can contain multiple lines. 
+  can contain multiple lines.
 
-- **Predefined prompts:** Dropdown menu with pre-defined prompts like "summary", "improve", "extend", "title 
+- **Predefined prompts:** Dropdown menu with pre-defined prompts like "summary", "improve", "extend", "title
   generation", etc. that are suitable for various use-cases. Selecting this will replace the prompt field content.
 
 - **Content Selector:** A dropdown menu for selecting the content to include as additional input for ChatGPT. The
@@ -121,7 +121,8 @@ Given these workflows, the content creation dialog could have the following elem
 - **Close/Cancel Button:** A button to close the dialog without applying any changes. This is useful if the user decides
   not to use the generated content after all.
 
-- **Alert:** a normally hidden area that can contain error messages or warnings.
+- **Alert:** a normally hidden area that can contain error messages or warnings. The text will be shown in red, so a 
+  label is not necessary.
 
 - **Help:** opens a page with a description of the dialog, and some example usages.
 
@@ -129,67 +130,74 @@ Given these workflows, the content creation dialog could have the following elem
 
 To build an intuitive and user-friendly interface for the dialog, it's crucial to structure the elements in a logical
 order that aligns with the user's workflow. This involves grouping the elements based on their function and arranging
-them in the sequence they are likely to be used. We order these dialog elements in the following groups below each 
+them in the sequence they are likely to be used. We order these dialog elements in the following groups below each
 other. Some groups have subgroups, which have an individual frame around them.
 
-1. **Prompt Group**: This group has the elements that the user interacts with to specify the prompt and the additional input for ChatGPT.
-   1. **Prompt details**
-       - Predefined Prompts
-       - Content Selector
-       - Text Length Selector
-   2. **Prompt Area**:
-       - Prompt Textarea (5 lines)
+1. **Prompt Group**: This group has the elements that the user interacts with to specify the prompt and the additional
+   input for ChatGPT.
+    1. **Prompt details**
+        - Predefined Prompts
+        - Content Selector
+        - Text Length Selector
+    2. **Prompt Area**:
+        - Prompt Textarea (5 lines)
 
-2. **Generation Control**: This group lets the user control the generation process. All buttons are arranged in a horizontal line with two subgroups.
-   1. **Generation Control**: 
-       - Generate Button
-       - Loading Indicator
-   2. **Content preview history navigation**:
-      - Back
-      - Forward
+2. **Generation Control**: This group lets the user control the generation process. All buttons are arranged in a
+   horizontal line with two subgroups.
+    1. **Generation Control**:
+        - Generate Button
+        - Loading Indicator
+    2. **Content preview history navigation**:
+        - Back
+        - Forward
+
+6. **Alert**: normally hidden.
 
 3. **Content Preview**: Allows the user to review the generated content.
     - ChatGPT Response Field
 
-4. **Content Actions**: These buttons are used when the user is satisfied with the content.
+4. **Content Actions and Dialog Control**:
     - Replace Button
     - Append Button
-
-5. **Dialog Control**: These elements give control over the dialog itself.
     - Cancel Button
-    - Close/Cancel Button
 
-6. **Additional Information**: These elements provide help and alerting functions.
-    - Alert
-    - Help
+The help and maximize buttons should appear as icons next to the close icon, all three right aligned on the top in 
+the dialog frame.
 
 ## Preview of the dialog.
 
-Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation. Buttons should 
-be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown. Text fields, Text 
-areas should be shown with a description what is in there, spaces rendered as _ . Otherwise the dialog should look 
-as closely as ascii art can make it to the fully implemented dialog. The names of groups and subgroups should not be 
-shown, except if they should appear in the fully implemented dialog.
+    +--------------------------------------------------------- [?] [□] [x] -+
+    |                                                                       |
+    | [\/Predefined] [\/Content Selector] [\/Text Length Selector]          |
+    |                                                                       |
+    | Prompt_Textarea______________________________________________________ |
+    |                                                                       |
+    | [Generate] [Spinner]            [Back] [Forward]                      |
+    |                                                                       |
+    | Alert_Text___________________________________________________________ |
+    |                                                                       |
+    | ChatGPT_Response_Field_______________________________________________ |
+    | ________________________________________________________             |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    | [Replace] [Append] [Cancel]                                           |
+    |                                                                       |
+    |                                                                       |
+    +-----------------------------------------------------------------------+
+Ascii-Art representing the dialog design.[^1]
 
+![testimage](figures/contentCreationDialog.svg)
 
-
-XXX
-
-Please do not answer; this is the current specification and I'll continue on the next message with my requests.
-
-XXX
-
-This layout provides a logical flow for the user. They start by specifying the prompt and additional input, then set the desired length of the output, and then they can generate the content. The generated content appears in the preview area, and they can decide to replace or append the content, or cancel the operation. They can also navigate through the history of generated content using the back and forth buttons. The loading indicator provides feedback on the status of the content generation, and the alert area provides important messages when necessary. The help button is always available for assistance.
-
-
-
-XXX: In terms of layout, these elements could be grouped and arranged in a way that supports the described workflows
-efficiently. For instance, "Prompt Field", "Content Selector", and "Text Length Selector" could be placed at the top of
-the dialog as these are the primary inputs. The "ChatGPT Response Field" could take the majority of the central area,
-with "History Navigation" buttons on its side. "Replace", "Append", "Generate", "Cancel", and "Close/Cancel" buttons
-could be arranged at the bottom of the dialog. The "Loading Indicator" could be placed near the "Generate" button, and
-the "Alert" could be placed at a noticeable place in the dialog, perhaps near the top or bottom. The "Help" button could
-be located near the top or at a corner, where it can be easily accessed but doesn't interfere with the main workflow.
+Suggestion for dialog design.[^2]
 
 ## Possible extensions
 
@@ -238,3 +246,23 @@ These ideas might or might not make sense - that's best reviewed after the featu
   the dialog.
 - **Loading Indicator:** A visual signal to show when the AI is processing a prompt and when it is ready.
 - **Alert:** An area to display error messages or warnings.
+
+[^1]: ChatGPT prompt to create that drawing:
+Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation. 
+Buttons should be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown.
+Drop down lists can be rendered like [\/Predefined].
+Text fields, Text areas should be shown with a description what is in there, spaces rendered as _, and with more _
+showing the full space they occupy. (For text areas that will be several lines.)
+Otherwise the dialog should look as closely as ascii art can make it to the fully implemented dialog. 
+The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
+No explanation is necessary, please render just a drawing of the dialog in a ascii art code block.
+
+[^2]: ChatGPT prompt to create that drawing:
+Please create a code block with a SVG representation of the dialog, that could be rendered by a browser to display a suggestion for the dialog. 
+The dialog should have a frame, group subgroups also with a small frame that surrounds the group of buttons etc.
+The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
+The text fields and text areas should be rendered as a frame, with a descriptive text shown inside.
+Render buttons and drop down lists with a frame, and indicate with a suitable symbol the drop down list. 
+No explanation is necessary, please render just a drawing of the dialog in a SVG code block.
+Please output only the svg tag and the svg elements, no comments, and take care to create a valid SVG including the 
+xmlns declaration.
