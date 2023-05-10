@@ -31,7 +31,9 @@ your feature documentation. A good idea is giving it examples of what you want, 
 4. When the usecases start to make sense, it's a good idea to collect the main intended usecases in a section "User
    Workflow". That can involve several turns of collecting and rewriting some usecases that seem fine and asking for
    more.
-5. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog elements.
+5. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog
+   elements. Probably it'll take some turns fixing parts of the spec until the list seems right. Recheck with "Please
+   check whether there are missing dialog elements, and whether these dialog elements fit the usage in the use cases."
 
 ## Other things you could have ChatGPT check
 

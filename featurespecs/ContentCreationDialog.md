@@ -81,12 +81,15 @@ To support the dialog design let's see some typical user workflows. Here are som
 Given these workflows, the content creation dialog could have the following elements:
 
 - **Prompt Field:** A text field where the user can write a custom prompt for ChatGPT. It should be a text area that
-  can contain multiple lines. This field could also include a dropdown menu with pre-defined prompts like "summary",
-  "improve", "extend", "title generation", etc. that are suitable for various use-cases.
+  can contain multiple lines. 
+
+- **Predefined prompts:** Dropdown menu with pre-defined prompts like "summary", "improve", "extend", "title 
+  generation", etc. that are suitable for various use-cases. Selecting this will replace the prompt field content.
 
 - **Content Selector:** A dropdown menu for selecting the content to include as additional input for ChatGPT. The
   options could include the current text of the edited attribute, the text of the edited component (and subcomponents,
-  if applicable) and the full text of the whole page.
+  if applicable) and the full text of the whole page. An abbreviation of that content will be displayed as tooltip
+  for the individual elements of the selection.
 
 - **Text Length Selector:** For textareas and richtext editors, a dropdown menu to select the desired text length.
   Options could include "one line", "one sentence", "one paragraph", "several paragraphs". This option is absent for
@@ -120,7 +123,86 @@ Given these workflows, the content creation dialog could have the following elem
 
 - **Alert:** a normally hidden area that can contain error messages or warnings.
 
+- **Help:** opens a page with a description of the dialog, and some example usages.
+
+## Structure of the dialog
+
+To build an intuitive and user-friendly interface for the dialog, it's crucial to structure the elements in a logical
+order that aligns with the user's workflow. This involves grouping the elements based on their function and arranging
+them in the sequence they are likely to be used. We order these dialog elements in the following groups below each 
+other. Some groups have subgroups, which have an individual frame around them.
+
+1. **Prompt Group**: This group has the elements that the user interacts with to specify the prompt and the additional input for ChatGPT.
+   1. **Prompt details**
+       - Predefined Prompts
+       - Content Selector
+       - Text Length Selector
+   2. **Prompt Area**:
+       - Prompt Textarea (5 lines)
+
+2. **Generation Control**: This group lets the user control the generation process. All buttons are arranged in a horizontal line with two subgroups.
+   1. **Generation Control**: 
+       - Generate Button
+       - Loading Indicator
+   2. **Content preview history navigation**:
+      - Back
+      - Forward
+
+3. **Content Preview**: Allows the user to review the generated content.
+    - ChatGPT Response Field
+
+4. **Content Actions**: These buttons are used when the user is satisfied with the content.
+    - Replace Button
+    - Append Button
+
+5. **Dialog Control**: These elements give control over the dialog itself.
+    - Cancel Button
+    - Close/Cancel Button
+
+6. **Additional Information**: These elements provide help and alerting functions.
+    - Alert
+    - Help
+
+## Preview of the dialog.
+
+Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation. Buttons should 
+be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown. Text fields, Text 
+areas should be shown with a description what is in there, spaces rendered as _ . Otherwise the dialog should look 
+as closely as ascii art can make it to the fully implemented dialog. The names of groups and subgroups should not be 
+shown, except if they should appear in the fully implemented dialog.
+
+
+
+XXX
+
+Please do not answer; this is the current specification and I'll continue on the next message with my requests.
+
+XXX
+
+This layout provides a logical flow for the user. They start by specifying the prompt and additional input, then set the desired length of the output, and then they can generate the content. The generated content appears in the preview area, and they can decide to replace or append the content, or cancel the operation. They can also navigate through the history of generated content using the back and forth buttons. The loading indicator provides feedback on the status of the content generation, and the alert area provides important messages when necessary. The help button is always available for assistance.
+
+
+
+XXX: In terms of layout, these elements could be grouped and arranged in a way that supports the described workflows
+efficiently. For instance, "Prompt Field", "Content Selector", and "Text Length Selector" could be placed at the top of
+the dialog as these are the primary inputs. The "ChatGPT Response Field" could take the majority of the central area,
+with "History Navigation" buttons on its side. "Replace", "Append", "Generate", "Cancel", and "Close/Cancel" buttons
+could be arranged at the bottom of the dialog. The "Loading Indicator" could be placed near the "Generate" button, and
+the "Alert" could be placed at a noticeable place in the dialog, perhaps near the top or bottom. The "Help" button could
+be located near the top or at a corner, where it can be easily accessed but doesn't interfere with the main workflow.
+
 ## Possible extensions
+
+### Likely extensions
+
+These are very recommendable, but lower priority and have some effort.
+
+- The title attribute of the loading indicator should show the last actual request sent to ChatGPT, for transparency
+  and debugging. A click on it could open a full screen read only dialog showing the complete request, scrollable.
+
+### Not planned for now
+
+These ideas might or might not make sense - that's best reviewed after the feature is implemented and has been used.
 
 - Request several variants simultaneously
 - temperature setting
@@ -130,26 +212,29 @@ Given these workflows, the content creation dialog could have the following elem
 - Some kind of templates: predefined structure descriptions for specific functions of the text
 - Advanced Text Editing: Incorporate features such as grammar and spelling checks, readability analysis, and style
   suggestions, check whether it fits the intended tone
-- Some kind of history, to go back to previous suggested variants and / or prompts
+- More kinds of history, to go back to previous suggested variants and / or prompts
 - automated linking to other pages / external content
 - content suggestions reviewing the whole page.
 - ai powered image selection
-- show the actual request sent to ChatGPT somewhere for transparency / debugging.
 - The dialog should save the last used settings (e.g., the chosen additional input and desired text length) for the next
-  time the dialog is opened.
+  time the dialog is opened. Not clear here to what extent: that depends on both the attribute, the component type
+  and the component instance.
 
 ## Glossary
 
 - **Component:** A reusable building block in Composum Pages, which can contain text attributes.
 - **Attribute:** A property of a component, which can contain text.
-- **Dialog:** In this context, the user interface for editing component attributes, and the proposed interface for interacting with the ChatGPT API.
+- **Dialog:** In this context, the user interface for editing component attributes, and the proposed interface for
+  interacting with the ChatGPT API.
 - **ChatGPT Completion API:** The API used to generate text from prompts.
 - **Prompt:** A text input that guides the AI in generating a specific type of text.
-- **Replace/Append:** The actions to take with the generated text. Replace will change the current attribute text with the generated text, and append will add the generated text to the end of the current attribute text.
+- **Replace/Append:** The actions to take with the generated text. Replace will change the current attribute text with
+  the generated text, and append will add the generated text to the end of the current attribute text.
 - **Textfield/Textarea/Richtext Editor:** Different types of input fields for text in Composum Pages.
 - **Text Length:** A user-specified guideline for how long the generated text should be.
 - **Additional Input:** Existing text that is used to give context to the AI when generating text.
 - **History:** A record of generated texts for a specific attribute during a session of the Content Creation Dialog.
-- **Session:** A single use of the Content Creation Dialog, from opening to either replacing/appending text or closing the dialog.
+- **Session:** A single use of the Content Creation Dialog, from opening to either replacing/appending text or closing
+  the dialog.
 - **Loading Indicator:** A visual signal to show when the AI is processing a prompt and when it is ready.
 - **Alert:** An area to display error messages or warnings.
