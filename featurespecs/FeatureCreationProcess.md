@@ -34,14 +34,33 @@ your feature documentation. A good idea is giving it examples of what you want, 
 5. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog
    elements. Probably it'll take some turns fixing parts of the spec until the list seems right. Recheck with "Please
    check whether there are missing dialog elements, and whether these dialog elements fit the usage in the use cases."
-6. Have ChatGPT render suggestions for the dialog layout.
+6. Have ChatGPT render suggestions for the dialog layout and incorporate these into the design document.
+
+An example for this is the [specification for the content creation dialog](ContentCreationDialog.md) which has been
+created with this process.
 
 ### Some specific prompts
 
 #### Dialog layout
 
-These prompts can help to get a visual overview; the SVG variant is quite useable to quickly display a design idea. 
-The SVG seems to need several tries to get it right.
+These prompts can help to get a visual overview (wireframe) 
+The SVG variant is quite useable to quickly display a design idea but seems to need several tries to get it 
+right. A HTML figure is also nice input, easy to get right and close to the actual dialog.
+
+> Please create a HTML table that shows this dialog design as a wireframe.
+> To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes,
+> but no CSS unless absolutely necessary.
+> Use the align and valign attributes for alignments.
+> For drop down lists include the options, as far as they are already specified.
+> Render icons like e.g. [X] for the close icon, without showing their names.
+> You can use nested tables with a border to create nested frames for the subgroups.
+> The names of groups and subgroups should not be shown, only labels that should appear in the fully
+> implemented dialog.
+> For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements.
+> The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
+> Do not output any comments or explanations, just a single code block with the HTML with the table element, no
+> surrounding HTML or BODY tag.
+
 
 > Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation.
 > Buttons should be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown.
@@ -59,7 +78,7 @@ The SVG seems to need several tries to get it right.
 > The text fields and text areas should be rendered as a frame, with a descriptive text shown inside.
 > Render buttons and drop down lists with a frame, and indicate with a suitable symbol the drop down list.
 > No explanation is necessary, please render just a drawing of the dialog in a SVG code block.
-> Please output only the svg tag and the svg elements, insert no comments into the SVG text, and take care to create a 
+> Please output only the svg tag and the svg elements, insert no comments into the SVG text, and take care to create a
 > valid SVG including the xmlns declaration.
 
 ## Other things you could have ChatGPT check

@@ -140,31 +140,125 @@ other. Some groups have subgroups, which have an individual frame around them.
         - Content Selector
         - Text Length Selector
     2. **Prompt Area**:
-        - Prompt Textarea (5 lines)
+        - Prompt Textarea (5 lines) with a label just above it.
 
 2. **Generation Control**: This group lets the user control the generation process. All buttons are arranged in a
    horizontal line with two subgroups.
-    1. **Generation Control**:
+    1. **Generation Control**: let aligned
         - Generate Button
         - Loading Indicator
-    2. **Content preview history navigation**:
+    2. **Content preview history navigation**: right aligned
         - Back
         - Forward
 
 6. **Alert**: normally hidden.
 
 3. **Content Preview**: Allows the user to review the generated content.
-    - ChatGPT Response Field
+    - ChatGPT Response Field, with a label just above it.
 
-4. **Content Actions and Dialog Control**:
+4. **Content Actions and Dialog Control**: left aligned
     - Replace Button
     - Append Button
     - Cancel Button
+    - Help Button (in addition to a help icon in the dialog frame)
 
 The help and maximize buttons should appear as icons next to the close icon, all three right aligned on the top in 
 the dialog frame.
 
 ## Preview of the dialog.
+
+Please create a HTML table that shows this dialog design as a wireframe. 
+To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes, 
+but no CSS unless absolutely necessary. 
+Use the align and valign attributes for alignments.
+For drop down lists include the options, as far as they are already specified.
+Render icons like e.g. [X] for the close icon, without showing their names.
+You can use nested tables with a border to create nested frames for the subgroups.
+The names of groups and subgroups should not be shown, only labels that should appear in the fully 
+implemented dialog.
+For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements.
+The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
+Do not output any comments or explanations, just a single code block with the HTML with the table element, no 
+surrounding HTML or BODY tag.
+
+<figure>
+    <table border="1" width="100%">
+      <tr>
+        <td colspan="4" align="right">[Help] [Maximize] [X]</td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <table border="1" width="100%">
+            <tr>
+              <td>
+                      <select>
+                        <option value="">--Predefined Prompts--</option>
+                        <option value="summary">Summary</option>
+                        <option value="improve">Improve</option>
+                        <option value="extend">Extend</option>
+                        <option value="title">Title Generation</option>
+                      </select>
+              </td>
+              <td>
+                      <select>
+                        <option value="">--Content Selector--</option>
+                        <option value="current">Current Text of Edited Attribute</option>
+                        <option value="component">Text of Edited Component</option>
+                        <option value="page">Full Text of Page</option>
+                      </select>
+              </td>
+              <td>
+                      <select>
+                        <option value="">--Text Length Selector--</option>
+                        <option value="line">One Line</option>
+                        <option value="sentence">One Sentence</option>
+                        <option value="paragraph">One Paragraph</option>
+                        <option value="multiparagraph">Several Paragraphs</option>
+                      </select>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="6">
+                <label>Prompt</label>
+                <br>
+                <textarea rows="5" cols="50"></textarea>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          <button>Generate</button>
+          [Processing]
+        </td>
+        <td align="right" colspan="2">
+          <button>Back</button>
+          <button>Forward</button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="color:red;">Alert Area</td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <label>ChatGPT Response</label>
+          <br>
+          <textarea rows="10" cols="50" readonly></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button>Replace</button>
+          <button>Append</button>
+          <button>Cancel</button>
+          <button>Help</button>
+        </td>
+      </tr>
+    </table>
+  <figcaption>A wireframe rendering of the dialog.</figcaption>
+</figure>
+
 
     +--------------------------------------------------------- [?] [□] [x] -+
     |                                                                       |
@@ -198,6 +292,15 @@ Ascii-Art representing the dialog design.[^1]
 ![testimage](figures/contentCreationDialog.svg)
 
 Suggestion for dialog design.[^2]
+
+Please create a HTML table that shows this dialog design. To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes, but no CSS. You can use nested tables to create nested frames. Only output the table element, no surrounding HTML frame. For the elements like buttons, input fields, text areas etc. you can use the corresponding HTML elements.
+
+
+## Implementation
+
+The implementation consists of the following parts:
+
+
 
 ## Possible extensions
 
