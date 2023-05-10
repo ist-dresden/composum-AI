@@ -31,4 +31,11 @@ your feature documentation. A good idea is giving it examples of what you want, 
 4. When the usecases start to make sense, it's a good idea to collect the main intended usecases in a section "User
    Workflow". That can involve several turns of collecting and rewriting some usecases that seem fine and asking for
    more.
-6. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog elements.
+5. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog elements.
+
+## Other things you could have ChatGPT check
+
+- "Please check this text for consistent use of terminology."
+- "Please check this text for grammar errors or inexact language."
+- "Please create a glossary of important terms"
+- 
