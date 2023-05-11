@@ -54,7 +54,8 @@ public class ChatGPTCategorizeDialogModel extends AbstractModel {
      */
     public List<String> getCurrentCategories() {
         SlingHttpServletRequest request = context.getRequest();
-        return List.of(request.getParameterValues("category"));
+        String[] categories = request.getParameterValues("category");
+        return categories != null ? List.of(categories) : List.of();
     }
 
     /**

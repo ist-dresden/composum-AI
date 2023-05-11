@@ -29,3 +29,21 @@
     }
 
 }
+
+.composum-chatgpt-pagesintegration-dialogs-categorize {
+
+    z-index: $chatgpt-layer;
+
+    .modal-content {
+        @include dialog-input-font;
+
+        label {
+            @include dialog-label-font;
+        }
+    }
+
+    .loading-curtain {
+        text-align: center;
+    }
+
+}

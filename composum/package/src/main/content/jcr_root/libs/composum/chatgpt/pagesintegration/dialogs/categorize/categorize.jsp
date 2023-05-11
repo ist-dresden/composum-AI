@@ -22,6 +22,11 @@
                 <div class="modal-body">
                     <div class="messages">
                         <div class="alert" style="display: none;"></div>
+                        <cpn:text class="text" i18n="true">
+                            This dialog helps set or update page categories.
+                            Review 'Current Categories' and consider 'Suggested Categories' from AI.
+                            Select desired categories, deselect unwanted ones.
+                            Click 'Accept' to use the changes, 'Cancel' to discard.</cpn:text>
                     </div>
 
                     <div class="panel panel-default">
@@ -35,10 +40,11 @@
                                     <div class="category-item form-group">
                                         <div class="category-select">
                                             <label class="composum-pages-edit-widget_option">
-                                                <input class="category-select-checkbox ${model.singleCategoryClass}"
+                                                <input class="category-select-checkbox"
                                                        type="checkbox" name="currentCategories"
-                                                       value="${category.categoryKey}">
-                                                <span class="label-text">${category.categoryName}:</span></label>
+                                                       value="${cpn:attr(request, category, 0)}">
+                                                <cpn:text classes="label-text" tagName="span"
+                                                          value="${category}"/></label>
                                         </div>
                                     </div>
                                 </c:forEach>
@@ -54,7 +60,7 @@
                         <div class="panel-body suggestions">
                             <div class="loading-curtain" style="display: none;"><i
                                     class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
-                            <div class="suggestion form-group" style="display: none;"></div>
+                            <div class="suggestions" style="display: none;"></div>
                         </div>
                     </div>
                 </div>

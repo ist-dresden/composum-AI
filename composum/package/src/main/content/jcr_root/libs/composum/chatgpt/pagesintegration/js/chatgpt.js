@@ -22,7 +22,7 @@
                 markdown: '/bin/cpm/platform/chatgpt/approximated.markdown',
                 translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html',
                 categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
-                categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html',
+                categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html'
             }
         };
 
@@ -32,6 +32,8 @@
             console.log('chatgpt.dialogInitializeView', dialog, $element);
             let $translationButtons = $element.find('.widget-chatgptaction.action-translate');
             $translationButtons.click(chatgpt.openTranslateDialog);
+            let $categorizeButtons = $element.find('.widget-chatgptaction.action-pagecategories');
+            $categorizeButtons.click(chatgpt.openCategorizeDialog);
         }
 
         /**
@@ -127,7 +129,7 @@
                     this.$translation.html(status.data.result.translation[0]);
                     this.setTranslated();
                 } else {
-                    onError(null, status);
+                    this.onError(null, status);
                 }
             },
 
@@ -185,24 +187,36 @@
         /** Opens the categorize dialog. The current categories are not taken from the resource, but from the dialog
          * this is called from, since the user might have modified this. */
         chatgpt.openCategorizeDialog = function (event) {
+            console.log('openCategorizeDialog', arguments);
+            let $target = $(event.target);
+            var path = $target.data('path');
+            var property = $target.data('property');
             let $widget = $(event.target).closest('div.form-group');
             let $inputs = $widget.find('input[type="text"][name="category"]');
             // make an array 'categories' of the values of all inputs with name 'category'
             let categories = [];
             $inputs.each(function () {
-                category.push($(this).val());
+                categories.push($(this).val());
             });
             var url = chatgpt.const.url.categorizeDialog + core.encodePath(path + '/' + property);
+            var urlparams = '';
             if (categories.length > 0) {
-                url += "?category=" + categories.join('&category=');
+                urlparams += "?category=" + categories.map(encodeURIComponent).join("&category=");
             }
-            core.openFormDialog(url, chatgpt.CategorizeDialog, {widget: $widget, categories: categories});
+            url = url + urlparams;
+            core.openFormDialog(url, chatgpt.CategorizeDialog, {
+                widget: $widget,
+                categories: categories,
+                path: path,
+                property: property,
+                categoryparams: urlparams
+            });
         }
 
         /**
          * Dialog for categorize - giving a page categories.
          * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
-         * @param options{widget, categories}
+         * @param options{widget, categories, path, property, categoryparams}
          */
         chatgpt.CategorizeDialog = core.components.FormDialog.extend({
 
@@ -211,6 +225,9 @@
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
                 this.widget = options.widget;
                 this.categories = options.categories;
+                this.path = options.path;
+                this.property = options.property;
+                this.categoryparams = options.categoryparams;
                 this.loadSuggestions();
                 // bind button cancel is not necessary - it is already bound to close by bootstrap
                 this.$el.find('button.accept').click(_.bind(this.accept, this));
@@ -218,7 +235,8 @@
 
             /** Load the suggestions for categories. */
             loadSuggestions: function () {
-                var url = chatgpt.const.url.categorizeSuggestions + core.encodePath(path + '/' + property);
+                var url = chatgpt.const.url.categorizeSuggestions +
+                    core.encodePath(this.path + '/' + this.property + this.categoryparams);
                 core.getHtml(url, _.bind(this.onSuggestions, this));
             },
 
