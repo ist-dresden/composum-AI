@@ -20,8 +20,10 @@ categories.
 
 - The request to ChatGPT is triggered upon opening the dialog, but there must be an indication of the loading status,
   as this could take a while.
-- In the dialog we display both currently assigned categories and the ChatGPT suggestions, so that the user can 
-  decide to add new and remove old in the same step. The 'Accept' button replaces the old categories.
+- In the dialog we display both currently assigned categories and the ChatGPT suggestions, so that the user can
+  decide to add new and remove old in the same step. The 'Accept' button replaces the old categories. The old
+  categories have preselected checkboxes, the new categories do not have preselected checkboxes. If ChatGPT suggests
+  categories already present, they are still shown in both sections, and their selection status is joined.
 
 ## Out of scope
 
@@ -35,123 +37,135 @@ To support the dialog design let's see some typical user workflows. Here are som
 
 1. **New Page Creation:**
 
-    A user creates a new page and wants to set categories for it:
+   A user creates a new page and wants to set categories for it:
 
-    a. The user writes the content for the page.
-    b. After saving the content, the user opens the dialog for setting page categories.
-    c. The system sends a request to ChatGPT to analyze the page's text content and suggest categories.
-    d. While waiting for the response, the system shows a loading status.
-    e. When the response arrives, the system displays the suggested categories.
-    f. The user selects the relevant categories from the suggestions and saves them.
+   a. The user writes the content for the page.
+   b. After saving the content, the user opens the dialog for setting page categories.
+   c. The system sends a request to ChatGPT to analyze the page's text content and suggest categories.
+   d. While waiting for the response, the system shows a loading status.
+   e. When the response arrives, the system displays the suggested categories.
+   f. The user selects the relevant categories from the suggestions and saves them.
 
 2. **Existing Page Editing:**
 
-    A user has already set categories for a page, edited the page, and now wants to update the categories:
+   A user has already set categories for a page, edited the page, and now wants to update the categories:
 
-    a. The user edits the content of the page and saves the changes.
-    b. The user opens the dialog for updating page categories.
-    c. The system sends a request to ChatGPT to analyze the updated page content and suggest new categories.
-    d. While waiting for the response, the system shows a loading status.
-    e. When the response arrives, the system displays the suggested categories, highlighting those that were previously selected but also presenting new ones.
-    f. The user can then deselect previously used categories if they are no longer relevant, select new relevant categories from the suggestions, and save the updated categories.
+   a. The user edits the content of the page and saves the changes.
+   b. The user opens the dialog for updating page categories.
+   c. The system sends a request to ChatGPT to analyze the updated page content and suggest new categories.
+   d. While waiting for the response, the system shows a loading status.
+   e. When the response arrives, the system displays the suggested categories, highlighting those that were previously
+   selected but also presenting new ones.
+   f. The user can then deselect previously used categories if they are no longer relevant, select new relevant
+   categories from the suggestions, and save the updated categories.
 
-In both cases, the user has the option to dismiss the dialog without saving any changes if they are not satisfied with the suggested categories.
+In both cases, the user has the option to dismiss the dialog without saving any changes if they are not satisfied with
+the suggested categories.
 
-This approach to suggesting categories after text content analysis should streamline the process and help users create more effective and accurate SEO tags for their pages.
+This approach to suggesting categories after text content analysis should streamline the process and help users create
+more effective and accurate SEO tags for their pages.
 
-## Dialog elements and ascii art of dialog layout
+## Dialog Elements
 
-Please create a HTML table as a raw HTML fragment in Github markdown, that shows this dialog design as a wireframe.
-Only the following HTML elements are permitted: h1, h2, h3, h4, h5, h6, br, b, i, strong, em, a, img, div, p, ol, ul,
-li, table, thead, tbody, tfoot, tr, td, th, caption, blockquote, dl, dt, dd, hr, summary, details, figure,
-figcaption, abbr, cite, mark, small, span, time.
-The elements button, input, textarea, select and option are explicitly forbidden - their appearence has to be
-approximated using other elements.
-Only the following attributes of HTML elements are permitted: accept, align, alt, aria-describedby, aria-hidden,
-aria-label, aria-labelledby, border, charset, checked, cols, colspan, coords, datetime, dir, disabled, for, headers,
-height, hreflang, id, label, lang, maxlength, media, method, name, open, readonly, rel, role, rows, rowspan, selected,
-shape, size, span, src, start, summary, tabindex, title, type, value, width.
-CSS and the style attribute is forbidden, and all
-Visibly render the dialog frame and internal frames and dividers, e.g. with nested tables with a border.
-Use the align and valign attributes for alignments.
-Render icons like e.g. [X] for the close icon, without showing their names.
-The names of groups and subgroups should not be shown, only labels that should appear in the fully
-implemented dialog.
-For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements as far
-as permitted.
-The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
-After discussion of the layout output a single code block with the HTML with the table element, no
-surrounding HTML or BODY tag. No discussion after the HTML block.
+Given these workflows, the content creation dialog could have the following elements:
 
-<table border="1" width="400">
-  <tr>
-    <td align="right">
-      [X]
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <b>Set Page Categories</b>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <b>Page Content:</b> <br>
-      <textarea rows="4" cols="50" disabled></textarea>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <b>Current Categories:</b> <br>
-      <textarea rows="2" cols="50" disabled></textarea>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <b>ChatGPT Suggested Categories:</b> <br>
-      <table border="1">
-        <tr>
-          <td><input type="checkbox"></td>
-          <td>Category 1</td>
-        </tr>
-        <tr>
-          <td><input type="checkbox"></td>
-          <td>Category 2</td>
-        </tr>
-        <!-- More rows as needed for additional categories -->
-      </table>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <button type="button">Add Selected Categories</button>
-      <button type="button">Replace with Selected Categories</button>
-    </td>
-  </tr>
-</table>
+1. **Alert:** a normally hidden area that can contain error messages or warnings. The text will be shown in red, so a
+   label is not necessary. If ChatGPT does suggest no categories, a message displayed here.
 
+2. **Current Categories Section:** This section lists the currently assigned categories (if any) with checkboxes
+   before each one. If there are none, this section is not visible.
 
-XXX
+1. **Loading Indicator:** A visual cue (spinner) that indicates that ChatGPT is generating
+   category suggestions. This appears immediately after the dialog is opened and disappears when the suggestions are
+   ready.
 
-1. **New Page Creation:**
-    - The user creates a new page and adds content to it.
-    - The user opens the ChatGPT-based dialog to generate category suggestions.
-    - ChatGPT analyzes the page's content and provides a list of suggested categories.
-    - The user selects the desired categories from the list, adds them to the page, and saves the changes.
+3. **ChatGPT Suggestions Section:** This section lists the category suggestions generated by ChatGPT. Before each a
+   checkbox is displayed; preselected are only those which also appear in the current categories section. If no 
+   suggestions are there or while they are being loaded, this section is invisible. Alternatively visible to the 
+   loading indicator.
 
-2. **Updating Categories for an Existing Page:**
-    - The user opens an existing page with pre-set categories and edits the content.
-    - The user opens the ChatGPT-based dialog to generate new category suggestions based on the updated content.
-    - ChatGPT analyzes the page's content and provides a list of suggested categories.
-    - The user selects the desired categories from the list, either adding them to the existing categories or replacing
-      the existing categories entirely.
-    - The user saves the changes to the page.
+4. **Accept Button:** A button that, when clicked, saves the selected categories to the page, replacing any previously
+   assigned categories. This button is enabled only when at least one category has been selected.
 
+5. **Cancel Button:** A button that, when clicked, closes the dialog without making any changes to the page's
+   categories.
 
- 
-- To keep things simple, we ignore existing categories and just display the suggestions ChatGPT creates. The user
-  can then choose to add these new categories, or to replace the whole category set.
+6. **Help Text:** A brief explanation at the top of the dialog explaining what categories are, how they improve SEO, and
+   how to use the dialog. This text should be clear and concise to help users understand the purpose and functionality
+   of the dialog.
 
+7. **Dialog Title:** The title of the dialog, which could be something like "Page Category Suggestions" or "ChatGPT
+   Category Suggestions."
+
+## Structure of the dialog
+
+To build an intuitive and user-friendly interface for the dialog, it's crucial to structure the elements in a logical
+order that aligns with the user's workflow. This involves grouping the elements based on their function and arranging
+them in the sequence they are likely to be used. We order these dialog elements in the following groups below each
+other. Some groups have subgroups, which have an individual frame around them.
+
+1. **Dialog Title:** Displayed at the top of the dialog, the label is "Page Category Suggestions."
+2. **Help Text:** Positioned below the title, no label necessary as this is explanatory text: "This dialog helps set 
+   or update page categories. Review 'Current Categories' and consider 'Suggested Categories' from AI. Select desired categories, deselect unwanted ones. Click 'Accept' to save changes, 'Cancel' to discard."
+3. **Alert Area:** Situated below the Help Text, this area does not need a label.
+5. **Current Categories Section:** This group is labeled "Current Categories" and is positioned under the Loading Indicator, which disappears once the categories are loaded. It contains:
+    - A list of current categories with checkboxes. Each category label is the category itself.
+6. **ChatGPT Suggestions Section:** This group is labeled "Suggested Categories" and is positioned below the Current Categories Section. It contains:
+    - A list of suggested categories with checkboxes. Each category label is the category itself.
+4. **Loading Indicator:** Spinner, positioned centrally within the dialog for clear visibility, no label required. 
+7. **Action Button Group:** This group is positioned at the bottom of the dialog and does not require a label. It contains:
+    - **Cancel Button:** With label "Cancel," positioned on the left of the save button.
+    - **Accept Button:** With label "Accept," positioned on the right.
+
+### Layout example
+
+    +----------------------------------------+
+    |            Page Category Suggestions   |
+    +----------------------------------------+
+    | This dialog helps set or update page...|
+    +----------------------------------------+
+    |                                        |
+    +----------------------------------------+
+    | Current Categories:                    |
+    | [x] category1   [x] category2          |
+    | [x] category3                          |
+    +----------------------------------------+
+    | Loading...                             |
+    +----------------------------------------+
+    | Suggested Categories:                  |
+    | [ ] suggestion1  [ ] suggestion2       |
+    | [ ] suggestion3                        |
+    +----------------------------------------+
+    |             [Cancel]   [Accept]        |
+    +----------------------------------------+
+
+### Implementation remarks
+
+The name of the feature that is used in names / IDs is "categorize".
+
+#### Implementation parts:
+
+The dialog is rendered with `/libs/composum/chatgpt/pagesintegration/dialogs/categorize/categorize.jsp` 
+(resource composum/chatgpt/pagesintegration/dialogs/categorize in Apache Sling) from
+`com.composum.chatgpt.bundle.ChatGPTDialogServlet` and uses model
+`com.composum.chatgpt.bundle.model.ChatGPTCategorizeDialogModel`.
+The URL is e.g.
+`/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
+and the currently assigned categories are added as parameter 'category' (multiple values).
+
+The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories. This is 
+implemented via a selector:
+`/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html/content/ist/software/home/test/_jcr_content/category`
+`/libs/composum/chatgpt/pagesintegration/dialogs/categorize/suggestions.jsp`
+
+The Javascript class CategorizeDialog in `/libs/composum/chatgpt/pagesintegration/js/chatgpt.js` triggers the loading 
+of the dialog and the AJAX call for loading the suggestions.
+
+The current categories are not taken from the resource, but from the dialog this is called from, since the user 
+might have modified this.
+
+Neccessary extensions:
+- com.composum.chatgpt.bundle.ChatGPTDialogServlet new operation categorizeDialog
 
 ## Possible extensions
 

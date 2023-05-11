@@ -82,7 +82,7 @@ since e.g. button and select is forbidden for an unknown reason.
 
 ##### render as HTML
 
-For rendering a HTML that can be inspected in a browser or, e.g., in the IntellJ markdown editor (but doesn't render 
+For rendering a HTML that can be inspected in a browser or, e.g., in the IntellJ markdown editor (but doesn't render
 well on Github), you can use:
 
 > Please create a HTML table that shows this dialog design as a wireframe.
@@ -133,3 +133,25 @@ SVG is more or less useable and looks better, but has sometimes bugs.
 - "Please check this text for grammar or orthografical errors and inexact language."
 - "Please create a glossary of important terms."
 - "Please check for types of redundant information and in which sections these redundancies occur."
+
+### In development:
+
+#### introductory prompt:
+
+ChatGPT: Please help me create a specification for a feature that extends our existing application Composum Pages.
+I'll give you the specification as it is right now in the next message. If I have a request for you that is not part of
+the specification, I'll prefix it with `ChatGPT:`, as in this message.
+After I give you the start of the specification, please make a suggestion how to continue the text of the specification.
+If you have suggestions that should not be part of the specification, please prefix them with "Comment:".
+
+ChatGPT: Important: do only briefly describe visual structure of the dialog, take care not repeat the function of the
+elements that was already described. Specify the texts for labels, buttons or text areas and mention
+whether a group or subgroup should have a label. Be brief, e.g. `**Cancel Button:** with label "Cancel", positioned
+left of the "Accept" button.`
+
+#### make excerpt for developer
+
+Please make an excerpt of this specification with what is important for implementing this. Please omit discussions, the
+reasons why it was specified that way, repetitions and redundancies - just what a developer would need to know about
+this feature to implement it. Do not include general discussions an experienced developer would know, no general
+guidelines, just information about this feature.

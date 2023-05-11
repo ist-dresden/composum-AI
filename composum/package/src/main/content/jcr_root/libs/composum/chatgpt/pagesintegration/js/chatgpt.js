@@ -20,7 +20,9 @@
             url: {
                 authoring: '/bin/cpm/platform/chatgpt/authoring',
                 markdown: '/bin/cpm/platform/chatgpt/approximated.markdown',
-                translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html'
+                translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html',
+                categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
+                categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html',
             }
         };
 
@@ -179,6 +181,63 @@
             }
             console.error('BUG! searchInput: no input found', $labelextension);
         }
+
+        /** Opens the categorize dialog. The current categories are not taken from the resource, but from the dialog
+         * this is called from, since the user might have modified this. */
+        chatgpt.openCategorizeDialog = function (event) {
+            let $widget = $(event.target).closest('div.form-group');
+            let $inputs = $widget.find('input[type="text"][name="category"]');
+            // make an array 'categories' of the values of all inputs with name 'category'
+            let categories = [];
+            $inputs.each(function () {
+                category.push($(this).val());
+            });
+            var url = chatgpt.const.url.categorizeDialog + core.encodePath(path + '/' + property);
+            if (categories.length > 0) {
+                url += "?category=" + categories.join('&category=');
+            }
+            core.openFormDialog(url, chatgpt.CategorizeDialog, {widget: $widget, categories: categories});
+        }
+
+        /**
+         * Dialog for categorize - giving a page categories.
+         * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
+         * @param options{widget, categories}
+         */
+        chatgpt.CategorizeDialog = core.components.FormDialog.extend({
+
+            /** $el is the dialog */
+            initialize: function (options) {
+                core.components.FormDialog.prototype.initialize.apply(this, [options]);
+                this.widget = options.widget;
+                this.categories = options.categories;
+                this.loadSuggestions();
+                // bind button cancel is not necessary - it is already bound to close by bootstrap
+                this.$el.find('button.accept').click(_.bind(this.accept, this));
+            },
+
+            /** Load the suggestions for categories. */
+            loadSuggestions: function () {
+                var url = chatgpt.const.url.categorizeSuggestions + core.encodePath(path + '/' + property);
+                core.getHtml(url, _.bind(this.onSuggestions, this));
+            },
+
+            onSuggestions: function (data) {
+                this.$el.find('div.suggestions').html(data);
+            },
+
+            /** Button 'Accept' was clicked. */
+            accept: function (event) {
+                // for testing we use a fixed category set
+                this.saveCategories(['test1', 'test2']);
+            },
+
+            saveCategories: function (categories) {
+                console.log('saveCategories', categories);
+                // TODO implement this.
+            }
+
+        });
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 

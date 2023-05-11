@@ -45,7 +45,7 @@ public class ChatGPTDialogServlet extends AbstractServiceServlet {
 
     public enum Extension {json, html}
 
-    public enum Operation {translationDialog}
+    public enum Operation {translationDialog, categorizeDialog}
 
     protected final ServletOperationSet<Extension, Operation> operations = new ServletOperationSet<>(Extension.json);
 
@@ -59,6 +59,9 @@ public class ChatGPTDialogServlet extends AbstractServiceServlet {
         super.init();
         // e.g. http://localhost:9090/bin/cpm/platform/chatgpt/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/chatgpt/pagesintegration/dialogs/translate"));
+        // e.g. http://localhost:9090/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
+        // or http://localhost:9090/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/chatgpt/pagesintegration/dialogs/categorize"));
     }
 
     /**
