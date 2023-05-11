@@ -228,9 +228,11 @@
                 this.path = options.path;
                 this.property = options.property;
                 this.categoryparams = options.categoryparams;
+                this.$suggestions = this.$el.find('div.suggestions');
                 this.loadSuggestions();
                 // bind button cancel is not necessary - it is already bound to close by bootstrap
                 this.$el.find('button.accept').click(_.bind(this.accept, this));
+                this.$el.find('input[type="checkbox"]').change(_.bind(this.duplicateChanges, this));
             },
 
             /** Load the suggestions for categories. */
@@ -241,13 +243,36 @@
             },
 
             onSuggestions: function (data) {
-                this.$el.find('div.suggestions').html(data);
+                this.$suggestions.html(data);
+                this.$suggestions.find('input[type="checkbox"]').change(_.bind(this.duplicateChanges, this));
+                this.$el.find('.current-categories input[type="checkbox"]').each(_.bind(function (index, element) {
+                    this.duplicateChanges({target: element});
+                }, this));
+            },
+
+            /** When a checkbox is changed we look for a second checkbox with the same value and synchronize it's state. */
+            duplicateChanges: function (event) {
+                let checkbox = event.target;
+                let value = checkbox.value;
+                let checked = checkbox.checked;
+                this.$el.find('input[type="checkbox"][value="' + value + '"]').each(function () {
+                    this.checked = checked;
+                });
             },
 
             /** Button 'Accept' was clicked. */
             accept: function (event) {
-                // for testing we use a fixed category set
-                this.saveCategories(['test1', 'test2']);
+                // collect the categories from the checked inputs
+                let categories = [];
+                this.$el.find('input[type="checkbox"]:checked').each(function () {
+                    let value = $(this).val();
+                    // remove a <p></p> around the value if it is there. Artifact of our HTML rendering.
+                    if (value.startsWith('<p>') && value.endsWith('</p>')) {
+                        value = value.substring(3, value.length - 4);
+                    }
+                    categories.push(value);
+                });
+                this.saveCategories(categories);
             },
 
             saveCategories: function (categories) {

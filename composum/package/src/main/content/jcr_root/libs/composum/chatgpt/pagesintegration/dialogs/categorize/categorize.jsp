@@ -42,7 +42,8 @@
                                             <label class="composum-pages-edit-widget_option">
                                                 <input class="category-select-checkbox"
                                                        type="checkbox" name="currentCategories"
-                                                       value="${cpn:attr(request, category, 0)}">
+                                                       value="${cpn:attr(request, category, 0)}"
+                                                       checked="checked">
                                                 <cpn:text classes="label-text" tagName="span"
                                                           value="${category}"/></label>
                                         </div>
@@ -66,7 +67,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary accept" data-dismiss="modal" disabled>Accept</button>
+                    <button type="button" class="btn btn-primary accept" data-dismiss="modal">Accept</button>
                 </div>
             </form>
         </div>
