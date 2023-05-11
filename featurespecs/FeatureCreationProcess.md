@@ -50,6 +50,8 @@ The SVG variant is quite useable to quickly display a design idea but seems to n
 right. A HTML figure is also nice input, easy to get right and close to the actual dialog, however to display it
 even on Github it needs to draw from a restricted set of attributes - Github removes many tags.
 
+##### render as Github markdown
+
 A wireframe of a dialog can be rendered as a raw HTML fragment in Github Markdown, but we need to specify which
 elements are permitted by the
 [Github sanitization whitelist](https://github.com/gjtorikian/html-pipeline/blob/main/lib/html_pipeline/sanitization_filter.rb).
@@ -78,7 +80,10 @@ since e.g. button and select is forbidden for an unknown reason.
 > After discussion of the layout output a single code block with the HTML with the table element, no
 > surrounding HTML or BODY tag. No discussion after the HTML block.
 
-For rendering a HTML that can be inspected in a browser or, e.g., in the IntellJ markdown editor, you can use:
+##### render as HTML
+
+For rendering a HTML that can be inspected in a browser or, e.g., in the IntellJ markdown editor (but doesn't render 
+well on Github), you can use:
 
 > Please create a HTML table that shows this dialog design as a wireframe.
 > To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes,
@@ -94,6 +99,8 @@ For rendering a HTML that can be inspected in a browser or, e.g., in the IntellJ
 > Do not output any comments or explanations, just a single code block with the HTML with the table element, no
 > surrounding HTML or BODY tag.
 
+##### render as ASCII art
+
 There is always ascii art to get a very quick overview:
 
 > Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation.
@@ -104,6 +111,8 @@ There is always ascii art to get a very quick overview:
 > Otherwise the dialog should look as closely as ascii art can make it to the fully implemented dialog.
 > The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
 > No explanation is necessary, please render just a drawing of the dialog in a ascii art code block.
+
+##### render as SVG
 
 SVG is more or less useable and looks better, but has sometimes bugs.
 
@@ -119,7 +128,8 @@ SVG is more or less useable and looks better, but has sometimes bugs.
 
 ## Other things you could have ChatGPT check
 
+- "Please check the page for contradictions."
 - "Please check this text for consistent use of terminology."
-- "Please check this text for grammar errors or inexact language."
-- "Please create a glossary of important terms"
-- 
+- "Please check this text for grammar or orthografical errors and inexact language."
+- "Please create a glossary of important terms."
+- "Please check for types of redundant information and in which sections these redundancies occur."

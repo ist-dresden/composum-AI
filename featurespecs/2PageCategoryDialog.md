@@ -18,10 +18,10 @@ categories.
 
 ## Basic implementation decisions
 
-- To keep things simple, we ignore existing categories and just display the suggestions ChatGPT creates. The user
-  can then choose to add these new categories, or to replace the whole category set.
 - The request to ChatGPT is triggered upon opening the dialog, but there must be an indication of the loading status,
   as this could take a while.
+- In the dialog we display both currently assigned categories and the ChatGPT suggestions, so that the user can 
+  decide to add new and remove old in the same step. The 'Accept' button replaces the old categories.
 
 ## Out of scope
 
@@ -34,20 +34,32 @@ categories.
 To support the dialog design let's see some typical user workflows. Here are some likely use cases for the feature:
 
 1. **New Page Creation:**
-    - The user creates a new page and adds content to it.
-    - The user opens the ChatGPT-based dialog to generate category suggestions.
-    - ChatGPT analyzes the page's content and provides a list of suggested categories.
-    - The user selects the desired categories from the list, adds them to the page, and saves the changes.
 
-2. **Updating Categories for an Existing Page:**
-    - The user opens an existing page with pre-set categories and edits the content.
-    - The user opens the ChatGPT-based dialog to generate new category suggestions based on the updated content.
-    - ChatGPT analyzes the page's content and provides a list of suggested categories.
-    - The user selects the desired categories from the list, either adding them to the existing categories or replacing
-      the existing categories entirely.
-    - The user saves the changes to the page.
+    A user creates a new page and wants to set categories for it:
 
-## Dialog layout
+    a. The user writes the content for the page.
+    b. After saving the content, the user opens the dialog for setting page categories.
+    c. The system sends a request to ChatGPT to analyze the page's text content and suggest categories.
+    d. While waiting for the response, the system shows a loading status.
+    e. When the response arrives, the system displays the suggested categories.
+    f. The user selects the relevant categories from the suggestions and saves them.
+
+2. **Existing Page Editing:**
+
+    A user has already set categories for a page, edited the page, and now wants to update the categories:
+
+    a. The user edits the content of the page and saves the changes.
+    b. The user opens the dialog for updating page categories.
+    c. The system sends a request to ChatGPT to analyze the updated page content and suggest new categories.
+    d. While waiting for the response, the system shows a loading status.
+    e. When the response arrives, the system displays the suggested categories, highlighting those that were previously selected but also presenting new ones.
+    f. The user can then deselect previously used categories if they are no longer relevant, select new relevant categories from the suggestions, and save the updated categories.
+
+In both cases, the user has the option to dismiss the dialog without saving any changes if they are not satisfied with the suggested categories.
+
+This approach to suggesting categories after text content analysis should streamline the process and help users create more effective and accurate SEO tags for their pages.
+
+## Dialog elements and ascii art of dialog layout
 
 Please create a HTML table as a raw HTML fragment in Github markdown, that shows this dialog design as a wireframe.
 Only the following HTML elements are permitted: h1, h2, h3, h4, h5, h6, br, b, i, strong, em, a, img, div, p, ol, ul,
@@ -117,6 +129,29 @@ surrounding HTML or BODY tag. No discussion after the HTML block.
     </td>
   </tr>
 </table>
+
+
+XXX
+
+1. **New Page Creation:**
+    - The user creates a new page and adds content to it.
+    - The user opens the ChatGPT-based dialog to generate category suggestions.
+    - ChatGPT analyzes the page's content and provides a list of suggested categories.
+    - The user selects the desired categories from the list, adds them to the page, and saves the changes.
+
+2. **Updating Categories for an Existing Page:**
+    - The user opens an existing page with pre-set categories and edits the content.
+    - The user opens the ChatGPT-based dialog to generate new category suggestions based on the updated content.
+    - ChatGPT analyzes the page's content and provides a list of suggested categories.
+    - The user selects the desired categories from the list, either adding them to the existing categories or replacing
+      the existing categories entirely.
+    - The user saves the changes to the page.
+
+
+ 
+- To keep things simple, we ignore existing categories and just display the suggestions ChatGPT creates. The user
+  can then choose to add these new categories, or to replace the whole category set.
+
 
 ## Possible extensions
 

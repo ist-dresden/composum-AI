@@ -99,7 +99,7 @@ other. Some groups have subgroups, which have an individual frame around them.
    each source language with a translateable text the following elements are repeated:
     - **Source Language Selector:** a radio button with the language name as label. Selecting a radio button triggers a
       translation request. Only visible if there is more than one source language.
-    - **Source Text:** the text in that language to translate. To save space, this should be in the same line like 
+    - **Source Text:** the text in that language to translate. To save space, this should be in the same line like
       the source language selector, or flow around it if it's not just one line.
 
 2. **Translation Result Group:** This group contains elements related to the translated text.
@@ -119,39 +119,39 @@ other. Some groups have subgroups, which have an individual frame around them.
 
 ## Example of a dialog layout:
 
-   +------------------------------------------------------------------------------+
-   |                                                                              |
-   | "Translation Error: Unable to translate text at this time. Try again later." |
-   |                                                                              |
-   +------------------------------------------------------------------------------+
-   | Source Language                                                              |
-   | +--------------------------------------------------------------------------+ |
-   | | (O) English                                                              | |
-   | |                                                                          | |
-   | | "Welcome to our website!"                                                | |
-   | |                                                                          | |
-   | | ( ) Spanish                                                              | |
-   | |                                                                          | |
-   | | "¡Bienvenido a nuestro sitio web!"                                       | |
-   | |                                                                          | |
-   | | ( ) French                                                               | |
-   | |                                                                          | |
-   | | "Bienvenue sur notre site Web!"                                          | |
-   | +--------------------------------------------------------------------------+ |
-   |                                                                              |
-   | Translated text                                                              |
-   | +--------------------------------------------------------------------------+ |
-   | | [Loading Indicator]                                                      | |
-   | |                                                                          | |
-   | | Translation Display Area                                                 | |
-   | |                                                                          | |
-   | | "Willkommen auf unserer Webseite!"                                       | |
-   | +--------------------------------------------------------------------------+ |
-   |                                                                              |
-   | +--------------------------------------------------------------------------+ |
-   | | [Accept Button]                     [Cancel Button]                      | |
-   | +--------------------------------------------------------------------------+ |
-   +------------------------------------------------------------------------------+
++------------------------------------------------------------------------------+
+| |
+| "Translation Error: Unable to translate text at this time. Try again later." |
+| |
++------------------------------------------------------------------------------+
+| Source Language |
+| +--------------------------------------------------------------------------+ |
+| | (O) English | |
+| | | |
+| | "Welcome to our website!"                                                | |
+| | | |
+| | ( ) Spanish | |
+| | | |
+| | "¡Bienvenido a nuestro sitio web!"                                       | |
+| | | |
+| | ( ) French | |
+| | | |
+| | "Bienvenue sur notre site Web!"                                          | |
+| +--------------------------------------------------------------------------+ |
+| |
+| Translated text |
+| +--------------------------------------------------------------------------+ |
+| | [Loading Indicator]                                                      | |
+| | | |
+| | Translation Display Area | |
+| | | |
+| | "Willkommen auf unserer Webseite!"                                       | |
+| +--------------------------------------------------------------------------+ |
+| |
+| +--------------------------------------------------------------------------+ |
+| | [Accept Button]                     [Cancel Button]                      | |
+| +--------------------------------------------------------------------------+ |
++------------------------------------------------------------------------------+
 
 ## User interaction diagram
 
@@ -175,15 +175,20 @@ sequenceDiagram
 
 ## Composum implementation references
 
-### Embedding buttons into widget labels:
+See also [Composum Integration.md](../composum/ComposumIntegration.md) and [Architecture of the Composum Integration].
 
-This is a precursor but not directly related to the feature. Implemented in
-Composum Pages https://github.com/ist-dresden/composum-pages/pull/72 :
-- PagesPlugin interface allows other projects to register, implemented in ChatGPTPagesPlugin
-- a PagesPlugin.getWidgetLabelExtensions() gives a number of Sling Resourcetypes that are used to render any label 
-  extensions. For our implementation we use the resource type
-  "composum/chatgpt/pagesintegration/widgetextensions/labelextension" 
-- 
+### Implementation of the translation
+
+The dialog is rendered with `/libs/composum/chatgpt/pagesintegration/dialogs/translate/translate.jsp`
+(resource composum/chatgpt/pagesintegration/dialogs/translate in Apache Sling) from
+`com.composum.chatgpt.bundle.ChatGPTDialogServlet` and uses model
+`com.composum.chatgpt.bundle.model.ChatGPTTranslationDialogModel` .
+The URL is e.g.
+`/bin/cpm/platform/chatgpt/dialog.translationDialog.html/content/ist/software/home/test/_jcr_content/jcr:description?propertypath=jcr:description&pages.locale=de`
+
+The Javascript class TranslationDialog in `/libs/composum/chatgpt/pagesintegration/js/chatgpt.js` triggers the loading 
+of the dialog and does call `com.composum.chatgpt.bundle.ChatGPTServlet.TranslateOperation` with
+`/bin/cpm/platform/chatgpt/authoring.translate.json` for the translation.
 
 ## Possible extensions later
 

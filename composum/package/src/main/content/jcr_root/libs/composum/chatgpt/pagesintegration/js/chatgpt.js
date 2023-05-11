@@ -24,6 +24,8 @@
             }
         };
 
+        /** Will be called from Pages after a dialog is rendered via the dialogplugins hook.
+         * Thus we bind ourselves into our buttons rendered into the dialog by the labelextension.jsp . */
         chatgpt.dialogInitializeView = function (dialog, $element) {
             console.log('chatgpt.dialogInitializeView', dialog, $element);
             let $translationButtons = $element.find('.widget-chatgptaction.action-translate');
