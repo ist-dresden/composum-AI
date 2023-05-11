@@ -43,7 +43,7 @@ the user in the prompt. We don't include a history and also no undo feature.
 
 ## User Workflow
 
-To support the dialog design let's see some typical user workflows. Here are some likely usecases for the feature:
+To support the dialog design let's see some typical user workflows. Here are some likely use cases for the feature:
 
 1. **Content Generation:** The user wants to create new content for a blank text field. They open the content creation
    dialog, write a prompt in the prompt field and select the desired text length from the dropdown menu. They then
@@ -167,19 +167,38 @@ the dialog frame.
 
 ## Preview of the dialog.
 
-Please create a HTML table that shows this dialog design as a wireframe. 
-To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes, 
-but no CSS unless absolutely necessary. 
-Use the align and valign attributes for alignments.
-For drop down lists include the options, as far as they are already specified.
-Render icons like e.g. [X] for the close icon, without showing their names.
-You can use nested tables with a border to create nested frames for the subgroups.
-The names of groups and subgroups should not be shown, only labels that should appear in the fully 
-implemented dialog.
-For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements.
-The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
-Do not output any comments or explanations, just a single code block with the HTML with the table element, no 
-surrounding HTML or BODY tag.
+    +--------------------------------------------------------- [?] [□] [x] -+
+    |                                                                       |
+    | [\/Predefined] [\/Content Selector] [\/Text Length Selector]          |
+    |                                                                       |
+    | Prompt_Textarea______________________________________________________ |
+    |                                                                       |
+    | [Generate] [Spinner]            [Back] [Forward]                      |
+    |                                                                       |
+    | Alert_Text___________________________________________________________ |
+    |                                                                       |
+    | ChatGPT_Response_Field_______________________________________________ |
+    | ________________________________________________________             |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    |                                                                       |
+    | [Replace] [Append] [Cancel]                                           |
+    |                                                                       |
+    |                                                                       |
+    +-----------------------------------------------------------------------+
+Ascii-Art representing the dialog design.[^1]
+
+![testimage](figures/contentCreationDialog.svg)
+
+Suggestion for dialog design.[^2]
 
 <figure>
     <table border="1" width="100%">
@@ -256,50 +275,15 @@ surrounding HTML or BODY tag.
         </td>
       </tr>
     </table>
-  <figcaption>A wireframe rendering of the dialog.</figcaption>
+  <figcaption>A wireframe rendering of the dialog.[^3]</figcaption>
 </figure>
+See footnote for related prompt.[^3]
 
+## Implementation plan
 
-    +--------------------------------------------------------- [?] [□] [x] -+
-    |                                                                       |
-    | [\/Predefined] [\/Content Selector] [\/Text Length Selector]          |
-    |                                                                       |
-    | Prompt_Textarea______________________________________________________ |
-    |                                                                       |
-    | [Generate] [Spinner]            [Back] [Forward]                      |
-    |                                                                       |
-    | Alert_Text___________________________________________________________ |
-    |                                                                       |
-    | ChatGPT_Response_Field_______________________________________________ |
-    | ________________________________________________________             |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    |                                                                       |
-    | [Replace] [Append] [Cancel]                                           |
-    |                                                                       |
-    |                                                                       |
-    +-----------------------------------------------------------------------+
-Ascii-Art representing the dialog design.[^1]
-
-![testimage](figures/contentCreationDialog.svg)
-
-Suggestion for dialog design.[^2]
-
-Please create a HTML table that shows this dialog design. To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes, but no CSS. You can use nested tables to create nested frames. Only output the table element, no surrounding HTML frame. For the elements like buttons, input fields, text areas etc. you can use the corresponding HTML elements.
-
-
-## Implementation
-
-The implementation consists of the following parts:
-
+The implementation of a dialog consists of the following parts:
+- 
+- possibly changes to the backend if necessary.
 
 
 ## Possible extensions
@@ -369,3 +353,18 @@ Render buttons and drop down lists with a frame, and indicate with a suitable sy
 No explanation is necessary, please render just a drawing of the dialog in a SVG code block.
 Please output only the svg tag and the svg elements, no comments, and take care to create a valid SVG including the 
 xmlns declaration.
+
+[^3]: ChatGPT prompt to create the HTML: 
+Please create a HTML table that shows this dialog design as a wireframe. 
+To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes, 
+but no CSS unless absolutely necessary. 
+Use the align and valign attributes for alignments.
+For drop down lists include the options, as far as they are already specified.
+Render icons like e.g. [X] for the close icon, without showing their names.
+You can use nested tables with a border to create nested frames for the subgroups.
+The names of groups and subgroups should not be shown, only labels that should appear in the fully 
+implemented dialog.
+For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements.
+The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
+Do not output any comments or explanations, just a single code block with the HTML with the table element, no 
+surrounding HTML or BODY tag.

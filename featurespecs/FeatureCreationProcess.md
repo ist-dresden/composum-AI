@@ -1,6 +1,6 @@
 # Some ideas how to go on creating a feature with ChatGPT support.
 
-In [ContentCreationDialog.md](ContentCreationDialog.md) there is an example feature that has been specified using a
+In [ContentCreationDialog.md](1ContentCreationDialog.md) there is an example feature that has been specified using a
 dialog with ChatGPT, and later implemented with it's help. Here are some ideas how to do something like that.
 
 The idea is to create a markdown file with the feature specification, and again and again give it to ChatGPT (likely
@@ -26,26 +26,59 @@ your feature documentation. A good idea is giving it examples of what you want, 
    support later steps.
 3. You'll now likely have a spec that has sections "basic idea", "basic implementation decisions", "out of scope",
    "possible extensions". Submit all of that except possible extensions and ask: "To support the dialog design let's
-   see some typical user workflows. Here are some likely usecases for the feature:"  That will likely lead to
+   see some typical user workflows. Here are some likely use cases for the feature:"  That will likely lead to
    improvements of the "out of scope" and "basic implementation decisions".
-4. When the usecases start to make sense, it's a good idea to collect the main intended usecases in a section "User
-   Workflow". That can involve several turns of collecting and rewriting some usecases that seem fine and asking for
+4. When the use cases start to make sense, it's a good idea to collect the main intended use cases in a section "User
+   Workflow". That can involve several turns of collecting and rewriting some use cases that seem fine and asking for
    more.
-5. After completing a list of usecases you'll have a clear idea of the feature. Now ask for the needed dialog
+5. After completing a list of use cases you'll have a clear idea of the feature. Now ask for the needed dialog
    elements. Probably it'll take some turns fixing parts of the spec until the list seems right. Recheck with "Please
    check whether there are missing dialog elements, and whether these dialog elements fit the usage in the use cases."
 6. Have ChatGPT render suggestions for the dialog layout and incorporate these into the design document.
 
-An example for this is the [specification for the content creation dialog](ContentCreationDialog.md) which has been
+(To be continued.)
+
+An example for this is the [specification for the content creation dialog](1ContentCreationDialog.md) which has been
 created with this process.
 
 ### Some specific prompts
 
 #### Dialog layout
 
-These prompts can help to get a visual overview (wireframe) 
-The SVG variant is quite useable to quickly display a design idea but seems to need several tries to get it 
-right. A HTML figure is also nice input, easy to get right and close to the actual dialog.
+These prompts can help to get a visual overview (wireframe)
+The SVG variant is quite useable to quickly display a design idea but seems to need several tries to get it
+right. A HTML figure is also nice input, easy to get right and close to the actual dialog, however to display it
+even on Github it needs to draw from a restricted set of attributes - Github removes many tags.
+
+A wireframe of a dialog can be rendered as a raw HTML fragment in Github Markdown, but we need to specify which
+elements are permitted by the
+[Github sanitization whitelist](https://github.com/gjtorikian/html-pipeline/blob/main/lib/html_pipeline/sanitization_filter.rb).
+Rendered like that the result can be included into the final documentation, but some things look not quite normal
+since e.g. button and select is forbidden for an unknown reason.
+
+> Please create a HTML table as a raw HTML fragment in Github markdown, that shows this dialog design as a wireframe.
+> Only the following HTML elements are permitted: h1, h2, h3, h4, h5, h6, br, b, i, strong, em, a, img, div, p, ol, ul,
+> li, table, thead, tbody, tfoot, tr, td, th, caption, blockquote, dl, dt, dd, hr, summary, details, figure,
+> figcaption, abbr, cite, mark, small, span, time.
+> The elements button, input, textarea, select and option are explicitly forbidden - their appearence has to be
+> approximated using other elements.
+> Only the following attributes of HTML elements are permitted: accept, align, alt, aria-describedby, aria-hidden,
+> aria-label, aria-labelledby, border, charset, checked, cols, colspan, coords, datetime, dir, disabled, for, headers,
+> height, hreflang, id, label, lang, maxlength, media, method, name, open, readonly, rel, role, rows, rowspan, selected,
+> shape, size, span, src, start, summary, tabindex, title, type, value, width.
+> CSS and the style attribute is forbidden, and all
+> Visibly render the dialog frame and internal frames and dividers, e.g. with nested tables with a border.
+> Use the align and valign attributes for alignments.
+> Render icons like e.g. [X] for the close icon, without showing their names.
+> The names of groups and subgroups should not be shown, only labels that should appear in the fully
+> implemented dialog.
+> For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements as far
+> as permitted.
+> The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
+> After discussion of the layout output a single code block with the HTML with the table element, no
+> surrounding HTML or BODY tag. No discussion after the HTML block.
+
+For rendering a HTML that can be inspected in a browser or, e.g., in the IntellJ markdown editor, you can use:
 
 > Please create a HTML table that shows this dialog design as a wireframe.
 > To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes,
@@ -61,6 +94,7 @@ right. A HTML figure is also nice input, easy to get right and close to the actu
 > Do not output any comments or explanations, just a single code block with the HTML with the table element, no
 > surrounding HTML or BODY tag.
 
+There is always ascii art to get a very quick overview:
 
 > Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation.
 > Buttons should be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown.
@@ -70,6 +104,8 @@ right. A HTML figure is also nice input, easy to get right and close to the actu
 > Otherwise the dialog should look as closely as ascii art can make it to the fully implemented dialog.
 > The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
 > No explanation is necessary, please render just a drawing of the dialog in a ascii art code block.
+
+SVG is more or less useable and looks better, but has sometimes bugs.
 
 > Please create a code block with a SVG representation of the dialog, that could be rendered by a browser to display
 > a suggestion for the dialog.

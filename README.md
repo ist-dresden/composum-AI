@@ -11,6 +11,16 @@ This project provides modules that provide basic backend services and frontend i
 being based on the [Apache Sling](https://sling.apache.org/) platform.
 Where possible and appropriate, some components will remain platform-agnostic.
 
+## Development with ChatGPT and Github Copilot
+
+Part of the intention of the project is to evaluate the use of AI services, in particular ChatGPT and the Github 
+Copilot IntelliJ plugin, for speeding up development. Some outcomes of that:
+
+- The [feature creation process](featurespecs/FeatureCreationProcess.md) massively improves the quality and speed of 
+  specifying a feature and thinking it through. See the [feature specification directory](featurespecs/) for 
+  examples of that.
+- Speeding up the development is ongoing, but Github Copilot certainly speeds up a lot of things.
+
 ## Planned services
 
 There are a number of ways ChatGPT's services could be valuable in a CMS. Those include the following:
