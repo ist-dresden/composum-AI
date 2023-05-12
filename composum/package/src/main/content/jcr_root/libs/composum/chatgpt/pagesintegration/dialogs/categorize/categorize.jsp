@@ -22,46 +22,48 @@
                 <div class="modal-body">
                     <div class="messages">
                         <div class="alert" style="display: none;"></div>
-                        <cpn:text class="text" i18n="true">
+                        <cpn:text class="text alert alert-light" i18n="true">
                             This dialog helps set or update page categories.
                             Review 'Current Categories' and consider 'Suggested Categories' from AI.
                             Select desired categories, deselect unwanted ones.
                             Click 'Accept' to use the changes, 'Cancel' to discard.</cpn:text>
                     </div>
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab">
-                            <cpn:text tagName="h4" class="panel-title dialog_title text"
-                                      i18n="true">Current Categories</cpn:text>
-                        </div>
-                        <div class="panel-body">
-                            <div class="current-categories">
-                                <c:forEach var="category" items="${model.currentCategories}">
-                                    <div class="category-item form-group">
-                                        <div class="category-select">
-                                            <label class="composum-pages-edit-widget_option">
-                                                <input class="category-select-checkbox"
-                                                       type="checkbox" name="currentCategories"
-                                                       value="${cpn:attr(request, category, 0)}"
-                                                       checked="checked">
-                                                <cpn:text classes="label-text" tagName="span"
-                                                          value="${category}"/></label>
+                    <c:if test="${model.hasCurrentCategories}">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab">
+                                <cpn:text tagName="h4" class="panel-title dialog_title text"
+                                          i18n="true">Current Categories</cpn:text>
+                            </div>
+                            <div class="panel-body">
+                                <div class="current-categories categorylist">
+                                    <c:forEach var="category" items="${model.currentCategories}">
+                                        <div class="category-item form-group">
+                                            <div class="category-select">
+                                                <label class="composum-pages-edit-widget_option">
+                                                    <input class="category-select-checkbox"
+                                                           type="checkbox" name="currentCategories"
+                                                           value="${cpn:attr(request, category, 0)}"
+                                                           checked="checked">
+                                                    <cpn:text classes="label-text" tagName="span"
+                                                              value="${category}"/></label>
+                                            </div>
                                         </div>
-                                    </div>
-                                </c:forEach>
+                                    </c:forEach>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </c:if>
+
 
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab">
                             <cpn:text tagName="h4" class="panel-title dialog_title text"
                                       i18n="true">Suggested Categories</cpn:text>
                         </div>
-                        <div class="panel-body suggestions">
+                        <div class="panel-body suggestions categorylist">
                             <div class="loading-curtain"><i
                                     class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
-                            <div class="suggestions" style="display: none;"></div>
                         </div>
                     </div>
                 </div>

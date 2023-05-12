@@ -10,6 +10,7 @@ import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
 import com.composum.chatgpt.bundle.ApproximateMarkdownService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.sling.core.BeanContext;
+import com.composum.sling.core.ResourceHandle;
 
 /**
  * Model for rendering the categorize dialog. It gets instantiated on a property resource, e.g. page/jcr:content/category .
@@ -58,12 +59,17 @@ public class ChatGPTCategorizeDialogModel extends AbstractModel {
         return categories != null ? List.of(categories) : List.of();
     }
 
+    public boolean getHasCurrentCategories() {
+        return !getCurrentCategories().isEmpty();
+    }
+
     /**
      * This uses the ApproximateMarkdownService on the current page and feeds that to ChatGPT for keywording.
      */
     public List<String> getSuggestedCategories() {
         ApproximateMarkdownService markdownService = Objects.requireNonNull(context.getService(ApproximateMarkdownService.class));
-        String markdown = markdownService.approximateMarkdown(getContainingPage().getResource());
+        Resource pageResource = getContainingPage().getResource();
+        String markdown = markdownService.approximateMarkdown(ResourceHandle.use(pageResource).getContentResource());
         GPTContentCreationService contentCreationService = Objects.requireNonNull(context.getService(GPTContentCreationService.class));
         return contentCreationService.generateKeywords(markdown);
     }

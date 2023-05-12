@@ -202,7 +202,10 @@
             // make an array 'categories' of the values of all inputs with name 'category'
             let categories = [];
             $inputs.each(function () {
-                categories.push($(this).val());
+                let value = $(this).val().trim();
+                if (value) {
+                    categories.push(value);
+                }
             });
             var url = chatgpt.const.url.categorizeDialog + core.encodePath(path + '/' + property);
             var urlparams = '';

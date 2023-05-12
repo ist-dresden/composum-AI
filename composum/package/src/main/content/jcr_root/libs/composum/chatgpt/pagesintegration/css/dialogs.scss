@@ -46,4 +46,15 @@
         text-align: center;
     }
 
+    .category-item {
+        width: 50%;
+    }
+
+    .categorylist {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
 }

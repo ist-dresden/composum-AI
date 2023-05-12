@@ -16,7 +16,7 @@ public interface ApproximateMarkdownService {
      * Generates a text formatted with markdown that heuristically represents the text content of a page or resource, mainly for use with ChatGPT.
      * That is rather heuristically - it cannot faithfully represent the page, but will probably be enough to generate summaries, keywords and so forth.
      *
-     * @param resource the resource to render to markdown
+     * @param resource the resource to render to markdown. Caution: if this is not the content resource of a page but the cpp:Page, the markdown will contain all subpages as well!
      * @return the markdown representation
      */
     @Nonnull
@@ -26,7 +26,7 @@ public interface ApproximateMarkdownService {
      * Generates a text formatted with markdown that heuristically represents the text content of a page or resource, mainly for use with ChatGPT.
      * That is rather heuristically - it cannot faithfully represent the page, but will probably be enough to generate summaries, keywords and so forth.
      *
-     * @param resource the resource to render to markdown
+     * @param resource the resource to render to markdown. Caution: if this is not the content resource of a page but the cpp:Page, the markdown will contain all subpages as well!
      * @param out      destination where the markdown rendering will be written.
      */
     void approximateMarkdown(@Nullable Resource resource, PrintWriter out);
