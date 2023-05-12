@@ -280,7 +280,9 @@
                     if (value.startsWith('<p>') && value.endsWith('</p>')) {
                         value = value.substring(3, value.length - 4);
                     }
-                    categories.push(value);
+                    if (!categories.includes(value)) {
+                        categories.push(value);
+                    }
                 });
                 this.saveCategories(categories);
             },
