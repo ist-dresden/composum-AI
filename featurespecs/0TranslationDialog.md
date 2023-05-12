@@ -190,6 +190,36 @@ The Javascript class TranslationDialog in `/libs/composum/chatgpt/pagesintegrati
 of the dialog and does call `com.composum.chatgpt.bundle.ChatGPTServlet.TranslateOperation` with
 `/bin/cpm/platform/chatgpt/authoring.translate.json` for the translation.
 
+## Test cases
+
+Some informal testcases:
+
+Sure, here are some informal test cases for the feature specified. These are based on the specification and aim to cover the basic functionality and edge cases.
+
+1. **Single Source Language Translation:**
+   - Scenario: The user clicks on the translation icon next to a single source language text field.
+   - Expected outcome: The system automatically triggers a translation request and the translated text is displayed in the dialog.
+
+2. **Multiple Source Languages Translation:**
+   - Scenario: The user clicks on the translation icon next to a text field that has multiple source languages.
+   - Expected outcome: The system presents texts for all available languages. Upon selecting one language via radio button, the system triggers a translation request and the translated text is displayed in the dialog.
+
+3. **Translation Acceptance:**
+   - Scenario: After viewing a translated text in the dialog, the user clicks the 'Accept' button.
+   - Expected outcome: The translated text gets populated in the original text field and the dialog closes.
+
+4. **Translation Cancellation:**
+   - Scenario: After viewing a translated text in the dialog, the user clicks the 'Cancel' button.
+   - Expected outcome: The dialog closes without making any changes to the original text field.
+
+5. **Translation Error Handling:**
+   - Scenario: The user selects a source language, but the system encounters an error during the translation process.
+   - Expected outcome: The system displays a message saying "Translation Error: Unable to translate text at this time." The user can close the dialog and return to editing the page, or try again.
+
+6. **Translation Icon Visibility:**
+   - Scenario: The user opens a dialog with a text attribute that has no texts in other languages.
+   - Expected outcome: The translation icon is not visible next to the text attribute.
+
 ## Possible extensions later
 
 - It might make sense to have "translation profiles" where the user can give some instructions how to translate. For

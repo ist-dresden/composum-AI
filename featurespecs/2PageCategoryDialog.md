@@ -139,6 +139,24 @@ other. Some groups have subgroups, which have an individual frame around them.
     |             [Cancel]   [Accept]        |
     +----------------------------------------+
 
+## User interaction diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Dialog
+    participant ChatGPT
+    User->>Dialog: Opens Categorization Dialog
+    Dialog->>ChatGPT: Requests category suggestions
+    ChatGPT-->>Dialog: Returns category suggestions
+    Dialog-->>User: Displays current categories & suggestions
+    User->>Dialog: Selects/Deselects categories
+    User->>Dialog: Clicks 'Accept'
+    Dialog-->>User: Updates categories, closes dialog
+    User->>Dialog: Clicks 'Cancel'
+    Dialog-->>User: Discards changes, closes dialog
+```
+
 ### Implementation remarks
 
 The name of the feature that is used in names / IDs is "categorize".
@@ -166,6 +184,64 @@ might have modified this.
 
 Neccessary extensions:
 - com.composum.chatgpt.bundle.ChatGPTDialogServlet new operation categorizeDialog
+
+## Test cases
+
+1. **Test Case 1: New Page Creation**
+
+   **Objective:** Verify that the categorization dialog generates relevant category suggestions for a new page.
+
+   - Steps:
+     1. Create a new page with unique content.
+     2. Save the content and open the categorization dialog.
+     3. Check if category suggestions are generated and displayed.
+
+   - Expected Result: Category suggestions should be relevant to the content of the new page.
+
+2. **Test Case 2: Existing Page Editing**
+
+   **Objective:** Verify that the categorization dialog updates the existing categories and generates new suggestions when a page is edited.
+
+   - Steps:
+     1. Edit an existing page with assigned categories.
+     2. Save the changes and open the categorization dialog.
+     3. Check if the existing categories are displayed, and new category suggestions are generated.
+
+   - Expected Result: Existing categories should be displayed, and new relevant category suggestions should be generated.
+
+3. **Test Case 3: Accepting Suggested Categories**
+
+   **Objective:** Verify that selected categories are saved when the 'Accept' button is clicked.
+
+   - Steps:
+     1. Open the categorization dialog and select some categories (both existing and suggested).
+     2. Click the 'Accept' button.
+     3. Reopen the categorization dialog and verify that the selected categories have been saved.
+
+   - Expected Result: The selected categories should be saved and displayed as current categories when the dialog is reopened.
+
+4. **Test Case 4: Canceling Changes**
+
+   **Objective:** Verify that no changes are saved when the 'Cancel' button is clicked.
+
+   - Steps:
+     1. Open the categorization dialog and select some categories (both existing and suggested).
+     2. Click the 'Cancel' button.
+     3. Reopen the categorization dialog and verify that no changes have been made to the categories.
+
+   - Expected Result: The original categories should remain unchanged when the dialog is reopened.
+
+5. **Test Case 5: Error Handling**
+
+   **Objective:** Verify that the dialog displays an error message when the ChatGPT service is unavailable or returns an error.
+
+   - Steps:
+     1. Simulate an error with the ChatGPT service (e.g., by disconnecting from the internet or modifying the API request).
+     2. Open the categorization dialog.
+     3. Check if an error message is displayed in the alert area.
+
+   - Expected Result: An error message should be displayed in the alert area, indicating a problem with the ChatGPT service.
+
 
 ## Possible extensions
 

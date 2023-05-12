@@ -35,6 +35,7 @@ your feature documentation. A good idea is giving it examples of what you want, 
    elements. Probably it'll take some turns fixing parts of the spec until the list seems right. Recheck with "Please
    check whether there are missing dialog elements, and whether these dialog elements fit the usage in the use cases."
 6. Have ChatGPT render suggestions for the dialog layout and incorporate these into the design document.
+7. Whether it's needed or just for fun: "Make an user interaction diagram as sequenceDiagram in a mermaid codeblock."
 
 (To be continued.)
 

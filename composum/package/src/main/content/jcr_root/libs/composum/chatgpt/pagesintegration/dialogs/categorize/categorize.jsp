@@ -59,7 +59,7 @@
                                       i18n="true">Suggested Categories</cpn:text>
                         </div>
                         <div class="panel-body suggestions">
-                            <div class="loading-curtain" style="display: none;"><i
+                            <div class="loading-curtain"><i
                                     class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
                             <div class="suggestions" style="display: none;"></div>
                         </div>

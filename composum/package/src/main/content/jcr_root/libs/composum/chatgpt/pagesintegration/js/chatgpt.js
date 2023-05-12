@@ -78,10 +78,16 @@
             accept: function (event) {
                 event.preventDefault();
                 console.log('accept', arguments);
-                if (this.$outputfield.hasClass('trumbowyg-textarea')) {
-                    this.$outputfield.trumbowyg('html', this.$translation.html());
+                let widget = core.widgetOf(this.$outputfield);
+                if (widget) {
+                    if (widget.richText) {
+                        widget.setValue(this.$translation.html());
+                    } else {
+                        widget.setValue(this.$translation.text());
+                    }
+                    widget.grabFocus();
                 } else {
-                    this.$outputfield.val(this.$translation.text());
+                    console.error("Bug: cannot find widget for ", this.$outputfield);
                 }
                 this.$el.modal('hide');
                 return false;
@@ -248,6 +254,7 @@
                 this.$el.find('.current-categories input[type="checkbox"]').each(_.bind(function (index, element) {
                     this.duplicateChanges({target: element});
                 }, this));
+                this.$el.find('.loading-curtain').hide();
             },
 
             /** When a checkbox is changed we look for a second checkbox with the same value and synchronize it's state. */
@@ -277,7 +284,8 @@
 
             saveCategories: function (categories) {
                 console.log('saveCategories', categories);
-                // TODO implement this.
+                let categoryWidget = core.widgetOf(this.widget);
+                categoryWidget.setValue(categories);
             }
 
         });

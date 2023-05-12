@@ -121,7 +121,7 @@ Given these workflows, the content creation dialog could have the following elem
 - **Close/Cancel Button:** A button to close the dialog without applying any changes. This is useful if the user decides
   not to use the generated content after all.
 
-- **Alert:** a normally hidden area that can contain error messages or warnings. The text will be shown in red, so a 
+- **Alert:** a normally hidden area that can contain error messages or warnings. The text will be shown in red, so a
   label is not necessary.
 
 - **Help:** opens a page with a description of the dialog, and some example usages.
@@ -162,7 +162,7 @@ other. Some groups have subgroups, which have an individual frame around them.
     - Cancel Button
     - Help Button (in addition to a help icon in the dialog frame)
 
-The help and maximize buttons should appear as icons next to the close icon, all three right aligned on the top in 
+The help and maximize buttons should appear as icons next to the close icon, all three right aligned on the top in
 the dialog frame.
 
 ## Preview of the dialog.
@@ -194,6 +194,7 @@ the dialog frame.
     |                                                                       |
     |                                                                       |
     +-----------------------------------------------------------------------+
+
 Ascii-Art representing the dialog design.[^1]
 
 ![testimage](figures/contentCreationDialog.svg)
@@ -279,12 +280,76 @@ Suggestion for dialog design.[^2]
 </figure>
 See footnote for related prompt.[^3]
 
+## User interaction diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Dialog
+    participant ChatGPT
+    User ->> Dialog: Open Dialog
+    Dialog ->> User: Display Dialog Elements
+    User ->> Dialog: Write a Prompt
+    User ->> Dialog: Select Additional Input
+    User ->> Dialog: Select Text Length
+    User ->> Dialog: Press Generate Button
+    Dialog ->> ChatGPT: Send Prompt and Additional Input
+    ChatGPT -->> Dialog: Send Generated Text
+    Dialog ->> User: Display Generated Text
+    User ->> Dialog: Press Replace or Append
+    Dialog ->> User: Update Text Field
+    User ->> Dialog: Close Dialog
+```
+
 ## Implementation plan
 
 The implementation of a dialog consists of the following parts:
 - 
+
 - possibly changes to the backend if necessary.
 
+## Test cases
+
+Some informal testcases:
+
+1. **New Page Creation Workflow:**
+
+   a. Create a new page with some text content.
+   b. Open the dialog for setting page categories.
+    - Test: Verify that the "Loading Indicator" is displayed while waiting for the category suggestions from ChatGPT.
+    - Test: Verify that the "Current Categories Section" is not visible since no categories have been set yet.
+      c. Wait for the category suggestions from ChatGPT.
+    - Test: Verify that the "Loading Indicator" disappears when the suggestions are ready.
+    - Test: Verify that the "ChatGPT Suggestions Section" is displayed with the category suggestions from ChatGPT.
+      d. Select some of the suggested categories and click the "Accept" button.
+    - Test: Verify that the selected categories are saved to the page.
+      e. Reopen the dialog for setting page categories.
+    - Test: Verify that the "Current Categories Section" is now visible with the categories selected in the previous
+      step.
+
+2. **Existing Page Editing Workflow:**
+
+   a. Open an existing page with some categories already set.
+   b. Edit the page content and save the changes.
+   c. Open the dialog for updating page categories.
+    - Test: Verify that the "Loading Indicator" is displayed while waiting for the category suggestions from ChatGPT.
+    - Test: Verify that the "Current Categories Section" is visible with the categories previously set.
+      d. Wait for the category suggestions from ChatGPT.
+    - Test: Verify that the "Loading Indicator" disappears when the suggestions are ready.
+    - Test: Verify that the "ChatGPT Suggestions Section" is displayed with the category suggestions from ChatGPT.
+      e. Deselect some previously used categories, select new relevant categories from the suggestions, and click the "
+      Accept" button.
+    - Test: Verify that the updated categories are saved to the page.
+      f. Reopen the dialog for updating page categories.
+    - Test: Verify that the "Current Categories Section" is now updated with the categories selected in the previous
+      step.
+
+3. **Error Handling:**
+
+   a. Open a page with a large amount of text that could potentially take a long time to analyze.
+    - Test: Verify that the "Loading Indicator" is displayed and remains visible for as long as the analysis is ongoing.
+      b. Simulate a failure in the ChatGPT category suggestions.
+    - Test: Verify that an appropriate error message is displayed in the "Alert" section.
 
 ## Possible extensions
 
@@ -335,36 +400,37 @@ These ideas might or might not make sense - that's best reviewed after the featu
 - **Alert:** An area to display error messages or warnings.
 
 [^1]: ChatGPT prompt to create that drawing:
-Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation. 
+Please create an ascii art of the dialog, rendered as markdown code block with 4 spaces indentation.
 Buttons should be rendered like [Cancel] when "Cancel" is the text on them, so that the layout is nicely shown.
 Drop down lists can be rendered like [\/Predefined].
 Text fields, Text areas should be shown with a description what is in there, spaces rendered as _, and with more _
 showing the full space they occupy. (For text areas that will be several lines.)
-Otherwise the dialog should look as closely as ascii art can make it to the fully implemented dialog. 
+Otherwise the dialog should look as closely as ascii art can make it to the fully implemented dialog.
 The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
 No explanation is necessary, please render just a drawing of the dialog in a ascii art code block.
 
 [^2]: ChatGPT prompt to create that drawing:
-Please create a code block with a SVG representation of the dialog, that could be rendered by a browser to display a suggestion for the dialog. 
+Please create a code block with a SVG representation of the dialog, that could be rendered by a browser to display a
+suggestion for the dialog.
 The dialog should have a frame, group subgroups also with a small frame that surrounds the group of buttons etc.
 The names of groups and subgroups should not be shown, except if they should appear in the fully implemented dialog.
 The text fields and text areas should be rendered as a frame, with a descriptive text shown inside.
-Render buttons and drop down lists with a frame, and indicate with a suitable symbol the drop down list. 
+Render buttons and drop down lists with a frame, and indicate with a suitable symbol the drop down list.
 No explanation is necessary, please render just a drawing of the dialog in a SVG code block.
-Please output only the svg tag and the svg elements, no comments, and take care to create a valid SVG including the 
+Please output only the svg tag and the svg elements, no comments, and take care to create a valid SVG including the
 xmlns declaration.
 
-[^3]: ChatGPT prompt to create the HTML: 
-Please create a HTML table that shows this dialog design as a wireframe. 
-To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes, 
-but no CSS unless absolutely necessary. 
+[^3]: ChatGPT prompt to create the HTML:
+Please create a HTML table that shows this dialog design as a wireframe.
+To render the dialog frame and internal frames and dividers, use the HTML table, tr and td attributes,
+but no CSS unless absolutely necessary.
 Use the align and valign attributes for alignments.
 For drop down lists include the options, as far as they are already specified.
 Render icons like e.g. [X] for the close icon, without showing their names.
 You can use nested tables with a border to create nested frames for the subgroups.
-The names of groups and subgroups should not be shown, only labels that should appear in the fully 
+The names of groups and subgroups should not be shown, only labels that should appear in the fully
 implemented dialog.
 For the elements like buttons, input fields, text areas etc. you should use the corresponding HTML elements.
 The dialog should look as closely as possible to the fully implemented dialog, while observing these conditions.
-Do not output any comments or explanations, just a single code block with the HTML with the table element, no 
+Do not output any comments or explanations, just a single code block with the HTML with the table element, no
 surrounding HTML or BODY tag.
