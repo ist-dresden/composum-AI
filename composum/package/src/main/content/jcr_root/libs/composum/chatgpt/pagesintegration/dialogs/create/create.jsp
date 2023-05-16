@@ -38,7 +38,7 @@
                                 </div>
 
                                 <div class="form-group col-md-4">
-                                    <label for="contentSelector">Base Content</label>
+                                    <label for="contentSelector">Base Text</label>
                                     <select id="contentSelector" name="contentSelect"
                                             class="form-control content-selector">
                                         <c:forEach items="${model.contentSelectors}" var="contentSelector">
@@ -83,7 +83,7 @@
                         <div class="panel-body">
                             <div class="form-group">
                                 <textarea name="response"
-                                          class="form-control chatgpt-response-field" rows="10" readonly></textarea>
+                                          class="form-control chatgpt-response-field" rows="10"></textarea>
                             </div>
                         </div>
                     </div>

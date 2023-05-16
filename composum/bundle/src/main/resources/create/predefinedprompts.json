@@ -1,6 +1,7 @@
 {
   "---": "",
-  "Summarize": "Please summarize the content.",
-  "Introduction": "Please write an introduction.",
-  "Conclusion": "Please write a conclusion."
+  "Summarize": "Please summarize the text.",
+  "Introduction": "Please write an introduction for the text.",
+  "Headline": "Please write a headline for the text. Print just the raw headline, no explanations and no quotes.",
+  "Conclusion": "Please write a conclusion for the text."
 }

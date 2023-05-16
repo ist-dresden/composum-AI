@@ -114,8 +114,10 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_PROMPTONTEXT);
         GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
-        int maxtokens = maxwords > 0 ? maxwords * 4 / 3 : 200;
-        request.setMaxTokens(maxtokens);
+        if (maxwords > 0) {
+            int maxtokens = maxwords > 0 ? maxwords * 4 / 3 : 200;
+            request.setMaxTokens(maxtokens);
+        }
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
         request.addMessages(messages);
         String response = chatCompletionService.getSingleChatCompletion(request);

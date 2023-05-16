@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
 import com.composum.pages.commons.taglib.EditWidgetTag;
+import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.util.ResourceUtil;
 
 /**
@@ -111,6 +112,6 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
      * Path to the current page.
      */
     public String getPagePath() {
-        return getPageManager().getContainingPage(context, resource).getPath();
+        return ResourceHandle.use(getPageManager().getContainingPage(context, resource).getResource()).getContentResource().getPath();
     }
 }

@@ -88,11 +88,11 @@
                     } else {
                         widget.setValue(this.$translation.text());
                     }
-                    widget.grabFocus();
                 } else {
                     console.error("Bug: cannot find widget for ", this.$outputfield);
                 }
                 this.$el.modal('hide');
+                widget.grabFocus();
                 return false;
             },
 
@@ -436,37 +436,35 @@
 
             replaceButtonClicked: function (event) {
                 event.preventDefault();
-                let widget = this.widget;
-                if (widget) {
-                    if (widget.richText) {
-                        widget.setValue(this.$response.html());
+                if (this.widget) {
+                    if (this.widget.richText) {
+                        this.widget.setValue(this.$response.val()); // HTML?
                     } else {
-                        widget.setValue(this.$response.text());
+                        this.widget.setValue(this.$response.val());
                     }
-                    widget.grabFocus();
                 } else {
                     console.error("Bug: cannot find widget for ", this.$outputfield);
                 }
                 this.$el.modal('hide');
+                this.widget.grabFocus();
                 return false;
             },
 
             appendButtonClicked: function (event) {
                 event.preventDefault();
-                let widget = core.widgetOf(this.$outputfield);
-                let previousValue = widget.getValue();
+                let previousValue = this.widget.getValue();
                 previousValue = previousValue ? previousValue.trim() + "\n\n" : "";
-                if (widget) {
-                    if (widget.richText) {
-                        widget.setValue(previousValue + "<p>" + this.$response.html() + "</p>");
+                if (this.widget) {
+                    if (this.widget.richText) {
+                        this.widget.setValue(previousValue + "<p>" + this.$response.val() + "</p>"); // HTML?
                     } else {
-                        widget.setValue(previousValue + this.$response.text());
+                        this.widget.setValue(previousValue + this.$response.val());
                     }
-                    widget.grabFocus();
                 } else {
                     console.error("Bug: cannot find widget for ", this.$outputfield);
                 }
                 this.$el.modal('hide');
+                this.widget.grabFocus();
                 return false;
             }
 

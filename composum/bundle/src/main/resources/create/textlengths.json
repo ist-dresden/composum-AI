@@ -1,7 +1,7 @@
 {
   "---": "",
-  "one line": "Please generate one line of text.",
-  "one sentence": "Please generate one sentence of text.",
-  "one paragraph": "Please generate one paragraph of text.",
-  "several paragraphs": "Please generate several paragraphs of text."
+  "one line": "Your response should be exactly one line of text.",
+  "one sentence": "Your response should contain one sentence of text.",
+  "one paragraph": "Your response should contain one paragraph of text.",
+  "several paragraphs": "Your response should contain several paragraphs of text."
 }
