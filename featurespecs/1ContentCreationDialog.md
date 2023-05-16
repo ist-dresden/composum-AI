@@ -328,6 +328,7 @@ The implementation of a dialog consists of the following parts:
 
 For the selects that contain fragments of the prompt we set the value to the prompt fragment.
 
+
 ### Identifiers etc.
 
 We use the following identifiers:
@@ -345,7 +346,7 @@ We use the following identifiers:
   - Loading Indicator: loading-indicator
   - Back Button: back-button
   - Forward Button: forward-button
-  - Alert Text: alert-text
+  - Alert Text: alert
   - ChatGPT Response Field: chatgpt-response-field
   - Replace Button: replace-button
   - Append Button: append-button

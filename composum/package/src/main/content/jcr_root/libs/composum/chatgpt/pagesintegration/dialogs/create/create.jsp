@@ -6,7 +6,7 @@
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"
              cssBase="composum-chatgpt-pagesintegration-dialogs-create"
-             id="chatgpt-create-dialog" cssAdd="dialog modal fade" role="dialog">
+             cssAdd="dialog modal fade" role="dialog">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">
@@ -20,7 +20,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="messages">
-                        <div class="alert alert-danger alert-text" id="alertArea" style="display: none;"></div>
+                        <div class="alert alert-danger alert-text" style="display: none;"></div>
                     </div>
 
                     <div class="panel panel-default mb-3">
@@ -42,7 +42,7 @@
                                     <select id="contentSelector" name="contentSelect"
                                             class="form-control content-selector">
                                         <c:forEach items="${model.contentSelectors}" var="contentSelector">
-                                            <option value="${contentSelector.value}">${contentSelector.key}</option>
+                                            <option value="${contentSelector.key}">${contentSelector.value}</option>
                                         </c:forEach>
                                     </select>
                                 </div>
@@ -65,14 +65,15 @@
                             </div>
 
                             <div class="row align-items-center">
-                              <div class="col-md-6">
-                                <button type="button" class="btn btn-primary generate-button" id="generateButton">Generate</button>
-                                <div class="loading-indicator" id="loadingIndicator" style="display: none;"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
-                              </div>
-                              <div class="col-md-6 text-right">
-                                <button type="button" class="btn btn-secondary back-button" id="backButton">Back</button>
-                                <button type="button" class="btn btn-secondary forward-button" id="forwardButton">Forward</button>
-                              </div>
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-primary generate-button">Generate</button>
+                                    <div class="loading-indicator" style="display: none;"><i
+                                            class="fa fa-spinner fa-pulse fa-fw"></i></div>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <button type="button" class="btn btn-secondary back-button">Back</button>
+                                    <button type="button" class="btn btn-secondary forward-button">Forward</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,15 +82,15 @@
                         <div class="panel-heading">Content suggestion</div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <textarea id="chatGptResponseField" name="response"
+                                <textarea name="response"
                                           class="form-control chatgpt-response-field" rows="10" readonly></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary replace-button" id="replaceButton">Replace</button>
-                    <button type="button" class="btn btn-primary append-button" id="appendButton">Append</button>
+                    <button type="button" class="btn btn-primary replace-button">Replace</button>
+                    <button type="button" class="btn btn-primary append-button">Append</button>
                     <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Cancel</button>
                 </div>
             </form>

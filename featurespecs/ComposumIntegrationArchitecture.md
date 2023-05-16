@@ -60,12 +60,12 @@ operation `{feature}Dialog` to serve that operation with with the {resourcetype}
 ### 3. CSS
 /libs/composum/chatgpt/pagesintegration/css/dialogs.scss 
 
-### 3. Java Model
+### 4. Java Model
 
 - **Java model**: create model specific to the feature, `com.composum.chatgpt.bundle.model.ChatGPT{Feature}
   DialogModel`, that implements properties needed for the JSP.
 
-### 4. JavaScript File
+### 5. JavaScript File
 
 Modify the JavaScript file at `/libs/composum/chatgpt/pagesintegration/js/chatgpt.js`.
 

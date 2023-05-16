@@ -310,9 +310,91 @@
 
         chatgpt.CreateDialog = core.components.FormDialog.extend({
 
+
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
+
+                this.$predefinedPrompts = this.$el.find('.predefined-prompts');
+                this.$contentSelect = this.$el.find('.content-selector');
+                this.$textLength = this.$el.find('.text-length-selector');
+                this.$prompt = this.$el.find('.prompt-textarea');
+                this.$outputField = this.$el.find('.chatgpt-response-field');
+                this.$alert = this.$el.find('.alert');
+                this.$loading = this.$el.find('.loading-indicator');
+
+                this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
+                this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));
+                this.$el.find('.generate-button').click(_.bind(this.generateButtonClicked, this));
+
+                this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
+                this.$prompt.change(_.bind(this.promptChanged, this));
             },
+
+            predefinedPromptsChanged: function (event) {
+                event.preventDefault();
+                let predefinedPrompt = this.$predefinedPrompts.val();
+                this.$prompt.val(predefinedPrompt);
+            },
+
+            promptChanged: function (event) {
+                event.preventDefault();
+                this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
+            },
+
+            backButtonClicked: function (event) {
+                alert('Back button clicked - not implemented yet');
+            },
+
+            forwardButtonClicked: function (event) {
+                alert('Forward button clicked - not implemented yet');
+            },
+
+            setLoading(loading) {
+                if (loading) {
+                    this.$loading.show();
+                } else {
+                    this.$loading.hide();
+                }
+                this.$alert.hide();
+            },
+
+            generateButtonClicked: function (event) {
+                this.setLoading(true);
+
+                let predefinedPrompt = this.$predefinedPrompts.val();
+                let contentSelect = this.$contentSelect.val();
+                let textLength = this.$textLength.val();
+                let prompt = this.$prompt.val();
+
+                // ajaxPost: function (url, data, config, onSuccess, onError, onComplete)
+                let url = chatgpt.const.url.authoring + ".create.json";
+                core.ajaxPost(url, {
+                    predefined: predefinedPrompt,
+                    contentSelect: contentSelect,
+                    textLength: textLength,
+                    prompt: prompt
+                }, {dataType: 'json'}, _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
+            },
+
+            generateSuccess: function (data) {
+                this.setLoading(false);
+                console.log("Success generating text: ", data);
+                alert('Success: ' + JSON.stringify(data));
+            },
+
+            generateError: function (jqXHR, textStatus, errorThrown) {
+                this.setLoading(false);
+                console.error("Error generating text: ", arguments);
+                this.$alert.html("Error generating text: " + JSON.stringify(arguments));
+                this.$alert.show();
+            },
+
+            save: function () {
+                // Use constant for output field
+                let output = this.$outputField.val();
+                // Assuming you have a reference to the widget in `this.options.widget`
+                this.options.widget.val(output);
+            }
 
         });
 
