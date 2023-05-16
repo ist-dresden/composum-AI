@@ -17,8 +17,8 @@
 - DONE: integrate translation suggestions into Composum Pages
 - DONE: implement markdown (ChatML) rendering for Composum Pages components to easily retrieve a textual 
   representation of the page
-- implement suggestions for page description and keywords (= categories) in pages
-- implement ChatGPT dialog that can be called from basic text components, and gives the user the possibility to
+- DONE: implement suggestions for page description and keywords (= categories) in pages
+- DONE: implement ChatGPT dialog that can be called from basic text components, and gives the user the possibility to
   prompt ChatGPT
 
 ## Possible improvements later

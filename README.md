@@ -34,7 +34,10 @@ There are a number of ways ChatGPT's services could be valuable in a CMS. Those 
 - possibly support of the user when searching the site using natural language
 - possibly support of the user by answering questions about the site content
 
-We will start with simple services and build on that.
+Currently we have implemented:
+- Translation support
+- Content creation support
+- Page category suggestions
 
 ## More project documentation
 
