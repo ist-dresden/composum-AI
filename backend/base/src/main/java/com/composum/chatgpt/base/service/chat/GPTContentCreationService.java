@@ -45,7 +45,8 @@ public interface GPTContentCreationService {
      *
      * @param prompt   the prompt text from the user
      * @param text     the text to use as context for the prompt
-     * @param maxwords used to hard limit text length - not used as an explicit instruction to ChatGPT, just to set maxtokens to 4/3 of that.
+     * @param maxwords used to hard limit text length - not used as an explicit instruction to ChatGPT,
+     *                 just to set maxtokens to 4/3 of that. If < 1, no limit is set.
      */
     @Nonnull
     String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxwords) throws GPTException;

@@ -107,4 +107,10 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
         return widget.getPropertyName();
     }
 
+    /**
+     * Path to the current page.
+     */
+    public String getPagePath() {
+        return getPageManager().getContainingPage(context, resource).getPath();
+    }
 }

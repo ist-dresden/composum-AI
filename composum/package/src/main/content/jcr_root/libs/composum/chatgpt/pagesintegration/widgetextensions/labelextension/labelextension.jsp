@@ -17,6 +17,7 @@ Loaded from /libs/composum/pages/commons/widget/labelextension.jsp via PagesPlug
                 class="widget-chatgptaction action-create fa fa-magic"
                 title="Create content with ChatGPT"
                 data-path="${model.path}" data-property="${model.property}" data-propertypath="${model.propertyI18nPath}"
+                data-pagepath="${model.pagePath}"
         ></span></c:if>
         <c:if test="${model.pageCategoriesButtonVisible}"><span
                 class="widget-chatgptaction action-pagecategories fa fa-tags"

@@ -1,6 +1,6 @@
 {
-  "": "No content is added except your prompt",
   "widget": "The text you were editing",
   "component": "The component you were editing, including subcomponents",
-  "page": "Current page"
+  "page": "Current page",
+  "": "No content is added except your prompt"
 }

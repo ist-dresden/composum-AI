@@ -300,19 +300,30 @@
 
         chatgpt.openCreationDialog = function (event) {
             let $target = $(event.target);
-            var path = $target.data('path');
-            var property = $target.data('property');
-            var propertypath = $target.data('propertypath');
-            var url = chatgpt.const.url.createDialog + core.encodePath(path + '/' + property) +
+            let path = $target.data('path');
+            let pagePath = $target.data('pagepath');
+            let property = $target.data('property');
+            let propertypath = $target.data('propertypath');
+            let url = chatgpt.const.url.createDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
-            core.openFormDialog(url, chatgpt.CreateDialog, {outputfield: chatgpt.searchInput($target)});
+            core.openFormDialog(url, chatgpt.CreateDialog, {
+                outputfield: chatgpt.searchInput($target),
+                componentPath: path, pagePath: pagePath
+            });
         }
 
+        /**
+         * Dialog for categorize - giving a page categories.
+         * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
+         * @param options{outputfield, componentPath, pagePath}
+         */
         chatgpt.CreateDialog = core.components.FormDialog.extend({
-
 
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
+                this.outputfield = options.outputfield;
+                this.componentPath = options.componentPath;
+                this.pagePath = options.pagePath;
 
                 this.$predefinedPrompts = this.$el.find('.predefined-prompts');
                 this.$contentSelect = this.$el.find('.content-selector');
@@ -321,6 +332,7 @@
                 this.$outputField = this.$el.find('.chatgpt-response-field');
                 this.$alert = this.$el.find('.alert');
                 this.$loading = this.$el.find('.loading-indicator');
+                this.$response = this.$el.find('.chatgpt-response-field');
 
                 this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
                 this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));
@@ -328,6 +340,10 @@
 
                 this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
                 this.$prompt.change(_.bind(this.promptChanged, this));
+
+                // bind buttons replace-button and append-button
+                this.$el.find('.replace-button').click(_.bind(this.replaceButtonClicked, this));
+                this.$el.find('.append-button').click(_.bind(this.appendButtonClicked, this));
             },
 
             predefinedPromptsChanged: function (event) {
@@ -368,8 +384,8 @@
 
                 // ajaxPost: function (url, data, config, onSuccess, onError, onComplete)
                 let url = chatgpt.const.url.authoring + ".create.json";
+                // FIXME(hps,16.05.23) implement aborting of the request
                 core.ajaxPost(url, {
-                    predefined: predefinedPrompt,
                     contentSelect: contentSelect,
                     textLength: textLength,
                     prompt: prompt
@@ -378,8 +394,14 @@
 
             generateSuccess: function (data) {
                 this.setLoading(false);
-                console.log("Success generating text: ", data);
-                alert('Success: ' + JSON.stringify(data));
+                if (data.status >= 200) {
+                    console.log("Success generating text: ", data);
+                    this.$response.val(data.data.result.text);
+                } else {
+                    console.error("Error generating text: ", data);
+                    this.$alert.html("Error generating text: " + JSON.stringify(data));
+                    this.$alert.show();
+                }
             },
 
             generateError: function (jqXHR, textStatus, errorThrown) {
@@ -389,11 +411,40 @@
                 this.$alert.show();
             },
 
-            save: function () {
-                // Use constant for output field
-                let output = this.$outputField.val();
-                // Assuming you have a reference to the widget in `this.options.widget`
-                this.options.widget.val(output);
+            replaceButtonClicked: function (event) {
+                event.preventDefault();
+                let widget = core.widgetOf(this.$outputfield);
+                if (widget) {
+                    if (widget.richText) {
+                        widget.setValue(this.$response.html());
+                    } else {
+                        widget.setValue(this.$response.text());
+                    }
+                    widget.grabFocus();
+                } else {
+                    console.error("Bug: cannot find widget for ", this.$outputfield);
+                }
+                this.$el.modal('hide');
+                return false;
+            },
+
+            appendButtonClicked: function (event) {
+                event.preventDefault();
+                let widget = core.widgetOf(this.$outputfield);
+                let previousValue = widget.getValue();
+                previousValue = previousValue ? previousValue.trim() + "\n\n" : "";
+                if (widget) {
+                    if (widget.richText) {
+                        widget.setValue(previousValue + "<p>" + this.$response.html() + "</p>");
+                    } else {
+                        widget.setValue(previousValue + this.$response.text());
+                    }
+                    widget.grabFocus();
+                } else {
+                    console.error("Bug: cannot find widget for ", this.$outputfield);
+                }
+                this.$el.modal('hide');
+                return false;
             }
 
         });

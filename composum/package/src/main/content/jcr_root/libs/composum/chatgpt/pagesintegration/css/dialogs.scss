@@ -72,9 +72,14 @@
         }
     }
 
-    .loading-curtain {
-        width: 100%;
-        text-align: center;
+    .generate-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .loading-indicator {
+        display: inline-block;
+        margin-left: 10px;
     }
 
 }

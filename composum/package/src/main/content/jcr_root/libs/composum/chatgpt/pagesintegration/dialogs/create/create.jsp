@@ -23,7 +23,7 @@
                         <div class="alert alert-danger alert-text" style="display: none;"></div>
                     </div>
 
-                    <div class="panel panel-default mb-3">
+                    <div class="panel panel-default mb-3">re
                         <div class="panel-heading">Prompt</div>
                         <div class="panel-body">
                             <div class="form-row">
@@ -65,10 +65,10 @@
                             </div>
 
                             <div class="row align-items-center">
-                                <div class="col-md-6">
+                                <div class="col-md-6 generate-container">
                                     <button type="button" class="btn btn-primary generate-button">Generate</button>
                                     <div class="loading-indicator" style="display: none;"><i
-                                            class="fa fa-spinner fa-pulse fa-fw"></i></div>
+                                            class="fa fa-2x fa-spinner fa-pulse fa-fw"></i></div>
                                 </div>
                                 <div class="col-md-6 text-right">
                                     <button type="button" class="btn btn-secondary back-button">Back</button>
@@ -89,9 +89,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary replace-button">Replace</button>
-                    <button type="button" class="btn btn-primary append-button">Append</button>
                     <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary append-button" data-dismiss="modal">Append</button>
+                    <button type="button" class="btn btn-primary replace-button" data-dismiss="modal">Replace</button>
                 </div>
             </form>
         </div>

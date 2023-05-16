@@ -352,23 +352,12 @@ We use the following identifiers:
   - Append Button: append-button
   - Cancel Button: cancel-button
   - Help Button: help-button
-- Parameter names for the inputs and outputs:
+- Parameter names for the inputs:
   - Prompt Textarea: prompt
-  - Predefined Prompts: predefined
   - Content Selector: contentSelect
   - Text Length Selector: textLength
-  - Generate Button: generate
-  - Loading Indicator: loading
-  - Back Button: back
-  - Forward Button: forward
-  - Alert Text: alert
-  - ChatGPT Response Field: response
-  - Replace Button: replace
-  - Append Button: append
-  - Cancel Button: cancel
-  - Help Button: help
 
-### automatical stuff:
+### automatically added:
 
 ChatGPTDialogServlet "Add a third operation creationDialog for resourcetype .../dialog/create"
 
