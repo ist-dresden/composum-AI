@@ -23,7 +23,7 @@
                         <div class="alert alert-danger alert-text" style="display: none;"></div>
                     </div>
 
-                    <div class="panel panel-default mb-3">re
+                    <div class="panel panel-default mb-3">
                         <div class="panel-heading">Prompt</div>
                         <div class="panel-body">
                             <div class="form-row">

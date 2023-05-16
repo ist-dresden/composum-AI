@@ -321,7 +321,8 @@
 
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
-                this.outputfield = options.outputfield;
+                this.$outputfield = options.outputfield;
+                this.widget = core.widgetOf(this.$outputfield);
                 this.componentPath = options.componentPath;
                 this.pagePath = options.pagePath;
 
@@ -344,17 +345,25 @@
                 // bind buttons replace-button and append-button
                 this.$el.find('.replace-button').click(_.bind(this.replaceButtonClicked, this));
                 this.$el.find('.append-button').click(_.bind(this.appendButtonClicked, this));
+
+                if (!this.widget) {
+                    console.log('No widget found for ', this.$outputfield);
+                    this.$alert.show();
+                    this.$alert.text('Bug, please report: no widget found for ' + this.$outputfield);
+                }
             },
 
             predefinedPromptsChanged: function (event) {
                 event.preventDefault();
                 let predefinedPrompt = this.$predefinedPrompts.val();
                 this.$prompt.val(predefinedPrompt);
+                return false;
             },
 
             promptChanged: function (event) {
                 event.preventDefault();
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
+                return false;
             },
 
             backButtonClicked: function (event) {
@@ -375,21 +384,35 @@
             },
 
             generateButtonClicked: function (event) {
+                event.preventDefault();
                 this.setLoading(true);
 
                 let predefinedPrompt = this.$predefinedPrompts.val();
                 let contentSelect = this.$contentSelect.val();
                 let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
+                var inputText;
+                var inputPath;
+                if (contentSelect === 'widget') {
+                    inputText = this.widget.getValue();
+                } else if (contentSelect === 'page') {
+                    inputPath = this.pagePath;
+                } else if (contentSelect === 'component') {
+                    inputPath = this.componentPath;
+                } else if (contentSelect === 'lastoutput') {
+                    inputText = this.$outputField.val();
+                }
 
-                // ajaxPost: function (url, data, config, onSuccess, onError, onComplete)
                 let url = chatgpt.const.url.authoring + ".create.json";
                 // FIXME(hps,16.05.23) implement aborting of the request
                 core.ajaxPost(url, {
                     contentSelect: contentSelect,
                     textLength: textLength,
+                    inputText: inputText,
+                    inputPath: inputPath,
                     prompt: prompt
                 }, {dataType: 'json'}, _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
+                return false;
             },
 
             generateSuccess: function (data) {
@@ -413,7 +436,7 @@
 
             replaceButtonClicked: function (event) {
                 event.preventDefault();
-                let widget = core.widgetOf(this.$outputfield);
+                let widget = this.widget;
                 if (widget) {
                     if (widget.richText) {
                         widget.setValue(this.$response.html());

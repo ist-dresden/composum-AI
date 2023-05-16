@@ -2,5 +2,6 @@
   "widget": "The text you were editing",
   "component": "The component you were editing, including subcomponents",
   "page": "Current page",
-  "": "No content is added except your prompt"
+  "lastoutput": "Current suggestion shown in the dialog (for iterative improvement)",
+  "": "No content is added to your prompt"
 }

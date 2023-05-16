@@ -184,7 +184,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             }
 
             trynumber = trynumber + 1;
-            delay = recalculateDelay(response.body(), delay);
+            delay = recalculateDelay(response, delay);
             // that normally shouldn't happen except in tests because of rate limiting, so we log a warning
             LOG.warn("Got 429 response from GPT, waiting {} ms: {}", delay, response.body());
             Thread.sleep(delay);
@@ -198,8 +198,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      * If the response body contains a string like "Please try again in 20s." (number varies)
      * we return a value of that many seconds, otherwise just use iterative doubling.
      */
-    protected long recalculateDelay(String body, long delay) {
-        if (body != null) {
+    protected long recalculateDelay(HttpResponse<String> response, long delay) {
+        String body;
+        if (response != null && (body = response.body()) != null) {
             Matcher matcher = PATTERN_TRY_AGAIN.matcher(body);
             if (matcher.find()) {
                 if (gptLimiter == null) {

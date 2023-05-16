@@ -7,6 +7,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -340,7 +341,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
+            String prompt = status.getRequiredParameter(PARAMETER_PROMPT, Pattern.compile(".*\\S.*"), "No prompt given");
             String textLength = request.getParameter("textLength");
             String inputPath = request.getParameter("inputPath");
             String inputText = request.getParameter("inputText");
@@ -348,7 +349,10 @@ public class ChatGPTServlet extends AbstractServiceServlet {
                 status.error("Both inputPath and inputText given, only one of them is allowed");
             }
             if (status.isValid()) {
-                String fullPrompt = textLength + "\n\n" + prompt;
+                String fullPrompt = prompt;
+                if (isNotBlank(textLength)) {
+                    fullPrompt = textLength + "\n\n" + prompt;
+                }
                 if (isNotBlank(inputPath)) {
                     Resource resource = request.getResourceResolver().getResource(inputPath);
                     if (resource == null) {
@@ -359,7 +363,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
                 }
                 if (status.isValid()) {
                     String result;
-                    if (isBlank(inputText)) {
+                    if (isNotBlank(inputText)) {
                         result = contentCreationService.executePromptOnText(fullPrompt, inputText, 0);
                     } else {
                         result = contentCreationService.executePrompt(fullPrompt, 0);
