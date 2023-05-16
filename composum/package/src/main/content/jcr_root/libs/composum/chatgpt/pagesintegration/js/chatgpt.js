@@ -22,7 +22,8 @@
                 markdown: '/bin/cpm/platform/chatgpt/approximated.markdown',
                 translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html',
                 categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
-                categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html'
+                categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html',
+                createDialog: '/bin/cpm/platform/chatgpt/dialog.creationDialog.html'
             }
         };
 
@@ -34,6 +35,8 @@
             $translationButtons.click(chatgpt.openTranslateDialog);
             let $categorizeButtons = $element.find('.widget-chatgptaction.action-pagecategories');
             $categorizeButtons.click(chatgpt.openCategorizeDialog);
+            let $createButtons = $element.find('.widget-chatgptaction.action-create');
+            $createButtons.click(chatgpt.openCreationDialog);
         }
 
         /**
@@ -294,6 +297,25 @@
             }
 
         });
+
+        chatgpt.openCreationDialog = function (event) {
+            let $target = $(event.target);
+            var path = $target.data('path');
+            var property = $target.data('property');
+            var propertypath = $target.data('propertypath');
+            var url = chatgpt.const.url.createDialog + core.encodePath(path + '/' + property) +
+                "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
+            core.openFormDialog(url, chatgpt.CreateDialog, {outputfield: chatgpt.searchInput($target)});
+        }
+
+        chatgpt.CreateDialog = core.components.FormDialog.extend({
+
+            initialize: function (options) {
+                core.components.FormDialog.prototype.initialize.apply(this, [options]);
+            },
+
+        });
+
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
