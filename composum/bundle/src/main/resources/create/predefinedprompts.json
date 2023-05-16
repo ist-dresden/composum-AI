@@ -3,7 +3,9 @@
   "Summarize": "Please summarize the text.",
   "Introduction": "Please write an introduction for the text.",
   "Conclusion": "Please write a conclusion for the text.",
+  "Expand": "Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present.",
   "Headline": "Please write a headline for the text. Print just the raw headline, no explanations and no quotes.",
   "10 Headlines": "Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes.",
-  "10 Headlines + Subheadline": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes."
+  "10 Headlines + Subheadline": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes.",
+  "Question": "Please answer the following question based on the given text:\n"
 }

@@ -186,12 +186,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             trynumber = trynumber + 1;
             delay = recalculateDelay(response, delay);
             // that normally shouldn't happen except in tests because of rate limiting, so we log a warning
-            LOG.warn("Got 429 response from GPT, waiting {} ms: {}", delay, response.body());
+            LOG.warn("Got error response from GPT, waiting {} ms: {}", delay, response != null ? response.body() : "(no response)");
             Thread.sleep(delay);
         }
 
-        LOG.error("Got too many 429 responses from GPT, giving up.", response.body());
-        throw new GPTException("Got too many 429 responses from GPT: " + response.body());
+        LOG.error("Got too many 429 / error responses from GPT, giving up.", response.body());
+        throw new GPTException("Got too many 429 / error responses from GPT: " + response.body());
     }
 
     /**

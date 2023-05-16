@@ -341,7 +341,8 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
-            String prompt = status.getRequiredParameter(PARAMETER_PROMPT, Pattern.compile(".*\\S.*"), "No prompt given");
+            String prompt = status.getRequiredParameter(PARAMETER_PROMPT,
+                    Pattern.compile("(?s).*\\S.*"), "No prompt given");
             String textLength = request.getParameter("textLength");
             String inputPath = request.getParameter("inputPath");
             String inputText = request.getParameter("inputText");
