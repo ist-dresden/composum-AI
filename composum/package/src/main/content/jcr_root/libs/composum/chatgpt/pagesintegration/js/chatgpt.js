@@ -358,9 +358,14 @@
                     this.$alert.text('Bug, please report: no widget found for ' + this.$outputfield);
                 }
 
-                let laststate = chatgpt.createDialogStates[this.componentPropertyPath];
-                if (laststate) {
-                    this.restoreStateFromMap(laststate);
+                this.history = chatgpt.createDialogStates[this.componentPropertyPath];
+                if (!this.history) {
+                    this.history = [];
+                    chatgpt.createDialogStates[this.componentPropertyPath] = this.history;
+                }
+                this.historyPosition = this.history.length - 1;
+                if (this.historyPosition >= 0) {
+                    this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
             },
 
@@ -376,7 +381,13 @@
             },
 
             saveState : function() {
-                chatgpt.createDialogStates[this.componentPropertyPath] = this.makeSaveStateMap();
+                // save if we are at the last position and the current state is different from the last saved state
+                let currentState = this.makeSaveStateMap();
+                let lastSavedState = this.history[this.historyPosition];
+                if (!_.isEqual(currentState, lastSavedState)) {
+                    this.history.push(currentState);
+                    this.historyPosition = this.history.length - 1;
+                }
             },
 
             /** Restores the state of this dialog from the given map. */
@@ -409,11 +420,20 @@
             },
 
             backButtonClicked: function (event) {
-                alert('Back button clicked - not implemented yet');
+                if (this.historyPosition == this.history.length - 1) {
+                    this.saveState();
+                }
+                if (this.historyPosition > 0) {
+                    this.historyPosition = this.historyPosition - 1;
+                    this.restoreStateFromMap(this.history[this.historyPosition]);
+                }
             },
 
             forwardButtonClicked: function (event) {
-                alert('Forward button clicked - not implemented yet');
+                if (this.historyPosition < this.history.length - 1) {
+                    this.historyPosition = this.historyPosition + 1;
+                    this.restoreStateFromMap(this.history[this.historyPosition]);
+                }
             },
 
             setLoading(loading) {
@@ -428,6 +448,9 @@
             generateButtonClicked: function (event) {
                 event.preventDefault();
                 this.setLoading(true);
+                if (this.$outputField.val()) {
+                    this.saveState();
+                }
 
                 let predefinedPrompt = this.$predefinedPrompts.val();
                 let contentSelect = this.$contentSelect.val();
