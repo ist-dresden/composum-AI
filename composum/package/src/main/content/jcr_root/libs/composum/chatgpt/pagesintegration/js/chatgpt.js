@@ -308,14 +308,17 @@
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
             core.openFormDialog(url, chatgpt.CreateDialog, {
                 outputfield: chatgpt.searchInput($target),
-                componentPath: path, pagePath: pagePath
+                componentPath: path, pagePath: pagePath, componentPropertyPath : path + '/' + property
             });
         }
+
+        /** Maps widget paths to the saved state for the dialog. */
+        chatgpt.createDialogStates = {};
 
         /**
          * Dialog for categorize - giving a page categories.
          * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
-         * @param options{outputfield, componentPath, pagePath}
+         * @param options{outputfield, componentPath, pagePath, componentPropertyPath}
          */
         chatgpt.CreateDialog = core.components.FormDialog.extend({
 
@@ -325,6 +328,7 @@
                 this.widget = core.widgetOf(this.$outputfield);
                 this.componentPath = options.componentPath;
                 this.pagePath = options.pagePath;
+                this.componentPropertyPath = options.componentPropertyPath;
 
                 this.$predefinedPrompts = this.$el.find('.predefined-prompts');
                 this.$contentSelect = this.$el.find('.content-selector');
@@ -338,6 +342,7 @@
                 this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
                 this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));
                 this.$el.find('.generate-button').click(_.bind(this.generateButtonClicked, this));
+                this.$el.find('.reset-button').click(_.bind(this.resetButtonClicked, this));
 
                 this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
                 this.$prompt.change(_.bind(this.promptChanged, this));
@@ -345,12 +350,49 @@
                 // bind buttons replace-button and append-button
                 this.$el.find('.replace-button').click(_.bind(this.replaceButtonClicked, this));
                 this.$el.find('.append-button').click(_.bind(this.appendButtonClicked, this));
+                this.$el.find('.cancel-button').click(_.bind(this.cancelButtonClicked, this));
 
                 if (!this.widget) {
                     console.log('No widget found for ', this.$outputfield);
                     this.$alert.show();
                     this.$alert.text('Bug, please report: no widget found for ' + this.$outputfield);
                 }
+
+                let laststate = chatgpt.createDialogStates[this.componentPropertyPath];
+                if (laststate) {
+                    this.restoreStateFromMap(laststate);
+                }
+            },
+
+            /** Creates a map that saves the content of all fields of this dialog. */
+            makeSaveStateMap : function() {
+                let map = {};
+                map['predefinedPrompts'] = this.$predefinedPrompts.val();
+                map['contentSelect'] = this.$contentSelect.val();
+                map['textLength'] = this.$textLength.val();
+                map['prompt'] = this.$prompt.val();
+                map['outputField'] = this.$outputField.val();
+                return map;
+            },
+
+            saveState : function() {
+                chatgpt.createDialogStates[this.componentPropertyPath] = this.makeSaveStateMap();
+            },
+
+            /** Restores the state of this dialog from the given map. */
+            restoreStateFromMap : function(map) {
+                this.$predefinedPrompts.val(map['predefinedPrompts']);
+                this.$contentSelect.val(map['contentSelect']);
+                this.$textLength.val(map['textLength']);
+                this.$prompt.val(map['prompt']);
+                this.$outputField.val(map['outputField']);
+            },
+
+            /** Button 'Reset' was clicked. */
+            resetButtonClicked: function (event) {
+                event.preventDefault();
+                this.restoreStateFromMap({});
+                return false;
             },
 
             predefinedPromptsChanged: function (event) {
@@ -465,6 +507,13 @@
                 }
                 this.$el.modal('hide');
                 this.widget.grabFocus();
+                return false;
+            },
+
+            cancelButtonClicked: function (event) {
+                event.preventDefault();
+                this.saveState();
+                this.$el.modal('hide');
                 return false;
             }
 

@@ -71,6 +71,7 @@
                                             class="fa fa-2x fa-spinner fa-pulse fa-fw"></i></div>
                                 </div>
                                 <div class="col-md-6 text-right">
+                                    <button type="button" class="btn btn-secondary reset-button">Reset</button>
                                     <button type="button" class="btn btn-secondary back-button">Back</button>
                                     <button type="button" class="btn btn-secondary forward-button">Forward</button>
                                 </div>
