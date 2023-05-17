@@ -16,16 +16,24 @@
     (function (chatgpt, dialogs, pages, core, components) {
         'use strict';
 
-        chatgpt.const = {
-            url: {
-                authoring: '/bin/cpm/platform/chatgpt/authoring',
-                markdown: '/bin/cpm/platform/chatgpt/approximated.markdown',
-                translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html',
-                categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
-                categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html',
-                createDialog: '/bin/cpm/platform/chatgpt/dialog.creationDialog.html'
-            }
+        chatgpt.const = chatgpt.const || {};
+        chatgpt.const.url = chatgpt.const.url || {};
+        // all dialogs create their own subnodes in chatgpt.const.url to put that into several files.
+        chatgpt.const.url.general = {
+            authoring: '/bin/cpm/platform/chatgpt/authoring',
+            markdown: '/bin/cpm/platform/chatgpt/approximated.markdown',
         };
+
+        chatgpt.const.url.translate = {
+            translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html'
+        }
+        chatgpt.const.url.categorize = {
+            categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
+            categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html',
+        }
+        chatgpt.const.url.create = {
+            createDialog: '/bin/cpm/platform/chatgpt/dialog.creationDialog.html'
+        }
 
         /** Will be called from Pages after a dialog is rendered via the dialogplugins hook.
          * Thus we bind ourselves into our buttons rendered into the dialog by the labelextension.jsp . */
@@ -117,7 +125,7 @@
 
                 console.log('translate', arguments);
                 this.setTranslating();
-                let url = chatgpt.const.url.authoring + ".translate.json";
+                let url = chatgpt.const.url.general.authoring + ".translate.json";
                 core.ajaxPost(url, {
                         sourceLanguage: language,
                         path: this.$pathfield.val(),
@@ -178,7 +186,7 @@
             var path = $target.data('path');
             var property = $target.data('property');
             var propertypath = $target.data('propertypath');
-            var url = chatgpt.const.url.translationDialog + core.encodePath(path + '/' + property) +
+            var url = chatgpt.const.url.translate.translationDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
             core.openFormDialog(url, chatgpt.TranslationDialog, {outputfield: chatgpt.searchInput($target)});
         }
@@ -210,7 +218,7 @@
                     categories.push(value);
                 }
             });
-            var url = chatgpt.const.url.categorizeDialog + core.encodePath(path + '/' + property);
+            var url = chatgpt.const.url.categorize.categorizeDialog + core.encodePath(path + '/' + property);
             var urlparams = '';
             if (categories.length > 0) {
                 urlparams += "?category=" + categories.map(encodeURIComponent).join("&category=");
@@ -249,7 +257,7 @@
 
             /** Load the suggestions for categories. */
             loadSuggestions: function () {
-                var url = chatgpt.const.url.categorizeSuggestions +
+                var url = chatgpt.const.url.categorize.categorizeSuggestions +
                     core.encodePath(this.path + '/' + this.property + this.categoryparams);
                 core.getHtml(url, _.bind(this.onSuggestions, this));
             },
@@ -304,11 +312,11 @@
             let pagePath = $target.data('pagepath');
             let property = $target.data('property');
             let propertypath = $target.data('propertypath');
-            let url = chatgpt.const.url.createDialog + core.encodePath(path + '/' + property) +
+            let url = chatgpt.const.url.create.createDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
             core.openFormDialog(url, chatgpt.CreateDialog, {
                 outputfield: chatgpt.searchInput($target),
-                componentPath: path, pagePath: pagePath, componentPropertyPath : path + '/' + property
+                componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
             });
         }
 
@@ -370,7 +378,7 @@
             },
 
             /** Creates a map that saves the content of all fields of this dialog. */
-            makeSaveStateMap : function() {
+            makeSaveStateMap: function () {
                 let map = {};
                 map['predefinedPrompts'] = this.$predefinedPrompts.val();
                 map['contentSelect'] = this.$contentSelect.val();
@@ -380,7 +388,7 @@
                 return map;
             },
 
-            saveState : function() {
+            saveState: function () {
                 // save if we are at the last position and the current state is different from the last saved state
                 let currentState = this.makeSaveStateMap();
                 let lastSavedState = this.history[this.historyPosition];
@@ -391,7 +399,7 @@
             },
 
             /** Restores the state of this dialog from the given map. */
-            restoreStateFromMap : function(map) {
+            restoreStateFromMap: function (map) {
                 this.$predefinedPrompts.val(map['predefinedPrompts']);
                 this.$contentSelect.val(map['contentSelect']);
                 this.$textLength.val(map['textLength']);
@@ -468,7 +476,7 @@
                     inputText = this.$outputField.val();
                 }
 
-                let url = chatgpt.const.url.authoring + ".create.json";
+                let url = chatgpt.const.url.general.authoring + ".create.json";
                 // FIXME(hps,16.05.23) implement aborting of the request
                 core.ajaxPost(url, {
                     contentSelect: contentSelect,

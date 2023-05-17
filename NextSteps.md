@@ -21,6 +21,15 @@
 - DONE: implement ChatGPT dialog that can be called from basic text components, and gives the user the possibility to
   prompt ChatGPT
 
+##
+- Translation: german ?
+- Page assistant: writing style , grammar, recommendations
+- Creation: writing style , tone
+- Drag dialogs
+- Help page for dialog
+- titles
+- Page assistant: translate page
+
 ## Possible improvements later
 
 - use streaming responses https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.
