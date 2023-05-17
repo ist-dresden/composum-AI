@@ -22,13 +22,13 @@
   prompt ChatGPT
 
 ##
+- titles
+- Help page for dialog
 - Translation: german ?
-- Page assistant: writing style , grammar, recommendations
+- Page assistant: writing style
 - Creation: writing style , tone
 - Drag dialogs
-- Help page for dialog
-- titles
-- Page assistant: translate page
+- Page assistant: translate page , proofread, recommendations
 
 ## Possible improvements later
 

@@ -14,7 +14,7 @@
         chatgpt.const.url = chatgpt.const.url || {};
         chatgpt.const.url.categorize = {
             categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
-            categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html',
+            categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html'
         }
 
         /** Opens the categorize dialog. The current categories are not taken from the resource, but from the dialog
@@ -24,7 +24,7 @@
             let $target = $(event.target);
             var path = $target.data('path');
             var property = $target.data('property');
-            let $widget = $(event.target).closest('div.form-group');
+            let $widget = $target.closest('div.form-group');
             let $inputs = $widget.find('input[type="text"][name="category"]');
             // make an array 'categories' of the values of all inputs with name 'category'
             let categories = [];

@@ -14,7 +14,7 @@
         chatgpt.const.url = chatgpt.const.url || {};
         chatgpt.const.url.translate = {
             translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html'
-        }
+        };
 
         /**
          * Dialog for translation
@@ -40,7 +40,7 @@
                 this.$accept.click(_.bind(this.accept, this));
                 this.$languageSelects.on('change', _.bind(this.languageChanged, this));
 
-                if (this.$languageSelects.length == 1) {
+                if (this.$languageSelects.length === 1) {
                     this.translate(this.$languageSelects.first().val());
                 }
             },
@@ -69,7 +69,9 @@
                     console.error("Bug: cannot find widget for ", this.$outputfield);
                 }
                 this.$el.modal('hide');
-                widget.grabFocus();
+                if (widget) {
+                    widget.grabFocus();
+                }
                 return false;
             },
 

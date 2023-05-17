@@ -89,13 +89,13 @@
 
             /** Creates a map that saves the content of all fields of this dialog. */
             makeSaveStateMap: function () {
-                let map = {};
-                map['predefinedPrompts'] = this.$predefinedPrompts.val();
-                map['contentSelect'] = this.$contentSelect.val();
-                map['textLength'] = this.$textLength.val();
-                map['prompt'] = this.$prompt.val();
-                map['outputField'] = this.$outputField.val();
-                return map;
+                return {
+                    'predefinedPrompts': this.$predefinedPrompts.val(),
+                    'contentSelect': this.$contentSelect.val(),
+                    'textLength': this.$textLength.val(),
+                    'prompt': this.$prompt.val(),
+                    'outputField': this.$outputField.val()
+                };
             },
 
             saveState: function () {
@@ -154,7 +154,7 @@
                 }
             },
 
-            setLoading(loading) {
+            setLoading : function (loading) {
                 if (loading) {
                     this.$loading.show();
                 } else {

@@ -17,9 +17,12 @@
                 <input name="property" type="hidden" value="${model.fieldType}"/>
 
                 <div class="modal-header">
-                    <button type="button" class="close fa fa-close" data-dismiss="modal" aria-label="Close"></button>
-                    <cpn:text tagName="h4" class="modal-title dialog_title text"
-                              i18n="true">Translation Assistant</cpn:text>
+                    <button type="button" class="close fa fa-close" data-dismiss="modal"
+                            title="${cpn:i18n(slingRequest,'Close')}">
+                    </button>
+                    <cpn:text tagName="h4" class="modal-title dialog_title text" i18n="true">
+                        Translation Assistant
+                    </cpn:text>
                 </div>
                 <div class="modal-body">
                     <div class="messages">
@@ -28,8 +31,9 @@
 
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab">
-                            <cpn:text tagName="h4" class="panel-title dialog_title text"
-                                      i18n="true">Source Language</cpn:text>
+                            <cpn:text tagName="h4" class="panel-title dialog_title text" i18n="true">
+                                Source Language
+                            </cpn:text>
                         </div>
                         <div class="panel-body">
                             <div class="source-languages">
@@ -51,21 +55,27 @@
 
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab">
-                            <cpn:text tagName="h4" class="panel-title dialog_title text"
-                                      i18n="true">Translated text</cpn:text>
+                            <cpn:text tagName="h4" class="panel-title dialog_title text" i18n="true">
+                                Translated text
+                            </cpn:text>
                         </div>
                         <div class="panel-body translations">
-                            <div class="loading-curtain" style="display: none;"><i
-                                    class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
-                            <div class="translation form-group" style="display: none;"></div>
+                            <div class="loading-curtain" style="display: none;"><
+                                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"
+                                   title="${cpn:i18n(slingRequest,'Loading translation is in progress. Please wait a few seconds.')}">
+                                </i>
+                                </div>
+                                <div class="translation form-group" style="display: none;"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary accept" data-dismiss="modal" disabled>Accept</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><cpn:text
+                                i18n="true">Cancel</cpn:text></button>
+                        <button type="button" class="btn btn-primary accept" data-dismiss="modal" disabled><cpn:text
+                                i18n="true">Accept</cpn:text></button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-</cpp:element>
+    </cpp:element>

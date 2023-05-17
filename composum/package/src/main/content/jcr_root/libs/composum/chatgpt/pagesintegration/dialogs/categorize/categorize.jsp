@@ -15,7 +15,9 @@
                 <input name="path" type="hidden" value="${model.path}"/>
 
                 <div class="modal-header">
-                    <button type="button" class="close fa fa-close" data-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close fa fa-close" data-dismiss="modal"
+                            title="${cpn:i18n(slingRequest,'Close')}"
+                            aria-label="${cpn:i18n(slingRequest,'Close')}"></button>
                     <cpn:text tagName="h4" class="modal-title dialog_title text"
                               i18n="true">Page Category Suggestions</cpn:text>
                 </div>
@@ -58,18 +60,25 @@
 
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab">
-                            <cpn:text tagName="h4" class="panel-title dialog_title text"
-                                      i18n="true">Suggested Categories</cpn:text>
+                            <cpn:text
+                                    tagName="h4" class="panel-title dialog_title text"
+                                    i18n="true">Suggested Categories</cpn:text>
                         </div>
                         <div class="panel-body suggestions categorylist">
-                            <div class="loading-curtain"><i
-                                    class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
+                            <div class="loading-curtain">
+                                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"
+                                   title="${cpn:i18n(slingRequest,'Loading the suggestion for the categories. That might take a couple of seconds.')}"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary accept" data-dismiss="modal">Accept</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <cpn:text i18n="true">Cancel</cpn:text>
+                    </button>
+                    <button type="button" class="btn btn-primary accept" data-dismiss="modal">
+                        <cpn:text i18n="true">Accept</cpn:text>
+                    </button>
                 </div>
             </form>
         </div>

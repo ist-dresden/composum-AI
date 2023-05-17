@@ -8,21 +8,33 @@ Loaded from /libs/composum/pages/commons/widget/labelextension.jsp via PagesPlug
 --%><cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel" test="${model.visible}">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel"--%>
     <div class="labelextension-wrapper">
-        <c:if test="${model.translateButtonVisible}"><span
+        <c:if test="${model.translateButtonVisible}">
+            <span
                 class="widget-chatgptaction action-translate fa fa-language"
-                title="Create a translation with ChatGPT"
-                data-path="${model.path}" data-property="${model.property}" data-propertypath="${model.propertyI18nPath}"
-        ></span></c:if>
-        <c:if test="${model.contentCreationButtonVisible}"><span
+                title="${cpn:i18n(slingRequest,'Create a translation for this field with ChatGPT')}"
+                data-path="${model.path}"
+                data-property="${model.property}"
+                data-propertypath="${model.propertyI18nPath}"
+            ></span>
+        </c:if>
+        <c:if test="${model.contentCreationButtonVisible}">
+            <span
                 class="widget-chatgptaction action-create fa fa-magic"
-                title="Create content with ChatGPT"
-                data-path="${model.path}" data-property="${model.property}" data-propertypath="${model.propertyI18nPath}"
+                title="${cpn:i18n(slingRequest,'Create content for this field with ChatGPT')}"
+                data-path="${model.path}"
+                data-property="${model.property}"
+                data-propertypath="${model.propertyI18nPath}"
                 data-pagepath="${model.pagePath}"
-        ></span></c:if>
-        <c:if test="${model.pageCategoriesButtonVisible}"><span
+            ></span>
+        </c:if>
+        <c:if test="${model.pageCategoriesButtonVisible}">
+            <span
                 class="widget-chatgptaction action-pagecategories fa fa-tags"
-                title="Suggest categories with ChatGPT"
-                data-path="${model.path}" data-property="${model.property}" data-propertypath="${model.propertyI18nPath}"
-        ></span></c:if>
+                title="${cpn:i18n(slingRequest,'Suggest categories for this page from the page content using ChatGPT')}"
+                data-path="${model.path}"
+                data-property="${model.property}"
+                data-propertypath="${model.propertyI18nPath}"
+            ></span>
+        </c:if>
     </div>
 </cpp:element>
