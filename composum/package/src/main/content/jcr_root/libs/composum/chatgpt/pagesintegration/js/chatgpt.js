@@ -46,11 +46,14 @@
             console.error('BUG! searchInput: no input found', $labelextension);
         }
 
-        chatgpt.AbstractChatGPTDialog = core.components.FormDialog.extend({
-            initialize: function (options) {
-                core.components.FormDialog.prototype.initialize.apply(this, [options]);
-            }
-        });
+        chatgpt.initButtons = function($el) {
+            console.log('initButtons', $el);
+            $el.find(".maximize, .restore").click(function(event) {
+                event.preventDefault();
+                $el.toggleClass("dialog-size-maximized");
+                return false;
+            });
+        }
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 

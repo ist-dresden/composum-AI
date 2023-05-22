@@ -42,6 +42,7 @@
 
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
+                chatgpt.initButtons(this.$el);
                 this.$outputfield = options.outputfield;
                 this.widget = core.widgetOf(this.$outputfield);
                 this.componentPath = options.componentPath;
