@@ -16,7 +16,7 @@
 
                 <div class="modal-header">
                     <button type="button" class="close fa fa-close" data-dismiss="modal"
-                            title="${cpn:i18n(slingRequest,'Close')}"
+                            title="${cpn:i18n(slingRequest,'Close the dialog')}"
                             aria-label="${cpn:i18n(slingRequest,'Close')}"></button>
                     <cpn:text tagName="h4" class="modal-title dialog_title text"
                               i18n="true">Page Category Suggestions</cpn:text>
@@ -26,7 +26,9 @@
                         <div class="alert" style="display: none;"></div>
                         <cpn:text class="text alert alert-light" i18n="true">
                             This dialog helps set or update page categories.
-                            Review 'Current Categories' and consider 'Suggested Categories' from AI.
+                            You can review the currently selected categories and you can consider the categories
+                            suggested by the AI based on the current page text. Suggested categories that are
+                            already in the current categories are preselected.
                             Select desired categories, deselect unwanted ones.
                             Click 'Accept' to use the changes, 'Cancel' to discard.</cpn:text>
                     </div>

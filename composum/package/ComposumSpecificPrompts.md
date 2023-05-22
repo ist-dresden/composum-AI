@@ -1,6 +1,6 @@
 # Prompts for ChatGPT for Composum specific things
 
-## Title attributes / i18n
+## Title attributes / i18n ( promptlib:composum.i18n )
 
 Add title attributes for the UI elements that explain their function.
 Please wrap them into the function cpn:i18n , for example instead of `title="Close"`

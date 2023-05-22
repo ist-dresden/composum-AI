@@ -23,6 +23,7 @@
 
 ##
 - titles
+- possibly: edit text in translation
 - Help page for dialog
 - Translation: german ?
 - Page assistant: writing style

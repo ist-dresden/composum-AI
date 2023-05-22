@@ -18,7 +18,7 @@
 
                 <div class="modal-header">
                     <button type="button" class="close fa fa-close" data-dismiss="modal"
-                            title="${cpn:i18n(slingRequest,'Close')}">
+                            title="${cpn:i18n(slingRequest,'Close the dialog')}">
                     </button>
                     <cpn:text tagName="h4" class="modal-title dialog_title text" i18n="true">
                         Translation Assistant
@@ -29,7 +29,8 @@
                         <div class="alert" style="display: none;"></div>
                     </div>
 
-                    <div class="panel panel-default">
+                    <div class="panel panel-default"
+                         title="${cpn:i18n(slingRequest,'This shows the source of the translation; if there are multiple source languages with texts for this property, you can select the source language here. Selecting a source language triggers the translation process.')}">
                         <div class="panel-heading" role="tab">
                             <cpn:text tagName="h4" class="panel-title dialog_title text" i18n="true">
                                 Source Language
@@ -53,7 +54,8 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-default">
+                    <div class="panel panel-default"
+                         title="${cpn:i18n(slingRequest,'This ')}">
                         <div class="panel-heading" role="tab">
                             <cpn:text tagName="h4" class="panel-title dialog_title text" i18n="true">
                                 Translated text
@@ -64,18 +66,20 @@
                                 <i class="fa fa-spinner fa-pulse fa-3x fa-fw"
                                    title="${cpn:i18n(slingRequest,'Loading translation is in progress. Please wait a few seconds.')}">
                                 </i>
-                                </div>
-                                <div class="translation form-group" style="display: none;"></div>
                             </div>
+                            <div class="translation form-group" style="display: none;"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><cpn:text
-                                i18n="true">Cancel</cpn:text></button>
-                        <button type="button" class="btn btn-primary accept" data-dismiss="modal" disabled><cpn:text
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><cpn:text
+                            i18n="true">Cancel</cpn:text></button>
+                    <button type="button" class="btn btn-primary accept" data-dismiss="modal" disabled
+                            title="${cpn:i18n(slingRequest,'Replaces the text for the property in the component editor by the given translation.')}">
+                        <cpn:text
                                 i18n="true">Accept</cpn:text></button>
-                    </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
-    </cpp:element>
+    </div>
+</cpp:element>
