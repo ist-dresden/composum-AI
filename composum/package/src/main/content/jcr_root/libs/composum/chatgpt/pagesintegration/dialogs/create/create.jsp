@@ -6,16 +6,14 @@
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"
              cssBase="composum-chatgpt-pagesintegration-dialogs-create"
-             cssAdd="dialog modal fade" role="dialog">
+             cssAdd="dialog modal fade composum-chatgpt-dialog" role="dialog">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">
             <form class="widget-form">
                 <input name="_charset_" type="hidden" value="UTF-8"/>
                 <div class="modal-header">
-                    <button type="button" class="close fa fa-close" data-dismiss="modal"
-                            aria-label="${cpn:i18n(slingRequest,'Close')}"
-                            title="${cpn:i18n(slingRequest,'Close the dialog')}"></button>
+                    <sling:call script="buttons.jsp"/>
                     <cpn:text tagName="h4" class="modal-title dialog_title text" i18n="true">
                         Content creation assistant
                     </cpn:text>

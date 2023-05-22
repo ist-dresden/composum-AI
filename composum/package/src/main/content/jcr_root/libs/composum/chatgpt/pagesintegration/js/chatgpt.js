@@ -46,6 +46,12 @@
             console.error('BUG! searchInput: no input found', $labelextension);
         }
 
+        chatgpt.AbstractChatGPTDialog = core.components.FormDialog.extend({
+            initialize: function (options) {
+                core.components.FormDialog.prototype.initialize.apply(this, [options]);
+            }
+        });
+
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);

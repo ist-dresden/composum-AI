@@ -3,7 +3,8 @@
 @import "variables";
 @import "mixins";
 
-.composum-chatgpt-pagesintegration-dialogs-translate {
+// common for all dialogs
+.composum-chatgpt-dialog {
 
     z-index: $chatgpt-layer;
 
@@ -14,6 +15,46 @@
             @include dialog-label-font;
         }
     }
+
+    .framebutton {
+        float: right;
+        margin-top: -2px;
+        padding: 0;
+        // top: $bootstrap-spacing-v;
+        // right: $bootstrap-spacing-h;
+        border: none;
+        background: none;
+        @include icon-button;
+        color: #aaa;
+        opacity: 1;
+    }
+
+    .framebutton.restore {
+        display: none;
+    }
+
+}
+
+.composum-chatgpt-dialog.dialog-size-maximized {
+
+    .framebutton.restore {
+        display: inline-block;
+    }
+
+    .framebutton.mazimize {
+        display: none;
+    }
+
+    .modal-dialog {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+}
+
+.composum-chatgpt-pagesintegration-dialogs-translate {
 
     .language-select {
         float: left;
@@ -31,16 +72,6 @@
 }
 
 .composum-chatgpt-pagesintegration-dialogs-categorize {
-
-    z-index: $chatgpt-layer;
-
-    .modal-content {
-        @include dialog-input-font;
-
-        label {
-            @include dialog-label-font;
-        }
-    }
 
     .loading-curtain {
         width: 100%;
@@ -62,19 +93,9 @@
 
 .composum-chatgpt-pagesintegration-dialogs-create {
 
-    z-index: $chatgpt-layer;
-
-    .modal-content {
-        @include dialog-input-font;
-
-        label {
-            @include dialog-label-font;
-        }
-    }
-
     .generate-container {
-      display: flex;
-      align-items: center;
+        display: flex;
+        align-items: center;
     }
 
     .loading-indicator {

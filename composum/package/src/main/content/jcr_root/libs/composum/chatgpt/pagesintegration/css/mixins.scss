@@ -1,5 +1,7 @@
 @charset "UTF-8";
 
+@import "variables";
+
 @mixin font($family, $size) {
     font-family: $family, sans-serif;
     font-size: $size;
@@ -10,6 +12,22 @@
 
 @mixin default-font {
     @include font('robotolight', $default-font-size);
+}
+
+@mixin text-font {
+    @include font('robotolight', $text-font-size);
+}
+
+@mixin tree-font {
+    @include font('robotolight', $tree-font-size);
+}
+
+@mixin title-font {
+    @include font('robotolight', $title-font-size);
+}
+
+@mixin hint-font {
+    @include font('robotolight', $hint-font-size);
 }
 
 @mixin dialog-font {
@@ -24,18 +42,361 @@
     @include font('robotolight', $dialog-input-font-size);
 }
 
+@mixin monospace {
+    font-family: monospace;
+    font-size: $edit-mono-font-size;
+}
+
+@mixin button {
+    width: $edit-actions-button-size;
+    height: $edit-actions-button-size;
+    font-size: $edit-actions-icon-font-size;
+    line-height: $edit-actions-button-size;
+    font-weight: normal;
+    text-shadow: none;
+    text-decoration: none;
+    text-align: center;
+}
+
+@mixin main-selection-background {
+    background: $tools-pane-main-selection-color;
+    background: -moz-linear-gradient(top, #3392e3 0%, #3392e3 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3392e3), color-stop(100%, #3392e3));
+    background: -webkit-linear-gradient(top, #3392e3 0%, #3392e3 100%);
+    background: -o-linear-gradient(top, #3392e3 0%, #3392e3 100%);
+    background: -ms-linear-gradient(top, #3392e3 0%, #3392e3 100%);
+    background: linear-gradient(to bottom, #3392e3 0%, #3392e3 100%);
+}
+
+@mixin secondary-selection-background {
+    background: $tools-pane-sec-selection-color;
+    background: -moz-linear-gradient(top, #929292 0%, #929292 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #929292), color-stop(100%, #929292));
+    background: -webkit-linear-gradient(top, #929292 0%, #929292 100%);
+    background: -o-linear-gradient(top, #929292 0%, #929292 100%);
+    background: -ms-linear-gradient(top, #929292 0%, #929292 100%);
+    background: linear-gradient(to bottom, #929292 0%, #929292 100%);
+}
+
+@mixin icon-button {
+    @include button;
+    font-family: "FontAwesome";
+}
+
+@mixin tools-input {
+    border-color: #888;
+    background-image: linear-gradient(to bottom, #888 0, #666 100%);
+    background-color: #666;
+    color: #ddd;
+}
+
+@mixin tools-button {
+    @include icon-button;
+    width: $edit-actions-button-size + 4;
+    height: $edit-actions-button-size;
+    font-size: $edit-actions-icon-font-size - 2;
+    line-height: $edit-actions-button-size - 2;
+    padding: 1px 1px 0;
+    @include tools-input;
+    &.active,
+    &:active,
+    &:hover {
+        background-image: linear-gradient(to bottom, #aaa 0, #ccc 100%);
+        background-color: #ccc;
+        color: #444;
+    }
+
+    &.active:hover {
+        background-image: linear-gradient(to bottom, #888 0, #666 100%);
+        background-color: #666;
+        color: #ddd;
+    }
+}
+
 @mixin edit-label-font {
     font-family: $edit-label-font-family;
     font-size: $edit-label-font-size;
 }
 
 @mixin edit-hint-font {
-    font-family: $edit-hint-font-family;
+    font-family: $edit-label-font-family;
     font-size: $edit-hint-font-size;
+}
+
+@mixin edit-handle-color {
+    background-color: $edit-handle-background;
+    mix-blend-mode: difference;
+}
+
+@mixin edit-select-color {
+    background-color: $edit-select-background;
+    color: $edit-select-foreground;
+    mix-blend-mode: difference;
+}
+
+@mixin edit-select-active-color {
+    background-color: $edit-select-background;
+    color: $edit-select-foreground;
+    mix-blend-mode: normal;
+}
+
+@mixin clear-after {
+    &:after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+}
+
+@mixin full-size {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+@mixin aspect-ratio-wrapper($width, $height) {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+
+    &:before {
+        content: "";
+        display: block;
+        padding-top: $height / $width * 100%;
+    }
+}
+
+@mixin aspect-ratio-element {
+    @include full-size;
+}
+
+@mixin trapezoid-base {
+
+    &:before, &:after {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        content: '';
+    }
+}
+
+@mixin trapezoid-top($color, $width, $height) {
+    @include trapezoid-base;
+
+    &:before, &:after {
+        top: 0;
+        border-color: $color transparent transparent transparent;
+    }
+
+    &:before {
+        border-width: $height 0 0 $width;
+        left: -$width;
+    }
+
+    &:after {
+        border-width: $height $width 0 0;
+        right: -$width;
+    }
+}
+
+@mixin trapezoid-bottom($color, $width, $height) {
+    @include trapezoid-base;
+
+    &:before, &:after {
+        top: 0;
+        border-color: transparent transparent $color transparent;
+    }
+
+    &:before {
+        border-width: 0 0 $height $width;
+        left: -$width + 0.3;
+    }
+
+    &:after {
+        border-width: 0 $width $height 0;
+        right: -$width + 0.3;
+    }
+}
+
+@mixin trapezoid-left($color, $width, $height) {
+    @include trapezoid-base;
+
+    &:before, &:after {
+        left: 0;
+        border-color: transparent transparent transparent $color;
+    }
+
+    &:before {
+        border-width: $height 0 0 $width;
+        top: -$height;
+    }
+
+    &:after {
+        border-width: 0 0 $height $width;
+        bottom: -$height;
+    }
+}
+
+@mixin trapezoid-right($color, $width, $height) {
+    @include trapezoid-base;
+
+    &:before, &:after {
+        right: 0;
+        border-color: transparent $color transparent transparent;
+    }
+
+    &:before {
+        border-width: $height $width 0 0;
+        top: -$height;
+    }
+
+    &:after {
+        border-width: 0 $width $height 0;
+        bottom: -$height;
+    }
+}
+
+@mixin tab-base($color) {
+    list-style: none;
+    display: inline-block;
+    position: relative;
+    margin: 5px 5px 0;
+    height: $tabbed-widget-tab-height;
+    line-height: $tabbed-widget-tab-height;
+    background-color: $color;
+}
+
+@mixin tab-top($color) {
+    @include trapezoid-bottom($color, 12px, $tabbed-widget-tab-height);
+}
+
+@mixin scollbars($size, $foreground, $background) {
+    scrollbar-color: dark;
+    scrollbar-width: thin;
+    &::-webkit-scrollbar {
+        width: $size;
+        height: $size;
+    }
+    &::-webkit-scrollbar-thumb {
+        border: 2px solid $background;
+        border-radius: $size / 2;
+        background: $foreground;
+    }
+    &::-webkit-scrollbar-track {
+        border-radius: $size / 2;
+        background: $background;
+    }
+    &::-webkit-scrollbar-corner {
+        background: $background;
+    }
+}
+
+@mixin scrolloption($foreground, $background) {
+    overflow: auto;
+    @include scollbars($tools-pane-padding, $foreground, $background);
+}
+
+@mixin scrollframe {
+    @include scrolloption($page-frame-scrollbar-fg, $page-frame-scrollbar-bg);
+}
+
+@mixin scrolltools {
+    @include scrolloption($tools-pane-scrollbar-fg, $tools-pane-scrollbar-bg);
+}
+
+/*
+ * media queries
+ */
+
+@mixin screen-size-xl-min {
+    @media (min-width: #{$screen-size-xl}) {
+        @content;
+    }
+}
+
+@mixin screen-size-l-xl {
+    @media (min-width: #{$screen-size-l}) and (max-width: #{$screen-size-xl - 1px}) {
+        @content;
+    }
+}
+
+@mixin screen-size-l-min {
+    @media (min-width: #{$screen-size-l}) {
+        @content;
+    }
+}
+
+@mixin screen-size-m-l {
+    @media (min-width: #{$screen-size-m}) and (max-width: #{$screen-size-l - 1px}) {
+        @content;
+    }
+}
+
+@mixin screen-size-m-min {
+    @media (min-width: #{$screen-size-m}) {
+        @content;
+    }
+}
+
+@mixin screen-size-s-m {
+    @media (min-width: #{$screen-size-s}) and (max-width: #{$screen-size-m - 1px}) {
+        @content;
+    }
+}
+
+@mixin screen-size-s-min {
+    @media (min-width: #{$screen-size-s}) {
+        @content;
+    }
+}
+
+@mixin screen-size-s-max {
+    @media (max-width: #{$screen-size-s - 1px}) {
+        @content;
+    }
+}
+
+@mixin screen-size-xs-s {
+    @media (min-width: #{$screen-size-xs}) and (max-width: #{$screen-size-s - 1px}) {
+        @content;
+    }
 }
 
 @mixin screen-size-xs-max {
     @media (max-width: #{$screen-size-xs - 1px}) {
+        @content;
+    }
+}
+
+@mixin screen-size-xxs-xs {
+    @media (min-width: #{$screen-size-xxs}) and (max-width: #{$screen-size-xs - 1px}) {
+        @content;
+    }
+}
+
+@mixin screen-size-xxs-max {
+    @media (max-width: #{$screen-size-xxs - 1px}) {
+        @content;
+    }
+}
+
+@mixin desktop {
+    @include screen-size-m-min {
+        @content;
+    }
+}
+
+@mixin tablet {
+    @include screen-size-s-m {
+        @content;
+    }
+}
+
+@mixin mobile {
+    @include screen-size-xs-max {
         @content;
     }
 }

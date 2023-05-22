@@ -6,7 +6,7 @@
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTTranslationDialogModel"
              cssBase="composum-chatgpt-pagesintegration-dialogs-translate"
-             id="chatgpt-translate-dialog" cssAdd="dialog modal fade" role="dialog">
+             id="chatgpt-translate-dialog" cssAdd="dialog modal fade composum-chatgpt-dialog" role="dialog">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTTranslationDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">
@@ -17,9 +17,7 @@
                 <input name="property" type="hidden" value="${model.fieldType}"/>
 
                 <div class="modal-header">
-                    <button type="button" class="close fa fa-close" data-dismiss="modal"
-                            title="${cpn:i18n(slingRequest,'Close the dialog')}">
-                    </button>
+                    <sling:call script="buttons.jsp"/>
                     <cpn:text tagName="h4" class="modal-title dialog_title text" i18n="true">
                         Translation Assistant
                     </cpn:text>

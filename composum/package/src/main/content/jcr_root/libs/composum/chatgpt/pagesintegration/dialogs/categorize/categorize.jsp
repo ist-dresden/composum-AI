@@ -6,7 +6,7 @@
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTCategorizeDialogModel"
              cssBase="composum-chatgpt-pagesintegration-dialogs-categorize"
-             id="chatgpt-categorize-dialog" cssAdd="dialog modal fade" role="dialog">
+             id="chatgpt-categorize-dialog" cssAdd="dialog modal fade composum-chatgpt-dialog" role="dialog">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTCategorizeDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">
@@ -15,9 +15,7 @@
                 <input name="path" type="hidden" value="${model.path}"/>
 
                 <div class="modal-header">
-                    <button type="button" class="close fa fa-close" data-dismiss="modal"
-                            title="${cpn:i18n(slingRequest,'Close the dialog')}"
-                            aria-label="${cpn:i18n(slingRequest,'Close')}"></button>
+                    <sling:call script="buttons.jsp"/>
                     <cpn:text tagName="h4" class="modal-title dialog_title text"
                               i18n="true">Page Category Suggestions</cpn:text>
                 </div>
