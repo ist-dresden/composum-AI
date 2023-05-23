@@ -48,12 +48,26 @@
 
         chatgpt.initButtons = function($el) {
             console.log('initButtons', $el);
-            $el.find(".maximize, .restore").click(function(event) {
+            $el.find("button.maximize, .restore").click(function(event) {
                 event.preventDefault();
                 $el.toggleClass("dialog-size-maximized");
                 return false;
             });
+            $el.find("button.help").click(chatgpt.openHelpDialog.bind(this));
         }
+
+        chatgpt.openHelpDialog = function(event) {
+            event.preventDefault();
+            let $button = $(event.target);
+            let url = $button.data('helpurl');
+            core.openFormDialog(url, chatgpt.HelpDialog);
+            return false;
+        }
+
+        /** A dialog showing help. */
+        chatgpt.HelpDialog = components.LoadedDialog.extend({
+            // no functions so far.
+        });
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
