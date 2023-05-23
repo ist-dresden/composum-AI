@@ -109,4 +109,8 @@
 
     z-index: $chatgpt-help-layer;
 
+    .help {
+        display: none;
+    }
+
 }

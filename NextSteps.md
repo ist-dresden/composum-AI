@@ -22,14 +22,16 @@
   prompt ChatGPT
 
 ##
-- titles
-- possibly: edit text in translation
+- DONE: titles
 - Help page for dialog
+- possibly: edit text in translation
 - Translation: german ?
 - Page assistant: writing style
 - Creation: writing style , tone
 - Drag dialogs
-- Page assistant: translate page , proofread, recommendations
+- Page assistant: translate page , proofread, recommendations, 
+  - compare /libs/composum/pages/stage/tools/componentHelp 
+  - pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/tools/component/help/context/content.jsp
 
 ## Possible improvements later
 
