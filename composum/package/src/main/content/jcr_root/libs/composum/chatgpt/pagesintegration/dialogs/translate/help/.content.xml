@@ -1,21 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:cpp="http://sling.composum.com/pages/1.0"
-          xmlns:jcr="http://www.jcp.org/jcr/1.0"
-          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
-          jcr:title="Translation Assistant Help"
-          jcr:primaryType="cpp:Page">
+        xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+        jcr:primaryType="cpp:Page">
     <jcr:content
             jcr:primaryType="cpp:PageContent"
             sling:resourceType="composum/pages/stage/edit/tools/component/help/page"
+            jcr:title="Translation Assistant Help"
             template="/libs/composum/pages/stage/edit/tools/component/help/template">
         <main
                 jcr:primaryType="cpp:Container"
                 sling:resourceType="composum/pages/stage/edit/tools/component/help/parsys">
-            <text_01
-                    jcr:primaryType="cpp:Element"
-                    sling:resourceType="composum/pages/components/element/text"
-                    text="HELPTEXT">
-            </text_01>
+            <section_1039340572
+                    jcr:primaryType="cpp:Container"
+                    sling:resourceType="composum/pages/components/container/section"
+                    jcr:title="Usage of the translation dialog">
+                <text
+                        jcr:primaryType="cpp:Element"
+                        sling:resourceType="composum/pages/components/element/text"
+                        text="&lt;p>The translation dialog generates a suggestion for translating the text of the currently edited component property into the currently selected language. If the property has texts in several other languages, all of them are offered as source for the translation in the source language section and the desired source can be selected. This selection triggers the translation process. If there is only one source language available, the translation using it's text is triggered immediately.&lt;/p>&lt;p>The 'Accept' button will overwrite the value in the property editor in the currently edited component with the translation suggestion. It will not yet be saved into the page, and can be edited freely before saving.&lt;/p>">
+                    <i18n
+                            jcr:primaryType="nt:unstructured">
+                        <de
+                                jcr:primaryType="nt:unstructured"
+                                text="&lt;p>Der Übersetzungsdialog generiert einen Vorschlag zur Übersetzung des Textes der gerade bearbeiteten Komponenteneigenschaft in die aktuell ausgewählte Sprache. Wenn die Eigenschaft Texte in mehreren anderen Sprachen hat, werden alle als Quelle für die Übersetzung im Quellensprachenbereich angeboten, und die gewünschte Quelle kann ausgewählt werden. Diese Auswahl löst den Übersetzungsprozess aus. Wenn nur eine Quellsprache verfügbar ist, wird die Übersetzung unter Verwendung ihres Textes sofort ausgelöst.&lt;/p>&lt;p>Die Schaltfläche 'Akzeptieren' überschreibt den Wert im Eigenschafteneditor der gerade bearbeiteten Komponente mit dem Übersetzungsvorschlag. Es wird noch nicht in die Seite gespeichert und kann vor dem Speichern frei bearbeitet werden.&lt;/p>"/>
+                    </i18n>
+                </text>
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Verwendung des Übersetzungsfensters"/>
+                </i18n>
+            </section_1039340572>
+            <section
+                    jcr:primaryType="cpp:Container"
+                    sling:resourceType="composum/pages/components/container/section"
+                    jcr:title="Caution"
+                    level="warning">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Achtung"/>
+                </i18n>
+                <text_01
+                        jcr:primaryType="cpp:Element"
+                        sling:resourceType="composum/pages/components/element/text"
+                        text="&lt;p>As with all artificial intelligence based services, please be aware that AIs currently sometimes create content that is wrong though it might even look right on the first glance. Please do never use AI generated content without manually checking it.&lt;/p>">
+                    <i18n
+                            jcr:primaryType="nt:unstructured">
+                        <de
+                                jcr:primaryType="nt:unstructured"
+                                text="&lt;p>Wie bei allen auf künstlicher Intelligenz basierenden Diensten sei darauf hingewiesen, dass KIs manchmal Inhalte erstellen können, die falsch sind, obwohl sie auf den ersten Blick richtig aussehen könnten. Bitte verwenden Sie niemals vom AI generierte Inhalte, ohne sie manuell zu überprüfen.&lt;/p>"/>
+                    </i18n>
+                </text_01>
+            </section>
         </main>
+        <i18n
+                jcr:primaryType="nt:unstructured">
+            <de
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Hilfe zum Übersetzungsdialog"/>
+        </i18n>
     </jcr:content>
 </jcr:root>

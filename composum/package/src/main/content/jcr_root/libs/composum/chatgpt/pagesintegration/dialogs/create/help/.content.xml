@@ -2,20 +2,36 @@
 <jcr:root xmlns:cpp="http://sling.composum.com/pages/1.0"
           xmlns:jcr="http://www.jcp.org/jcr/1.0"
           xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
-          jcr:title="Content Creation Assistant Help"
-          jcr:primaryType="cpp:Page">
-    <jcr:content
-            jcr:primaryType="cpp:PageContent"
-            sling:resourceType="composum/pages/stage/edit/tools/component/help/page"
-            template="/libs/composum/pages/stage/edit/tools/component/help/template">
-        <main
-                jcr:primaryType="cpp:Container"
-                sling:resourceType="composum/pages/stage/edit/tools/component/help/parsys">
-            <text_01
-                    jcr:primaryType="cpp:Element"
-                    sling:resourceType="composum/pages/components/element/text"
-                    text="HELPTEXT">
-            </text_01>
-        </main>
-    </jcr:content>
+          jcr:primaryType="cpp:Page"
+          jcr:title="Content Creation Assistant Help">
+	<jcr:content
+			jcr:primaryType="cpp:PageContent"
+			sling:resourceType="composum/pages/stage/edit/tools/component/help/page"
+			template="/libs/composum/pages/stage/edit/tools/component/help/template">
+		<main
+				jcr:primaryType="cpp:Container"
+				sling:resourceType="composum/pages/stage/edit/tools/component/help/parsys">
+			<section_1039340572
+					jcr:primaryType="cpp:Container"
+					sling:resourceType="composum/pages/components/container/section"
+					jcr:title="Usage of the translation dialog">
+				<text
+						jcr:primaryType="cpp:Element"
+						sling:resourceType="composum/pages/components/element/text"
+						text="&lt;p>The translation dialog generates a suggestion for translating the text of the currently edited component property into the currently selected language. If the property has texts in several other languages, all of them are offered as source for the translation in the source language section and the desired source can be selected. This selection triggers the translation process. If there is only one source language available, the translation using it's text is triggered immediately.&lt;/p>&lt;p>The 'Accept' button will overwrite the value in the property editor in the currently edited component with the translation suggestion. It will not yet be saved into the page, and can be edited freely before saving.&lt;/p>">
+				</text>
+			</section_1039340572>
+			<section
+					jcr:primaryType="cpp:Container"
+					sling:resourceType="composum/pages/components/container/section"
+					jcr:title="Caution"
+					level="warning">
+				<text_01
+						jcr:primaryType="cpp:Element"
+						sling:resourceType="composum/pages/components/element/text"
+						text="&lt;p>As with all artificial intelligence based services, please be aware that AIs currently sometimes create content that is wrong though it might even look right on the first glance. Please do never use AI generated content without manually checking it.&lt;/p>">
+				</text_01>
+			</section>
+		</main>
+	</jcr:content>
 </jcr:root>

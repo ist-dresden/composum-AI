@@ -7,7 +7,6 @@
 <cpp:defineFrameObjects/>
 <cpp:model var="model" type="com.composum.pages.commons.model.Page">
     <%--@elvariable id="model" type="com.composum.pages.commons.model.Page"--%>
-    asdfasdf ${model} ${model.title}
     <div class="dialog modal fade composum-chatgpt-dialog composum-chatgpt-pagesintegration-dialogs-help in"
          role="dialog">
         <div class="modal-dialog form-panel">
