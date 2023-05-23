@@ -34,7 +34,7 @@
             $categorizeButtons.click(chatgpt.openCategorizeDialog);
             let $createButtons = $element.find('.widget-chatgptaction.action-create');
             $createButtons.click(chatgpt.openCreationDialog);
-        }
+        };
 
         /** Looks for the actual text input or textarea that belongs to the labelextension. */
         chatgpt.searchInput = function ($labelextension) {
@@ -44,30 +44,102 @@
                 return $input;
             }
             console.error('BUG! searchInput: no input found', $labelextension);
-        }
+        };
 
-        chatgpt.initButtons = function($el) {
-            console.log('initButtons', $el);
-            $el.find("button.maximize, .restore").click(function(event) {
+        chatgpt.commonDialogInit = function ($el) {
+            $el.find("button.maximize").click(chatgpt.maximizeRestoreFunc($el, true));
+            $el.find("button.restore").click(chatgpt.maximizeRestoreFunc($el, false));
+            $el.find("button.help").click(chatgpt.openHelpDialog.bind(this));
+            chatgpt.addDragging($el);
+        };
+
+        chatgpt.maximizeRestoreFunc = function ($el, ismaximize) {
+            let origcss;
+            return function(event) {
                 event.preventDefault();
                 $el.toggleClass("dialog-size-maximized");
+                // save original position and size of dialog which could have been modified by dragging
+                const $dialog = $el.find(".modal-dialog");
+                if (ismaximize) {
+                    origcss = $dialog.css(["top","left","position"]);
+                    $dialog.css("position", "");
+                    $dialog.css("left", "");
+                    $dialog.css("top", "");
+                } else {
+                    $dialog.css(origcss);
+                }
                 return false;
-            });
-            $el.find("button.help").click(chatgpt.openHelpDialog.bind(this));
-        }
+            };
+        };
 
-        chatgpt.openHelpDialog = function(event) {
+        chatgpt.openHelpDialog = function (event) {
             event.preventDefault();
             let $button = $(event.target);
             let url = $button.data('helpurl');
             core.openFormDialog(url, chatgpt.HelpDialog);
             return false;
-        }
+        };
 
         /** A dialog showing help. */
         chatgpt.HelpDialog = components.LoadedDialog.extend({
-            // no functions so far.
+
+            initialize: function (options) {
+                components.LoadedDialog.prototype.initialize.call(this, options);
+                chatgpt.commonDialogInit(this.$el);
+            }
+
         });
+
+        /** Adds dragging to the modal header. */
+        chatgpt.addDragging = function ($el) {
+            let dragging = false;
+            let offset = {};
+            let marginTop = 0;
+            const $dialog = $el.find(".modal-dialog");
+
+            $dialog.find(".modal-header").on("mousedown", function (e) {
+                if ($(e.target).closest("button").length > 0 || e.which !== 1) {
+                    return;
+                }
+
+                e.preventDefault();
+                console.log("start dragging");
+                if ($dialog.css('marginTop')) {
+                    marginTop = parseInt($dialog.css('marginTop'), 10);
+                }
+
+                $dialog.css({
+                    position: 'absolute',
+                    left: $dialog.offset().left,
+                    top: $dialog.offset().top - marginTop
+                });
+
+                dragging = true;
+                offset = {
+                    x: e.clientX - $dialog.offset().left,
+                    y: e.clientY - $dialog.offset().top - marginTop
+                };
+            });
+
+            $(document).on("mousemove", function (e) {
+                if (dragging) {
+                    e.preventDefault();
+                    console.log("continue dragging: " + e.clientX + ", " + e.clientY);
+                    $dialog.offset({
+                        left: e.clientX - offset.x,
+                        top: e.clientY - offset.y - marginTop
+                    });
+                }
+            });
+
+            $(document).on("mouseup", function (e) {
+                if (dragging) {
+                    e.preventDefault();
+                    console.log("stop dragging");
+                    dragging = false;
+                }
+            });
+        }
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 

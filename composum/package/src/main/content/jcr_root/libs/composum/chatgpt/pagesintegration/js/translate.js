@@ -25,7 +25,7 @@
 
             initialize: function (options) {
                 components.LoadedDialog.prototype.initialize.call(this, options);
-                chatgpt.initButtons(this.$el);
+                chatgpt.commonDialogInit(this.$el);
                 this.$pathfield = this.$el.find('input[name="path"]');
                 this.$propertyfield = this.$el.find('input[name="property"]');
                 this.$accept = this.$el.find('.btn-primary.accept');
