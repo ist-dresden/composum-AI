@@ -60,7 +60,7 @@
                             </cpn:text>
                         </div>
                         <div class="panel-body translations">
-                            <div class="loading-curtain" style="display: none;"><
+                            <div class="loading-curtain" style="display: none;">
                                 <i class="fa fa-spinner fa-pulse fa-3x fa-fw"
                                    title="${cpn:i18n(slingRequest,'Loading translation is in progress. Please wait a few seconds.')}">
                                 </i>

@@ -18,7 +18,7 @@
 
         /**
          * Dialog for translation
-         * @param options{path,propertyName}
+         * @param options{path,propertyName, widget}
          */
         // as example see replication.PublishDialog
         chatgpt.TranslationDialog = components.LoadedDialog.extend({
@@ -29,12 +29,12 @@
                 this.$pathfield = this.$el.find('input[name="path"]');
                 this.$propertyfield = this.$el.find('input[name="property"]');
                 this.$accept = this.$el.find('.btn-primary.accept');
-                this.$form = this.$el.find('form');
                 this.$translation = this.$el.find('.translation');
                 this.$languageSelects = this.$el.find('.language-select-radio')
                 this.$alert = this.$el.find('.alert');
                 this.$spinner = this.$el.find('.loading-curtain');
-                this.$outputfield = options.outputfield;
+                this.widget = options.widget;
+                this.isRichText = options.isRichText;
 
                 this.$el.on('shown.bs.modal', _.bind(this.onShown, this));
                 this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
@@ -59,20 +59,13 @@
             accept: function (event) {
                 event.preventDefault();
                 console.log('accept', arguments);
-                let widget = core.widgetOf(this.$outputfield);
-                if (widget) {
-                    if (widget.richText) {
-                        widget.setValue(this.$translation.html());
-                    } else {
-                        widget.setValue(this.$translation.text());
-                    }
+                if (this.isRichText) {
+                    this.widget.setValue(this.$translation.html());
                 } else {
-                    console.error("Bug: cannot find widget for ", this.$outputfield);
+                    this.widget.setValue(this.$translation.text());
                 }
                 this.$el.modal('hide');
-                if (widget) {
-                    widget.grabFocus();
-                }
+                this.widget.grabFocus();
                 return false;
             },
 
@@ -115,7 +108,12 @@
 
             onTranslation: function (status) {
                 if (status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.translation) {
-                    this.$translation.html(status.data.result.translation[0]);
+                    let translationResult = status.data.result.translation[0];
+                    if (this.isRichText) {
+                        this.$translation.html(translationResult);
+                    } else {
+                        this.$translation.text(translationResult);
+                    }
                     this.setTranslated();
                 } else {
                     this.onError(null, status);
@@ -158,9 +156,16 @@
             var path = $target.data('path');
             var property = $target.data('property');
             var propertypath = $target.data('propertypath');
+            let outputfield = chatgpt.searchInput($target);
+            let widget = core.widgetOf(outputfield);
+            if (!widget) {
+                console.error("Bug: cannot find widget for ", this.$outputfield);
+                throw "Bug: cannot find widget for " + this.$outputfield;
+            }
+            let isRichText = !!widget.richText;
             var url = chatgpt.const.url.translate.translationDialog + core.encodePath(path + '/' + property) +
-                "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
-            core.openFormDialog(url, chatgpt.TranslationDialog, {outputfield: chatgpt.searchInput($target)});
+                "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
+            core.openFormDialog(url, chatgpt.TranslationDialog, {widget: widget, isRichText: isRichText});
         }
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);

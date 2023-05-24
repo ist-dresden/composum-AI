@@ -33,6 +33,7 @@
 - Page assistant: translate page , proofread, recommendations, 
   - compare /libs/composum/pages/stage/tools/componentHelp 
   - pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/tools/component/help/context/content.jsp
+- Bug: translation in all properties component - fill german value and translate to english.
 
 ## Possible improvements later
 

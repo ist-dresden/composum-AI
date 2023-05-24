@@ -88,7 +88,7 @@ public class ChatGPTTranslationDialogModelTest {
         ec.checkThat(model, is(notNullValue()));
         ec.checkThat(model.getPropertyEditHandle(), is(notNullValue()));
         ec.checkThat(model.getPropertyName(), is("jcr:description"));
-        ec.checkThat(model.getFieldType(), is("rich"));
+        ec.checkThat(model.getFieldType(), is("text"));
         // we give up at this point: the setup according to AbstractModel is too complex to mock for the expected value of the test.
         // ec.checkThat(model.getPropertyEditHandle().getValue(), is("<p>english <em>description</em></p>"));
     }

@@ -179,8 +179,7 @@ public class ChatGPTTranslationDialogModel extends AbstractModel {
      * @see com.composum.sling.cpnl.TextTag.Type
      */
     public String getFieldType() {
-        // FIXME(hps,05.05.23) somehow determine this.
-        return "rich";
+        return Boolean.TRUE.equals(Boolean.valueOf(context.getRequest().getParameter("richtext"))) ? "rich" : "text";
     }
 
     public boolean isTranslationPossible() {

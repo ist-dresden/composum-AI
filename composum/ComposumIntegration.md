@@ -6,7 +6,7 @@ State: in execution; this just preliminary.
 
 ## Location of integration in the UI
 
-Over a widget we have at the left a title and at the right a description (hint). We will add buttons at the right of 
+Over a widget we have at the left a title and at the right a description (hint). We will add buttons at the right of
 the hint.
 
 ## Mechanism for embedding buttons into widget labels:
@@ -14,34 +14,35 @@ the hint.
 ### Composum Pages side
 
 Implemented in Composum Pages https://github.com/ist-dresden/composum-pages/pull/72 :
+
 - PagesPlugin interface allows other projects to register, implemented in ChatGPTPagesPlugin
-- a PagesPlugin.getWidgetLabelExtensions() gives a number of Sling Resourcetypes that are used to render any label 
-  extensions. The resource used for rendering is the property resource of the extended widget, e.g. 
-  /content//some/page/jcr:description . label.jsp gets sling:call to labelextension.jsp which does sling:include for 
+- a PagesPlugin.getWidgetLabelExtensions() gives a number of Sling Resourcetypes that are used to render any label
+  extensions. The resource used for rendering is the property resource of the extended widget, e.g.
+  /content//some/page/jcr:description . label.jsp gets sling:call to labelextension.jsp which does sling:include for
   that.
-- /libs/composum/pages/stage/edit/js/dialogs.js contains a hook so that plugins can bind themselves into dialogs: 
-  composum.pages.dialogs.const.dialogplugins is a list of objects where dialogInitializeView is called with dialog 
+- /libs/composum/pages/stage/edit/js/dialogs.js contains a hook so that plugins can bind themselves into dialogs:
+  composum.pages.dialogs.const.dialogplugins is a list of objects where dialogInitializeView is called with dialog
   and the root $element of the dialog.
 
 ### Implementation of the buttons in the widget labels in composum-chatgpt-integration
 
 - For our implementation we use the resource type
-  "composum/chatgpt/pagesintegration/widgetextensions/labelextension" 
-- /libs/composum/chatgpt/pagesintegration/widgetextensions/labelextension/labelextension.jsp implements the label 
-  extensions, drawing on the model com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel for visibility 
+  "composum/chatgpt/pagesintegration/widgetextensions/labelextension"
+- /libs/composum/chatgpt/pagesintegration/widgetextensions/labelextension/labelextension.jsp implements the label
+  extensions, drawing on the model com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel for visibility
   checking of the individual buttons.
-- /libs/composum/chatgpt/pagesintegration/css/widgetextensions.scss (and variables.scss and mixins.scss copied from 
+- /libs/composum/chatgpt/pagesintegration/css/widgetextensions.scss (and variables.scss and mixins.scss copied from
   pages) for styling of the label extension.
-- /libs/composum/chatgpt/pagesintegration/js/chatgpt.js contains provisions for binding the label extension buttons 
-  to open the dialogs: registration in composum.pages.dialogs.const.dialogplugins so that dialogInitializeView is 
+- /libs/composum/chatgpt/pagesintegration/js/chatgpt.js contains provisions for binding the label extension buttons
+  to open the dialogs: registration in composum.pages.dialogs.const.dialogplugins so that dialogInitializeView is
   called after the dialog is rendered.
-  
+
 ### Widget extension in detail:
 
 labelextension calls a service (PagesPluginService) that has PagesPlugin registered
 PagesPluginService is available from AbstractModel
 
-## Relevant files in Composum Pages 
+## Relevant files in Composum Pages
 
 ### CSS
 
@@ -50,15 +51,16 @@ pages/commons/package/src/main/content/jcr_root/libs/composum/pages/commons/css/
 in category:composum.components.widgets[css:/libs/composum/nodes/commons/components/clientlibs/components]
 
 ### Javascript
+
 category:composum.components.widgets[js:/libs/composum/nodes/commons/components/clientlibs/components]
-relevant: pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/js/dialogs.js declares many 
-dialogs. We need integration into create dialog, too - at least for content creation; translation doesn't matter 
-(would be inactive, anyway). Base class: ElementDialog, covers everything. Binding of actions seems usually done in 
+relevant: pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/js/dialogs.js declares many
+dialogs. We need integration into create dialog, too - at least for content creation; translation doesn't matter
+(would be inactive, anyway). Base class: ElementDialog, covers everything. Binding of actions seems usually done in
 initView .
 
 ### Possible Icons for label extensions
 
-Translation: https://fontawesome.com/v4/icon/language fa-language 
+Translation: https://fontawesome.com/v4/icon/language fa-language
 
 Tagging: https://fontawesome.com/v4/icon/tags fa-tags
 
@@ -69,7 +71,33 @@ perhaps https://icons.getbootstrap.com/icons/chat-dots-fill/
 ! https://icons.getbootstrap.com/icons/magic/ <i class="bi bi-magic"></i>
 ! https://fontawesome.com/v4/icon/magic <i class="fa fa-magic" aria-hidden="true"></i>
 
+### Handling of HTML
+
+We have 3 cases for the widgets we support.
+
+#### text fields as in headlines.
+
+These are plain text. Example: this is a <b>title with bold text</b> with *emphasized* stuff.
+Translation:
+
+- displayed as HTML -> BUG! (Solution: .textContent=...)
+- transported to GPT as it is, got back as it is
+- displayed translation as HTML -> (Solution: .textContent=...)
+- inserted with markup removed - BUG!
+
+#### text areas, as in code component
+
+No translation for code available.
+
+#### richtext editors, as in the normal text component
+
+Translation:
+- displayed as HTML -> OK.
+- transported to GPT as it is, got back as it is
+- inserted as HTML -> OK.
+
 ## Further ideas:
+
 https://alex-d.github.io/Trumbowyg/documentation/ custom buttons for trumbowyg
 
 # To review with Ralf
