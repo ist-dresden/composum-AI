@@ -6,7 +6,7 @@
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"
              cssBase="composum-chatgpt-pagesintegration-dialogs-create"
-             cssAdd="dialog modal fade composum-chatgpt-dialog" role="dialog">
+             cssAdd="dialog modal fade composum-chatgpt-dialog extra-wide" role="dialog">
     <%--@elvariable id="model" type="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">

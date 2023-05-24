@@ -16,6 +16,28 @@
         }
     }
 
+    @media (min-width: 840px) {
+
+        .modal-dialog {
+            width: 900px; // equal to 'modal-lg'
+        }
+
+        &.extra-wide {
+
+            .modal-dialog {
+                width: 96%;
+                max-width: 1200px;
+            }
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 839px) {
+
+        .modal-dialog {
+            width: 748px;
+        }
+    }
+
     .framebutton {
         float: right;
         margin-top: -2px;
@@ -47,6 +69,7 @@
 
     .modal-dialog {
         width: 100%;
+        max-width: 100%;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -89,6 +112,10 @@
         justify-content: flex-start;
     }
 
+    button.help {
+        display: none;
+    }
+
 }
 
 .composum-chatgpt-pagesintegration-dialogs-create {
@@ -109,7 +136,7 @@
 
     z-index: $chatgpt-help-layer;
 
-    .help {
+    button.help {
         display: none;
     }
 
