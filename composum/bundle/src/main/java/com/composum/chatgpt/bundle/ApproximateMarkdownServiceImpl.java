@@ -82,6 +82,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
             return;
         }
+        if (!ResourceUtil.normalize(resource.getPath()).startsWith("/content/")) {
+            throw new IllegalArgumentException("For security reasons the resource must be in /content but is: " + resource.getPath());
+        }
         boolean wasHandledAsPage = pageHandling(resource, out);
         boolean wasHandledAsTable = tableHandling(resource, out);
         boolean printEmptyLine = false;

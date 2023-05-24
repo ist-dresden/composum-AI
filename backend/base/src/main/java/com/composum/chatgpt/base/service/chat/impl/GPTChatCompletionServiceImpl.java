@@ -257,6 +257,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
         String[] words = text.split("\\s+");
         if (words.length > maxwords) {
+            // FIXME(hps,24.05.23) is there a way to do this using tokens? This is a rather wild estimate.
             int middle = words.length / 2;
             int start = maxwords / 2;
             int end = words.length - (maxwords - 1) / 2;

@@ -81,11 +81,13 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         List<GPTChatMessage> messages = template.getMessages(Map.of("sourcelanguage", sourceLanguage, "sourcephrase", text, "targetlanguage", targetLanguage));
         request.addMessages(messages);
         // set request.setMaxTokens to about 2 times the number of words in the text to translate
-        // since that seems a likely limit for the translation, but give a leeway for error messages.
-        request.setMaxTokens(2 * text.split("\\s+").length + 50);
+        // since that seems a generous limit for the translation, but give a leeway for error messages.
+        // this splitting is quite an overestimation, but that's better than underestimating in this context.
+        int maxTokens = 2 * text.split(" |[^a-z]").length + 50;
+        request.setMaxTokens(maxTokens);
         String response = chatCompletionService.getSingleChatCompletion(request);
         cache.put(cachekey, response);
-        LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
+        LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
         return response;
     }
 

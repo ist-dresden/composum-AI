@@ -23,7 +23,7 @@
 
 ##
 - DONE: titles
-- Help page for dialog
+- DONE: Help page for dialogs
 - Bug: deal with rich text in content creation - several paragraphs etc.
 - possibly: edit text in translation
 - Translation: german ?

@@ -103,14 +103,14 @@ public class ApproximateMarkdownServiceImplTest {
                 "category", "test, dummy"));
 
         service.approximateMarkdown(component, printWriter);
-        String expectedOutput = "Content of page /parent/path in markdown syntax starts now:\n" +
+        String expectedOutput = "Content of page /content/parent/path in markdown syntax starts now:\n" +
                 "\n" +
                 "\n" +
                 "# myPage\n" +
                 "The best page!\n" +
                 "\n" +
                 "\n" +
-                "End of content of page /parent/path\n" +
+                "End of content of page /content/parent/path\n" +
                 "\n";
         assertEquals(expectedOutput, writer.toString());
     }
@@ -148,7 +148,7 @@ public class ApproximateMarkdownServiceImplTest {
     private Resource createMockResource(String resourceType, Map<String, Object> attributes) {
         Map<String, Object> props = new HashMap<>(attributes);
         props.put("sling:resourceType", resourceType);
-        Resource resource = context.create().resource("/parent/path/res", props);
+        Resource resource = context.create().resource("/content/parent/path/res", props);
         return resource;
     }
 

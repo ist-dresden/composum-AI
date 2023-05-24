@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -241,6 +242,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             }
             if (status.isValid()) {
                 String translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
+                translation = XSS.filter(translation);
                 status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
             }
         }
@@ -258,6 +260,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             if (status.isValid()) {
                 List<String> result = contentCreationService.generateKeywords(text);
+                result = result.stream().map(XSS::filter).collect(Collectors.toList());
                 status.data(RESULTKEY).put(RESULTKEY_KEYWORDS, result);
             }
         }
@@ -277,6 +280,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
                 String result = contentCreationService.generateDescription(text, maxwords != null ? maxwords : -1);
+                result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_DESCRIPTIION, result);
             }
         }
@@ -297,6 +301,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
                 String result = contentCreationService.executePrompt(prompt, maxwords != null ? maxwords : -1);
+                result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
         }
@@ -318,6 +323,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
                 String result = contentCreationService.executePromptOnText(prompt, text, maxwords != null ? maxwords : -1);
+                result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
         }
@@ -379,6 +385,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
                     } else {
                         result = contentCreationService.executePrompt(fullPrompt, maxwords);
                     }
+                    result = XSS.filter(result);
                     status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
                 }
             }

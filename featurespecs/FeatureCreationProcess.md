@@ -26,7 +26,7 @@ your feature documentation. A good idea is giving it examples of what you want, 
    support later steps.
 3. You'll now likely have a spec that has sections "basic idea", "basic implementation decisions", "out of scope",
    "possible extensions". Submit all of that except possible extensions and ask: "To support the dialog design let's
-   see some typical user workflows. Here are some likely use cases for the feature:"  That will likely lead to
+   consider some typical user workflows. Some likely use cases for the feature are:"  That will likely lead to
    improvements of the "out of scope" and "basic implementation decisions".
 4. When the use cases start to make sense, it's a good idea to collect the main intended use cases in a section "User
    Workflow". That can involve several turns of collecting and rewriting some use cases that seem fine and asking for
