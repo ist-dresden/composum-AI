@@ -22,10 +22,13 @@
             let pagePath = $target.data('pagepath');
             let property = $target.data('property');
             let propertypath = $target.data('propertypath');
+            let outputfield = chatgpt.searchInput($target);
+            let widget = core.widgetOf(outputfield);
+            let isRichText = widget && !!widget.richText;
             let url = chatgpt.const.url.create.createDialog + core.encodePath(path + '/' + property) +
-                "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale();
+                "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
             core.openFormDialog(url, chatgpt.CreateDialog, {
-                outputfield: chatgpt.searchInput($target),
+                widget: widget, isRichText: isRichText,
                 componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
             });
         }
@@ -36,15 +39,15 @@
         /**
          * Dialog for categorize - giving a page categories.
          * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
-         * @param options{outputfield, componentPath, pagePath, componentPropertyPath}
+         * @param options{widget, isRichText, componentPath, pagePath, componentPropertyPath}
          */
         chatgpt.CreateDialog = core.components.FormDialog.extend({
 
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
                 chatgpt.commonDialogInit(this.$el);
-                this.$outputfield = options.outputfield;
-                this.widget = core.widgetOf(this.$outputfield);
+                this.widget = options.widget;
+                this.isRichText = options.isRichText;
                 this.componentPath = options.componentPath;
                 this.pagePath = options.pagePath;
                 this.componentPropertyPath = options.componentPropertyPath;
@@ -72,9 +75,9 @@
                 this.$el.find('.cancel-button').click(_.bind(this.cancelButtonClicked, this));
 
                 if (!this.widget) {
-                    console.log('No widget found for ', this.$outputfield);
+                    console.log('No widget found for ', this.componentPropertyPath);
                     this.$alert.show();
-                    this.$alert.text('Bug, please report: no widget found for ' + this.$outputfield);
+                    this.$alert.text('Bug, please report: no widget found for ' + this.componentPropertyPath);
                 }
 
                 this.history = chatgpt.createDialogStates[this.componentPropertyPath];
@@ -155,7 +158,7 @@
                 }
             },
 
-            setLoading : function (loading) {
+            setLoading: function (loading) {
                 if (loading) {
                     this.$loading.show();
                 } else {
@@ -203,7 +206,12 @@
                 this.setLoading(false);
                 if (data.status >= 200) {
                     console.log("Success generating text: ", data);
-                    this.$response.val(data.data.result.text);
+                    let value = data.data.result.text;
+                    if (this.isRichText) {
+                        core.widgetOf(this.$response.find('textarea')).setValue(value);
+                    } else {
+                        this.$response.val(value);
+                    }
                 } else {
                     console.error("Error generating text: ", data);
                     this.$alert.html("Error generating text: " + JSON.stringify(data));
@@ -220,14 +228,11 @@
 
             replaceButtonClicked: function (event) {
                 event.preventDefault();
-                if (this.widget) {
-                    if (this.widget.richText) {
-                        this.widget.setValue(this.$response.val()); // HTML?
-                    } else {
-                        this.widget.setValue(this.$response.val());
-                    }
+                if (this.isRichText) {
+                    let suggestion = core.widgetOf(this.$response.find('textarea')).getValue();
+                    this.widget.setValue(suggestion);
                 } else {
-                    console.error("Bug: cannot find widget for ", this.$outputfield);
+                    this.widget.setValue(this.$response.val());
                 }
                 this.$el.modal('hide');
                 this.widget.grabFocus();
@@ -238,14 +243,10 @@
                 event.preventDefault();
                 let previousValue = this.widget.getValue();
                 previousValue = previousValue ? previousValue.trim() + "\n\n" : "";
-                if (this.widget) {
-                    if (this.widget.richText) {
-                        this.widget.setValue(previousValue + "<p>" + this.$response.val() + "</p>"); // HTML?
-                    } else {
-                        this.widget.setValue(previousValue + this.$response.val());
-                    }
+                if (this.isRichText) {
+                    this.widget.setValue(previousValue + "<p>" + this.$response.val() + "</p>"); // HTML?
                 } else {
-                    console.error("Bug: cannot find widget for ", this.$outputfield);
+                    this.widget.setValue(previousValue + "\n" + this.$response.val());
                 }
                 this.$el.modal('hide');
                 this.widget.grabFocus();

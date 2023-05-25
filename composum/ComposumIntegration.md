@@ -78,23 +78,20 @@ We have 3 cases for the widgets we support.
 #### text fields as in headlines.
 
 These are plain text. Example: this is a <b>title with bold text</b> with *emphasized* stuff.
-Translation:
-
-- displayed as HTML -> BUG! (Solution: .textContent=...)
-- transported to GPT as it is, got back as it is
-- displayed translation as HTML -> (Solution: .textContent=...)
-- inserted with markup removed - BUG!
+Translation: We set the fields in Javascript with .textContent=... and escape it properly with the cpn:text tag in JSPs.
+Content creation: response field is text area -> OK.
 
 #### text areas, as in code component
 
-No translation for code available.
+No translation for code available. Content creation: same as text fields -> OK.
 
 #### richtext editors, as in the normal text component
 
-Translation:
-- displayed as HTML -> OK.
-- transported to GPT as it is, got back as it is
-- inserted as HTML -> OK.
+Translation: displayed as HTML using cpn:text type="rich" or as .html() from the json response -> OK. 
+Transported to GPT as it is, got back as it is. Inserted with widget.setValue which uses it as HTML.
+
+Content creation: we use a richttext widget with a trumbowyg editor -> value can be transferred to original widget.
+Transported to GPT as is, that is as HTML. Probably OK - we'll see.
 
 ## Further ideas:
 

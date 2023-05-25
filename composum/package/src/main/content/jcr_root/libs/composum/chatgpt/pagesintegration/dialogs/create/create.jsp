@@ -115,8 +115,19 @@
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <textarea name="response"
-                                          class="form-control chatgpt-response-field" rows="10"></textarea>
+                                <c:choose>
+                                    <c:when test="${model.isRichText}">
+                                        <cpp:widgetForm disabled="true" cssBase="composum-chatgpt-pagesintegration-dialogs-create"
+                                                        cssAdd="chatgpt-response-field">
+                                            <cpp:widget type="richtext"
+                                                        modelClass="com.composum.chatgpt.bundle.model.ChatGPTCreateDialogModel"/>
+                                        </cpp:widgetForm>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <textarea name="response"
+                                                  class="form-control chatgpt-response-field" rows="10"></textarea>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>

@@ -31,4 +31,26 @@ public class ChatGPTCreateDialogModel extends AbstractModel {
             throw new RuntimeException("Failed to read JSON file: " + filePath, e);
         }
     }
+
+    /**
+     * Whether it is field type rich or just text.
+     */
+    public Boolean getIsRichText() {
+        return Boolean.valueOf(context.getRequest().getParameter("richtext"));
+    }
+
+    /**
+     * For rendering as richtext widget - this is used as initial value for the text.
+     */
+    public String getText() {
+        return "";
+    }
+
+    /**
+     * For rendering as richttext widget - the height in the inline style. Possibly auto , max-content, fit-content or a specific height.
+     * Doing fit-content just adapts to the content and you can scroll the whole dialog, anyway.
+     */
+    public String getHeight() {
+        return "fit-content";
+    }
 }
