@@ -55,13 +55,13 @@
 
         chatgpt.maximizeRestoreFunc = function ($el, ismaximize) {
             let origcss;
-            return function(event) {
+            return function (event) {
                 event.preventDefault();
                 $el.toggleClass("dialog-size-maximized");
                 // save original position and size of dialog which could have been modified by dragging
                 const $dialog = $el.find(".modal-dialog");
                 if (ismaximize) {
-                    origcss = $dialog.css(["top","left","position"]);
+                    origcss = $dialog.css(["top", "left", "position"]);
                     $dialog.css("position", "");
                     $dialog.css("left", "");
                     $dialog.css("top", "");
@@ -96,8 +96,9 @@
             let offset = {};
             let marginTop = 0;
             const $dialog = $el.find(".modal-dialog");
+            const $header = $dialog.find(".modal-header");
 
-            $dialog.find(".modal-header").on("mousedown", function (e) {
+            function handleMouseDown(e) {
                 if ($(e.target).closest("button").length > 0 || e.which !== 1) {
                     return;
                 }
@@ -119,9 +120,12 @@
                     x: e.clientX - $dialog.offset().left,
                     y: e.clientY - $dialog.offset().top - marginTop
                 };
-            });
 
-            $(document).on("mousemove", function (e) {
+                $(document).on("mousemove", handleMouseMove);
+                $(document).on("mouseup", handleMouseUp);
+            }
+
+            function handleMouseMove(e) {
                 if (dragging) {
                     e.preventDefault();
                     console.log("continue dragging: " + e.clientX + ", " + e.clientY);
@@ -130,16 +134,20 @@
                         top: e.clientY - offset.y - marginTop
                     });
                 }
-            });
+            }
 
-            $(document).on("mouseup", function (e) {
+            function handleMouseUp(e) {
                 if (dragging) {
                     e.preventDefault();
                     console.log("stop dragging");
                     dragging = false;
+                    $(document).off("mousemove", handleMouseMove);
+                    $(document).off("mouseup", handleMouseUp);
                 }
-            });
-        }
+            }
+
+            $header.on("mousedown", handleMouseDown);
+        };
 
     })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 

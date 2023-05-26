@@ -190,8 +190,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             Thread.sleep(delay);
         }
 
-        LOG.error("Got too many 429 / error responses from GPT, giving up.", response.body());
-        throw new GPTException("Got too many 429 / error responses from GPT: " + response.body());
+        String responsebody = response != null ? response.body() : "(no response)";
+        LOG.error("Got too many 429 / error responses from GPT, giving up. {}", responsebody);
+        throw new GPTException("Got too many 429 / error responses from GPT: " + responsebody);
     }
 
     /**
