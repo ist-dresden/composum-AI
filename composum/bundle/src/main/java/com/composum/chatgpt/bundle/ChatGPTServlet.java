@@ -330,12 +330,6 @@ public class ChatGPTServlet extends AbstractServiceServlet {
 
     }
 
-    /* - Parameter names for the inputs and outputs:
-      - Prompt Textarea: prompt
-      - Content Selector: contentSelect
-      - Text Length Selector: textLength
-*/
-
     /**
      * Implements the content creation operation. Input parameters are:
      * - prompt: the prompt to execute

@@ -69,10 +69,10 @@
                 this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
                 this.$prompt.change(_.bind(this.promptChanged, this));
 
-                // bind buttons replace-button and append-button
                 this.$el.find('.replace-button').click(_.bind(this.replaceButtonClicked, this));
                 this.$el.find('.append-button').click(_.bind(this.appendButtonClicked, this));
                 this.$el.find('.cancel-button').click(_.bind(this.cancelButtonClicked, this));
+                this.$el.on('hidden.bs.modal', _.bind(this.abortRunningCalls, this));
 
                 if (!this.widget) {
                     console.log('No widget found for ', this.componentPropertyPath);
@@ -174,7 +174,13 @@
                     this.saveState();
                 }
 
-                let predefinedPrompt = this.$predefinedPrompts.val();
+                const that = this;
+
+                function consumeXhr(xhr) {
+                    that.abortRunningCalls();
+                    that.runningxhr = xhr;
+                }
+
                 let contentSelect = this.$contentSelect.val();
                 let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
@@ -191,15 +197,22 @@
                 }
 
                 let url = chatgpt.const.url.general.authoring + ".create.json";
-                // FIXME(hps,16.05.23) implement aborting of the request
                 core.ajaxPost(url, {
-                    contentSelect: contentSelect,
-                    textLength: textLength,
-                    inputText: inputText,
-                    inputPath: inputPath,
-                    prompt: prompt
-                }, {dataType: 'json'}, _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
+                        contentSelect: contentSelect,
+                        textLength: textLength,
+                        inputText: inputText,
+                        inputPath: inputPath,
+                        prompt: prompt
+                    }, {dataType: 'json', xhrconsumer: consumeXhr},
+                    _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
                 return false;
+            },
+
+            abortRunningCalls: function () {
+                if (this.runningxhr) {
+                    this.runningxhr.abort();
+                    this.runningxhr = undefined;
+                }
             },
 
             generateSuccess: function (data) {
