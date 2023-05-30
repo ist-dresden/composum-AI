@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.composum.chatgpt</groupId>
 		<artifactId>composum-chatgpt-integration-composum</artifactId>
-		<version>0.1.0</version>
+		<version>0.1.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>composum-chatgpt-integration-composum-package</artifactId>
