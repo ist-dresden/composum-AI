@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.ServletResolverConstants;
 import org.osgi.framework.BundleContext;
@@ -218,10 +220,16 @@ public class ChatGPTServlet extends AbstractServiceServlet {
             String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No sourceLanguage given");
             String targetLanguage = request.getParameter("targetLanguage");
             if (isNoneBlank(path, property)) {
-                Resource propertyResource = request.getResourceResolver().getResource(path + '/' + property);
-                if (propertyResource == null) {
+                ResourceResolver resolver = request.getResourceResolver();
+                Resource nodeResource = resolver.getResource(path);
+                if (nodeResource == null) {
                     status.error("No resource found at " + path + '/' + property);
                 } else {
+                    Resource propertyResource = nodeResource.getChild(property);
+                    if (propertyResource == null) {
+                        // that's possible if there is a i18n value but no value for the default language yet
+                        propertyResource = new SyntheticResource(resolver, path + '/' + property, null);
+                    }
                     BeanContext context = new BeanContext.Servlet(getServletContext(), bundleContext, request, response);
                     ChatGPTTranslationDialogModel model = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
                     if (model == null) {

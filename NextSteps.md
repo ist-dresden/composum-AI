@@ -25,12 +25,11 @@
 - DONE: titles
 - DONE: Help page for dialogs
 - DONE: Drag dialogs
-- Bug: translation in all properties component - fill german value and translate to english.
-- Error handling. (e.g. connection error.)
-- possibly: edit text in translation
-- Translation: german ?
 - Page assistant: writing style
-- Creation: writing style , tone
+- Bug: translation in all properties component - fill german value and translate to english.
+- Check Error handling. (e.g. connection error.)
+- Unclear: content generation for non-default language?
+- Translation: german ?
 - Page assistant: translate page , proofread, recommendations, 
   - compare /libs/composum/pages/stage/tools/componentHelp 
   - pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/tools/component/help/context/content.jsp
@@ -42,3 +41,4 @@
   experience. https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format
 - perhaps use moderation api to check for troublesome user messages and troublesome responses
 - use Composum platform caching service, possibly with an abstraction.
+- possibly: edit text in translation
