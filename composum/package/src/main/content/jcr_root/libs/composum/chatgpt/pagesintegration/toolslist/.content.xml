@@ -4,6 +4,14 @@
           jcr:primaryType="sling:Folder"
           jcr:description="Tools declaration for extending the right sidebar of Composum Pages"
           sling:resourceType="composum/pages/tools/collection">
+	<reviewTool
+			jcr:primaryType="nt:unstructured"
+			sling:resourceType="composum/chatgpt/pagesintegration/tools/review"
+			categories="[context,standalone,edit,page,container,element]"
+			iconClass="commenting-o"
+			hint="ChatGPT based page review"
+			title="Page review"
+			order="{Long}500"/>
 	<labelExtension
 			jcr:primaryType="nt:unstructured"
 			resourceType="composum/chatgpt/pagesintegration/widgetextensions/labelextension"
