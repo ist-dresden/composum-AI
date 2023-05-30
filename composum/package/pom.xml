@@ -103,6 +103,15 @@
 						</embedded>
 					</embeddeds>
 
+					<dependencies>
+						<dependency>
+							<group>com/composum/pages</group>
+							<name>composum-pages-stage-package</name>
+							<!-- Need WidgetTools and labelextensions mechanism from pages 1.5.1 -->
+							<version>1.5.1</version> -->
+						</dependency>
+					</dependencies>
+
 				</configuration>
 			</plugin>
 
