@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="sling:Folder"
+          jcr:description="Tools declaration for extending the right sidebar of Composum Pages"
+          sling:resourceType="composum/pages/tools/collection">
+	<labelExtension
+			jcr:primaryType="nt:unstructured"
+			resourceType="composum/chatgpt/pagesintegration/widgetextensions/labelextension"
+			categories="[widget,label,standalone,edit,page,container,element]"
+			order="{Long}100"/>
+</jcr:root>
