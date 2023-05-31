@@ -42,3 +42,6 @@
 - perhaps use moderation api to check for troublesome user messages and troublesome responses
 - use Composum platform caching service, possibly with an abstraction.
 - possibly: edit text in translation
+- use library to count the tokens 
+- https://stackoverflow.com/questions/75804599/openai-api-how-do-i-count-tokens-before-i-send-an-api-request
+  https://github.com/knuddelsgmbh/jtokkit  https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken
