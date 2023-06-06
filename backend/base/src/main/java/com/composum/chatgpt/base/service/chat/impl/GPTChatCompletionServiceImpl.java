@@ -60,7 +60,7 @@ import com.theokanning.openai.completion.chat.ChatMessage;
  */
 // FIXME(hps,06.04.23) check error handling
 // FIXME(hps,06.04.23) more configurability
-@Component(service = GPTChatCompletionService.class)
+@Component(service = GPTChatCompletionService.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
@@ -127,6 +127,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.apiKey = null;
         if (config.enable()) {
             this.apiKey = retrieveOpenAIKey(config);
+        } else {
+            LOG.info("ChatGPT is disabled.");
         }
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -134,7 +136,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         templates.clear(); // bundleContext changed, after all.
     }
 
-    private static String retrieveOpenAIKey(GPTChatCompletionServiceConfig config) {
+    private static String retrieveOpenAIKey(@Nonnull GPTChatCompletionServiceConfig config) {
         String apiKey = config.openAiApiKey();
         if (apiKey != null && !apiKey.isBlank()) {
             LOG.info("Using OpenAI API key from configuration.");
