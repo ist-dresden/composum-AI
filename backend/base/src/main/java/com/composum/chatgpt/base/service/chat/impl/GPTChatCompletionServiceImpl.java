@@ -79,6 +79,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
+    private static final String DEFAULT_MODEL = "gpt-3.5-turbo";
+    private static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
+    private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
+
     private String apiKey;
     private String defaultModel;
 
@@ -119,9 +123,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
         RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
         this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
-        this.defaultModel = config.defaultModel().trim();
+        this.defaultModel = config.defaultModel() != null && !config.defaultModel().isBlank() ? config.defaultModel().trim() : DEFAULT_MODEL;
         httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(config.connectionTimeout()))
+                .connectTimeout(Duration.ofSeconds(config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT))
                 .build();
         this.config = config;
         this.apiKey = null;
@@ -187,7 +191,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     .uri(URI.create(CHAT_COMPLETION_URL))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + apiKey)
-                    .timeout(Duration.ofSeconds(config.requestTimeout()))
+                    .timeout(Duration.ofSeconds(config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT))
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                     .build();
 
@@ -380,13 +384,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         @AttributeDefinition(name = "OpenAI API Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
         String openAiApiKeyFile();
 
-        @AttributeDefinition(name = "Default model to use for the chat completion. The default is gpt-3.5-turbo. Please consider the varying prices https://openai.com/pricing .", defaultValue = "gpt-3.5-turbo")
+        @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
         String defaultModel();
 
-        @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "20")
+        @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "" + DEFAULTVALUE_CONNECTIONTIMEOUT)
         int connectionTimeout();
 
-        @AttributeDefinition(name = "Request timeout in seconds", defaultValue = "60")
+        @AttributeDefinition(name = "Request timeout in seconds", defaultValue = "" + DEFAULTVALUE_REQUESTTIMEOUT)
         int requestTimeout();
     }
 
