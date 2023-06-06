@@ -10,7 +10,7 @@
 
 	<groupId>com.composum.chatgpt</groupId>
 	<artifactId>composum-chatgpt-integration</artifactId>
-	<version>0.1.1</version>
+	<version>0.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Composum ChatGPT Integration</name>
@@ -39,8 +39,4 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
-  <scm>
-    <tag>composum-chatgpt-integration-0.1.1</tag>
-  </scm>
 </project>
