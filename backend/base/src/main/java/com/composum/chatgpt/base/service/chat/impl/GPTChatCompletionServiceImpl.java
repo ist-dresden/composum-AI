@@ -58,9 +58,9 @@ import com.theokanning.openai.completion.chat.ChatMessage;
  * @see "https://platform.openai.com/docs/api-reference/chat/create"
  * @see "https://platform.openai.com/docs/guides/chat"
  */
-// FIXME(hps,06.04.23) Handle errors sensibly and retry
+// FIXME(hps,06.04.23) check error handling
 // FIXME(hps,06.04.23) more configurability
-@Component(service = GPTChatCompletionService.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(service = GPTChatCompletionService.class)
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
