@@ -6,6 +6,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +43,10 @@ import com.composum.chatgpt.base.service.chat.GPTChatRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.knuddels.jtokkit.Encodings;
+import com.knuddels.jtokkit.api.Encoding;
+import com.knuddels.jtokkit.api.EncodingRegistry;
+import com.knuddels.jtokkit.api.EncodingType;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
@@ -62,6 +68,16 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
+
+    /**
+     * Environment variable where we take the key from, if not configured directly.
+     */
+    public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
+
+    /**
+     * System property where we take the key from, if not configured directly.
+     */
+    public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
     private String apiKey;
     private String defaultModel;
@@ -86,6 +102,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected volatile GPTChatCompletionServiceConfig config;
 
+    protected EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
+
+    /**
+     * Tokenizer used for GPT-3.5 and GPT-4.
+     */
+    protected Encoding enc = registry.getEncoding(EncodingType.CL100K_BASE);
+
     private BundleContext bundleContext;
 
     private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
@@ -101,11 +124,44 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 .connectTimeout(Duration.ofSeconds(config.connectionTimeout()))
                 .build();
         this.config = config;
-        this.apiKey = config.openAiApiKey().trim();
+        this.apiKey = null;
+        if (config.enable()) {
+            this.apiKey = retrieveOpenAIKey(config);
+        }
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         this.bundleContext = bundleContext;
         templates.clear(); // bundleContext changed, after all.
+    }
+
+    private static String retrieveOpenAIKey(GPTChatCompletionServiceConfig config) {
+        String apiKey = config.openAiApiKey();
+        if (apiKey != null && !apiKey.isBlank()) {
+            LOG.info("Using OpenAI API key from configuration.");
+            return apiKey.trim();
+        }
+        if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().isBlank()) {
+            try {
+                apiKey = Files.readString(Paths.get(config.openAiApiKeyFile()));
+            } catch (IOException e) {
+                throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
+            }
+        }
+        if (apiKey != null && !apiKey.isBlank()) {
+            LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
+            return apiKey.trim();
+        }
+        apiKey = System.getenv(OPENAI_API_KEY);
+        if (apiKey != null && !apiKey.isBlank()) {
+            LOG.info("Using OpenAI API key from environment variable {}.", OPENAI_API_KEY);
+            return apiKey.trim();
+        }
+        apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
+        if (apiKey != null && !apiKey.isBlank()) {
+            LOG.info("Using OpenAI API key from system property {}.", OPENAI_API_KEY_SYSPROP);
+            return apiKey.trim();
+        }
+        return null;
     }
 
     @Deactivate
@@ -229,9 +285,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     protected void checkEnabled() {
-        if (apiKey == null || apiKey.isBlank()) {
+        if (!isEnabled()) {
             throw new IllegalStateException("No API key configured for the GPT chat completion service. Please configure the service.");
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return config != null && config.enable() && apiKey != null && !apiKey.isBlank();
     }
 
     @Nonnull
@@ -278,11 +339,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     public String markdownToHtml(String markdown) {
-        // FIXME(hps,20.04.23) not threadsafe, so not shared - if we need it regularily this should be cached.
-//        Parser parser = Parser.builder().build();
-//        HtmlRenderer renderer = HtmlRenderer.builder().build();
-//        Document document = parser.parse(markdown);
-//        return renderer.render(document);
         StringWriter writer = new StringWriter();
         HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer, true);
         MarkupParser parser = new MarkupParser(new MarkdownLanguage());
@@ -292,42 +348,19 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
+    public int countTokens(@Nullable String text) {
+        if (text == null) {
+            return 0;
+        }
+        List<Integer> encoded = this.enc.encodeOrdinary(text);
+        return encoded.size();
+    }
+
+    @Override
     public String htmlToMarkdown(String html) {
-        if (html == null) {
+        if (html == null || html.isBlank()) {
             return "";
         }
-//        html = html.replaceAll("<a\\s+href=\"([^\"]+)\">([^<]+)</a>", "[$2]($1)");
-//
-//        // Replace <strong> and <b> tags with bold markdown
-//        html = html.replaceAll("<(strong|b)>(.*?)</\\1>", "**$2**");
-//
-//        // Replace <code> tags with inline code markdown
-//        html = html.replaceAll("<code>(.*?)</code>", "`$1`");
-//
-//        // Replace <em> and <i> tags with italic markdown
-//        html = html.replaceAll("<(em|i)>(.*?)</\\1>", "_$2_");
-//
-//        // Replace <p> tags with a blank line and add margin
-//        html = html.replaceAll("<p>(.*?)</p>", "\n\n$1");
-//
-//        // Replace <br> tags with a line break
-//        html = html.replaceAll("<br>", "\n");
-//
-//        // Replace <u> tags with underline markdown
-//        html = html.replaceAll("<u>(.*?)</u>", "<u>$1</u>");
-//
-//        // Replace <ul> tags with list markdown
-//        html = html.replaceAll("<ul>(.*?)</ul>", "\n$1");
-//
-//        // Replace <li> tags with list item markdown
-//        html = html.replaceAll("<li>(.*?)</li>", "\n- $1");
-//
-//        // Replace <ol> tags with ordered list markdown
-//        html = html.replaceAll("<ol>(.*?)</ol>", "\n$1");
-//
-//        // Replace nested <li> tags with nested list item markdown
-//        html = html.replaceAll("</li>\n<li>", "\n    - ");
-//
         return new HtmlToMarkdownConverter().convert(html);
     }
 
@@ -335,8 +368,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
-        @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, the ")
+        @AttributeDefinition(name = "Enable the GPT Chat Completion Service", description = "Enable the GPT Chat Completion Service", defaultValue = "true")
+        boolean enable();
+
+        @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
         String openAiApiKey();
+
+        // alternatively, a key file
+        @AttributeDefinition(name = "OpenAI API Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
+        String openAiApiKeyFile();
 
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is gpt-3.5-turbo. Please consider the varying prices https://openai.com/pricing .", defaultValue = "gpt-3.5-turbo")
         String defaultModel();

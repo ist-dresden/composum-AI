@@ -48,12 +48,12 @@
                 <text_01
                         jcr:primaryType="cpp:Element"
                         sling:resourceType="composum/pages/components/element/text"
-                        text="&lt;p>As with all artificial intelligence based services, please be aware that AIs currently sometimes create content that is wrong though it might even look right on the first glance. Please do never use AI generated content without manually checking it.&lt;/p>">
+                        text="&lt;p>As with all artificial intelligence based services, please be aware that AIs currently sometimes create content that is wrong though it might even look right on the first glance. Please do never use AI generated content without manually checking it. Do not use this to translate into a language you don't know.&lt;/p>">
                     <i18n
                             jcr:primaryType="nt:unstructured">
                         <de
                                 jcr:primaryType="nt:unstructured"
-                                text="&lt;p>Wie bei allen auf künstlicher Intelligenz basierenden Diensten sei darauf hingewiesen, dass KIs manchmal Inhalte erstellen können, die falsch sind, obwohl sie auf den ersten Blick richtig aussehen könnten. Bitte verwenden Sie niemals vom AI generierte Inhalte, ohne sie manuell zu überprüfen.&lt;/p>"/>
+                                text="&lt;p>Wie bei allen auf künstlicher Intelligenz basierenden Diensten sei darauf hingewiesen, dass KIs manchmal Inhalte erstellen können, die falsch sind, obwohl sie auf den ersten Blick richtig aussehen könnten. Bitte verwenden Sie niemals vom AI generierte Inhalte, ohne sie manuell zu überprüfen. Nutzen Sie dies nicht, um in eine Sprache zu übersetzen, die sie nicht kennen.&lt;/p>"/>
                     </i18n>
                 </text_01>
             </section>

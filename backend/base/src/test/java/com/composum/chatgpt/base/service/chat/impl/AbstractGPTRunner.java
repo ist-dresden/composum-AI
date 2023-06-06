@@ -23,8 +23,18 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public boolean enable() {
+                return true;
+            }
+
+            @Override
             public String openAiApiKey() {
                 return apiKey;
+            }
+
+            @Override
+            public String openAiApiKeyFile() {
+                return null;
             }
 
             @Override

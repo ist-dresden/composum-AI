@@ -2,12 +2,15 @@ package com.composum.chatgpt.bundle.model;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
 import com.composum.pages.commons.taglib.EditWidgetTag;
@@ -29,18 +32,24 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     private boolean valid;
     private EditWidgetTag widget;
     private Model model;
+    private GPTChatCompletionService chatCompletionService;
 
     @Override
     protected void initializeWithResource(@NotNull Resource resource) {
         super.initializeWithResource(resource);
         if (context.getAttribute(EditWidgetTag.WIDGET_VAR, Object.class) instanceof EditWidgetTag) {
             widget = context.getAttribute(EditWidgetTag.WIDGET_VAR, EditWidgetTag.class);
-            if (widget.getModel() instanceof Model) {
+            chatCompletionService = context.getService(GPTChatCompletionService.class);
+            if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled()) {
                 model = (Model) widget.getModel();
                 valid = true;
             }
         }
         LOG.info("initializeWithResource valid={}", valid);
+    }
+
+    public boolean isEnabled() {
+        return chatCompletionService != null && chatCompletionService.isEnabled();
     }
 
     public String getWidgetType() {
@@ -51,7 +60,7 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
      * If anything at all is visible. If not, we don't want to ouput any styled wrapper divs etc.
      */
     public boolean isVisible() {
-        return isTranslateButtonVisible() || isContentCreationButtonVisible() || isPageCategoriesButtonVisible();
+        return isEnabled() && (isTranslateButtonVisible() || isContentCreationButtonVisible() || isPageCategoriesButtonVisible());
     }
 
     /**

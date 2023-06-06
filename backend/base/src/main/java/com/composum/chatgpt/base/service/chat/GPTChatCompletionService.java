@@ -50,4 +50,16 @@ public interface GPTChatCompletionService {
      * Opposite of {@link #markdownToHtml(String)}.
      */
     String markdownToHtml(String markdown);
+
+    /**
+     * Counts the number of tokens for the text for the normally used model. Caution: message boundaries need some tokens
+     * and slicing text might create a token or two, too, so do not exactly rely on that.
+     */
+    int countTokens(@Nullable String text);
+
+    /**
+     * Whether ChatGPT completion is enabled. If not, calling the methods that access ChatGPT throws an IllegalStateException.
+     */
+    boolean isEnabled();
+
 }
