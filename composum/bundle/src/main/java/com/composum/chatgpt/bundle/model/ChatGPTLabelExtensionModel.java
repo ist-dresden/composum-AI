@@ -37,7 +37,7 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     @Override
     protected void initializeWithResource(@NotNull Resource resource) {
         super.initializeWithResource(resource);
-        if (context.getAttribute(EditWidgetTag.WIDGET_VAR, Object.class) instanceof EditWidgetTag) {
+        if (context.getAttribute(EditWidgetTag.WIDGET_VAR, Object.class) instanceof EditWidgetTag && isEnabled()) {
             widget = context.getAttribute(EditWidgetTag.WIDGET_VAR, EditWidgetTag.class);
             chatCompletionService = context.getService(GPTChatCompletionService.class);
             if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled()) {
