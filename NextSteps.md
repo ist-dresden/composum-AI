@@ -26,6 +26,12 @@
 - DONE: Help page for dialogs
 - DONE: Drag dialogs
 - Page assistant: writing style
+- Page assistant in preview: can also process selected text!
+- Extend content creation assistent with selection as input. (Not possible on page, but there.) -> could also 
+  replace the selection / insert created text at point.
+- Sitespecific or global templates for prompts.
+- Global configuration for prompts: e.g. glossary, important terms, background information.
+- Somehow implement streaming to make result more responsive.
 - Bug: translation in all properties component - fill german value and translate to english.
 - Check Error handling. (e.g. connection error.)
 - Unclear: content generation for non-default language?
@@ -45,3 +51,11 @@
 - use library to count the tokens 
 - https://stackoverflow.com/questions/75804599/openai-api-how-do-i-count-tokens-before-i-send-an-api-request
   https://github.com/knuddelsgmbh/jtokkit  https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken
+
+```mermaid
+graph LR
+    A("Standard Node") -->|Edge 1| B((Round Node))
+    B -->|Edge 2| C{Decision Node}
+    C -->|Edge 3| D_5[_Node_with_Underscores_and.Dots]
+    D_5 -->|Edge 4| E["Node with special characters: !@#$%^&*()"]
+```
