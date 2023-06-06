@@ -27,7 +27,6 @@ import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -60,7 +59,7 @@ import com.theokanning.openai.completion.chat.ChatMessage;
  */
 // FIXME(hps,06.04.23) check error handling
 // FIXME(hps,06.04.23) more configurability
-@Component(service = GPTChatCompletionService.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(service = GPTChatCompletionService.class)
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
@@ -104,8 +103,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     protected volatile RateLimiter gptLimiter;
 
-    protected volatile GPTChatCompletionServiceConfig config;
-
     protected EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
 
     /**
@@ -116,20 +113,24 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private BundleContext bundleContext;
 
     private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
+    private long requestTimeout;
+    private long connectionTimeout;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
+        LOG.info("Activating GPTChatCompletionService {}", config);
         // since it costs a bit of money and there are remote limits, we do limit it somewhat, especially for the case of errors.
         RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
         RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
         this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
-        this.defaultModel = config.defaultModel() != null && !config.defaultModel().isBlank() ? config.defaultModel().trim() : DEFAULT_MODEL;
-        httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT))
-                .build();
-        this.config = config;
+        this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().isBlank() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.apiKey = null;
-        if (config.enable()) {
+        this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
+        this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
+        httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(connectionTimeout))
+                .build();
+        if (config == null || !config.disable()) {
             this.apiKey = retrieveOpenAIKey(config);
         } else {
             LOG.info("ChatGPT is disabled.");
@@ -138,24 +139,28 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         this.bundleContext = bundleContext;
         templates.clear(); // bundleContext changed, after all.
+        LOG.info("ChatGPT activated: {}", isEnabled());
     }
 
-    private static String retrieveOpenAIKey(@Nonnull GPTChatCompletionServiceConfig config) {
-        String apiKey = config.openAiApiKey();
-        if (apiKey != null && !apiKey.isBlank()) {
-            LOG.info("Using OpenAI API key from configuration.");
-            return apiKey.trim();
-        }
-        if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().isBlank()) {
-            try {
-                apiKey = Files.readString(Paths.get(config.openAiApiKeyFile()));
-            } catch (IOException e) {
-                throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
+    private static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
+        String apiKey = null;
+        if (config != null) {
+            apiKey = config.openAiApiKey();
+            if (apiKey != null && !apiKey.isBlank()) {
+                LOG.info("Using OpenAI API key from configuration.");
+                return apiKey.trim();
             }
-        }
-        if (apiKey != null && !apiKey.isBlank()) {
-            LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
-            return apiKey.trim();
+            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().isBlank()) {
+                try {
+                    apiKey = Files.readString(Paths.get(config.openAiApiKeyFile()));
+                } catch (IOException e) {
+                    throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
+                }
+                if (apiKey != null && !apiKey.isBlank()) {
+                    LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
+                    return apiKey.trim();
+                }
+            }
         }
         apiKey = System.getenv(OPENAI_API_KEY);
         if (apiKey != null && !apiKey.isBlank()) {
@@ -191,7 +196,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     .uri(URI.create(CHAT_COMPLETION_URL))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + apiKey)
-                    .timeout(Duration.ofSeconds(config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT))
+                    .timeout(Duration.ofSeconds(requestTimeout))
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                     .build();
 
@@ -298,7 +303,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     public boolean isEnabled() {
-        return config != null && config.enable() && apiKey != null && !apiKey.isBlank();
+        return apiKey != null && !apiKey.isEmpty();
     }
 
     @Nonnull
@@ -363,6 +368,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
+    @Nonnull
     public String htmlToMarkdown(String html) {
         if (html == null || html.isBlank()) {
             return "";
@@ -374,8 +380,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
-        @AttributeDefinition(name = "Enable the GPT Chat Completion Service", description = "Enable the GPT Chat Completion Service", defaultValue = "true")
-        boolean enable();
+        @AttributeDefinition(name = "Disable the GPT Chat Completion Service", description = "Disable the GPT Chat Completion Service", defaultValue = "false")
+        boolean disable();
 
         @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
         String openAiApiKey();

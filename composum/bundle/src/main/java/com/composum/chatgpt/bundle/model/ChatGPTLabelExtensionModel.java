@@ -123,4 +123,15 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
     public String getPagePath() {
         return ResourceHandle.use(getPageManager().getContainingPage(context, resource).getResource()).getContentResource().getPath();
     }
+
+
+    @Override
+    public String toString() {
+        return "ChatGPTLabelExtensionModel{" +
+                "resource=" + resource.getPath() +
+                ", valid=" + valid +
+                ", widget=" + widget +
+                ", model=" + model +
+                '}';
+    }
 }
