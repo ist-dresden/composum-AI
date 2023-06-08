@@ -78,7 +78,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
-    private static final String DEFAULT_MODEL = "gpt-3.5-turbo";
+    public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
     private static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
     private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
 
