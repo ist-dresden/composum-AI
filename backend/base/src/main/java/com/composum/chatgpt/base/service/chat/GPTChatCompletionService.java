@@ -20,6 +20,11 @@ public interface GPTChatCompletionService {
     String getSingleChatCompletion(GPTChatRequest request) throws GPTException;
 
     /**
+     * Give some messages and receive the streaming response via callback, to reduce waiting time.
+     */
+    void streamingChatCompletion(GPTChatRequest request, GPTCompletionCallback callback) throws GPTException;
+
+    /**
      * Retrieves a (usually cached) chat template with that name. Mostly for backend internal use.
      * The templates are retrieved from the bundle resources at "chattemplates/", and are cached.
      *

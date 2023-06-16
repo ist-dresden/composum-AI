@@ -71,7 +71,7 @@ public class GPTChatCompletionServiceImplTest {
         long delay = 1000L;
         HttpResponse<String> response = Mockito.mock(HttpResponse.class);
         Mockito.when(response.body()).thenReturn(body);
-        long actualDelay = service.recalculateDelay(response, delay);
+        long actualDelay = service.recalculateDelay(response.body(), delay);
         assertEquals(27000L, actualDelay);
     }
 
@@ -81,7 +81,7 @@ public class GPTChatCompletionServiceImplTest {
         long delay = 1000L;
         HttpResponse<String> response = Mockito.mock(HttpResponse.class);
         Mockito.when(response.body()).thenReturn(body);
-        long actualDelay = service.recalculateDelay(response, delay);
+        long actualDelay = service.recalculateDelay(response.body(), delay);
         assertEquals(2000L, actualDelay);
     }
 

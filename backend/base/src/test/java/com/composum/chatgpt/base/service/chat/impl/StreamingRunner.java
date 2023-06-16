@@ -50,10 +50,11 @@ public class StreamingRunner {
         String apiKey = Files.readString(filePath).trim();
         List<ChatMessage> messages = new ArrayList<>();
         String content = "";
-        for (int i = 0; i < 10; i++) { // 10000 for error
-            content = content + " " + i;
-        }
-        content = content + " What is the first and what is the last number in this message?";
+//        for (int i = 0; i < 10; i++) { // 10000 for error
+//            content = content + " " + i;
+//        }
+//        content = content + " What is the first and what is the last number in this message?";
+        content = "Create a haiku about the weather.";
         messages.add(new ChatMessage("user", content));
         ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
                 .model(DEFAULT_MODEL)
@@ -80,13 +81,16 @@ public class StreamingRunner {
         // print all headers of response
         response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v));
         // result:  {"id":"chatcmpl-7PF2mSly0Vt200mHpNshcxGKCrXTM","object":"chat.completion.chunk","created":1686250384,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{"role":"assistant"},"index":0,"finish_reason":null}]}
-        //The first number in this message is 0 and the last number is 9. {"id":"chatcmpl-7PF2mSly0Vt200mHpNshcxGKCrXTM","object":"chat.completion.chunk","created":1686250384,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{},"index":0,"finish_reason":"stop"}]}
+        // {"id":"chatcmpl-7RnobyLIyEVNSrc3AKIAukowesabD","object":"chat.completion.chunk","created":1686860701,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{"content":"Rain"},"index":0,"finish_reason":null}]}
+        // {"id":"chatcmpl-7RnobyLIyEVNSrc3AKIAukowesabD","object":"chat.completion.chunk","created":1686860701,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{"content":"drops"},"index":0,"finish_reason":null}]}
+        // The first number in this message is 0 and the last number is 9. {"id":"chatcmpl-7PF2mSly0Vt200mHpNshcxGKCrXTM","object":"chat.completion.chunk","created":1686250384,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{},"index":0,"finish_reason":"stop"}]}
         //DONE
     }
 
     private void handleLine(String s) {
         if (s.startsWith("data:")) {
             s = s.substring(5);
+            System.out.println(s);
             if (" [DONE]".equals(s)) {
                 System.out.println("DONE");
                 return;
