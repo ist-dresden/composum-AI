@@ -20,7 +20,8 @@
 	<properties>
 		<openai.api.key>${env.OPENAI_API_KEY}</openai.api.key>
 		<!-- Skip deployment to maven central as this contains configurations. -->
-		<maven.deploy.skip>false</maven.deploy.skip>
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<deploy.package>false</deploy.package>
 	</properties>
 
 	<build>
@@ -53,6 +54,7 @@
 					<properties>
 						<createdBy>${package.company}</createdBy>
 					</properties>
+					<install>false</install>
 
 					<filters>
 						<filter>
@@ -72,6 +74,11 @@
 	</build>
 
 	<profiles>
+
+		<profile>
+			<!-- Try to skip deployment on test.composum.com through Github Actions until OpenAI Key is set. -->
+			<id>develop</id>
+		</profile>
 
 		<profile>
 			<id>installBundle</id>

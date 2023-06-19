@@ -26,7 +26,19 @@
 	<modules>
 		<module>bundle</module>
 		<module>package</module>
-		<module>config</module>
 	</modules>
+
+	<profiles>
+		<profile>
+			<!-- heroic attempt to stop the content-package-maven-plugin from deploying config -->
+			<id>config</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>config</module>
+			</modules>
+		</profile>
+	</profiles>
 
 </project>
