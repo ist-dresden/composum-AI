@@ -3,17 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-composum</artifactId>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration-composum</artifactId>
 		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-integration-composum-package</artifactId>
+	<artifactId>composum-ai-integration-composum-package</artifactId>
 	<packaging>content-package</packaging>
 
-	<name>Composum ChatGPT Integration::Composum::Package</name>
+	<name>Composum AI::Composum::Package</name>
 	<description>
-		Composum specific package for ChatGPT Integration.
+		Composum specific package for Composum AI.
 		Contains the backend base bundle, the composum bundle and the code.
 	</description>
 
@@ -78,7 +78,7 @@
 
 					<filters>
 						<filter>
-							<root>/libs/composum/ai</root>
+							<root>/libs/composum/chatgpt</root>
 							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
 						</filter>
 						<filter>
@@ -87,8 +87,8 @@
 						<filter>
 							<root>/libs/composum/ai/install</root>
 							<includes>
-								<include>.*/composum-chatgpt-integration-backend-base.*\.jar</include>
-								<include>.*/composum-chatgpt-integration-composum-bundle.*\.jar</include>
+								<include>.*/composum-ai-integration-backend-base.*\.jar</include>
+								<include>.*/composum-ai-integration-composum-bundle.*\.jar</include>
 							</includes>
 						</filter>
 					</filters>
@@ -96,12 +96,12 @@
 					<embeddeds>
 						<embedded>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>composum-chatgpt-integration-backend-base</artifactId>
+							<artifactId>composum-ai-integration-backend-base</artifactId>
 							<target>/libs/composum/ai/install</target>
 						</embedded>
 						<embedded>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
+							<artifactId>composum-ai-integration-composum-bundle</artifactId>
 							<target>/libs/composum/ai/install</target>
 						</embedded>
 					</embeddeds>
@@ -136,13 +136,13 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>composum-chatgpt-integration-backend-base</artifactId>
+			<artifactId>composum-ai-integration-backend-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
+			<artifactId>composum-ai-integration-composum-bundle</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

@@ -4,7 +4,7 @@ See also [Composum Integration.md](../composum/ComposumIntegration.md) for speci
 
 ## Naming
 
-Java classes are at com.composum.chatgpt.bundle or in subpackages like com.composum.chatgpt.bundle.model for models.
+Java classes are at com.composum.ai.bundle or in subpackages like com.composum.ai.bundle.model for models.
 Resources are at path /libs/composum/ai/pagesintegration/ .
 
 ## Servlets
@@ -55,14 +55,14 @@ operation `{feature}Dialog` to serve that operation with with the {resourcetype}
 - **Feature JSP:** Create a JSP file for the new feature
   at `/libs/composum/ai/pagesintegration/dialogs/{feature}/{feature}.jsp`. This file will be used to render the
   dialog of the feature. This resource is derived from `com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses a
-  model specific to the feature, `com.composum.chatgpt.bundle.model.ChatGPT{Feature}DialogModel`.
+  model specific to the feature, `com.composum.ai.bundle.model.ChatGPT{Feature}DialogModel`.
 
 ### 3. CSS
 /libs/composum/ai/pagesintegration/css/dialogs.scss 
 
 ### 4. Java Model
 
-- **Java model**: create model specific to the feature, `com.composum.chatgpt.bundle.model.ChatGPT{Feature}
+- **Java model**: create model specific to the feature, `com.composum.ai.bundle.model.ChatGPT{Feature}
   DialogModel`, that implements properties needed for the JSP.
 
 ### 5. JavaScript File

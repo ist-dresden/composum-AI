@@ -8,14 +8,14 @@
 		<version>1.7.0</version>
 	</parent>
 
-	<groupId>com.composum.chatgpt</groupId>
-	<artifactId>composum-chatgpt-integration</artifactId>
+	<groupId>com.composum.ai</groupId>
+	<artifactId>composum-ai-integration</artifactId>
 	<version>0.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Composum ChatGPT Integration</name>
+	<name>Composum AI</name>
 	<description>
-		Reactor for Composum ChatGPT Integration, a set of modules to provide ChatGPT services for CMS like Composum
+		Reactor for Composum AI, a set of modules to provide AI based services for CMS like Composum
 		Pages or AEM
 	</description>
 	<url>https://github.com/ist-dresden/composum-chatgpt-integration</url>

@@ -3,17 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration</artifactId>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration</artifactId>
 		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-integration-backend</artifactId>
+	<artifactId>composum-ai-integration-backend</artifactId>
 	<packaging>pom</packaging>
 
-	<name>Composum ChatGPT Integration::Backend</name>
+	<name>Composum AI::Backend</name>
 	<description>
-		Reactor for Composum ChatGPT Integration Backend modules.
+		Reactor for Composum AI Integration Backend modules.
 	</description>
 
 	<modules>

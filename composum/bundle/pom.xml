@@ -3,23 +3,23 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-composum</artifactId>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration-composum</artifactId>
 		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
+	<artifactId>composum-ai-integration-composum-bundle</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Composum ChatGPT Integration::Composum::Bundle</name>
+	<name>Composum AI::Composum::Bundle</name>
 	<description>
-		Composum specific bundle for ChatGPT integration
+		Composum specific bundle for Composum AI
 	</description>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.composum.chatgpt</groupId>
-			<artifactId>composum-chatgpt-integration-backend-base</artifactId>
+			<groupId>com.composum.ai</groupId>
+			<artifactId>composum-ai-integration-backend-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -175,7 +175,7 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							com.composum.chatgpt.bundle.*
+							com.composum.ai.bundle.*
 						</Export-Package>
 					</instructions>
 				</configuration>

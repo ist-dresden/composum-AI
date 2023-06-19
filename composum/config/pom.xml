@@ -4,16 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-composum</artifactId>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration-composum</artifactId>
 		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-config</artifactId>
+	<artifactId>composum-ai-config</artifactId>
 	<packaging>content-package</packaging>
 
-	<name>Composum ChatGPT Config</name>
-	<description>Configuration for Composum ChatGPT Integration</description>
+	<name>Composum AI Config</name>
+	<description>Configuration for Composum AI Integration</description>
 
 
 	<build>

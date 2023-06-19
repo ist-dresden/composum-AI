@@ -3,17 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-backend</artifactId>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration-backend</artifactId>
 		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>composum-chatgpt-integration-backend-base</artifactId>
+	<artifactId>composum-ai-integration-backend-base</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Composum ChatGPT Integration::Backend::Base</name>
+	<name>Composum AI::Backend::Base</name>
 	<description>
-		Basic functionality for ChatGPT integration, somewhat platform agnostic
+		Basic functionality for Composum AI, somewhat platform agnostic
 	</description>
 
 	<properties>
@@ -120,8 +120,8 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							!com.composum.chatgpt.base.*.impl,
-							com.composum.chatgpt.base.*
+							!com.composum.ai.base.*.impl,
+							com.composum.ai.base.*
 						</Export-Package>
 						<Embed-Dependency>
 							api*;groupId=com.theokanning.openai-gpt3-java,
