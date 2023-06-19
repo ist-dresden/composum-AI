@@ -9,7 +9,7 @@
 			sling:resourceType="composum/ai/pagesintegration/tools/review"
 			categories="[context,standalone,edit,page,container,element]"
 			iconClass="commenting-o"
-			hint="ChatGPT based page review"
+			hint="AI based page review"
 			title="Page review"
 			order="{Long}500"/>
 	<labelExtension

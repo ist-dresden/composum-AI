@@ -4,10 +4,10 @@
 <%@taglib prefix="cpp" uri="http://sling.composum.com/cppl/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
-<cpp:element var="model" type="com.composum.ai.composum.bundle.model.ChatGPTCategorizeDialogModel"
-             cssBase="composum-chatgpt-pagesintegration-dialogs-categorize"
-             id="chatgpt-categorize-dialog" cssAdd="dialog modal fade composum-chatgpt-dialog" role="dialog">
-    <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.ChatGPTCategorizeDialogModel"--%>
+<cpp:element var="model" type="com.composum.ai.composum.bundle.model.CategorizeDialogModel"
+             cssBase="composum-ai-pagesintegration-dialogs-categorize"
+             id="ai-categorize-dialog" cssAdd="dialog modal fade composum-ai-dialog" role="dialog">
+    <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.CategorizeDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">
             <form class="widget-form">

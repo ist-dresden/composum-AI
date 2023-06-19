@@ -347,7 +347,7 @@ We use the following identifiers:
   - Back Button: back-button
   - Forward Button: forward-button
   - Alert Text: alert
-  - ChatGPT Response Field: chatgpt-response-field
+  - ChatGPT Response Field: ai-response-field
   - Replace Button: replace-button
   - Append Button: append-button
   - Cancel Button: cancel-button

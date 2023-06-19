@@ -23,9 +23,9 @@ import com.composum.sling.core.util.ResourceUtil;
  * <li>the pagecategories button, visible only for the categories of the page, which is a multi textfield for property "category" : cpp:widget label="Category" property="category" type="textfield" multi="true"</li>
  * </ul>
  */
-public class ChatGPTLabelExtensionModel extends AbstractModel {
+public class LabelExtensionModel extends AbstractModel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChatGPTLabelExtensionModel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LabelExtensionModel.class);
 
     private boolean valid;
     private EditWidgetTag widget;
@@ -72,7 +72,7 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
             if (propertyResource == null) {
                 propertyResource = new SyntheticResource(getResource().getResourceResolver(), getPath() + '/' + widget.getProperty(), "nt:unstructured");
             }
-            ChatGPTTranslationDialogModel translationmodel = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
+            TranslationDialogModel translationmodel = context.withResource(propertyResource).adaptTo(TranslationDialogModel.class);
             if (translationmodel != null) {
                 translationmodel.setPropertyI18nPath(getPropertyI18nPath());
             }
@@ -125,7 +125,7 @@ public class ChatGPTLabelExtensionModel extends AbstractModel {
 
     @Override
     public String toString() {
-        return "ChatGPTLabelExtensionModel{" +
+        return "LabelExtensionModel{" +
                 "resource=" + resource.getPath() +
                 ", valid=" + valid +
                 ", widget=" + widget +

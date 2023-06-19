@@ -18,7 +18,7 @@ import com.composum.sling.core.ResourceHandle;
  * The dialog is rendered with `/libs/composum/ai/pagesintegration/dialogs/categorize/categorize.jsp`
  * (resource composum/ai/pagesintegration/dialogs/categorize in Apache Sling) from
  * `com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses model
- * `model.com.composum.ai.composum.bundle.ChatGPTCategorizeDialogModel`.
+ * `model.com.composum.ai.composum.bundle.CategorizeDialogModel`.
  * The URL is e.g.
  * `/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
  * and the currently assigned categories are added as parameter 'category' (multiple values).
@@ -34,7 +34,7 @@ import com.composum.sling.core.ResourceHandle;
  * The current categories are not taken from the resource, but from the dialog this is called from, since the user
  * might have modified this, and are transmitted as parameter 'category' (multiple values) in the request.
  */
-public class ChatGPTCategorizeDialogModel extends AbstractModel {
+public class CategorizeDialogModel extends AbstractModel {
 
     /**
      * Initializes the model.

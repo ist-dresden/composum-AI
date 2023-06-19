@@ -28,11 +28,11 @@
          * Thus we bind ourselves into our buttons rendered into the dialog by the labelextension.jsp */
         chatgpt.dialogInitializeView = function (dialog, $element) {
             console.log('chatgpt.dialogInitializeView', dialog, $element);
-            let $translationButtons = $element.find('.widget-chatgptaction.action-translate');
+            let $translationButtons = $element.find('.widget-ai-action.action-translate');
             $translationButtons.click(chatgpt.openTranslateDialog);
-            let $categorizeButtons = $element.find('.widget-chatgptaction.action-pagecategories');
+            let $categorizeButtons = $element.find('.widget-ai-action.action-pagecategories');
             $categorizeButtons.click(chatgpt.openCategorizeDialog);
-            let $createButtons = $element.find('.widget-chatgptaction.action-create');
+            let $createButtons = $element.find('.widget-ai-action.action-create');
             $createButtons.click(chatgpt.openCreationDialog);
         };
 

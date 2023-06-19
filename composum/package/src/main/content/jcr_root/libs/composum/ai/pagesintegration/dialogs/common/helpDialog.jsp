@@ -7,7 +7,7 @@
 <cpp:defineFrameObjects/>
 <cpp:model var="model" type="com.composum.pages.commons.model.Page">
     <%--@elvariable id="model" type="com.composum.pages.commons.model.Page"--%>
-    <div class="dialog modal fade composum-chatgpt-dialog composum-chatgpt-pagesintegration-dialogs-help extra-wide in"
+    <div class="dialog modal fade composum-ai-dialog composum-ai-pagesintegration-dialogs-help extra-wide in"
          role="dialog">
         <div class="modal-dialog form-panel">
             <div class="modal-content">

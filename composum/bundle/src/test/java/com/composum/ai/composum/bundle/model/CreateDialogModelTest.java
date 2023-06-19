@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class ChatGPTCreateDialogModelTest {
+public class CreateDialogModelTest {
 
-    private ChatGPTCreateDialogModel model = new ChatGPTCreateDialogModel();
+    private CreateDialogModel model = new CreateDialogModel();
 
     @Test
     public void testGetPredefinedPrompts() {

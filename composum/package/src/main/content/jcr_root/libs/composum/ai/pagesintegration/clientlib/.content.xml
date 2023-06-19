@@ -2,7 +2,7 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
         jcr:primaryType="sling:Folder"
         sling:resourceType="composum/nodes/commons/clientlib"
-        jcr:description="clientlib for the ChatGPT extension to Pages"
+        jcr:description="clientlib for the AI extension to Pages"
         category="[composum.components.widgets]"
         order="{Long}1000">
     <css jcr:primaryType="sling:OrderedFolder"

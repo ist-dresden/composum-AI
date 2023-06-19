@@ -37,7 +37,7 @@ import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
-import com.composum.ai.composum.bundle.model.ChatGPTTranslationDialogModel;
+import com.composum.ai.composum.bundle.model.TranslationDialogModel;
 import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.servlet.AbstractServiceServlet;
@@ -231,7 +231,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
                         propertyResource = new SyntheticResource(resolver, path + '/' + property, null);
                     }
                     BeanContext context = new BeanContext.Servlet(getServletContext(), bundleContext, request, response);
-                    ChatGPTTranslationDialogModel model = context.withResource(propertyResource).adaptTo(ChatGPTTranslationDialogModel.class);
+                    TranslationDialogModel model = context.withResource(propertyResource).adaptTo(TranslationDialogModel.class);
                     if (model == null) {
                         status.error("Could not read from " + path + '/' + property);
                     } else {

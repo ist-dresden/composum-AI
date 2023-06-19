@@ -56,10 +56,10 @@
                 this.$contentSelect = this.$el.find('.content-selector');
                 this.$textLength = this.$el.find('.text-length-selector');
                 this.$prompt = this.$el.find('.prompt-textarea');
-                this.$outputField = this.$el.find('.chatgpt-response-field');
+                this.$outputField = this.$el.find('.ai-response-field');
                 this.$alert = this.$el.find('.alert');
                 this.$loading = this.$el.find('.loading-indicator');
-                this.$response = this.$el.find('.chatgpt-response-field');
+                this.$response = this.$el.find('.ai-response-field');
 
                 this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
                 this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));

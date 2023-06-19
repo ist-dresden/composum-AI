@@ -4,10 +4,10 @@
 <%@taglib prefix="cpp" uri="http://sling.composum.com/cppl/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
-<cpp:element var="model" type="com.composum.ai.composum.bundle.model.ChatGPTCreateDialogModel"
-             cssBase="composum-chatgpt-pagesintegration-dialogs-create"
-             cssAdd="dialog modal fade composum-chatgpt-dialog extra-wide" role="dialog">
-    <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.ChatGPTCreateDialogModel"--%>
+<cpp:element var="model" type="com.composum.ai.composum.bundle.model.CreateDialogModel"
+             cssBase="composum-ai-pagesintegration-dialogs-create"
+             cssAdd="dialog modal fade composum-ai-dialog extra-wide" role="dialog">
+    <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.CreateDialogModel"--%>
     <div class="modal-dialog form-panel">
         <div class="modal-content">
             <form class="widget-form">
@@ -117,15 +117,15 @@
                             <div class="form-group">
                                 <c:choose>
                                     <c:when test="${model.isRichText}">
-                                        <cpp:widgetForm disabled="true" cssBase="composum-chatgpt-pagesintegration-dialogs-create"
-                                                        cssAdd="chatgpt-response-field">
+                                        <cpp:widgetForm disabled="true" cssBase="composum-ai-pagesintegration-dialogs-create"
+                                                        cssAdd="ai-response-field">
                                             <cpp:widget type="richtext"
-                                                        modelClass="com.composum.ai.composum.bundle.model.ChatGPTCreateDialogModel"/>
+                                                        modelClass="com.composum.ai.composum.bundle.model.CreateDialogModel"/>
                                         </cpp:widgetForm>
                                     </c:when>
                                     <c:otherwise>
                                         <textarea name="response"
-                                                  class="form-control chatgpt-response-field" rows="10"></textarea>
+                                                  class="form-control ai-response-field" rows="10"></textarea>
                                     </c:otherwise>
                                 </c:choose>
                             </div>

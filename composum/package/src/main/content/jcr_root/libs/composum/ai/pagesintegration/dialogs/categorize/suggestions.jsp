@@ -4,8 +4,8 @@
 <%@taglib prefix="cpp" uri="http://sling.composum.com/cppl/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
-<cpn:component var="model" type="com.composum.ai.composum.bundle.model.ChatGPTCategorizeDialogModel">
-    <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.ChatGPTCategorizeDialogModel"--%>
+<cpn:component var="model" type="com.composum.ai.composum.bundle.model.CategorizeDialogModel">
+    <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.CategorizeDialogModel"--%>
     <c:forEach var="category" items="${model.suggestedCategories}">
         <div class="category-item form-group">
             <div class="category-select">

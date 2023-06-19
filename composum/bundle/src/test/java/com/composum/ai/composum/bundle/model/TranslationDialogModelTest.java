@@ -29,10 +29,10 @@ import com.composum.pages.commons.service.SiteManager;
 import com.composum.sling.core.BeanContext;
 
 /**
- * Tests for {@link ChatGPTTranslationDialogModel}.
+ * Tests for {@link TranslationDialogModel}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ChatGPTTranslationDialogModelTest {
+public class TranslationDialogModelTest {
 
     public static final String PATH = "/content/i18izedpage";
     @Rule
@@ -84,7 +84,7 @@ public class ChatGPTTranslationDialogModelTest {
     public void testModel() {
         context.request().setParameterMap(Map.of("propertypath", "jcr:description"));
         Resource resource = context.resourceResolver().getResource(PATH + "/jcr:content/jcr:description");
-        ChatGPTTranslationDialogModel model = beanContext.withResource(resource).adaptTo(ChatGPTTranslationDialogModel.class);
+        TranslationDialogModel model = beanContext.withResource(resource).adaptTo(TranslationDialogModel.class);
         ec.checkThat(model, is(notNullValue()));
         ec.checkThat(model.getPropertyEditHandle(), is(notNullValue()));
         ec.checkThat(model.getPropertyName(), is("jcr:description"));

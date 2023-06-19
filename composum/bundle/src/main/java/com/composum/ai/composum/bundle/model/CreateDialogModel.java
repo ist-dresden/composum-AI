@@ -7,7 +7,7 @@ import java.util.Map;
 import com.composum.pages.commons.model.AbstractModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ChatGPTCreateDialogModel extends AbstractModel {
+public class CreateDialogModel extends AbstractModel {
 
     private final ObjectMapper mapper = new ObjectMapper();
 

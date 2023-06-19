@@ -19,7 +19,7 @@ import com.composum.sling.core.BeanContext;
 /**
  * Model for rendering the translation dialog. It gets instantiated on a property resource, e.g. page/cr:content/jcr:description .
  */
-public class ChatGPTTranslationDialogModel extends AbstractModel {
+public class TranslationDialogModel extends AbstractModel {
 
     /**
      * The name of the property for which the translation dialog is opened, e.g. "jcr:title", "title", "text", ...
