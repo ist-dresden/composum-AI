@@ -181,13 +181,13 @@ See also [Composum Integration.md](../composum/ComposumIntegration.md) and [Arch
 
 The dialog is rendered with `/libs/composum/ai/pagesintegration/dialogs/translate/translate.jsp`
 (resource composum/ai/pagesintegration/dialogs/translate in Apache Sling) from
-`com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses model
+`com.composum.ai.composum.bundle.AIDialogServlet` and uses model
 `model.com.composum.ai.composum.bundle.ChatGPTTranslationDialogModel` .
 The URL is e.g.
 `/bin/cpm/platform/ai/dialog.translationDialog.html/content/ist/software/home/test/_jcr_content/jcr:description?propertypath=jcr:description&pages.locale=de`
 
 The Javascript class TranslationDialog in `/libs/composum/ai/pagesintegration/js/chatgpt.js` triggers the loading 
-of the dialog and does call `com.composum.ai.composum.bundle.ChatGPTServlet.TranslateOperation` with
+of the dialog and does call `com.composum.ai.composum.bundle.AIServlet.TranslateOperation` with
 `/bin/cpm/platform/ai/authoring.translate.json` for the translation.
 
 ## Test cases

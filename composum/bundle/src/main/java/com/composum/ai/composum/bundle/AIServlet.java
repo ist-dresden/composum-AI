@@ -51,14 +51,14 @@ import com.composum.sling.core.util.XSS;
  */
 @Component(service = Servlet.class,
         property = {
-                Constants.SERVICE_DESCRIPTION + "=Composum ChatGPT Servlet",
+                Constants.SERVICE_DESCRIPTION + "=Composum AI Backend Servlet",
                 ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/authoring",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
-public class ChatGPTServlet extends AbstractServiceServlet {
+public class AIServlet extends AbstractServiceServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChatGPTServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AIServlet.class);
 
     /**
      * Parameter to transmit a text on which ChatGPT is to operate - not as instructions but as data.

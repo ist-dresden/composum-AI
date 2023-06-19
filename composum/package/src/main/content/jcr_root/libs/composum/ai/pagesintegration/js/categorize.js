@@ -5,21 +5,21 @@
  */
 (function (window) {
     window.composum = window.composum || {};
-    window.composum.chatgpt = window.composum.chatgpt || {};
+    window.composum.ai = window.composum.ai || {};
 
-    (function (chatgpt, dialogs, pages, core, components) {
+    (function (ai, dialogs, pages, core, components) {
         'use strict';
 
-        chatgpt.const = chatgpt.const || {};
-        chatgpt.const.url = chatgpt.const.url || {};
-        chatgpt.const.url.categorize = {
+        ai.const = ai.const || {};
+        ai.const.url = ai.const.url || {};
+        ai.const.url.categorize = {
             categorizeDialog: '/bin/cpm/platform/ai/dialog.categorizeDialog.html',
             categorizeSuggestions: '/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html'
         }
 
         /** Opens the categorize dialog. The current categories are not taken from the resource, but from the dialog
          * this is called from, since the user might have modified this. */
-        chatgpt.openCategorizeDialog = function (event) {
+        ai.openCategorizeDialog = function (event) {
             console.log('openCategorizeDialog', arguments);
             let $target = $(event.target);
             var path = $target.data('path');
@@ -34,13 +34,13 @@
                     categories.push(value);
                 }
             });
-            var url = chatgpt.const.url.categorize.categorizeDialog + core.encodePath(path + '/' + property);
+            var url = ai.const.url.categorize.categorizeDialog + core.encodePath(path + '/' + property);
             var urlparams = '';
             if (categories.length > 0) {
                 urlparams += "?category=" + categories.map(encodeURIComponent).join("&category=");
             }
             url = url + urlparams;
-            core.openFormDialog(url, chatgpt.CategorizeDialog, {
+            core.openFormDialog(url, ai.CategorizeDialog, {
                 widget: $widget,
                 categories: categories,
                 path: path,
@@ -54,12 +54,12 @@
          * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
          * @param options{widget, categories, path, property, categoryparams}
          */
-        chatgpt.CategorizeDialog = core.components.FormDialog.extend({
+        ai.CategorizeDialog = core.components.FormDialog.extend({
 
             /** $el is the dialog */
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
-                chatgpt.commonDialogInit(this.$el);
+                ai.commonDialogInit(this.$el);
                 this.widget = options.widget;
                 this.categories = options.categories;
                 this.path = options.path;
@@ -74,7 +74,7 @@
 
             /** Load the suggestions for categories. */
             loadSuggestions: function () {
-                var url = chatgpt.const.url.categorize.categorizeSuggestions +
+                var url = ai.const.url.categorize.categorizeSuggestions +
                     core.encodePath(this.path + '/' + this.property + this.categoryparams);
                 core.getHtml(url, _.bind(this.onSuggestions, this));
             },
@@ -123,6 +123,6 @@
 
         });
 
-    })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
+    })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);

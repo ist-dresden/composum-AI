@@ -25,7 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 
 /**
- * Test for {@link ApproximateMarkdownServiceImpl}, mostly generated with ChatGPT and then fixed.
+ * Test for {@link ApproximateMarkdownServiceImpl}, mostly generated with the AI and then fixed.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ApproximateMarkdownServiceImplTest {

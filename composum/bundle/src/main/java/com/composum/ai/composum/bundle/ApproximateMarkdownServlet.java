@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(service = Servlet.class,
         property = {
-                Constants.SERVICE_DESCRIPTION + "=Composum ChatGPT Approximated Markdown Servlet",
+                Constants.SERVICE_DESCRIPTION + "=Composum AI Approximated Markdown Servlet",
                 ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/approximated.markdown",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })

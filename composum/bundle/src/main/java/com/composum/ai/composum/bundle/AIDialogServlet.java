@@ -33,15 +33,15 @@ import com.composum.sling.core.util.XSS;
  */
 @Component(service = Servlet.class,
         property = {
-                Constants.SERVICE_DESCRIPTION + "=Composum ChatGPT Servlet",
+                Constants.SERVICE_DESCRIPTION + "=Composum AI Dialog Servlet",
                 ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/dialog",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
-public class ChatGPTDialogServlet extends AbstractServiceServlet {
+public class AIDialogServlet extends AbstractServiceServlet {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChatGPTDialogServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AIDialogServlet.class);
 
     public enum Extension {json, html}
 

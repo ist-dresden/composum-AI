@@ -5,47 +5,47 @@
  */
 (function (window) {
     window.composum = window.composum || {};
-    window.composum.chatgpt = window.composum.chatgpt || {};
+    window.composum.ai = window.composum.ai || {};
 
-    (function (chatgpt, dialogs, pages, core, components) {
+    (function (ai, dialogs, pages, core, components) {
         'use strict';
 
-        chatgpt.const = chatgpt.const || {};
-        chatgpt.const.url = chatgpt.const.url || {};
-        chatgpt.const.url.create = {
+        ai.const = ai.const || {};
+        ai.const.url = ai.const.url || {};
+        ai.const.url.create = {
             createDialog: '/bin/cpm/platform/ai/dialog.creationDialog.html'
         }
 
-        chatgpt.openCreationDialog = function (event) {
+        ai.openCreationDialog = function (event) {
             let $target = $(event.target);
             let path = $target.data('path');
             let pagePath = $target.data('pagepath');
             let property = $target.data('property');
             let propertypath = $target.data('propertypath');
-            let outputfield = chatgpt.searchInput($target);
+            let outputfield = ai.searchInput($target);
             let widget = core.widgetOf(outputfield);
             let isRichText = widget && !!widget.richText;
-            let url = chatgpt.const.url.create.createDialog + core.encodePath(path + '/' + property) +
+            let url = ai.const.url.create.createDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
-            core.openFormDialog(url, chatgpt.CreateDialog, {
+            core.openFormDialog(url, ai.CreateDialog, {
                 widget: widget, isRichText: isRichText,
                 componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
             });
         }
 
         /** Maps widget paths to the saved state for the dialog. */
-        chatgpt.createDialogStates = {};
+        ai.createDialogStates = {};
 
         /**
          * Dialog for categorize - giving a page categories.
          * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
          * @param options{widget, isRichText, componentPath, pagePath, componentPropertyPath}
          */
-        chatgpt.CreateDialog = core.components.FormDialog.extend({
+        ai.CreateDialog = core.components.FormDialog.extend({
 
             initialize: function (options) {
                 core.components.FormDialog.prototype.initialize.apply(this, [options]);
-                chatgpt.commonDialogInit(this.$el);
+                ai.commonDialogInit(this.$el);
                 this.widget = options.widget;
                 this.isRichText = options.isRichText;
                 this.componentPath = options.componentPath;
@@ -80,10 +80,10 @@
                     this.$alert.text('Bug, please report: no widget found for ' + this.componentPropertyPath);
                 }
 
-                this.history = chatgpt.createDialogStates[this.componentPropertyPath];
+                this.history = ai.createDialogStates[this.componentPropertyPath];
                 if (!this.history) {
                     this.history = [];
-                    chatgpt.createDialogStates[this.componentPropertyPath] = this.history;
+                    ai.createDialogStates[this.componentPropertyPath] = this.history;
                 }
                 this.historyPosition = this.history.length - 1;
                 if (this.historyPosition >= 0) {
@@ -196,7 +196,7 @@
                     inputText = this.$outputField.val();
                 }
 
-                let url = chatgpt.const.url.general.authoring + ".create.json";
+                let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
                         contentSelect: contentSelect,
                         textLength: textLength,
@@ -276,6 +276,6 @@
         });
 
 
-    })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
+    })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);

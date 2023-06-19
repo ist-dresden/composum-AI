@@ -17,7 +17,7 @@ import com.composum.sling.core.ResourceHandle;
  * <p>
  * The dialog is rendered with `/libs/composum/ai/pagesintegration/dialogs/categorize/categorize.jsp`
  * (resource composum/ai/pagesintegration/dialogs/categorize in Apache Sling) from
- * `com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses model
+ * `com.composum.ai.composum.bundle.AIDialogServlet` and uses model
  * `model.com.composum.ai.composum.bundle.CategorizeDialogModel`.
  * The URL is e.g.
  * `/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`

@@ -5,14 +5,14 @@
  */
 (function (window) {
     window.composum = window.composum || {};
-    window.composum.chatgpt = window.composum.chatgpt || {};
+    window.composum.ai = window.composum.ai || {};
 
-    (function (chatgpt, dialogs, pages, core, components) {
+    (function (ai, dialogs, pages, core, components) {
         'use strict';
 
-        chatgpt.const = chatgpt.const || {};
-        chatgpt.const.url = chatgpt.const.url || {};
-        chatgpt.const.url.translate = {
+        ai.const = ai.const || {};
+        ai.const.url = ai.const.url || {};
+        ai.const.url.translate = {
             translationDialog: '/bin/cpm/platform/ai/dialog.translationDialog.html'
         };
 
@@ -21,11 +21,11 @@
          * @param options{path,propertyName, widget}
          */
         // as example see replication.PublishDialog
-        chatgpt.TranslationDialog = components.LoadedDialog.extend({
+        ai.TranslationDialog = components.LoadedDialog.extend({
 
             initialize: function (options) {
                 components.LoadedDialog.prototype.initialize.call(this, options);
-                chatgpt.commonDialogInit(this.$el);
+                ai.commonDialogInit(this.$el);
                 this.$pathfield = this.$el.find('input[name="path"]');
                 this.$propertyfield = this.$el.find('input[name="property"]');
                 this.$accept = this.$el.find('.btn-primary.accept');
@@ -90,7 +90,7 @@
 
                 console.log('translate', arguments);
                 this.setTranslating();
-                let url = chatgpt.const.url.general.authoring + ".translate.json";
+                let url = ai.const.url.general.authoring + ".translate.json";
                 core.ajaxPost(url, {
                         sourceLanguage: language,
                         path: this.$pathfield.val(),
@@ -151,23 +151,23 @@
 
         });
 
-        chatgpt.openTranslateDialog = function (event) {
+        ai.openTranslateDialog = function (event) {
             let $target = $(event.target);
             var path = $target.data('path');
             var property = $target.data('property');
             var propertypath = $target.data('propertypath');
-            let outputfield = chatgpt.searchInput($target);
+            let outputfield = ai.searchInput($target);
             let widget = core.widgetOf(outputfield);
             if (!widget) {
                 console.error("Bug: cannot find widget for ", this.$outputfield);
                 throw "Bug: cannot find widget for " + this.$outputfield;
             }
             let isRichText = !!widget.richText;
-            var url = chatgpt.const.url.translate.translationDialog + core.encodePath(path + '/' + property) +
+            var url = ai.const.url.translate.translationDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
-            core.openFormDialog(url, chatgpt.TranslationDialog, {widget: widget, isRichText: isRichText});
+            core.openFormDialog(url, ai.TranslationDialog, {widget: widget, isRichText: isRichText});
         }
 
-    })(window.composum.chatgpt, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
+    })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);

@@ -307,7 +307,7 @@ The implementation of a dialog consists of the following parts:
 
 1. The dialog would be rendered with `/libs/composum/ai/pagesintegration/dialogs/create/create.jsp` (resource
    composum/ai/pagesintegration/dialogs/create in Apache Sling)
-   from `com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses
+   from `com.composum.ai.composum.bundle.AIDialogServlet` and uses
    model `model.com.composum.ai.composum.bundle.ChatGPTCreateDialogModel`.
 
 2. The URL would be
@@ -318,11 +318,11 @@ The implementation of a dialog consists of the following parts:
    of the dialog
 
 4. The JavaScript class `CreateDialog` in `/libs/composum/ai/pagesintegration/js/chatgpt.js` triggers the loading
-   of the dialog and the JSON AJAX call `com.composum.ai.composum.bundle.ChatGPTServlet.CreationOperation`
+   of the dialog and the JSON AJAX call `com.composum.ai.composum.bundle.AIServlet.CreationOperation`
    with `/bin/cpm/platform/ai/authoring.create.json` for the creation process.
 
 6. Necessary extensions:
-    - `com.composum.ai.composum.bundle.ChatGPTDialogServlet` new operation `creationDialog`.
+    - `com.composum.ai.composum.bundle.AIDialogServlet` new operation `creationDialog`.
 
 - possibly changes to the backend if necessary.
 

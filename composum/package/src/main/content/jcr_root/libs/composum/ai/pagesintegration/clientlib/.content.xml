@@ -12,7 +12,7 @@
                 ]"/>
     <js jcr:primaryType="sling:OrderedFolder"
             embed="[
-                    composum/ai/pagesintegration/js/chatgpt.js,
+                    composum/ai/pagesintegration/js/ai.js,
                     composum/ai/pagesintegration/js/create.js,
                     composum/ai/pagesintegration/js/translate.js,
                     composum/ai/pagesintegration/js/categorize.js
