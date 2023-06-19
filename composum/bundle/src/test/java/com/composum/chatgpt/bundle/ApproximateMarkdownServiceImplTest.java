@@ -22,7 +22,7 @@ import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 
 /**
  * Test for {@link ApproximateMarkdownServiceImpl}, mostly generated with ChatGPT and then fixed.

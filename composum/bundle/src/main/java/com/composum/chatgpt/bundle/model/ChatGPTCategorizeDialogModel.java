@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 
-import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
+import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.chatgpt.bundle.ApproximateMarkdownService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.sling.core.BeanContext;

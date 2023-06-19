@@ -33,10 +33,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.chatgpt.base.service.GPTException;
-import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
-import com.composum.chatgpt.base.service.chat.GPTContentCreationService;
-import com.composum.chatgpt.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.base.service.GPTException;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
+import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.chatgpt.bundle.model.ChatGPTTranslationDialogModel;
 import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;
@@ -296,7 +296,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link com.composum.chatgpt.base.service.chat.GPTContentCreationService#executePrompt(java.lang.String, int)}
+     * Servlet representation of {@link GPTContentCreationService#executePrompt(java.lang.String, int)}
      * with arguments prompt and maxwords.
      * Input parameters is text and the optional numeric parameter maxwords,
      * output is in data.result.text the generated text.
@@ -317,7 +317,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link com.composum.chatgpt.base.service.chat.GPTContentCreationService#executePromptOnText(java.lang.String, java.lang.String, int)}
+     * Servlet representation of {@link GPTContentCreationService#executePromptOnText(java.lang.String, java.lang.String, int)}
      * with arguments prompt, text and maxwords.
      * Input parameters is a text, the prompt to execute on it and the optional numeric parameter maxwords,
      * output is in data.result.text the generated text.

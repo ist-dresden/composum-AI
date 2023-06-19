@@ -21,7 +21,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.sling.core.util.ResourceUtil;
 
 /**

@@ -2,15 +2,13 @@ package com.composum.chatgpt.bundle.model;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.chatgpt.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
 import com.composum.pages.commons.taglib.EditWidgetTag;
