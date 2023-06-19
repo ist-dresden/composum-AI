@@ -175,7 +175,7 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							com.composum.ai.bundle.*
+							com.composum.ai.composum.bundle.*
 						</Export-Package>
 					</instructions>
 				</configuration>

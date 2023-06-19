@@ -120,8 +120,9 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							!com.composum.ai.base.*.impl,
-							com.composum.ai.base.*
+							!com.composum.ai.backend.base.impl,
+							!com.composum.ai.backend.base.*.impl,
+							com.composum.ai.backend.base.*
 						</Export-Package>
 						<Embed-Dependency>
 							api*;groupId=com.theokanning.openai-gpt3-java,
