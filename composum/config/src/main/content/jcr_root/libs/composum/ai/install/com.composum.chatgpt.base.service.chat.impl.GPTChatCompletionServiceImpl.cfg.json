@@ -1,0 +1,5 @@
+{
+  "defaultModel": "gpt-3.5-turbo",
+  "disable": false,
+  "openAiApiKey": "${env.OPENAI_API_KEY}"
+}
