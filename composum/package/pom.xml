@@ -78,10 +78,14 @@
 
 					<filters>
 						<filter>
-							<root>/libs/composum/chatgpt/pagesintegration</root>
+							<root>/libs/composum/ai</root>
+							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
 						</filter>
 						<filter>
-							<root>/libs/composum/chatgpt/install</root>
+							<root>/libs/composum/ai/pagesintegration</root>
+						</filter>
+						<filter>
+							<root>/libs/composum/ai/install</root>
 							<includes>
 								<include>.*/composum-chatgpt-integration-backend-base.*\.jar</include>
 								<include>.*/composum-chatgpt-integration-composum-bundle.*\.jar</include>
@@ -93,12 +97,12 @@
 						<embedded>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>composum-chatgpt-integration-backend-base</artifactId>
-							<target>/libs/composum/chatgpt/install</target>
+							<target>/libs/composum/ai/install</target>
 						</embedded>
 						<embedded>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
-							<target>/libs/composum/chatgpt/install</target>
+							<target>/libs/composum/ai/install</target>
 						</embedded>
 					</embeddeds>
 

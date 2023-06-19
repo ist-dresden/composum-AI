@@ -15,20 +15,20 @@ import com.composum.sling.core.ResourceHandle;
 /**
  * Model for rendering the categorize dialog. It gets instantiated on a property resource, e.g. page/jcr:content/category .
  * <p>
- * The dialog is rendered with `/libs/composum/chatgpt/pagesintegration/dialogs/categorize/categorize.jsp`
- * (resource composum/chatgpt/pagesintegration/dialogs/categorize in Apache Sling) from
+ * The dialog is rendered with `/libs/composum/ai/pagesintegration/dialogs/categorize/categorize.jsp`
+ * (resource composum/ai/pagesintegration/dialogs/categorize in Apache Sling) from
  * `com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses model
  * `model.com.composum.ai.composum.bundle.ChatGPTCategorizeDialogModel`.
  * The URL is e.g.
- * `/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
+ * `/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
  * and the currently assigned categories are added as parameter 'category' (multiple values).
  * <p>
  * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories. This is
  * implemented via a selector:
- * `/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html/content/ist/software/home/test/_jcr_content/category`
- * `/libs/composum/chatgpt/pagesintegration/dialogs/categorize/suggestions.jsp`
+ * `/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html/content/ist/software/home/test/_jcr_content/category`
+ * `/libs/composum/ai/pagesintegration/dialogs/categorize/suggestions.jsp`
  * <p>
- * The Javascript class CategorizeDialog in `/libs/composum/chatgpt/pagesintegration/js/chatgpt.js` triggers the loading
+ * The Javascript class CategorizeDialog in `/libs/composum/ai/pagesintegration/js/chatgpt.js` triggers the loading
  * of the dialog and the AJAX call for loading the suggestions.
  * <p>
  * The current categories are not taken from the resource, but from the dialog this is called from, since the user

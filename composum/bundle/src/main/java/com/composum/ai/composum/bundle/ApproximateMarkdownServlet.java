@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum ChatGPT Approximated Markdown Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/chatgpt/approximated.markdown",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/approximated.markdown",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })
-// curl -u admin:admin http://localhost:9090/bin/cpm/platform/chatgpt/approximated.markdown.md/content/ist/composum/home
+// curl -u admin:admin http://localhost:9090/bin/cpm/platform/ai/approximated.markdown.md/content/ist/composum/home
 public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);

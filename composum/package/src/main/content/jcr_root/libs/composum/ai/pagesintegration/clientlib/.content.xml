@@ -7,15 +7,15 @@
         order="{Long}1000">
     <css jcr:primaryType="sling:OrderedFolder"
             embed="[
-                    composum/chatgpt/pagesintegration/css/widgetextensions.css,
-                    composum/chatgpt/pagesintegration/css/dialogs.css
+                    composum/ai/pagesintegration/css/widgetextensions.css,
+                    composum/ai/pagesintegration/css/dialogs.css
                 ]"/>
     <js jcr:primaryType="sling:OrderedFolder"
             embed="[
-                    composum/chatgpt/pagesintegration/js/chatgpt.js,
-                    composum/chatgpt/pagesintegration/js/create.js,
-                    composum/chatgpt/pagesintegration/js/translate.js,
-                    composum/chatgpt/pagesintegration/js/categorize.js
+                    composum/ai/pagesintegration/js/chatgpt.js,
+                    composum/ai/pagesintegration/js/create.js,
+                    composum/ai/pagesintegration/js/translate.js,
+                    composum/ai/pagesintegration/js/categorize.js
                 ]">
     </js>
 </jcr:root>

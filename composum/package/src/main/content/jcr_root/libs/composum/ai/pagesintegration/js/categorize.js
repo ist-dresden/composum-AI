@@ -13,8 +13,8 @@
         chatgpt.const = chatgpt.const || {};
         chatgpt.const.url = chatgpt.const.url || {};
         chatgpt.const.url.categorize = {
-            categorizeDialog: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html',
-            categorizeSuggestions: '/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html'
+            categorizeDialog: '/bin/cpm/platform/ai/dialog.categorizeDialog.html',
+            categorizeSuggestions: '/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html'
         }
 
         /** Opens the categorize dialog. The current categories are not taken from the resource, but from the dialog

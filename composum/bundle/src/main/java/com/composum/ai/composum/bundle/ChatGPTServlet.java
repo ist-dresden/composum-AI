@@ -52,7 +52,7 @@ import com.composum.sling.core.util.XSS;
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum ChatGPT Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/chatgpt/authoring",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/authoring",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
@@ -203,7 +203,7 @@ public class ChatGPTServlet extends AbstractServiceServlet {
      * a list containing the translation as (currently) a single string.
      * We use a list since it might be sensible to create multiple translation variants in the future, if requested.
      */
-    // http://localhost:9090/bin/cpm/platform/chatgpt/authoring.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
+    // http://localhost:9090/bin/cpm/platform/ai/authoring.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
     public class TranslateOperation extends AbstractGPTServletOperation {
 
         @Override

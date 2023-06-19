@@ -34,7 +34,7 @@ import com.composum.sling.core.util.XSS;
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum ChatGPT Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/chatgpt/dialog",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/dialog",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
@@ -57,13 +57,13 @@ public class ChatGPTDialogServlet extends AbstractServiceServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        // e.g. http://localhost:9090/bin/cpm/platform/chatgpt/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/chatgpt/pagesintegration/dialogs/translate"));
-        // e.g. http://localhost:9090/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
-        // or http://localhost:9090/bin/cpm/platform/chatgpt/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/chatgpt/pagesintegration/dialogs/categorize"));
-        // e.g. http://localhost:9090/bin/cpm/platform/chatgpt/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/chatgpt/pagesintegration/dialogs/create"));
+        // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/ai/pagesintegration/dialogs/translate"));
+        // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
+        // or http://localhost:9090/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/ai/pagesintegration/dialogs/categorize"));
+        // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/ai/pagesintegration/dialogs/create"));
     }
 
     /**

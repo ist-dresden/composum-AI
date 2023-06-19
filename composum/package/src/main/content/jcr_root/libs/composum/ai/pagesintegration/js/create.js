@@ -13,7 +13,7 @@
         chatgpt.const = chatgpt.const || {};
         chatgpt.const.url = chatgpt.const.url || {};
         chatgpt.const.url.create = {
-            createDialog: '/bin/cpm/platform/chatgpt/dialog.creationDialog.html'
+            createDialog: '/bin/cpm/platform/ai/dialog.creationDialog.html'
         }
 
         chatgpt.openCreationDialog = function (event) {

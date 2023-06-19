@@ -6,7 +6,7 @@
           sling:resourceType="composum/pages/tools/collection">
 	<reviewTool
 			jcr:primaryType="nt:unstructured"
-			sling:resourceType="composum/chatgpt/pagesintegration/tools/review"
+			sling:resourceType="composum/ai/pagesintegration/tools/review"
 			categories="[context,standalone,edit,page,container,element]"
 			iconClass="commenting-o"
 			hint="ChatGPT based page review"
@@ -14,7 +14,7 @@
 			order="{Long}500"/>
 	<labelExtension
 			jcr:primaryType="nt:unstructured"
-			resourceType="composum/chatgpt/pagesintegration/widgetextensions/labelextension"
+			resourceType="composum/ai/pagesintegration/widgetextensions/labelextension"
 			categories="[widget,label,standalone,edit,page,container,element]"
 			order="{Long}100"/>
 </jcr:root>

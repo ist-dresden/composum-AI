@@ -26,7 +26,7 @@
 	</modules>
 
 	<properties>
-		<package.group>com/composum/chatgpt</package.group>
+		<package.group>com/composum/ai</package.group>
 	</properties>
 
 	<dependencyManagement>

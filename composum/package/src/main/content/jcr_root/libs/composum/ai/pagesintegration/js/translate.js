@@ -13,7 +13,7 @@
         chatgpt.const = chatgpt.const || {};
         chatgpt.const.url = chatgpt.const.url || {};
         chatgpt.const.url.translate = {
-            translationDialog: '/bin/cpm/platform/chatgpt/dialog.translationDialog.html'
+            translationDialog: '/bin/cpm/platform/ai/dialog.translationDialog.html'
         };
 
         /**

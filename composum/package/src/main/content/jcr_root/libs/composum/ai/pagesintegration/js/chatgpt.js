@@ -20,8 +20,8 @@
         chatgpt.const.url = chatgpt.const.url || {};
         // all dialogs create their own subnodes in chatgpt.const.url to put that into several files.
         chatgpt.const.url.general = {
-            authoring: '/bin/cpm/platform/chatgpt/authoring',
-            markdown: '/bin/cpm/platform/chatgpt/approximated.markdown'
+            authoring: '/bin/cpm/platform/ai/authoring',
+            markdown: '/bin/cpm/platform/ai/approximated.markdown'
         };
 
         /** Will be called from Pages after a dialog is rendered via the dialogplugins hook.
