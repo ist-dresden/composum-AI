@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -78,8 +79,33 @@
 
 					<filters>
 						<filter>
+							<root>/etc/packages/com/composum/chatgpt</root>
+							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
+						</filter>
+						<filter>
+							<root>/etc/packages/com/composum/ai</root>
+							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
+							<includes>
+								<include>.*chatgpt.*</include>
+							</includes>
+						</filter>
+						<filter>
 							<root>/libs/composum/chatgpt</root>
 							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
+						</filter>
+						<filter>
+							<root>/libs/composum/platform/install</root>
+							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
+							<includes>
+								<include>.*chatgpt.*</include>
+							</includes>
+						</filter>
+						<filter>
+							<root>/apps/sling/install</root>
+							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
+							<includes>
+								<include>.*com.composum.chatgpt.*</include>
+							</includes>
 						</filter>
 						<filter>
 							<root>/libs/composum/ai/pagesintegration</root>
@@ -111,7 +137,8 @@
 							<group>com/composum/pages</group>
 							<name>composum-pages-stage-package</name>
 							<!-- Need WidgetTools and labelextensions mechanism from pages 1.5.1 -->
-							<version>1.5.1</version> --&gt;
+							<version>1.5.1</version>
+							--&gt;
 						</dependency>
 					</dependencies>
 
