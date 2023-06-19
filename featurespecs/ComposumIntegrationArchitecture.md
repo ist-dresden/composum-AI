@@ -11,7 +11,7 @@ Resources are at path /libs/composum/chatgpt/pagesintegration/ .
 
 General URL prefix is /bin/cpm/platform/chatgpt/ .
 
-### `com.composum.chatgpt.bundle.ChatGPTDialogServlet`
+### `com.composum.ai.composum.bundle.ChatGPTDialogServlet`
 
 at `/bin/cpm/platform/chatgpt/dialog` : serves the HTML for the dialogs. Follows the usual Composum
 AbstractServiceServlet pattern with an URL like
@@ -21,7 +21,7 @@ AbstractServiceServlet pattern with an URL like
 that shows the translation dialog for the property resource that is given as the suffix.
 Extension can be html or json.
 
-## `com.composum.chatgpt.bundle.ChatGPTServlet`
+## `com.composum.ai.composum.bundle.ChatGPTServlet`
 
 at `/bin/cpm/platform/chatgpt/authoring` is a servlet providing an adapter to the the backend services that call
 ChatGPT. Javascript actions will call that servlet except if they want to render a resource (in that case
@@ -47,14 +47,14 @@ Make a list specifying
 
 ### 1. adapt ChatGPTDialogServlet
 
-Modify the server-side servlet `com.composum.chatgpt.bundle.ChatGPTDialogServlet`: extend the servlet with a new
+Modify the server-side servlet `com.composum.ai.composum.bundle.ChatGPTDialogServlet`: extend the servlet with a new
 operation `{feature}Dialog` to serve that operation with with the {resourcetype} - it'll be available at {dialogURL}.
 
 ### 2. JSP Files
 
 - **Feature JSP:** Create a JSP file for the new feature
   at `/libs/composum/chatgpt/pagesintegration/dialogs/{feature}/{feature}.jsp`. This file will be used to render the
-  dialog of the feature. This resource is derived from `com.composum.chatgpt.bundle.ChatGPTDialogServlet` and uses a
+  dialog of the feature. This resource is derived from `com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses a
   model specific to the feature, `com.composum.chatgpt.bundle.model.ChatGPT{Feature}DialogModel`.
 
 ### 3. CSS

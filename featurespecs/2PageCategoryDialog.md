@@ -165,8 +165,8 @@ The name of the feature that is used in names / IDs is "categorize".
 
 The dialog is rendered with `/libs/composum/chatgpt/pagesintegration/dialogs/categorize/categorize.jsp` 
 (resource composum/chatgpt/pagesintegration/dialogs/categorize in Apache Sling) from
-`com.composum.chatgpt.bundle.ChatGPTDialogServlet` and uses model
-`com.composum.chatgpt.bundle.model.ChatGPTCategorizeDialogModel`.
+`com.composum.ai.composum.bundle.ChatGPTDialogServlet` and uses model
+`model.com.composum.ai.composum.bundle.ChatGPTCategorizeDialogModel`.
 The URL is e.g.
 `/bin/cpm/platform/chatgpt/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
 and the currently assigned categories are added as parameter 'category' (multiple values).
@@ -183,7 +183,7 @@ The current categories are not taken from the resource, but from the dialog this
 might have modified this.
 
 Neccessary extensions:
-- com.composum.chatgpt.bundle.ChatGPTDialogServlet new operation categorizeDialog
+- com.composum.ai.composum.bundle.ChatGPTDialogServlet new operation categorizeDialog
 
 ## Test cases
 

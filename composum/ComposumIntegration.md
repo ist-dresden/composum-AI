@@ -29,7 +29,7 @@ Implemented in Composum Pages https://github.com/ist-dresden/composum-pages/pull
 - For our implementation we use the resource type
   "composum/chatgpt/pagesintegration/widgetextensions/labelextension"
 - /libs/composum/chatgpt/pagesintegration/widgetextensions/labelextension/labelextension.jsp implements the label
-  extensions, drawing on the model com.composum.chatgpt.bundle.model.ChatGPTLabelExtensionModel for visibility
+  extensions, drawing on the model model.com.composum.ai.composum.bundle.ChatGPTLabelExtensionModel for visibility
   checking of the individual buttons.
 - /libs/composum/chatgpt/pagesintegration/css/widgetextensions.scss (and variables.scss and mixins.scss copied from
   pages) for styling of the label extension.
