@@ -18,7 +18,7 @@
 		Reactor for Composum AI, a set of modules to provide AI based services for CMS like Composum
 		Pages or AEM
 	</description>
-	<url>https://github.com/ist-dresden/composum-chatgpt-integration</url>
+	<url>https://github.com/ist-dresden/composum-AI</url>
 
 	<modules>
 		<module>backend</module>
