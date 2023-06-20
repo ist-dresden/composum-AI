@@ -30,8 +30,9 @@ data security rules. It's likely that in time there will also be LLM that can be
 
 ## Current status
 
-In our [first release](https://github.com/ist-dresden/composum-AI/releases/tag/composum-chatgpt
--integration-0.1.1) we have implemented the following dialogs that help with editing in Composum Pages:
+In our 
+[first release](https://github.com/ist-dresden/composum-AI/releases/tag/composum-chatgpt-integration-0.1.1)
+we have implemented the following dialogs that help with editing in Composum Pages:
 
 - a translation dialog that can be opened on any edited textfield in multilingual websites and suggests translations
   of the text of a component into other languages

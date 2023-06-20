@@ -1,6 +1,6 @@
 # Discussion of this module from a Business perspective
 
-The Composum ChatGPT integration project enhances content management in Composum Pages by providing AI-assisted features
+The Composum AI project enhances content management in Composum Pages by providing AI-assisted features
 such as translation, content creation, and SEO keyword suggestion, with potential expansions for to use
 the integration in Adobe Experience Manager.
 
