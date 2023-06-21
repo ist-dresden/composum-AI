@@ -25,9 +25,9 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
 
     private void run() throws InterruptedException {
         GPTChatRequest request = new GPTChatRequest();
-        StringBuilder buffer = new StringBuilder();
-        for (int i = 0; i < 10000; i++) buffer.append("hallo "); // add that to requets to provoke error
-        request.addMessage(GPTMessageRole.USER, "Make 5 haiku about the weather" + buffer);
+        StringBuilder requestElongator = new StringBuilder();
+        // for (int i = 0; i < 10000; i++) requestElongator.append("hallo "); // add that to requets to provoke error
+        request.addMessage(GPTMessageRole.USER, "Make 2 haiku about the weather" + requestElongator);
         chatCompletionService.streamingChatCompletion(request, this);
         System.out.println("Call returned.");
         while (!isFinished) Thread.sleep(1000);
@@ -61,6 +61,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
 
     @Override
     public void onError(Throwable throwable) {
+        isFinished = true;
         throwable.printStackTrace(System.err);
     }
 }

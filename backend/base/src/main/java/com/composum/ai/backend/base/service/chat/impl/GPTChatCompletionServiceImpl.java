@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -240,7 +242,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
             HttpRequest httpRequest = makeRequest(jsonRequest);
 
-            performCallAsync(httpRequest, HttpResponse.BodyHandlers.fromLineSubscriber(new LineSubscriber(callback, id)), 0, 2000);
+            performCallAsync(httpRequest, new ResponseLineSubscriber(callback, id), 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
             Thread.currentThread().interrupt();
@@ -249,14 +251,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    protected class LineSubscriber implements Flow.Subscriber<String> {
+    protected class ResponseLineSubscriber implements Flow.Subscriber<String> {
         private final GPTCompletionCallback callback;
         private final long id;
         private volatile Flow.Subscription subscription;
 
         private volatile boolean cancelled = false;
 
-        public LineSubscriber(GPTCompletionCallback callback, long id) {
+        public ResponseLineSubscriber(GPTCompletionCallback callback, long id) {
             this.callback = callback;
             this.id = id;
         }
@@ -409,33 +411,50 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      * @return the response if it was HTTP 200
      * @throws GPTException if given up or if there was a non-retryable statuscode
      */
-    protected <T> CompletableFuture<HttpResponse<T>> performCallAsync(HttpRequest httpRequest, HttpResponse.BodyHandler<T> bodyHandler, int tryNumber, long defaultDelay) {
+    protected CompletableFuture<HttpResponse<Void>> performCallAsync(HttpRequest httpRequest, Flow.Subscriber<String> lineSubscriber, int tryNumber, long defaultDelay) {
         if (tryNumber >= 5) {
             LOG.error("Got too many 429 / error responses from GPT, giving up.");
-            throw new GPTException("Got too many 429 / error responses from GPT");
+            GPTException gptException = new GPTException("Got too many 429 / error responses from GPT");
+            lineSubscriber.onError(gptException);
+            throw gptException;
         }
+
+        StringBuilder errorResponseBody = new StringBuilder();
+
+        HttpResponse.BodyHandler<Void> bodyHandler = (responseInfo) -> {
+            if (responseInfo.statusCode() == 200) {
+                return HttpResponse.BodyHandlers.fromLineSubscriber(lineSubscriber).apply(responseInfo);
+            } else {
+                return HttpResponse.BodySubscribers.ofByteArrayConsumer(
+                        (bytesOpt) -> bytesOpt.ifPresent(bytes ->
+                                errorResponseBody.append(new String(bytes, UTF_8))
+                        )
+                );
+            }
+        };
 
         return httpClient.sendAsync(httpRequest, bodyHandler)
                 .thenCompose(response -> {
-                    LOG.debug("Got response " + response.statusCode());
                     if (response.statusCode() == 200) return CompletableFuture.completedFuture(response);
                     if (response.statusCode() != 429) {
-                        String responsebody = readoutResponse(response);
-                        LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), responsebody);
-                        throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + responsebody);
+                        LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), errorResponseBody);
+                        GPTException gptException = new GPTException("Got error response from GPT: " + response.statusCode() + " " + errorResponseBody);
+                        lineSubscriber.onError(gptException);
+                        throw gptException;
                     }
 
-                    String responsebody = readoutResponse(response);
-                    long delay = recalculateDelay(responsebody, defaultDelay);
-                    LOG.warn("Got error response from GPT, waiting {} ms: {}", delay, responsebody != null ? responsebody : "(no response)");
+                    long delay = recalculateDelay(errorResponseBody.toString(), defaultDelay);
+                    LOG.warn("Got error response from GPT, waiting {} ms: {}", delay, errorResponseBody != null ? errorResponseBody : "(no response)");
 
                     return CompletableFuture.completedFuture(null)
-                            .thenComposeAsync(v -> performCallAsync(httpRequest, bodyHandler, tryNumber + 1, delay * 2),
+                            .thenComposeAsync(v -> performCallAsync(httpRequest, lineSubscriber, tryNumber + 1, delay * 2),
                                     CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS));
                 })
                 .exceptionally(e -> {
+                    lineSubscriber.onError(e);
                     LOG.error("Error while calling GPT", e);
-                    throw new GPTException("Error while calling GPT", e);
+                    GPTException gptException = new GPTException("Error while calling GPT", e);
+                    throw gptException;
                 });
     }
 
