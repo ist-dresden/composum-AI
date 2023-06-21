@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.concurrent.Flow;
+
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
@@ -12,6 +14,7 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner implements GPTCompletionCallback {
 
     StringBuilder buffer = new StringBuilder();
+    private Flow.Subscription subscription;
 
     public static void main(String[] args) throws Exception {
         RunGPTChatCompletionServiceStreamingImpl instance = new RunGPTChatCompletionServiceStreamingImpl();
@@ -29,13 +32,30 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     }
 
     @Override
-    public void receiveNextData(String data) {
-        buffer.append(data);
-        System.out.println(data);
+    public void onFinish(GPTFinishReason finishReason) {
+        System.out.println("Finished: " + finishReason);
     }
 
     @Override
-    public void receiveFinish(GPTFinishReason finishReason) {
-        System.out.println("Finished: " + finishReason);
+    public void onComplete() {
+        System.out.println("Completed");
+        GPTCompletionCallback.super.onComplete();
+    }
+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        System.out.println("Subscribed");
+        this.subscription = subscription;
+    }
+
+    @Override
+    public void onNext(String item) {
+        buffer.append(item);
+        System.out.println(item);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        throwable.printStackTrace(System.err);
     }
 }

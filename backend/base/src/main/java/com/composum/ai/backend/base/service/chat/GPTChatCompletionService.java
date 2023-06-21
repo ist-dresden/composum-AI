@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat;
 
+import java.util.concurrent.Flow;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -16,13 +18,20 @@ public interface GPTChatCompletionService {
 
     /**
      * The simplest case: give some messages and get a single response.
+     * If the response can be more than a few words, do consider using {@link #streamingChatCompletion(GPTChatRequest, GPTCompletionCallback)} instead,
+     * to give the user some feedback while waiting.
      */
-    String getSingleChatCompletion(GPTChatRequest request) throws GPTException;
+    @Nullable
+    String getSingleChatCompletion(@Nonnull GPTChatRequest request) throws GPTException;
 
     /**
      * Give some messages and receive the streaming response via callback, to reduce waiting time.
+     * It possibly waits if a rate limit is reached, but otherwise returns immediately after scheduling an asynchronous call.
+     * The asynchronous call can be aborted by calling {@link Flow.Subscription#cancel()} on the subscription that is
+     * presented to {@link GPTCompletionCallback#onSubscribe(Flow.Subscription)} once the call is established.
      */
-    void streamingChatCompletion(GPTChatRequest request, GPTCompletionCallback callback) throws GPTException;
+    @Nonnull
+    void streamingChatCompletion(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
     /**
      * Retrieves a (usually cached) chat template with that name. Mostly for backend internal use.

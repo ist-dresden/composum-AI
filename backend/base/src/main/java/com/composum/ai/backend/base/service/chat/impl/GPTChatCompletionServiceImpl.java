@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
@@ -237,13 +238,69 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
 
             HttpRequest httpRequest = makeRequest(jsonRequest);
-            HttpResponse<Stream<String>> response = performCall(httpRequest, HttpResponse.BodyHandlers.ofLines());
-            response.body().forEachOrdered(line -> handleStreamingEvent(callback, id, line));
-            LOG.debug("Response {} from GPT finished", id);
+            HttpResponse<Void> response = performCall(httpRequest, HttpResponse.BodyHandlers.fromLineSubscriber(new LineSubscriber(callback, id)));
+            // by contract with performCall we know that the response has HTTP 200 status code, no need to check it here
+            LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.error("Error while call {} to GPT", id, e);
             throw new GPTException("Error while calling GPT", e);
+        }
+    }
+
+    protected class LineSubscriber implements Flow.Subscriber<String> {
+        private final GPTCompletionCallback callback;
+        private final long id;
+        private volatile Flow.Subscription subscription;
+
+        private volatile boolean cancelled = false;
+
+        public LineSubscriber(GPTCompletionCallback callback, long id) {
+            this.callback = callback;
+            this.id = id;
+        }
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            callback.onSubscribe(
+                    new Flow.Subscription() {
+                        @Override
+                        public void request(long n) {
+                            subscription.request(n);
+                        }
+
+                        @Override
+                        public void cancel() {
+                            cancelled = true;
+                            subscription.cancel();
+                        }
+                    }
+            );
+            subscription.request(Long.MAX_VALUE);
+        }
+
+        @Override
+        public void onNext(String item) {
+            if (!cancelled) {
+                handleStreamingEvent(callback, id, item);
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            if (!cancelled) {
+                LOG.error("Error while streaming call {} to GPT", id, throwable);
+                callback.onError(throwable);
+            }
+        }
+
+        @Override
+        public void onComplete() {
+            if (!cancelled) {
+                LOG.debug("Response {} from GPT finished", id);
+                callback.onComplete();
+            }
         }
     }
 
@@ -268,20 +325,24 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 String content = choice.getMessage().getContent();
                 if (!StringUtil.isBlank(content)) {
                     LOG.debug("Response {} from GPT: {}", id, content);
-                    callback.receiveNextData(content);
+                    callback.onNext(content);
                 }
                 GPTFinishReason finishReason = GPTFinishReason.fromChatGPT(choice.getFinishReason());
                 if (finishReason != null) {
                     LOG.debug("Response {} from GPT finished with reason {}", id, finishReason);
-                    callback.receiveFinish(finishReason);
+                    callback.onFinish(finishReason);
                 }
             } catch (RuntimeException | IOException e) {
                 LOG.error("Id {} Cannot deserialize {}", id, line, e);
-                throw new GPTException("Cannot deserialize " + line, e);
+                GPTException gptException = new GPTException("Cannot deserialize " + line, e);
+                callback.onError(gptException);
+                throw gptException;
             }
         } else if (!line.isBlank()) {
             LOG.error("Bug: Got unexpected line from GPT, expecting streaming data: {}", line);
-            throw new GPTException("Unexpected line from GPT: " + line);
+            GPTException gptException = new GPTException("Unexpected line from GPT: " + line);
+            callback.onError(gptException);
+            throw gptException;
         }
 
     }

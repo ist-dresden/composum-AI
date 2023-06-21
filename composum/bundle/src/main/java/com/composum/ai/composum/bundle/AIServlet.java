@@ -80,6 +80,9 @@ public class AIServlet extends AbstractServiceServlet {
      */
     public static final String PARAMETER_PATH = "path";
 
+    /** If set to true for operations that support it, we use  */
+    public static final String PARAMETER_STREAMING = "streaming";
+
     /**
      * Property name, given as parameter.
      */
