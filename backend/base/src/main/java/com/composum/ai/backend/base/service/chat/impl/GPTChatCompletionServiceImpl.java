@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -238,10 +239,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
 
             HttpRequest httpRequest = makeRequest(jsonRequest);
-            HttpResponse<Void> response = performCall(httpRequest, HttpResponse.BodyHandlers.fromLineSubscriber(new LineSubscriber(callback, id)));
-            // by contract with performCall we know that the response has HTTP 200 status code, no need to check it here
+
+            performCallAsync(httpRequest, HttpResponse.BodyHandlers.fromLineSubscriber(new LineSubscriber(callback, id)), 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             Thread.currentThread().interrupt();
             LOG.error("Error while call {} to GPT", id, e);
             throw new GPTException("Error while calling GPT", e);
@@ -368,6 +369,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      * @throws IOException          if there was an io error
      * @throws InterruptedException if the thread was interrupted
      */
+    // that should be the same as performCallAsync(...,200,0).join(), but I'll replace that when I trust the mechanics there.
     protected <T> HttpResponse<T> performCall(HttpRequest httpRequest, HttpResponse.BodyHandler<T> bodyHandler) throws IOException, InterruptedException {
         HttpResponse<T> response = null;
         long delay = 2000;
@@ -399,6 +401,42 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         String responsebody = response != null ? readoutResponse(response.body()) : "(no response)";
         LOG.error("Got too many 429 / error responses from GPT, giving up. {}", responsebody);
         throw new GPTException("Got too many 429 / error responses from GPT: " + responsebody);
+    }
+
+    /**
+     * Executes a call with retries. It returns a response only if it was HTTP 200, otherwise it's retried or given up.
+     *
+     * @return the response if it was HTTP 200
+     * @throws GPTException if given up or if there was a non-retryable statuscode
+     */
+    protected <T> CompletableFuture<HttpResponse<T>> performCallAsync(HttpRequest httpRequest, HttpResponse.BodyHandler<T> bodyHandler, int tryNumber, long defaultDelay) {
+        if (tryNumber >= 5) {
+            LOG.error("Got too many 429 / error responses from GPT, giving up.");
+            throw new GPTException("Got too many 429 / error responses from GPT");
+        }
+
+        return httpClient.sendAsync(httpRequest, bodyHandler)
+                .thenCompose(response -> {
+                    LOG.debug("Got response " + response.statusCode());
+                    if (response.statusCode() == 200) return CompletableFuture.completedFuture(response);
+                    if (response.statusCode() != 429) {
+                        String responsebody = readoutResponse(response);
+                        LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), responsebody);
+                        throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + responsebody);
+                    }
+
+                    String responsebody = readoutResponse(response);
+                    long delay = recalculateDelay(responsebody, defaultDelay);
+                    LOG.warn("Got error response from GPT, waiting {} ms: {}", delay, responsebody != null ? responsebody : "(no response)");
+
+                    return CompletableFuture.completedFuture(null)
+                            .thenComposeAsync(v -> performCallAsync(httpRequest, bodyHandler, tryNumber + 1, delay * 2),
+                                    CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS));
+                })
+                .exceptionally(e -> {
+                    LOG.error("Error while calling GPT", e);
+                    throw new GPTException("Error while calling GPT", e);
+                });
     }
 
     String readoutResponse(Object response) {

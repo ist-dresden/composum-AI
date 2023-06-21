@@ -15,6 +15,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
 
     StringBuilder buffer = new StringBuilder();
     private Flow.Subscription subscription;
+    private boolean isFinished;
 
     public static void main(String[] args) throws Exception {
         RunGPTChatCompletionServiceStreamingImpl instance = new RunGPTChatCompletionServiceStreamingImpl();
@@ -22,11 +23,14 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
         instance.run();
     }
 
-    private void run() {
+    private void run() throws InterruptedException {
         GPTChatRequest request = new GPTChatRequest();
-        request.addMessage(GPTMessageRole.USER, "Make a haiku about the weather");
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < 10000; i++) buffer.append("hallo "); // add that to requets to provoke error
+        request.addMessage(GPTMessageRole.USER, "Make 5 haiku about the weather" + buffer);
         chatCompletionService.streamingChatCompletion(request, this);
-        System.out.println("Finished");
+        System.out.println("Call returned.");
+        while (!isFinished) Thread.sleep(1000);
         System.out.println("Complete response:");
         System.out.println(buffer);
     }
@@ -40,6 +44,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     public void onComplete() {
         System.out.println("Completed");
         GPTCompletionCallback.super.onComplete();
+        isFinished = true;
     }
 
     @Override
