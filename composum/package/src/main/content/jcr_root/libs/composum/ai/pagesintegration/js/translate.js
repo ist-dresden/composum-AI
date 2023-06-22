@@ -40,6 +40,7 @@
                 this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
                 this.$accept.click(_.bind(this.accept, this));
                 this.$languageSelects.on('change', _.bind(this.languageChanged, this));
+                this.streaming = typeof (EventSource) !== "undefined";
 
                 if (this.$languageSelects.length === 1) {
                     this.translate(this.$languageSelects.first().val());
@@ -94,6 +95,7 @@
                 core.ajaxPost(url, {
                         sourceLanguage: language,
                         path: this.$pathfield.val(),
+                        streaming: this.streaming,
                         property: this.$propertyfield.val()
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.onTranslation, this), _.bind(this.onError, this));
@@ -104,19 +106,32 @@
                     this.runningxhr.abort();
                     this.runningxhr = undefined;
                 }
+                if (this.eventSource) {
+                    this.eventSource.close();
+                    this.eventSource = undefined;
+                }
             },
 
             onTranslation: function (status) {
-                if (status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.translation) {
+                const statusOk = status && status.status >= 200 && status.status < 300 && status.data && status.data.result;
+
+                if (statusOk && status.data.result.translation) {
                     let translationResult = status.data.result.translation[0];
-                    if (this.isRichText) {
-                        this.$translation.html(translationResult);
-                    } else {
-                        this.$translation.text(translationResult);
-                    }
+                    this.setTranslation(translationResult);
                     this.setTranslated();
+                } else if (statusOk && status.data.result.streamid) {
+                    const streamid = status.data.result.streamid;
+                    this.startStreaming(streamid);
                 } else {
                     this.onError(null, status);
+                }
+            },
+
+            setTranslation(translation) {
+                if (this.isRichText) {
+                    this.$translation.html(translationResult);
+                } else {
+                    this.$translation.text(translationResult);
                 }
             },
 
@@ -147,6 +162,22 @@
                 this.$spinner.show();
                 this.$translation.hide();
                 this.$accept.prop('disabled', true);
+            },
+
+            startStreaming: function (streamid) {
+                console.log('startStreaming', arguments);
+                let url = ai.const.url.general.authoring + ".streamresponse.sse";
+                this.abortRunningCalls();
+                this.eventSource = new EventSource(url + "?streamid=" + streamid);
+                this.eventSource.onmessage = this.onStreamingMessage.bind(this);
+                this.eventSource.onerror = this.onError.bind(this);
+                this.eventSource.onopen = function () {
+                    console.log('eventSource.onopen', arguments)
+                };
+            },
+
+            onStreamingMessage: function (event) {
+                console.log('onStreamingMessage', arguments);
             }
 
         });

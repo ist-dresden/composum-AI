@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -300,7 +301,7 @@ public class AIServlet extends AbstractServiceServlet {
                 String translation = null;
                 List<String> cachekey = List.of(sourceLanguage, targetLanguage, text);
                 String cached = translationCache.getIfPresent(cachekey);
-                if (cached != null) {
+                if (0 == 1 && cached != null) { // FIXME reactivate
                     LOG.info("Using cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
                     translation = cached;
                 } else if (!streaming) {
@@ -309,7 +310,7 @@ public class AIServlet extends AbstractServiceServlet {
                     translation = XSS.filter(translation);
                     status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
                 }
-                if (streaming && translation != null) {
+                if (streaming && translation == null) {
                     EventStream callback = new EventStream();
                     callback.addWholeResponseListener((result) -> {
                         translationCache.put(cachekey, result);
@@ -499,9 +500,8 @@ public class AIServlet extends AbstractServiceServlet {
                     response.setContentType("text/event-stream");
                     response.setCharacterEncoding("UTF-8");
                     response.setHeader("Cache-Control", "no-cache");
-                    response.setHeader("Connection", "keep-alive");
-                    try {
-                        stream.writeTo(response.getOutputStream());
+                    try (ServletOutputStream outputStream = response.getOutputStream()) {
+                        stream.writeTo(outputStream);
                     } catch (IOException | InterruptedException e) {
                         status.error("Error writing to stream: " + e, e);
                         Thread.currentThread().interrupt();

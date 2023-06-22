@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Flow;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -53,11 +54,17 @@ public class EventStream implements GPTCompletionCallback {
         while (true) {
             String line = null;
             try {
-                line = queue.poll(60, java.util.concurrent.TimeUnit.SECONDS);
+                line = queue.poll(60, TimeUnit.MINUTES); // XXX set to something sensible.
             } catch (InterruptedException e) {
                 onError(e);
                 throw e;
             }
+            if (line == null) {
+                LOG.error("EventStream.writeTo timed out for {}", id);
+                onError(new IOException("timed out"));
+                return;
+            }
+            LOG.debug("EventStream.writeTo {} line {}", id, line);
             if (QUEUEEND.equals(line)) {
                 LOG.debug("EventStream.writeTo finished for {}", id);
                 return;
@@ -84,9 +91,9 @@ public class EventStream implements GPTCompletionCallback {
         queue.add("data: " + status.getJsonString());
         queue.add("");
         queue.add(QUEUEEND);
-        if (subscription != null) {
+        /* XXX Not sure whether this is necessary. if (subscription != null) {
             subscription.cancel();
-        }
+        } */
         if (null != getWholeResponse()) {
             wholeResponseListeners.forEach(listener -> listener.accept(getWholeResponse()));
         }
@@ -121,6 +128,7 @@ public class EventStream implements GPTCompletionCallback {
         item = XSS.filter(item); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
         // TODO: find a better way to filter the output
         queue.add("data: " + gson.toJson(item));
+        queue.add("\n");
         wholeResponse.append(item);
     }
 
