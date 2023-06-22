@@ -280,7 +280,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                         }
                     }
             );
-            subscription.request(Long.MAX_VALUE);
+            subscription.request(10000);
         }
 
         @Override

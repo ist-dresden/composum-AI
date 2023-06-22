@@ -29,7 +29,7 @@ import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.util.XSS;
 
 /**
- * Servlet that serves the dialogs and processes the reactions, if they aren't handled within Javascript itself.
+ * Servlet that serves the dialogs.
  */
 @Component(service = Servlet.class,
         property = {

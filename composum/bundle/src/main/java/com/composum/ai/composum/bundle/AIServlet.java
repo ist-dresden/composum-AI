@@ -1,5 +1,7 @@
 package com.composum.ai.composum.bundle;
 
+import static com.composum.sling.core.servlet.ServletOperationSet.Method.GET;
+import static com.composum.sling.core.servlet.ServletOperationSet.Method.POST;
 import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
@@ -7,6 +9,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,6 +30,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.ServletResolverConstants;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -45,6 +51,7 @@ import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.servlet.Status;
 import com.composum.sling.core.util.XSS;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * Servlet providing the various services from the backend as servlet, which are useable for the authors.
@@ -80,9 +87,6 @@ public class AIServlet extends AbstractServiceServlet {
      */
     public static final String PARAMETER_PATH = "path";
 
-    /** If set to true for operations that support it, we use  */
-    public static final String PARAMETER_STREAMING = "streaming";
-
     /**
      * Property name, given as parameter.
      */
@@ -113,6 +117,31 @@ public class AIServlet extends AbstractServiceServlet {
      */
     public static final String RESULTKEY_TRANSLATION = "translation";
 
+    /**
+     * Used to transmit whether the response was complete (finishreason {@link com.composum.ai.backend.base.service.chat.GPTFinishReason#STOP} or length restriction {@link com.composum.ai.backend.base.service.chat.GPTFinishReason#LENGTH}). Lowercase String.
+     */
+    public static final String RESULTKEY_FINISHREASON = "finishreason";
+
+    /**
+     * If set to true for operations that support it, the actual response can be streamed with {@link StreamResponseOperation}
+     * in a followup GET request.
+     */
+    public static final String PARAMETER_STREAMING = "streaming";
+
+    /**
+     * Transmits the ID of the stream to {@link StreamResponseOperation}.
+     */
+    public static final String PARAMETER_STREAMID = "streamid";
+
+    /**
+     * Alternative to {@link #RESULTKEY_TEXT} when the response will be streamed.
+     */
+    public static final String RESULTKEY_STREAMID = "streamid";
+
+    /**
+     * Session contains a map at this key thqt maps the streamids to the streaming handle.
+     */
+    public static final String SESSIONKEY_STREAMING = AIServlet.class.getName() + ".streaming";
 
     @Reference
     protected GPTChatCompletionService chatService;
@@ -128,9 +157,9 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected BundleContext bundleContext;
 
-    public enum Extension {json}
+    public enum Extension {json, sse}
 
-    public enum Operation {translate, keywords, description, prompt, create}
+    public enum Operation {translate, keywords, description, prompt, create, streamresponse}
 
     protected final ServletOperationSet<Extension, Operation> operations = new ServletOperationSet<>(Extension.json);
 
@@ -143,7 +172,7 @@ public class AIServlet extends AbstractServiceServlet {
     public void init() throws ServletException {
         super.init();
         // FIXME(hps,19.04.23) only use POST later, but for now, GET is easier to test
-        for (ServletOperationSet.Method method : List.of(ServletOperationSet.Method.GET, ServletOperationSet.Method.POST)) {
+        for (ServletOperationSet.Method method : List.of(GET, POST)) {
             operations.setOperation(method, Extension.json, Operation.translate,
                     new TranslateOperation());
             operations.setOperation(method, Extension.json, Operation.keywords,
@@ -155,6 +184,8 @@ public class AIServlet extends AbstractServiceServlet {
             operations.setOperation(method, Extension.json, Operation.create,
                     new CreateOperation());
         }
+        operations.setOperation(GET, Extension.sse, Operation.streamresponse,
+                new StreamResponseOperation());
     }
 
     @Activate
@@ -393,6 +424,54 @@ public class AIServlet extends AbstractServiceServlet {
                     result = XSS.filter(result);
                     status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
                 }
+            }
+        }
+    }
+
+    protected String saveStream(EventStream stream, SlingHttpServletRequest request) {
+        String streamId = UUID.randomUUID().toString();
+        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        if (streams == null) {
+            streams = (Map<String, EventStream>) (Map) CacheBuilder.newBuilder()
+                    .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).build().asMap();
+            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
+        }
+        streams.put(streamId, stream);
+        stream.setId(streamId);
+        return streamId;
+    }
+
+    protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
+        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        return streams.get(streamId);
+    }
+
+    /**
+     * Returns an event stream that was prepared by a previous operation with parameter {@link #PARAMETER_STREAMING} set.
+     * It got returned a {@link #RESULTKEY_STREAMID} key in the result data, and then retrieves the stream with this operation.
+     * The event stream is stored in the session under the key {@link #SESSIONKEY_STREAMING} and is removed after
+     * the request.
+     */
+    public class StreamResponseOperation implements ServletOperation {
+
+        @Override
+        public void doIt(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response, @org.jetbrains.annotations.Nullable ResourceHandle resource) throws RepositoryException, IOException, ServletException {
+            Status status = new Status(request, response, LOG);
+            String streamId = status.getRequiredParameter(RESULTKEY_STREAMID, null, "No stream id given");
+            if (status.isValid()) {
+                EventStream stream = retrieveStream(streamId, request);
+                if (stream == null) {
+                    status.error("No response found.");
+                } else {
+                    response.setContentType("text/event-stream");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setHeader("Cache-Control", "no-cache");
+                    response.setHeader("Connection", "keep-alive");
+                    stream.writeTo(response.getOutputStream());
+                }
+            }
+            if (!status.isValid()) {
+                status.sendJson(HttpServletResponse.SC_BAD_REQUEST);
             }
         }
     }
