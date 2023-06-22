@@ -1,10 +1,13 @@
 package com.composum.ai.composum.bundle;
 
 import java.io.IOException;
-import java.util.Queue;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 
 import org.slf4j.Logger;
@@ -31,7 +34,13 @@ public class EventStream implements GPTCompletionCallback {
     /**
      * concurrent queue with strings as lines to write, already in SSE format.
      */
-    private final Queue<String> queue = new ArrayBlockingQueue<>(100);
+    final BlockingQueue<String> queue = new ArrayBlockingQueue<>(100);
+
+    final StringBuilder wholeResponse = new StringBuilder();
+
+    final List<Consumer<String>> wholeResponseListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    private volatile GPTFinishReason finishReason;
 
     private final Gson gson = new Gson();
 
@@ -39,15 +48,22 @@ public class EventStream implements GPTCompletionCallback {
         this.id = id;
     }
 
-    public void writeTo(ServletOutputStream outputStream) {
+    public void writeTo(ServletOutputStream outputStream) throws InterruptedException {
         while (true) {
-            String line = queue.poll();
+            String line = null;
+            try {
+                line = queue.poll(60, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                onError(e);
+                throw e;
+            }
             if (QUEUEEND.equals(line)) {
                 LOG.debug("EventStream.writeTo finished for {}", id);
                 return;
             }
             try {
                 outputStream.println(line);
+                outputStream.flush();
             } catch (IOException e) {
                 LOG.error("Error writing to {} : {}", id, e.toString());
                 onError(e);
@@ -59,6 +75,7 @@ public class EventStream implements GPTCompletionCallback {
     @Override
     public void onFinish(GPTFinishReason finishReason) {
         LOG.debug("EventStream.onFinish");
+        this.finishReason = finishReason;
         Status status = new Status(null, null, LOG);
         status.data(AIServlet.RESULTKEY).put(AIServlet.RESULTKEY_FINISHREASON, finishReason.name());
         queue.add("\n");
@@ -68,6 +85,25 @@ public class EventStream implements GPTCompletionCallback {
         queue.add(QUEUEEND);
         if (subscription != null) {
             subscription.cancel();
+        }
+        if (null != getWholeResponse()) {
+            wholeResponseListeners.forEach(listener -> listener.accept(getWholeResponse()));
+        }
+    }
+
+    public void addWholeResponseListener(Consumer<String> listener) {
+        wholeResponseListeners.add(listener);
+    }
+
+    /**
+     * Returns the whole response, but only if it was received completely, otherwise null.
+     */
+    @Nullable
+    public String getWholeResponse() {
+        if (finishReason == GPTFinishReason.STOP) {
+            return wholeResponse.toString();
+        } else {
+            return null;
         }
     }
 
@@ -82,6 +118,7 @@ public class EventStream implements GPTCompletionCallback {
     public void onNext(String item) {
         LOG.debug("EventStream.onNext for {} : {}", id, item);
         queue.add("data: " + gson.toJson(item));
+        wholeResponse.append(item);
     }
 
     @Override
