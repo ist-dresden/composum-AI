@@ -51,6 +51,7 @@ import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.servlet.Status;
 import com.composum.sling.core.util.XSS;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 /**
@@ -157,6 +158,9 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected BundleContext bundleContext;
 
+    protected Cache<List<String>, String> translationCache;
+
+
     public enum Extension {json, sse}
 
     public enum Operation {translate, keywords, description, prompt, create, streamresponse}
@@ -186,6 +190,15 @@ public class AIServlet extends AbstractServiceServlet {
         }
         operations.setOperation(GET, Extension.sse, Operation.streamresponse,
                 new StreamResponseOperation());
+        // FIXME(hps,19.04.23) at least make it configurable.
+        translationCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(30, TimeUnit.MINUTES)
+                .expireAfterWrite(120, TimeUnit.MINUTES)
+                .maximumSize(128)  // each entry can be at most a few kilobytes, so that'd be less than one megabyte
+                .removalListener(notification -> {
+                    LOG.debug("Removing translation from cache: {}", notification.getKey());
+                })
+                .build();
     }
 
     @Activate
@@ -253,6 +266,7 @@ public class AIServlet extends AbstractServiceServlet {
             }
             String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No sourceLanguage given");
             String targetLanguage = request.getParameter("targetLanguage");
+            boolean streaming = "true".equals(request.getParameter(PARAMETER_STREAMING));
             if (isNoneBlank(path, property)) {
                 ResourceResolver resolver = request.getResourceResolver();
                 Resource nodeResource = resolver.getResource(path);
@@ -283,9 +297,27 @@ public class AIServlet extends AbstractServiceServlet {
                 status.error("No targetLanguage given, and it could not be determined from context.");
             }
             if (status.isValid()) {
-                String translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
-                translation = XSS.filter(translation);
-                status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
+                String translation = null;
+                List<String> cachekey = List.of(sourceLanguage, targetLanguage, text);
+                String cached = translationCache.getIfPresent(cachekey);
+                if (cached != null) {
+                    LOG.info("Using cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
+                    translation = cached;
+                } else if (!streaming) {
+                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
+                    translationCache.put(cachekey, translation);
+                    translation = XSS.filter(translation);
+                    status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
+                }
+                if (streaming && translation != null) {
+                    EventStream callback = new EventStream();
+                    callback.addWholeResponseListener((result) -> {
+                        translationCache.put(cachekey, result);
+                    });
+                    String id = saveStream(callback, request);
+                    translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, callback);
+                    status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
+                }
             }
         }
 
@@ -455,7 +487,8 @@ public class AIServlet extends AbstractServiceServlet {
     public class StreamResponseOperation implements ServletOperation {
 
         @Override
-        public void doIt(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response, @org.jetbrains.annotations.Nullable ResourceHandle resource) throws RepositoryException, IOException, ServletException {
+        public void doIt(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response, @org.jetbrains.annotations.Nullable ResourceHandle resource)
+                throws IOException {
             Status status = new Status(request, response, LOG);
             String streamId = status.getRequiredParameter(RESULTKEY_STREAMID, null, "No stream id given");
             if (status.isValid()) {
@@ -467,7 +500,12 @@ public class AIServlet extends AbstractServiceServlet {
                     response.setCharacterEncoding("UTF-8");
                     response.setHeader("Cache-Control", "no-cache");
                     response.setHeader("Connection", "keep-alive");
-                    stream.writeTo(response.getOutputStream());
+                    try {
+                        stream.writeTo(response.getOutputStream());
+                    } catch (IOException | InterruptedException e) {
+                        status.error("Error writing to stream: " + e, e);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
             if (!status.isValid()) {

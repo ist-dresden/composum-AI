@@ -38,7 +38,6 @@ public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
         super.setup();
         translationService = new GPTTranslationServiceImpl();
         translationService.chatCompletionService = chatCompletionService;
-        translationService.activate(null);
     }
 
 }

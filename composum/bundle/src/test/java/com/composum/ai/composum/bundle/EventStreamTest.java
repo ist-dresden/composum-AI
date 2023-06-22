@@ -3,12 +3,15 @@ package com.composum.ai.composum.bundle;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.concurrent.Flow;
 
 import javax.servlet.ServletOutputStream;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.sling.xss.XSSFilter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.sling.core.util.ServiceHandle;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventStreamTest {
@@ -32,10 +36,13 @@ public class EventStreamTest {
     @Mock
     private Flow.Subscription subscription;
 
+    @Mock
+    private XSSFilter xssFilter;
+
     private final StringBuilder buf = new StringBuilder();
 
     @Before
-    public void setup() throws IOException {
+    public void setup() throws IOException, IllegalAccessException {
         Mockito.doAnswer(
                 invocation -> {
                     String line = invocation.getArgument(0);
@@ -43,6 +50,10 @@ public class EventStreamTest {
                     return null;
                 }
         ).when(outputStream).println(anyString());
+        when(xssFilter.filter(anyString())).thenAnswer(invocation -> (String) invocation.getArgument(0));
+        ServiceHandle xssfilterhandle =
+                (ServiceHandle) FieldUtils.readStaticField(com.composum.sling.core.util.XSS.class, "XSSFilter_HANDLE", true);
+        FieldUtils.writeField(xssfilterhandle, "service", xssFilter, true);
     }
 
     @Test(timeout = 1000)

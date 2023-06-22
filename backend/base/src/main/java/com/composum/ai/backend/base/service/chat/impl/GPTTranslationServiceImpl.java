@@ -2,25 +2,22 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements translation.
@@ -39,26 +36,6 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Reference
     protected GPTChatCompletionService chatCompletionService;
 
-    protected Cache<List<String>, String> cache;
-
-    @Activate
-    public void activate(GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig config) {
-        // FIXME(hps,19.04.23) use more decent implementation or at least make it configurable.
-        cache = CacheBuilder.newBuilder()
-                .expireAfterAccess(30, TimeUnit.MINUTES)
-                .expireAfterWrite(120, TimeUnit.MINUTES)
-                .maximumSize(128)  // each entry can be at most a few kilobytes, so that'd be less than one megabyte
-                .removalListener(notification -> {
-                    LOG.debug("Removing translation from cache: {}", notification.getKey());
-                })
-                .build();
-    }
-
-    @Deactivate
-    public void deactivate() {
-        cache = null;
-    }
-
     /**
      * Translate the text from the target to destination language, either Java locale name or language name.
      */
@@ -67,14 +44,24 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(sourceLanguage) || Strings.isNullOrEmpty(targetLanguage)) {
             return "";
         }
-        List<String> cachekey = List.of(sourceLanguage, targetLanguage, text);
-        String cached = cache.getIfPresent(cachekey);
-        if (cached != null) {
-            // log parameters and result
-            LOG.debug("Returning cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
-            return cached;
+
+        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage);
+        String response = chatCompletionService.getSingleChatCompletion(request);
+        LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
+        return response;
+    }
+
+    @Override
+    public void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(sourceLanguage) || Strings.isNullOrEmpty(targetLanguage)) {
+            throw new IllegalArgumentException("Empty text or languages");
         }
 
+        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage);
+        chatCompletionService.streamingChatCompletion(request, callback);
+    }
+
+    private GPTChatRequest makeRequest(String text, String sourceLanguage, String targetLanguage) {
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
@@ -85,10 +72,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         // this splitting is quite an overestimation, but that's better than underestimating in this context.
         int maxTokens = 2 * text.split(" |[^a-z]").length + 50;
         request.setMaxTokens(maxTokens);
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        cache.put(cachekey, response);
-        LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
-        return response;
+        return request;
     }
 
 }

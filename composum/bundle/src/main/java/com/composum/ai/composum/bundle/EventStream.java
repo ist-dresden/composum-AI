@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.servlet.Status;
+import com.composum.sling.core.util.XSS;
 import com.google.gson.Gson;
 
 public class EventStream implements GPTCompletionCallback {
@@ -117,6 +118,8 @@ public class EventStream implements GPTCompletionCallback {
     @Override
     public void onNext(String item) {
         LOG.debug("EventStream.onNext for {} : {}", id, item);
+        item = XSS.filter(item); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
+        // TODO: find a better way to filter the output
         queue.add("data: " + gson.toJson(item));
         wholeResponse.append(item);
     }

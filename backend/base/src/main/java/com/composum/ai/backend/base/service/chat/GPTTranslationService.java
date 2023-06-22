@@ -16,4 +16,10 @@ public interface GPTTranslationService {
     @Nonnull
     String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage) throws GPTException;
 
+
+    /**
+     * Translate the text from the target to destination language, either Java locale name or language name.
+     */
+    void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, @Nonnull GPTCompletionCallback callback) throws GPTException;
+
 }
