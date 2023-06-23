@@ -129,9 +129,9 @@
 
             setTranslation(translation) {
                 if (this.isRichText) {
-                    this.$translation.html(translationResult);
+                    this.$translation.html(translation);
                 } else {
-                    this.$translation.text(translationResult);
+                    this.$translation.text(translation);
                 }
             },
 
@@ -168,6 +168,7 @@
                 console.log('startStreaming', arguments);
                 let url = ai.const.url.general.authoring + ".streamresponse.sse";
                 this.abortRunningCalls();
+                this.streamingResult = "";
                 this.eventSource = new EventSource(url + "?streamid=" + streamid);
                 this.eventSource.onmessage = this.onStreamingMessage.bind(this);
                 this.eventSource.onerror = this.onError.bind(this);
@@ -178,6 +179,9 @@
 
             onStreamingMessage: function (event) {
                 console.log('onStreamingMessage', arguments);
+                this.streamingResult += JSON.parse(event.data);
+                this.setTranslation(this.streamingResult);
+                this.$translation.show();
             }
 
         });
