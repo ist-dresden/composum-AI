@@ -285,7 +285,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @Override
         public void onNext(String item) {
-            LOG.debug("Response line for {} from GPT: {}", id, item);
+            LOG.debug("Received line from ChatGPT for {} from GPT: {}", id, item);
             if (!cancelled) {
                 handleStreamingEvent(callback, id, item);
             }

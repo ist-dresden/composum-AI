@@ -171,7 +171,7 @@
                 this.streamingResult = "";
                 this.eventSource = new EventSource(url + "?streamid=" + streamid);
                 this.eventSource.onmessage = this.onStreamingMessage.bind(this);
-                this.eventSource.onerror = this.onError.bind(this);
+                this.eventSource.onerror = this.onStreamingError.bind(this);
                 this.eventSource.onopen = function () {
                     console.log('eventSource.onopen', arguments)
                 };
@@ -182,6 +182,11 @@
                 this.streamingResult += JSON.parse(event.data);
                 this.setTranslation(this.streamingResult);
                 this.$translation.show();
+            },
+
+            onStreamingError: function (event) {
+                console.log('onStreamingError', arguments);
+                this.onError(null, event);
             }
 
         });

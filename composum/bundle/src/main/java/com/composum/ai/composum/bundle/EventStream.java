@@ -94,6 +94,7 @@ public class EventStream implements GPTCompletionCallback {
         queue.add("event: finish");
         queue.add("data: " + status.getJsonString());
         queue.add("");
+        queue.add("");
         queue.add(QUEUEEND);
         /* XXX Not sure whether this is necessary. if (subscription != null) {
             subscription.cancel();
@@ -151,6 +152,7 @@ public class EventStream implements GPTCompletionCallback {
         queue.add("");
         queue.add("event: error");
         queue.add("data: " + status.getJsonString());
+        queue.add("");
         queue.add("");
         queue.add(QUEUEEND);
     }
