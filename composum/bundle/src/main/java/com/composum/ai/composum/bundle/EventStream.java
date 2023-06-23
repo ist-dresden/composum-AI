@@ -46,7 +46,7 @@ public class EventStream implements GPTCompletionCallback {
 
     private final Gson gson = new Gson();
 
-    private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 500);
+    private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 250);
 
     public void setId(String id) {
         this.id = id;

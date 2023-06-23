@@ -51,14 +51,17 @@
                 this.componentPath = options.componentPath;
                 this.pagePath = options.pagePath;
                 this.componentPropertyPath = options.componentPropertyPath;
+                this.streaming = typeof (EventSource) !== "undefined";
 
                 this.$predefinedPrompts = this.$el.find('.predefined-prompts');
                 this.$contentSelect = this.$el.find('.content-selector');
                 this.$textLength = this.$el.find('.text-length-selector');
                 this.$prompt = this.$el.find('.prompt-textarea');
                 this.$outputField = this.$el.find('.ai-response-field');
-                this.$alert = this.$el.find('.alert');
-                this.$loading = this.$el.find('.loading-indicator');
+                this.$alert = this.$el.find('.generalalert');
+                this.$truncationalert = this.$el.find('.truncationalert');
+
+                this.$spinner = this.$el.find('.loading-indicator');
                 this.$response = this.$el.find('.ai-response-field');
 
                 this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
@@ -160,9 +163,9 @@
 
             setLoading: function (loading) {
                 if (loading) {
-                    this.$loading.show();
+                    this.$spinner.show();
                 } else {
-                    this.$loading.hide();
+                    this.$spinner.hide();
                 }
                 this.$alert.hide();
             },
@@ -202,6 +205,7 @@
                         textLength: textLength,
                         inputText: inputText,
                         inputPath: inputPath,
+                        streaming: this.streaming,
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
@@ -213,22 +217,34 @@
                     this.runningxhr.abort();
                     this.runningxhr = undefined;
                 }
+                if (this.eventSource) {
+                    this.eventSource.close();
+                    this.eventSource = undefined;
+                }
             },
 
             generateSuccess: function (data) {
                 this.setLoading(false);
-                if (data.status >= 200) {
+                const statusOK = data.status && data.status >= 200 && data.status < 300 && data.data && data.data.result;
+                if (statusOK && data.data.result.text) {
                     console.log("Success generating text: ", data);
                     let value = data.data.result.text;
-                    if (this.isRichText) {
-                        core.widgetOf(this.$response.find('textarea')).setValue(value);
-                    } else {
-                        this.$response.val(value);
-                    }
+                    setValue(value);
+                } else if (statusOK && data.data.result.streamid) {
+                    const streamid = data.data.result.streamid;
+                    this.startStreaming(streamid);
                 } else {
                     console.error("Error generating text: ", data);
                     this.$alert.html("Error generating text: " + JSON.stringify(data));
                     this.$alert.show();
+                }
+            },
+
+            setValue: function (value) {
+                if (this.isRichText) {
+                    core.widgetOf(this.$response.find('textarea')).setValue(value);
+                } else {
+                    this.$response.val(value);
                 }
             },
 
@@ -271,6 +287,64 @@
                 this.saveState();
                 this.$el.modal('hide');
                 return false;
+            },
+
+            startStreaming: function (streamid) {
+                console.log("Start streaming: ", arguments);
+                let url = ai.const.url.general.authoring + ".streamresponse.sse";
+                this.abortRunningCalls();
+                this.setLoading(true);
+                this.streamingResult = "";
+                this.eventSource = new EventSource(url + "?streamid=" + streamid);
+                this.eventSource.onmessage = this.onStreamingMessage.bind(this, this.eventSource);
+                this.eventSource.onerror = this.onStreamingError.bind(this, this.eventSource);
+                this.eventSource.addEventListener('finished', this.onStreamingFinished.bind(this));
+                this.eventSource.addEventListener('exception', this.onStreamingException.bind(this));
+            },
+
+            onStreamingMessage: function (eventSource, event) {
+                console.log('onStreamingMessage', arguments);
+                this.streamingResult += JSON.parse(event.data);
+                this.setValue(this.streamingResult);
+            },
+
+            onStreamingError: function (eventSource, event) {
+                console.log('onStreamingError', arguments);
+                eventSource.close();
+                this.abortRunningCalls();
+                this.setLoading(false);
+                this.$alert.text('Connection failed.');
+                this.$alert.show();
+            },
+
+            onStreamingFinished: function (event) {
+                console.log('onStreamingFinished', arguments);
+                this.eventSource.close();
+                this.abortRunningCalls();
+                this.setLoading(false);
+                const status = JSON.parse(event.data);
+                console.log(status);
+                const statusOk = status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.finishreason;
+                if (statusOk) {
+                    const finishreason = status.data.result.finishreason;
+                    if (finishreason === 'STOP') {
+                        this.$truncationalert.hide();
+                    } else if (finishreason == 'LENGTH') {
+                        this.$truncationalert.show();
+                    } else {
+                        console.error('BUG: Unknown finishreason: ' + finishreason);
+                    }
+                }
+            },
+
+            /** Exception on the server side. */
+            onStreamingException: function (event) {
+                console.log('onStreamingException', arguments);
+                eventSource.close();
+                this.setLoading(false);
+                this.abortRunningCalls();
+                this.$alert.text(event.data);
+                this.$alert.show();
             }
 
         });

@@ -41,6 +41,16 @@ public interface GPTContentCreationService {
     String executePrompt(@Nullable String prompt, int maxwords) throws GPTException;
 
     /**
+     * Executes a given prompt from the user using ChatGPT.
+     *
+     * @param prompt   the prompt text from the user
+     * @param maxwords used to hard limit text length - not used as an explicit instruction to ChatGPT, just to set maxtokens to 4/3 of that.
+     * @param callback the callback to use for streaming the result
+     */
+    void executePromptStreaming(@Nonnull String prompt, int maxwords, @Nonnull GPTCompletionCallback callback) throws GPTException;
+
+
+    /**
      * Executes a given prompt from the user using ChatGPT, using the given text as context.
      *
      * @param prompt   the prompt text from the user
@@ -50,5 +60,17 @@ public interface GPTContentCreationService {
      */
     @Nonnull
     String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxwords) throws GPTException;
+
+
+    /**
+     * Executes a given prompt from the user using ChatGPT, using the given text as context.
+     *
+     * @param prompt   the prompt text from the user
+     * @param text     the text to use as context for the prompt
+     * @param maxwords used to hard limit text length - not used as an explicit instruction to ChatGPT,
+     *                 just to set maxtokens to 4/3 of that. If < 1, no limit is set.
+     * @param callback the callback to use for streaming the result
+     */
+    void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, int maxwords, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
 }

@@ -23,7 +23,7 @@ public class StringstreamSlowdownTest {
         result.append(str);
     };
 
-    private StringstreamSlowdown slowdown = new StringstreamSlowdown(target, 500) {
+    private StringstreamSlowdown slowdown = new StringstreamSlowdown(target, 250) {
         @Override
         protected long getTime() {
             return time;

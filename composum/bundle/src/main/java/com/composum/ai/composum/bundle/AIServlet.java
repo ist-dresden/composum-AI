@@ -207,6 +207,27 @@ public class AIServlet extends AbstractServiceServlet {
         this.bundleContext = bundleContext;
     }
 
+    /**
+     * Saves stream for streaming requests into session, to be retrieved with {@link #retrieveStream(String, SlingHttpServletRequest)} during a {@link StreamResponseOperation}.
+     */
+    protected String saveStream(EventStream stream, SlingHttpServletRequest request) {
+        String streamId = UUID.randomUUID().toString();
+        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        if (streams == null) {
+            streams = (Map<String, EventStream>) (Map) CacheBuilder.newBuilder()
+                    .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).build().asMap();
+            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
+        }
+        streams.put(streamId, stream);
+        stream.setId(streamId);
+        return streamId;
+    }
+
+    protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
+        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        return streams.get(streamId);
+    }
+
     protected abstract class AbstractGPTServletOperation implements ServletOperation {
 
         /**
@@ -301,7 +322,7 @@ public class AIServlet extends AbstractServiceServlet {
                 String translation = null;
                 List<String> cachekey = List.of(sourceLanguage, targetLanguage, text);
                 String cached = translationCache.getIfPresent(cachekey);
-                if (0 == 1 && cached != null) { // FIXME reactivate
+                if (cached != null) {
                     LOG.info("Using cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
                     translation = cached;
                 } else if (!streaming) {
@@ -420,6 +441,7 @@ public class AIServlet extends AbstractServiceServlet {
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT,
                     Pattern.compile("(?s).*\\S.*"), "No prompt given");
+            boolean streaming = "true".equals(request.getParameter(PARAMETER_STREAMING));
             String textLength = request.getParameter("textLength");
             String inputPath = request.getParameter("inputPath");
             String inputText = request.getParameter("inputText");
@@ -448,35 +470,28 @@ public class AIServlet extends AbstractServiceServlet {
                     }
                 }
                 if (status.isValid()) {
-                    String result;
-                    if (isNotBlank(inputText)) {
-                        result = contentCreationService.executePromptOnText(fullPrompt, inputText, maxwords);
+                    if (!streaming) {
+                        String result;
+                        if (isNotBlank(inputText)) {
+                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, maxwords);
+                        } else {
+                            result = contentCreationService.executePrompt(fullPrompt, maxwords);
+                        }
+                        result = XSS.filter(result);
+                        status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
                     } else {
-                        result = contentCreationService.executePrompt(fullPrompt, maxwords);
+                        EventStream callback = new EventStream();
+                        String id = saveStream(callback, request);
+                        if (isNotBlank(inputText)) {
+                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, maxwords, callback);
+                        } else {
+                            contentCreationService.executePromptStreaming(fullPrompt, maxwords, callback);
+                        }
+                        status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
                     }
-                    result = XSS.filter(result);
-                    status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
                 }
             }
         }
-    }
-
-    protected String saveStream(EventStream stream, SlingHttpServletRequest request) {
-        String streamId = UUID.randomUUID().toString();
-        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
-        if (streams == null) {
-            streams = (Map<String, EventStream>) (Map) CacheBuilder.newBuilder()
-                    .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).build().asMap();
-            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
-        }
-        streams.put(streamId, stream);
-        stream.setId(streamId);
-        return streamId;
-    }
-
-    protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
-        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
-        return streams.get(streamId);
     }
 
     /**

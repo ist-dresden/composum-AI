@@ -54,10 +54,6 @@
                 this.translate(language);
             },
 
-            onShown: function (event) {
-                console.log('onShown', arguments);
-            },
-
             accept: function (event) {
                 event.preventDefault();
                 console.log('accept', arguments);
@@ -111,14 +107,18 @@
                     this.eventSource.close();
                     this.eventSource = undefined;
                 }
+                this.$alert.hide();
+                this.$spinner.hide();
+                this.$accept.prop('disabled', true);
             },
 
+            /** When a non-streaming translation is finished. */
             onTranslation: function (status) {
                 const statusOk = status && status.status >= 200 && status.status < 300 && status.data && status.data.result;
 
                 if (statusOk && status.data.result.translation) {
                     let translationResult = status.data.result.translation[0];
-                    this.setTranslation(translationResult);
+                    this.updateTranslation(translationResult);
                     this.setTranslated();
                 } else if (statusOk && status.data.result.streamid) {
                     const streamid = status.data.result.streamid;
@@ -128,7 +128,7 @@
                 }
             },
 
-            setTranslation(translation) {
+            updateTranslation(translation) {
                 if (this.isRichText) {
                     this.$translation.html(translation);
                 } else {
@@ -137,7 +137,7 @@
             },
 
             setTranslated: function () {
-                this.$alert.hide();
+                this.abortRunningCalls();
                 this.$spinner.hide();
                 if (this.$translation.text()) {
                     this.$accept.prop('disabled', false);
@@ -151,8 +151,7 @@
                 // TODO sensible handling of errors
                 this.$alert.text(xhr.status + " " + xhr.statusText + " : " + xhr.responseText + " / " + status);
                 this.$alert.show();
-                this.$spinner.hide();
-                this.$accept.prop('disabled', true);
+                this.abortRunningCalls();
             },
 
             setTranslating: function () {
@@ -171,23 +170,19 @@
                 this.eventSource = new EventSource(url + "?streamid=" + streamid);
                 this.eventSource.onmessage = this.onStreamingMessage.bind(this, this.eventSource);
                 this.eventSource.onerror = this.onStreamingError.bind(this, this.eventSource);
-                this.eventSource.onopen = function () {
-                    console.log('eventSource.onopen', arguments)
-                };
-                this.eventSource.addEventListener('finished', this.onStreamingFinished.bind(this, this.eventSource));
-                this.eventSource.addEventListener('exception', this.onStreamingException.bind(this, this.eventSource));
+                this.eventSource.addEventListener('finished', this.onStreamingFinished.bind(this));
+                this.eventSource.addEventListener('exception', this.onStreamingException.bind(this));
             },
 
             onStreamingMessage: function (eventSource, event) {
                 console.log('onStreamingMessage', arguments);
                 this.streamingResult += JSON.parse(event.data);
-                this.setTranslation(this.streamingResult);
+                this.updateTranslation(this.streamingResult);
             },
 
             onStreamingFinished: function (eventSource, event) {
                 console.log('onStreamingFinished', arguments);
                 eventSource.close();
-                this.$spinner.hide();
                 this.setTranslated();
                 const status = JSON.parse(event.data);
                 console.log(status);
@@ -208,7 +203,7 @@
             onStreamingException: function (eventSource, event) {
                 console.log('onStreamingException', arguments);
                 eventSource.close();
-                this.$spinner.hide();
+                this.abortRunningCalls();
                 this.$alert.text(event.data);
                 this.$alert.show();
             },
@@ -216,6 +211,7 @@
             onStreamingError: function (eventSource, event) {
                 console.log('onStreamingError', arguments);
                 eventSource.close();
+                this.abortRunningCalls();
                 this.$spinner.hide();
                 this.$alert.text('Connection failed.');
                 this.$alert.show();

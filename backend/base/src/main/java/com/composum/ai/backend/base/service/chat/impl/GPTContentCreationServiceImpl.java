@@ -12,9 +12,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 
@@ -94,6 +96,11 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (prompt == null || prompt.isBlank()) {
             return "";
         }
+        GPTChatRequest request = makeExecutePromptRequest(prompt, maxwords);
+        return chatCompletionService.getSingleChatCompletion(request);
+    }
+
+    protected GPTChatRequest makeExecutePromptRequest(String prompt, int maxwords) {
         GPTChatRequest request = new GPTChatRequest();
         int maxtokens = 200;
         if (maxwords > 0) {
@@ -101,8 +108,13 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         }
         request.setMaxTokens(maxtokens);
         request.addMessage(GPTMessageRole.USER, prompt);
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        return response;
+        return request;
+    }
+
+    @Override
+    public void executePromptStreaming(@Nonnull String prompt, int maxwords, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        GPTChatRequest request = makeExecutePromptRequest(prompt, maxwords);
+        chatCompletionService.streamingChatCompletion(request, callback);
     }
 
     @Nonnull
@@ -111,17 +123,27 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         if (prompt == null || prompt.isBlank()) {
             return "";
         }
+        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, maxwords);
+        return chatCompletionService.getSingleChatCompletion(request);
+    }
+
+    protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, int maxwords) {
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_PROMPTONTEXT);
-        GPTChatRequest request = new GPTChatRequest();
         String shortenedText = chatCompletionService.shorten(text, MAXWORDS);
+        List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
+        GPTChatRequest request = new GPTChatRequest();
         if (maxwords > 0) {
             int maxtokens = maxwords > 0 ? maxwords * 4 / 3 : 200;
             request.setMaxTokens(maxtokens);
         }
-        List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
         request.addMessages(messages);
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        return response;
+        return request;
+    }
+
+    @Override
+    public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, int maxwords, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, maxwords);
+        chatCompletionService.streamingChatCompletion(request, callback);
     }
 
 }
