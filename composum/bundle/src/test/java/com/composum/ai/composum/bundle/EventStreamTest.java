@@ -69,9 +69,7 @@ public class EventStreamTest {
         eventStream.onFinish(GPTFinishReason.STOP);
         eventStream.onComplete();
         eventStream.writeTo(outputStream);
-        String expected = "data: \"testItem1 \"\n" +
-                "data: \"testItem2 \"\n" +
-                "data: \"testItem3.\"\n" +
+        String expected = "data: \"testItem1 testItem2 testItem3.\"\n" +
                 "\n" +
                 "\n" +
                 "event: finish\n" +
@@ -96,7 +94,6 @@ public class EventStreamTest {
         eventStream.writeTo(outputStream);
         ec.checkThat(buf.toString().replaceAll("\\d{13}", "<timestamp>")
                 , is(("\n" +
-                        "\n" +
                         "event: error\n" +
                         "data: {\"status\":400,\"success\":false,\"warning\":false,\"title\":\"Error\",\"messages\":[{\"level\":\"error\",\"text\":\"Internal error: java.lang.Throwable: testError\",\"rawText\":\"Internal error: java.lang.Throwable: testError\",\"arguments\":[\"testError\"],\"timestamp\":1687439360950}]}\n" +
                         "\n").replaceAll("\\d{13}", "<timestamp>")));

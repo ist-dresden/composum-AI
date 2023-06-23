@@ -14,6 +14,7 @@ import javax.servlet.ServletOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.servlet.Status;
@@ -45,6 +46,8 @@ public class EventStream implements GPTCompletionCallback {
     private volatile GPTFinishReason finishReason;
 
     private final Gson gson = new Gson();
+
+    private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 500);
 
     public void setId(String id) {
         this.id = id;
@@ -82,11 +85,12 @@ public class EventStream implements GPTCompletionCallback {
 
     @Override
     public void onFinish(GPTFinishReason finishReason) {
-        LOG.debug("EventStream.onFinish");
+        LOG.debug("EventStream.onFinish for {} : {}", id, finishReason);
+        slowdown.flush();
         this.finishReason = finishReason;
         Status status = new Status(null, null, LOG);
         status.data(AIServlet.RESULTKEY).put(AIServlet.RESULTKEY_FINISHREASON, finishReason.name());
-        queue.add("\n");
+        queue.add("");
         queue.add("event: finish");
         queue.add("data: " + status.getJsonString());
         queue.add("");
@@ -123,13 +127,17 @@ public class EventStream implements GPTCompletionCallback {
     }
 
     @Override
-    public void onNext(String item) {
-        LOG.debug("EventStream.onNext for {} : {}", id, item);
-        item = XSS.filter(item); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
+    public void onNext(String data) {
+        LOG.debug("EventStream.onNext for {} : {}", id, data);
+        slowdown.accept(data);
+    }
+
+    protected void writeData(String data) {
+        data = XSS.filter(data); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
         // TODO: find a better way to filter the output
-        queue.add("data: " + gson.toJson(item));
-        queue.add("\n");
-        wholeResponse.append(item);
+        queue.add("data: " + gson.toJson(data));
+        queue.add(""); // empty line to separate events and force processing of this event
+        wholeResponse.append(data);
     }
 
     @Override
@@ -140,7 +148,7 @@ public class EventStream implements GPTCompletionCallback {
         }
         Status status = new Status(null, null, LOG);
         status.error("Internal error: " + throwable.toString(), throwable);
-        queue.add("\n");
+        queue.add("");
         queue.add("event: error");
         queue.add("data: " + status.getJsonString());
         queue.add("");
