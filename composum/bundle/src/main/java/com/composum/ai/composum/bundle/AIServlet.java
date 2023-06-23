@@ -8,6 +8,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +22,6 @@ import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -498,11 +498,11 @@ public class AIServlet extends AbstractServiceServlet {
                     LOG.warn("No stream found for id {}", streamId); // the browser shouldn't ask for it
                     status.setStatus(410);
                 } else {
-                    response.setContentType("text/event-stream");
                     response.setCharacterEncoding("UTF-8");
+                    response.setContentType("text/event-stream");
                     response.setHeader("Cache-Control", "no-cache");
-                    try (ServletOutputStream outputStream = response.getOutputStream()) {
-                        stream.writeTo(outputStream);
+                    try (PrintWriter writer = response.getWriter()) {
+                        stream.writeTo(writer);
                         if (stream.getWholeResponse() != null) {
                             LOG.debug("Whole translation for {} : {}", streamId, stream.getWholeResponse());
                         }

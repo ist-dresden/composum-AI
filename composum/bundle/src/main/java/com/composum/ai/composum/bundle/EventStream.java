@@ -1,6 +1,7 @@
 package com.composum.ai.composum.bundle;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -9,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
-import javax.servlet.ServletOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class EventStream implements GPTCompletionCallback {
         this.id = id;
     }
 
-    public void writeTo(ServletOutputStream outputStream) throws InterruptedException {
+    public void writeTo(PrintWriter writer) throws InterruptedException {
         while (true) {
             String line = null;
             try {
@@ -72,12 +72,12 @@ public class EventStream implements GPTCompletionCallback {
                 return;
             }
             try {
-                outputStream.println(line);
-                outputStream.flush();
-            } catch (IOException e) {
+                writer.println(line);
+                writer.flush();
+            } catch (RuntimeException e) {
                 LOG.error("Error writing to {} : {}", id, e.toString());
-                onError(e);
-                return;
+                subscription.cancel();
+                throw e;
             }
         }
     }

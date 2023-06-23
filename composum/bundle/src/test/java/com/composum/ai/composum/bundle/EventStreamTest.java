@@ -6,9 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Flow;
-
-import javax.servlet.ServletOutputStream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.xss.XSSFilter;
@@ -33,7 +32,7 @@ public class EventStreamTest {
     public ErrorCollector ec = new ErrorCollector();
 
     @Mock
-    private ServletOutputStream outputStream;
+    private PrintWriter writer;
 
     @Mock
     private Flow.Subscription subscription;
@@ -51,7 +50,7 @@ public class EventStreamTest {
                     buf.append(line).append("\n");
                     return null;
                 }
-        ).when(outputStream).println(anyString());
+        ).when(writer).println(anyString());
         when(xssFilter.filter(anyString())).thenAnswer(invocation -> (String) invocation.getArgument(0));
         ServiceHandle xssfilterhandle =
                 (ServiceHandle) FieldUtils.readStaticField(com.composum.sling.core.util.XSS.class, "XSSFilter_HANDLE", true);
@@ -68,7 +67,7 @@ public class EventStreamTest {
         eventStream.onNext("testItem3.");
         eventStream.onFinish(GPTFinishReason.STOP);
         eventStream.onComplete();
-        eventStream.writeTo(outputStream);
+        eventStream.writeTo(writer);
         String expected = "data: \"testItem1 testItem2 testItem3.\"\n" +
                 "\n" +
                 "\n" +
@@ -91,7 +90,7 @@ public class EventStreamTest {
 
         verify(subscription).cancel();
         ec.checkThat(eventStream.queue.contains("event: error"), is(true));
-        eventStream.writeTo(outputStream);
+        eventStream.writeTo(writer);
         ec.checkThat(buf.toString().replaceAll("\\d{13}", "<timestamp>")
                 , is(("\n" +
                         "event: error\n" +
