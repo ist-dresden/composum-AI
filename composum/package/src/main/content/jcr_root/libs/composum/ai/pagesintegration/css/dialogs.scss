@@ -84,8 +84,14 @@
         margin-right: 10px;
     }
 
+    .translations {
+        min-height: 5em;
+    }
+
     .loading-curtain {
+        position: absolute;
         text-align: center;
+        left: 50%;
     }
 
     .source-languages .singlesource {

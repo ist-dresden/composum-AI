@@ -18,7 +18,6 @@ import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.servlet.Status;
-import com.composum.sling.core.util.XSS;
 import com.google.gson.Gson;
 
 public class EventStream implements GPTCompletionCallback {
@@ -91,7 +90,7 @@ public class EventStream implements GPTCompletionCallback {
         Status status = new Status(null, null, LOG);
         status.data(AIServlet.RESULTKEY).put(AIServlet.RESULTKEY_FINISHREASON, finishReason.name());
         queue.add("");
-        queue.add("event: finish");
+        queue.add("event: finished");
         queue.add("data: " + status.getJsonString());
         queue.add("");
         queue.add("");
@@ -134,7 +133,7 @@ public class EventStream implements GPTCompletionCallback {
     }
 
     protected void writeData(String data) {
-        data = XSS.filter(data); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
+        // data = XSS.filter(data); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
         // TODO: find a better way to filter the output
         queue.add("data: " + gson.toJson(data));
         queue.add(""); // empty line to separate events and force processing of this event
@@ -150,7 +149,7 @@ public class EventStream implements GPTCompletionCallback {
         Status status = new Status(null, null, LOG);
         status.error("Internal error: " + throwable.toString(), throwable);
         queue.add("");
-        queue.add("event: error");
+        queue.add("event: exception"); // do not use 'error' as event name as that is received when the connection is closed.
         queue.add("data: " + status.getJsonString());
         queue.add("");
         queue.add("");

@@ -60,9 +60,14 @@ function processRequest(req, res) {
                 res.writeHead(405, 'Method Not Allowed');
                 return res.end();
             }
+            if (!eventdata) {
+                res.writeHead(410, 'No data anymore');
+                return res.end();
+            }
             res.setHeader('Content-Type', 'text/event-stream;charset=utf-8');
             res.writeHead(200, 'OK');
             res.end(eventdata);
+            eventdata = undefined;
             break;
         default:
             res.writeHead(404, 'Not Found');
@@ -72,4 +77,59 @@ function processRequest(req, res) {
 }
 
 var formHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Stream Tester</title>
+</head>
+<body>
+    <form onsubmit="submitForm(event)">
+        <textarea id="testdata" rows="15" cols="120"></textarea>
+        <br/>
+        <button type="submit">Send</button>
+    </form>
+    <pre id="result"></pre>
+    <script>
+        function submitForm(event) {
+            event.preventDefault();
+            document.getElementById('result').textContent = '';
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/saveevents', true);
+            xhr.onload = function () {
+                if (xhr.status === 204) {
+                    var eventSource = new EventSource('/events');
+                    eventSource.addEventListener('finished', onMyEvent);
+                    eventSource.onmessage = onMessage;
+                    eventSource.onerror = onError;
+                    setTimeout(() => eventSource.close(), 10000);
+                }
+            };
+            xhr.send(document.getElementById('testdata').value);
+        }
+        
+        function onMessage(event) {
+            console.log('onMessage', arguments);
+            const newEvent = '\\n=== message ' + event.type + '\\n' + event.data;
+            document.getElementById('result').textContent += newEvent;
+        }
+        
+        function onError(event) {
+            console.log('onError', arguments);
+            const newEvent = '\\n=== ERROR ' + event.type + '\\n' + event.data + '\\n' + JSON.stringify(event);
+            document.getElementById('result').textContent += newEvent;
+        }
+        
+        function onMyEvent(event) {
+            console.log('onMyEvent', arguments);
+            const newEvent = '\\n=== myevent ' + event.type + '\\n' + event.data;
+            document.getElementById('result').textContent += newEvent;
+        }
+        
+        // set testdata to some default value
+        document.getElementById('testdata').value = 'data: "Bäume sind in der Höhle."\\n\\n' + 
+        'event: finished\\n' + 
+        'data: {"status":200,"success":true,"warning":false,"data":{"result":{"finishreason":"STOP"}}}\\n\\n';
+    </script>
+</body>
+</html>
 `;

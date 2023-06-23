@@ -495,13 +495,17 @@ public class AIServlet extends AbstractServiceServlet {
             if (status.isValid()) {
                 EventStream stream = retrieveStream(streamId, request);
                 if (stream == null) {
-                    status.error("No response found.");
+                    LOG.warn("No stream found for id {}", streamId); // the browser shouldn't ask for it
+                    status.setStatus(410);
                 } else {
                     response.setContentType("text/event-stream");
                     response.setCharacterEncoding("UTF-8");
                     response.setHeader("Cache-Control", "no-cache");
                     try (ServletOutputStream outputStream = response.getOutputStream()) {
                         stream.writeTo(outputStream);
+                        if (stream.getWholeResponse() != null) {
+                            LOG.debug("Whole translation for {} : {}", streamId, stream.getWholeResponse());
+                        }
                     } catch (IOException | InterruptedException e) {
                         status.error("Error writing to stream: " + e, e);
                         Thread.currentThread().interrupt();
