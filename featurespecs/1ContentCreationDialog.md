@@ -301,6 +301,33 @@ sequenceDiagram
     User ->> Dialog: Close Dialog
 ```
 
+## Saving State
+
+Since content creation often takes a couple of attempts to get right, we want the user to be able to switch back and
+forth between the last results. Therefore we provide "back" and "forth" buttons to switch between previous states of
+the dialog and keep a history that contains the states of all dialog fields at certain points. There are several
+variants as to when the state should be saved:
+
+- **On Generating New Content:** Each time new content is generated, the current state of the dialog is saved. That
+  has, however, the problem that when a user generates some content, changes it in the response field, and then hits '
+  Generate' again, that
+  changed content in the response field would not be saved.
+- **On Navigation:** When the user navigates back or forth through the history, the current state of the dialog should
+  be saved before the state is changed. That, however, has the problem that when a user generates some content, then
+  edits the prompt field, and then hits 'back' or 'forth', then the changed prompt would be saved, which does not
+  correspond to the result.
+
+To alleviate these problems we combine those, which might generate an unpleasant number of states in the history,
+but avoids both mentioned kinds of problems:
+
+- **Always save the state before it's changed:** Whether the user hits 'Back', 'Forward', 'Reset' or the content
+  generation was finished,
+  always save the current state before anything is changed. (Of course only if it was modified in
+  comparison to the last history entry.)
+
+However, the dialog history should be cleared each time the content creation dialog is opened, as it is only meant
+to be a temporary history.
+
 ## Implementation plan
 
 The implementation of a dialog consists of the following parts:
@@ -328,7 +355,6 @@ The implementation of a dialog consists of the following parts:
 
 For the selects that contain fragments of the prompt we set the value to the prompt fragment.
 
-
 ### Identifiers etc.
 
 We use the following identifiers:
@@ -338,24 +364,24 @@ We use the following identifiers:
 - {dialogURL} = `/bin/cpm/platform/ai/dialog.createDialog.html`
 - ID for dialog: chatgpt-create-dialog
 - HTML class for dialog fields:
-  - Prompt Textarea: prompt-textarea
-  - Predefined Prompts: predefined-prompts
-  - Content Selector: content-selector
-  - Text Length Selector: text-length-selector
-  - Generate Button: generate-button
-  - Loading Indicator: loading-indicator
-  - Back Button: back-button
-  - Forward Button: forward-button
-  - Alert Text: alert
-  - ChatGPT Response Field: ai-response-field
-  - Replace Button: replace-button
-  - Append Button: append-button
-  - Cancel Button: cancel-button
-  - Help Button: help-button
+    - Prompt Textarea: prompt-textarea
+    - Predefined Prompts: predefined-prompts
+    - Content Selector: content-selector
+    - Text Length Selector: text-length-selector
+    - Generate Button: generate-button
+    - Loading Indicator: loading-indicator
+    - Back Button: back-button
+    - Forward Button: forward-button
+    - Alert Text: alert
+    - ChatGPT Response Field: ai-response-field
+    - Replace Button: replace-button
+    - Append Button: append-button
+    - Cancel Button: cancel-button
+    - Help Button: help-button
 - Parameter names for the inputs:
-  - Prompt Textarea: prompt
-  - Content Selector: contentSelect
-  - Text Length Selector: textLength
+    - Prompt Textarea: prompt
+    - Content Selector: contentSelect
+    - Text Length Selector: textLength
 
 ### automatically added:
 

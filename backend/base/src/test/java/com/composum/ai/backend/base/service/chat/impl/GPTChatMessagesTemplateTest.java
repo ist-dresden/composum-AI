@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
@@ -65,6 +67,7 @@ public class GPTChatMessagesTemplateTest {
 
     @Test(expected = GPTException.class)
     public void testGetMessages_missingPlaceholder() {
+        Logger log = LoggerFactory.getLogger(GPTChatMessagesTemplate.class);
         GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("this", "foo");

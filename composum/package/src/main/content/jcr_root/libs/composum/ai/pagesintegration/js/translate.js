@@ -149,7 +149,8 @@
             onError: function (xhr, status) {
                 console.error('onError', arguments);
                 // TODO sensible handling of errors
-                this.$alert.text(xhr.status + " " + xhr.statusText + " : " + xhr.responseText + " / " + status);
+                let alert = xhr && xhr.status + " " + xhr.statusText + " : " + xhr.responseText + " / " + status || status;
+                this.$alert.text(alert);
                 this.$alert.show();
                 this.abortRunningCalls();
             },
@@ -191,7 +192,7 @@
                     const finishreason = status.data.result.finishreason;
                     if (finishreason === 'STOP') {
                         this.$truncationalert.hide();
-                    } else if (finishreason == 'LENGTH') {
+                    } else if (finishreason === 'LENGTH') {
                         this.$truncationalert.show();
                     } else {
                         console.error('BUG: Unknown finishreason: ' + finishreason);

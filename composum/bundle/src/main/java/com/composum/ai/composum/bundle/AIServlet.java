@@ -322,19 +322,21 @@ public class AIServlet extends AbstractServiceServlet {
                 String translation = null;
                 List<String> cachekey = List.of(sourceLanguage, targetLanguage, text);
                 String cached = translationCache.getIfPresent(cachekey);
-                if (cached != null) {
+                if (isNotBlank(cached)) {
                     LOG.info("Using cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
                     translation = cached;
-                } else if (!streaming) {
-                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
-                    translationCache.put(cachekey, translation);
-                    translation = XSS.filter(translation);
-                    status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
                 }
-                if (streaming && translation == null) {
+                if (!streaming && isBlank(translation)) {
+                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
+                    translation = XSS.filter(translation);
+                    translationCache.put(cachekey, translation);
+                }
+                if (isNotBlank(translation)) {
+                    status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
+                } else if (streaming) {
                     EventStream callback = new EventStream();
                     callback.addWholeResponseListener((result) -> {
-                        translationCache.put(cachekey, result);
+                        translationCache.put(cachekey, XSS.filter(result));
                     });
                     String id = saveStream(callback, request);
                     translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, callback);

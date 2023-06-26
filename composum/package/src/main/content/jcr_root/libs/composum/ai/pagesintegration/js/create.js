@@ -98,12 +98,15 @@
                     this.$response.change(this.adjustButtonStates.bind(this));
                 }
 
+                this.$el.find('#promptTextarea').mouseleave(this.adjustButtonStates.bind(this));
+                this.$el.find('.generate-container').mouseenter(this.adjustButtonStates.bind(this));
+
                 this.adjustButtonStates();
             },
 
             adjustButtonStates: function () {
-                // this.$el.find('.back-button').prop('disabled', this.historyPosition <= 0);
-                // this.$el.find('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
+                this.$el.find('.back-button').prop('disabled', this.historyPosition <= 0);
+                this.$el.find('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
                 this.$el.find('.generate-button').prop('disabled', !this.$prompt.val());
                 let responseVal;
                 if (this.isRichText) {
@@ -131,10 +134,11 @@
                 let currentState = this.makeSaveStateMap();
                 let lastSavedState = this.history[this.historyPosition];
                 if (!_.isEqual(currentState, lastSavedState)) {
+                    console.log("SAVING STATE!");
                     this.history.push(currentState);
                     this.historyPosition = this.history.length - 1;
                 }
-                console.log('saveState', this.historyPosition, this.history);
+                console.log('saveState', this.historyPosition, this.history.length, this.history);
                 this.adjustButtonStates();
             },
 
@@ -145,13 +149,14 @@
                 this.$textLength.val(map['textLength']);
                 this.$prompt.val(map['prompt']);
                 this.setResult(map['result']);
+                this.adjustButtonStates();
             },
 
             /** Button 'Reset' was clicked. */
             resetButtonClicked: function (event) {
                 event.preventDefault();
+                this.saveState();
                 this.restoreStateFromMap({});
-                this.adjustButtonStates();
                 return false;
             },
 
@@ -171,22 +176,23 @@
             },
 
             backButtonClicked: function (event) {
-                if (this.historyPosition == this.history.length - 1) {
-                    this.saveState();
-                }
+                this.saveState();
                 if (this.historyPosition > 0) {
                     this.historyPosition = this.historyPosition - 1;
-                    this.restoreStateFromMap(this.history[this.historyPosition]);
+                    let lastSavedState = this.history[this.historyPosition];
+                    console.log('switching to state', this.historyPosition, this.history.length)
+                    this.restoreStateFromMap(lastSavedState);
                 }
-                this.adjustButtonStates();
             },
 
             forwardButtonClicked: function (event) {
+                this.saveState();
                 if (this.historyPosition < this.history.length - 1) {
                     this.historyPosition = this.historyPosition + 1;
-                    this.restoreStateFromMap(this.history[this.historyPosition]);
+                    let lastSavedState = this.history[this.historyPosition];
+                    console.log('switching to state', this.historyPosition, this.history.length)
+                    this.restoreStateFromMap(lastSavedState);
                 }
-                this.adjustButtonStates();
             },
 
             setLoading: function (loading) {
@@ -201,9 +207,6 @@
             generateButtonClicked: function (event) {
                 event.preventDefault();
                 this.setLoading(true);
-                if (this.getResult()) {
-                    this.saveState();
-                }
 
                 const that = this;
 
@@ -258,6 +261,7 @@
                     console.log("Success generating text: ", data);
                     let value = data.data.result.text;
                     setValue(value);
+                    this.saveState();
                 } else if (statusOK && data.data.result.streamid) {
                     const streamid = data.data.result.streamid;
                     this.startStreaming(streamid);
@@ -359,6 +363,7 @@
                 this.eventSource.close();
                 this.abortRunningCalls();
                 this.setLoading(false);
+                this.saveState();
                 const status = JSON.parse(event.data);
                 console.log(status);
                 const statusOk = status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.finishreason;
