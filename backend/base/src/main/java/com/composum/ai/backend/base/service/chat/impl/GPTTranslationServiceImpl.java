@@ -47,6 +47,13 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
         GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage);
         String response = chatCompletionService.getSingleChatCompletion(request);
+        if (response.startsWith("```")) {
+            response = response.substring(3);
+        }
+        if (response.endsWith("```")) {
+            response = response.substring(0, response.length() - 3);
+        }
+        response = response.trim();
         LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
         return response;
     }
