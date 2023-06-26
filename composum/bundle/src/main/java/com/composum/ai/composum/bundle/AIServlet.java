@@ -329,14 +329,14 @@ public class AIServlet extends AbstractServiceServlet {
                 if (!streaming && isBlank(translation)) {
                     translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
                     translation = XSS.filter(translation);
-                    translationCache.put(cachekey, translation);
+                    // translationCache.put(cachekey, translation);
                 }
                 if (isNotBlank(translation)) {
                     status.data(RESULTKEY).put(RESULTKEY_TRANSLATION, List.of(translation));
                 } else if (streaming) {
                     EventStream callback = new EventStream();
                     callback.addWholeResponseListener((result) -> {
-                        translationCache.put(cachekey, XSS.filter(result));
+                        // translationCache.put(cachekey, XSS.filter(result));
                     });
                     String id = saveStream(callback, request);
                     translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, callback);

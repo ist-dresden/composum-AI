@@ -25,7 +25,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 
 public class GPTChatMessagesTemplate {
-    private static final Logger LOG = LoggerFactory.getLogger(GPTChatMessagesTemplate.class);
+    static final Logger LOG = LoggerFactory.getLogger(GPTChatMessagesTemplate.class);
 
     public static final String TEMPLATEDIR = "chattemplates/chatgpt/";
     public static final String TEMPLATESUFFIX = ".txt";

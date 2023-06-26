@@ -18,7 +18,6 @@ import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.servlet.Status;
-import com.composum.sling.core.util.XSS;
 import com.google.gson.Gson;
 
 public class EventStream implements GPTCompletionCallback {
@@ -134,8 +133,8 @@ public class EventStream implements GPTCompletionCallback {
     }
 
     protected void writeData(String data) {
-        data = XSS.filter(data); // OUCH - that doesn't really work as the troublesome stuff could be spread out...
-        // TODO: find a better way to filter the output
+        // data = XSS.filter(data); // OUCH - that breaks things sometimes and doesn't really work as the troublesome
+        // stuff could be spread out... TODO: find a better way to filter the output
         queue.add("data: " + gson.toJson(data));
         queue.add(""); // empty line to separate events and force processing of this event
         wholeResponse.append(data);

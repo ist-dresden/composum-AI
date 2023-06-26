@@ -26,7 +26,7 @@
                     <div class="messages">
                         <cpn:text class="alert alert-warning truncationalert" i18n="true" style="display: none;">
                             The translation was too long and has been truncated.</cpn:text>
-                        <div class="alert generalalert" style="display: none;"></div>
+                        <div class="alert alert-warning generalalert" style="display: none;"></div>
                     </div>
 
                     <div class="panel panel-default"

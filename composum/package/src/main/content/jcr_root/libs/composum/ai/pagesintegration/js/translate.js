@@ -107,7 +107,6 @@
                     this.eventSource.close();
                     this.eventSource = undefined;
                 }
-                this.$alert.hide();
                 this.$spinner.hide();
                 this.$accept.prop('disabled', true);
             },
@@ -169,21 +168,21 @@
                 this.abortRunningCalls();
                 this.streamingResult = "";
                 this.eventSource = new EventSource(url + "?streamid=" + streamid);
-                this.eventSource.onmessage = this.onStreamingMessage.bind(this, this.eventSource);
-                this.eventSource.onerror = this.onStreamingError.bind(this, this.eventSource);
+                this.eventSource.onmessage = this.onStreamingMessage.bind(this);
+                this.eventSource.onerror = this.onStreamingError.bind(this);
                 this.eventSource.addEventListener('finished', this.onStreamingFinished.bind(this));
                 this.eventSource.addEventListener('exception', this.onStreamingException.bind(this));
             },
 
-            onStreamingMessage: function (eventSource, event) {
+            onStreamingMessage: function (event) {
                 console.log('onStreamingMessage', arguments);
                 this.streamingResult += JSON.parse(event.data);
                 this.updateTranslation(this.streamingResult);
             },
 
-            onStreamingFinished: function (eventSource, event) {
+            onStreamingFinished: function (event) {
                 console.log('onStreamingFinished', arguments);
-                eventSource.close();
+                this.eventSource.close();
                 this.setTranslated();
                 const status = JSON.parse(event.data);
                 console.log(status);
@@ -201,17 +200,17 @@
             },
 
             /** Exception on the server side. */
-            onStreamingException: function (eventSource, event) {
+            onStreamingException: function (event) {
                 console.log('onStreamingException', arguments);
-                eventSource.close();
+                this.eventSource.close();
                 this.abortRunningCalls();
                 this.$alert.text(event.data);
                 this.$alert.show();
             },
 
-            onStreamingError: function (eventSource, event) {
+            onStreamingError: function (event) {
                 console.log('onStreamingError', arguments);
-                eventSource.close();
+                this.eventSource.close();
                 this.abortRunningCalls();
                 this.$spinner.hide();
                 this.$alert.text('Connection failed.');
