@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
+import com.composum.pages.commons.model.Page;
 import com.composum.pages.commons.taglib.EditWidgetTag;
 import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.util.ResourceUtil;
@@ -119,7 +120,12 @@ public class LabelExtensionModel extends AbstractModel {
      * Path to the current page.
      */
     public String getPagePath() {
-        return ResourceHandle.use(getPageManager().getContainingPage(context, resource).getResource()).getContentResource().getPath();
+        Page containingPage = getPageManager().getContainingPage(context, resource);
+        if (containingPage != null) {
+            return ResourceHandle.use(containingPage.getResource()).getContentResource().getPath();
+        } else { // site root
+            return ResourceHandle.use(resource).getContentResource().getPath();
+        }
     }
 
 
