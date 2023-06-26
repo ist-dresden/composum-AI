@@ -67,7 +67,9 @@ public class StringstreamSlowdown implements Consumer<String>, AutoCloseable {
             collected.delete(0, fragment.length());
             return fragment;
         } else if (collected.length() > 80) {
-            return collected.toString();
+            String result = collected.toString();
+            collected.setLength(0);
+            return result;
         } else {
             return null;
         }

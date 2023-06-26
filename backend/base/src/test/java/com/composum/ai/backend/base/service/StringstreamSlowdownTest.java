@@ -50,4 +50,19 @@ public class StringstreamSlowdownTest {
         ec.checkThat(result.toString(), Matchers.is("Hello there! Let's go! And again! Now again! The rest."));
     }
 
+    @Test
+    public void testLongerThan80() {
+        String str = "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+        slowdown.accept(str);
+        ec.checkThat(result.toString(), Matchers.isEmptyString());
+        time += 500;
+        slowdown.accept("0");
+        ec.checkThat(result.toString(), Matchers.is(str + "0"));
+        slowdown.accept(str);
+        ec.checkThat(result.toString(), Matchers.is(str + "0"));
+        time += 500;
+        slowdown.accept("0");
+        ec.checkThat(result.toString(), Matchers.is(str + "0" + str + "0"));
+    }
+
 }
