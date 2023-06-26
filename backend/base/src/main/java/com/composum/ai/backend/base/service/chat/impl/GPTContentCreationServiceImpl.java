@@ -1,8 +1,10 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,7 +65,14 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         request.addMessages(messages);
         request.setMaxTokens(50); // pretty arbitrary limit for now, needs testing.
         String response = chatCompletionService.getSingleChatCompletion(request);
-        return List.of(response.trim().split("\\s*\n\\s*"));
+        List<String> lines = List.of(response.trim().split("\\s*\n\\s*"));
+        lines = lines.stream()
+                .filter(l -> !l.isBlank())
+                .filter(l -> l.length() < 40) // that should drop weird things and comments
+                .map(l -> l.trim())
+                .map(l -> l.startsWith("- ") ? l.substring(2) : l)
+                .collect(Collectors.toList());
+        return lines;
     }
 
     @Nonnull
