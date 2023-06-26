@@ -57,7 +57,6 @@
                 this.$contentSelect = this.$el.find('.content-selector');
                 this.$textLength = this.$el.find('.text-length-selector');
                 this.$prompt = this.$el.find('.prompt-textarea');
-                this.$outputField = this.$el.find('.ai-response-field');
                 this.$alert = this.$el.find('.generalalert');
                 this.$truncationalert = this.$el.find('.truncationalert');
 
@@ -92,6 +91,28 @@
                 if (this.historyPosition >= 0) {
                     this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
+
+                if (this.isRichText) {
+                    core.widgetOf(this.$response.find('textarea')).onChange(this.adjustButtonStates.bind(this));
+                } else {
+                    this.$response.change(this.adjustButtonStates.bind(this));
+                }
+
+                this.adjustButtonStates();
+            },
+
+            adjustButtonStates: function () {
+                // this.$el.find('.back-button').prop('disabled', this.historyPosition <= 0);
+                // this.$el.find('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
+                this.$el.find('.generate-button').prop('disabled', !this.$prompt.val());
+                let responseVal;
+                if (this.isRichText) {
+                    responseVal = core.widgetOf(this.$response.find('textarea')).getValue();
+                } else {
+                    responseVal = this.$response.val();
+                }
+                this.$el.find('.replace-button').prop('disabled', !responseVal);
+                this.$el.find('.append-button').prop('disabled', !responseVal);
             },
 
             /** Creates a map that saves the content of all fields of this dialog. */
@@ -101,7 +122,7 @@
                     'contentSelect': this.$contentSelect.val(),
                     'textLength': this.$textLength.val(),
                     'prompt': this.$prompt.val(),
-                    'outputField': this.$outputField.val()
+                    'result': this.getResult()
                 };
             },
 
@@ -113,6 +134,8 @@
                     this.history.push(currentState);
                     this.historyPosition = this.history.length - 1;
                 }
+                console.log('saveState', this.historyPosition, this.history);
+                this.adjustButtonStates();
             },
 
             /** Restores the state of this dialog from the given map. */
@@ -121,13 +144,14 @@
                 this.$contentSelect.val(map['contentSelect']);
                 this.$textLength.val(map['textLength']);
                 this.$prompt.val(map['prompt']);
-                this.$outputField.val(map['outputField']);
+                this.setResult(map['result']);
             },
 
             /** Button 'Reset' was clicked. */
             resetButtonClicked: function (event) {
                 event.preventDefault();
                 this.restoreStateFromMap({});
+                this.adjustButtonStates();
                 return false;
             },
 
@@ -135,12 +159,14 @@
                 event.preventDefault();
                 let predefinedPrompt = this.$predefinedPrompts.val();
                 this.$prompt.val(predefinedPrompt);
+                this.adjustButtonStates();
                 return false;
             },
 
             promptChanged: function (event) {
                 event.preventDefault();
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
+                this.adjustButtonStates();
                 return false;
             },
 
@@ -152,6 +178,7 @@
                     this.historyPosition = this.historyPosition - 1;
                     this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
+                this.adjustButtonStates();
             },
 
             forwardButtonClicked: function (event) {
@@ -159,6 +186,7 @@
                     this.historyPosition = this.historyPosition + 1;
                     this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
+                this.adjustButtonStates();
             },
 
             setLoading: function (loading) {
@@ -173,7 +201,7 @@
             generateButtonClicked: function (event) {
                 event.preventDefault();
                 this.setLoading(true);
-                if (this.$outputField.val()) {
+                if (this.getResult()) {
                     this.saveState();
                 }
 
@@ -196,7 +224,7 @@
                 } else if (contentSelect === 'component') {
                     inputPath = this.componentPath;
                 } else if (contentSelect === 'lastoutput') {
-                    inputText = this.$outputField.val();
+                    inputText = this.getResult();
                 }
 
                 let url = ai.const.url.general.authoring + ".create.json";
@@ -240,11 +268,20 @@
                 }
             },
 
-            setValue: function (value) {
+            setResult: function (value) {
                 if (this.isRichText) {
                     core.widgetOf(this.$response.find('textarea')).setValue(value);
                 } else {
                     this.$response.val(value);
+                }
+                this.adjustButtonStates();
+            },
+
+            getResult: function () {
+                if (this.isRichText) {
+                    return core.widgetOf(this.$response.find('textarea')).getValue();
+                } else {
+                    return this.$response.val();
                 }
             },
 
@@ -305,7 +342,7 @@
             onStreamingMessage: function (eventSource, event) {
                 console.log('onStreamingMessage', arguments);
                 this.streamingResult += JSON.parse(event.data);
-                this.setValue(this.streamingResult);
+                this.setResult(this.streamingResult);
             },
 
             onStreamingError: function (eventSource, event) {
