@@ -139,19 +139,36 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
-        httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(connectionTimeout))
-                .build();
         if (config == null || !config.disable()) {
             this.apiKey = retrieveOpenAIKey(config);
         } else {
             LOG.info("ChatGPT is disabled.");
         }
-        mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        if (isEnabled()) {
+            this.httpClient = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(connectionTimeout))
+                    .build();
+            mapper = new ObjectMapper();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        } else {
+            this.httpClient = null;
+        }
         this.bundleContext = bundleContext;
         templates.clear(); // bundleContext changed, after all.
         LOG.info("ChatGPT activated: {}", isEnabled());
+    }
+
+    @Deactivate
+    public void deactivate() {
+        LOG.info("Deactivating GPTChatCompletionService");
+        this.apiKey = null;
+        this.defaultModel = null;
+        this.limiter = null;
+        this.gptLimiter = null;
+        this.httpClient = null;
+        this.mapper = null;
+        this.bundleContext = null;
+        this.templates.clear();
     }
 
     private static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
@@ -185,13 +202,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             return apiKey.trim();
         }
         return null;
-    }
-
-    @Deactivate
-    public void deactivate() {
-        httpClient = null;
-        apiKey = null;
-        templates.clear();
     }
 
     @Override
@@ -282,22 +292,34 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                         }
                     }
             );
-            subscription.request(10000);
+            subscription.request(1000);
         }
 
         @Override
         public void onNext(String item) {
             LOG.debug("Received line from ChatGPT for {} from GPT: {}", id, item);
             if (!cancelled) {
-                handleStreamingEvent(callback, id, item);
+                try {
+                    handleStreamingEvent(callback, id, item);
+                } catch (RuntimeException e) {
+                    LOG.error("Error while handling streaming event {} from GPT", id, e);
+                    try {
+                        callback.onError(e);
+                    } finally {
+                        subscription.cancel();
+                        onError(e);
+                    }
+                }
             }
         }
 
         @Override
         public void onError(Throwable throwable) {
-            if (!cancelled) {
-                LOG.error("Error while streaming call {} to GPT", id, throwable);
+            LOG.error("Error while streaming call {} to GPT", id, throwable);
+            try {
                 callback.onError(throwable);
+            } finally {
+                subscription.cancel();
             }
         }
 
