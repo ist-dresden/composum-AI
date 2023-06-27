@@ -26,22 +26,9 @@ public class GPTChatCompletionServiceImplTest {
     @Test
     public void testShortenLongText() {
         String text = "This is a very long text that should be shortened. Well, not really very long, but long enough.";
-        String shortenedText = service.shorten(text, 4);
-        assertEquals("This is ... enough.", shortenedText);
-    }
-
-    @Test
-    public void testShortenTextWithOddMaxWords() {
-        String text = "This is a text with odd max words which we shorten.";
-        String shortenedText = service.shorten(text, 3);
-        assertEquals("This ... shorten.", shortenedText);
-    }
-
-    @Test
-    public void testShortenTextWithEvenMaxWords() {
-        String text = "This is a text with even max words which we shorten.";
-        String shortenedText = service.shorten(text, 4);
-        assertEquals("This is ... shorten.", shortenedText);
+        String shortenedText = service.shorten(text, 20);
+        assertEquals(20, service.countTokens(shortenedText));
+        assertEquals("This is a very long text ... (truncated) ...  very long, but long enough.", shortenedText);
     }
 
     @Test
@@ -49,20 +36,6 @@ public class GPTChatCompletionServiceImplTest {
         String text = "";
         String shortenedText = service.shorten(text, 10);
         assertEquals(text, shortenedText);
-    }
-
-    @Test
-    public void testShortenTextWithOddNumberOfWords() {
-        String text = "This is a text with odd wordcount.";
-        String shortenedText = service.shorten(text, 4);
-        assertEquals("This is ... wordcount.", shortenedText);
-    }
-
-    @Test
-    public void testShortenTextWithEvenNumberOfWords() {
-        String text = "This is a text with even number of words.";
-        String shortenedText = service.shorten(text, 4);
-        assertEquals("This is ... words.", shortenedText);
     }
 
     @Test

@@ -24,7 +24,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="messages">
-                        <div class="alert" style="display: none;"></div>
+                        <cpn:text class="alert alert-warning truncationalert" i18n="true" style="display: none;">
+                            The translation was too long and has been truncated.</cpn:text>
+                        <div class="alert alert-warning generalalert" style="display: none;"></div>
                     </div>
 
                     <div class="panel panel-default"
@@ -65,7 +67,7 @@
                                    title="${cpn:i18n(slingRequest,'Loading translation is in progress. Please wait a few seconds.')}">
                                 </i>
                             </div>
-                            <div class="translation form-group" style="display: none;"></div>
+                            <div class="translation form-group"></div>
                         </div>
                     </div>
                 </div>

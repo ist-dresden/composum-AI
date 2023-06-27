@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.concurrent.Flow;
+
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
@@ -12,6 +14,8 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner implements GPTCompletionCallback {
 
     StringBuilder buffer = new StringBuilder();
+    private Flow.Subscription subscription;
+    private boolean isFinished;
 
     public static void main(String[] args) throws Exception {
         RunGPTChatCompletionServiceStreamingImpl instance = new RunGPTChatCompletionServiceStreamingImpl();
@@ -19,23 +23,45 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
         instance.run();
     }
 
-    private void run() {
+    private void run() throws InterruptedException {
         GPTChatRequest request = new GPTChatRequest();
-        request.addMessage(GPTMessageRole.USER, "Make a haiku about the weather");
+        StringBuilder requestElongator = new StringBuilder();
+        // for (int i = 0; i < 10000; i++) requestElongator.append("hallo "); // add that to requets to provoke error
+        request.addMessage(GPTMessageRole.USER, "Make 2 haiku about the weather" + requestElongator);
         chatCompletionService.streamingChatCompletion(request, this);
-        System.out.println("Finished");
+        System.out.println("Call returned.");
+        while (!isFinished) Thread.sleep(1000);
         System.out.println("Complete response:");
         System.out.println(buffer);
     }
 
     @Override
-    public void receiveNextData(String data) {
-        buffer.append(data);
-        System.out.println(data);
+    public void onFinish(GPTFinishReason finishReason) {
+        System.out.println("Finished: " + finishReason);
     }
 
     @Override
-    public void receiveFinish(GPTFinishReason finishReason) {
-        System.out.println("Finished: " + finishReason);
+    public void onComplete() {
+        System.out.println("Completed");
+        GPTCompletionCallback.super.onComplete();
+        isFinished = true;
+    }
+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        System.out.println("Subscribed");
+        this.subscription = subscription;
+    }
+
+    @Override
+    public void onNext(String item) {
+        buffer.append(item);
+        System.out.println(item);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        isFinished = true;
+        throwable.printStackTrace(System.err);
     }
 }

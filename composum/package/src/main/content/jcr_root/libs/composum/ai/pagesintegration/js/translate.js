@@ -31,7 +31,8 @@
                 this.$accept = this.$el.find('.btn-primary.accept');
                 this.$translation = this.$el.find('.translation');
                 this.$languageSelects = this.$el.find('.language-select-radio')
-                this.$alert = this.$el.find('.alert');
+                this.$alert = this.$el.find('.generalalert');
+                this.$truncationalert = this.$el.find('.truncationalert');
                 this.$spinner = this.$el.find('.loading-curtain');
                 this.widget = options.widget;
                 this.isRichText = options.isRichText;
@@ -40,6 +41,7 @@
                 this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
                 this.$accept.click(_.bind(this.accept, this));
                 this.$languageSelects.on('change', _.bind(this.languageChanged, this));
+                this.streaming = typeof (EventSource) !== "undefined";
 
                 if (this.$languageSelects.length === 1) {
                     this.translate(this.$languageSelects.first().val());
@@ -50,10 +52,6 @@
                 var language = $(event.target).val();
                 console.log('languageChanged', language, arguments);
                 this.translate(language);
-            },
-
-            onShown: function (event) {
-                console.log('onShown', arguments);
             },
 
             accept: function (event) {
@@ -77,6 +75,7 @@
                 console.error('abort', arguments);
                 event.preventDefault();
                 this.abortRunningCalls();
+                this.$spinner.hide();
                 return false;
             },
 
@@ -94,6 +93,8 @@
                 core.ajaxPost(url, {
                         sourceLanguage: language,
                         path: this.$pathfield.val(),
+                        richText: this.isRichText,
+                        streaming: this.streaming,
                         property: this.$propertyfield.val()
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.onTranslation, this), _.bind(this.onError, this));
@@ -104,30 +105,42 @@
                     this.runningxhr.abort();
                     this.runningxhr = undefined;
                 }
+                if (this.eventSource) {
+                    this.eventSource.close();
+                    this.eventSource = undefined;
+                }
             },
 
+            /** When a non-streaming translation is finished. */
             onTranslation: function (status) {
-                if (status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.translation) {
+                const statusOk = status && status.status >= 200 && status.status < 300 && status.data && status.data.result;
+
+                if (statusOk && status.data.result.translation) {
                     let translationResult = status.data.result.translation[0];
-                    if (this.isRichText) {
-                        this.$translation.html(translationResult);
-                    } else {
-                        this.$translation.text(translationResult);
-                    }
+                    this.updateTranslation(translationResult);
                     this.setTranslated();
+                } else if (statusOk && status.data.result.streamid) {
+                    const streamid = status.data.result.streamid;
+                    this.startStreaming(streamid);
                 } else {
                     this.onError(null, status);
                 }
             },
 
+            updateTranslation(translation) {
+                if (this.isRichText) {
+                    this.$translation.html(translation);
+                } else {
+                    this.$translation.text(translation);
+                }
+            },
+
             setTranslated: function () {
-                this.$alert.hide();
+                this.abortRunningCalls();
                 this.$spinner.hide();
                 if (this.$translation.text()) {
-                    this.$translation.show();
                     this.$accept.prop('disabled', false);
                 } else {
-                    this.$translation.hide();
                     this.$accept.prop('disabled', true);
                 }
             },
@@ -135,18 +148,77 @@
             onError: function (xhr, status) {
                 console.error('onError', arguments);
                 // TODO sensible handling of errors
-                this.$alert.text(xhr.status + " " + xhr.statusText + " : " + xhr.responseText + " / " + status);
+                let alert = xhr && xhr.status + " " + xhr.statusText + " : " + xhr.responseText + " / " + status || status;
+                this.$alert.text(alert);
                 this.$alert.show();
+                this.abortRunningCalls();
                 this.$spinner.hide();
-                this.$translation.hide();
                 this.$accept.prop('disabled', true);
             },
 
             setTranslating: function () {
                 this.$alert.hide();
+                this.$alert.text('');
                 this.$spinner.show();
-                this.$translation.hide();
+                this.$translation.html("");
+                this.$truncationalert.hide();
                 this.$accept.prop('disabled', true);
+            },
+
+            startStreaming: function (streamid) {
+                console.log('startStreaming', arguments);
+                let url = ai.const.url.general.authoring + ".streamresponse.sse";
+                this.abortRunningCalls();
+                this.streamingResult = "";
+                this.eventSource = new EventSource(url + "?streamid=" + streamid);
+                this.eventSource.onmessage = this.onStreamingMessage.bind(this);
+                this.eventSource.onerror = this.onStreamingError.bind(this);
+                this.eventSource.addEventListener('finished', this.onStreamingFinished.bind(this));
+                this.eventSource.addEventListener('exception', this.onStreamingException.bind(this));
+            },
+
+            onStreamingMessage: function (event) {
+                console.log('onStreamingMessage', arguments);
+                this.streamingResult += JSON.parse(event.data);
+                this.updateTranslation(this.streamingResult);
+            },
+
+            onStreamingFinished: function (event) {
+                console.log('onStreamingFinished', arguments);
+                this.eventSource.close();
+                this.setTranslated();
+                const status = JSON.parse(event.data);
+                console.log(status);
+                const statusOk = status && status.status >= 200 && status.status < 300 && status.data && status.data.result && status.data.result.finishreason;
+                if (statusOk) {
+                    const finishreason = status.data.result.finishreason;
+                    if (finishreason === 'STOP') {
+                        this.$truncationalert.hide();
+                    } else if (finishreason === 'LENGTH') {
+                        this.$truncationalert.show();
+                    } else {
+                        console.error('BUG: Unknown finishreason: ' + finishreason);
+                    }
+                }
+            },
+
+            /** Exception on the server side. */
+            onStreamingException: function (event) {
+                console.log('onStreamingException', arguments);
+                this.eventSource.close();
+                this.abortRunningCalls();
+                this.$spinner.hide();
+                this.$alert.text(event.data);
+                this.$alert.show();
+            },
+
+            onStreamingError: function (event) {
+                console.log('onStreamingError', arguments);
+                this.eventSource.close();
+                this.abortRunningCalls();
+                this.$spinner.hide();
+                this.$alert.text('Connection failed.');
+                this.$alert.show();
             }
 
         });

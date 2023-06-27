@@ -78,35 +78,6 @@
 
 					<filters>
 						<filter>
-							<root>/etc/packages/com/composum/chatgpt</root>
-							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
-						</filter>
-						<filter>
-							<root>/etc/packages/com/composum/ai</root>
-							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
-							<includes>
-								<include>.*chatgpt.*</include>
-							</includes>
-						</filter>
-						<filter>
-							<root>/libs/composum/chatgpt</root>
-							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
-						</filter>
-						<filter>
-							<root>/libs/composum/platform/install</root>
-							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
-							<includes>
-								<include>.*chatgpt.*</include>
-							</includes>
-						</filter>
-						<filter>
-							<root>/apps/sling/install</root>
-							<!-- FIXME this filter is just for cleaning up obsolete paths. Remove this when done. -->
-							<includes>
-								<include>.*com.composum.chatgpt.*</include>
-							</includes>
-						</filter>
-						<filter>
 							<root>/libs/composum/ai/pagesintegration</root>
 						</filter>
 						<filter>

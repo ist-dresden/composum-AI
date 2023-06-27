@@ -2,11 +2,14 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.impl.SimpleLogger;
 
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
@@ -64,11 +67,20 @@ public class GPTChatMessagesTemplateTest {
     }
 
     @Test(expected = GPTException.class)
-    public void testGetMessages_missingPlaceholder() {
-        GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("this", "foo");
-        template.getMessages(placeholders);
+    public void testGetMessages_missingPlaceholder() throws NoSuchFieldException, IllegalAccessException {
+        Logger log = GPTChatMessagesTemplate.LOG;
+        Field field = SimpleLogger.class.getDeclaredField("currentLogLevel");
+        field.setAccessible(true);
+        int oldLogLevel = field.getInt(log);
+        field.set(log, 1000); // annoying way to remove logging of the expected error
+        try {
+            GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("this", "foo");
+            template.getMessages(placeholders);
+        } finally {
+            field.set(log, oldLogLevel);
+        }
     }
 
     @Test(expected = GPTException.class)

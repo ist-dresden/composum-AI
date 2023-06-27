@@ -28,3 +28,4 @@ target
 .DS_*
 # Other stuff
 *.orig
+/tags
