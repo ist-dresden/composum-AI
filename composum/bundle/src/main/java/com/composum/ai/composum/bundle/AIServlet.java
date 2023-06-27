@@ -454,6 +454,7 @@ public class AIServlet extends AbstractServiceServlet {
             if (isNoneBlank(inputPath, inputText)) {
                 status.error("Both inputPath and inputText given, only one of them is allowed");
             }
+            boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
             int maxwords = 300; // some arbitrary default
             if (isNotBlank(textLength)) {
                 Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
@@ -466,6 +467,9 @@ public class AIServlet extends AbstractServiceServlet {
                 String fullPrompt = prompt;
                 if (isNotBlank(textLength)) {
                     fullPrompt = textLength + "\n\n" + prompt;
+                }
+                if (richtext) {
+                    fullPrompt = fullPrompt + "\n\n" + "Create HTML and begin the text with <p>";
                 }
                 if (isNotBlank(inputPath)) {
                     Resource resource = request.getResourceResolver().getResource(inputPath);

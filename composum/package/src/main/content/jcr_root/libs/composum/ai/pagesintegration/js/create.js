@@ -237,6 +237,7 @@
                         inputText: inputText,
                         inputPath: inputPath,
                         streaming: this.streaming,
+                        richText: this.isRichText,
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
