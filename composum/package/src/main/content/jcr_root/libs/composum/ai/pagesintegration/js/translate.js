@@ -93,6 +93,7 @@
                 core.ajaxPost(url, {
                         sourceLanguage: language,
                         path: this.$pathfield.val(),
+                        richText: this.isRichText,
                         streaming: this.streaming,
                         property: this.$propertyfield.val()
                     }, {dataType: 'json', xhrconsumer: consumeXhr},

@@ -298,11 +298,11 @@
 
             replaceButtonClicked: function (event) {
                 event.preventDefault();
+                const result = this.getResult();
                 if (this.isRichText) {
-                    let suggestion = core.widgetOf(this.$response.find('textarea')).getValue();
-                    this.widget.setValue(suggestion);
+                    this.widget.setValue(result);
                 } else {
-                    this.widget.setValue(this.$response.val());
+                    this.widget.setValue(result);
                 }
                 this.$el.modal('hide');
                 this.widget.grabFocus();
@@ -311,12 +311,13 @@
 
             appendButtonClicked: function (event) {
                 event.preventDefault();
+                const result = this.getResult();
                 let previousValue = this.widget.getValue();
                 previousValue = previousValue ? previousValue.trim() + "\n\n" : "";
                 if (this.isRichText) {
-                    this.widget.setValue(previousValue + "<p>" + this.$response.val() + "</p>"); // HTML?
+                    this.widget.setValue(previousValue + "<p>" + result + "</p>");
                 } else {
-                    this.widget.setValue(previousValue + "\n" + this.$response.val());
+                    this.widget.setValue(previousValue + "\n\n" + result);
                 }
                 this.$el.modal('hide');
                 this.widget.grabFocus();

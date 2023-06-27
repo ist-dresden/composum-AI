@@ -13,4 +13,4 @@ Please retrieve the text to translate, delimited with three backticks.
 ---------- assistant ----------
 ```${sourcephrase}```
 ---------- user ----------
-Please translate the text from ${sourcelanguage} to ${targetlanguage}. Do not surround the text delimited with three backticks.
+Please translate the text from ${sourcelanguage} to ${targetlanguage}. Do not surround the text delimited with three backticks. ${addition}

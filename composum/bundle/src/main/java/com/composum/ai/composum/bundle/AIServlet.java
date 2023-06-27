@@ -94,6 +94,8 @@ public class AIServlet extends AbstractServiceServlet {
      */
     public static final String PARAMETER_PROPERTY = "property";
 
+    public static final String PARAMETER_RICHTEXT = "richText";
+
     /**
      * Key for {@link Status#data(String)} - toplevel key in the servlet result.
      */
@@ -266,8 +268,9 @@ public class AIServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link GPTTranslationService}, specifically {@link GPTTranslationService#singleTranslation(String, String, String)}
-     * with arguments text, sourceLanguage, targetLanguage .
+     * Servlet representation of {@link GPTTranslationService}, specifically
+     * {@link GPTTranslationService#singleTranslation(String, String, String, boolean)} and the streaming version,
+     * with arguments text, sourceLanguage, targetLanguage, {@value #PARAMETER_RICHTEXT} .
      * Input are the parameters text, sourceLanguage, targetLanguage, output is in data.result.translation
      * a list containing the translation as (currently) a single string.
      * We use a list since it might be sensible to create multiple translation variants in the future, if requested.
@@ -288,7 +291,8 @@ public class AIServlet extends AbstractServiceServlet {
             }
             String sourceLanguage = status.getRequiredParameter("sourceLanguage", null, "No sourceLanguage given");
             String targetLanguage = request.getParameter("targetLanguage");
-            boolean streaming = "true".equals(request.getParameter(PARAMETER_STREAMING));
+            boolean streaming = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_STREAMING));
+            boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
             if (isNoneBlank(path, property)) {
                 ResourceResolver resolver = request.getResourceResolver();
                 Resource nodeResource = resolver.getResource(path);
@@ -327,7 +331,7 @@ public class AIServlet extends AbstractServiceServlet {
                     translation = cached;
                 }
                 if (!streaming && isBlank(translation)) {
-                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage);
+                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage, richtext);
                     translation = XSS.filter(translation);
                     // translationCache.put(cachekey, translation);
                 }
@@ -339,7 +343,7 @@ public class AIServlet extends AbstractServiceServlet {
                         // translationCache.put(cachekey, XSS.filter(result));
                     });
                     String id = saveStream(callback, request);
-                    translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, callback);
+                    translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, richtext, callback);
                     status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
                 }
             }

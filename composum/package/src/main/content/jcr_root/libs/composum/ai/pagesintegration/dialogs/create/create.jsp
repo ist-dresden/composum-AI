@@ -21,7 +21,7 @@
                 <div class="modal-body">
                     <div class="messages">
                         <cpn:text class="alert alert-warning truncationalert" i18n="true" style="display: none;">
-                            The translation was too long and has been truncated.</cpn:text>
+                            The generated text was too long and has been truncated.</cpn:text>
                         <div class="alert alert-danger alert-text generalalert" style="display: none;"></div>
                     </div>
 
