@@ -75,6 +75,7 @@
                 console.error('abort', arguments);
                 event.preventDefault();
                 this.abortRunningCalls();
+                this.$spinner.hide();
                 return false;
             },
 
@@ -107,8 +108,6 @@
                     this.eventSource.close();
                     this.eventSource = undefined;
                 }
-                this.$spinner.hide();
-                this.$accept.prop('disabled', true);
             },
 
             /** When a non-streaming translation is finished. */
@@ -152,6 +151,8 @@
                 this.$alert.text(alert);
                 this.$alert.show();
                 this.abortRunningCalls();
+                this.$spinner.hide();
+                this.$accept.prop('disabled', true);
             },
 
             setTranslating: function () {
@@ -204,6 +205,7 @@
                 console.log('onStreamingException', arguments);
                 this.eventSource.close();
                 this.abortRunningCalls();
+                this.$spinner.hide();
                 this.$alert.text(event.data);
                 this.$alert.show();
             },
