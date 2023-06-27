@@ -158,6 +158,7 @@
 
             setTranslating: function () {
                 this.$alert.hide();
+                this.$alert.text('');
                 this.$spinner.show();
                 this.$translation.html("");
                 this.$truncationalert.hide();

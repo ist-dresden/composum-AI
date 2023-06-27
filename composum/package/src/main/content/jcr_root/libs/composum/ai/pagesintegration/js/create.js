@@ -198,10 +198,11 @@
             setLoading: function (loading) {
                 if (loading) {
                     this.$spinner.show();
+                    this.$alert.hide();
+                    this.$alert.text('');
                 } else {
                     this.$spinner.hide();
                 }
-                this.$alert.hide();
             },
 
             generateButtonClicked: function (event) {
