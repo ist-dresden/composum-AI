@@ -92,6 +92,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
     private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
 
+    public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
+
     private String apiKey;
     private String defaultModel;
 
@@ -533,28 +535,26 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     @Nonnull
-    public String shorten(@Nullable String text, int maxwords) {
+    public String shorten(@Nullable String text, int maxtokens) {
         if (text == null) {
             return "";
         }
-        String[] words = text.split("\\s+");
-        if (words.length > maxwords) {
-            // FIXME(hps,24.05.23) is there a way to do this using tokens? This is a rather wild estimate.
-            int middle = words.length / 2;
-            int start = maxwords / 2;
-            int end = words.length - (maxwords - 1) / 2;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < start; i++) {
-                sb.append(words[i]).append(" ");
-            }
-            sb.append("...");
-            for (int i = end; i < words.length; i++) {
-                sb.append(" ").append(words[i]);
-            }
-            return sb.toString();
-        } else {
+        List<Integer> markerTokens = enc.encodeOrdinary(TRUNCATE_MARKER);
+        if (maxtokens <= markerTokens.size() + 6) {
+            // this is absurd, probably usage error.
+            LOG.warn("Cannot shorten text to {} tokens, too short. Returning original text.", maxtokens);
             return text;
         }
+
+        List<Integer> encoded = enc.encodeOrdinary(text);
+        if (encoded.size() <= maxtokens) {
+            return text;
+        }
+        int borderTokens = (maxtokens - markerTokens.size()) / 2;
+        List<Integer> result = encoded.subList(0, borderTokens);
+        result.addAll(markerTokens);
+        result.addAll(encoded.subList(encoded.size() - maxtokens + result.size(), encoded.size()));
+        return enc.decode(result);
     }
 
     @Override
@@ -572,8 +572,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         if (text == null) {
             return 0;
         }
-        List<Integer> encoded = this.enc.encodeOrdinary(text);
-        return encoded.size();
+        return enc.countTokensOrdinary(text);
     }
 
     @Override

@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.util.ServiceHandle;
 
-@Ignore("XXX temporarily disabled because of us experimenting.")
 @RunWith(MockitoJUnitRunner.class)
 public class EventStreamTest {
 
@@ -51,7 +50,7 @@ public class EventStreamTest {
                     return null;
                 }
         ).when(writer).println(anyString());
-        when(xssFilter.filter(anyString())).thenAnswer(invocation -> (String) invocation.getArgument(0));
+        // when(xssFilter.filter(anyString())).thenAnswer(invocation -> (String) invocation.getArgument(0));
         ServiceHandle xssfilterhandle =
                 (ServiceHandle) FieldUtils.readStaticField(com.composum.sling.core.util.XSS.class, "XSSFilter_HANDLE", true);
         FieldUtils.writeField(xssfilterhandle, "service", xssFilter, true);
@@ -71,8 +70,9 @@ public class EventStreamTest {
         String expected = "data: \"testItem1 testItem2 testItem3.\"\n" +
                 "\n" +
                 "\n" +
-                "event: finish\n" +
+                "event: finished\n" +
                 "data: {\"status\":200,\"success\":true,\"warning\":false,\"data\":{\"result\":{\"finishreason\":\"STOP\"}}}\n" +
+                "\n" +
                 "\n";
         ec.checkThat(buf.toString(), is(expected));
         ec.checkThat(eventStream.getWholeResponse(), is("testItem1 testItem2 testItem3."));
@@ -89,12 +89,12 @@ public class EventStreamTest {
         eventStream.onError(throwable);
 
         verify(subscription).cancel();
-        ec.checkThat(eventStream.queue.contains("event: error"), is(true));
+        ec.checkThat(eventStream.queue.toString(), eventStream.queue.contains("event: exception"), is(true));
         eventStream.writeTo(writer);
         ec.checkThat(buf.toString().replaceAll("\\d{13}", "<timestamp>")
                 , is(("\n" +
-                        "event: error\n" +
+                        "event: exception\n" +
                         "data: {\"status\":400,\"success\":false,\"warning\":false,\"title\":\"Error\",\"messages\":[{\"level\":\"error\",\"text\":\"Internal error: java.lang.Throwable: testError\",\"rawText\":\"Internal error: java.lang.Throwable: testError\",\"arguments\":[\"testError\"],\"timestamp\":1687439360950}]}\n" +
-                        "\n").replaceAll("\\d{13}", "<timestamp>")));
+                        "\n\n").replaceAll("\\d{13}", "<timestamp>")));
     }
 }

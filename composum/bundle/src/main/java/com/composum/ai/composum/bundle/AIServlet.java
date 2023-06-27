@@ -82,7 +82,15 @@ public class AIServlet extends AbstractServiceServlet {
     /**
      * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
      */
-    public static final String PARAMETER_MAXWORDS = "maxwords";
+    public static final String PARAMETER_MAXWORDS = "maxtokens";
+
+    /**
+     * Optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
+     * That might lead to cutoff, as this is a hard limit and ChatGPT doesn't know about that during generation.
+     * So it's advisable to specify the desired text length in the prompt, too.
+     */
+    public static final String PARAMETER_MAXTOKENS = "maxtokens";
+
 
     /**
      * The path to a resource, given as parameter.
@@ -400,9 +408,9 @@ public class AIServlet extends AbstractServiceServlet {
         @Override
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
-            Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
+            Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePrompt(prompt, maxwords != null ? maxwords : -1);
+                String result = contentCreationService.executePrompt(prompt, maxtokens != null ? maxtokens : -1);
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -422,9 +430,9 @@ public class AIServlet extends AbstractServiceServlet {
         protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
-            Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
+            Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePromptOnText(prompt, text, maxwords != null ? maxwords : -1);
+                String result = contentCreationService.executePromptOnText(prompt, text, maxtokens != null ? maxtokens : -1);
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -455,11 +463,11 @@ public class AIServlet extends AbstractServiceServlet {
                 status.error("Both inputPath and inputText given, only one of them is allowed");
             }
             boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
-            int maxwords = 300; // some arbitrary default
+            int maxtokens = 400; // some arbitrary default
             if (isNotBlank(textLength)) {
                 Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
                 if (matcher.matches()) {
-                    maxwords = Integer.parseInt(matcher.group(1));
+                    maxtokens = Integer.parseInt(matcher.group(1));
                     textLength = matcher.group(2) + "\n\n" + prompt;
                 }
             }
@@ -483,9 +491,9 @@ public class AIServlet extends AbstractServiceServlet {
                     if (!streaming) {
                         String result;
                         if (isNotBlank(inputText)) {
-                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, maxwords);
+                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, maxtokens);
                         } else {
-                            result = contentCreationService.executePrompt(fullPrompt, maxwords);
+                            result = contentCreationService.executePrompt(fullPrompt, maxtokens);
                         }
                         result = XSS.filter(result);
                         status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
@@ -493,9 +501,9 @@ public class AIServlet extends AbstractServiceServlet {
                         EventStream callback = new EventStream();
                         String id = saveStream(callback, request);
                         if (isNotBlank(inputText)) {
-                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, maxwords, callback);
+                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, maxtokens, callback);
                         } else {
-                            contentCreationService.executePromptStreaming(fullPrompt, maxwords, callback);
+                            contentCreationService.executePromptStreaming(fullPrompt, maxtokens, callback);
                         }
                         status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
                     }

@@ -44,15 +44,15 @@ public interface GPTChatCompletionService {
 
     /**
      * Helper method to shorten texts by taking out the middle if too long.
-     * In texts longer than this many words we replace the middle with ... since ChatGPT can only process a limited
-     * number of words / tokens and in the introduction or summary there is probably the most information about the text.
-     * The output has then maxwords words, including the ... marker.
+     * In texts longer than this many tokens we replace the middle with " ... (truncated) ... " since ChatGPT can only
+     * process a limited number of words / tokens and in the introduction or summary there is probably the most
+     * condensed information about the text. The output has then maxtokens tokens, including the ... marker.
      *
      * @param text     the text to shorten
-     * @param maxwords the maximum number of words in the output
+     * @param maxtokens the maximum number of tokens in the output
      */
     @Nonnull
-    String shorten(@Nullable String text, int maxwords) throws GPTException;
+    String shorten(@Nullable String text, int maxtokens) throws GPTException;
 
     /**
      * Helper for preprocessing HTML so that it can easily read by ChatGPT.
