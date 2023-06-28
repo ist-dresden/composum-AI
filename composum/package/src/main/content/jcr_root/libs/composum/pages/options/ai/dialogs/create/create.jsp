@@ -5,7 +5,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.ai.composum.bundle.model.CreateDialogModel"
-             cssBase="composum-ai-pagesintegration-dialogs-create"
+             cssBase="composum-pages-options-ai-dialogs-create"
              cssAdd="dialog modal fade composum-ai-dialog extra-wide" role="dialog">
     <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.CreateDialogModel"--%>
     <div class="modal-dialog form-panel">
@@ -119,7 +119,7 @@
                             <div class="form-group">
                                 <c:choose>
                                     <c:when test="${model.isRichText}">
-                                        <cpp:widgetForm disabled="true" cssBase="composum-ai-pagesintegration-dialogs-create"
+                                        <cpp:widgetForm disabled="true" cssBase="composum-pages-options-ai-dialogs-create"
                                                         cssAdd="ai-response-field">
                                             <cpp:widget type="richtext"
                                                         modelClass="com.composum.ai.composum.bundle.model.CreateDialogModel"/>

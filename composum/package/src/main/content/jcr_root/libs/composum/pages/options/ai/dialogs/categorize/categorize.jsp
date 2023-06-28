@@ -5,7 +5,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
 <cpp:element var="model" type="com.composum.ai.composum.bundle.model.CategorizeDialogModel"
-             cssBase="composum-ai-pagesintegration-dialogs-categorize"
+             cssBase="composum-pages-options-ai-dialogs-categorize"
              id="ai-categorize-dialog" cssAdd="dialog modal fade composum-ai-dialog" role="dialog">
     <%--@elvariable id="model" type="com.composum.ai.composum.bundle.model.CategorizeDialogModel"--%>
     <div class="modal-dialog form-panel">
