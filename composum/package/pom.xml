@@ -87,6 +87,10 @@
 								<include>.*/composum-ai-integration-composum-bundle.*\.jar</include>
 							</includes>
 						</filter>
+						<filter>
+							<!-- Cleanup rule for obsolete path. TODO: remove in release >= 0.4.0 -->
+							<root>/libs/composum/ai/pagesintegration</root>
+						</filter>
 					</filters>
 
 					<embeddeds>
