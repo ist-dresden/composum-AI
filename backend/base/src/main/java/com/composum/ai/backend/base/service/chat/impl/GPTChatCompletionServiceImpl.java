@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.sling.commons.threads.ThreadPool;
+import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
@@ -35,6 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -94,6 +97,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
 
+    /**
+     * Threadpool for accessing ChatGPT
+     */
+    public static final String COMPOSUM_AI_CHAT_GPT = "Composum-AI-ChatGPT";
+
     private String apiKey;
     private String defaultModel;
 
@@ -128,6 +136,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private long requestTimeout;
     private long connectionTimeout;
 
+    @Reference
+    protected ThreadPoolManager threadPoolManager;
+
+    protected ThreadPool executor;
+
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         LOG.info("Activating GPTChatCompletionService {}", config);
@@ -145,8 +158,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.info("ChatGPT is disabled.");
         }
         if (isEnabled()) {
+            this.executor = threadPoolManager.get(COMPOSUM_AI_CHAT_GPT);
             this.httpClient = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(connectionTimeout))
+                    .executor(executor)
                     .build();
             mapper = new ObjectMapper();
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -161,6 +176,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Deactivate
     public void deactivate() {
         LOG.info("Deactivating GPTChatCompletionService");
+        if (executor != null) {
+            threadPoolManager.release(executor);
+            executor = null;
+        }
         this.apiKey = null;
         this.defaultModel = null;
         this.limiter = null;
