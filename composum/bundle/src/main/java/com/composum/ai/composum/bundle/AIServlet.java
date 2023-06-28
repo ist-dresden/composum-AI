@@ -47,6 +47,7 @@ import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.ai.composum.bundle.model.TranslationDialogModel;
 import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;
+import com.composum.sling.core.Restricted;
 import com.composum.sling.core.servlet.AbstractServiceServlet;
 import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
@@ -65,9 +66,12 @@ import com.google.common.cache.CacheBuilder;
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
+@Restricted(key = AIServlet.SERVICE_KEY)
 public class AIServlet extends AbstractServiceServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(AIServlet.class);
+
+    public static final String SERVICE_KEY = "pages/content/ai";
 
     /**
      * Parameter to transmit a text on which ChatGPT is to operate - not as instructions but as data.
