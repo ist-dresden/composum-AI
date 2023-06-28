@@ -5,7 +5,7 @@ See also [Composum Integration.md](../composum/ComposumIntegration.md) for speci
 ## Naming
 
 Java classes are at com.composum.ai.bundle or in subpackages like com.composum.ai.bundle.model for models.
-Resources are at path /libs/composum/ai/pagesintegration/ .
+Resources are at path /libs/composum/pages/options/ai/ .
 
 ## Servlets
 
@@ -39,7 +39,7 @@ That's broken down to be partially executable by ChatGPT.
 Make a list specifying
 
 - {feature} = short name of feature, e.g. create for creation dialog.
-- {resourcetype} = component resource type composum/ai/pagesintegration/dialogs/{feature}
+- {resourcetype} = component resource type composum/pages/options/ai/dialogs/{feature}
 - {dialogURL} = `/bin/cpm/platform/ai/dialog.{feature}Dialog.html`
 - ID for dialog chatgpt-{feature}-dialog
 - a HTML class for all dialog fields that need to be addressed from Javascript: inputs or divs where output will be written. These don't need any common prefix as reading them out will be done using the dialog ID - just use a name appropriate to their function.
@@ -53,12 +53,12 @@ operation `{feature}Dialog` to serve that operation with with the {resourcetype}
 ### 2. JSP Files
 
 - **Feature JSP:** Create a JSP file for the new feature
-  at `/libs/composum/ai/pagesintegration/dialogs/{feature}/{feature}.jsp`. This file will be used to render the
+  at `/libs/composum/pages/options/ai/dialogs/{feature}/{feature}.jsp`. This file will be used to render the
   dialog of the feature. This resource is derived from `com.composum.ai.composum.bundle.AIDialogServlet` and uses a
   model specific to the feature, `com.composum.ai.bundle.model.ChatGPT{Feature}DialogModel`.
 
 ### 3. CSS
-/libs/composum/ai/pagesintegration/css/dialogs.scss 
+/libs/composum/pages/options/ai/css/dialogs.scss 
 
 ### 4. Java Model
 
@@ -67,7 +67,7 @@ operation `{feature}Dialog` to serve that operation with with the {resourcetype}
 
 ### 5. JavaScript File
 
-Modify the JavaScript file at `/libs/composum/ai/pagesintegration/js/chatgpt.js`.
+Modify the JavaScript file at `/libs/composum/pages/options/ai/js/chatgpt.js`.
 
 - Add the URL constant for the {dialogUrl}
 - Add a new "open{Feature}Dialog" method that loads the dialog at {dialogURL} with Ajax, modeled after the other open

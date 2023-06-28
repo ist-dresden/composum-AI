@@ -27,13 +27,13 @@ Implemented in Composum Pages https://github.com/ist-dresden/composum-pages/pull
 ### Implementation of the buttons in the widget labels in composum-chatgpt-integration
 
 - For our implementation we use the resource type
-  "composum/ai/pagesintegration/widgetextensions/labelextension"
-- /libs/composum/ai/pagesintegration/widgetextensions/labelextension/labelextension.jsp implements the label
+  "composum/pages/options/ai/widgetextensions/labelextension"
+- /libs/composum/pages/options/ai/widgetextensions/labelextension/labelextension.jsp implements the label
   extensions, drawing on the model model.com.composum.ai.composum.bundle.ChatGPTLabelExtensionModel for visibility
   checking of the individual buttons.
-- /libs/composum/ai/pagesintegration/css/widgetextensions.scss (and variables.scss and mixins.scss copied from
+- /libs/composum/pages/options/ai/css/widgetextensions.scss (and variables.scss and mixins.scss copied from
   pages) for styling of the label extension.
-- /libs/composum/ai/pagesintegration/js/chatgpt.js contains provisions for binding the label extension buttons
+- /libs/composum/pages/options/ai/js/chatgpt.js contains provisions for binding the label extension buttons
   to open the dialogs: registration in composum.pages.dialogs.const.dialogplugins so that dialogInitializeView is
   called after the dialog is rendered.
 

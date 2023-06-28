@@ -58,12 +58,12 @@ public class AIDialogServlet extends AbstractServiceServlet {
     public void init() throws ServletException {
         super.init();
         // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/ai/pagesintegration/dialogs/translate"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/translate"));
         // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
         // or http://localhost:9090/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/ai/pagesintegration/dialogs/categorize"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/categorize"));
         // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/ai/pagesintegration/dialogs/create"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/create"));
     }
 
     /**

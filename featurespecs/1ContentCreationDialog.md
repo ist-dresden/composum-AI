@@ -332,8 +332,8 @@ to be a temporary history.
 
 The implementation of a dialog consists of the following parts:
 
-1. The dialog would be rendered with `/libs/composum/ai/pagesintegration/dialogs/create/create.jsp` (resource
-   composum/ai/pagesintegration/dialogs/create in Apache Sling)
+1. The dialog would be rendered with `/libs/composum/pages/options/ai/dialogs/create/create.jsp` (resource
+   composum/pages/options/ai/dialogs/create in Apache Sling)
    from `com.composum.ai.composum.bundle.AIDialogServlet` and uses
    model `model.com.composum.ai.composum.bundle.ChatGPTCreateDialogModel`.
 
@@ -341,10 +341,10 @@ The implementation of a dialog consists of the following parts:
    e.g. `/bin/cpm/platform/ai/dialog.creationDialog.html/content/ist/software/home/test/_jcr_content/create`
 
 3. The created content is via an additional JSON AJAX request that is then forwarded to ChatGPT. The Javascript
-   class CreationDialog in `/libs/composum/ai/pagesintegration/js/chatgpt.js` triggers the loading
+   class CreationDialog in `/libs/composum/pages/options/ai/js/chatgpt.js` triggers the loading
    of the dialog
 
-4. The JavaScript class `CreateDialog` in `/libs/composum/ai/pagesintegration/js/chatgpt.js` triggers the loading
+4. The JavaScript class `CreateDialog` in `/libs/composum/pages/options/ai/js/chatgpt.js` triggers the loading
    of the dialog and the JSON AJAX call `com.composum.ai.composum.bundle.AIServlet.CreationOperation`
    with `/bin/cpm/platform/ai/authoring.create.json` for the creation process.
 
@@ -360,7 +360,7 @@ For the selects that contain fragments of the prompt we set the value to the pro
 We use the following identifiers:
 
 - {feature} = create
-- {resourcetype} = composum/ai/pagesintegration/dialogs/create
+- {resourcetype} = composum/pages/options/ai/dialogs/create
 - {dialogURL} = `/bin/cpm/platform/ai/dialog.createDialog.html`
 - ID for dialog: chatgpt-create-dialog
 - HTML class for dialog fields:

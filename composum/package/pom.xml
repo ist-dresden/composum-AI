@@ -78,7 +78,7 @@
 
 					<filters>
 						<filter>
-							<root>/libs/composum/ai/pagesintegration</root>
+							<root>/libs/composum/pages/options/ai</root>
 						</filter>
 						<filter>
 							<root>/libs/composum/ai/install</root>

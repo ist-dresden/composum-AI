@@ -7,15 +7,15 @@
         order="{Long}1000">
     <css jcr:primaryType="sling:OrderedFolder"
             embed="[
-                    composum/ai/pagesintegration/css/widgetextensions.css,
-                    composum/ai/pagesintegration/css/dialogs.css
+                    composum/pages/options/ai/css/widgetextensions.css,
+                    composum/pages/options/ai/css/dialogs.css
                 ]"/>
     <js jcr:primaryType="sling:OrderedFolder"
             embed="[
-                    composum/ai/pagesintegration/js/ai.js,
-                    composum/ai/pagesintegration/js/create.js,
-                    composum/ai/pagesintegration/js/translate.js,
-                    composum/ai/pagesintegration/js/categorize.js
+                    composum/pages/options/ai/js/ai.js,
+                    composum/pages/options/ai/js/create.js,
+                    composum/pages/options/ai/js/translate.js,
+                    composum/pages/options/ai/js/categorize.js
                 ]">
     </js>
 </jcr:root>
