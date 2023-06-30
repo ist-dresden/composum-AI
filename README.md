@@ -46,7 +46,9 @@ we have implemented the following dialogs that help with editing in Composum Pag
 
 ## Try it out!
 
-The easiest way to try it are the Composum Sling starter (a JAR you can execute locally) or the docker image
+The easiest way to try it is the [Composum Cloud](https://cloud.composum.com) where Composum-AI is deployed. You can 
+get a free account there, create a site and test it. 
+Second there is the Composum Sling starter (a JAR you can execute locally) or the docker image
 [composum/featurelauncher-composum](https://hub.docker.com/r/composum/featurelauncher-composum)
 available through the
 [Composum Launcher](https://github.com/ist-dresden/composum-launch) project - see there for description.

@@ -116,7 +116,7 @@ public class AIServlet extends AbstractServiceServlet {
     /**
      * Key in the result that transmits the generated description.
      */
-    public static final String RESULTKEY_DESCRIPTIION = "description";
+    public static final String RESULTKEY_DESCRIPTION = "description";
 
     /**
      * Key in the result that transmits the generated list of keywords.
@@ -395,7 +395,7 @@ public class AIServlet extends AbstractServiceServlet {
             if (status.isValid()) {
                 String result = contentCreationService.generateDescription(text, maxwords != null ? maxwords : -1);
                 result = XSS.filter(result);
-                status.data(RESULTKEY).put(RESULTKEY_DESCRIPTIION, result);
+                status.data(RESULTKEY).put(RESULTKEY_DESCRIPTION, result);
             }
         }
 
