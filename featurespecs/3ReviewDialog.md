@@ -115,6 +115,11 @@ The dialog could look as follows (ASCII art):
 | Additional Prompt Input Field                     | Submit Button |
 ---------------------------------------------------------------------
 
+## Composum Implementation
+
+The sidebar normally has a button toolbar (e.g. composum-pages-tools_actions btn-toolbar) and a tools pane (e.g. 
+composum-pages-stage-edit-tools-page-versions_panel composum-pages-tools_panel) , 
+e.g. /libs/composum/pages/stage/edit/tools/page/versions/versions.jsp
 
 ## Feature list in consideration for the initial prompt library
 

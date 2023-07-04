@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+@import "variables";
+@import "mixins";
+
+.composum-pages-options-ai-tools-review {
+
+    &_dialog-title {
+        font-size: 120%;
+        position: relative;
+        top: 5px;
+    }
+
+}
