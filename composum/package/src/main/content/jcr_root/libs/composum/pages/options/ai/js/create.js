@@ -83,6 +83,7 @@
                 }
 
                 this.history = ai.createDialogStates[this.componentPropertyPath];
+                console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
                 if (!this.history) {
                     this.history = [];
                     ai.createDialogStates[this.componentPropertyPath] = this.history;

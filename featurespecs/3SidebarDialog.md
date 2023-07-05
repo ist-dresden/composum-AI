@@ -99,11 +99,11 @@ The AI dialog interface comprises the following elements:
 The dialog could look as follows (ASCII art):
 
 ---------------------------------------------------------------------
-| Alert Area (hidden by default)                                    |
+| History Navigation: Back | Forward |  Help Button                 |
 ---------------------------------------------------------------------
 | Content Selector | Predefined Prompts Dropdown                    |
 ---------------------------------------------------------------------
-| History Navigation: Back | Forward |  Help Button                 |
+| Alert Area (hidden by default)                                    |
 ---------------------------------------------------------------------
 | Prompt Input Field                                  | Submit Button|
 ---------------------------------------------------------------------

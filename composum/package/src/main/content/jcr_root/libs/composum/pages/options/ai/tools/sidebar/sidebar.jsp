@@ -7,7 +7,7 @@
 <cpp:defineFrameObjects/>
 <% request.setAttribute(RA_STICKY_LOCALE, request.getLocale()); // use editors locale %>
 <cpp:element var="review" type="com.composum.ai.composum.bundle.model.SidebarDialogModel" mode="none"
-             cssBase="composum-pages-options-ai-tools-review" cssAdd="composum-pages-tools">
+             cssBase="composum-pages-options-ai-tools-sidebar" cssAdd="composum-pages-tools">
     <div class="composum-pages-tools_actions btn-toolbar text-center">
         <span class="${reviewCssBase}_dialog-title">Composum-AI</span>
         <div class="composum-pages-tools_left-actions">
@@ -40,46 +40,45 @@
             </div>
         </div>
     </div>
-    <div class="${versionsCssBase}_panel composum-pages-tools_panel">
-        <div class="${versionsCssBase}_versions-head">
-            <i class="${versionsCssBase}_selection-icon fa fa-chevron-right"></i>
-            <div class="${versionsCssBase}_primary-selection">
-                <div class="${versionsCssBase}_selection-name"></div>
-                <div class="${versionsCssBase}_selection-time"></div>
-            </div>
-            <div class="${versionsCssBase}_secondary-selection">
-                <div class="${versionsCssBase}_selection-name"></div>
-                <div class="${versionsCssBase}_selection-time"></div>
-            </div>
-            <div class="${versionsCssBase}_display-controls">
-                <input class="${versionsCssBase}_version-slider widget slider-widget" type="text"
-                       data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0"/>
-            </div>
-            <div class="${versionsCssBase}_compare-controls">
-                <div class="label" title="${cpn:i18n(slingRequest,'compare properties')}">
-                    <span>${cpn:i18n(slingRequest,'compare:')}</span>
-                    <select class="${versionsCssBase}_property-filter widget select-widget"
-                            title="${cpn:i18n(slingRequest,'compare properties')}">
-                        <option value="properties">${cpn:i18n(slingRequest,'all')}</option>
-                        <option value="text">${cpn:i18n(slingRequest,'text')}</option>
-                        <option value="i18n">${cpn:i18n(slingRequest,'i18n')}</option>
+    <div class="${reviewCssBase}_panel composum-pages-tools_panel">
+        <form>
+            <div class="selectors">
+                <div class="form-group col-xs-6 selector"
+                     title="${cpn:i18n(slingRequest,'This replaces the prompt by one of a number of predefined prompts you can use directly or use as an example for your own prompt.')}">
+                    <select id="predefinedPrompts" name="predefined"
+                            class="composum-pages-tools_select predefined-prompts form-control">
+                        <option value=""><cpn:text i18n="true">(Predef. Prompt)</cpn:text></option>
+                        <c:forEach items="${review.predefinedPrompts}" var="predefinedPrompt">
+                            <option value="${predefinedPrompt.value}">${predefinedPrompt.key}</option>
+                        </c:forEach>
                     </select>
                 </div>
-                <div class="label" title="${cpn:i18n(slingRequest,'highlight differences')}">
-                    <input class="${versionsCssBase}_option-highlight widget checkbox-widget" type="checkbox"
-                           title="${cpn:i18n(slingRequest,'highlight differences')}"/>
-                    <span>${cpn:i18n(slingRequest,'highlight')}</span>
-                </div>
-                <div class="label" title="${cpn:i18n(slingRequest,'show equal values')}">
-                    <input class="${versionsCssBase}_option-equal widget checkbox-widget" type="checkbox"
-                           title="${cpn:i18n(slingRequest,'show equal values')}"/>
-                    <span>${cpn:i18n(slingRequest,'show equal')}</span>
+
+                <div class="form-group col-xs-6 selector"
+                     title="${cpn:i18n(slingRequest,'Select which text the AI receives in addition to your prompt, if any.')}">
+                    <select id="contentSelector" name="contentSelect"
+                            class="composum-pages-tools_select content-selector form-control">
+                        <option value=""><cpn:text i18n="true">(Base Text)</cpn:text></option>
+                        <c:forEach items="${review.contentSelectors}" var="contentSelector">
+                            <option value="${contentSelector.key}">${contentSelector.value}</option>
+                        </c:forEach>
+                    </select>
                 </div>
             </div>
-        </div>
-        <div class="${versionsCssBase}_content">
-                <%-- <sling:call script="versionList.jsp"/> - load after init via Ajax --%>
-        </div>
+            <div class="promptcontainer">
+                <textarea class="form-control" name="prompt-0" rows="5"
+                          placeholder="${cpn:i18n(slingRequest,'Prompt: your request to the AI. If you like some examples you can select one of the predefined prompts - that will replace the content of this field.')}"></textarea>
+            </div>
+            <div class="ai-response" id="response-0">
+                <p>This is where the AI response will go.</p>
+                <p>Another paragraph with a longer text. Another paragraph with a longer text. Another paragraph with a
+                    longer text.Another paragraph with a longer text.Another paragraph with a longer text.</p>
+            </div>
+            <div class="promptcontainer-1">
+                <textarea class="form-control" name="prompt-1" rows="3"
+                          placeholder="${cpn:i18n(slingRequest,'If you like to continue this topic and have additional queries.')}"></textarea>
+            </div>
+        </form>
     </div>
 </cpp:element>
 

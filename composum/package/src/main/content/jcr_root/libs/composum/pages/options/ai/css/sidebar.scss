@@ -3,12 +3,25 @@
 @import "variables";
 @import "mixins";
 
-.composum-pages-options-ai-tools-review {
+.composum-pages-options-ai-tools-sidebar {
 
     &_dialog-title {
         font-size: 120%;
         position: relative;
         top: 5px;
+    }
+
+    textarea {
+        color: #fff;
+        background-color: #505050;
+    }
+
+    .selector {
+        padding: 7px 5px 0px 5px;
+    }
+
+    .ai-response {
+        padding: 5px;
     }
 
 }
