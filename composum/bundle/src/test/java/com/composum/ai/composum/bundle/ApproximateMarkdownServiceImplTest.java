@@ -81,7 +81,7 @@ public class ApproximateMarkdownServiceImplTest {
         row2Builder.resource("r2c2", "sling:resourceType", "composum/pages/components/composed/table/cell", "text", "r2c2");
 
         service.approximateMarkdown(table, printWriter);
-        String expectedOutput = "#### Test Table\n" +
+        String expectedOutput = "#### Test Table\n\n" +
                 "| r1c1 | r1c2 |  |\n" +
                 "| r2c1 | r2c2 |  |\n" +
                 "\n" +
@@ -106,7 +106,7 @@ public class ApproximateMarkdownServiceImplTest {
         String expectedOutput = "Content of page /content/parent/path in markdown syntax starts now:\n" +
                 "\n" +
                 "\n" +
-                "# myPage\n" +
+                "# myPage\n\n" +
                 "The best page!\n" +
                 "\n" +
                 "\n" +
