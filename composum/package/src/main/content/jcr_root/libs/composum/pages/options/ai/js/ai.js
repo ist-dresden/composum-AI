@@ -11,7 +11,9 @@
     window.composum.pages.dialogs.const.dialogplugins = window.composum.pages.dialogs.const.dialogplugins || [];
     window.composum.ai = window.composum.ai || {};
 
-    window.composum.pages.dialogs.const.dialogplugins.push(window.composum.ai);
+    if (window.composum.pages.dialogs.const.dialogplugins.indexOf(window.composum.ai) < 0) {
+        window.composum.pages.dialogs.const.dialogplugins.push(window.composum.ai);
+    }
 
     (function (ai, dialogs, pages, core, components) {
         'use strict';

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cpp="http://sling.composum.com/pages/1.0"
+        xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+        jcr:primaryType="cpp:Page">
+    <jcr:content
+            jcr:primaryType="cpp:PageContent"
+            sling:resourceType="composum/pages/stage/edit/tools/component/help/page"
+            jcr:title="Sidebar AI Assistant Help"
+            template="/libs/composum/pages/stage/edit/tools/component/help/template">
+        <main
+                jcr:primaryType="cpp:Container"
+                sling:resourceType="composum/pages/stage/edit/tools/component/help/parsys">
+            <section_1039340572
+                    jcr:primaryType="cpp:Container"
+                    sling:resourceType="composum/pages/components/container/section"
+                    jcr:title="Usage of the translation dialog">
+                <text
+                        jcr:primaryType="cpp:Element"
+                        sling:resourceType="composum/pages/components/element/text"
+                        text="TO BE DONE">
+                    <i18n
+                            jcr:primaryType="nt:unstructured">
+                        <de
+                                jcr:primaryType="nt:unstructured"
+                                text="TODO"/>
+                    </i18n>
+                </text>
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Verwendung des Übersetzungsdialogs"/>
+                </i18n>
+            </section_1039340572>
+            <section
+                    jcr:primaryType="cpp:Container"
+                    sling:resourceType="composum/pages/components/container/section"
+                    jcr:title="Caution"
+                    level="warning">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Achtung"/>
+                </i18n>
+                <text_01
+                        jcr:primaryType="cpp:Element"
+                        sling:resourceType="composum/pages/components/element/text"
+                        text="&lt;p>As with all artificial intelligence based services, please be aware that AIs currently sometimes create content that is wrong though it might even look right on the first glance. Please do never use AI generated content without manually checking it.&lt;/p>">
+                    <i18n
+                            jcr:primaryType="nt:unstructured">
+                        <de
+                                jcr:primaryType="nt:unstructured"
+                                text="&lt;p>Wie bei allen auf künstlicher Intelligenz basierenden Diensten sei darauf hingewiesen, dass KIs manchmal Inhalte erstellen können, die falsch sind, obwohl sie auf den ersten Blick richtig aussehen könnten. Bitte verwenden Sie niemals vom AI generierte Inhalte, ohne sie manuell zu überprüfen.&lt;/p>"/>
+                    </i18n>
+                </text_01>
+            </section>
+        </main>
+        <i18n
+                jcr:primaryType="nt:unstructured">
+            <de
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Hilfe zum Schreibassistenten"/>
+        </i18n>
+    </jcr:content>
+</jcr:root>
