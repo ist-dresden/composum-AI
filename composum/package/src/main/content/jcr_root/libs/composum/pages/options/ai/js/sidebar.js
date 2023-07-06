@@ -43,16 +43,17 @@
                 this.findSingleElemenet('.forward-button').click(_.bind(this.forwardButtonClicked, this));
                 this.findSingleElemenet('.generate-button').click(_.bind(this.generateButtonClicked, this));
                 this.findSingleElemenet('.reset-button').click(_.bind(this.resetButtonClicked, this));
+                this.findSingleElemenet('.reset-history-button').click(_.bind(this.resetHistoryButtonClicked, this));
                 this.findSingleElemenet('.stop-button').click(_.bind(this.stopButtonClicked, this));
 
                 this.findSingleElemenet('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
                 this.$prompt.change(_.bind(this.promptChanged, this));
 
-                this.history = ai.sidebarDialogStates[this.componentPropertyPath];
+                this.history = ai.sidebarDialogStates[this.pagePath];
                 console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
                 if (!this.history) {
                     this.history = [];
-                    ai.sidebarDialogStates[this.componentPropertyPath] = this.history;
+                    ai.sidebarDialogStates[this.pagePath] = this.history;
                 }
                 this.historyPosition = this.history.length - 1;
                 if (this.historyPosition >= 0) {
@@ -119,6 +120,12 @@
                 this.saveState();
                 this.restoreStateFromMap({});
                 return false;
+            },
+
+            resetHistoryButtonClicked: function (event) {
+                this.history = [];
+                this.historyPosition = -1;
+                this.resetButtonClicked(event);
             },
 
             predefinedPromptsChanged: function (event) {

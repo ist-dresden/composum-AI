@@ -139,7 +139,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             String description = resource.getValueMap().get("jcr:description", String.class);
             List<String> categories = resource.getValueMap().get("category", List.class);
             if (StringUtils.isNotBlank(title)) {
-                out.println("# " + getMarkdown(title));
+                out.println("# " + getMarkdown(title) + "\n");
             }
             if (categories != null && !categories.isEmpty()) {
                 out.println("Categories: " + categories.stream().collect(Collectors.joining(", ")));
@@ -167,7 +167,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (isTable) {
             String title = resource.getValueMap().get("title", String.class);
             if (StringUtils.isNotBlank(title)) {
-                out.println("#### " + getMarkdown(title));
+                out.println("#### " + getMarkdown(title) + "\n");
             }
             // for each child of type "row" we print a line with the values of the children of type "cell"
             StreamSupport.stream(resource.getChildren().spliterator(), true)

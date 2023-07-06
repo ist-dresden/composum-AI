@@ -20,13 +20,16 @@
                         class="fa fa-stop stop-button composum-pages-tools_button btn btn-default"
                         title="${cpn:i18n(slingRequest,'Aborts an AI reply')}">
                 </button>
+                <button type="button"
+                        class="fa fa-trash-o reset-button composum-pages-tools_button btn btn-default"
+                        title="${cpn:i18n(slingRequest,'Resets this form but keeps the history.')}"></button>
             </div>
         </div>
         <div class="composum-pages-tools_right-actions">
             <div class="composum-pages-tools_button-group btn-group btn-group-sm" role="group">
                 <button type="button"
-                        class="fa fa-trash-o reset-button composum-pages-tools_button btn btn-default"
-                        title="${cpn:i18n(slingRequest,'Resets this form but keeps the history.')}"></button>
+                        class="fa fa-trash reset-history-button composum-pages-tools_button btn btn-default"
+                        title="${cpn:i18n(slingRequest,'Resets this form including the whole history.')}"></button>
                 <button type="button"
                         class="fa fa-step-backward back-button composum-pages-tools_button btn btn-default"
                         title="${cpn:i18n(slingRequest,'Go back in the history of this dialog. You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}"></button>
