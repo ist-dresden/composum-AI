@@ -37,8 +37,7 @@
         ai.createDialogStates = {};
 
         /**
-         * Dialog for categorize - giving a page categories.
-         * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
+         * Content creation dialog.
          * @param options{widget, isRichText, componentPath, pagePath, componentPropertyPath}
          */
         ai.CreateDialog = core.components.FormDialog.extend({

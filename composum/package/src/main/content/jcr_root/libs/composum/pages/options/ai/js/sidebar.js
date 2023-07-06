@@ -17,34 +17,35 @@
         ai.sidebarDialogStates = {};
 
         /**
-         * Dialog for categorize - giving a page categories.
-         * The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories.
-         * @param options{widget, isRichText, componentPath, pagePath, componentPropertyPath}
+         * Dialog for the AI sidebar.
+         * @param options{el}
          */
         ai.SidebarDialog = Backbone.View.extend({
 
             initialize: function (options) {
+
                 ai.commonDialogInit(this.$el);
-                const dataholder = this.$el.find('.dataholder');
+                const dataholder = this.findSingleElemenet('.dataholder');
                 this.componentPath = dataholder.data('componentpath');
                 this.pagePath = dataholder.data('pagepath');
                 this.streaming = typeof (EventSource) !== "undefined";
 
-                this.$predefinedPrompts = this.$el.find('.predefined-prompts');
-                this.$contentSelect = this.$el.find('.content-selector');
-                this.$prompt = this.$el.find('.prompt-textarea');
-                this.$alert = this.$el.find('.generalalert');
-                this.$truncationalert = this.$el.find('.truncationalert');
+                this.$predefinedPrompts = this.findSingleElemenet('.predefined-prompts');
+                this.$contentSelect = this.findSingleElemenet('.content-selector');
+                this.$prompt = this.findSingleElemenet('.promptcontainer textarea');
+                this.$alert = this.findSingleElemenet('.generalalert');
+                this.$truncationalert = this.findSingleElemenet('.truncationalert');
 
-                this.$spinner = this.$el.find('.loading-indicator');
-                this.$response = this.$el.find('.ai-response-field');
+                this.$spinner = this.findSingleElemenet('.loading-indicator');
+                this.$response = this.findSingleElemenet('.ai-response-text');
 
-                this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
-                this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));
-                this.$el.find('.generate-button').click(_.bind(this.generateButtonClicked, this));
-                this.$el.find('.reset-button').click(_.bind(this.resetButtonClicked, this));
+                this.findSingleElemenet('.back-button').click(_.bind(this.backButtonClicked, this));
+                this.findSingleElemenet('.forward-button').click(_.bind(this.forwardButtonClicked, this));
+                this.findSingleElemenet('.generate-button').click(_.bind(this.generateButtonClicked, this));
+                this.findSingleElemenet('.reset-button').click(_.bind(this.resetButtonClicked, this));
+                this.findSingleElemenet('.stop-button').click(_.bind(this.stopButtonClicked, this));
 
-                this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
+                this.findSingleElemenet('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
                 this.$prompt.change(_.bind(this.promptChanged, this));
 
                 this.history = ai.sidebarDialogStates[this.componentPropertyPath];
@@ -58,9 +59,17 @@
                     this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
 
-                this.$el.find('#promptTextarea').mouseleave(this.adjustButtonStates.bind(this));
+                this.$prompt.mouseleave(this.adjustButtonStates.bind(this));
 
                 this.adjustButtonStates();
+            },
+
+            findSingleElemenet: function (selector) {
+                let $el = this.$el.find(selector);
+                if ($el.length !== 1) {
+                    console.error('BUG! SidebarDialog: missing element for selector', selector, $el);
+                }
+                return $el;
             },
 
             setUpWidgets: function (root) {
@@ -68,9 +77,9 @@
             },
 
             adjustButtonStates: function () {
-                this.$el.find('.back-button').prop('disabled', this.historyPosition <= 0);
-                this.$el.find('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
-                this.$el.find('.generate-button').prop('disabled', !this.$prompt.val()); //XXX
+                this.findSingleElemenet('.back-button').prop('disabled', this.historyPosition <= 0);
+                this.findSingleElemenet('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
+                this.findSingleElemenet('.generate-button').prop('disabled', !this.$prompt.val()); //XXX
             },
 
             /** Creates a map that saves the content of all fields of this dialog. */
@@ -127,6 +136,12 @@
                 return false;
             },
 
+            stopButtonClicked: function (event) {
+                this.abortRunningCalls();
+                this.setLoading(false);
+                this.adjustButtonStates();
+            },
+
             backButtonClicked: function (event) {
                 this.saveState();
                 if (this.historyPosition > 0) {
@@ -169,7 +184,6 @@
                 }
 
                 let contentSelect = this.$contentSelect.val();
-                let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
                 var inputText;
                 var inputPath;
@@ -186,11 +200,9 @@
                 let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
                         contentSelect: contentSelect,
-                        textLength: textLength,
                         inputText: inputText,
                         inputPath: inputPath,
                         streaming: this.streaming,
-                        richText: this.isRichText,
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
@@ -227,12 +239,12 @@
             },
 
             setResult: function (value) { // XXX
-                this.$response.val(value);
+                this.$response.text(value || '');
                 this.adjustButtonStates();
             },
 
             getResult: function () {
-                return this.$response.val();
+                return this.$response.text();
             },
 
             generateError: function (jqXHR, textStatus, errorThrown) {

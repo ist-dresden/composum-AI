@@ -79,7 +79,7 @@
         </div>
         <div class="ai-response">
             <div class="loading-indicator" style="display: none;">
-                <i class="fa fa-2x fa-spinner fa-pulse fa-fw"></i>
+                <i class="loading-indicator-symbol fa fa-2x fa-spinner fa-pulse fa-fw"></i>
             </div>
             <div class="ai-response-text">
                 <p><cpn:text

@@ -24,4 +24,14 @@
         padding: 15px 5px 5px 5px;
     }
 
+    .loading-indicator {
+        text-align: center;
+        height: 0px;
+    }
+
+    .loading-indicator .loading-indicator-symbol {
+        position: relative;
+        top: 2em;
+    }
+
 }

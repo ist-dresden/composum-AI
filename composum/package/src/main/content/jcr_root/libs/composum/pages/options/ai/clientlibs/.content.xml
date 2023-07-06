@@ -10,8 +10,7 @@
 		<css jcr:primaryType="sling:OrderedFolder"
 		     embed="[
 	                    composum/pages/options/ai/css/widgetextensions.css,
-	                    composum/pages/options/ai/css/dialogs.css,
-	                    composum/pages/options/ai/css/sidebar.css
+	                    composum/pages/options/ai/css/dialogs.css
 	                ]"/>
 		<js jcr:primaryType="sling:OrderedFolder"
 		    embed="[
@@ -28,6 +27,10 @@
 			jcr:description="clientlib for the AI extension to Pages right side bar"
 			category="[composum.pages.edit.frame]"
 						order="{Long}1000">
+		<css jcr:primaryType="sling:OrderedFolder"
+		     embed="[
+	                    composum/pages/options/ai/css/sidebar.css
+	                ]"/>
 		<js jcr:primaryType="sling:OrderedFolder"
 		    embed="[
 	                    composum/pages/options/ai/js/sidebar.js
