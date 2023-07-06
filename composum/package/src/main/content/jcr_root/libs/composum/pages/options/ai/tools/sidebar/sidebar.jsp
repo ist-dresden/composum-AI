@@ -9,7 +9,7 @@
 <cpp:element var="review" type="com.composum.ai.composum.bundle.model.SidebarDialogModel" mode="none"
              cssBase="composum-pages-options-ai-tools-sidebar" cssAdd="composum-pages-tools">
     <div class="composum-pages-tools_actions btn-toolbar text-center">
-        <span class="${reviewCssBase}_dialog-title">Composum-AI</span>
+        <span class="${reviewCssBase}_dialog-title">AI</span>
         <div class="composum-pages-tools_left-actions">
             <div class="composum-pages-tools_button-group btn-group btn-group-sm" role="group">
                 <button type="button"
@@ -87,7 +87,7 @@
             <div class="ai-response-text"><%--
                 --%><cpn:text i18n="true">Hi, I am the Composum AI!</cpn:text>
 <%--            --%><cpn:text i18n="true">
-                    Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions.
+                    Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions. I can also help you through the other AI dialogs accessible through the icons in the field-labels of the component dialogs.
                 </cpn:text>
             </div>
         </div>
