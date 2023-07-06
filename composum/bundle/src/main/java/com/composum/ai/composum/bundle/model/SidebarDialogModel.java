@@ -18,11 +18,11 @@ import com.composum.sling.core.util.LinkUtil;
 public class SidebarDialogModel extends FrameModel {
 
     public Map<String, String> getPredefinedPrompts() {
-        return readJsonFile("create/predefinedprompts.json");
+        return readJsonFile("sidebar/predefinedprompts.json");
     }
 
     public Map<String, String> getContentSelectors() {
-        return readJsonFile("create/contentselectors.json");
+        return readJsonFile("sidebar/contentselectors.json");
     }
 
     public String getPageContentResourcePath() {
@@ -38,8 +38,6 @@ public class SidebarDialogModel extends FrameModel {
     public String getHelpUrl() {
         return LinkUtil.getUrl(getContext().getRequest(),
                 AIDialogServlet.SERVLET_PATH + ".sidebarDialog.help.html" + getDelegate().getPath());
-        //             /bin/cpm/platform/ai/dialog.creationDialog.html/content/ist/composum/home/platform/setup/_jcr_content/main/row_1608866902/column-0/section/text/textcreationDialog.help.html/content/ist/composum/home/platform/setup/jcr:content/main/row_1608866902/column-0/section/text/text
-        //            /bin/cpm/pages/edit.contextTools.html/content/ist/composum/home/platform/setup/_jcr_content/main/row_1608866902/column-0/section/text.help.html/content/ist/composum/home/platform/setup/jcr:content/main/row_1608866902/column-0/section/text
     }
 
 }

@@ -4,10 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.composum.pages.commons.model.AbstractModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CreateDialogModel extends AbstractModel {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CreateDialogModel.class);
 
     public Map<String, String> getPredefinedPrompts() {
         return readJsonFile("create/predefinedprompts.json");
@@ -27,7 +32,8 @@ public class CreateDialogModel extends AbstractModel {
             InputStream inputStream = CreateDialogModel.class.getClassLoader().getResourceAsStream(filePath);
             return mapper.readValue(inputStream, Map.class);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read JSON file: " + filePath, e);
+            LOG.error("Cannot read {}", filePath, e);
+            return null;
         }
     }
 

@@ -203,6 +203,7 @@
                         inputText: inputText,
                         inputPath: inputPath,
                         streaming: this.streaming,
+                        textLength: "-1|",
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
@@ -275,7 +276,7 @@
 
             onStreamingError: function (eventSource, event) {
                 console.log('onStreamingError', arguments);
-                eventSource.close();
+                this.eventSource.close();
                 this.abortRunningCalls();
                 this.setLoading(false);
                 this.$alert.text('Connection failed.');
@@ -306,7 +307,7 @@
             /** Exception on the server side. */
             onStreamingException: function (event) {
                 console.log('onStreamingException', arguments);
-                eventSource.close();
+                this.eventSource.close();
                 this.setLoading(false);
                 this.abortRunningCalls();
                 this.$alert.text(event.data);
