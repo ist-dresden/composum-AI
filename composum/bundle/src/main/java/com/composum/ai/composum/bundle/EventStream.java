@@ -66,7 +66,7 @@ public class EventStream implements GPTCompletionCallback {
                 onError(new IOException("timed out"));
                 return;
             }
-            LOG.debug("EventStream.writeTo {} line {}", id, line);
+            LOG.trace("EventStream.writeTo {} line {}", id, line);
             if (QUEUEEND.equals(line)) {
                 LOG.debug("EventStream.writeTo finished for {}", id);
                 return;
@@ -103,6 +103,11 @@ public class EventStream implements GPTCompletionCallback {
         }
     }
 
+    @Override
+    public void setLoggingId(String loggingId) {
+        LOG.debug("EventStream.setLoggingId for {} : {}", id, loggingId);
+    }
+
     public void addWholeResponseListener(Consumer<String> listener) {
         wholeResponseListeners.add(listener);
     }
@@ -128,7 +133,7 @@ public class EventStream implements GPTCompletionCallback {
 
     @Override
     public void onNext(String data) {
-        LOG.debug("EventStream.onNext for {} : {}", id, data);
+        LOG.trace("EventStream.onNext for {} : {}", id, data);
         slowdown.accept(data);
     }
 

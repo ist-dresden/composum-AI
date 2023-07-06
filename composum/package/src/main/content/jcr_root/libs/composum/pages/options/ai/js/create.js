@@ -347,7 +347,7 @@
             },
 
             onStreamingMessage: function (eventSource, event) {
-                console.log('onStreamingMessage', arguments);
+                // console.log('onStreamingMessage', arguments);
                 this.streamingResult += JSON.parse(event.data);
                 this.setResult(this.streamingResult);
             },

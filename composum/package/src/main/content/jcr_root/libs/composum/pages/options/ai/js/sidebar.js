@@ -203,7 +203,7 @@
                         inputText: inputText,
                         inputPath: inputPath,
                         streaming: this.streaming,
-                        textLength: "-1|",
+                        textLength: "0|",
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
@@ -269,7 +269,7 @@
             },
 
             onStreamingMessage: function (eventSource, event) {
-                console.log('onStreamingMessage', arguments);
+                // console.log('onStreamingMessage', arguments);
                 this.streamingResult += JSON.parse(event.data);
                 this.setResult(this.streamingResult);
             },
@@ -285,6 +285,7 @@
 
             onStreamingFinished: function (event) {
                 console.log('onStreamingFinished', arguments);
+                console.log('Complete text: ', this.streamingResult);
                 this.eventSource.close();
                 this.abortRunningCalls();
                 this.setLoading(false);

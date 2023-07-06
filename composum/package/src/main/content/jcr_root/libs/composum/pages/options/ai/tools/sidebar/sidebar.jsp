@@ -81,12 +81,11 @@
             <div class="loading-indicator" style="display: none;">
                 <i class="loading-indicator-symbol fa fa-2x fa-spinner fa-pulse fa-fw"></i>
             </div>
-            <div class="ai-response-text">
-                <p><cpn:text
-                        i18n="true">Hi, I am the Composum AI!</cpn:text></p>
-                <p><cpn:text
-                        i18n="true">Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions.</cpn:text></p>
-
+            <div class="ai-response-text"><%--
+                --%><cpn:text i18n="true">Hi, I am the Composum AI!</cpn:text>
+<%--            --%><cpn:text i18n="true">
+                    Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions.
+                </cpn:text>
             </div>
         </div>
             <%-- Not yet implemented

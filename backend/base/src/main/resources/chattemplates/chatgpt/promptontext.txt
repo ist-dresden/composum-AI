@@ -5,5 +5,7 @@ Delimit it with three backticks.
 ---------- assistant ----------
 ```${text}```
 ---------- user ----------
-With this text, please do the following.
+About this text you just printed for me, please do the following. If I refer to "the text" then this means this text you just retrieved and printed.
+PROMPT:
+
 ${prompt}

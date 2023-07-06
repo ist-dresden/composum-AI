@@ -472,13 +472,13 @@ public class AIServlet extends AbstractServiceServlet {
                 Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
                 if (matcher.matches()) {
                     maxtokens = Integer.parseInt(matcher.group(1));
-                    textLength = matcher.group(2) + "\n\n" + prompt;
+                    textLength = matcher.group(2);
                 }
             }
             if (status.isValid()) {
                 String fullPrompt = prompt;
                 if (isNotBlank(textLength)) {
-                    fullPrompt = textLength + "\n\n" + prompt;
+                    fullPrompt = textLength + "\n\n" + fullPrompt;
                 }
                 if (richtext) {
                     fullPrompt = fullPrompt + "\n\n" + "Create HTML and begin the text with <p>";
@@ -541,7 +541,7 @@ public class AIServlet extends AbstractServiceServlet {
                     try (PrintWriter writer = response.getWriter()) {
                         stream.writeTo(writer);
                         if (stream.getWholeResponse() != null) {
-                            LOG.debug("Whole translation for {} : {}", streamId, stream.getWholeResponse());
+                            LOG.debug("Whole response for {} : {}", streamId, stream.getWholeResponse());
                         }
                     } catch (IOException | InterruptedException e) {
                         status.error("Error writing to stream: " + e, e);
