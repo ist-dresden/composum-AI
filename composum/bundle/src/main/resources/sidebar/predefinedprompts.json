@@ -1,13 +1,9 @@
 {
-  "---": "",
   "Summarize": "Please summarize the text.",
-  "Introduction": "Please write an introduction for the text.",
-  "Conclusion": "Please write a conclusion for the text.",
-  "Expand": "Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style.",
-  "Headline": "Please write a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.",
-  "10 headline suggestions": "Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.",
-  "10 headline + subheadline suggestions": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style.",
+  "Find errors": "Please act as a proofreader and review the text for any spelling, grammar, or punctuation errors, typos. Check whether the sentence structure and the use of words are correct and appropriate. Check for run-on sentences, and incorrect subject-verb agreement, missing or repeated words. Always cite at at least part of the sentence where the problem occurs, and give a suggestion for improvement. Be picky.",
+  "Review": "Check whether there is a good text flow, and whether there are contradictions or repetitions and redundancy in the text, inconsistent style or tone and stylistic problems. Check for long and complicated sentences that could be made simpler and more understandable. Give suggestions for improvement. Be picky.",
   "Question": "Please answer the following question based on the given text:\n",
   "Improve": "Please improve the text into a businesslike informative style.\nDo also fix orthographical and grammar errors.",
-  "SEO Description": "Please create a description for a web page with the following text, usable for search engine optimization (SEO)."
+  "10 headline suggestions": "Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.",
+  "10 headline + subheadline suggestions": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style."
 }

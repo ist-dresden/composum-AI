@@ -1,7 +1,5 @@
 {
-  "widget": "The text field you were editing",
-  "component": "The component you were editing, including subcomponents",
+  "component": "The currently selected component, including subcomponents",
   "page": "Current page text",
-  "lastoutput": "Current suggestion shown in this dialog (for iterative improvement)",
   "": "No text is added to your prompt"
 }
