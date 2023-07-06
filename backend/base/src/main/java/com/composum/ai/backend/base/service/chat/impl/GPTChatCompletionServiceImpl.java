@@ -32,7 +32,6 @@ import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
-import org.jsoup.internal.StringUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -374,7 +373,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 ChatCompletionChunk chunk = mapper.readerFor(ChatCompletionChunk.class).readValue(line);
                 ChatCompletionChoice choice = chunk.getChoices().get(0);
                 String content = choice.getMessage().getContent();
-                if (!StringUtil.isBlank(content)) {
+                if (content != null && !content.isEmpty()) {
                     LOG.trace("Response {} from GPT: {}", id, content);
                     callback.onNext(content);
                 }
