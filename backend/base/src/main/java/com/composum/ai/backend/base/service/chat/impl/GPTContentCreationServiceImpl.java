@@ -146,8 +146,8 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     }
 
     @Override
-    public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, int maxwords, @Nonnull GPTCompletionCallback callback) throws GPTException {
-        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, maxwords);
+    public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, int maxtokens, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, maxtokens);
         chatCompletionService.streamingChatCompletion(request, callback);
     }
 

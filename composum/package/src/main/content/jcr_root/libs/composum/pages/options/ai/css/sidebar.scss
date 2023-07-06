@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+@import "variables";
+@import "mixins";
+
+.composum-pages-options-ai-tools-sidebar {
+
+    &_dialog-title {
+        font-size: 120%;
+        position: relative;
+        top: 5px;
+    }
+
+    textarea {
+        color: #fff;
+        background-color: #505050;
+    }
+
+    .selector {
+        padding: 7px 5px 0px 5px;
+    }
+
+    .ai-response {
+        padding: 15px 5px 5px 5px;
+    }
+
+    .ai-response-text {
+        white-space: break-spaces;
+    }
+
+    .loading-indicator {
+        text-align: center;
+        height: 0px;
+    }
+
+    .loading-indicator .loading-indicator-symbol {
+        position: relative;
+        top: 2em;
+    }
+
+}

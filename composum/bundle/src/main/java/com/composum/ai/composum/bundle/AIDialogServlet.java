@@ -34,18 +34,19 @@ import com.composum.sling.core.util.XSS;
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Dialog Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/dialog",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=" + AIDialogServlet.SERVLET_PATH,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
 public class AIDialogServlet extends AbstractServiceServlet {
 
+    public static final String SERVLET_PATH = "/bin/cpm/platform/ai/dialog";
 
     private static final Logger LOG = LoggerFactory.getLogger(AIDialogServlet.class);
 
     public enum Extension {json, html}
 
-    public enum Operation {translationDialog, categorizeDialog, creationDialog}
+    public enum Operation {translationDialog, categorizeDialog, creationDialog, sidebarDialog}
 
     protected final ServletOperationSet<Extension, Operation> operations = new ServletOperationSet<>(Extension.json);
 
@@ -64,6 +65,9 @@ public class AIDialogServlet extends AbstractServiceServlet {
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/categorize"));
         // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/create"));
+
+        // primarily for help http://localhost:9090/bin/cpm/platform/ai/dialog.sidebarDialog.help.html
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.sidebarDialog, new ShowDialogOperation("composum/pages/options/ai/tools/sidebar"));
     }
 
     /**

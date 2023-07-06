@@ -11,7 +11,9 @@
     window.composum.pages.dialogs.const.dialogplugins = window.composum.pages.dialogs.const.dialogplugins || [];
     window.composum.ai = window.composum.ai || {};
 
-    window.composum.pages.dialogs.const.dialogplugins.push(window.composum.ai);
+    if (window.composum.pages.dialogs.const.dialogplugins.indexOf(window.composum.ai) < 0) {
+        window.composum.pages.dialogs.const.dialogplugins.push(window.composum.ai);
+    }
 
     (function (ai, dialogs, pages, core, components) {
         'use strict';
@@ -47,9 +49,9 @@
         };
 
         ai.commonDialogInit = function ($el) {
-            $el.find("button.maximize").click(ai.maximizeRestoreFunc($el, true));
-            $el.find("button.restore").click(ai.maximizeRestoreFunc($el, false));
-            $el.find("button.help").click(ai.openHelpDialog.bind(this));
+            $el.find("button.maximize-button").click(ai.maximizeRestoreFunc($el, true));
+            $el.find("button.restore-button").click(ai.maximizeRestoreFunc($el, false));
+            $el.find("button.help-button").click(ai.openHelpDialog.bind(this));
             ai.addDragging($el);
         };
 

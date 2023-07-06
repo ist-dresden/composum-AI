@@ -4,13 +4,13 @@
           jcr:primaryType="sling:Folder"
           jcr:description="Tools declaration for extending the right sidebar of Composum Pages"
           sling:resourceType="composum/pages/tools/collection">
-	<reviewTool
+	<sidebarAiTool
 			jcr:primaryType="nt:unstructured"
-			sling:resourceType="composum/pages/options/ai/tools/reviewFIXMEDEACTIVATED"
+			sling:resourceType="composum/pages/options/ai/tools/sidebar"
 			categories="[context,standalone,edit,page,container,element]"
 			iconClass="commenting-o"
-			hint="AI based page review"
-			title="Page review"
+			hint="AI sidebar tool"
+			title="AI Sidebar Tool"
 			order="{Long}500"/>
 	<labelExtension
 			jcr:primaryType="nt:unstructured"

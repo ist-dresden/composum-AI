@@ -17,4 +17,9 @@ public interface GPTCompletionCallback extends Flow.Subscriber<String> {
     default void onComplete() {
         // empty because we have onFinish.
     }
+
+    /**
+     * For debugging: this sets the internal ID that is used for logging purposes. Not a good ID give to the world, though.
+     */
+    void setLoggingId(String loggingId);
 }

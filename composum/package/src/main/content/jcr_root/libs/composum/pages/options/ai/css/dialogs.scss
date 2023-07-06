@@ -51,7 +51,7 @@
         opacity: 1;
     }
 
-    .framebutton.restore {
+    .framebutton.restore-button {
         display: none;
     }
 
@@ -59,11 +59,11 @@
 
 .composum-ai-dialog.dialog-size-maximized {
 
-    .framebutton.restore {
+    .framebutton.restore-button {
         display: inline-block;
     }
 
-    .framebutton.maximize {
+    .framebutton.maximize-button {
         display: none;
     }
 

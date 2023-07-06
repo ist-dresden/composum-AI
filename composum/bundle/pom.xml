@@ -53,6 +53,11 @@
 			<artifactId>composum-pages-commons-bundle</artifactId>
 			<version>${composum.pages.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.composum.pages</groupId>
+			<artifactId>composum-pages-stage-bundle</artifactId>
+			<version>${composum.pages.version}</version>
+		</dependency>
 
 		<!-- Other libraries -->
 		<dependency>

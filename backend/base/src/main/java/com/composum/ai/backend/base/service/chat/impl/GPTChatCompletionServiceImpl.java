@@ -32,7 +32,6 @@ import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
-import org.jsoup.internal.StringUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -241,9 +240,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 LOG.error("Got empty response {} from GPT: {}", id, response.body());
                 throw new GPTException("Got empty response from GPT: " + response.body());
             }
-            LOG.debug("Response {} usage {} , finish reason {}", id, result.getUsage(), choices.get(0).getFinishReason());
-            LOG.debug("Response {} from GPT: {}", id, choices.get(0).getMessage());
-            return choices.get(0).getMessage().getContent();
+            ChatCompletionChoice choice = choices.get(0);
+            if (result.getUsage() != null || choice.getFinishReason() != null) {
+                LOG.debug("Response {} usage {} , finish reason {}", id, result.getUsage(), choice.getFinishReason());
+            }
+            LOG.trace("Response {} from GPT: {}", id, choice.getMessage());
+            return choice.getMessage().getContent();
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.error("Error while call {} to GPT", id, e);
@@ -292,6 +294,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         public ResponseLineSubscriber(GPTCompletionCallback callback, long id) {
             this.callback = callback;
             this.id = id;
+            callback.setLoggingId("" + id);
         }
 
         @Override
@@ -316,7 +319,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @Override
         public void onNext(String item) {
-            LOG.debug("Received line from ChatGPT for {} from GPT: {}", id, item);
+            LOG.trace("Received line from ChatGPT for {} from GPT: {}", id, item);
             if (!cancelled) {
                 try {
                     handleStreamingEvent(callback, id, item);
@@ -370,8 +373,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 ChatCompletionChunk chunk = mapper.readerFor(ChatCompletionChunk.class).readValue(line);
                 ChatCompletionChoice choice = chunk.getChoices().get(0);
                 String content = choice.getMessage().getContent();
-                if (!StringUtil.isBlank(content)) {
-                    LOG.debug("Response {} from GPT: {}", id, content);
+                if (content != null && !content.isEmpty()) {
+                    LOG.trace("Response {} from GPT: {}", id, content);
                     callback.onNext(content);
                 }
                 GPTFinishReason finishReason = GPTFinishReason.fromChatGPT(choice.getFinishReason());

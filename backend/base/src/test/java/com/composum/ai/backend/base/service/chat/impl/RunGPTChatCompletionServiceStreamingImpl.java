@@ -48,6 +48,11 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     }
 
     @Override
+    public void setLoggingId(String loggingId) {
+        System.out.println("Logging ID: " + loggingId);
+    }
+
+    @Override
     public void onSubscribe(Flow.Subscription subscription) {
         System.out.println("Subscribed");
         this.subscription = subscription;

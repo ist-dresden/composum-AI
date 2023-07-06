@@ -12,110 +12,75 @@
 
         ai.const = ai.const || {};
         ai.const.url = ai.const.url || {};
-        ai.const.url.create = {
-            createDialog: '/bin/cpm/platform/ai/dialog.creationDialog.html'
-        }
-
-        ai.openCreationDialog = function (event) {
-            let $target = $(event.target);
-            let path = $target.data('path');
-            let pagePath = $target.data('pagepath');
-            let property = $target.data('property');
-            let propertypath = $target.data('propertypath');
-            let outputfield = ai.searchInput($target);
-            let widget = core.widgetOf(outputfield);
-            let isRichText = widget && !!widget.richText;
-            let url = ai.const.url.create.createDialog + core.encodePath(path + '/' + property) +
-                "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
-            core.openFormDialog(url, ai.CreateDialog, {
-                widget: widget, isRichText: isRichText,
-                componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
-            });
-        }
 
         /** Maps widget paths to the saved state for the dialog. */
-        ai.createDialogStates = {};
+        ai.sidebarDialogStates = {};
 
         /**
-         * Content creation dialog.
-         * @param options{widget, isRichText, componentPath, pagePath, componentPropertyPath}
+         * Dialog for the AI sidebar.
+         * @param options{el}
          */
-        ai.CreateDialog = core.components.FormDialog.extend({
+        ai.SidebarDialog = Backbone.View.extend({
 
             initialize: function (options) {
-                core.components.FormDialog.prototype.initialize.apply(this, [options]);
+
                 ai.commonDialogInit(this.$el);
-                this.widget = options.widget;
-                this.isRichText = options.isRichText;
-                this.componentPath = options.componentPath;
-                this.pagePath = options.pagePath;
-                this.componentPropertyPath = options.componentPropertyPath;
+                const dataholder = this.findSingleElemenet('.dataholder');
+                this.componentPath = dataholder.data('componentpath');
+                this.pagePath = dataholder.data('pagepath');
                 this.streaming = typeof (EventSource) !== "undefined";
 
-                this.$predefinedPrompts = this.$el.find('.predefined-prompts');
-                this.$contentSelect = this.$el.find('.content-selector');
-                this.$textLength = this.$el.find('.text-length-selector');
-                this.$prompt = this.$el.find('.prompt-textarea');
-                this.$alert = this.$el.find('.generalalert');
-                this.$truncationalert = this.$el.find('.truncationalert');
+                this.$predefinedPrompts = this.findSingleElemenet('.predefined-prompts');
+                this.$contentSelect = this.findSingleElemenet('.content-selector');
+                this.$prompt = this.findSingleElemenet('.promptcontainer textarea');
+                this.$alert = this.findSingleElemenet('.generalalert');
+                this.$truncationalert = this.findSingleElemenet('.truncationalert');
 
-                this.$spinner = this.$el.find('.loading-indicator');
-                this.$response = this.$el.find('.ai-response-field');
+                this.$spinner = this.findSingleElemenet('.loading-indicator');
+                this.$response = this.findSingleElemenet('.ai-response-text');
 
-                this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
-                this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));
-                this.$el.find('.generate-button').click(_.bind(this.generateButtonClicked, this));
-                this.$el.find('.reset-button').click(_.bind(this.resetButtonClicked, this));
+                this.findSingleElemenet('.back-button').click(_.bind(this.backButtonClicked, this));
+                this.findSingleElemenet('.forward-button').click(_.bind(this.forwardButtonClicked, this));
+                this.findSingleElemenet('.generate-button').click(_.bind(this.generateButtonClicked, this));
+                this.findSingleElemenet('.reset-button').click(_.bind(this.resetButtonClicked, this));
+                this.findSingleElemenet('.reset-history-button').click(_.bind(this.resetHistoryButtonClicked, this));
+                this.findSingleElemenet('.stop-button').click(_.bind(this.stopButtonClicked, this));
 
-                this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
+                this.findSingleElemenet('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
                 this.$prompt.change(_.bind(this.promptChanged, this));
 
-                this.$el.find('.replace-button').click(_.bind(this.replaceButtonClicked, this));
-                this.$el.find('.append-button').click(_.bind(this.appendButtonClicked, this));
-                this.$el.find('.cancel-button').click(_.bind(this.cancelButtonClicked, this));
-                this.$el.on('hidden.bs.modal', _.bind(this.abortRunningCalls, this));
-
-                if (!this.widget) {
-                    console.log('No widget found for ', this.componentPropertyPath);
-                    this.$alert.show();
-                    this.$alert.text('Bug, please report: no widget found for ' + this.componentPropertyPath);
-                }
-
-                this.history = ai.createDialogStates[this.componentPropertyPath];
+                this.history = ai.sidebarDialogStates[this.pagePath];
                 console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
                 if (!this.history) {
                     this.history = [];
-                    ai.createDialogStates[this.componentPropertyPath] = this.history;
+                    ai.sidebarDialogStates[this.pagePath] = this.history;
                 }
                 this.historyPosition = this.history.length - 1;
                 if (this.historyPosition >= 0) {
                     this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
 
-                if (this.isRichText) {
-                    core.widgetOf(this.$response.find('textarea')).onChange(this.adjustButtonStates.bind(this));
-                } else {
-                    this.$response.change(this.adjustButtonStates.bind(this));
-                }
-
-                this.$el.find('#promptTextarea').mouseleave(this.adjustButtonStates.bind(this));
-                this.$el.find('.generate-container').mouseenter(this.adjustButtonStates.bind(this));
+                this.$prompt.mouseleave(this.adjustButtonStates.bind(this));
 
                 this.adjustButtonStates();
             },
 
-            adjustButtonStates: function () {
-                this.$el.find('.back-button').prop('disabled', this.historyPosition <= 0);
-                this.$el.find('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
-                this.$el.find('.generate-button').prop('disabled', !this.$prompt.val());
-                let responseVal;
-                if (this.isRichText) {
-                    responseVal = core.widgetOf(this.$response.find('textarea')).getValue();
-                } else {
-                    responseVal = this.$response.val();
+            findSingleElemenet: function (selector) {
+                let $el = this.$el.find(selector);
+                if ($el.length !== 1) {
+                    console.error('BUG! SidebarDialog: missing element for selector', selector, $el);
                 }
-                this.$el.find('.replace-button').prop('disabled', !responseVal);
-                this.$el.find('.append-button').prop('disabled', !responseVal);
+                return $el;
+            },
+
+            setUpWidgets: function (root) {
+                // CPM.widgets.setUp(root); probably not needed
+            },
+
+            adjustButtonStates: function () {
+                this.findSingleElemenet('.back-button').prop('disabled', this.historyPosition <= 0);
+                this.findSingleElemenet('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
+                this.findSingleElemenet('.generate-button').prop('disabled', !this.$prompt.val()); //XXX
             },
 
             /** Creates a map that saves the content of all fields of this dialog. */
@@ -123,8 +88,7 @@
                 return {
                     'predefinedPrompts': this.$predefinedPrompts.val(),
                     'contentSelect': this.$contentSelect.val(),
-                    'textLength': this.$textLength.val(),
-                    'prompt': this.$prompt.val(),
+                    'prompt': this.$prompt.val(), // XXX
                     'result': this.getResult()
                 };
             },
@@ -146,13 +110,11 @@
             restoreStateFromMap: function (map) {
                 this.$predefinedPrompts.val(map['predefinedPrompts']);
                 this.$contentSelect.val(map['contentSelect']);
-                this.$textLength.val(map['textLength']);
-                this.$prompt.val(map['prompt']);
+                this.$prompt.val(map['prompt']); // XXX
                 this.setResult(map['result']);
                 this.adjustButtonStates();
             },
 
-            /** Button 'Reset' was clicked. */
             resetButtonClicked: function (event) {
                 event.preventDefault();
                 this.saveState();
@@ -160,19 +122,31 @@
                 return false;
             },
 
+            resetHistoryButtonClicked: function (event) {
+                this.history = [];
+                this.historyPosition = -1;
+                this.resetButtonClicked(event);
+            },
+
             predefinedPromptsChanged: function (event) {
                 event.preventDefault();
                 let predefinedPrompt = this.$predefinedPrompts.val();
-                this.$prompt.val(predefinedPrompt);
+                this.$prompt.val(predefinedPrompt); // XXX
                 this.adjustButtonStates();
                 return false;
             },
 
-            promptChanged: function (event) {
+            promptChanged: function (event) { // XXX
                 event.preventDefault();
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
                 this.adjustButtonStates();
                 return false;
+            },
+
+            stopButtonClicked: function (event) {
+                this.abortRunningCalls();
+                this.setLoading(false);
+                this.adjustButtonStates();
             },
 
             backButtonClicked: function (event) {
@@ -197,7 +171,7 @@
 
             setLoading: function (loading) {
                 if (loading) {
-                    this.$spinner.show();
+                    this.$spinner.show(); // XXX
                     this.$alert.hide();
                     this.$alert.text('');
                 } else {
@@ -205,7 +179,7 @@
                 }
             },
 
-            generateButtonClicked: function (event) {
+            generateButtonClicked: function (event) { // XXX
                 event.preventDefault();
                 this.setLoading(true);
 
@@ -217,7 +191,6 @@
                 }
 
                 let contentSelect = this.$contentSelect.val();
-                let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
                 var inputText;
                 var inputPath;
@@ -234,11 +207,10 @@
                 let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
                         contentSelect: contentSelect,
-                        textLength: textLength,
                         inputText: inputText,
                         inputPath: inputPath,
                         streaming: this.streaming,
-                        richText: this.isRichText,
+                        textLength: "0|",
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
@@ -256,7 +228,7 @@
                 }
             },
 
-            generateSuccess: function (data) {
+            generateSuccess: function (data) { // XXX
                 this.setLoading(false);
                 const statusOK = data.status && data.status >= 200 && data.status < 300 && data.data && data.data.result;
                 if (statusOK && data.data.result.text) {
@@ -274,21 +246,13 @@
                 }
             },
 
-            setResult: function (value) {
-                if (this.isRichText) {
-                    core.widgetOf(this.$response.find('textarea')).setValue(value);
-                } else {
-                    this.$response.val(value);
-                }
+            setResult: function (value) { // XXX
+                this.$response.text(value || '');
                 this.adjustButtonStates();
             },
 
             getResult: function () {
-                if (this.isRichText) {
-                    return core.widgetOf(this.$response.find('textarea')).getValue();
-                } else {
-                    return this.$response.val();
-                }
+                return this.$response.text();
             },
 
             generateError: function (jqXHR, textStatus, errorThrown) {
@@ -296,41 +260,6 @@
                 console.error("Error generating text: ", arguments);
                 this.$alert.html("Error generating text: " + JSON.stringify(arguments));
                 this.$alert.show();
-            },
-
-            replaceButtonClicked: function (event) {
-                event.preventDefault();
-                const result = this.getResult();
-                if (this.isRichText) {
-                    this.widget.setValue(result);
-                } else {
-                    this.widget.setValue(result);
-                }
-                this.$el.modal('hide');
-                this.widget.grabFocus();
-                return false;
-            },
-
-            appendButtonClicked: function (event) {
-                event.preventDefault();
-                const result = this.getResult();
-                let previousValue = this.widget.getValue();
-                previousValue = previousValue ? previousValue.trim() + "\n\n" : "";
-                if (this.isRichText) {
-                    this.widget.setValue(previousValue + "<p>" + result + "</p>");
-                } else {
-                    this.widget.setValue(previousValue + "\n\n" + result);
-                }
-                this.$el.modal('hide');
-                this.widget.grabFocus();
-                return false;
-            },
-
-            cancelButtonClicked: function (event) {
-                event.preventDefault();
-                this.saveState();
-                this.$el.modal('hide');
-                return false;
             },
 
             startStreaming: function (streamid) {
@@ -363,6 +292,7 @@
 
             onStreamingFinished: function (event) {
                 console.log('onStreamingFinished', arguments);
+                console.log('Complete text: ', this.streamingResult);
                 this.eventSource.close();
                 this.abortRunningCalls();
                 this.setLoading(false);
@@ -394,6 +324,16 @@
 
         });
 
+        /**
+         * register this tool as a pages context tool for initialization after load of the context tools set
+         */
+        pages.contextTools.addTool(function (contextTabs) {
+            var tool = core.getWidget(contextTabs.el, '.composum-pages-options-ai-tools-sidebar', ai.SidebarDialog);
+            if (tool) {
+                tool.contextTabs = contextTabs;
+            }
+            return tool;
+        });
 
     })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
