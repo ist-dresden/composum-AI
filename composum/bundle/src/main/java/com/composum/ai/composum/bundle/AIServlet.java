@@ -85,6 +85,11 @@ public class AIServlet extends AbstractServiceServlet {
     public static final String PARAMETER_PROMPT = "prompt";
 
     /**
+     * Parameter to transmit additional chat after {@link #PARAMETER_PROMPT}. Format: array of serialized {@link com.composum.ai.backend.base.service.chat.GPTChatMessage}.
+     */
+    public static final String PARAMETER_CHAT = "chat";
+
+    /**
      * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
      */
     public static final String PARAMETER_MAXWORDS = "maxtokens";

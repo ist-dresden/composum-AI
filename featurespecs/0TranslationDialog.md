@@ -166,8 +166,8 @@ sequenceDiagram
     ComponentDialog ->> TranslationDialog: Opens TranslationDialog
     TranslationDialog ->> TranslationDialog: Displays source language options
     User ->> TranslationDialog: Selects source language
-    TranslationDialog ->> ChatGPT: Requests translation
-    ChatGPT ->> TranslationDialog: Returns translated text
+    TranslationDialog ->> Backend: Requests translation
+    Backend ->> TranslationDialog: Returns translated text
     TranslationDialog ->> TranslationDialog: Displays translated text
     User ->> TranslationDialog: Clicks Accept or Cancel
     TranslationDialog ->> ComponentDialog: Closes and updates text (if Accept was clicked)

@@ -293,8 +293,8 @@ sequenceDiagram
     User ->> Dialog: Select Additional Input
     User ->> Dialog: Select Text Length
     User ->> Dialog: Press Generate Button
-    Dialog ->> ChatGPT: Send Prompt and Additional Input
-    ChatGPT -->> Dialog: Send Generated Text
+    Dialog ->> Backend: Send Prompt and Additional Input
+    Backend -->> Dialog: Send Generated Text
     Dialog ->> User: Display Generated Text
     User ->> Dialog: Press Replace or Append
     Dialog ->> User: Update Text Field
