@@ -9,6 +9,7 @@
 - Always consider the superclasses a class inherits and look for methods there, to avoid introducing duplicated code.
 - Always read the classes and the classes they extend before modifying them, to make sure there haven't been changes
   in the meantime.
+- For Unittests test one thing in each method.
 - Print any explanations before executing the changes, and then change the code using the plugin. Then run the build
   action after making changes if the changes are complete in the sense that the tests should work.
 - At the end verify whether you have fulfilled your task.

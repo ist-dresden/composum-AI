@@ -70,7 +70,7 @@ public class GPTChatRequest {
      * current one, and the other messages are added at the back.
      */
     public void mergeIn(@Nullable GPTChatRequest additionalParameters) {
-        if (additionalParameters == null) {
+        if (additionalParameters != null) {
             if (additionalParameters.getMaxTokens() != null) {
                 setMaxTokens(additionalParameters.getMaxTokens());
             }
@@ -94,7 +94,6 @@ public class GPTChatRequest {
                         addMessages(List.of(message));
                     }
                 }
-                addMessages(additionalParameters.getMessages());
             }
         }
     }
