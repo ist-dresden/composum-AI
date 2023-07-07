@@ -38,7 +38,7 @@ public interface GPTContentCreationService {
      * @param maxtokens used to hard limit text length to that many tokens. If < 1, no limit is set.
      */
     @Nonnull
-    String executePrompt(@Nullable String prompt, int maxtokens) throws GPTException;
+    String executePrompt(@Nullable String prompt, @Nullable GPTChatRequest additionalParameters) throws GPTException;
 
     /**
      * Executes a given prompt from the user using ChatGPT.
@@ -47,7 +47,7 @@ public interface GPTContentCreationService {
      * @param maxtokens used to hard limit text length to that many tokens. If < 1, no limit is set.
      * @param callback the callback to use for streaming the result
      */
-    void executePromptStreaming(@Nonnull String prompt, int maxtokens, @Nonnull GPTCompletionCallback callback) throws GPTException;
+    void executePromptStreaming(@Nonnull String prompt, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
 
     /**
@@ -58,7 +58,7 @@ public interface GPTContentCreationService {
      * @param maxtokens used to hard limit text length to that many tokens. If < 1, no limit is set.
      */
     @Nonnull
-    String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxtokens) throws GPTException;
+    String executePromptOnText(@Nullable String prompt, @Nullable String text, @Nullable GPTChatRequest additionalParameters) throws GPTException;
 
 
     /**
@@ -69,6 +69,6 @@ public interface GPTContentCreationService {
      * @param maxtokens used to hard limit text length to that many tokens. If < 1, no limit is set.
      * @param callback the callback to use for streaming the result
      */
-    void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, int maxtokens, @Nonnull GPTCompletionCallback callback) throws GPTException;
+    void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
 }

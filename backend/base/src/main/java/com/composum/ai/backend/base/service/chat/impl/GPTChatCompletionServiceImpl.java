@@ -223,7 +223,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
-    public String getSingleChatCompletion(GPTChatRequest request) throws GPTException {
+    public String getSingleChatCompletion(@Nonnull GPTChatRequest request) throws GPTException {
         checkEnabled();
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
@@ -264,12 +264,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
-    public void streamingChatCompletion(GPTChatRequest request, GPTCompletionCallback callback) throws GPTException {
+    public void streamingChatCompletion(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException {
         checkEnabled();
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
             String jsonRequest = createJsonRequest(request, true);
+            callback.setRequest(jsonRequest);
 
             LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
 
@@ -579,25 +580,25 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     @Nonnull
-    public String shorten(@Nullable String text, int maxtokens) {
+    public String shorten(@Nullable String text, int maxTokens) {
         if (text == null) {
             return "";
         }
         List<Integer> markerTokens = enc.encodeOrdinary(TRUNCATE_MARKER);
-        if (maxtokens <= markerTokens.size() + 6) {
+        if (maxTokens <= markerTokens.size() + 6) {
             // this is absurd, probably usage error.
-            LOG.warn("Cannot shorten text to {} tokens, too short. Returning original text.", maxtokens);
+            LOG.warn("Cannot shorten text to {} tokens, too short. Returning original text.", maxTokens);
             return text;
         }
 
         List<Integer> encoded = enc.encodeOrdinary(text);
-        if (encoded.size() <= maxtokens) {
+        if (encoded.size() <= maxTokens) {
             return text;
         }
-        int borderTokens = (maxtokens - markerTokens.size()) / 2;
+        int borderTokens = (maxTokens - markerTokens.size()) / 2;
         List<Integer> result = encoded.subList(0, borderTokens);
         result.addAll(markerTokens);
-        result.addAll(encoded.subList(encoded.size() - maxtokens + result.size(), encoded.size()));
+        result.addAll(encoded.subList(encoded.size() - maxTokens + result.size(), encoded.size()));
         return enc.decode(result);
     }
 

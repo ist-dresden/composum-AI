@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.ai.composum.bundle.model.TranslationDialogModel;
@@ -414,7 +415,7 @@ public class AIServlet extends AbstractServiceServlet {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
             Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePrompt(prompt, maxtokens != null ? maxtokens : -1);
+                String result = contentCreationService.executePrompt(prompt, GPTChatRequest.ofMaxTokens(maxtokens));
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -436,7 +437,7 @@ public class AIServlet extends AbstractServiceServlet {
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePromptOnText(prompt, text, maxtokens != null ? maxtokens : -1);
+                String result = contentCreationService.executePromptOnText(prompt, text, GPTChatRequest.ofMaxTokens(maxtokens));
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -495,9 +496,9 @@ public class AIServlet extends AbstractServiceServlet {
                     if (!streaming) {
                         String result;
                         if (isNotBlank(inputText)) {
-                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, maxtokens);
+                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, GPTChatRequest.ofMaxTokens(maxtokens));
                         } else {
-                            result = contentCreationService.executePrompt(fullPrompt, maxtokens);
+                            result = contentCreationService.executePrompt(fullPrompt, GPTChatRequest.ofMaxTokens(maxtokens));
                         }
                         result = XSS.filter(result);
                         status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
@@ -505,9 +506,9 @@ public class AIServlet extends AbstractServiceServlet {
                         EventStream callback = new EventStream();
                         String id = saveStream(callback, request);
                         if (isNotBlank(inputText)) {
-                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, maxtokens, callback);
+                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, GPTChatRequest.ofMaxTokens(maxtokens), callback);
                         } else {
-                            contentCreationService.executePromptStreaming(fullPrompt, maxtokens, callback);
+                            contentCreationService.executePromptStreaming(fullPrompt, GPTChatRequest.ofMaxTokens(maxtokens), callback);
                         }
                         status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
                     }

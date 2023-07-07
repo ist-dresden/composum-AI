@@ -22,4 +22,10 @@ public interface GPTCompletionCallback extends Flow.Subscriber<String> {
      * For debugging: this sets the internal ID that is used for logging purposes. Not a good ID give to the world, though.
      */
     void setLoggingId(String loggingId);
+
+    /**
+     * For debugging - the request that was sent to ChatGPT as JSON.
+     */
+    default void setRequest(String json) {
+    }
 }

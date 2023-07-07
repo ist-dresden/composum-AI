@@ -2,6 +2,8 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import java.io.IOException;
 
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+
 /**
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
  * we don't do that as an JUnit test.
@@ -21,8 +23,8 @@ public class RunGPTCreateContentImpl extends AbstractGPTRunner {
         executePrompt("Tell a long joke.", 100);
     }
 
-    private void executePrompt(String prompt, int maxWords) {
-        String result = service.executePrompt(prompt, maxWords);
+    private void executePrompt(String prompt, int maxTokens) {
+        String result = service.executePrompt(prompt, GPTChatRequest.ofMaxTokens(maxTokens));
         // print parameters and result
         System.out.printf("%nExecuting '%s': %n%s%n%n", prompt, result);
     }

@@ -68,7 +68,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         lines = lines.stream()
                 .filter(l -> !l.isBlank())
                 .filter(l -> l.length() < 40) // that should drop weird things and comments
-                .map(l -> l.trim())
+                .map(String::trim)
                 .map(l -> l.startsWith("- ") ? l.substring(2) : l)
                 .collect(Collectors.toList());
         return lines;
@@ -94,60 +94,55 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         request.setMaxTokens(maxtokens);
         List<GPTChatMessage> messages = template.getMessages(placeholders);
         request.addMessages(messages);
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        return response;
+        return chatCompletionService.getSingleChatCompletion(request);
     }
 
     @Nonnull
     @Override
-    public String executePrompt(@Nullable String prompt, int maxtokens) {
+    public String executePrompt(@Nullable String prompt, @Nullable GPTChatRequest additionalParameters) {
         if (prompt == null || prompt.isBlank()) {
             return "";
         }
-        GPTChatRequest request = makeExecutePromptRequest(prompt, maxtokens);
+        GPTChatRequest request = makeExecutePromptRequest(prompt, additionalParameters);
         return chatCompletionService.getSingleChatCompletion(request);
     }
 
-    protected GPTChatRequest makeExecutePromptRequest(String prompt, int maxtokens) {
+    protected GPTChatRequest makeExecutePromptRequest(String prompt, @Nullable GPTChatRequest additionalParameters) {
         GPTChatRequest request = new GPTChatRequest();
-        if (maxtokens > 0) {
-            request.setMaxTokens(maxtokens);
-        }
         request.addMessage(GPTMessageRole.USER, prompt);
+        request.mergeIn(additionalParameters);
         return request;
     }
 
     @Override
-    public void executePromptStreaming(@Nonnull String prompt, int maxtokens, @Nonnull GPTCompletionCallback callback) throws GPTException {
-        GPTChatRequest request = makeExecutePromptRequest(prompt, maxtokens);
+    public void executePromptStreaming(@Nonnull String prompt, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        GPTChatRequest request = makeExecutePromptRequest(prompt, additionalParameters);
         chatCompletionService.streamingChatCompletion(request, callback);
     }
 
     @Nonnull
     @Override
-    public String executePromptOnText(@Nullable String prompt, @Nullable String text, int maxtokens) {
+    public String executePromptOnText(@Nullable String prompt, @Nullable String text, @Nullable GPTChatRequest additionalParameters) {
         if (prompt == null || prompt.isBlank()) {
             return "";
         }
-        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, maxtokens);
+        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, additionalParameters);
         return chatCompletionService.getSingleChatCompletion(request);
     }
 
-    protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, int maxtokens) {
+    protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, @Nullable GPTChatRequest additionalParameters) {
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_PROMPTONTEXT);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
         GPTChatRequest request = new GPTChatRequest();
-        if (maxtokens > 0) {
-            request.setMaxTokens(maxtokens);
-        }
         request.addMessages(messages);
+        request.mergeIn(additionalParameters);
         return request;
     }
 
     @Override
-    public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, int maxtokens, @Nonnull GPTCompletionCallback callback) throws GPTException {
-        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, maxtokens);
+    public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, additionalParameters);
         chatCompletionService.streamingChatCompletion(request, callback);
     }
 
