@@ -40,10 +40,6 @@
                 this.$alert = this.findSingleElemenet('.generalalert');
                 this.$truncationalert = this.findSingleElemenet('.truncationalert');
 
-                // these are variable here
-                // this.$prompt = this.findSingleElemenet('.promptcontainer textarea');
-                // this.$spinner = this.findSingleElemenet('.loading-indicator');
-                // this.$response = this.findSingleElemenet('.ai-response-text');
                 this.$el.on('change', '.promptcontainer textarea', this.promptChanged.bind(this));
                 this.$el.on('mouseleave', '.promptcontainer textarea', this.adjustButtonStates.bind(this));
 
@@ -98,7 +94,7 @@
                 let currentState = this.makeSaveStateMap();
                 let lastSavedState = this.history[this.historyPosition];
                 if (!_.isEqual(currentState, lastSavedState)) {
-                    console.log("SAVING STATE!");
+                    console.log("SAVING STATE!", currentState);
                     this.history.push(currentState);
                     this.historyPosition = this.history.length - 1;
                 }
@@ -112,7 +108,6 @@
                     'predefinedPrompts': this.$predefinedPrompts.val(),
                     'contentSelect': this.$contentSelect.val(),
                     'firstprompt': this.findSingleElemenet('.promptcontainer.first textarea').val(),
-                    'firstresponse': this.findSingleElemenet('.first .ai-response-text').val(),
                     'chat': this.getChat(),
                     'result': this.getResult()
                 }
@@ -123,18 +118,29 @@
                 this.$predefinedPrompts.val(map['predefinedPrompts']);
                 this.$contentSelect.val(map['contentSelect']);
                 this.findSingleElemenet('.promptcontainer.first textarea').val(map['firstprompt']);
-                this.findSingleElemenet('.first .ai-response-text').val(map['firstresponse']);
-                let chatCount = map['chat'].length;
+                this.findSingleElemenet('.first .ai-response-text').text(map['firstresponse']);
+                let chatCount = (map['chat'] || []).filter(function (chatitem) {
+                    return chatitem.role === 'USER';
+                }).length;
+                this.adjustChatCount(0);
                 this.adjustChatCount(chatCount);
-                for (let i = 0; i < chatCount; i++) {
-                    let chatitem = map['chat'][i]; // [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}]
+                if (map.chat && map.chat.length > 0) this.findSingleElemenet('.first .ai-response-text').text(map.chat[0].content);
+                let chatFields = this.$el.find('.chat');
+                for (let i = 1; i < map.chat.length; i++) {
+                    let chatitem = map['chat'][i];
+                    let chatField = chatFields.eq(i-1);
                     if (chatitem.role === 'USER') {
-                        this.$el.find('.promptcontainer').eq(i).find('textarea').val(chatitem.content);
+                        chatField.find('textarea').val(chatitem.content);
                     } else {
-                        this.$el.find('.ai-response-text').eq(i).val(chatitem.content);
+                        chatField.find('.ai-response-text').text(chatitem.content);
                     }
                 }
                 this.adjustButtonStates();
+                if (!_.isEqual(this.makeSaveStateMap(), map)) {
+                    let currentState = this.makeSaveStateMap();
+                    debugger;
+                    this.restoreStateFromMap(map);
+                }
             },
 
             resetButtonClicked: function (event) {
@@ -172,7 +178,7 @@
                         this.$el.find('.additionalprompts').append($newAnswer);
                     }
                 } else if (numberOfExistingChats > numberOfChats) {
-                    this.$el.find('promptcontainer.chat').slice(numberOfChats).remove();
+                    this.$el.find('.promptcontainer.chat').slice(numberOfChats).remove();
                     this.$el.find('.ai-response.chat').slice(numberOfChats).remove();
                 }
 
@@ -212,7 +218,7 @@
                 if (this.historyPosition > 0) {
                     this.historyPosition = this.historyPosition - 1;
                     let lastSavedState = this.history[this.historyPosition];
-                    console.log('switching to state', this.historyPosition, this.history.length)
+                    console.log('switching to state', this.historyPosition, this.history.length, lastSavedState)
                     this.restoreStateFromMap(lastSavedState);
                 }
             },
@@ -222,14 +228,14 @@
                 if (this.historyPosition < this.history.length - 1) {
                     this.historyPosition = this.historyPosition + 1;
                     let lastSavedState = this.history[this.historyPosition];
-                    console.log('switching to state', this.historyPosition, this.history.length)
+                    console.log('switching to state', this.historyPosition, this.history.length, lastSavedState)
                     this.restoreStateFromMap(lastSavedState);
                 }
             },
 
             setLoading: function (loading) {
                 if (loading) {
-                    this.$el.find('.loading-indicator').show(); // XXX
+                    this.$el.find('.loading-indicator').last().show();
                     this.$alert.hide();
                     this.$alert.text('');
                 } else {
@@ -240,19 +246,20 @@
                 }
             },
 
-            /** Format  [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}] for AIServlet chat parameter. */
+            /** Format  [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}] for AIServlet chat parameter.
+             * Contains the first response (as that fits the conversation model) the other .chat items. */
             getChat: function () {
                 let chat = [];
                 let firstResponse = this.$el.find('.ai-response.first .ai-response-text').text();
-                firstResponse && chat.push({"role": "ASSISTANT", "content": firstResponse});
+                chat.push({"role": "ASSISTANT", "content": firstResponse});
                 this.$el.find('.chat').each(function (index, element) {
                     let $element = $(element);
                     if ($element.hasClass('promptcontainer')) {
                         let value = $element.find('textarea').val();
-                        value && chat.push({"role": "USER", "content": value});
+                        chat.push({"role": "USER", "content": value});
                     } else {
                         let responseText = $element.find('.ai-response-text').text();
-                        responseText && chat.push({"role": "ASSISTANT", "content": responseText});
+                        chat.push({"role": "ASSISTANT", "content": responseText});
                     }
                 });
                 return chat;
