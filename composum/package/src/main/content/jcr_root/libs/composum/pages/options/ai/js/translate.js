@@ -37,10 +37,10 @@
                 this.widget = options.widget;
                 this.isRichText = options.isRichText;
 
-                this.$el.on('shown.bs.modal', _.bind(this.onShown, this));
-                this.$el.on('hidden.bs.modal', _.bind(this.onHidden, this));
-                this.$accept.click(_.bind(this.accept, this));
-                this.$languageSelects.on('change', _.bind(this.languageChanged, this));
+                this.$el.on('shown.bs.modal', this.onShown.bind(this));
+                this.$el.on('hidden.bs.modal', this.onHidden.bind(this));
+                this.$accept.click(this.accept.bind(this));
+                this.$languageSelects.on('change', this.languageChanged.bind(this));
                 this.streaming = typeof (EventSource) !== "undefined";
 
                 if (this.$languageSelects.length === 1) {
@@ -97,7 +97,7 @@
                         streaming: this.streaming,
                         property: this.$propertyfield.val()
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
-                    _.bind(this.onTranslation, this), _.bind(this.onError, this));
+                    this.onTranslation.bind(this), this.onError.bind(this));
             },
 
             abortRunningCalls: function () {

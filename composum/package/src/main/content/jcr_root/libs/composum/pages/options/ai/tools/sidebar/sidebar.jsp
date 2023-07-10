@@ -75,28 +75,29 @@
                 </select>
             </div>
         </div>
-
-        <div class="promptcontainer">
+        <div class="promptcontainer first">
                 <textarea class="form-control" name="prompt" rows="5"
                           placeholder="${cpn:i18n(slingRequest,'Prompt: your request to the AI. If you like some examples you can select one of the predefined prompts - that will replace the content of this field.')}"></textarea>
         </div>
-        <div class="ai-response">
+        <div class="ai-response first">
             <div class="loading-indicator" style="display: none;">
                 <i class="loading-indicator-symbol fa fa-2x fa-spinner fa-pulse fa-fw"></i>
             </div>
-            <div class="ai-response-text"><%--
-                --%><cpn:text i18n="true">Hi, I am the Composum AI!</cpn:text>
-<%--            --%><cpn:text i18n="true">
-                    Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions. I can also help you through the other AI dialogs accessible through the icons in the field-labels of the component dialogs.
-                </cpn:text>
-            </div>
+            <c:set var="intro1"
+                   value="${cpn:i18n(slingRequest,'Hi, I am the Composum AI!')}"
+                   scope="request"/>
+            <c:set var="intro2"
+                   value="${cpn:i18n(slingRequest,'Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions. I can also help you through the other AI dialogs accessible through the icons in the field-labels of the component dialogs.')}"
+                   scope="request"/>
+            <div class="ai-response-text">${intro1}<br/>${intro2}</div>
         </div>
-            <%-- Not yet implemented
-            <div class="promptcontainer-1 hide" style="display: none;">
+        <div class="promptcontainertemplate hidden">
                 <textarea class="form-control" name="prompt-1" rows="3"
                           placeholder="${cpn:i18n(slingRequest,'If you like to continue this topic and have additional queries.')}"></textarea>
-            </div>
-            --%>
+        </div>
+            <%-- The .promptcontainer.template and the .ai-response will be copied to add more fields during the chat, with class template removed and class chat added. --%>
+        <div class="additionalprompts">
+        </div>
     </div>
 </cpp:element>
 

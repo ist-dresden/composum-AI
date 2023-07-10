@@ -62,18 +62,18 @@
                 this.$spinner = this.$el.find('.loading-indicator');
                 this.$response = this.$el.find('.ai-response-field');
 
-                this.$el.find('.back-button').click(_.bind(this.backButtonClicked, this));
-                this.$el.find('.forward-button').click(_.bind(this.forwardButtonClicked, this));
-                this.$el.find('.generate-button').click(_.bind(this.generateButtonClicked, this));
-                this.$el.find('.reset-button').click(_.bind(this.resetButtonClicked, this));
+                this.$el.find('.back-button').click(this.backButtonClicked.bind(this));
+                this.$el.find('.forward-button').click(this.forwardButtonClicked.bind(this));
+                this.$el.find('.generate-button').click(this.generateButtonClicked.bind(this));
+                this.$el.find('.reset-button').click(this.resetButtonClicked.bind(this));
 
-                this.$el.find('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
-                this.$prompt.change(_.bind(this.promptChanged, this));
+                this.$el.find('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
+                this.$prompt.change(this.promptChanged.bind(this));
 
-                this.$el.find('.replace-button').click(_.bind(this.replaceButtonClicked, this));
-                this.$el.find('.append-button').click(_.bind(this.appendButtonClicked, this));
-                this.$el.find('.cancel-button').click(_.bind(this.cancelButtonClicked, this));
-                this.$el.on('hidden.bs.modal', _.bind(this.abortRunningCalls, this));
+                this.$el.find('.replace-button').click(this.replaceButtonClicked.bind(this));
+                this.$el.find('.append-button').click(this.appendButtonClicked.bind(this));
+                this.$el.find('.cancel-button').click(this.cancelButtonClicked.bind(this));
+                this.$el.on('hidden.bs.modal', this.abortRunningCalls.bind(this));
 
                 if (!this.widget) {
                     console.log('No widget found for ', this.componentPropertyPath);
@@ -241,7 +241,7 @@
                         richText: this.isRichText,
                         prompt: prompt
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
-                    _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
+                    this.generateSuccess.bind(this), this.generateError.bind(this));
                 return false;
             },
 
@@ -262,7 +262,7 @@
                 if (statusOK && data.data.result.text) {
                     console.log("Success generating text: ", data);
                     let value = data.data.result.text;
-                    setValue(value);
+                    this.setResult(value);
                     this.saveState();
                 } else if (statusOK && data.data.result.streamid) {
                     const streamid = data.data.result.streamid;

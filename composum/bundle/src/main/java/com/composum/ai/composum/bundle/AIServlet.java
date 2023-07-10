@@ -537,6 +537,7 @@ public class AIServlet extends AbstractServiceServlet {
 
         protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, Status status) {
             GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens);
+            additionalParameters = additionalParameters != null ? additionalParameters : new GPTChatRequest();
             if (isNotBlank(chat)) {
                 try {
                     final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
