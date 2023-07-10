@@ -25,10 +25,13 @@
 - DONE: titles
 - DONE: Help page for dialogs
 - DONE: Drag dialogs
-- Bugs content creation: prompt leer & Generate; result leer & accept / replace
-- Page assistant: writing style
+- DONE: use streaming responses https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.
+  ipynb  to improve user experience.
+  https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format 
+- DONE: Page assistant: writing style
+- DONE: use library to count the tokens -> JTokkit
 - Page assistant in preview: can also process selected text!
-- Sitespecific or global templates for prompts.
+- Site specific or global templates for prompts.
 - Global configuration for prompts: e.g. glossary, important terms, background information.
 - Somehow implement streaming to make result more responsive.
 - Bug: translation in all properties component - fill german value and translate to english.
@@ -41,15 +44,11 @@
 
 ## Possible improvements later
 
-- use streaming responses https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.ipynb 
-  to improve user experience.
-  https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format 
+- batch mode translation for a whole page / site
+- Prompt registry where people can put interesting prompts and like them (social component)
 - perhaps use moderation api to check for troublesome user messages and troublesome responses
 - use Composum platform caching service, possibly with an abstraction.
-- possibly: edit text in translation
-- use library to count the tokens 
-- https://stackoverflow.com/questions/75804599/openai-api-how-do-i-count-tokens-before-i-send-an-api-request
-  https://github.com/knuddelsgmbh/jtokkit  https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken
+- possibly: edit text in translation, after all?
 
 ## Won't do
 

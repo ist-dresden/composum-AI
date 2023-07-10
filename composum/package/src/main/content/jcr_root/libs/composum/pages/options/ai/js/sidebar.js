@@ -93,16 +93,6 @@
                     }));
             },
 
-            /** Creates a map that saves the content of all fields of this dialog. */
-            makeSaveStateMap: function () {
-                return {
-                    'predefinedPrompts': this.$predefinedPrompts.val(),
-                    'contentSelect': this.$contentSelect.val(),
-                    'prompt': this.findSingleElemenet('.promptcontainer.first textarea').val(), // XXX
-                    'result': this.getResult()
-                }
-            },
-
             saveState: function () {
                 // save if we are at the last position and the current state is different from the last saved state
                 let currentState = this.makeSaveStateMap();
@@ -116,16 +106,34 @@
                 this.adjustButtonStates();
             },
 
+            /** Creates a map that saves the content of all fields of this dialog. */
+            makeSaveStateMap: function () {
+                return {
+                    'predefinedPrompts': this.$predefinedPrompts.val(),
+                    'contentSelect': this.$contentSelect.val(),
+                    'firstprompt': this.findSingleElemenet('.promptcontainer.first textarea').val(),
+                    'firstresponse': this.findSingleElemenet('.first .ai-response-text').val(),
+                    'chat': this.getChat(),
+                    'result': this.getResult()
+                }
+            },
+
             /** Restores the state of this dialog from the given map. */
             restoreStateFromMap: function (map) {
                 this.$predefinedPrompts.val(map['predefinedPrompts']);
                 this.$contentSelect.val(map['contentSelect']);
-                this.$el.find('.chat').remove();
-                // XXX
-                // this.$prompt = this.findSingleElemenet('.promptcontainer.first textarea');
-                // this.$prompt.val(map['prompt']);
-                // this.$response = this.findSingleElemenet('.first .ai-response-text');
-                this.setResult(map['result']);
+                this.findSingleElemenet('.promptcontainer.first textarea').val(map['firstprompt']);
+                this.findSingleElemenet('.first .ai-response-text').val(map['firstresponse']);
+                let chatCount = map['chat'].length;
+                this.adjustChatCount(chatCount);
+                for (let i = 0; i < chatCount; i++) {
+                    let chatitem = map['chat'][i]; // [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}]
+                    if (chatitem.role === 'USER') {
+                        this.$el.find('.promptcontainer').eq(i).find('textarea').val(chatitem.content);
+                    } else {
+                        this.$el.find('.ai-response-text').eq(i).val(chatitem.content);
+                    }
+                }
                 this.adjustButtonStates();
             },
 
@@ -301,7 +309,7 @@
                 }
             },
 
-            generateSuccess: function (data) { // XXX
+            generateSuccess: function (data) {
                 const statusOK = data.status && data.status >= 200 && data.status < 300 && data.data && data.data.result;
                 if (statusOK && data.data.result.text) {
                     console.log("Success generating text: ", data);
@@ -320,7 +328,7 @@
                 }
             },
 
-            setResult: function (value) { // XXX
+            setResult: function (value) {
                 this.$response.text(value || '');
                 this.adjustButtonStates();
             },
