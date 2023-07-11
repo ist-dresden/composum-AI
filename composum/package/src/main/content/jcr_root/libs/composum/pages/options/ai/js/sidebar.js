@@ -28,7 +28,7 @@
         ai.SidebarDialog = Backbone.View.extend({
 
             initialize: function (options) {
-
+                let that = this;
                 ai.commonDialogInit(this.$el);
                 const dataholder = this.findSingleElemenet('.dataholder');
                 this.componentPath = dataholder.data('componentpath');
@@ -46,6 +46,11 @@
                 this.findSingleElemenet('.back-button').click(this.backButtonClicked.bind(this));
                 this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
                 this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
+                this.$el.on('keypress', '.promptcontainer textarea', function (e) {
+                    if (e.which === 13) { // bind 'enter' in the textarea to the generate button
+                        that.generateButtonClicked(e);
+                    }
+                });
                 this.findSingleElemenet('.reset-button').click(this.resetButtonClicked.bind(this));
                 this.findSingleElemenet('.reset-history-button').click(this.resetHistoryButtonClicked.bind(this));
                 this.findSingleElemenet('.stop-button').click(this.stopButtonClicked.bind(this));
@@ -118,29 +123,24 @@
                 this.$predefinedPrompts.val(map['predefinedPrompts']);
                 this.$contentSelect.val(map['contentSelect']);
                 this.findSingleElemenet('.promptcontainer.first textarea').val(map['firstprompt']);
-                this.findSingleElemenet('.first .ai-response-text').text(map['firstresponse']);
+                this.findSingleElemenet('.first .ai-response-text').text(map['firstresponse'] || '');
                 let chatCount = (map['chat'] || []).filter(function (chatitem) {
                     return chatitem.role === 'USER';
                 }).length;
                 this.adjustChatCount(0);
                 this.adjustChatCount(chatCount);
-                if (map.chat && map.chat.length > 0) this.findSingleElemenet('.first .ai-response-text').text(map.chat[0].content);
+                if (map.chat && map.chat.length > 0) this.findSingleElemenet('.first .ai-response-text').text(map.chat[0].content || '');
                 let chatFields = this.$el.find('.chat');
-                for (let i = 1; i < map.chat.length; i++) {
+                for (let i = 1; map.chat && i < map.chat.length; i++) {
                     let chatitem = map['chat'][i];
-                    let chatField = chatFields.eq(i-1);
+                    let chatField = chatFields.eq(i - 1);
                     if (chatitem.role === 'USER') {
                         chatField.find('textarea').val(chatitem.content);
                     } else {
-                        chatField.find('.ai-response-text').text(chatitem.content);
+                        chatField.find('.ai-response-text').text(chatitem.content || '');
                     }
                 }
                 this.adjustButtonStates();
-                if (!_.isEqual(this.makeSaveStateMap(), map)) {
-                    let currentState = this.makeSaveStateMap();
-                    debugger;
-                    this.restoreStateFromMap(map);
-                }
             },
 
             resetButtonClicked: function (event) {
@@ -200,10 +200,20 @@
             },
 
             promptChanged: function (event) {
-                event.preventDefault();
+                console.log('promptChanged', event);
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
                 this.adjustButtonStates();
-                // XXX delete all prompts after the modified prompt.
+                // delete all prompts after the modified prompt.
+                let $changedField = $(event.target).closest('.promptcontainer');
+                if ($changedField.hasClass('first')) {
+                    this.adjustChatCount(0);
+                    this.$el.find('.ai-response.first .ai-response-text').text('');
+                } else {
+                    let $chatFields = this.$el.find('.promptcontainer.chat');
+                    let index = $chatFields.index($changedField);
+                    this.adjustChatCount(index + 1);
+                    this.$el.find('.ai-response.chat').last().find('.ai-response-text').text('');
+                }
                 return false;
             },
 
@@ -265,8 +275,18 @@
                 return chat;
             },
 
+            /* delay generation a bit so that promptChanged can be called first */
             generateButtonClicked: function (event) {
+                console.log('generateButtonClicked', event);
                 event.preventDefault();
+                let that = this;
+                setTimeout(function () {
+                    that.generate();
+                }, 100);
+            },
+
+            generate: function () {
+                console.log('generate');
                 this.setLoading(true);
 
                 const that = this;
