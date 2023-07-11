@@ -32,6 +32,7 @@ import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
+import org.jsoup.internal.StringUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -50,6 +51,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,8 +71,8 @@ import com.theokanning.openai.completion.chat.ChatMessage;
  * @see "https://platform.openai.com/docs/api-reference/chat/create"
  * @see "https://platform.openai.com/docs/guides/chat"
  */
-// FIXME(hps,06.04.23) check error handling
-// FIXME(hps,06.04.23) more configurability
+// TODO(hps,06.04.23) check error handling
+// TODO(hps,06.04.23) more configurability
 @Component(service = GPTChatCompletionService.class)
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
@@ -223,7 +225,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
-    public String getSingleChatCompletion(GPTChatRequest request) throws GPTException {
+    public String getSingleChatCompletion(@Nonnull GPTChatRequest request) throws GPTException {
         checkEnabled();
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
@@ -264,12 +266,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
-    public void streamingChatCompletion(GPTChatRequest request, GPTCompletionCallback callback) throws GPTException {
+    public void streamingChatCompletion(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException {
         checkEnabled();
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
             String jsonRequest = createJsonRequest(request, true);
+            callback.setRequest(jsonRequest);
 
             LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
 
@@ -540,6 +543,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         for (GPTChatMessage message : request.getMessages()) {
             messages.add(new ChatMessage(message.getRole().toString(), message.getContent()));
         }
+        while(!messages.isEmpty() && StringUtil.isBlank(messages.get(messages.size()-1).getContent())) {
+            LOG.debug("Removing empty last message."); // suspicious - likely misusage of the API
+            messages.remove(messages.size()-1);
+        }
+        if (!messages.isEmpty() && messages.get(messages.size() - 1).getRole() == GPTMessageRole.ASSISTANT.toString()) {
+            LOG.debug("Removing last message because it's an assistant message and that'd be confusing for GPT.");
+            messages.remove(messages.size() - 1);
+        }
         ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
                 .model(defaultModel)
                 .messages(messages)
@@ -579,25 +590,25 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     @Nonnull
-    public String shorten(@Nullable String text, int maxtokens) {
+    public String shorten(@Nullable String text, int maxTokens) {
         if (text == null) {
             return "";
         }
         List<Integer> markerTokens = enc.encodeOrdinary(TRUNCATE_MARKER);
-        if (maxtokens <= markerTokens.size() + 6) {
+        if (maxTokens <= markerTokens.size() + 6) {
             // this is absurd, probably usage error.
-            LOG.warn("Cannot shorten text to {} tokens, too short. Returning original text.", maxtokens);
+            LOG.warn("Cannot shorten text to {} tokens, too short. Returning original text.", maxTokens);
             return text;
         }
 
         List<Integer> encoded = enc.encodeOrdinary(text);
-        if (encoded.size() <= maxtokens) {
+        if (encoded.size() <= maxTokens) {
             return text;
         }
-        int borderTokens = (maxtokens - markerTokens.size()) / 2;
+        int borderTokens = (maxTokens - markerTokens.size()) / 2;
         List<Integer> result = encoded.subList(0, borderTokens);
         result.addAll(markerTokens);
-        result.addAll(encoded.subList(encoded.size() - maxtokens + result.size(), encoded.size()));
+        result.addAll(encoded.subList(encoded.size() - maxTokens + result.size(), encoded.size()));
         return enc.decode(result);
     }
 

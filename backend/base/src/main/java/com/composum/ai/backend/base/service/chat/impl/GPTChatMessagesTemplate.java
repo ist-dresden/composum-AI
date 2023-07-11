@@ -59,7 +59,7 @@ public class GPTChatMessagesTemplate {
                     .iterator();
             List<List<String>> blocks = getMessageLineBlocks(lineiterator);
             processBlocks(blocks);
-        } catch (IOException | NullPointerException e) {
+        } catch (IOException | RuntimeException e) {
             throw new GPTException("Internal error (1) reading chat template " + name, e);
         }
     }

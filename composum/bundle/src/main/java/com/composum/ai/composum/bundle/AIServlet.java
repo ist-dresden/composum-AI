@@ -9,6 +9,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.ai.composum.bundle.model.TranslationDialogModel;
@@ -55,6 +59,9 @@ import com.composum.sling.core.servlet.Status;
 import com.composum.sling.core.util.XSS;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Servlet providing the various services from the backend as servlet, which are useable for the authors.
@@ -82,6 +89,13 @@ public class AIServlet extends AbstractServiceServlet {
      * Parameter to transmit a prompt on which ChatGPT is to operate - that is, the instructions.
      */
     public static final String PARAMETER_PROMPT = "prompt";
+
+    /**
+     * Parameter to transmit additional chat after {@link #PARAMETER_PROMPT}. Format: array of serialized
+     * {@link com.composum.ai.backend.base.service.chat.GPTChatMessage}.
+     * E.g. <code>[{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}]</code>.
+     */
+    public static final String PARAMETER_CHAT = "chat";
 
     /**
      * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
@@ -174,6 +188,8 @@ public class AIServlet extends AbstractServiceServlet {
     protected BundleContext bundleContext;
 
     protected Cache<List<String>, String> translationCache;
+
+    protected Gson gson = new Gson();
 
 
     public enum Extension {json, sse}
@@ -402,7 +418,7 @@ public class AIServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link GPTContentCreationService#executePrompt(java.lang.String, int)}
+     * Servlet representation of {@link GPTContentCreationService#executePrompt(String, GPTChatRequest)}
      * with arguments prompt and maxwords.
      * Input parameters is text and the optional numeric parameter maxwords,
      * output is in data.result.text the generated text.
@@ -414,7 +430,7 @@ public class AIServlet extends AbstractServiceServlet {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
             Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePrompt(prompt, maxtokens != null ? maxtokens : -1);
+                String result = contentCreationService.executePrompt(prompt, GPTChatRequest.ofMaxTokens(maxtokens));
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -423,7 +439,7 @@ public class AIServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link GPTContentCreationService#executePromptOnText(java.lang.String, java.lang.String, int)}
+     * Servlet representation of {@link GPTContentCreationService#executePromptOnText(String, String, GPTChatRequest)}
      * with arguments prompt, text and maxwords.
      * Input parameters is a text, the prompt to execute on it and the optional numeric parameter maxwords,
      * output is in data.result.text the generated text.
@@ -436,7 +452,7 @@ public class AIServlet extends AbstractServiceServlet {
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePromptOnText(prompt, text, maxtokens != null ? maxtokens : -1);
+                String result = contentCreationService.executePromptOnText(prompt, text, GPTChatRequest.ofMaxTokens(maxtokens));
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -463,10 +479,12 @@ public class AIServlet extends AbstractServiceServlet {
             String textLength = request.getParameter("textLength");
             String inputPath = request.getParameter("inputPath");
             String inputText = request.getParameter("inputText");
+            String chat = request.getParameter(PARAMETER_CHAT);
             if (isNoneBlank(inputPath, inputText)) {
                 status.error("Both inputPath and inputText given, only one of them is allowed");
             }
             boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
+
             int maxtokens = 400; // some arbitrary default
             if (isNotBlank(textLength)) {
                 Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
@@ -475,6 +493,8 @@ public class AIServlet extends AbstractServiceServlet {
                     textLength = matcher.group(2);
                 }
             }
+            GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, status);
+
             if (status.isValid()) {
                 String fullPrompt = prompt;
                 if (isNotBlank(textLength)) {
@@ -495,9 +515,9 @@ public class AIServlet extends AbstractServiceServlet {
                     if (!streaming) {
                         String result;
                         if (isNotBlank(inputText)) {
-                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, maxtokens);
+                            result = contentCreationService.executePromptOnText(fullPrompt, inputText, additionalParameters);
                         } else {
-                            result = contentCreationService.executePrompt(fullPrompt, maxtokens);
+                            result = contentCreationService.executePrompt(fullPrompt, additionalParameters);
                         }
                         result = XSS.filter(result);
                         status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
@@ -505,14 +525,32 @@ public class AIServlet extends AbstractServiceServlet {
                         EventStream callback = new EventStream();
                         String id = saveStream(callback, request);
                         if (isNotBlank(inputText)) {
-                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, maxtokens, callback);
+                            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, additionalParameters, callback);
                         } else {
-                            contentCreationService.executePromptStreaming(fullPrompt, maxtokens, callback);
+                            contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
                         }
                         status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
                     }
                 }
             }
+        }
+
+        protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, Status status) {
+            GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens);
+            additionalParameters = additionalParameters != null ? additionalParameters : new GPTChatRequest();
+            if (isNotBlank(chat)) {
+                try {
+                    final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
+                        // empty
+                    }.getType();
+
+                    List<GPTChatMessage> messages = gson.fromJson(chat, listOfMyClassObject);
+                    additionalParameters.addMessages(messages);
+                } catch (IllegalArgumentException | JsonSyntaxException e) {
+                    status.error("Invalid chat parameter " + chat, e);
+                }
+            }
+            return additionalParameters;
         }
     }
 

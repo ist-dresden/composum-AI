@@ -147,8 +147,8 @@ sequenceDiagram
     participant Dialog
     participant ChatGPT
     User->>Dialog: Opens Categorization Dialog
-    Dialog->>ChatGPT: Requests category suggestions
-    ChatGPT-->>Dialog: Returns category suggestions
+    Dialog->>Backend: Requests category suggestions
+    Backend-->>Dialog: Returns category suggestions
     Dialog-->>User: Displays current categories & suggestions
     User->>Dialog: Selects/Deselects categories
     User->>Dialog: Clicks 'Accept'

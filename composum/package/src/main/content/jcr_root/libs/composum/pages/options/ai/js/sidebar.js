@@ -18,12 +18,17 @@
 
         /**
          * Dialog for the AI sidebar.
+         * Since we'd like to allow a chat, we always create a new promptcontainer after a response. That means however
+         * that we have a moving target for output. To handle that:
+         * - when the user changes a promptcontainer textarea, we remove the following promptcontainers.
+         * - when the user clicks on 'submit', we submit until the last existing promptcontainer.
+         *
          * @param options{el}
          */
         ai.SidebarDialog = Backbone.View.extend({
 
             initialize: function (options) {
-
+                let that = this;
                 ai.commonDialogInit(this.$el);
                 const dataholder = this.findSingleElemenet('.dataholder');
                 this.componentPath = dataholder.data('componentpath');
@@ -32,25 +37,29 @@
 
                 this.$predefinedPrompts = this.findSingleElemenet('.predefined-prompts');
                 this.$contentSelect = this.findSingleElemenet('.content-selector');
-                this.$prompt = this.findSingleElemenet('.promptcontainer textarea');
                 this.$alert = this.findSingleElemenet('.generalalert');
                 this.$truncationalert = this.findSingleElemenet('.truncationalert');
+                this.$prompt = this.findSingleElemenet('.promptcontainer.first textarea');
 
-                this.$spinner = this.findSingleElemenet('.loading-indicator');
-                this.$response = this.findSingleElemenet('.ai-response-text');
+                this.$el.on('change', '.promptcontainer textarea', this.promptChanged.bind(this));
+                this.$el.on('mouseleave', '.promptcontainer textarea', this.adjustButtonStates.bind(this));
 
-                this.findSingleElemenet('.back-button').click(_.bind(this.backButtonClicked, this));
-                this.findSingleElemenet('.forward-button').click(_.bind(this.forwardButtonClicked, this));
-                this.findSingleElemenet('.generate-button').click(_.bind(this.generateButtonClicked, this));
-                this.findSingleElemenet('.reset-button').click(_.bind(this.resetButtonClicked, this));
-                this.findSingleElemenet('.reset-history-button').click(_.bind(this.resetHistoryButtonClicked, this));
-                this.findSingleElemenet('.stop-button').click(_.bind(this.stopButtonClicked, this));
+                this.findSingleElemenet('.back-button').click(this.backButtonClicked.bind(this));
+                this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
+                this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
+                this.$el.on('keypress', '.promptcontainer textarea', function (e) {
+                    if (e.which === 13) { // bind 'enter' in the textarea to the generate button
+                        that.generateButtonClicked(e);
+                    }
+                });
+                this.findSingleElemenet('.reset-button').click(this.resetButtonClicked.bind(this));
+                this.findSingleElemenet('.reset-history-button').click(this.resetHistoryButtonClicked.bind(this));
+                this.findSingleElemenet('.stop-button').click(this.stopButtonClicked.bind(this));
 
-                this.findSingleElemenet('.predefined-prompts').change(_.bind(this.predefinedPromptsChanged, this));
-                this.$prompt.change(_.bind(this.promptChanged, this));
+                this.findSingleElemenet('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
 
                 this.history = ai.sidebarDialogStates[this.pagePath];
-                console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
+                console.log('History for ', this.pagePath, ' used.'); // FIXME remove this.
                 if (!this.history) {
                     this.history = [];
                     ai.sidebarDialogStates[this.pagePath] = this.history;
@@ -60,8 +69,7 @@
                     this.restoreStateFromMap(this.history[this.historyPosition]);
                 }
 
-                this.$prompt.mouseleave(this.adjustButtonStates.bind(this));
-
+                this.adjustChatCount(0);
                 this.adjustButtonStates();
             },
 
@@ -80,17 +88,11 @@
             adjustButtonStates: function () {
                 this.findSingleElemenet('.back-button').prop('disabled', this.historyPosition <= 0);
                 this.findSingleElemenet('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
-                this.findSingleElemenet('.generate-button').prop('disabled', !this.$prompt.val()); //XXX
-            },
-
-            /** Creates a map that saves the content of all fields of this dialog. */
-            makeSaveStateMap: function () {
-                return {
-                    'predefinedPrompts': this.$predefinedPrompts.val(),
-                    'contentSelect': this.$contentSelect.val(),
-                    'prompt': this.$prompt.val(), // XXX
-                    'result': this.getResult()
-                };
+                // .generate-button is enabled if any of the prompts has content
+                this.findSingleElemenet('.generate-button').prop('disabled',
+                    !this.$el.find('.promptcontainer textarea').toArray().some(function (el) {
+                        return el.value.trim().length > 0;
+                    }));
             },
 
             saveState: function () {
@@ -98,7 +100,7 @@
                 let currentState = this.makeSaveStateMap();
                 let lastSavedState = this.history[this.historyPosition];
                 if (!_.isEqual(currentState, lastSavedState)) {
-                    console.log("SAVING STATE!");
+                    console.log("SAVING STATE!", currentState);
                     this.history.push(currentState);
                     this.historyPosition = this.history.length - 1;
                 }
@@ -106,12 +108,39 @@
                 this.adjustButtonStates();
             },
 
+            /** Creates a map that saves the content of all fields of this dialog. */
+            makeSaveStateMap: function () {
+                return {
+                    'predefinedPrompts': this.$predefinedPrompts.val(),
+                    'contentSelect': this.$contentSelect.val(),
+                    'firstprompt': this.findSingleElemenet('.promptcontainer.first textarea').val(),
+                    'chat': this.getChat(),
+                    'result': this.getResult()
+                }
+            },
+
             /** Restores the state of this dialog from the given map. */
             restoreStateFromMap: function (map) {
                 this.$predefinedPrompts.val(map['predefinedPrompts']);
                 this.$contentSelect.val(map['contentSelect']);
-                this.$prompt.val(map['prompt']); // XXX
-                this.setResult(map['result']);
+                this.findSingleElemenet('.promptcontainer.first textarea').val(map['firstprompt']);
+                this.findSingleElemenet('.first .ai-response-text').text(map['firstresponse'] || '');
+                let chatCount = (map['chat'] || []).filter(function (chatitem) {
+                    return chatitem.role === 'USER';
+                }).length;
+                this.adjustChatCount(0);
+                this.adjustChatCount(chatCount);
+                if (map.chat && map.chat.length > 0) this.findSingleElemenet('.first .ai-response-text').text(map.chat[0].content || '');
+                let chatFields = this.$el.find('.chat');
+                for (let i = 1; map.chat && i < map.chat.length; i++) {
+                    let chatitem = map['chat'][i];
+                    let chatField = chatFields.eq(i - 1);
+                    if (chatitem.role === 'USER') {
+                        chatField.find('textarea').val(chatitem.content);
+                    } else {
+                        chatField.find('.ai-response-text').text(chatitem.content || '');
+                    }
+                }
                 this.adjustButtonStates();
             },
 
@@ -128,18 +157,74 @@
                 this.resetButtonClicked(event);
             },
 
+            /** We delete all input- and their output fields if the input field is empty, starting from the end. */
+            deleteEmptyChatFields: function () {
+                while (this.$el.find('.promptcontainer.chat textarea').last().length
+                && !this.$el.find('.promptcontainer.chat textarea').last().val()) {
+                    this.$el.find('.promptcontainer.chat').last().remove();
+                    this.$el.find('.ai-response.chat').last().remove();
+                }
+
+                this.$response = this.$el.find('.ai-response-text').last();
+            },
+
+            /** If numberOfChats is smaller than the current number of chat fields, remove those.
+             * If it's larger, add by copying .airesponse.first and .promptcontainer.template and clearing the texts. */
+            adjustChatCount: function (numberOfChats) {
+                let numberOfExistingChats = this.getChatCount();
+                if (numberOfExistingChats < numberOfChats) {
+                    let $promptTemplate = this.$el.find('.promptcontainertemplate');
+                    let $answerTemplate = this.$el.find('.ai-response.first');
+                    for (let i = numberOfExistingChats; i < numberOfChats; i++) {
+                        let $newChat = $promptTemplate.clone();
+                        $newChat.removeClass('promptcontainertemplate');
+                        $newChat.removeClass('hidden');
+                        $newChat.addClass('promptcontainer');
+                        $newChat.addClass('chat');
+                        this.$el.find('.additionalprompts').append($newChat);
+
+                        let $newAnswer = $answerTemplate.clone();
+                        $newAnswer.removeClass('first');
+                        $newAnswer.addClass('chat');
+                        $newAnswer.find('.ai-response-text').text('');
+                        this.$el.find('.additionalprompts').append($newAnswer);
+                    }
+                } else if (numberOfExistingChats > numberOfChats) {
+                    this.$el.find('.promptcontainer.chat').slice(numberOfChats).remove();
+                    this.$el.find('.ai-response.chat').slice(numberOfChats).remove();
+                }
+
+                this.$response = this.$el.find('.ai-response-text').last();
+            },
+
+            getChatCount: function () {
+                return this.$el.find('.promptcontainer.chat').length;
+            },
+
             predefinedPromptsChanged: function (event) {
                 event.preventDefault();
                 let predefinedPrompt = this.$predefinedPrompts.val();
-                this.$prompt.val(predefinedPrompt); // XXX
+                this.adjustChatCount(0);
+                this.$prompt.val(predefinedPrompt);
                 this.adjustButtonStates();
                 return false;
             },
 
-            promptChanged: function (event) { // XXX
-                event.preventDefault();
+            promptChanged: function (event) {
+                console.log('promptChanged', event);
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
                 this.adjustButtonStates();
+                // delete all prompts after the modified prompt.
+                let $changedField = $(event.target).closest('.promptcontainer');
+                if ($changedField.hasClass('first')) {
+                    this.adjustChatCount(0);
+                    this.$el.find('.ai-response.first .ai-response-text').text('');
+                } else {
+                    let $chatFields = this.$el.find('.promptcontainer.chat');
+                    let index = $chatFields.index($changedField);
+                    this.adjustChatCount(index + 1);
+                    this.$el.find('.ai-response.chat').last().find('.ai-response-text').text('');
+                }
                 return false;
             },
 
@@ -154,7 +239,7 @@
                 if (this.historyPosition > 0) {
                     this.historyPosition = this.historyPosition - 1;
                     let lastSavedState = this.history[this.historyPosition];
-                    console.log('switching to state', this.historyPosition, this.history.length)
+                    console.log('switching to state', this.historyPosition, this.history.length, lastSavedState)
                     this.restoreStateFromMap(lastSavedState);
                 }
             },
@@ -164,24 +249,55 @@
                 if (this.historyPosition < this.history.length - 1) {
                     this.historyPosition = this.historyPosition + 1;
                     let lastSavedState = this.history[this.historyPosition];
-                    console.log('switching to state', this.historyPosition, this.history.length)
+                    console.log('switching to state', this.historyPosition, this.history.length, lastSavedState)
                     this.restoreStateFromMap(lastSavedState);
                 }
             },
 
             setLoading: function (loading) {
                 if (loading) {
-                    this.$spinner.show(); // XXX
+                    this.$el.find('.loading-indicator').last().show();
                     this.$alert.hide();
                     this.$alert.text('');
                 } else {
-                    this.$spinner.hide();
+                    this.$el.find('.loading-indicator').hide();
+                    if (this.$response.text()) {
+                        this.adjustChatCount(this.getChatCount() + 1);
+                    }
                 }
             },
 
-            generateButtonClicked: function (event) { // XXX
+            /** Format  [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}] for AIServlet chat parameter.
+             * Contains the first response (as that fits the conversation model) the other .chat items. */
+            getChat: function () {
+                let chat = [];
+                let firstResponse = this.$el.find('.ai-response.first .ai-response-text').text();
+                chat.push({"role": "ASSISTANT", "content": firstResponse});
+                this.$el.find('.chat').each(function (index, element) {
+                    let $element = $(element);
+                    if ($element.hasClass('promptcontainer')) {
+                        let value = $element.find('textarea').val();
+                        chat.push({"role": "USER", "content": value});
+                    } else {
+                        let responseText = $element.find('.ai-response-text').text();
+                        chat.push({"role": "ASSISTANT", "content": responseText});
+                    }
+                });
+                return chat;
+            },
+
+            /* delay generation a bit so that promptChanged can be called first */
+            generateButtonClicked: function (event) {
+                console.log('generateButtonClicked', event);
                 event.preventDefault();
+                let that = this;
+                setTimeout(() => that.generate(), 100);
+            },
+
+            generate: function () {
+                console.log('generate');
                 this.setLoading(true);
+                this.deleteEmptyChatFields();
 
                 const that = this;
 
@@ -191,7 +307,7 @@
                 }
 
                 let contentSelect = this.$contentSelect.val();
-                let prompt = this.$prompt.val();
+                let chat = this.getChat();
                 var inputText;
                 var inputPath;
                 if (contentSelect === 'widget') {
@@ -211,9 +327,10 @@
                         inputPath: inputPath,
                         streaming: this.streaming,
                         textLength: "0|",
-                        prompt: prompt
+                        prompt: this.$prompt.val(),
+                        chat: JSON.stringify(chat)
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
-                    _.bind(this.generateSuccess, this), _.bind(this.generateError, this));
+                    this.generateSuccess.bind(this), this.generateError.bind(this));
                 return false;
             },
 
@@ -228,13 +345,13 @@
                 }
             },
 
-            generateSuccess: function (data) { // XXX
-                this.setLoading(false);
+            generateSuccess: function (data) {
                 const statusOK = data.status && data.status >= 200 && data.status < 300 && data.data && data.data.result;
                 if (statusOK && data.data.result.text) {
                     console.log("Success generating text: ", data);
                     let value = data.data.result.text;
-                    setValue(value);
+                    this.setResult(value);
+                    this.setLoading(false);
                     this.saveState();
                 } else if (statusOK && data.data.result.streamid) {
                     const streamid = data.data.result.streamid;
@@ -243,10 +360,11 @@
                     console.error("Error generating text: ", data);
                     this.$alert.html("Error generating text: " + JSON.stringify(data));
                     this.$alert.show();
+                    this.setLoading(false);
                 }
             },
 
-            setResult: function (value) { // XXX
+            setResult: function (value) {
                 this.$response.text(value || '');
                 this.adjustButtonStates();
             },
@@ -304,7 +422,7 @@
                     const finishreason = status.data.result.finishreason;
                     if (finishreason === 'STOP') {
                         this.$truncationalert.hide();
-                    } else if (finishreason == 'LENGTH') {
+                    } else if (finishreason === 'LENGTH') {
                         this.$truncationalert.show();
                     } else {
                         console.error('BUG: Unknown finishreason: ' + finishreason);

@@ -15,7 +15,7 @@
             <section_1039340572
                     jcr:primaryType="cpp:Container"
                     sling:resourceType="composum/pages/components/container/section"
-                    jcr:title="Usage of the translation dialog">
+                    jcr:title="Usage of the content creation dialog">
                 <text
                         jcr:primaryType="cpp:Element"
                         sling:resourceType="composum/pages/components/element/text"

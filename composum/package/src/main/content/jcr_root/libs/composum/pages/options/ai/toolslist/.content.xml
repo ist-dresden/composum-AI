@@ -7,7 +7,7 @@
 	<sidebarAiTool
 			jcr:primaryType="nt:unstructured"
 			sling:resourceType="composum/pages/options/ai/tools/sidebar"
-			categories="[context,standalone,edit,page,container,element]"
+			categories="[context,standalone,edit,page,container,element,develop]"
 			iconClass="commenting-o"
 			hint="AI sidebar tool"
 			title="AI Sidebar Tool"
@@ -15,6 +15,6 @@
 	<labelExtension
 			jcr:primaryType="nt:unstructured"
 			resourceType="composum/pages/options/ai/widgetextensions/labelextension"
-			categories="[widget,label,standalone,edit,page,container,element]"
+			categories="[widget,label,standalone,edit,page,container,element,develop]"
 			order="{Long}100"/>
 </jcr:root>

@@ -30,7 +30,6 @@ public interface GPTChatCompletionService {
      * The asynchronous call can be aborted by calling {@link Flow.Subscription#cancel()} on the subscription that is
      * presented to {@link GPTCompletionCallback#onSubscribe(Flow.Subscription)} once the call is established.
      */
-    @Nonnull
     void streamingChatCompletion(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
     /**
@@ -46,13 +45,13 @@ public interface GPTChatCompletionService {
      * Helper method to shorten texts by taking out the middle if too long.
      * In texts longer than this many tokens we replace the middle with " ... (truncated) ... " since ChatGPT can only
      * process a limited number of words / tokens and in the introduction or summary there is probably the most
-     * condensed information about the text. The output has then maxtokens tokens, including the ... marker.
+     * condensed information about the text. The output has then maxTokens tokens, including the ... marker.
      *
-     * @param text     the text to shorten
-     * @param maxtokens the maximum number of tokens in the output
+     * @param text      the text to shorten
+     * @param maxTokens the maximum number of tokens in the output
      */
     @Nonnull
-    String shorten(@Nullable String text, int maxtokens) throws GPTException;
+    String shorten(@Nullable String text, int maxTokens) throws GPTException;
 
     /**
      * Helper for preprocessing HTML so that it can easily read by ChatGPT.
@@ -61,7 +60,7 @@ public interface GPTChatCompletionService {
     String htmlToMarkdown(@Nullable String html);
 
     /**
-     * Opposite of {@link #markdownToHtml(String)}.
+     * Opposite of {@link #htmlToMarkdown(String)}.
      */
     String markdownToHtml(String markdown);
 

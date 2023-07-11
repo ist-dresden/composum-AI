@@ -68,20 +68,20 @@
                 this.$suggestions = this.$el.find('div.suggestions');
                 this.loadSuggestions();
                 // bind button cancel is not necessary - it is already bound to close by bootstrap
-                this.$el.find('button.accept').click(_.bind(this.accept, this));
-                this.$el.find('input[type="checkbox"]').change(_.bind(this.duplicateChanges, this));
+                this.$el.find('button.accept').click(this.accept.bind(this));
+                this.$el.find('input[type="checkbox"]').change(this.duplicateChanges.bind(this));
             },
 
             /** Load the suggestions for categories. */
             loadSuggestions: function () {
                 var url = ai.const.url.categorize.categorizeSuggestions +
                     core.encodePath(this.path + '/' + this.property + this.categoryparams);
-                core.getHtml(url, _.bind(this.onSuggestions, this));
+                core.getHtml(url, this.onSuggestions.bind(this));
             },
 
             onSuggestions: function (data) {
                 this.$suggestions.html(data);
-                this.$suggestions.find('input[type="checkbox"]').change(_.bind(this.duplicateChanges, this));
+                this.$suggestions.find('input[type="checkbox"]').change(this.duplicateChanges.bind(this));
                 this.$el.find('.current-categories input[type="checkbox"]').each(_.bind(function (index, element) {
                     this.duplicateChanges({target: element});
                 }, this));

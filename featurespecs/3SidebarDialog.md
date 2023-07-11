@@ -121,6 +121,10 @@ The sidebar normally has a button toolbar (e.g. composum-pages-tools_actions btn
 composum-pages-stage-edit-tools-page-versions_panel composum-pages-tools_panel) , 
 e.g. /libs/composum/pages/stage/edit/tools/page/versions/versions.jsp
 
+The dialog has a variable number of prompt input and result output fields, since we emulate a chat. We always create 
+an input and output field when needed. That means, however, that on pressing the "generate" button we have to take 
+the output field just after the last filled input field as a result output.
+
 ## Feature list in consideration for the initial prompt library
 
 0. **Query AI**: Use AI to execute a user specified instruction, independent of the edited page.
