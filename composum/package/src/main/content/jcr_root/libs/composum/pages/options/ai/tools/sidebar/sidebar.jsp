@@ -14,11 +14,11 @@
             <div class="composum-pages-tools_button-group btn-group btn-group-sm" role="group">
                 <button type="button"
                         class="fa fa-play generate-button composum-pages-tools_button btn btn-default"
-                        title="${cpn:i18n(slingRequest,'Triggers an AI reply - please give that a couple of seconds. You can also press enter.')}">
+                        title="${cpn:i18n(slingRequest,'Submit: triggers an AI reply - please give that a couple of seconds. You can also press enter.')}">
                 </button>
                 <button type="button"
                         class="fa fa-stop stop-button composum-pages-tools_button btn btn-default"
-                        title="${cpn:i18n(slingRequest,'Aborts an AI reply')}">
+                        title="${cpn:i18n(slingRequest,'Stop: aborts an AI reply')}">
                 </button>
                 <button type="button"
                         class="fa fa-trash-o reset-button composum-pages-tools_button btn btn-default"
@@ -84,7 +84,7 @@
                 <i class="loading-indicator-symbol fa fa-2x fa-spinner fa-pulse fa-fw"></i>
             </div>
             <c:set var="intro1"
-                   value="${cpn:i18n(slingRequest,'Hi, I am the Composum AI!')}"
+                   value="${cpn:i18n(slingRequest,'Hi, I am the Composum Sidebar AI!')}"
                    scope="request"/>
             <c:set var="intro2"
                    value="${cpn:i18n(slingRequest,'Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions. I can also help you through the other AI dialogs accessible through the icons in the field-labels of the component dialogs.')}"

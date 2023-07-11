@@ -33,8 +33,7 @@
                             <div class="form-row">
                                 <div class="form-group col-md-4"
                                      title="${cpn:i18n(slingRequest,'This replaces the prompt by one of a number of predefined prompts you can use directly or use as an example for your own prompt.')}">
-                                    <label for="predefinedPrompts"
-                                           title="${cpn:i18n(slingRequest,'Predefined Prompts')}">
+                                    <label for="predefinedPrompts">
                                         <cpn:text i18n="true">Predefined Prompts</cpn:text>
                                     </label>
                                     <select id="predefinedPrompts" name="predefined"
@@ -47,8 +46,7 @@
 
                                 <div class="form-group col-md-4"
                                      title="${cpn:i18n(slingRequest,'Select which text the AI receives in addition to your prompt, if any.')}">
-                                    <label for="contentSelector"
-                                           title="${cpn:i18n(slingRequest,'Base Text')}">
+                                    <label for="contentSelector">
                                         <cpn:text i18n="true">Base Text</cpn:text>
                                     </label>
                                     <select id="contentSelector" name="contentSelect"
