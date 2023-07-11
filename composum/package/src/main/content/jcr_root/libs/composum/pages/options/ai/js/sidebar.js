@@ -39,6 +39,7 @@
                 this.$contentSelect = this.findSingleElemenet('.content-selector');
                 this.$alert = this.findSingleElemenet('.generalalert');
                 this.$truncationalert = this.findSingleElemenet('.truncationalert');
+                this.$prompt = this.findSingleElemenet('.promptcontainer.first textarea');
 
                 this.$el.on('change', '.promptcontainer textarea', this.promptChanged.bind(this));
                 this.$el.on('mouseleave', '.promptcontainer textarea', this.adjustButtonStates.bind(this));
@@ -58,7 +59,7 @@
                 this.findSingleElemenet('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
 
                 this.history = ai.sidebarDialogStates[this.pagePath];
-                console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
+                console.log('History for ', this.pagePath, ' used.'); // FIXME remove this.
                 if (!this.history) {
                     this.history = [];
                     ai.sidebarDialogStates[this.pagePath] = this.history;
@@ -156,6 +157,17 @@
                 this.resetButtonClicked(event);
             },
 
+            /** We delete all input- and their output fields if the input field is empty, starting from the end. */
+            deleteEmptyChatFields: function () {
+                while (this.$el.find('.promptcontainer.chat textarea').last().length
+                && !this.$el.find('.promptcontainer.chat textarea').last().val()) {
+                    this.$el.find('.promptcontainer.chat').last().remove();
+                    this.$el.find('.ai-response.chat').last().remove();
+                }
+
+                this.$response = this.$el.find('.ai-response-text').last();
+            },
+
             /** If numberOfChats is smaller than the current number of chat fields, remove those.
              * If it's larger, add by copying .airesponse.first and .promptcontainer.template and clearing the texts. */
             adjustChatCount: function (numberOfChats) {
@@ -182,7 +194,6 @@
                     this.$el.find('.ai-response.chat').slice(numberOfChats).remove();
                 }
 
-                this.$prompt = this.$el.find('.promptcontainer textarea').last();
                 this.$response = this.$el.find('.ai-response-text').last();
             },
 
@@ -280,14 +291,13 @@
                 console.log('generateButtonClicked', event);
                 event.preventDefault();
                 let that = this;
-                setTimeout(function () {
-                    that.generate();
-                }, 100);
+                setTimeout(() => that.generate(), 100);
             },
 
             generate: function () {
                 console.log('generate');
                 this.setLoading(true);
+                this.deleteEmptyChatFields();
 
                 const that = this;
 
@@ -297,7 +307,6 @@
                 }
 
                 let contentSelect = this.$contentSelect.val();
-                let prompt = this.findSingleElemenet('.promptcontainer.first textarea').val();
                 let chat = this.getChat();
                 var inputText;
                 var inputPath;
@@ -318,7 +327,7 @@
                         inputPath: inputPath,
                         streaming: this.streaming,
                         textLength: "0|",
-                        prompt: prompt,
+                        prompt: this.$prompt.val(),
                         chat: JSON.stringify(chat)
                     }, {dataType: 'json', xhrconsumer: consumeXhr},
                     this.generateSuccess.bind(this), this.generateError.bind(this));

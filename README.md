@@ -1,5 +1,10 @@
 # Composum AI
 
+Fast and flexible, 
+Composum empowers you,
+Content blooms with ease.
+-- ChatGPT
+
 ## Basic idea
 
 With the advent of large language models (LLM) like [ChatGPT](https://openai.com/blog/chatgpt),
