@@ -1,5 +1,11 @@
 # Next steps in the implementation
 
+- preselect page text in sidebar
+- solve html problem in creation dialog better.
+- scroll the chat field to the top.
+- text from component
+- save scroll position
+
 ## Basic steps for implementing a translation service
 
 - DONE: choose framework to access ChatGPT / library / code generation; implement basic access to ChatGPT chat API

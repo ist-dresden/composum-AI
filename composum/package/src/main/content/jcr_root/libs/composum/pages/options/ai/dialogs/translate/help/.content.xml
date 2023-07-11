@@ -31,7 +31,7 @@
                         jcr:primaryType="nt:unstructured">
                     <de
                             jcr:primaryType="nt:unstructured"
-                            jcr:title="Verwendung des Übersetzungsfensters"/>
+                            jcr:title="Verwendung des Übersetzungsdialogs"/>
                 </i18n>
             </section_1039340572>
             <section
