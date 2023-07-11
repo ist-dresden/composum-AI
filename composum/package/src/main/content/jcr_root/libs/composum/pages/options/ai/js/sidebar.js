@@ -43,6 +43,7 @@
                 this.$alert = this.findSingleElemenet('.generalalert');
                 this.$truncationalert = this.findSingleElemenet('.truncationalert');
                 this.$prompt = this.findSingleElemenet('.promptcontainer.first textarea');
+                this.$response = this.$el.find('.ai-response-text').first();
 
                 this.$el.on('change', '.promptcontainer textarea', this.promptChanged.bind(this));
                 this.$el.on('mouseleave', '.promptcontainer textarea', this.adjustButtonStates.bind(this));
@@ -60,6 +61,8 @@
                 this.findSingleElemenet('.stop-button').click(this.stopButtonClicked.bind(this));
 
                 this.findSingleElemenet('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
+
+                this.initialState = this.makeSaveStateMap();
 
                 this.history = ai.sidebarDialogStates[this.pagePath];
                 console.log('History for ', this.pagePath, ' used.'); // FIXME remove this.
@@ -159,7 +162,7 @@
             resetButtonClicked: function (event) {
                 event.preventDefault();
                 this.saveState();
-                this.restoreStateFromMap({});
+                this.restoreStateFromMap(this.initialState);
                 return false;
             },
 
@@ -355,6 +358,7 @@
                     this.eventSource.close();
                     this.eventSource = undefined;
                 }
+                this.$el.find('.loading-indicator').hide();
             },
 
             generateSuccess: function (data) {
