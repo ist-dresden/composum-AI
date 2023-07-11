@@ -5,7 +5,7 @@ Delimit it with three backticks.
 ---------- assistant ----------
 ```${text}```
 ---------- user ----------
-About this text you just printed for me, please do the following. If I refer to "the text" then this means this text you just retrieved and printed.
+The following instruction is specifically about the text you've just retrieved and displayed. Whenever I refer to "the text", I'm referencing this exact piece of content. Please keep this in mind while executing the following prompt:
 PROMPT:
 
 ${prompt}

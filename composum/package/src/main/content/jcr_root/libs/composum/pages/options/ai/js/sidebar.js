@@ -16,6 +16,9 @@
         /** Maps widget paths to the saved state for the dialog. */
         ai.sidebarDialogStates = {};
 
+        /** Maps widget paths to the last scrollTop for the dialog. */
+        ai.scrollPositions = {};
+
         /**
          * Dialog for the AI sidebar.
          * Since we'd like to allow a chat, we always create a new promptcontainer after a response. That means however
@@ -67,10 +70,18 @@
                 this.historyPosition = this.history.length - 1;
                 if (this.historyPosition >= 0) {
                     this.restoreStateFromMap(this.history[this.historyPosition]);
+                } else {
+                    this.adjustChatCount(0);
                 }
 
-                this.adjustChatCount(0);
                 this.adjustButtonStates();
+
+                const scrollTop = ai.scrollPositions[this.pagePath];
+                this.$scrollHandle = this.findSingleElemenet('.composum-pages-tools_panel');
+                if (scrollTop) {
+                    setTimeout(() => this.$scrollHandle.scrollTop(scrollTop), 0);
+                }
+                this.$scrollHandle.scroll(() => ai.scrollPositions[this.pagePath] = this.$scrollHandle.scrollTop());
             },
 
             findSingleElemenet: function (selector) {
