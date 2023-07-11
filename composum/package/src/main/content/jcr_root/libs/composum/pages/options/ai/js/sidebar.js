@@ -192,13 +192,13 @@
                         $newChat.removeClass('hidden');
                         $newChat.addClass('promptcontainer');
                         $newChat.addClass('chat');
-                        this.$el.find('.additionalprompts').append($newChat);
+                        this.$scrollHandle.append($newChat);
 
                         let $newAnswer = $answerTemplate.clone();
                         $newAnswer.removeClass('first');
                         $newAnswer.addClass('chat');
                         $newAnswer.find('.ai-response-text').text('');
-                        this.$el.find('.additionalprompts').append($newAnswer);
+                        this.$scrollHandle.append($newAnswer);
                     }
                 } else if (numberOfExistingChats > numberOfChats) {
                     this.$el.find('.promptcontainer.chat').slice(numberOfChats).remove();
@@ -364,6 +364,7 @@
                     this.setResult(value);
                     this.setLoading(false);
                     this.saveState();
+                    this.scrollToLastPromptContainer();
                 } else if (statusOK && data.data.result.streamid) {
                     const streamid = data.data.result.streamid;
                     this.startStreaming(streamid);
@@ -372,6 +373,16 @@
                     this.$alert.html("Error generating text: " + JSON.stringify(data));
                     this.$alert.show();
                     this.setLoading(false);
+                }
+            },
+
+            /** Scrolls the last promptcontainer to the top within this.$scrollHandle so that the response field is visible. */
+            scrollToLastPromptContainer: function () {
+                let lastPromptContainer = this.$el.find('.promptcontainer').last();
+                if (lastPromptContainer.length) {
+                    setTimeout(() => {
+                        this.$scrollHandle.animate({scrollTop: lastPromptContainer.position().top + this.$scrollHandle.scrollTop()}, 'slow');
+                    }, 500);
                 }
             },
 
@@ -396,6 +407,7 @@
                 let url = ai.const.url.general.authoring + ".streamresponse.sse";
                 this.abortRunningCalls();
                 this.setLoading(true);
+                this.scrollToLastPromptContainer();
                 this.streamingResult = "";
                 this.eventSource = new EventSource(url + "?streamid=" + streamid);
                 this.eventSource.onmessage = this.onStreamingMessage.bind(this, this.eventSource);
@@ -424,6 +436,7 @@
                 console.log('Complete text: ', this.streamingResult);
                 this.eventSource.close();
                 this.abortRunningCalls();
+                this.scrollToLastPromptContainer(); // before setloading since otherwise wrong position
                 this.setLoading(false);
                 this.saveState();
                 const status = JSON.parse(event.data);

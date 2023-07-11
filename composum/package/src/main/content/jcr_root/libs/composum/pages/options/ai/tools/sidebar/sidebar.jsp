@@ -94,9 +94,7 @@
                 <textarea class="form-control" name="prompt-1" rows="3"
                           placeholder="${cpn:i18n(slingRequest,'If you like to continue this topic and have additional queries.')}"></textarea>
         </div>
-            <%-- The .promptcontainer.template and the .ai-response will be copied to add more fields during the chat, with class template removed and class chat added. --%>
-        <div class="additionalprompts">
-        </div>
+        <%-- The .promptcontainer.template and the .ai-response will be copied to add more fields during the chat, with class template removed and class chat added. --%>
     </div>
 </cpp:element>
 
