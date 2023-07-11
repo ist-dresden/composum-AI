@@ -130,6 +130,7 @@
             },
 
             saveState: function () {
+                this.abortRunningCalls();
                 // save if we are at the last position and the current state is different from the last saved state
                 let currentState = this.makeSaveStateMap();
                 let lastSavedState = this.history[this.historyPosition];
