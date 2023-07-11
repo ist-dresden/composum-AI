@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
                 ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/approximated.markdown",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })
-// curl -u admin:admin http://localhost:9090/bin/cpm/platform/ai/approximated.markdown.md/content/ist/composum/home
+// curl -u admin:admin http://localhost:9090/bin/cpm/platform/ai/approximated.markdown.md/content/ist/composum/home/platform/_jcr_content
 public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);

@@ -88,7 +88,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             throw new IllegalArgumentException("For security reasons the resource must be in /content but is: " + resource.getPath());
         }
         boolean wasHandledAsPage = pageHandling(resource, out);
-        boolean wasHandledAsTable = tableHandling(resource, out);
+        boolean wasHandledAsTable = !wasHandledAsPage && tableHandling(resource, out);
+        handleContentReference(resource, out);
         boolean printEmptyLine = false;
         if (!wasHandledAsPage && !wasHandledAsTable) {
             handleCodeblock(resource, out);
@@ -113,6 +114,18 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (wasHandledAsPage) {
             String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
             out.println("\nEnd of content of page " + path + "\n");
+        }
+    }
+
+    protected void handleContentReference(Resource resource, PrintWriter out) {
+        String reference = resource.getValueMap().get("contentReference", String.class);
+        if (StringUtils.startsWith(reference, "/content/")) {
+            Resource referencedResource = resource.getResourceResolver().getResource(reference);
+            if (referencedResource != null) {
+                approximateMarkdown(referencedResource, out);
+            } else {
+                LOG.info("Resource {} referenced from {} not found.", reference, resource.getPath());
+            }
         }
     }
 
