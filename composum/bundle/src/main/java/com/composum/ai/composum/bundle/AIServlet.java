@@ -501,7 +501,8 @@ public class AIServlet extends AbstractServiceServlet {
                     fullPrompt = textLength + "\n\n" + fullPrompt;
                 }
                 if (richtext) {
-                    fullPrompt = fullPrompt + "\n\n" + "Create HTML and begin the text with <p>";
+                    fullPrompt = fullPrompt + "\n\n" +
+                            "Important: your response must not be Markdown but be completely in HTML and begin with <p>, lists be HTML <ul> or <ol> and so forth!";
                 }
                 if (isNotBlank(inputPath)) {
                     Resource resource = request.getResourceResolver().getResource(inputPath);

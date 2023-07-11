@@ -248,9 +248,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             }
             LOG.trace("Response {} from GPT: {}", id, choice.getMessage());
             return choice.getMessage().getContent();
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.error("Error while call {} to GPT", id, e);
+            LOG.error("Interrupted during call {} to GPT", id, e);
+            throw new GPTException("Interrupted during call to GPT", e);
+        } catch (IOException e) {
+            if (!e.toString().contains("Stream") || !e.toString().contains("cancelled")) {
+                LOG.error("Error while call {} to GPT", id, e);
+            }
             throw new GPTException("Error while calling GPT", e);
         }
     }
@@ -543,9 +548,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         for (GPTChatMessage message : request.getMessages()) {
             messages.add(new ChatMessage(message.getRole().toString(), message.getContent()));
         }
-        while(!messages.isEmpty() && StringUtil.isBlank(messages.get(messages.size()-1).getContent())) {
+        while (!messages.isEmpty() && StringUtil.isBlank(messages.get(messages.size() - 1).getContent())) {
             LOG.debug("Removing empty last message."); // suspicious - likely misusage of the API
-            messages.remove(messages.size()-1);
+            messages.remove(messages.size() - 1);
         }
         if (!messages.isEmpty() && messages.get(messages.size() - 1).getRole() == GPTMessageRole.ASSISTANT.toString()) {
             LOG.debug("Removing last message because it's an assistant message and that'd be confusing for GPT.");

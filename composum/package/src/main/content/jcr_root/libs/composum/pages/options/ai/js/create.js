@@ -277,6 +277,7 @@
             setResult: function (value) {
                 if (this.isRichText) {
                     core.widgetOf(this.$response.find('textarea')).setValue(value);
+                    this.$response.attr('data-fullresponse', value); // for debugging
                 } else {
                     this.$response.val(value);
                 }

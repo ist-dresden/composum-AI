@@ -1,9 +1,6 @@
 # Next steps in the implementation
 
-- preselect page text in sidebar
-- solve html problem in creation dialog better.
 - scroll the chat field to the top.
-- text from component
 - save scroll position
 
 ## Basic steps for implementing a translation service
