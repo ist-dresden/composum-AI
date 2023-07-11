@@ -1,5 +1,5 @@
 {
-  "component": "The currently selected component, including subcomponents",
-  "page": "Current page text",
+  "page": "Current page text is added to your prompt",
+  "component": "Text of the currently selected component, including subcomponents",
   "": "No text is added to your prompt"
 }

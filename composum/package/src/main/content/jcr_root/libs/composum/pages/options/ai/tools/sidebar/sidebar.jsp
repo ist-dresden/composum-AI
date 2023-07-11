@@ -68,7 +68,6 @@
                  title="${cpn:i18n(slingRequest,'Select which text the AI receives in addition to your prompt, if any.')}">
                 <select id="contentSelector" name="contentSelect"
                         class="composum-pages-tools_select content-selector form-control">
-                    <option value=""><cpn:text i18n="true">(Base Text)</cpn:text></option>
                     <c:forEach items="${review.contentSelectors}" var="contentSelector">
                         <option value="${contentSelector.key}">${contentSelector.value}</option>
                     </c:forEach>
