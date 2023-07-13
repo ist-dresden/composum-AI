@@ -53,9 +53,11 @@
                     this.findSingleElemenet('.back-button').click(this.backButtonClicked.bind(this));
                     this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
                     this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
-                    this.$el.on('keypress', '.promptcontainer textarea', function (e) {
-                        if (e.which === 13 && (e.ctrlKey || e.metaKey)) { // bind 'Control-Enter' or 'Command-Enter' in the textarea to the generate button
-                            that.generateButtonClicked(e);
+                    this.$el.on('keypress', '.promptcontainer textarea', (e) => {
+                        if (e.which === 13 && (e.ctrlKey || e.metaKey)) {
+                            this.promptChanged(e);
+                            // bind 'Control-Enter' or 'Command-Enter' in the textarea to the generate button
+                            this.generateButtonClicked(e);
                         }
                     });
                     this.findSingleElemenet('.reset-button').click(this.resetButtonClicked.bind(this));
@@ -234,16 +236,23 @@
                 console.log('promptChanged', event);
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
                 this.adjustButtonStates();
-                // delete all prompts after the modified prompt.
-                let $changedField = $(event.target).closest('.promptcontainer');
-                if ($changedField.hasClass('first')) {
-                    this.adjustChatCount(0);
-                    this.$el.find('.ai-response.first .ai-response-text').text('');
-                } else {
-                    let $chatFields = this.$el.find('.promptcontainer.chat');
-                    let index = $chatFields.index($changedField);
-                    this.adjustChatCount(index + 1);
-                    this.$el.find('.ai-response.chat').last().find('.ai-response-text').text('');
+                // delete all prompts after the modified prompt, but only if the prompt was actually modified.
+                // for that we save the state before the change and compare it to the state after the change.
+                // the value is always saved in the attribute data-previous-value on the event target (the text area).
+                const previousValue = $(event.target).data('previous-value');
+                const currentValue = $(event.target).val();
+                $(event.target).data('previous-value', currentValue);
+                if (!previousValue || previousValue !== currentValue) {
+                    let $changedField = $(event.target).closest('.promptcontainer');
+                    if ($changedField.hasClass('first')) {
+                        this.adjustChatCount(0);
+                        this.$el.find('.ai-response.first .ai-response-text').text('');
+                    } else {
+                        let $chatFields = this.$el.find('.promptcontainer.chat');
+                        let index = $chatFields.index($changedField);
+                        this.adjustChatCount(index + 1);
+                        this.$el.find('.ai-response.chat').last().find('.ai-response-text').text('');
+                    }
                 }
                 return false;
             },
