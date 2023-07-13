@@ -86,6 +86,10 @@
                                             title="${cpn:i18n(slingRequest,'Triggers the text generation - please give that a couple of seconds.')}">
                                         <cpn:text i18n="true">Generate</cpn:text>
                                     </button>
+                                    <button type="button" class="btn btn-primary stop-button"
+                                            title="${cpn:i18n(slingRequest,'Stops the text generation.')}">
+                                        <cpn:text i18n="true">Stop</cpn:text>
+                                    </button>
                                     <div class="loading-indicator" style="display: none;">
                                         <i class="fa fa-2x fa-spinner fa-pulse fa-fw"></i>
                                     </div>
@@ -95,14 +99,14 @@
                                             title="${cpn:i18n(slingRequest,'Resets this form.')}">
                                         <cpn:text i18n="true">Reset</cpn:text>
                                     </button>
-                                    <span title="${cpn:i18n(slingRequest,'You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}">
-                                    <button type="button" class="btn btn-secondary back-button">
+                                    <button type="button" class="btn btn-secondary back-button"
+                                            title="${cpn:i18n(slingRequest,'You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}">
                                         <cpn:text i18n="true">Back</cpn:text>
                                     </button>
-                                    <button type="button" class="btn btn-secondary forward-button">
+                                    <button type="button" class="btn btn-secondary forward-button"
+                                            title="${cpn:i18n(slingRequest,'You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}">
                                         <cpn:text i18n="true">Forward</cpn:text>
                                     </button>
-                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -117,7 +121,8 @@
                             <div class="form-group">
                                 <c:choose>
                                     <c:when test="${model.isRichText}">
-                                        <cpp:widgetForm disabled="true" cssBase="composum-pages-options-ai-dialogs-create"
+                                        <cpp:widgetForm disabled="true"
+                                                        cssBase="composum-pages-options-ai-dialogs-create"
                                                         cssAdd="ai-response-field">
                                             <cpp:widget type="richtext"
                                                         modelClass="com.composum.ai.composum.bundle.model.CreateDialogModel"/>

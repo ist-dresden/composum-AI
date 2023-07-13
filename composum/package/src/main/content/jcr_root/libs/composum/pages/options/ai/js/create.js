@@ -64,7 +64,8 @@
 
                 this.$el.find('.back-button').click(this.backButtonClicked.bind(this));
                 this.$el.find('.forward-button').click(this.forwardButtonClicked.bind(this));
-                this.$el.find('.generate-button').click(this.generateButtonClicked.bind(this));
+                this.$el.find('.generate-button').click(this.generateButtonClicked.bind(this)).prop('disabled', true);
+                this.$el.find('.stop-button').click(this.stopButtonClicked.bind(this));
                 this.$el.find('.reset-button').click(this.resetButtonClicked.bind(this));
 
                 this.$el.find('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
@@ -156,6 +157,8 @@
             /** Button 'Reset' was clicked. */
             resetButtonClicked: function (event) {
                 event.preventDefault();
+                this.abortRunningCalls();
+                this.setLoading(false);
                 this.saveState();
                 this.restoreStateFromMap({});
                 return false;
@@ -179,6 +182,8 @@
             backButtonClicked: function (event) {
                 this.saveState();
                 if (this.historyPosition > 0) {
+                    this.abortRunningCalls();
+                    this.setLoading(false);
                     this.historyPosition = this.historyPosition - 1;
                     let lastSavedState = this.history[this.historyPosition];
                     console.log('switching to state', this.historyPosition, this.history.length)
@@ -189,6 +194,8 @@
             forwardButtonClicked: function (event) {
                 this.saveState();
                 if (this.historyPosition < this.history.length - 1) {
+                    this.abortRunningCalls();
+                    this.setLoading(false);
                     this.historyPosition = this.historyPosition + 1;
                     let lastSavedState = this.history[this.historyPosition];
                     console.log('switching to state', this.historyPosition, this.history.length)
@@ -204,10 +211,12 @@
                 } else {
                     this.$spinner.hide();
                 }
+                this.$el.find('.stop-button').prop('disabled', !loading);
             },
 
             generateButtonClicked: function (event) {
                 event.preventDefault();
+                this.saveState();
                 this.setLoading(true);
 
                 const that = this;
@@ -325,6 +334,14 @@
                 }
                 this.$el.modal('hide');
                 this.widget.grabFocus();
+                return false;
+            },
+
+            stopButtonClicked: function (event) {
+                event.preventDefault();
+                this.abortRunningCalls();
+                this.setLoading(false);
+                this.saveState();
                 return false;
             },
 
