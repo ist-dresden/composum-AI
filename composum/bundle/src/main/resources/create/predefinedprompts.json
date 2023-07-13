@@ -18,5 +18,6 @@
   "BAB Framework Text": "Please write a complete text using the Before-After-Bridge (BAB) framework. Start by describing the problem, then envision the improvements, and finally introduce the solution that makes this transformation possible.",
   "AIDA Framework Text": "Please write a complete text using the AIDA framework. Start by capturing attention, then generate interest, induce desire, and finally, call for action.",
   "Slogan": "Based on the given text, please create a catchy and memorable slogan that captures its main theme.",
-  "CTA": "Based on the text, create a call to action that encourages the reader to take the next step, and clearly conveys the unique value proposition to the reader."
+  "CTA": "Based on the text, create a call to action that encourages the reader to take the next step, and clearly conveys the unique value proposition to the reader.",
+  "Markdown to HTML": "Convert the text from Markdown to HTML."
 }
