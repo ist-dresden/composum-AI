@@ -54,7 +54,7 @@
                     this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
                     this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
                     this.$el.on('keypress', '.promptcontainer textarea', function (e) {
-                        if (e.which === 13) { // bind 'enter' in the textarea to the generate button
+                        if (e.which === 13 && (e.ctrlKey || e.metaKey)) { // bind 'Control-Enter' or 'Command-Enter' in the textarea to the generate button
                             that.generateButtonClicked(e);
                         }
                     });
