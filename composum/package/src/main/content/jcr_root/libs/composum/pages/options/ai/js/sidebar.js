@@ -31,60 +31,65 @@
         ai.SidebarDialog = Backbone.View.extend({
 
             initialize: function (options) {
-                let that = this;
-                ai.commonDialogInit(this.$el);
-                const dataholder = this.findSingleElemenet('.dataholder');
-                this.componentPath = dataholder.data('componentpath');
-                this.pagePath = dataholder.data('pagepath');
-                this.streaming = typeof (EventSource) !== "undefined";
+                try {
+                    let that = this;
+                    ai.commonDialogInit(this.$el);
+                    const dataholder = this.findSingleElemenet('.dataholder');
+                    this.componentPath = dataholder.data('componentpath');
+                    this.pagePath = dataholder.data('pagepath');
+                    this.streaming = typeof (EventSource) !== "undefined";
 
-                this.$predefinedPrompts = this.findSingleElemenet('.predefined-prompts');
-                this.$contentSelect = this.findSingleElemenet('.content-selector');
-                this.$alert = this.findSingleElemenet('.generalalert');
-                this.$truncationalert = this.findSingleElemenet('.truncationalert');
-                this.$prompt = this.findSingleElemenet('.promptcontainer.first textarea');
-                this.$response = this.$el.find('.ai-response-text').first();
+                    this.$predefinedPrompts = this.findSingleElemenet('.predefined-prompts');
+                    this.$contentSelect = this.findSingleElemenet('.content-selector');
+                    this.$alert = this.findSingleElemenet('.generalalert');
+                    this.$truncationalert = this.findSingleElemenet('.truncationalert');
+                    this.$prompt = this.findSingleElemenet('.promptcontainer.first textarea');
+                    this.$response = this.$el.find('.ai-response-text').first();
+                    this.$scrollHandle = this.findSingleElemenet('.composum-pages-tools_panel');
 
-                this.$el.on('change', '.promptcontainer textarea', this.promptChanged.bind(this));
-                this.$el.on('mouseleave', '.promptcontainer textarea', this.adjustButtonStates.bind(this));
+                    this.$el.on('change', '.promptcontainer textarea', this.promptChanged.bind(this));
+                    this.$el.on('mouseleave', '.promptcontainer textarea', this.adjustButtonStates.bind(this));
 
-                this.findSingleElemenet('.back-button').click(this.backButtonClicked.bind(this));
-                this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
-                this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
-                this.$el.on('keypress', '.promptcontainer textarea', function (e) {
-                    if (e.which === 13) { // bind 'enter' in the textarea to the generate button
-                        that.generateButtonClicked(e);
+                    this.findSingleElemenet('.back-button').click(this.backButtonClicked.bind(this));
+                    this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
+                    this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
+                    this.$el.on('keypress', '.promptcontainer textarea', function (e) {
+                        if (e.which === 13) { // bind 'enter' in the textarea to the generate button
+                            that.generateButtonClicked(e);
+                        }
+                    });
+                    this.findSingleElemenet('.reset-button').click(this.resetButtonClicked.bind(this));
+                    this.findSingleElemenet('.reset-history-button').click(this.resetHistoryButtonClicked.bind(this));
+                    this.findSingleElemenet('.stop-button').click(this.stopButtonClicked.bind(this));
+
+                    this.findSingleElemenet('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
+
+                    this.initialState = this.makeSaveStateMap();
+
+                    this.history = ai.sidebarDialogStates[this.pagePath];
+                    console.log('History for ', this.pagePath, ' used.'); // FIXME remove this.
+                    if (!this.history) {
+                        this.history = [];
+                        ai.sidebarDialogStates[this.pagePath] = this.history;
                     }
-                });
-                this.findSingleElemenet('.reset-button').click(this.resetButtonClicked.bind(this));
-                this.findSingleElemenet('.reset-history-button').click(this.resetHistoryButtonClicked.bind(this));
-                this.findSingleElemenet('.stop-button').click(this.stopButtonClicked.bind(this));
+                    this.historyPosition = this.history.length - 1;
+                    if (this.historyPosition >= 0) {
+                        this.restoreStateFromMap(this.history[this.historyPosition]);
+                    } else {
+                        this.adjustChatCount(0);
+                    }
 
-                this.findSingleElemenet('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
+                    this.adjustButtonStates();
 
-                this.initialState = this.makeSaveStateMap();
-
-                this.history = ai.sidebarDialogStates[this.pagePath];
-                console.log('History for ', this.pagePath, ' used.'); // FIXME remove this.
-                if (!this.history) {
-                    this.history = [];
-                    ai.sidebarDialogStates[this.pagePath] = this.history;
+                    const scrollTop = ai.scrollPositions[this.pagePath];
+                    if (scrollTop) {
+                        setTimeout(() => this.$scrollHandle.scrollTop(scrollTop), 0);
+                    }
+                    this.$scrollHandle.scroll(() => ai.scrollPositions[this.pagePath] = this.$scrollHandle.scrollTop());
+                } catch (e) {
+                    console.error(e);
+                    // can't do anything about that, but at least don't break other scripts
                 }
-                this.historyPosition = this.history.length - 1;
-                if (this.historyPosition >= 0) {
-                    this.restoreStateFromMap(this.history[this.historyPosition]);
-                } else {
-                    this.adjustChatCount(0);
-                }
-
-                this.adjustButtonStates();
-
-                const scrollTop = ai.scrollPositions[this.pagePath];
-                this.$scrollHandle = this.findSingleElemenet('.composum-pages-tools_panel');
-                if (scrollTop) {
-                    setTimeout(() => this.$scrollHandle.scrollTop(scrollTop), 0);
-                }
-                this.$scrollHandle.scroll(() => ai.scrollPositions[this.pagePath] = this.$scrollHandle.scrollTop());
             },
 
             findSingleElemenet: function (selector) {
