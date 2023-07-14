@@ -174,7 +174,7 @@
             },
 
             resetHistoryButtonClicked: function (event) {
-                this.history = [];
+                this.history.length = 0;
                 this.historyPosition = -1;
                 this.resetButtonClicked(event);
             },
