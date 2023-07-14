@@ -139,7 +139,7 @@ public class GPTChatMessagesTemplate {
                         LOG.error("Problem with template usage: missing placeholder value for placeholder {} in template {}", name, templateName, new Exception("Stacktrace, not thrown"));
                         throw new GPTException("Missing placeholder value for " + name);
                     }
-                    return value;
+                    return Matcher.quoteReplacement(value);
                 });
             }
             result.add(new GPTChatMessage(message.getRole(), content));
