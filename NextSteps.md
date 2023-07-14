@@ -1,8 +1,5 @@
 # Next steps in the implementation
 
-- scroll the chat field to the top.
-- save scroll position
-
 ## Basic steps for implementing a translation service
 
 - DONE: choose framework to access ChatGPT / library / code generation; implement basic access to ChatGPT chat API
@@ -33,28 +30,26 @@
   https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format 
 - DONE: Page assistant: writing style
 - DONE: use library to count the tokens -> JTokkit
+- DONE: save scroll position, scroll the chat field to the top.
 - Page assistant in preview: can also process selected text!
 - Site specific or global templates for prompts.
 - Global configuration for prompts: e.g. glossary, important terms, background information.
-- Somehow implement streaming to make result more responsive.
+- DONE Somehow implement streaming to make result more responsive.
 - Bug: translation in all properties component - fill german value and translate to english.
 - Check Error handling. (e.g. connection error.)
-- Unclear: content generation for non-default language?
-- Translation: german ?
-- Page assistant: translate page , proofread, recommendations, 
-  - compare /libs/composum/pages/stage/tools/componentHelp 
-  - pages/stage/package/src/main/content/jcr_root/libs/composum/pages/stage/edit/tools/component/help/context/content.jsp
+- Unclear: content generation from text in non-default language?
+- better mode of shortening texts if required text length is small. 
 
 ## Possible improvements later
 
+- possibly: edit text in translation, after all? That's better because only there you see the original.
 - batch mode translation for a whole page / site
 - Prompt registry where people can put interesting prompts and like them (social component)
 - perhaps use moderation api to check for troublesome user messages and troublesome responses
 - use Composum platform caching service, possibly with an abstraction.
-- possibly: edit text in translation, after all?
 
 ## Won't do
 
 - (Extend content creation assistent with selection as input. (Not possible on page, but there.) -> could also 
   replace the selection / insert created text at point. Alternative: explicit input. Isn't really necessary, since 
-  user can just incorporate that into the prompt.)
+  user can just incorporate that into the prompt, or put it into the content suggestion field and iterate over that.)

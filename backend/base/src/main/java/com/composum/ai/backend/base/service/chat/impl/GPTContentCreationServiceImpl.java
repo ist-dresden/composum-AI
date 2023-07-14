@@ -45,8 +45,10 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
 
     /**
      * To respect limits of ChatGPT we replace in texts longer than this many words we replace the middle with [...]
+     * TODO: use an intelligent algorithm to determine this limit, but that's pretty hard for executePromptOnText.
+     * 3000 would collide with the 1000 token default for maxtokens, so we use 2800.
      */
-    protected static final int MAXTOKENS = 3000;
+    protected static final int MAXTOKENS = 2800;
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
@@ -133,6 +135,8 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, @Nullable GPTChatRequest additionalParameters) {
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_PROMPTONTEXT);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
+        // TODO use intelligent algorithm to determine this limit, but that's pretty hard here.
+        // also, the user should be alerted about that.
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
         GPTChatRequest request = new GPTChatRequest();
         request.addMessages(messages);

@@ -14,7 +14,7 @@
             <div class="composum-pages-tools_button-group btn-group btn-group-sm" role="group">
                 <button type="button"
                         class="fa fa-play generate-button composum-pages-tools_button btn btn-default"
-                        title="${cpn:i18n(slingRequest,'Submit: triggers an AI reply - please give that a couple of seconds. You can also press enter.')}">
+                        title="${cpn:i18n(slingRequest,'Submit: triggers an AI reply - please give that a couple of seconds. You can also press Control-Enter or Command-Enter in the prompt fields.')}">
                 </button>
                 <button type="button"
                         class="fa fa-stop stop-button composum-pages-tools_button btn btn-default"
