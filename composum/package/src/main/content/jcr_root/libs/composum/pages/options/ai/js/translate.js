@@ -223,7 +223,7 @@
 
         });
 
-        ai.openTranslateDialog = function (event) {
+        ai.openTranslateDialog = _.debounce(function (event) {
             let $target = $(event.target);
             var path = $target.data('path');
             var property = $target.data('property');
@@ -238,7 +238,7 @@
             var url = ai.const.url.translate.translationDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
             core.openFormDialog(url, ai.TranslationDialog, {widget: widget, isRichText: isRichText});
-        }
+        }, 1000, true);
 
     })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 

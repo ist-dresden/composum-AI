@@ -16,7 +16,7 @@
             createDialog: '/bin/cpm/platform/ai/dialog.creationDialog.html'
         }
 
-        ai.openCreationDialog = function (event) {
+        ai.openCreationDialog = _.debounce(function (event) {
             let $target = $(event.target);
             let path = $target.data('path');
             let pagePath = $target.data('pagepath');
@@ -31,7 +31,7 @@
                 widget: widget, isRichText: isRichText,
                 componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
             });
-        }
+        }, 1000, true);
 
         /** Maps widget paths to the saved state for the dialog. */
         ai.createDialogStates = {};
