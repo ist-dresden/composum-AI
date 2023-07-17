@@ -17,7 +17,7 @@
                         title="${cpn:i18n(slingRequest,'Submit: triggers an AI reply - please give that a couple of seconds. You can also press Control-Enter or Command-Enter in the prompt fields.')}">
                 </button>
                 <button type="button"
-                        class="fa fa-stop stop-button composum-pages-tools_button btn btn-default"
+                        class="fa fa-stop stop-button composum-pages-tools_button btn btn-default" disabled="disabled"
                         title="${cpn:i18n(slingRequest,'Stop: aborts an AI reply')}">
                 </button>
                 <button type="button"

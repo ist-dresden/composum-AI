@@ -296,6 +296,7 @@
                         this.adjustChatCount(this.getChatCount() + 1);
                     }
                 }
+                this.$el.find('.stop-button').prop('disabled', !loading);
             },
 
             /** Format  [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}] for AIServlet chat parameter.
