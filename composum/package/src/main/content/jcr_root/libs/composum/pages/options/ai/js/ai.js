@@ -42,7 +42,8 @@
         ai.searchInput = function ($labelextension) {
             var $formgroup = $labelextension.closest('div.form-group');
             var $input = $formgroup.find('input[type="text"],textarea');
-            if ($input.length === 1) {
+            if ($input.length >= 1 && $input.length <= 2) {
+                // sanity check; for code area there are actually 2 outputs
                 return $input;
             }
             console.error('BUG! searchInput: no input found', $labelextension);
