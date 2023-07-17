@@ -177,6 +177,8 @@
                 this.history.length = 0;
                 this.historyPosition = -1;
                 this.resetButtonClicked(event);
+                this.history.length = 0;
+                this.historyPosition = -1;
             },
 
             /** We delete all input- and their output fields if the input field is empty, starting from the end. */

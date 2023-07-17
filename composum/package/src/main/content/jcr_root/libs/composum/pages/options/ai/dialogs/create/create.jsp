@@ -34,7 +34,7 @@
                                 <div class="form-group col-md-4"
                                      title="${cpn:i18n(slingRequest,'This replaces the prompt by one of a number of predefined prompts you can use directly or use as an example for your own prompt.')}">
                                     <label for="predefinedPrompts">
-                                        <cpn:text i18n="true">Predefined Prompts</cpn:text>
+                                        <cpn:text i18n="true">Predefined Prompts ('Instructions')</cpn:text>
                                     </label>
                                     <select id="predefinedPrompts" name="predefined"
                                             class="form-control predefined-prompts">
@@ -47,7 +47,7 @@
                                 <div class="form-group col-md-4"
                                      title="${cpn:i18n(slingRequest,'Select which text the AI receives in addition to your prompt, if any.')}">
                                     <label for="contentSelector">
-                                        <cpn:text i18n="true">Base Text</cpn:text>
+                                        <cpn:text i18n="true">Base Text ('Data' for the instructions)</cpn:text>
                                     </label>
                                     <select id="contentSelector" name="contentSelect"
                                             class="form-control content-selector">
@@ -90,14 +90,18 @@
                                             title="${cpn:i18n(slingRequest,'Stops the text generation.')}">
                                         <cpn:text i18n="true">Stop</cpn:text>
                                     </button>
+                                    <button type="button" class="btn btn-secondary reset-button"
+                                            title="${cpn:i18n(slingRequest,'Resets this form.')}">
+                                        <cpn:text i18n="true">Reset</cpn:text>
+                                    </button>
                                     <div class="loading-indicator" style="display: none;">
                                         <i class="fa fa-2x fa-spinner fa-pulse fa-fw"></i>
                                     </div>
                                 </div>
                                 <div class="col-md-6 text-right">
-                                    <button type="button" class="btn btn-secondary reset-button"
-                                            title="${cpn:i18n(slingRequest,'Resets this form.')}">
-                                        <cpn:text i18n="true">Reset</cpn:text>
+                                    <button type="button" class="btn btn-secondary reset-history-button"
+                                            title="${cpn:i18n(slingRequest,'Resets this form including the whole history.')}">
+                                        <cpn:text i18n="true">Reset History</cpn:text>
                                     </button>
                                     <button type="button" class="btn btn-secondary back-button"
                                             title="${cpn:i18n(slingRequest,'You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}">
