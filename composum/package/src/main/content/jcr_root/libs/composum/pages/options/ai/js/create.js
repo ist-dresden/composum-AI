@@ -16,7 +16,7 @@
             createDialog: '/bin/cpm/platform/ai/dialog.creationDialog.html'
         }
 
-        ai.openCreationDialog = function (event) {
+        ai.openCreationDialog = _.debounce(function (event) {
             let $target = $(event.target);
             let path = $target.data('path');
             let pagePath = $target.data('pagepath');
@@ -31,7 +31,7 @@
                 widget: widget, isRichText: isRichText,
                 componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
             });
-        }
+        }, 1000, true);
 
         /** Maps widget paths to the saved state for the dialog. */
         ai.createDialogStates = {};
@@ -67,6 +67,7 @@
                 this.$el.find('.generate-button').click(this.generateButtonClicked.bind(this)).prop('disabled', true);
                 this.$el.find('.stop-button').click(this.stopButtonClicked.bind(this));
                 this.$el.find('.reset-button').click(this.resetButtonClicked.bind(this));
+                this.$el.find('.reset-history-button').click(this.resetHistoryButtonClicked.bind(this));
 
                 this.$el.find('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
                 this.$prompt.change(this.promptChanged.bind(this));
@@ -136,7 +137,7 @@
                 let currentState = this.makeSaveStateMap();
                 let lastSavedState = this.history[this.historyPosition];
                 if (!_.isEqual(currentState, lastSavedState)) {
-                    console.log("SAVING STATE!");
+                    console.log("saving state", currentState);
                     this.history.push(currentState);
                     this.historyPosition = this.history.length - 1;
                 }
@@ -179,6 +180,14 @@
                 return false;
             },
 
+            resetHistoryButtonClicked: function (event) {
+                this.history.length = 0;
+                this.historyPosition = -1;
+                this.resetButtonClicked(event);
+                this.history.length = 0;
+                this.historyPosition = -1;
+            },
+
             backButtonClicked: function (event) {
                 this.saveState();
                 if (this.historyPosition > 0) {
@@ -216,7 +225,6 @@
 
             generateButtonClicked: function (event) {
                 event.preventDefault();
-                this.saveState();
                 this.setLoading(true);
 
                 const that = this;
@@ -286,10 +294,10 @@
 
             setResult: function (value) {
                 if (this.isRichText) {
-                    core.widgetOf(this.$response.find('textarea')).setValue(value);
+                    core.widgetOf(this.$response.find('textarea')).setValue(value || '');
                     this.$response.attr('data-fullresponse', value); // for debugging
                 } else {
-                    this.$response.val(value);
+                    this.$response.val(value || '');
                 }
                 this.adjustButtonStates();
             },
@@ -317,6 +325,7 @@
                 } else {
                     this.widget.setValue(result);
                 }
+                this.saveState();
                 this.$el.modal('hide');
                 this.widget.grabFocus();
                 return false;
@@ -332,6 +341,7 @@
                 } else {
                     this.widget.setValue(previousValue + "\n\n" + result);
                 }
+                this.saveState();
                 this.$el.modal('hide');
                 this.widget.grabFocus();
                 return false;

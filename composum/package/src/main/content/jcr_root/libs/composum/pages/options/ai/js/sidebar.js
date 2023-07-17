@@ -174,9 +174,11 @@
             },
 
             resetHistoryButtonClicked: function (event) {
-                this.history = [];
+                this.history.length = 0;
                 this.historyPosition = -1;
                 this.resetButtonClicked(event);
+                this.history.length = 0;
+                this.historyPosition = -1;
             },
 
             /** We delete all input- and their output fields if the input field is empty, starting from the end. */
@@ -294,6 +296,7 @@
                         this.adjustChatCount(this.getChatCount() + 1);
                     }
                 }
+                this.$el.find('.stop-button').prop('disabled', !loading);
             },
 
             /** Format  [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}] for AIServlet chat parameter.

@@ -29,7 +29,7 @@
         /** Will be called from Pages after a dialog is rendered via the dialogplugins hook.
          * Thus we bind ourselves into our buttons rendered into the dialog by the labelextension.jsp */
         ai.dialogInitializeView = function (dialog, $element) {
-            console.log('ai.dialogInitializeView', dialog, $element);
+            // console.log('ai.dialogInitializeView', dialog, $element);
             let $translationButtons = $element.find('.widget-ai-action.action-translate');
             $translationButtons.click(ai.openTranslateDialog);
             let $categorizeButtons = $element.find('.widget-ai-action.action-pagecategories');
@@ -42,17 +42,25 @@
         ai.searchInput = function ($labelextension) {
             var $formgroup = $labelextension.closest('div.form-group');
             var $input = $formgroup.find('input[type="text"],textarea');
-            if ($input.length === 1) {
+            if ($input.length >= 1 && $input.length <= 2) {
+                // sanity check; for code area there are actually 2 outputs
                 return $input;
             }
             console.error('BUG! searchInput: no input found', $labelextension);
         };
 
+        /** Common initialization called from all dialogs on opening. */
         ai.commonDialogInit = function ($el) {
             $el.find("button.maximize-button").click(ai.maximizeRestoreFunc($el, true));
             $el.find("button.restore-button").click(ai.maximizeRestoreFunc($el, false));
             $el.find("button.help-button").click(ai.openHelpDialog.bind(this));
             ai.addDragging($el);
+            // Fix that ensures scrolling works for the dialog we've been called on.
+            $el.on("hidden.bs.modal", function (e) {
+                if ($('.modal:visible').length) {
+                    $('body').addClass('modal-open');
+                }
+            });
         };
 
         ai.maximizeRestoreFunc = function ($el, ismaximize) {

@@ -19,7 +19,7 @@
 
         /** Opens the categorize dialog. The current categories are not taken from the resource, but from the dialog
          * this is called from, since the user might have modified this. */
-        ai.openCategorizeDialog = function (event) {
+        ai.openCategorizeDialog = _.debounce(function (event) {
             console.log('openCategorizeDialog', arguments);
             let $target = $(event.target);
             var path = $target.data('path');
@@ -47,7 +47,7 @@
                 property: property,
                 categoryparams: urlparams
             });
-        }
+        }, 1000, true);
 
         /**
          * Dialog for categorize - giving a page categories.

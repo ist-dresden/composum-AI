@@ -17,7 +17,7 @@
                         title="${cpn:i18n(slingRequest,'Submit: triggers an AI reply - please give that a couple of seconds. You can also press Control-Enter or Command-Enter in the prompt fields.')}">
                 </button>
                 <button type="button"
-                        class="fa fa-stop stop-button composum-pages-tools_button btn btn-default"
+                        class="fa fa-stop stop-button composum-pages-tools_button btn btn-default" disabled="disabled"
                         title="${cpn:i18n(slingRequest,'Stop: aborts an AI reply')}">
                 </button>
                 <button type="button"
@@ -31,10 +31,10 @@
                         class="fa fa-trash reset-history-button composum-pages-tools_button btn btn-default"
                         title="${cpn:i18n(slingRequest,'Resets this form including the whole history.')}"></button>
                 <button type="button"
-                        class="fa fa-step-backward back-button composum-pages-tools_button btn btn-default"
+                        class="fa fa-caret-left back-button composum-pages-tools_button btn btn-default"
                         title="${cpn:i18n(slingRequest,'Go back in the history of this dialog. You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}"></button>
                 <button type="button"
-                        class="fa fa-step-forward forward-button composum-pages-tools_button btn btn-default"
+                        class="fa fa-caret-right forward-button composum-pages-tools_button btn btn-default"
                         title="${cpn:i18n(slingRequest,'Go forward in the history of this dialog. You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts.')}"></button>
                 <button type="button"
                         class="fa fa-question help-button composum-pages-tools_button btn btn-default"
