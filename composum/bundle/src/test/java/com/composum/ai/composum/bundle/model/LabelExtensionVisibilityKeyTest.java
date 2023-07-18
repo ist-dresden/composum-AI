@@ -1,10 +1,10 @@
 package com.composum.ai.composum.bundle.model;
 
 import static com.composum.ai.composum.bundle.model.LabelExtensionVisibilityKey.CREATE;
-import static com.composum.ai.composum.bundle.model.LabelExtensionVisibilityKey.DEFAULTVISIBILITY;
 import static com.composum.ai.composum.bundle.model.LabelExtensionVisibilityKey.TRANSLATE;
 import static com.composum.ai.composum.bundle.model.LabelExtensionVisibilityKey.isVisible;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Rule;
@@ -22,10 +22,10 @@ public class LabelExtensionVisibilityKeyTest {
     @Test
     public void testIsVisible() {
         // Test when the value is null
-        assertThat(isVisible(null, CREATE), is(DEFAULTVISIBILITY));
+        assertThat(isVisible(null, CREATE), nullValue());
 
         // Test when the value is blank
-        assertThat(isVisible("", CREATE), is(DEFAULTVISIBILITY));
+        assertThat(isVisible("", CREATE), nullValue());
 
         // Test when the value is "ALL" or "true"
         assertThat(isVisible("ALL", CREATE), is(true));
@@ -42,7 +42,7 @@ public class LabelExtensionVisibilityKeyTest {
         assertThat(isVisible("!CREATE", CREATE), is(false));
 
         // Test when none of the conditions are met and the default visibility is returned
-        assertThat(isVisible("SOME_RANDOM_VALUE", CREATE), is(DEFAULTVISIBILITY));
+        assertThat(isVisible("SOME_RANDOM_VALUE", CREATE), nullValue());
 
         // Test when the value is a combination of values
         assertThat(isVisible("create,none", CREATE), is(true));

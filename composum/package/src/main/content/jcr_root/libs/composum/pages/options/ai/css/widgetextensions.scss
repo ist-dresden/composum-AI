@@ -11,8 +11,19 @@
         margin-left: 5px;
     }
 
+    /** Make invisible in anything but a .modal-dialog (see below). */
     .widget-ai-action {
+        display: none;
+    }
 
+}
+
+.modal-dialog .composum-pages-options-ai-widgetextensions-labelextension {
+
+    .widget-ai-action {
+        display: inline-block;
+        position: relative;
+        top: -3px;
     }
 
 }

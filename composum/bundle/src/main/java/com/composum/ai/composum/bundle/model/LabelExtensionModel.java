@@ -1,6 +1,8 @@
 package com.composum.ai.composum.bundle.model;
 
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -34,6 +36,17 @@ public class LabelExtensionModel extends AbstractModel {
      */
     public static final String ATTRIBUTE_AIVISIBLE = "aivisible";
 
+    /**
+     * For now we explicitly exclude some properties where AI is wrong, later we'll use {@link #ATTRIBUTE_AIVISIBLE},
+     * but that requires changing Pages.
+     */
+    protected static final Set<String> IGNORED_PROPERTIES = Set.of("author", "style/category.view", "style/category.edit",
+            "settings/google/api/key", "settings/here/api/key", "serviceUri", "key", "defaultValue");
+
+    protected static final List<Pattern> IGNORED_PROPERTIES_PATTERNS = List.of(
+            Pattern.compile("settings/.*/key"),
+            Pattern.compile("languages/.*/(key|label|:name)"));
+
     private static final Logger LOG = LoggerFactory.getLogger(LabelExtensionModel.class);
 
     private boolean valid;
@@ -42,7 +55,7 @@ public class LabelExtensionModel extends AbstractModel {
     private GPTChatCompletionService chatCompletionService;
     private String aivisible;
 
-    protected boolean visibilityByKey(@Nonnull LabelExtensionVisibilityKey assistantKey) {
+    protected Boolean visibilityByKey(@Nonnull LabelExtensionVisibilityKey assistantKey) {
         Object attributeRaw = widget.getAttributeSet().get(ATTRIBUTE_AIVISIBLE);
         String attributeValue = attributeRaw != null ? String.valueOf(attributeRaw) : null;
         return LabelExtensionVisibilityKey.isVisible(attributeValue, assistantKey);
@@ -77,13 +90,19 @@ public class LabelExtensionModel extends AbstractModel {
         return isEnabled() && (isTranslateButtonVisible() || isContentCreationButtonVisible() || isPageCategoriesButtonVisible());
     }
 
+    protected boolean isIgnoredProperty() {
+        String propertyName = widget.getPropertyName();
+        return IGNORED_PROPERTIES.contains(propertyName) ||
+                IGNORED_PROPERTIES_PATTERNS.stream().anyMatch(p -> p.matcher(propertyName).matches());
+    }
+
     /**
      * The translation button is visible only for widgettypes textfield, textarea, richtext, and only if there are texts in other languages than the current one, and if i18n="true" and multi="false".
      */
     public boolean isTranslateButtonVisible() {
         boolean visible = valid && widget.isI18n() && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
-        visible = visible && visibilityByKey(LabelExtensionVisibilityKey.TRANSLATE);
+        visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.TRANSLATE));
         if (visible) {
             Resource propertyResource = getResource().getChild(widget.getProperty());
             if (propertyResource == null) {
@@ -103,9 +122,10 @@ public class LabelExtensionModel extends AbstractModel {
      */
     public boolean isContentCreationButtonVisible() {
         boolean visible = valid && !widget.isMulti();
-        visible = visible && visibilityByKey(LabelExtensionVisibilityKey.CREATE);
+        Boolean visibilityByKey = visibilityByKey(LabelExtensionVisibilityKey.CREATE);
+        visible = visible && !Boolean.FALSE.equals(visibilityByKey);
+        visible = visible && (Boolean.TRUE.equals(visibilityByKey) || !isIgnoredProperty());
         visible = visible && List.of("textfield", "textarea", "codearea", "richtext").contains(widget.getWidgetType());
-        visible = visible && !widget.getPropertyName().startsWith("style/category."); // not sensible for content creation.
         return visible;
     }
 
@@ -115,7 +135,7 @@ public class LabelExtensionModel extends AbstractModel {
     public boolean isPageCategoriesButtonVisible() {
         boolean visible = valid && widget.isMulti() && "textfield".equals(widget.getWidgetType());
         visible = visible && "category".equals(widget.getProperty());
-        visible = visible && visibilityByKey(LabelExtensionVisibilityKey.CATEGORIZE);
+        visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.CATEGORIZE));
         visible = visible && ResourceUtil.isResourceType(model.getResource(), "composum/pages/components/page");
         return visible;
     }

@@ -34,21 +34,19 @@ public enum LabelExtensionVisibilityKey {
     CATEGORIZE;
 
     /**
-     * A regex that matches all correct visibility declarations: a comma separated list (spaces permitted) of true, false, a name of one of the dialog constants or ! and the name of one of the dialog constants, case insensitive.
+     * A regex that matches all correct visibility declarations: a comma separated list (spaces permitted) of true, false, a name of one of the dialog constants or ! and the name of one of the dialog constants, case-insensitive.
      */
     public static final Pattern VALID_EXPRESSIONS =
             Pattern.compile("\\s*(true|false|all|none|translate|create|categorize|!translate|!create|!categorize)(\\s*,\\s*(true|false|all|none|translate|create|categorize|!translate|!create|!categorize))*\\s*", Pattern.CASE_INSENSITIVE);
 
-    /**
-     * Default for visibility. Don't rely on that not changing.
-     */
-    public static final boolean DEFAULTVISIBILITY = true;
-
     private static final Logger LOG = LoggerFactory.getLogger(LabelExtensionVisibilityKey.class);
 
-    public static boolean isVisible(@Nullable String value, @Nullable LabelExtensionVisibilityKey assistant) {
+    /**
+     * Checks whether the item is visible; returns null if the rule doesn't say whether it is.
+     */
+    public static Boolean isVisible(@Nullable String value, @Nullable LabelExtensionVisibilityKey assistant) {
         if (value == null || value.isBlank()) {
-            return DEFAULTVISIBILITY;
+            return null;
         }
         // log warning if the value is not valid
         if (!VALID_EXPRESSIONS.matcher(value).matches()) {
@@ -74,7 +72,7 @@ public enum LabelExtensionVisibilityKey {
                 return false;
             }
         }
-        return DEFAULTVISIBILITY;
+        return null;
     }
 
 }
