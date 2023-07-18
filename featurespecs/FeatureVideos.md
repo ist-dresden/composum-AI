@@ -1,4 +1,12 @@
-# What to show in the Demo video(s)
+# Planning for the Demo video(s)
+
+Screen recordings with QuickTime , cut with iMovie
+Compression with Handbrake 'Fast 1080p30' + web optimized.
+Create picture of first frame with
+ffmpeg -i QuickDemo.mp4 -vframes 1 QuickDemo-poster.png
+!! Filename of picture shouldn't be exactly as movie
+
+## Quick Demo
 
 Intro Picture?
 9 - Translation2.mov - Translate

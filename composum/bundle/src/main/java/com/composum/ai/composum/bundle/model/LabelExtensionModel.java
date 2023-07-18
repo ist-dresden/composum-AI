@@ -2,6 +2,8 @@ package com.composum.ai.composum.bundle.model;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.jetbrains.annotations.NotNull;
@@ -26,12 +28,25 @@ import com.composum.sling.core.util.ResourceUtil;
  */
 public class LabelExtensionModel extends AbstractModel {
 
+    /**
+     * Additional attribute for a widget whether the ai should be visible or not.
+     * E.g. <code>&lt;cpp:widget type="textfield" label="Author" name="author" value="${model.author}" aivisible="false"/></code>
+     */
+    public static final String ATTRIBUTE_AIVISIBLE = "aivisible";
+
     private static final Logger LOG = LoggerFactory.getLogger(LabelExtensionModel.class);
 
     private boolean valid;
     private EditWidgetTag widget;
     private Model model;
     private GPTChatCompletionService chatCompletionService;
+    private String aivisible;
+
+    protected boolean visibilityByKey(@Nonnull LabelExtensionVisibilityKey assistantKey) {
+        Object attributeRaw = widget.getAttributeSet().get(ATTRIBUTE_AIVISIBLE);
+        String attributeValue = attributeRaw != null ? String.valueOf(attributeRaw) : null;
+        return LabelExtensionVisibilityKey.isVisible(attributeValue, assistantKey);
+    }
 
     @Override
     protected void initializeWithResource(@NotNull Resource resource) {
@@ -68,6 +83,7 @@ public class LabelExtensionModel extends AbstractModel {
     public boolean isTranslateButtonVisible() {
         boolean visible = valid && widget.isI18n() && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
+        visible = visible && visibilityByKey(LabelExtensionVisibilityKey.TRANSLATE);
         if (visible) {
             Resource propertyResource = getResource().getChild(widget.getProperty());
             if (propertyResource == null) {
@@ -87,6 +103,7 @@ public class LabelExtensionModel extends AbstractModel {
      */
     public boolean isContentCreationButtonVisible() {
         boolean visible = valid && !widget.isMulti();
+        visible = visible && visibilityByKey(LabelExtensionVisibilityKey.CREATE);
         visible = visible && List.of("textfield", "textarea", "codearea", "richtext").contains(widget.getWidgetType());
         visible = visible && !widget.getPropertyName().startsWith("style/category."); // not sensible for content creation.
         return visible;
@@ -98,6 +115,7 @@ public class LabelExtensionModel extends AbstractModel {
     public boolean isPageCategoriesButtonVisible() {
         boolean visible = valid && widget.isMulti() && "textfield".equals(widget.getWidgetType());
         visible = visible && "category".equals(widget.getProperty());
+        visible = visible && visibilityByKey(LabelExtensionVisibilityKey.CATEGORIZE);
         visible = visible && ResourceUtil.isResourceType(model.getResource(), "composum/pages/components/page");
         return visible;
     }
@@ -136,6 +154,7 @@ public class LabelExtensionModel extends AbstractModel {
                 ", valid=" + valid +
                 ", widget=" + widget +
                 ", model=" + model +
+                ", aivisible=" + (widget != null ? widget.getAttributeSet().get(ATTRIBUTE_AIVISIBLE) : null) +
                 '}';
     }
 }

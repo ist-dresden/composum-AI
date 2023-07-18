@@ -7,9 +7,10 @@
     - Prompt ("instructions")
 - API key in site configuration? Tenant configuration?
 - (Explain: why isn't it there in edit styles)
-
+  
 - ??? Konfiguration f. Seiten?
 - ??? Input prompt nicht ersetzen? Predefined
+- Bug: for new component the history key is wrong in the create dialog
 
 ## Small bugs
 
