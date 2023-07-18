@@ -81,15 +81,19 @@
 							<root>/libs/composum/pages/options/ai</root>
 						</filter>
 						<filter>
-							<root>/libs/composum/ai/install</root>
+							<root>/libs/composum/pages/install</root>
 							<includes>
 								<include>.*/composum-ai-integration-backend-base.*\.jar</include>
 								<include>.*/composum-ai-integration-composum-bundle.*\.jar</include>
 							</includes>
 						</filter>
 						<filter>
-							<!-- Cleanup rule for obsolete path. TODO: remove in release >= 0.4.0 -->
-							<root>/libs/composum/ai/pagesintegration</root>
+							<!-- Cleanup rule for obsolete path. TODO: remove in release >= 0.5.0 -->
+							<root>/libs/composum/ai/install</root>
+							<includes>
+								<include>.*/composum-ai-integration-backend-base.*\.jar</include>
+								<include>.*/composum-ai-integration-composum-bundle.*\.jar</include>
+							</includes>
 						</filter>
 					</filters>
 
@@ -97,12 +101,12 @@
 						<embedded>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>composum-ai-integration-backend-base</artifactId>
-							<target>/libs/composum/ai/install</target>
+							<target>/libs/composum/pages/install</target>
 						</embedded>
 						<embedded>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>composum-ai-integration-composum-bundle</artifactId>
-							<target>/libs/composum/ai/install</target>
+							<target>/libs/composum/pages/install</target>
 						</embedded>
 					</embeddeds>
 
