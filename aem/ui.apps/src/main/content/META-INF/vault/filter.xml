@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/apps/composum-ai/clientlibs"/>
+    <filter root="/apps/composum-ai/components"/>
+    <filter root="/apps/composum-ai/i18n"/>
+</workspaceFilter>
