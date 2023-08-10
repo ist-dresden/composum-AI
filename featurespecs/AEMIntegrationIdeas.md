@@ -29,6 +29,11 @@ modifying Opax configuration
 
 ## Multi language structure
 
+## Icons
+
+https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Icon.html#availableIcons
+? GearsEdit , AutomatedSegment , Annotate , Scribble
+
 ## Workarounds
 
 Fix for archetype needed:
