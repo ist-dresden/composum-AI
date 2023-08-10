@@ -23,6 +23,7 @@
 	<modules>
 		<module>backend</module>
 		<module>composum</module>
+		<module>aem</module>
 	</modules>
 
 	<properties>
