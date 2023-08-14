@@ -1,5 +1,7 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import static com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult.NOT_HANDLED;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -8,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,11 +19,14 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 
 /**
  * Implementation for {@link ApproximateMarkdownService}.
@@ -50,6 +53,11 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @Reference
     protected GPTChatCompletionService chatCompletionService;
     protected Set<String> htmltags = new HashSet<>();
+
+    // List of ApproximateMarkdownServicePlugin dynamically injected by OSGI
+    @Nonnull
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, service = ApproximateMarkdownServicePlugin.class)
+    protected volatile List<ApproximateMarkdownServicePlugin> plugins;
 
     protected static void logUnhandledAttributes(Resource resource) {
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
@@ -88,11 +96,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (!ResourceUtil.normalize(resource.getPath()).startsWith("/content/")) {
             throw new IllegalArgumentException("For security reasons the resource must be in /content but is: " + resource.getPath());
         }
-        boolean wasHandledAsPage = pageHandling(resource, out);
-        boolean wasHandledAsTable = !wasHandledAsPage && tableHandling(resource, out);
-        handleContentReference(resource, out);
+        ApproximateMarkdownServicePlugin.PluginResult pluginResult = executePlugins(resource, out);
         boolean printEmptyLine = false;
-        if (!wasHandledAsPage && !wasHandledAsTable) {
+        if (pluginResult == NOT_HANDLED) {
             handleCodeblock(resource, out);
             for (String attributename : TEXT_ATTRIBUTES) {
                 String value = resource.getValueMap().get(attributename, String.class);
@@ -104,34 +110,29 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                 }
             }
         }
-        if (wasHandledAsPage || wasHandledAsTable || printEmptyLine) {
+        if (printEmptyLine) {
             out.println();
         }
-        logUnhandledAttributes(resource);
-        // the table method handles it's expected children, but the other methods do not.
-        if (!wasHandledAsTable) {
+        if (pluginResult == NOT_HANDLED || pluginResult == ApproximateMarkdownServicePlugin.PluginResult.HANDLED_ATTRIBUTES) {
             resource.getChildren().forEach(child -> approximateMarkdown(child, out));
         }
-        if (wasHandledAsPage) {
-            String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
-            out.println("\nEnd of content of page " + path + "\n");
-        }
-    }
-
-    protected void handleContentReference(Resource resource, PrintWriter out) {
-        String reference = resource.getValueMap().get("contentReference", String.class);
-        if (StringUtils.startsWith(reference, "/content/")) {
-            Resource referencedResource = resource.getResourceResolver().getResource(reference);
-            if (referencedResource != null) {
-                approximateMarkdown(referencedResource, out);
-            } else {
-                LOG.info("Resource {} referenced from {} not found.", reference, resource.getPath());
-            }
-        }
+        logUnhandledAttributes(resource);
     }
 
     @Nonnull
-    protected String getMarkdown(@Nullable String value) {
+    protected ApproximateMarkdownServicePlugin.PluginResult executePlugins(@Nonnull Resource resource, @Nonnull PrintWriter out) {
+        for (ApproximateMarkdownServicePlugin plugin : plugins) {
+            ApproximateMarkdownServicePlugin.PluginResult pluginResult = plugin.maybeHandle(resource, out, this);
+            if (pluginResult != null && pluginResult != NOT_HANDLED) {
+                return pluginResult;
+            }
+        }
+        return NOT_HANDLED;
+    }
+
+    @Override
+    @Nonnull
+    public String getMarkdown(@Nullable String value) {
         String markdown;
         if (value == null) {
             markdown = "";
@@ -141,28 +142,6 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             markdown = value.trim();
         }
         return markdown;
-    }
-
-    protected boolean pageHandling(Resource resource, PrintWriter out) {
-        boolean isPage = resource.getResourceType().equals("composum/pages/components/page");
-        if (isPage) {
-            String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
-            out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
-
-            String title = resource.getValueMap().get("jcr:title", String.class);
-            String description = resource.getValueMap().get("jcr:description", String.class);
-            List<String> categories = resource.getValueMap().get("category", List.class);
-            if (StringUtils.isNotBlank(title)) {
-                out.println("# " + getMarkdown(title) + "\n");
-            }
-            if (categories != null && !categories.isEmpty()) {
-                out.println("Categories: " + categories.stream().collect(Collectors.joining(", ")));
-            }
-            if (StringUtils.isNotBlank(description)) {
-                out.println(getMarkdown(description));
-            }
-        }
-        return isPage;
     }
 
     protected void handleCodeblock(Resource resource, PrintWriter out) {
@@ -175,29 +154,6 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     }
 
     // debugging code; remove after it works.
-
-    protected boolean tableHandling(Resource resource, PrintWriter out) {
-        boolean isTable = resource.getResourceType().equals("composum/pages/components/composed/table");
-        if (isTable) {
-            String title = resource.getValueMap().get("title", String.class);
-            if (StringUtils.isNotBlank(title)) {
-                out.println("#### " + getMarkdown(title) + "\n");
-            }
-            // for each child of type "row" we print a line with the values of the children of type "cell"
-            StreamSupport.stream(resource.getChildren().spliterator(), true)
-                    .filter(row -> row.getResourceType().equals("composum/pages/components/composed/table/row"))
-                    .forEach(row -> {
-                        out.print("| ");
-                        StreamSupport.stream(row.getChildren().spliterator(), true)
-                                .filter(cell -> cell.getResourceType().equals("composum/pages/components/composed/table/cell"))
-                                .map(cell -> cell.getValueMap().get("text", String.class))
-                                .forEach(text -> out.print(getMarkdown(text) + " | "));
-                        out.println(" |");
-                    });
-            out.println();
-        }
-        return isTable;
-    }
 
     /**
      * This is debugging code we needed to gather information for the implementation; we keep it around for now.

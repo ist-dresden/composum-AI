@@ -30,4 +30,11 @@ public interface ApproximateMarkdownService {
      * @param out      destination where the markdown rendering will be written.
      */
     void approximateMarkdown(@Nullable Resource resource, PrintWriter out);
+
+    /**
+     * Returns a markdown representation of an attribute value, which might be plain text or HTML. We determine whether
+     * it's HTML heuristically - in that case it's transformed to markdown, otherwise we just return the value.
+     */
+    @Nonnull
+    String getMarkdown(@Nullable String value);
 }
