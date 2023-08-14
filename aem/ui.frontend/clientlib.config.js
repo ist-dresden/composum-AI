@@ -63,8 +63,27 @@ module.exports = {
     },
     {
       ...libsBaseConfig,
+      name: 'clientlib-dependencies',
+      categories: ['composum-ai.dependencies'],
+      assets: {
+        // Copy entrypoint scripts and stylesheets into the respective ClientLib
+        // directories
+        js: {
+          cwd: 'clientlib-dependencies',
+          files: ['**/*.js'],
+          flatten: false
+        },
+        css: {
+          cwd: 'clientlib-dependencies',
+          files: ['**/*.css'],
+          flatten: false
+        }
+      }
+    },
+    {
+      ...libsBaseConfig,
       name: 'clientlib-site',
-      categories: ['composum-ai.site'],
+      categories: ['composum-ai.site', 'cq.authoring.editor.sites.page.hook'],
       dependencies: ['composum-ai.dependencies'],
       assets: {
         // Copy entrypoint scripts and stylesheets into the respective ClientLib

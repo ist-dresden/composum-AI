@@ -4,6 +4,36 @@
 
 AEM Cloud SDK with WKND Site https://wknd.site/
 
+## Discussion how to develop the frontend
+
+Two basic options: use ui.frontend or do it directly in the ui.apps client libraries .
+
+Important aspect: we want the AEM and Composum FE to diverge as little as possible, so we'll need to share 
+javascript code as far as possible. The styling should however be similar to the native styling. 
+
+### Directly develop in client libraries
+
+- use Immediately-Invoked Function Expressions (IIFE) like in composum
+- less moving parts than ui.frontend, though the archetype functionality seems to work fine there.
+- for development use automatic sync - works fine
+
+### ui.frontend
+
+- Can use ES6 modules or IIFE; for IIFE it's not clear
+- development server
+
+Advantages:
+- a standard way for AEM projects
+
+## Creation of the dialogs
+
+Possible options:
+
+- directly as HTML from AEM
+- create a component with a dialog and grab the HTML from that, save that.
+- create content resource that renders as the dialog
+- render servlet as in Composum
+
 ## Where to integrate
 
 Text:
