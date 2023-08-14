@@ -18,6 +18,8 @@
   tests passing null to these parameters. Try to test various cases for each method, e.g. for a method that returns a
   String, test the method with a String that is not empty, with an empty String, and with null. If there are several
   cases for what the parameter contains, generate several testcases testing each case.
+- At the beginning of the sessions use plugin operation executeAction with 'listActions' to find out what actions 
+  are available (e.g. for executing a build).
 - Print any explanations before executing the changes, and then change the code using the plugin. Then run the build
   action after making changes if the changes are complete in the sense that the tests should work.
 - At the end verify whether you have fulfilled your task.

@@ -23,6 +23,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.composum.ai</groupId>
+			<artifactId>composum-ai-integration-backend-slingbase</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!--		&lt;!&ndash; Composum Pages &ndash;&gt;-->
 		<!--		<dependency>-->
 		<!--			<groupId>com.composum.pages</groupId>-->

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration-backend</artifactId>
+		<version>0.4.2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>composum-ai-integration-backend-slingbase</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>Composum AI::Backend::SlingBase</name>
+	<description>
+		Common Functionality for Composum AI specific to Sling but would be useable in both Composum and AEM and similar.
+	</description>
+
+	<properties>
+		<wikitext.version>3.0.42</wikitext.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.composum.ai</groupId>
+			<artifactId>composum-ai-integration-backend-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- JUnit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							javax.annotation;version="[1,4)",
+							!javax.annotation.meta,
+							*
+						</Import-Package>
+						<Export-Package>
+							!com.composum.ai.backend.base.impl,
+							!com.composum.ai.backend.base.*.impl,
+							com.composum.ai.backend.base.*
+						</Export-Package>
+						<Embed-Dependency>
+							api*;groupId=com.theokanning.openai-gpt3-java,
+							jtokkit*;groupId=com.knuddels,
+							jsoup*,
+							org.eclipse.mylyn.wikitext*
+						</Embed-Dependency>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+
+		<profile>
+			<id>uploadBundle</id>
+			<activation>
+				<property>
+					<name>upload.bundle</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.sling</groupId>
+						<artifactId>sling-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>install-bundle</id>
+								<phase>install</phase>
+								<goals>
+									<goal>install</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+	</profiles>
+
+</project>

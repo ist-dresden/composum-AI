@@ -66,6 +66,11 @@
 							<target>/apps/composum-ai-packages/application/install</target>
 						</embedded>
 						<embedded>
+							<groupId>com.composum.ai</groupId>
+							<artifactId>composum-ai-integration-backend-slingbase</artifactId>
+							<target>/apps/composum-ai-packages/application/install</target>
+						</embedded>
+						<embedded>
 							<groupId>com.composum.ai.aem</groupId>
 							<artifactId>composum-ai.core</artifactId>
 							<target>/apps/composum-ai-packages/application/install</target>
@@ -205,6 +210,11 @@
 		<dependency>
 			<groupId>com.composum.ai</groupId>
 			<artifactId>composum-ai-integration-backend-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.composum.ai</groupId>
+			<artifactId>composum-ai-integration-backend-slingbase</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

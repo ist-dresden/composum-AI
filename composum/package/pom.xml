@@ -105,6 +105,11 @@
 						</embedded>
 						<embedded>
 							<groupId>${project.groupId}</groupId>
+							<artifactId>composum-ai-integration-backend-slingbase</artifactId>
+							<target>/libs/composum/pages/install</target>
+						</embedded>
+						<embedded>
+							<groupId>${project.groupId}</groupId>
 							<artifactId>composum-ai-integration-composum-bundle</artifactId>
 							<target>/libs/composum/pages/install</target>
 						</embedded>
@@ -142,6 +147,12 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>composum-ai-integration-backend-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>composum-ai-integration-backend-slingbase</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

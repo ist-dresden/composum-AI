@@ -95,6 +95,11 @@ Import-Package: javax.annotation;version=0.0.0,*
 			<artifactId>composum-ai-integration-backend-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.composum.ai</groupId>
+			<artifactId>composum-ai-integration-backend-slingbase</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- Testing -->
 		<dependency>
