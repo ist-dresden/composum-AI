@@ -84,6 +84,7 @@
 							<root>/libs/composum/pages/install</root>
 							<includes>
 								<include>.*/composum-ai-integration-backend-base.*\.jar</include>
+								<include>.*/composum-ai-integration-backend-slingbase.*\.jar</include>
 								<include>.*/composum-ai-integration-composum-bundle.*\.jar</include>
 							</includes>
 						</filter>

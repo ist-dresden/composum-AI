@@ -48,6 +48,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.composum.bundle.model.TranslationDialogModel;
 import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;

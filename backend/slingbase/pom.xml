@@ -27,6 +27,42 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- Other libraries -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<!-- Sling, JCR -->
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-commons</artifactId>
+		</dependency>
+
+		<!-- Java Annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+
+		<!-- OSGi, Felix -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+		</dependency>
+
 		<!-- JUnit -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -41,6 +77,14 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
 		</dependency>
 
 	</dependencies>
@@ -64,16 +108,10 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							!com.composum.ai.backend.base.impl,
-							!com.composum.ai.backend.base.*.impl,
-							com.composum.ai.backend.base.*
+							!com.composum.ai.backend.slingbase.impl,
+							!com.composum.ai.backend.slingbase.*.impl,
+							com.composum.ai.backend.slingbase.*
 						</Export-Package>
-						<Embed-Dependency>
-							api*;groupId=com.theokanning.openai-gpt3-java,
-							jtokkit*;groupId=com.knuddels,
-							jsoup*,
-							org.eclipse.mylyn.wikitext*
-						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -83,30 +121,13 @@
 	<profiles>
 
 		<profile>
-			<id>uploadBundle</id>
-			<activation>
-				<property>
-					<name>upload.bundle</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.sling</groupId>
-						<artifactId>sling-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>install-bundle</id>
-								<phase>install</phase>
-								<goals>
-									<goal>install</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
+			<id>installBundle</id>
+		</profile>
+		<profile>
+			<id>installPackage</id>
+		</profile>
+		<profile>
+			<id>installTestContent</id>
 		</profile>
 
 	</profiles>

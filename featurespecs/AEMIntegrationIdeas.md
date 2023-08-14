@@ -69,3 +69,14 @@ https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/
 Fix for archetype needed:
 https://github.com/adobe/aem-project-archetype/issues/986
 -D appId="composum/ai" does not work (subpackages aren't installed) -> use -D appId="composum-ai" 
+
+## Debugging
+
+see https://experienceleague.adobe.com/docs/experience-manager-65/developing/introduction/clientlibs.html?lang=en
+http://localhost:4502/libs/granite/ui/content/dumplibs.test.html?categories=cq.authoring.editor.sites.page.hook
+unfortunately ?debugClientLibs=true breaks the editor. Better configure Adobe Granite HTML Library Manager
+
+## TODOs
+
+- move common Java code to slingbase
+- 

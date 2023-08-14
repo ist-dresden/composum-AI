@@ -7,7 +7,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
-import com.composum.ai.composum.bundle.ApproximateMarkdownService;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;

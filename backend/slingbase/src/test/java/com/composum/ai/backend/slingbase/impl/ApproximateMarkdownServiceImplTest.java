@@ -1,4 +1,4 @@
-package com.composum.ai.composum.bundle;
+package com.composum.ai.backend.slingbase.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

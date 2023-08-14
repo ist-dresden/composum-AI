@@ -1,4 +1,4 @@
-package com.composum.ai.composum.bundle;
+package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
 import java.io.PrintWriter;

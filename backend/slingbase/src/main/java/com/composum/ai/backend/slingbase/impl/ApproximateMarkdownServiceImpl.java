@@ -1,4 +1,4 @@
-package com.composum.ai.composum.bundle;
+package com.composum.ai.backend.slingbase.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,13 +16,14 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
-import com.composum.sling.core.util.ResourceUtil;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 
 /**
  * Implementation for {@link ApproximateMarkdownService}.
@@ -143,7 +144,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     }
 
     protected boolean pageHandling(Resource resource, PrintWriter out) {
-        boolean isPage = ResourceUtil.isResourceType(resource, "composum/pages/components/page");
+        boolean isPage = resource.getResourceType().equals("composum/pages/components/page");
         if (isPage) {
             String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
             out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
@@ -176,7 +177,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     // debugging code; remove after it works.
 
     protected boolean tableHandling(Resource resource, PrintWriter out) {
-        boolean isTable = ResourceUtil.isResourceType(resource, "composum/pages/components/composed/table");
+        boolean isTable = resource.getResourceType().equals("composum/pages/components/composed/table");
         if (isTable) {
             String title = resource.getValueMap().get("title", String.class);
             if (StringUtils.isNotBlank(title)) {
@@ -184,11 +185,11 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             }
             // for each child of type "row" we print a line with the values of the children of type "cell"
             StreamSupport.stream(resource.getChildren().spliterator(), true)
-                    .filter(row -> ResourceUtil.isResourceType(row, "composum/pages/components/composed/table/row"))
+                    .filter(row -> row.getResourceType().equals("composum/pages/components/composed/table/row"))
                     .forEach(row -> {
                         out.print("| ");
                         StreamSupport.stream(row.getChildren().spliterator(), true)
-                                .filter(cell -> ResourceUtil.isResourceType(cell, "composum/pages/components/composed/table/cell"))
+                                .filter(cell -> cell.getResourceType().equals("composum/pages/components/composed/table/cell"))
                                 .map(cell -> cell.getValueMap().get("text", String.class))
                                 .forEach(text -> out.print(getMarkdown(text) + " | "));
                         out.println(" |");
