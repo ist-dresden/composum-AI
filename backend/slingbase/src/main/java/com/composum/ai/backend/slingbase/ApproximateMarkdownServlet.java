@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })
 // curl -u admin:admin http://localhost:9090/bin/cpm/platform/ai/approximated.markdown.md/content/ist/composum/home/platform/_jcr_content
+// http://localhost:4502/bin/cpm/platform/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
 public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);
@@ -47,10 +48,7 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         String path = info.getSuffix();
         Resource resource = request.getResourceResolver().getResource(path);
         response.setContentType("text/plain");
-        try (Writer w = response.getWriter();
-             PrintWriter out = new PrintWriter(w)) {
-            approximateMarkdownService.approximateMarkdown(resource, out);
-        }
+        approximateMarkdownService.approximateMarkdown(resource, response.getWriter());
     }
 
 }

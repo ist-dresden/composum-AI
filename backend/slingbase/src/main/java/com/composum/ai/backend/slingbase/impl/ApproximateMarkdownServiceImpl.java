@@ -74,10 +74,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @Nonnull
     @Override
     public String approximateMarkdown(@Nullable Resource resource) {
-        try (StringWriter s = new StringWriter();
-             PrintWriter p = new PrintWriter(s)) {
-            approximateMarkdown(resource, p);
-            p.close();
+        try (StringWriter s = new StringWriter()) {
+            try (PrintWriter p = new PrintWriter(s)) {
+                approximateMarkdown(resource, p);
+            }
             return s.toString();
         } catch (IOException e) {
             // pretty much impossible for a StringWriter , no sensible handling.
