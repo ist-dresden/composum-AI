@@ -49,7 +49,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     /**
      * Pattern that matches an opening html tag and captures the tag name.
      */
-    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(\\w+)(\\s+[^>]*)?>");
+    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(ext|a|sly|strong|code|em|language|type|p|br|div|path|u|ul|attributes|li|ol)(\\s+[^>]*)?>", Pattern.CASE_INSENSITIVE);
+
     @Reference
     protected GPTChatCompletionService chatCompletionService;
     protected Set<String> htmltags = new HashSet<>();

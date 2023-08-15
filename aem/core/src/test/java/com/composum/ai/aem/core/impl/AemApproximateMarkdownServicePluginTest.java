@@ -3,10 +3,14 @@ package com.composum.ai.aem.core.impl;
 import static junitx.framework.Assert.assertEquals;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +45,8 @@ public class AemApproximateMarkdownServicePluginTest {
             {
                 chatCompletionService = mock(GPTChatCompletionService.class);
                 plugins = Collections.singletonList(new AemApproximateMarkdownServicePlugin());
+                when(chatCompletionService.htmlToMarkdown(anyString()))
+                        .then(invocation -> invocation.getArgument(0));
             }
         };
         writer = new StringWriter();
@@ -66,7 +72,7 @@ public class AemApproximateMarkdownServicePluginTest {
                 "\n" +
                 "\n" +
                 "# myPage\n\n" +
-                "The best page!\n\n\n";
+                "The best page!\n";
         assertThat(writer.toString(), is(expectedOutput));
     }
 
@@ -74,6 +80,47 @@ public class AemApproximateMarkdownServicePluginTest {
         Map<String, Object> props = new HashMap<>(attributes);
         props.put("sling:resourceType", resourceType);
         return context.create().resource("/content/parent/path/res", props);
+    }
+
+    private Resource createMockResource(String path, String json) {
+        return context.load(true).json(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)), path);
+    }
+
+    @Test
+    public void testTeaser() {
+        Resource teaser = createMockResource("/content/parent/path/res/jcr:content/teaser", "{\n" +
+                "  \"cq:panelTitle\": \"Panel Downhill Skiing Wyoming\",\n" +
+                "  \"fileReference\": \"/content/dam/wknd/en/adventures/downhill-skiing-wyoming/AdobeStock_185234795.jpeg\",\n" +
+                "  \"jcr:description\": \"\\u003cp\\u003eA skiers paradise far from crowds and close to nature with terrain so vast it appears uncharted.\\u003c/p\\u003e\\r\\n\",\n" +
+                "  \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "  \"titleFromPage\": \"true\",\n" +
+                "  \"descriptionFromPage\": \"true\",\n" +
+                "  \"sling:resourceType\": \"core/wcm/components/teaser/v1/teaser\",\n" +
+                "  \"actions\": {\n" +
+                "    \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "    \"item0\": {\n" +
+                "      \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "      \"link\": \"/content/wknd/us/en/adventures/downhill-skiing-wyoming\",\n" +
+                "      \"text\": \"View Trip\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}");
+        Resource page = createMockResource("/content/wknd/us/en/adventures/downhill-skiing-wyoming", "{\n" +
+                "  \"jcr:primaryType\": \"cq:Page\",\n" +
+                "  \"jcr:content\": {\n" +
+                "    \"jcr:description\": \"A skiers paradise far from crowds and close to nature with terrain so vast it appears uncharted.  With 2,500 acres of legendary terrain, unmatched levels of snowfall each winter, and unparalleled backcountry access, Jackson Hole offers a truly unique skiing experience.\",\n" +
+                "    \"jcr:primaryType\": \"cq:PageContent\",\n" +
+                "    \"jcr:title\": \"Downhill Skiing Wyoming\",\n" +
+                "    \"sling:resourceType\": \"wknd/components/page\"\n" +
+                "  }\n" +
+                "}");
+        service.approximateMarkdown(teaser, printWriter);
+        String expectedOutput = "Downhill Skiing Wyoming\n" +
+                "<p>A skiers paradise far from crowds and close to nature with terrain so vast it appears uncharted.</p>\n" +
+                "[View Trip](/content/wknd/us/en/adventures/downhill-skiing-wyoming)\n" +
+                "\n" +
+                "A skiers paradise far from crowds and close to nature with terrain so vast it appears uncharted.  With 2,500 acres of legendary terrain, unmatched levels of snowfall each winter, and unparalleled backcountry access, Jackson Hole offers a truly unique skiing experience.\n";
+        assertThat(writer.toString(), is(expectedOutput));
     }
 
 }

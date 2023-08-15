@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -31,9 +32,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     /**
      * If a resource renders as a resource type matching that pattern, we ignore it completely, including child nodes.
      */
-    protected static final Pattern FULLY_IGNORED_TYPES = Pattern.compile("core/wcm/components/list/v?/list");
+    protected static final Pattern FULLY_IGNORED_TYPES = Pattern.compile("core/wcm/components/list/v./list");
 
-    protected static final Pattern TEASER_TYPES = Pattern.compile("core/wcm/components/teaser/v?/teaser");
+    protected static final Pattern TEASER_TYPES = Pattern.compile("core/wcm/components/teaser/v./teaser");
 
     @Override
     public @Nonnull PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service) {
@@ -54,7 +55,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
      * <p>
      * ??? pageTitle vs. jcr:title , shortDescription
      */
-    protected boolean pageHandling(Resource resource, PrintWriter out, @Nonnull ApproximateMarkdownService helper) {
+    protected boolean pageHandling(Resource resource, PrintWriter out, @Nonnull ApproximateMarkdownService service) {
         ValueMap vm = resource.getValueMap();
         boolean isPage = vm.get(JcrConstants.JCR_PRIMARYTYPE, String.class).equals("cq:PageContent");
         if (isPage) {
@@ -62,19 +63,11 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
 
             String title = vm.get(JCR_TITLE, String.class);
-            String description = vm.get(JCR_DESCRIPTION, String.class);
-            String shortDescription = vm.get("shortDescription", String.class);
             if (StringUtils.isNotBlank(title)) {
-                out.println("# " + helper.getMarkdown(title) + "\n");
+                out.println("# " + service.getMarkdown(title) + "\n");
             }
-            if (StringUtils.isNotBlank(shortDescription)) {
-                out.println(helper.getMarkdown(shortDescription));
-                out.println("\n");
-            }
-            if (StringUtils.isNotBlank(description)) {
-                out.println(helper.getMarkdown(description));
-                out.println("\n");
-            }
+            outputIfNotBlank(out, vm, "shortDescription", service);
+            outputIfNotBlank(out, vm, JCR_DESCRIPTION, service);
         }
         return isPage;
     }
@@ -87,22 +80,34 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     protected boolean handleTeaser(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
         if (resourceRendersAsComponentMatching(resource, TEASER_TYPES)) {
             ValueMap vm = resource.getValueMap();
-            outputIfNotBlank(out, vm, "pretitle");
-            outputIfNotBlank(out, vm, "title");
-            outputIfNotBlank(out, vm, JCR_TITLE);
-            outputIfNotBlank(out, vm, JCR_DESCRIPTION);
-            Resource actions = resource.getChild("action");
+            outputIfNotBlank(out, vm, "pretitle", service);
+            outputIfNotBlank(out, vm, "title", service);
+            outputIfNotBlank(out, vm, JCR_TITLE, service);
+            boolean titleFromPage = vm.get("titleFromPage", false);
+            boolean descriptionFromPage = vm.get("descriptionFromPage", false);
+            Resource actions = resource.getChild("actions");
+            if (actions != null) {
+                for (Resource action : actions.getChildren()) {
+                    Resource linkedPage = getLinkedPage(action);
+                    if (titleFromPage && linkedPage != null) {
+                        outputIfNotBlank(out, linkedPage.getValueMap(), JCR_TITLE, service);
+                    }
+                }
+            }
+
+            outputIfNotBlank(out, vm, JCR_DESCRIPTION, service);
+
             if (actions != null) {
                 for (Resource action : actions.getChildren()) {
                     ValueMap actionVm = action.getValueMap();
-                    outputIfNotBlank(out, actionVm, "text");
+                    String text = actionVm.get("text", String.class);
                     String link = actionVm.get("link", String.class);
-                    if (StringUtils.isNotBlank(link)) {
-                        Resource linkedPage = resource.getResourceResolver().getResource(link);
-                        if (linkedPage != null) {
-                            outputIfNotBlank(out, linkedPage.getValueMap(), JCR_TITLE);
-                            outputIfNotBlank(out, linkedPage.getValueMap(), JCR_DESCRIPTION);
-                        }
+                    if (StringUtils.isNotBlank(text)) {
+                        out.println("[" + text + "](" + link + ")\n");
+                    }
+                    Resource linkedPage = getLinkedPage(action);
+                    if (descriptionFromPage && linkedPage != null) {
+                        outputIfNotBlank(out, linkedPage.getValueMap(), JCR_DESCRIPTION, service);
                     }
                 }
             }
@@ -111,10 +116,25 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         return false;
     }
 
-    private void outputIfNotBlank(@Nonnull PrintWriter out, @Nonnull ValueMap vm, @Nonnull String attribute) {
+    protected @Nullable Resource getLinkedPage(Resource action) {
+        ValueMap actionVm = action.getValueMap();
+        String link = actionVm.get("link", String.class);
+        if (StringUtils.isNotBlank(link)) {
+            Resource linkedPage = action.getResourceResolver().getResource(link);
+            if (linkedPage != null) {
+                linkedPage = linkedPage.getChild("jcr:content");
+                if (linkedPage != null) {
+                    return linkedPage;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void outputIfNotBlank(@Nonnull PrintWriter out, @Nonnull ValueMap vm, @Nonnull String attribute, ApproximateMarkdownService service) {
         String value = vm.get(attribute, String.class);
         if (StringUtils.isNotBlank(value)) {
-            out.println(value);
+            out.println(service.getMarkdown(value));
         }
     }
 
