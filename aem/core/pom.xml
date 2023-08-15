@@ -101,6 +101,14 @@ Import-Package: javax.annotation;version=0.0.0,*
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- Java Annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.2</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

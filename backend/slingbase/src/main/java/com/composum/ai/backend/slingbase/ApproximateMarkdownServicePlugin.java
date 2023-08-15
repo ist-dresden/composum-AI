@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import javax.annotation.Nonnull;
 
 import org.apache.sling.api.resource.Resource;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Implements special treatment for some resources, depending on the actual system.
@@ -32,7 +31,7 @@ public interface ApproximateMarkdownServicePlugin {
      *
      * @return what is already handled by this plugin. It is possible to write to the PrintWriter in any case.
      */
-    @NotNull
+    @Nonnull
     PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service);
 
 }
