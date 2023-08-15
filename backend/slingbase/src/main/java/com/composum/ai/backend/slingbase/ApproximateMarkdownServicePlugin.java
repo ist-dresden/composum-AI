@@ -1,6 +1,7 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.PrintWriter;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -33,5 +34,25 @@ public interface ApproximateMarkdownServicePlugin {
      */
     @Nonnull
     PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service);
+
+    /**
+     * Returns true when the sling:resourceType or one of the sling:resourceSuperType of the sling:resourceType match the pattern.
+     * Useable to check whether a resource is rendered with a derivation of a certain component.
+     */
+    default boolean resourceRendersAsComponentMatching(@Nonnull Resource resource, @Nonnull Pattern pattern) {
+        String resourceType = resource.getResourceType();
+        if (pattern.matcher(resourceType).matches()) {
+            return true;
+        }
+        Resource component = resource.getResourceResolver().getResource(resourceType);
+        while (component != null) {
+            String supertype = component.getResourceSuperType();
+            if (supertype != null && pattern.matcher(supertype).matches()) {
+                return true;
+            }
+            component = component.getResourceResolver().getResource(supertype);
+        }
+        return false;
+    }
 
 }

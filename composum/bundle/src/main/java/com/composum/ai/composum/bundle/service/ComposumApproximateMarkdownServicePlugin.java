@@ -10,14 +10,17 @@ import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 
-// export as OSGI service
-
+/**
+ * Special handling for composum/pages/components/page and components
+ */
+@Component(service = ApproximateMarkdownServicePlugin.class)
 public class ComposumApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComposumApproximateMarkdownServicePlugin.class);

@@ -104,7 +104,14 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                 String value = resource.getValueMap().get(attributename, String.class);
                 if (value != null) {
                     String prefix = ATTRIBUTE_TO_MARKDOWN_PREFIX.getOrDefault(attributename, "");
-                    String markdown = getMarkdown(value);
+                    String markdown;
+                    if ("text".equals(attributename) && resource.getValueMap().get("textIsRich") != null) {
+                        String textIsRich = resource.getValueMap().get("textIsRich", String.class);
+                        markdown = "true".equalsIgnoreCase(textIsRich) ?
+                                chatCompletionService.htmlToMarkdown(value).trim() : value;
+                    } else {
+                        markdown = getMarkdown(value);
+                    }
                     out.println(prefix + markdown);
                     printEmptyLine = true;
                 }

@@ -1,6 +1,8 @@
 package com.composum.ai.aem.core.impl;
 
 import static junitx.framework.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.io.PrintWriter;
@@ -46,13 +48,6 @@ public class AemApproximateMarkdownServicePluginTest {
     }
 
     @Test
-    public void testTableHandlingWithNonTableResource() {
-        component = createMockResource("not/table", new HashMap<>());
-        service.approximateMarkdown(component, printWriter);
-        assertEquals("", writer.toString());
-    }
-
-    @Test
     public void testPageHandlingWithNonPageResource() {
         component = createMockResource("not/page", new HashMap<>());
         service.approximateMarkdown(component, printWriter);
@@ -61,7 +56,7 @@ public class AemApproximateMarkdownServicePluginTest {
 
     @Test
     public void testPageHandlingWithPageResource() {
-        component = createMockResource("composum/pages/components/page",
+        component = createMockResource("cq:PageContent",
                 ImmutableMap.of("jcr:title", "myPage",
                         "jcr:description", "The best page!",
                         "category", "test, dummy"));
@@ -71,8 +66,8 @@ public class AemApproximateMarkdownServicePluginTest {
                 "\n" +
                 "\n" +
                 "# myPage\n\n" +
-                "The best page!\n";
-        assertEquals(expectedOutput, writer.toString());
+                "The best page!\n\n\n";
+        assertThat(writer.toString(), is(expectedOutput));
     }
 
     private Resource createMockResource(String resourceType, Map<String, Object> attributes) {
