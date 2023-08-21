@@ -189,7 +189,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                 Resource referencedResource = resource.getResourceResolver().getResource(reference);
                 if (referencedResource != null) {
                     Resource dataNode = referencedResource.getChild("jcr:content/data");
-                    Map<String, String> elementLabels = elementLabels(dataNode);
+                    Map<String, String> elementLabels = new HashMap<>();
+                    Map<String, Integer> listOrder = new HashMap<>();
+                    findElementLabels(dataNode, elementLabels, listOrder);
                     if (referencedResource.getChild("jcr:content/data/" + variation) != null) {
                         referencedResource = referencedResource.getChild("jcr:content/data/" + variation);
                     } else {
@@ -197,10 +199,16 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                     }
                     ValueMap vm = referencedResource.getValueMap();
                     if (elementNames == null) {
-                        // all attributes that are not jcr: and don't end with _LastModified
-                        elementNames = vm.keySet().stream()
-                                .filter(key -> !key.startsWith("jcr:") && !key.contains("@"))
+                        elementNames = listOrder.entrySet().stream()
+                                .sorted(Map.Entry.comparingByValue())
+                                .map(Map.Entry::getKey)
                                 .toArray(String[]::new);
+                        if (elementNames.length == 0) {
+                            // all attributes that are not jcr: and don't end with _LastModified
+                            elementNames = vm.keySet().stream()
+                                    .filter(key -> !key.startsWith("jcr:") && !key.contains("@"))
+                                    .toArray(String[]::new);
+                        }
                     }
                     for (String elementName : elementNames) {
                         String value = vm.get(elementName, String.class);
@@ -229,8 +237,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     /**
      * Looks for the cq:model and determines the labels.
      */
-    protected Map<String, String> elementLabels(Resource dataNode) {
-        Map<String, String> result = new HashMap<>();
+    protected void findElementLabels(Resource dataNode, Map<String, String> labels, Map<String, Integer> listOrder) {
         if (dataNode != null) {
             String cqModelPath = dataNode.getValueMap().get("cq:model", String.class);
             Resource cqModel = dataNode.getResourceResolver().getResource(cqModelPath);
@@ -240,15 +247,22 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                 for (Resource r : modelResources) {
                     String name = r.getValueMap().get("name", String.class);
                     String fieldLabel = r.getValueMap().get("fieldLabel", String.class);
+                    String listOrderString = r.getValueMap().get("listOrder", String.class);
                     if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(fieldLabel)) {
-                        result.put(name, fieldLabel);
+                        labels.put(name, fieldLabel);
+                        if (StringUtils.isNotBlank(listOrderString)) {
+                            try {
+                                listOrder.put(name, Integer.parseInt(listOrderString));
+                            } catch (NumberFormatException e) {
+                                LOG.warn("Unable to parse listOrder {} for element {}.", listOrderString, name);
+                            }
+                        }
                     }
                 }
             } else {
                 LOG.warn("cq:model {} referenced from {} not found.", cqModelPath, dataNode.getPath());
             }
         }
-        return result;
     }
 
     // recursively search all cq:model descendants for elements with fieldLabel and name

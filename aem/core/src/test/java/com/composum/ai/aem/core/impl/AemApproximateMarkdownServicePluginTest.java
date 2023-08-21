@@ -12,7 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -186,8 +185,8 @@ public class AemApproximateMarkdownServicePluginTest {
                 ImmutableMap.of("fragmentPath", "/content/dam/cf/foo"));
 
         service.approximateMarkdown(component, printWriter);
-        String expectedOutput = "An A: theA\n" +
-                "An B: theB\n";
+        String expectedOutput = "An B: theB\n" +
+                "An A: theA\n";
         assertEquals(expectedOutput, writer.toString());
     }
 
