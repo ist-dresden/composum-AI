@@ -1,9 +1,11 @@
 package com.composum.ai.aem.core.impl;
 
+import static com.day.cq.commons.jcr.JcrConstants.JCR_CONTENT;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_DESCRIPTION;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_TITLE;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -12,6 +14,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.jsoup.Jsoup;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,8 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
 
     protected static final Pattern EXPERIENCEFRAGMENT_TYPES = Pattern.compile("core/wcm/components/experiencefragment/v./experiencefragment");
 
+    protected static final Pattern CONTENTFRAGMENT_TYPES = Pattern.compile("core/wcm/components/contentfragment/v./contentfragment");
+
     @Override
     public @Nonnull PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service) {
         if (resourceRendersAsComponentMatching(resource, FULLY_IGNORED_TYPES)) {
@@ -46,7 +51,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         if (pageHandling(resource, out, service)) {
             return PluginResult.HANDLED_ATTRIBUTES;
         }
-        if (handleTeaser(resource, out, service) || handleExperienceFragment(resource, out, service)) {
+        if (handleTeaser(resource, out, service) || handleExperienceFragment(resource, out, service) || handleContentFragment(resource, out, service)) {
             return PluginResult.HANDLED_ALL;
         }
         return PluginResult.NOT_HANDLED;
@@ -59,7 +64,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
      */
     protected boolean pageHandling(Resource resource, PrintWriter out, @Nonnull ApproximateMarkdownService service) {
         ValueMap vm = resource.getValueMap();
-        boolean isPage = vm.get(JcrConstants.JCR_PRIMARYTYPE, String.class).equals("cq:PageContent");
+        boolean isPage = Objects.equals(vm.get(JcrConstants.JCR_PRIMARYTYPE, String.class), "cq:PageContent");
         if (isPage) {
             String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
             out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
@@ -124,7 +129,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         if (StringUtils.isNotBlank(link)) {
             Resource linkedPage = action.getResourceResolver().getResource(link);
             if (linkedPage != null) {
-                linkedPage = linkedPage.getChild("jcr:content");
+                linkedPage = linkedPage.getChild(JCR_CONTENT);
                 if (linkedPage != null) {
                     return linkedPage;
                 }
@@ -140,21 +145,70 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         }
     }
 
+    /**
+     * Creates markdown for core/wcm/components/experiencefragment/v1/experiencefragment and derived components.
+     *
+     * @see "https://github.com/adobe/aem-core-wcm-components/blob/main/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v2/experiencefragment/README.md"
+     */
     protected boolean handleExperienceFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
         if (resourceRendersAsComponentMatching(resource, EXPERIENCEFRAGMENT_TYPES)) {
             String reference = resource.getValueMap().get("fragmentVariationPath", String.class);
             if (StringUtils.startsWith(reference, "/content/")) {
                 Resource referencedResource = resource.getResourceResolver().getResource(reference);
                 if (referencedResource != null) {
-                    if (referencedResource.getChild("jcr:content") != null) {
-                        referencedResource = referencedResource.getChild("jcr:content");
+                    if (referencedResource.getChild(JCR_CONTENT) != null) {
+                        referencedResource = referencedResource.getChild(JCR_CONTENT);
                         if (referencedResource.getChild("root") != null) {
                             referencedResource = referencedResource.getChild("root");
                         }
                     }
                     service.approximateMarkdown(referencedResource, out);
                 } else {
-                    LOG.info("Resource {} referenced from {} attribute {} not found.", reference, resource.getPath(), "fragmentVariationPath");
+                    LOG.warn("Resource {} referenced from {} attribute {} not found.", reference, resource.getPath(), "fragmentVariationPath");
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Creates markdown for core/wcm/components/contentfragment/v1/contentfragment and derived components.
+     *
+     * @see "https://github.com/adobe/aem-core-wcm-components/blob/main/content/src/content/jcr_root/apps/core/wcm/components/contentfragment/v1/contentfragment/README.md"
+     */
+    protected boolean handleContentFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
+        if (resourceRendersAsComponentMatching(resource, CONTENTFRAGMENT_TYPES)) {
+            String reference = resource.getValueMap().get("fragmentPath", String.class);
+            if (StringUtils.startsWith(reference, "/content/")) {
+                String variation = resource.getValueMap().get("variationName", "master");
+                String[] elementNames = resource.getValueMap().get("elementNames", String[].class);
+                Resource referencedResource = resource.getResourceResolver().getResource(reference);
+                if (referencedResource != null) {
+                    if (referencedResource.getChild("jcr:content/data/" + variation) != null) {
+                        referencedResource = referencedResource.getChild("jcr:content/data/" + variation);
+                    } else {
+                        LOG.warn("Content fragment {} referenced in {} does not have a variation named {}.", reference, resource.getPath(), variation);
+                    }
+                    ValueMap vm = referencedResource.getValueMap();
+                    if (elementNames == null) {
+                        // all attributes that are not jcr: and don't end with _LastModified
+                        elementNames = vm.keySet().stream()
+                                .filter(key -> !key.startsWith("jcr:") && !key.contains("@"))
+                                .toArray(String[]::new);
+                    }
+                    for (String elementName : elementNames) {
+                        String value = vm.get(elementName, String.class);
+                        String contentType = vm.get(elementName + "@ContentType", String.class);
+                        if (StringUtils.isNotBlank(value)) {
+                            if ("text/html".equals(contentType)) {
+                                value = service.getMarkdown(value);
+                            }
+                            out.println(value);
+                        }
+                    }
+                } else {
+                    LOG.warn("Resource {} referenced from {} attribute {} not found.", reference, resource.getPath(), "fragmentPath");
                 }
             }
             return true;
