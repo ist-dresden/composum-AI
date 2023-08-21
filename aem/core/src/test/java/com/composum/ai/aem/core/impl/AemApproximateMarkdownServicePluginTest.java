@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl;
 
 import static junitx.framework.Assert.assertEquals;
+import static org.apache.jackrabbit.vault.util.JcrConstants.JCR_TITLE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -121,6 +122,19 @@ public class AemApproximateMarkdownServicePluginTest {
                 "\n" +
                 "A skiers paradise far from crowds and close to nature with terrain so vast it appears uncharted.  With 2,500 acres of legendary terrain, unmatched levels of snowfall each winter, and unparalleled backcountry access, Jackson Hole offers a truly unique skiing experience.\n";
         assertThat(writer.toString(), is(expectedOutput));
+    }
+
+
+    @Test
+    public void testExperienceFragment() {
+        context.create().resource("/content/experience-fragments/foo/master/jcr:content/root", ImmutableMap.of(JCR_TITLE, "thetitle"));
+
+        component = createMockResource("core/wcm/components/experiencefragment/v1/experiencefragment",
+                ImmutableMap.of("fragmentVariationPath", "/content/experience-fragments/foo/master"));
+
+        service.approximateMarkdown(component, printWriter);
+        String expectedOutput = "## thetitle\n\n";
+        assertEquals(expectedOutput, writer.toString());
     }
 
 }

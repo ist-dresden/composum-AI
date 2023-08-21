@@ -46,20 +46,23 @@ https://experienceleague.adobe.com/docs/experience-manager-core-components/using
 ## Resource -> approximate markdown transformation
 
 Special resource types of WKND:
-- wknd/components/contentfragment -> core/wcm/components/contentfragment/v1/contentfragment : fragmentPath , variationName, elementNames , ??? childnodes
+- wknd/components/contentfragment -> core/wcm/components/contentfragment/v1/contentfragment : fragmentPath , 
+  variationName, elementNames , ??? childnodes
     - fragmentPath references /content/dam/* ; take attribute elementNames from (fragmentPath)/jcr_content/data/
       (variationName or master)
     - evtl. text attribute if present?
     - example http://localhost:4502/bin/browser.html/content/wknd/us/en/adventures/colorado-rock-climbing/_jcr_content/root/container/container_fixed/container/contentfragment
-- wknd/components/experiencefragment : fragmentVariationPath , ??? childnodes
-- wknd/components/teaser -> core/wcm/components/teaser/v1/teaser -> core/wcm/components/image : descriptionFromPage , titleFromPage , pretitle , 
+- OK: wknd/components/experiencefragment : fragmentVariationPath , ??? childnodes
+- OK: wknd/components/teaser -> core/wcm/components/teaser/v1/teaser -> core/wcm/components/image : descriptionFromPage 
+  , titleFromPage , pretitle , 
   (not fileReference - image) 
-  reference is in actions/item0/link
+      reference is in actions/item0/link
 - wknd/components/list -> core/wcm/components/list/v2/list - list of links; we don't include that for now since that's 
   not text content belonging to the page.
 - ?? cq:LiveCopy
     // titleFromAsset , descriptionFromAsset
 - Test: wknd/components/text text und textIsRich
+- ?? wknd/components/title : type="h3"
 
 ## OPAX
 

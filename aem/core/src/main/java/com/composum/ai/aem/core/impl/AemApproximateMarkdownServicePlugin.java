@@ -36,6 +36,8 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
 
     protected static final Pattern TEASER_TYPES = Pattern.compile("core/wcm/components/teaser/v./teaser");
 
+    protected static final Pattern EXPERIENCEFRAGMENT_TYPES = Pattern.compile("core/wcm/components/experiencefragment/v./experiencefragment");
+
     @Override
     public @Nonnull PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service) {
         if (resourceRendersAsComponentMatching(resource, FULLY_IGNORED_TYPES)) {
@@ -44,7 +46,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         if (pageHandling(resource, out, service)) {
             return PluginResult.HANDLED_ATTRIBUTES;
         }
-        if (handleTeaser(resource, out, service)) {
+        if (handleTeaser(resource, out, service) || handleExperienceFragment(resource, out, service)) {
             return PluginResult.HANDLED_ALL;
         }
         return PluginResult.NOT_HANDLED;
@@ -138,16 +140,26 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         }
     }
 
-    protected void handleContentReference(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
-        String reference = resource.getValueMap().get("contentReference", String.class);
-        if (StringUtils.startsWith(reference, "/content/")) {
-            Resource referencedResource = resource.getResourceResolver().getResource(reference);
-            if (referencedResource != null) {
-                service.approximateMarkdown(referencedResource, out);
-            } else {
-                LOG.info("Resource {} referenced from {} not found.", reference, resource.getPath());
+    protected boolean handleExperienceFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
+        if (resourceRendersAsComponentMatching(resource, EXPERIENCEFRAGMENT_TYPES)) {
+            String reference = resource.getValueMap().get("fragmentVariationPath", String.class);
+            if (StringUtils.startsWith(reference, "/content/")) {
+                Resource referencedResource = resource.getResourceResolver().getResource(reference);
+                if (referencedResource != null) {
+                    if (referencedResource.getChild("jcr:content") != null) {
+                        referencedResource = referencedResource.getChild("jcr:content");
+                        if (referencedResource.getChild("root") != null) {
+                            referencedResource = referencedResource.getChild("root");
+                        }
+                    }
+                    service.approximateMarkdown(referencedResource, out);
+                } else {
+                    LOG.info("Resource {} referenced from {} attribute {} not found.", reference, resource.getPath(), "fragmentVariationPath");
+                }
             }
+            return true;
         }
+        return false;
     }
 
 }
