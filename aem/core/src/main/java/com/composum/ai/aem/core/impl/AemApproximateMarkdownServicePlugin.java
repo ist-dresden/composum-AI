@@ -5,6 +5,10 @@ import static com.day.cq.commons.jcr.JcrConstants.JCR_DESCRIPTION;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_TITLE;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -14,7 +18,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.jsoup.Jsoup;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,6 +188,8 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                 String[] elementNames = resource.getValueMap().get("elementNames", String[].class);
                 Resource referencedResource = resource.getResourceResolver().getResource(reference);
                 if (referencedResource != null) {
+                    Resource dataNode = referencedResource.getChild("jcr:content/data");
+                    Map<String, String> elementLabels = elementLabels(dataNode);
                     if (referencedResource.getChild("jcr:content/data/" + variation) != null) {
                         referencedResource = referencedResource.getChild("jcr:content/data/" + variation);
                     } else {
@@ -204,7 +209,12 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                             if ("text/html".equals(contentType)) {
                                 value = service.getMarkdown(value);
                             }
-                            out.println(value);
+                            String label = elementLabels.get(elementName);
+                            if (StringUtils.isNotBlank(label)) {
+                                out.println(label + ": " + value);
+                            } else {
+                                out.println(value);
+                            }
                         }
                     }
                 } else {
@@ -214,6 +224,43 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             return true;
         }
         return false;
+    }
+
+    /**
+     * Looks for the cq:model and determines the labels.
+     */
+    protected Map<String, String> elementLabels(Resource dataNode) {
+        Map<String, String> result = new HashMap<>();
+        if (dataNode != null) {
+            String cqModelPath = dataNode.getValueMap().get("cq:model", String.class);
+            Resource cqModel = dataNode.getResourceResolver().getResource(cqModelPath);
+            if (cqModel != null) {
+                // recursively search all cq:model descendants for elements with fieldLabel and name
+                List<Resource> modelResources = listModelResources(new ArrayList<>(), cqModel);
+                for (Resource r : modelResources) {
+                    String name = r.getValueMap().get("name", String.class);
+                    String fieldLabel = r.getValueMap().get("fieldLabel", String.class);
+                    if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(fieldLabel)) {
+                        result.put(name, fieldLabel);
+                    }
+                }
+            } else {
+                LOG.warn("cq:model {} referenced from {} not found.", cqModelPath, dataNode.getPath());
+            }
+        }
+        return result;
+    }
+
+    // recursively search all cq:model descendants for elements with fieldLabel and name
+    protected List<Resource> listModelResources(List<Resource> list, Resource traversed) {
+        if (traversed.getValueMap().get("fieldLabel") != null && traversed.getValueMap().get("name") != null) {
+            list.add(traversed);
+        } else {
+            for (Resource child : traversed.getChildren()) {
+                listModelResources(list, child);
+            }
+        }
+        return list;
     }
 
 }

@@ -12,10 +12,12 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,14 +157,37 @@ public class AemApproximateMarkdownServicePluginTest {
 
     @Test
     public void testContentFragmentAllElements() {
-        context.create().resource("/content/dam/cf/foo/jcr:content/data/master", ImmutableMap.of("a", "theA", "b", "theB"));
+        Resource cqModel = createMockResource("/conf/wknd/settings/dam/cfm/models/adventure", "{\n" +
+                "  \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "  \"content\": {\n" +
+                "    \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "    \"items\": {\n" +
+                "      \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "      \"1570129167801\": {\n" +
+                "        \"fieldLabel\": \"An A\",\n" +
+                "        \"listOrder\": \"2\",\n" +
+                "        \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "        \"name\": \"a\"\n" +
+                "      },\n" +
+                "      \"1570129736887\": {\n" +
+                "        \"jcr:primaryType\": \"nt:unstructured\",\n" +
+                "        \"listOrder\": \"1\",\n" +
+                "        \"name\": \"b\",\n" +
+                "        \"fieldLabel\": \"An B\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n");
+
+        Resource master = context.create().resource("/content/dam/cf/foo/jcr:content/data/master", ImmutableMap.of("a", "theA", "b", "theB"));
+        master.getParent().adaptTo(ModifiableValueMap.class).put("cq:model", cqModel.getPath());
 
         component = createMockResource("core/wcm/components/contentfragment/v1/contentfragment",
                 ImmutableMap.of("fragmentPath", "/content/dam/cf/foo"));
 
         service.approximateMarkdown(component, printWriter);
-        String expectedOutput = "theA\n" +
-                "theB\n";
+        String expectedOutput = "An A: theA\n" +
+                "An B: theB\n";
         assertEquals(expectedOutput, writer.toString());
     }
 
