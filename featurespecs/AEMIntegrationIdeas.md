@@ -46,7 +46,7 @@ https://experienceleague.adobe.com/docs/experience-manager-core-components/using
 ## Resource -> approximate markdown transformation
 
 Special resource types of WKND:
-- wknd/components/contentfragment -> core/wcm/components/contentfragment/v1/contentfragment : fragmentPath , 
+- OK: wknd/components/contentfragment -> core/wcm/components/contentfragment/v1/contentfragment : fragmentPath , 
   variationName, elementNames , ??? childnodes
     - fragmentPath references /content/dam/* ; take attribute elementNames from (fragmentPath)/jcr_content/data/
       (variationName or master)
@@ -57,12 +57,16 @@ Special resource types of WKND:
   , titleFromPage , pretitle , 
   (not fileReference - image) 
       reference is in actions/item0/link
-- wknd/components/list -> core/wcm/components/list/v2/list - list of links; we don't include that for now since that's 
+- ?? wknd/components/list -> core/wcm/components/list/v2/list - list of links; we don't include that for now since 
+  that's 
   not text content belonging to the page.
 - ?? cq:LiveCopy
     // titleFromAsset , descriptionFromAsset
 - Test: wknd/components/text text und textIsRich
 - ?? wknd/components/title : type="h3"
+
+Alternative idea: render as HTML and convert that to markdown. Is more precise but it's difficult to avoid capturing 
+headers and footers and breadcrumbs and the like. -> Don't do that for now. 
 
 ## OPAX
 
