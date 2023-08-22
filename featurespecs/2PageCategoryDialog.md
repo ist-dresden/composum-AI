@@ -168,12 +168,12 @@ The dialog is rendered with `/libs/composum/pages/options/ai/dialogs/categorize/
 `com.composum.ai.composum.bundle.AIDialogServlet` and uses model
 `model.com.composum.ai.composum.bundle.ChatGPTCategorizeDialogModel`.
 The URL is e.g.
-`/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
+`/bin/cpm/ai/dialog.categorizeDialog.html/content/ist/software/home/test/_jcr_content/category`
 and the currently assigned categories are added as parameter 'category' (multiple values).
 
 The suggested categories are loaded via an additional HTML AJAX request that loads the suggested categories. This is 
 implemented via a selector:
-`/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html/content/ist/software/home/test/_jcr_content/category`
+`/bin/cpm/ai/dialog.categorizeDialog.suggestions.html/content/ist/software/home/test/_jcr_content/category`
 `/libs/composum/pages/options/ai/dialogs/categorize/suggestions.jsp`
 
 The Javascript class CategorizeDialog in `/libs/composum/pages/options/ai/js/chatgpt.js` triggers the loading 

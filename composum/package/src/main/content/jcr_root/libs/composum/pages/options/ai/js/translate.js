@@ -13,7 +13,7 @@
         ai.const = ai.const || {};
         ai.const.url = ai.const.url || {};
         ai.const.url.translate = {
-            translationDialog: '/bin/cpm/platform/ai/dialog.translationDialog.html'
+            translationDialog: '/bin/cpm/ai/dialog.translationDialog.html'
         };
 
         /**

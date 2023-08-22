@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Approximated Markdown Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/approximated.markdown",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/approximated.markdown",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })
-// curl -u admin:admin http://localhost:9090/bin/cpm/platform/ai/approximated.markdown.md/content/ist/composum/home/platform/_jcr_content
-// http://localhost:4502/bin/cpm/platform/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
+// curl -u admin:admin http://localhost:9090/bin/cpm/ai/approximated.markdown.md/content/ist/composum/home/platform/_jcr_content
+// http://localhost:4502/bin/cpm/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
 public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);

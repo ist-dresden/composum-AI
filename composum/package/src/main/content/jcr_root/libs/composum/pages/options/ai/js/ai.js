@@ -22,8 +22,8 @@
         ai.const.url = ai.const.url || {};
         // all dialogs create their own subnodes in ai.const.url to put that into several files.
         ai.const.url.general = {
-            authoring: '/bin/cpm/platform/ai/authoring',
-            markdown: '/bin/cpm/platform/ai/approximated.markdown'
+            authoring: '/bin/cpm/ai/authoring',
+            markdown: '/bin/cpm/ai/approximated.markdown'
         };
 
         /** Will be called from Pages after a dialog is rendered via the dialogplugins hook.
