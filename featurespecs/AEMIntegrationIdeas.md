@@ -34,6 +34,9 @@ Possible options:
 - create content resource that renders as the dialog
 - render servlet as in Composum
 
+Rendering dialog e.g. request
+http://localhost:4502/mnt/override/apps/composum-ai/test/components/contentcreation/_cq_dialog.html/content/wknd/language-masters/composum-ai-testpages/jcr:content/root/container/helloworld2?resourceType=composum-ai%2Ftest%2Fcomponents%2Fcontentcreation&_=1692791148487
+
 ## Where to integrate
 
 Text:
