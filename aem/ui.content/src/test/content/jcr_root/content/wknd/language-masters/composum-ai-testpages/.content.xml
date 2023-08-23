@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+        xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+        jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="wknd/components/page"
+            cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
+            jcr:title="Composum AI Testpages">
+        <root
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="wknd/components/container"
+                layout="responsiveGrid">
+            <container
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="wknd/components/container"
+                    cq:styleIds="[1554340406437]"
+                    layout="responsiveGrid">
+                <text
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/text"
+                        text="&lt;p>Text before&lt;/p>&#xd;&#xa;"
+                        textIsRich="true"/>
+                <helloworld
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/test/components/testdialog"/>
+                <helloworld2
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/test/components/contentcreation"/>
+                <text_1433451153
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/text"
+                        text="&lt;p>Text after&lt;/p>&#xd;&#xa;"
+                        textIsRich="true"/>
+            </container>
+        </root>
+    </jcr:content>
+</jcr:root>
