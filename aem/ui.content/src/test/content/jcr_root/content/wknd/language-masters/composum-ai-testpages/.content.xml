@@ -23,6 +23,9 @@
                         sling:resourceType="wknd/components/text"
                         text="&lt;p>Text before&lt;/p>&#xd;&#xa;"
                         textIsRich="true"/>
+                <contentcreation
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/components/contentcreation"/>
                 <helloworld
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="composum-ai/test/components/testdialog"/>

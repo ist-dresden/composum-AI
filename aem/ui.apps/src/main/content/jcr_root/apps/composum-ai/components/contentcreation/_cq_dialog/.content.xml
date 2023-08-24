@@ -1,0 +1,189 @@
+<jcr:root jcr:primaryType="nt:unstructured" sling:resourceType="cq/gui/components/authoring/dialog"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          helpPath="https://www.example.net/"
+          extraClientlibs="[]"
+          jcr:title="Composum AI Content Creation"
+          height="90%"
+          width="90%"
+          suppressFormUiBehavior="{Boolean}true"
+          mode="edit">
+	<content jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
+		<items jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured">
+			<promptColumns
+					jcr:primaryType="nt:unstructured"
+					sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+				<items jcr:primaryType="nt:unstructured">
+					<container
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/foundation/container">
+						<items jcr:primaryType="nt:unstructured">
+							<promptFieldset
+									jcr:primaryType="nt:unstructured"
+									jcr:title="Prompt"
+									sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+								<items jcr:primaryType="nt:unstructured">
+									<predefinedPrompts jcr:primaryType="nt:unstructured"
+									                   sling:resourceType="granite/ui/components/coral/foundation/form/select"
+									                   fieldLabel="Predefined Prompts" name="./predefinedPrompts">
+										<items jcr:primaryType="nt:unstructured">
+											<summary jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+											         text="Summary"
+											         value="summary">
+											</summary>
+											<improve jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+											         text="Improve"
+											         value="improve">
+											</improve>
+											<extend jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+											        text="Extend"
+											        value="extend">
+											</extend>
+											<titleGeneration jcr:primaryType="nt:unstructured"
+											                 sling:resourceType="nt:unstructured"
+											                 text="Title Generation" value="titleGeneration">
+											</titleGeneration>
+										</items>
+									</predefinedPrompts>
+									<promptArea jcr:primaryType="nt:unstructured"
+									            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+									            fieldLabel="Prompt Area" name="./promptArea" rows="5">
+									</promptArea>
+								</items>
+							</promptFieldset>
+						</items>
+					</container>
+					<container2
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/foundation/container">
+						<items jcr:primaryType="nt:unstructured">
+							<sourceFieldset
+									jcr:primaryType="nt:unstructured"
+									jcr:title="Source"
+									sling:resourceType="granite/ui/components/foundation/form/fieldset">
+								<items jcr:primaryType="nt:unstructured">
+									<contentSelector jcr:primaryType="nt:unstructured"
+									                 sling:resourceType="granite/ui/components/coral/foundation/form/select"
+									                 fieldLabel="Content Selector" name="./contentSelector">
+										<items jcr:primaryType="nt:unstructured">
+											<summary jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+											         text="Summary"
+											         value="summary">
+											</summary>
+										</items>
+									</contentSelector>
+									<sourceContent
+											jcr:primaryType="nt:unstructured"
+											sling:resourceType="granite/ui/components/foundation/form/textarea"
+											fieldDescription="FIELD_DESCRIPTION"
+											fieldLabel="SourceContent"
+											name="./sourceContent"/>
+								</items>
+							</sourceFieldset>
+						</items>
+					</container2>
+				</items>
+			</promptColumns>
+			<generateActionbar
+					jcr:primaryType="nt:unstructured"
+					margin="{Boolean}false"
+					sling:resourceType="granite/ui/components/coral/foundation/actionbar">
+				<primary
+						jcr:primaryType="nt:unstructured">
+					<generate
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/foundation/button"
+							class="composum-ai-generate"
+							text="Generate"/>
+					<textLengthSelector jcr:primaryType="nt:unstructured"
+					                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+					                    fieldLabel="" name="./textLengthSelector">
+						<items jcr:primaryType="nt:unstructured">
+							<oneLine jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+							         text="One Line"
+							         value="oneLine">
+							</oneLine>
+							<oneSentence jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+							             text="One Sentence"
+							             value="oneSentence">
+							</oneSentence>
+							<oneParagraph jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+							              text="One Paragraph" value="oneParagraph">
+							</oneParagraph>
+							<severalParagraphs jcr:primaryType="nt:unstructured"
+							                   sling:resourceType="nt:unstructured"
+							                   text="Several Paragraphs" value="severalParagraphs">
+							</severalParagraphs>
+						</items>
+					</textLengthSelector>
+				</primary>
+				<secondary
+						jcr:primaryType="nt:unstructured">
+					<reset
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/foundation/button"
+							class="composum-ai-reset"
+							text="Reset"/>
+					<back
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/foundation/button"
+							class="composum-ai-back"
+							text="Back"/>
+					<forward
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/foundation/button"
+							class="composum-ai-forward"
+							text="Forward"/>
+				</secondary>
+			</generateActionbar>
+
+			<contentSuggestion
+					jcr:primaryType="nt:unstructured"
+					jcr:title="Content Suggestion"
+					sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+				<items jcr:primaryType="nt:unstructured">
+					<content
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="cq/gui/components/authoring/dialog/richtext"
+							fieldLabel=""
+							name="./content"
+							useFixedInlineToolbar="{Boolean}true"
+					/>
+				</items>
+			</contentSuggestion>
+		</items>
+	</content>
+
+	<footer jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
+		<items jcr:primaryType="nt:unstructured">
+			<cancel
+					jcr:primaryType="nt:unstructured"
+					sling:resourceType="granite/ui/components/coral/foundation/button"
+					text="Cancel"
+					variant="default"/>
+			<save
+					jcr:primaryType="nt:unstructured"
+					sling:resourceType="granite/ui/components/coral/foundation/button"
+					text="Save"
+					variant="primary"/>
+		</items>
+	</footer>
+
+	<granite:toolbar jcr:primaryType="nt:unstructured"
+	                 sling:resourceType="granite/ui/components/coral/foundation/toolbar">
+		<items jcr:primaryType="nt:unstructured">
+			<cancel
+					jcr:primaryType="nt:unstructured"
+					sling:resourceType="granite/ui/components/coral/foundation/button"
+					text="Cancel"
+					variant="default"/>
+			<save
+					jcr:primaryType="nt:unstructured"
+					sling:resourceType="granite/ui/components/coral/foundation/button"
+					text="Save"
+					variant="primary"/>
+		</items>
+	</granite:toolbar>
+
+</jcr:root>
