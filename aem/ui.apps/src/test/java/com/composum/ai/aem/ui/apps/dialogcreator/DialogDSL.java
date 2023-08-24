@@ -12,6 +12,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An attempt at a DSL to create Granite UI Foundation Server-side dialogs, but not a very successful one. That's not really better than just writing the XML directly, and Java isn't really the best language for this.
+ *
+ * @see "https://developer.adobe.com/experience-manager/reference-materials/6-5/granite-ui/api/jcr_root/libs/granite/ui/components/coral/foundation/server.html"
+ */
 public class DialogDSL {
 
     StringBuilder sb = new StringBuilder();
@@ -91,40 +96,44 @@ public class DialogDSL {
     }
 
     private void createCreationDialog() throws IOException {
-        createDialog("ChatGPT Content Creation", "src/test/content/jcr_root/apps/composum-ai/test/components/contentcreation/_cq_dialog/.content.xml",
+        createDialog("ChatGPT Content Creation", "src/test/content/jcr_root/apps/composum-ai/test/components/contentcreation/_cq_dialog/.content.new.xml",
                 () -> foundation("content", "container",
                         () -> unstructured("items",
                                 () -> {
                                     // Actual dialog content starts here
-                                    unstructured("promptGroup", "fieldset", asList("jcr:title", "Prompt Group"),
-                                            () -> {
-                                                foundation("promptDetails", "fieldset", asList("jcr:title", "Prompt Details", "layout", "horizontal"),
-                                                        () -> {
-                                                            foundation("predefinedPrompts", "form/select", asList("fieldLabel", "Predefined Prompts", "name", "./predefinedPrompts"),
-                                                                    () -> {
-                                                                        unstructured("summary", asList("text", "Summary", "value", "summary"), empty);
-                                                                        unstructured("improve", asList("text", "Improve", "value", "improve"), empty);
-                                                                        unstructured("extend", asList("text", "Extend", "value", "extend"), empty);
-                                                                        unstructured("titleGeneration", asList("text", "Title Generation", "value", "titleGeneration"), empty);
-                                                                    }
-                                                            );
-                                                            foundation("contentSelector", "form/select", asList("fieldLabel", "Content Selector", "name", "./contentSelector"),
-                                                                    () -> {
-                                                                        // Options for content selector can be added here
-                                                                    }
-                                                            );
-                                                            foundation("textLengthSelector", "form/select", asList("fieldLabel", "Text Length Selector", "name", "./textLengthSelector"),
-                                                                    () -> {
-                                                                        unstructured("oneLine", asList("text", "One Line", "value", "oneLine"), empty);
-                                                                        unstructured("oneSentence", asList("text", "One Sentence", "value", "oneSentence"), empty);
-                                                                        unstructured("oneParagraph", asList("text", "One Paragraph", "value", "oneParagraph"), empty);
-                                                                        unstructured("severalParagraphs", asList("text", "Several Paragraphs", "value", "severalParagraphs"), empty);
-                                                                    }
-                                                            );
-                                                        }
-                                                );
-                                                foundation("promptArea", "form/textarea", asList("fieldLabel", "Prompt Area", "name", "./promptArea", "rows", "5"), empty);
-                                            }
+                                    foundation("promptGroup", "fieldset", asList("jcr:title", "Prompt Group"),
+                                            () -> unstructured("items",
+                                                    () -> {
+                                                        foundation("promptDetails", "fieldset", asList("jcr:title", "Prompt Details", "layout", "horizontal"),
+                                                                () -> unstructured("items",
+                                                                        () -> {
+                                                                            foundation("predefinedPrompts", "form/select", asList("fieldLabel", "Predefined Prompts", "name", "./predefinedPrompts"),
+                                                                                    () -> {
+                                                                                        unstructured("summary", asList("text", "Summary", "value", "summary"), empty);
+                                                                                        unstructured("improve", asList("text", "Improve", "value", "improve"), empty);
+                                                                                        unstructured("extend", asList("text", "Extend", "value", "extend"), empty);
+                                                                                        unstructured("titleGeneration", asList("text", "Title Generation", "value", "titleGeneration"), empty);
+                                                                                    }
+                                                                            );
+                                                                            foundation("contentSelector", "form/select", asList("fieldLabel", "Content Selector", "name", "./contentSelector"),
+                                                                                    () -> {
+                                                                                        // Options for content selector can be added here
+                                                                                    }
+                                                                            );
+                                                                            foundation("textLengthSelector", "form/select", asList("fieldLabel", "Text Length Selector", "name", "./textLengthSelector"),
+                                                                                    () -> {
+                                                                                        unstructured("oneLine", asList("text", "One Line", "value", "oneLine"), empty);
+                                                                                        unstructured("oneSentence", asList("text", "One Sentence", "value", "oneSentence"), empty);
+                                                                                        unstructured("oneParagraph", asList("text", "One Paragraph", "value", "oneParagraph"), empty);
+                                                                                        unstructured("severalParagraphs", asList("text", "Several Paragraphs", "value", "severalParagraphs"), empty);
+                                                                                    }
+                                                                            );
+                                                                        }
+                                                                )
+                                                        );
+                                                        foundation("promptArea", "form/textarea", asList("fieldLabel", "Prompt Area", "name", "./promptArea", "rows", "5"), empty);
+                                                    }
+                                            )
                                     );
                                     // Other dialog elements like Generation Control, Content Preview, etc. can be added in a similar manner below.
                                     // Actual dialog content ends here

@@ -1,34 +1,94 @@
-<jcr:root  jcr:primaryType="nt:unstructured" sling:resourceType="cq/gui/components/authoring/dialog" xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" jcr:title="ChatGPT Content Creation" mode="edit">
-    <content  jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
-        <items  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured">
-            <promptGroup  jcr:primaryType="nt:unstructured" sling:resourceType="fieldset" jcr:title="Prompt Group">
-                <promptDetails  jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/fieldset" jcr:title="Prompt Details" layout="horizontal">
-                    <predefinedPrompts  jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Predefined Prompts" name="./predefinedPrompts">
-                        <summary  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="Summary" value="summary">
-                        </summary>
-                        <improve  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="Improve" value="improve">
-                        </improve>
-                        <extend  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="Extend" value="extend">
-                        </extend>
-                        <titleGeneration  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="Title Generation" value="titleGeneration">
-                        </titleGeneration>
-                    </predefinedPrompts>
-                    <contentSelector  jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Content Selector" name="./contentSelector">
-                    </contentSelector>
-                    <textLengthSelector  jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/select" fieldLabel="Text Length Selector" name="./textLengthSelector">
-                        <oneLine  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="One Line" value="oneLine">
-                        </oneLine>
-                        <oneSentence  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="One Sentence" value="oneSentence">
-                        </oneSentence>
-                        <oneParagraph  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="One Paragraph" value="oneParagraph">
-                        </oneParagraph>
-                        <severalParagraphs  jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured" text="Several Paragraphs" value="severalParagraphs">
-                        </severalParagraphs>
-                    </textLengthSelector>
-                </promptDetails>
-                <promptArea  jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/form/textarea" fieldLabel="Prompt Area" name="./promptArea" rows="5">
-                </promptArea>
-            </promptGroup>
-        </items>
-    </content>
+<jcr:root jcr:primaryType="nt:unstructured" sling:resourceType="cq/gui/components/authoring/dialog"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          jcr:title="ChatGPT Content Creation" mode="edit">
+	<content jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
+		<items jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured">
+			<prompt
+					jcr:primaryType="nt:unstructured"
+					jcr:title="Prompt"
+					sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+				<items jcr:primaryType="nt:unstructured">
+					<fixedColumns
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+							margin="{Boolean}true" maximized="{Boolean}true">
+						<items jcr:primaryType="nt:unstructured">
+							<predefinedPrompts jcr:primaryType="nt:unstructured"
+							                   sling:resourceType="granite/ui/components/coral/foundation/form/select"
+							                   fieldLabel="Predefined Prompts" name="./predefinedPrompts">
+								<items jcr:primaryType="nt:unstructured">
+									<summary jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									         text="Summary"
+									         value="summary">
+									</summary>
+									<improve jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									         text="Improve"
+									         value="improve">
+									</improve>
+									<extend jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									        text="Extend"
+									        value="extend">
+									</extend>
+									<titleGeneration jcr:primaryType="nt:unstructured"
+									                 sling:resourceType="nt:unstructured"
+									                 text="Title Generation" value="titleGeneration">
+									</titleGeneration>
+								</items>
+							</predefinedPrompts>
+							<contentSelector jcr:primaryType="nt:unstructured"
+							                 sling:resourceType="granite/ui/components/coral/foundation/form/select"
+							                 fieldLabel="Content Selector" name="./contentSelector">
+								<items jcr:primaryType="nt:unstructured">
+									<summary jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									         text="Summary"
+									         value="summary">
+									</summary>
+								</items>
+							</contentSelector>
+							<textLengthSelector jcr:primaryType="nt:unstructured"
+							                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+							                    fieldLabel="Text Length Selector" name="./textLengthSelector">
+								<items jcr:primaryType="nt:unstructured">
+									<oneLine jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									         text="One Line"
+									         value="oneLine">
+									</oneLine>
+									<oneSentence jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									             text="One Sentence"
+									             value="oneSentence">
+									</oneSentence>
+									<oneParagraph jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+									              text="One Paragraph" value="oneParagraph">
+									</oneParagraph>
+									<severalParagraphs jcr:primaryType="nt:unstructured"
+									                   sling:resourceType="nt:unstructured"
+									                   text="Several Paragraphs" value="severalParagraphs">
+									</severalParagraphs>
+								</items>
+							</textLengthSelector>
+						</items>
+					</fixedColumns>
+					<promptArea jcr:primaryType="nt:unstructured"
+					            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+					            fieldLabel="Prompt Area" name="./promptArea" rows="5">
+					</promptArea>
+				</items>
+			</prompt>
+			<contentSuggestion
+					jcr:primaryType="nt:unstructured"
+					jcr:title="Content Suggestion"
+					sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+				<items jcr:primaryType="nt:unstructured">
+					<content
+							jcr:primaryType="nt:unstructured"
+							sling:resourceType="cq/gui/components/authoring/dialog/richtext"
+							fieldLabel="Content"
+							name="./content"
+							useFixedInlineToolbar="{Boolean}true"
+					/>
+				</items>
+			</contentSuggestion>
+		</items>
+	</content>
 </jcr:root>
