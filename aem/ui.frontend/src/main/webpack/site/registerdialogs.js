@@ -6,21 +6,23 @@
 (function ($, channel, window, undefined) {
     "use strict";
 
-    var ACTION_ICON = "coral-Icon--gearsEdit";
-    var ACTION_TITLE = "Coomposum AI Content Generation";
-    var ACTION_NAME = "ComposumAI";
+    const ACTION_ICON = "coral-Icon--gearsEdit";
+    const ACTION_TITLE = "Coomposum AI Content Generation";
+    const ACTION_NAME = "ComposumAI";
+    const CREATE_DIALOG_URL = "/mnt/override/apps/composum-ai/components/contentcreation/_cq_dialog.html/conf/composum-ai/settings/dialogs/contentcreation";
 
-    var composumAiAction = new Granite.author.ui.ToolbarAction({
+    const composumAiAction = new Granite.author.ui.ToolbarAction({
         name: ACTION_NAME,
         icon: ACTION_ICON,
         text: ACTION_TITLE,
+        order: "last",
         execute: function (editable) {
-            showDialog();
+            showDialog(editable);
         },
         condition: function (editable) {
-            console.log("editable.type check", editable.type);
-            console.log("editable", editable, JSON.toString(editable));
-            return true; // editable && editable.type === "chatgptintegration/components/title";
+            // TODO implement some condition where the dialog makes sence. On editable.designDialog?
+            console.log("editable", editable);
+            return true;
         },
         isNonMulti: true,
     });
@@ -32,42 +34,25 @@
         }
     });
 
+    function showDialog(editable) {
+        const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
 
-    function showDialog() {
-        // Create the dialog
-        var dialog = new Coral.Dialog().set({
-            id: 'composumAI-dialog',
-            header: {
-                innerHTML: 'Generate Content through Composum AI'
-            },
-            content: {
-                innerHTML: '<form class="coral-Form coral-Form--vertical"><section class="coral-Form-fieldset"><div class="coral-Form-fieldwrapper"><textarea is="coral-textarea" class="coral-Form-field" placeholder="Enter your prompt" id="textarea1"  name="name"></textarea></div><div class="coral-Form-fieldwrapper"> <textarea is="coral-textarea" class="coral-Form-field" placeholder="Result will be displayed here" id="textarea2"  name="name"></textarea></div></section></form>'
-            },
-            footer: {
-                innerHTML: '<button is="coral-button" variant="primary">Generate</button><button is="coral-button" variant="primary" coral-close>Close</button>'
+        $.ajax({
+            url: CREATE_DIALOG_URL,
+            type: "GET",
+            dataType: "html",
+            success: function (data) {
+                // reload the dialog since otherwise we get an internal error in Coral on second show.
+                $('#composumAI-dialog').remove();
+                // throw away HTML head and so forth:
+                const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
+                dialog.attr('id', dialogId);
+                dialog.appendTo('body');
+                dialog.get()[0].show(); // call Coral function on the element.
+            }.bind(this),
+            error: function (xhr, status, error) {
+                console.log("error loading create dialog", xhr, status, error);
             }
         });
-
-        // Add an event listener to the submit button
-        dialog.footer.querySelector("button").addEventListener("click", function () {
-            var textarea1Value = dialog.content.querySelector("#textarea1").value;
-            var servletUrl = "/bin/chat?prompt=" + encodeURIComponent(textarea1Value);
-
-            dialog.content.querySelector("#textarea2").value = 'Generating...';
-
-            // Send a request to the servlet
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", servletUrl);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                    dialog.content.querySelector("#textarea2").value = xhr.responseText;
-                }
-            };
-            xhr.send();
-        });
-
-        // Open the dialog
-        document.body.appendChild(dialog);
-        dialog.show();
     }
 })(jQuery, jQuery(document), this);
