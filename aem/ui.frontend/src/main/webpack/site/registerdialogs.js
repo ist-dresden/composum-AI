@@ -47,6 +47,7 @@
                 // throw away HTML head and so forth:
                 const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
                 dialog.attr('id', dialogId);
+                dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
                 dialog.appendTo('body');
                 dialog.get()[0].show(); // call Coral function on the element.
             }.bind(this),

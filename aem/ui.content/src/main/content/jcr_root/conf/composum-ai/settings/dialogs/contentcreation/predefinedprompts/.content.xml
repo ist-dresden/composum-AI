@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created by com.composum.ai.composum.bundle.WritePredefinedPromptsInAEMFormat - can be used for updating, too. -->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" jcr:primaryType="sling:OrderedFolder">
+    <___ jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+         text="---"
+         value=""></___>
+    <summarize jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+               text="Summarize"
+               value="Please summarize the text."></summarize>
+    <introduction jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                  text="Introduction"
+                  value="Please write an introduction for the text."></introduction>
+    <conclusion jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                text="Conclusion"
+                value="Please write a conclusion for the text."></conclusion>
+    <expand jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+            text="Expand"
+            value="Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style."></expand>
+    <extend jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+            text="Extend"
+            value="Please extend the text with more details and elaboration while maintaining the current tone and style."></extend>
+    <abstract jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+              text="Abstract"
+              value="Please write an abstract for the text that provides a concise overview of the key points and main themes."></abstract>
+    <headline jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+              text="Headline"
+              value="Please write a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style."></headline>
+    <___headline_suggestions jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                             text="10 headline suggestions"
+                             value="Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style."></___headline_suggestions>
+    <___headline___subheadline_suggestions jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                                           text="10 headline + subheadline suggestions"
+                                           value="Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style."></___headline___subheadline_suggestions>
+    <question jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+              text="Question"
+              value="Please answer the following question based on the given text:
+"></question>
+    <improve jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+             text="Improve"
+             value="Please improve the text into a businesslike informative style.
+Do also fix orthographical and grammar errors."></improve>
+    <seo_description jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                     text="SEO Description"
+                     value="Please create a description for a web page with the following text, usable for search engine optimization (SEO)."></seo_description>
+    <teaser jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+            text="Teaser"
+            value="Please write a brief, engaging teaser for the text. It should pique the reader's interest and encourage them to read the full content."></teaser>
+    <rewrite_for_different_audience jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                                    text="Rewrite for Different Audience"
+                                    value="Please rewrite the text to suit a different audience:
+"></rewrite_for_different_audience>
+    <bullet_point_summary jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                          text="Bullet Point Summary"
+                          value="Please summarize the main points of the text as a list of bullet points."></bullet_point_summary>
+    <bab_framework_text jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                        text="BAB Framework Text"
+                        value="Please write a complete text using the Before-After-Bridge (BAB) framework. Start by describing the problem, then envision the improvements, and finally introduce the solution that makes this transformation possible."></bab_framework_text>
+    <aida_framework_text jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                         text="AIDA Framework Text"
+                         value="Please write a complete text using the AIDA framework. Start by capturing attention, then generate interest, induce desire, and finally, call for action."></aida_framework_text>
+    <slogan jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+            text="Slogan"
+            value="Based on the given text, please create a catchy and memorable slogan that captures its main theme."></slogan>
+    <cta jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+         text="CTA"
+         value="Based on the text, create a call to action that encourages the reader to take the next step, and clearly conveys the unique value proposition to the reader."></cta>
+    <markdown_to_html jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                      text="Markdown to HTML"
+                      value="Convert the following text from Markdown to HTML:
+
+"></markdown_to_html>
+</jcr:root>
