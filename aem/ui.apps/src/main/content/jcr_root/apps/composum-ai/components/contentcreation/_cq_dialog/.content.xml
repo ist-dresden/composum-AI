@@ -1,7 +1,6 @@
 <jcr:root jcr:primaryType="nt:unstructured" sling:resourceType="cq/gui/components/authoring/dialog"
           xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
           xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
-          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
           helpPath="https://www.example.net/"
           extraClientlibs="[]"
           jcr:title="Composum AI Content Creation"
@@ -26,7 +25,9 @@
                                 <items jcr:primaryType="nt:unstructured">
                                     <predefinedPrompts jcr:primaryType="nt:unstructured"
                                                        sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                                       fieldLabel="Predefined Prompts" name="./predefinedPrompts">
+                                                       fieldLabel="Predefined Prompts (Instructions)"
+                                                       fieldDescription="This replaces the prompt (that is, the instructions to be executed by the AI) by one of a number of predefined prompts you can use directly or modify to create your own prompt."
+                                                       name="./predefinedPrompts">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
@@ -34,8 +35,9 @@
                                     </predefinedPrompts>
                                     <promptArea jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
-                                                fieldDescription="The instructions to the AI that will be applied to the source text."
-                                                fieldLabel="Prompt Area" name="./promptArea" rows="15">
+                                                fieldLabel="Input Prompt (Instructions)"
+                                                fieldDescription="The instructions to the AI that will be applied to the source text. If you like some examples you can select one of the predefined prompts - that will replace the content of this field."
+                                                name="./promptArea" rows="15">
                                     </promptArea>
                                 </items>
                             </promptFieldset>
@@ -52,7 +54,9 @@
                                 <items jcr:primaryType="nt:unstructured">
                                     <contentSelector jcr:primaryType="nt:unstructured"
                                                      sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                                     fieldLabel="Content Selector" name="./contentSelector">
+                                                     fieldLabel="Source Content Selection"
+                                                     fieldDescription="Select which text the AI receives in addition to your prompt, if any. This can serve basically as data for your request to generate new text or modify this given text, if your prompt requires that."
+                                                     name="./contentSelector">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
@@ -61,8 +65,8 @@
                                     <sourceContent
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
-                                            fieldDescription="The base text that is modified according to the prompt."
-                                            fieldLabel="SourceContent" rows="15"
+                                            fieldDescription="The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed."
+                                            fieldLabel="Source Content ('Data' for the instructions)" rows="15"
                                             name="./sourceContent"/>
 
                                     <!--
@@ -199,45 +203,69 @@
                     </container2>
                 </items>
             </promptColumns>
-            <generateActionbar
+
+            <generateButtonFieldset
                     jcr:primaryType="nt:unstructured"
-                    margin="{Boolean}false"
-                    sling:resourceType="granite/ui/components/coral/foundation/actionbar">
-                <primary
-                        jcr:primaryType="nt:unstructured">
-                    <generate
+                    jcr:title=""
+                    sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                <items jcr:primaryType="nt:unstructured">
+                    <generateActionbar
                             jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/button"
-                            class="composum-ai-generate"
-                            text="Generate"/>
-                    <textLengthSelector jcr:primaryType="nt:unstructured"
-                                        sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                        fieldLabel="" name="./textLengthSelector">
-                        <datasource
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
-                                path="/conf/composum-ai/settings/dialogs/contentcreation/textlengths"/>
-                    </textLengthSelector>
-                </primary>
-                <secondary
-                        jcr:primaryType="nt:unstructured">
-                    <reset
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/button"
-                            class="composum-ai-reset"
-                            text="Reset"/>
-                    <back
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/button"
-                            class="composum-ai-back"
-                            text="Back"/>
-                    <forward
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/button"
-                            class="composum-ai-forward"
-                            text="Forward"/>
-                </secondary>
-            </generateActionbar>
+                            margin="{Boolean}false"
+                            sling:resourceType="granite/ui/components/coral/foundation/actionbar">
+                        <primary
+                                jcr:primaryType="nt:unstructured">
+                            <generate
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-generate"
+                                    fieldDescription="Triggers the content generation according to the instructions and the source text. Please give that a couple of seconds."
+                                    text="Generate"/>
+                            <stop
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-stop"
+                                    fieldDescription="Aborts the content generation."
+                                    text="Stop"/>
+                            <textlengthLabel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/foundation/text"
+                                    text="Text Length"/>
+                            <textLengthSelector jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                fieldLabel=""
+                                                fieldDescription="The desired approximate length of the generated text."
+                                                name="./textLengthSelector">
+                                <datasource
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
+                                        path="/conf/composum-ai/settings/dialogs/contentcreation/textlengths"/>
+                            </textLengthSelector>
+                        </primary>
+                        <secondary
+                                jcr:primaryType="nt:unstructured">
+                            <reset
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-reset"
+                                    fieldDescription="Resets this form including the whole history."
+                                    text="Reset History"/>
+                            <back
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-back"
+                                    fieldDescription="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
+                                    text="Back"/>
+                            <forward
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-forward"
+                                    fieldDescrpition="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
+                                    text="Forward"/>
+                        </secondary>
+                    </generateActionbar>
+                </items>
+            </generateButtonFieldset>
 
             <contentSuggestion
                     jcr:primaryType="nt:unstructured"
@@ -254,43 +282,34 @@
                     <content
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/foundation/form/textarea"
-                            fieldDescription="The generated content"
                             fieldLabel=""
                             name="./content"/>
+
+                    <saveActionbar
+                            jcr:primaryType="nt:unstructured"
+                            margin="{Boolean}false"
+                            sling:resourceType="granite/ui/components/coral/foundation/actionbar">
+                        <primary
+                                jcr:primaryType="nt:unstructured">
+                            <cancel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-cancel"
+                                    text="Cancel"/>
+                            <append jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    class="composum-ai-append"
+                                    fieldDescription="Append the created text to the editor of the component property you were editing when you opened this dialog."
+                                    text="Append"/>
+                            <replace jcr:primaryType="nt:unstructured"
+                                     sling:resourceType="granite/ui/components/coral/foundation/button"
+                                     class="composum-ai-replace"
+                                     fieldDescription="Replace the content of the editor of the component property you were editing when you opened this dialog with the created text."
+                                     text="Replace"/>
+                        </primary>
+                    </saveActionbar>
                 </items>
             </contentSuggestion>
         </items>
     </content>
-
-    <footer jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
-        <items jcr:primaryType="nt:unstructured">
-            <cancel
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                    text="Cancel1"
-                    variant="default"/>
-            <save
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                    text="Save1"
-                    variant="primary"/>
-        </items>
-    </footer>
-
-    <granite:toolbar jcr:primaryType="nt:unstructured"
-                     sling:resourceType="granite/ui/components/coral/foundation/toolbar">
-        <items jcr:primaryType="nt:unstructured">
-            <cancel
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                    text="Cancel2"
-                    variant="default"/>
-            <save
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                    text="Save2"
-                    variant="primary"/>
-        </items>
-    </granite:toolbar>
-
 </jcr:root>
