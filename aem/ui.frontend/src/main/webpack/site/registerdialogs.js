@@ -3,6 +3,8 @@
  * Thanks to https://techforum.medium.com/how-to-connect-adobe-experience-manager-aem-with-chatgpt-312651291713 for hints!
  */
 
+import { ContentCreationDialog } from './ContentCreationDialog.js';
+
 (function ($, channel, window, undefined) {
     "use strict";
 
@@ -17,12 +19,16 @@
         text: ACTION_TITLE,
         order: "last",
         execute: function (editable) {
+            console.log("aitoolbar execute", arguments);
             showDialog(editable);
         },
         condition: function (editable) {
+            console.log("aitoolbar editable", arguments);
             // TODO implement some condition where the dialog makes sence. On editable.designDialog?
-            console.log("editable", editable);
             return true;
+        },
+        _postExecute() {
+            console.log("aitoolbar post execute ", arguments);
         },
         isNonMulti: true,
     });
@@ -50,6 +56,7 @@
                 dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
                 dialog.appendTo('body');
                 dialog.get()[0].show(); // call Coral function on the element.
+                new ContentCreationDialog(editable, dialog);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);

@@ -87,6 +87,7 @@ modifying Opax configuration
 - https://github.com/adobe/aem-guides-wknd
 - https://techforum.medium.com/how-to-connect-adobe-experience-manager-aem-with-chatgpt-312651291713
 - https://experienceleague.adobe.com/docs/experience-manager-core-components/using/introduction.html?lang=en
+- https://developer.adobe.com/experience-manager/reference-materials/6-5/jsdoc/ui-touch/editor-core/Granite.author.editables.html
 
 ## Multi language structure
 

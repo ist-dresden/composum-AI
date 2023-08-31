@@ -26,8 +26,9 @@
                                 <items jcr:primaryType="nt:unstructured">
                                     <predefinedPrompts jcr:primaryType="nt:unstructured"
                                                        sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                                       fieldLabel="Predefined Prompts (Instructions)"
+                                                       fieldLabel="Overwrite Input Prompt with Predefined Prompt"
                                                        fieldDescription="This replaces the prompt (that is, the instructions to be executed by the AI) by one of a number of predefined prompts you can use directly or modify to create your own prompt."
+                                                       size="10"
                                                        name="./predefinedPrompts" granite:class="composum-ai-predefined-prompts">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
@@ -68,7 +69,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             fieldDescription="The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed."
                                             fieldLabel="Source Content ('Data' for the instructions)" rows="15"
-                                            name="./sourceContent"/>
+                                            name="./sourceContent" granite:class="composum-ai-source-content"/>
 
                                     <!--
                                     <sourceText
@@ -288,7 +289,7 @@
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/foundation/form/textarea"
                             fieldLabel=""
-                            name="./content" granite:class="composum-ai-ai-response-field"/>
+                            name="./content" granite:class="composum-ai-response-field"/>
 
                     <saveActionbar
                             jcr:primaryType="nt:unstructured"
