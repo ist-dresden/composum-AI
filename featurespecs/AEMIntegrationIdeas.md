@@ -96,6 +96,16 @@ modifying Opax configuration
 https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Icon.html#availableIcons
 ? GearsEdit , AutomatedSegment , Annotate , Scribble
 
+For dialog calls content dialog: https://spectrum.adobe.com/page/icons/ MagicWand oder auch GearsEdit
+
+<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS" icon="infocircle" tabindex="0" 
+aria-describedby="description_bc498e27-76c6-4923-8968-8e7f8f68a3d7" alt="description" role="img" 
+aria-label="description" size="S">
+      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
+        <use xlink:href="#spectrum-icon-24-MagicWand"></use>
+      </svg>
+    </coral-icon>
+
 ## Workarounds
 
 Fix for archetype needed:

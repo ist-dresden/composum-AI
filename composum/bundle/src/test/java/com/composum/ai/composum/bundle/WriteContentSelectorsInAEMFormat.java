@@ -11,5 +11,6 @@ public class WriteContentSelectorsInAEMFormat {
     public static void main(String[] args) {
         final String jsonfile = "/create/contentselectors.json";
         jsonListToXML(WriteContentSelectorsInAEMFormat.class, jsonfile, true);
+        System.out.println("CAUTION: the 'no content' is different (directly from source content)");
     }
 }

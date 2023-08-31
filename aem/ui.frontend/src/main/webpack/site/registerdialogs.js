@@ -27,9 +27,6 @@ import { ContentCreationDialog } from './ContentCreationDialog.js';
             // TODO implement some condition where the dialog makes sence. On editable.designDialog?
             return true;
         },
-        _postExecute() {
-            console.log("aitoolbar post execute ", arguments);
-        },
         isNonMulti: true,
     });
 
@@ -56,11 +53,21 @@ import { ContentCreationDialog } from './ContentCreationDialog.js';
                 dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
                 dialog.appendTo('body');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(editable, dialog);
+                new ContentCreationDialog(editable, dialog, retrieveContent(editable));
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
             }
         });
     }
+
+    function retrieveContent(editable) {
+        if (editable.dom.hasClass('text')) {
+            return editable.dom.find('.cmp-text').text();
+        } else {
+            console.error('dont know how to retrieve text from editable', editable);
+        }
+        debugger;
+    }
+
 })(jQuery, jQuery(document), this);

@@ -1,10 +1,13 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
+const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
+
 class ContentCreationDialog {
-    constructor(editable, dialog) {
+    constructor(editable, dialog, oldContent) {
         console.log("ContentCreationDialog constructor ", arguments);
         this.editable = editable;
         this.dialog = $(dialog);
+        this.oldContent = oldContent;
         this.assignElements();
         this.bindActions();
     }
@@ -30,6 +33,7 @@ class ContentCreationDialog {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
         this.$promptArea.on('change', this.onPromptAreaChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
+        this.$sourceContentArea.on('change', this.onSourceContentAreaChanged.bind(this));
     }
 
     onPredefinedPromptsChanged(event) {
@@ -47,9 +51,60 @@ class ContentCreationDialog {
 
     onContentSelectorChanged(event) {
         console.log("onContentSelectorChanged", arguments);
-        // TODO implement
+        // possible values widget, component, page, lastoutput, -
+        const key = this.$contentSelector.val();
+        switch (key) {
+            case 'lastoutput':
+                this.setSourceContentArea(this.$responseArea.val());
+                break;
+            case 'widget':
+                this.setSourceContentArea(this.oldContent);
+                break;
+            case 'component':
+                this.retrieveValue(this.editable.path, (value) => this.setSourceContentArea(value));
+                break;
+            case 'page':
+                this.retrieveValue(this.pagePath(this.editable.path), (value) => this.setSourceContentArea(value));
+                break;
+            case '-':
+                break;
+            default:
+                console.error('BUG! ContentCreationDialog: unknown content selector value', key);
+        }
     }
 
+    setSourceContentArea(value) {
+        this.$sourceContentArea.val(value);
+    }
+
+    onSourceContentAreaChanged(event) {
+        console.log("onSourceContentAreaChanged", arguments);
+        this.$contentSelector.val('-');
+    }
+
+    retrieveValue(path, callback) {
+        $.ajax({
+            url: Granite.HTTP.externalize(APPROXIMATE_MARKDOWN_SERVLET + path),
+            type: "GET",
+            dataType: "text",
+            success: function (data) {
+                debugger;
+                callback(data);
+            }.bind(this),
+            error: function (xhr, status, error) {
+                console.log("error loading approximate markdown", xhr, status, error);
+                debugger;
+            }
+        });
+
+        // http://localhost:4502/bin/cpm/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
+        // http://localhost:4502/bin/cpm/ai/approximated.markdown/content/wknd/language-masters/composum-ai-testpages/jcr:content?_=1693499009746
+    }
+
+    /** The path until the /jcr:content */
+    pagePath(path) {
+        return path.substring(0, path.lastIndexOf('/jcr:content') + '/jcr:content'.length);
+    }
 }
 
 export {ContentCreationDialog};
