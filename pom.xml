@@ -8,17 +8,24 @@
 		<version>1.7.0</version>
 	</parent>
 
-	<groupId>com.composum.ai</groupId>
-	<artifactId>composum-ai-integration</artifactId>
-	<version>0.4.2-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>com.composum.ai</groupId>
+    <artifactId>composum-ai-integration</artifactId>
+    <version>0.4.2-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<name>Composum AI</name>
-	<description>
-		Reactor for Composum AI, a set of modules to provide AI based services for CMS like Composum
-		Pages or AEM
-	</description>
-	<url>https://github.com/ist-dresden/composum-AI</url>
+    <name>Composum AI</name>
+    <description>
+        Reactor for Composum AI, a set of modules to provide AI based services for CMS like Composum
+        Pages or AEM
+    </description>
+    <url>https://github.com/ist-dresden/composum-AI</url>
+    <scm>
+        <connection>scm:git:https://github.com/ist-dresden/composum-AI.git</connection>
+        <developerConnection>scm:git:https://github.com/ist-dresden/composum-AI.git
+        </developerConnection>
+        <url>https://github.com/ist-dresden/composum-AI.git</url>
+        <tag>HEAD</tag>
+    </scm>
 
 	<modules>
 		<module>backend</module>
@@ -26,18 +33,18 @@
 		<module>aem</module>
 	</modules>
 
-	<properties>
-		<package.group>com/composum/ai</package.group>
-	</properties>
+    <properties>
+        <package.group>com/composum/ai</package.group>
+    </properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.theokanning.openai-gpt3-java</groupId>
-				<artifactId>api</artifactId>
-				<version>0.12.0</version>
-				<scope>provided</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.theokanning.openai-gpt3-java</groupId>
+                <artifactId>api</artifactId>
+                <version>0.12.0</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
