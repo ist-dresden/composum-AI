@@ -18,12 +18,11 @@
         Reactor for Composum AI, a set of modules to provide AI based services for CMS like Composum
         Pages or AEM
     </description>
-    <url>https://github.com/ist-dresden/composum-AI</url>
+    <url>${siteurl}</url>
     <scm>
-        <connection>scm:git:https://github.com/ist-dresden/composum-AI.git</connection>
-        <developerConnection>scm:git:https://github.com/ist-dresden/composum-AI.git
-        </developerConnection>
-        <url>https://github.com/ist-dresden/composum-AI.git</url>
+        <connection>scm:git:${giturl}</connection>
+        <developerConnection>scm:git:${giturl}</developerConnection>
+        <url>${giturl}</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -35,6 +34,8 @@
 
     <properties>
         <package.group>com/composum/ai</package.group>
+        <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
+        <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
     </properties>
 
     <dependencyManagement>
