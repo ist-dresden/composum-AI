@@ -10,6 +10,7 @@ class ContentCreationDialog {
         this.oldContent = oldContent;
         this.assignElements();
         this.bindActions();
+        this.setSourceContentArea(oldContent);
     }
 
     findSingleElement(selector) {
@@ -88,12 +89,10 @@ class ContentCreationDialog {
             type: "GET",
             dataType: "text",
             success: function (data) {
-                debugger;
                 callback(data);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading approximate markdown", xhr, status, error);
-                debugger;
             }
         });
 

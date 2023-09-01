@@ -53,6 +53,7 @@ import { ContentCreationDialog } from './ContentCreationDialog.js';
                 dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
                 dialog.appendTo('body');
                 dialog.get()[0].show(); // call Coral function on the element.
+                dialog.find('coral-dialog-footer').children().appendTo(dialog.find('coral-dialog-header div.cq-dialog-actions'));
                 new ContentCreationDialog(editable, dialog, retrieveContent(editable));
             }.bind(this),
             error: function (xhr, status, error) {
