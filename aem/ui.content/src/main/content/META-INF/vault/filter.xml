@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
-    <filter root="/conf/composum-ai" mode="merge"/>
-    <filter root="/content/composum-ai" mode="merge"/>
-    <filter root="/content/dam/composum-ai/asset.jpg" mode="merge"/>
+    <filter root="/conf/composum-ai"/>
+    <filter root="/content/composum-ai"/>
+    <filter root="/content/dam/composum-ai"/>
     <filter root="/content/experience-fragments/composum-ai" mode="merge"/>
 </workspaceFilter>
