@@ -1,5 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
+import {AICreate} from './AICreate.js';
+
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
@@ -11,6 +13,7 @@ class ContentCreationDialog {
         this.assignElements();
         this.bindActions();
         this.setSourceContentArea(oldContent);
+        this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
     }
 
     findSingleElement(selector) {
@@ -35,6 +38,7 @@ class ContentCreationDialog {
         this.$promptArea.on('change', this.onPromptAreaChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContentArea.on('change', this.onSourceContentAreaChanged.bind(this));
+        this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
     }
 
     onPredefinedPromptsChanged(event) {
@@ -104,6 +108,33 @@ class ContentCreationDialog {
     pagePath(path) {
         return path.substring(0, path.lastIndexOf('/jcr:content') + '/jcr:content'.length);
     }
+
+    onGenerateButtonClicked(event) {
+        console.log("onGenerateButtonClicked", arguments);
+        const data = {
+            prompt: this.$promptArea.val(),
+            source: this.$sourceContentArea.val(),
+            textLength: this.$textLengthSelector.val()
+        };
+        console.log("createContent", data);
+        this.createServlet.createContent(data);
+    }
+
+    streamingCallback(data) {
+        console.log("ContentCreationDialog streamingCallback", arguments);
+        this.$responseArea.val(data); // XXX
+    }
+
+    doneCallback(data) {
+        console.log("ContentCreationDialog doneCallback", arguments);
+        this.$responseArea.val(data); // XXX
+    }
+
+    errorCallback(data) {
+        console.log("ContentCreationDialog errorCallback", arguments);
+        this.$responseArea.val(data); // XXX
+    }
+
 }
 
 export {ContentCreationDialog};

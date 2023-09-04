@@ -60,12 +60,12 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     /**
      * Parameter to transmit a text on which ChatGPT is to operate - not as instructions but as data.
      */
-    public static final String PARAMETER_TEXT = "text";
+    public static final String PARAMETER_SOURCE = "source";
 
     /**
      * Parameter with a JCR path that is used as input text on which ChatGPT is to operate - not as instructions but as data.
      */
-    public static final String PARAMETER_INPUTPATH = "inputPath";
+    public static final String PARAMETER_SOURCEPATH = "sourcePath";
 
     /**
      * Parameter to transmit a prompt on which ChatGPT is to operate - that is, the instructions.
@@ -227,12 +227,12 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
         String prompt = getMandatoryParameter(request, response, PARAMETER_PROMPT);
         String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
-        String inputPath = request.getParameter(PARAMETER_INPUTPATH);
-        String inputText = request.getParameter(PARAMETER_TEXT);
-        String chat = request.getParameter(PARAMETER_CHATHISTORY);
-        if (isNoneBlank(inputPath, inputText) || isAllBlank(inputPath, inputText)) {
-            LOG.warn("Exacly one of inputPath are inputText required, given where inputPath {} , inputText {}", isNotBlank(inputPath), isNotBlank(inputText));
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exactly one of inputPath and inputText needs to be given, given where inputPath " + isNotBlank(inputPath) + " , inputText " + isNotBlank(inputText));
+        String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
+        String sourceText = request.getParameter(PARAMETER_SOURCE);
+        String chatHistory = request.getParameter(PARAMETER_CHATHISTORY);
+        if (isNoneBlank(sourcePath, sourceText) || isAllBlank(sourcePath, sourceText)) {
+            LOG.warn("Exacly one of sourcePath are sourceText required, given where sourcePath {} , sourceText {}", isNotBlank(sourcePath), isNotBlank(sourceText));
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exactly one of sourcePath and sourceText needs to be given, given where sourcePath " + isNotBlank(sourcePath) + " , sourceText " + isNotBlank(sourceText));
             return;
         }
         boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
@@ -245,7 +245,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 textLength = matcher.group(2);
             }
         }
-        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response);
+        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chatHistory, response);
 
         String fullPrompt = prompt;
         if (isNotBlank(textLength)) {
@@ -255,21 +255,21 @@ public class AICreateServlet extends SlingAllMethodsServlet {
             fullPrompt = fullPrompt + "\n\n" +
                     "Important: your response must not be Markdown but be completely in HTML and begin with <p>, lists be HTML <ul> or <ol> and so forth!";
         }
-        if (isNotBlank(inputPath)) {
-            Resource resource = request.getResourceResolver().getResource(inputPath);
+        if (isNotBlank(sourcePath)) {
+            Resource resource = request.getResourceResolver().getResource(sourcePath);
             if (resource == null) {
-                LOG.warn("No resource found at {}", inputPath);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resource found at " + inputPath);
+                LOG.warn("No resource found at {}", sourcePath);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resource found at " + sourcePath);
                 return;
             } else {
-                inputText = markdownService.approximateMarkdown(resource);
+                sourceText = markdownService.approximateMarkdown(resource);
             }
         }
 
         EventStream callback = new EventStream();
         String id = saveStream(callback, request);
-        if (isNotBlank(inputText)) {
-            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, additionalParameters, callback);
+        if (isNotBlank(sourceText)) {
+            contentCreationService.executePromptOnTextStreaming(fullPrompt, sourceText, additionalParameters, callback);
         } else {
             contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
         }
