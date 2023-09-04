@@ -101,7 +101,7 @@ public class AIServlet extends AbstractServiceServlet {
     /**
      * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
      */
-    public static final String PARAMETER_MAXWORDS = "maxtokens";
+    public static final String PARAMETER_MAXWORDS = "maxwords";
 
     /**
      * Optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
@@ -170,7 +170,7 @@ public class AIServlet extends AbstractServiceServlet {
     public static final String RESULTKEY_STREAMID = "streamid";
 
     /**
-     * Session contains a map at this key thqt maps the streamids to the streaming handle.
+     * Session contains a map at this key that maps the streamids to the streaming handle.
      */
     public static final String SESSIONKEY_STREAMING = AIServlet.class.getName() + ".streaming";
 
@@ -256,7 +256,9 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
-        return streams.get(streamId);
+        EventStream stream = streams.get(streamId);
+        streams.remove(streamId);
+        return stream;
     }
 
     protected abstract class AbstractGPTServletOperation implements ServletOperation {
