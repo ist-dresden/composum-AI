@@ -1,0 +1,301 @@
+package com.composum.ai.backend.slingbase;
+
+import static org.apache.commons.lang3.StringUtils.isAllBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.servlets.HttpConstants;
+import org.apache.sling.api.servlets.ServletResolverConstants;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.jetbrains.annotations.NotNull;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
+import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+
+/**
+ * Servlet providing the various services from the backend as servlet, which are useable for the authors.
+ */
+@Component(service = Servlet.class,
+        property = {
+                Constants.SERVICE_DESCRIPTION + "=Composum AI Backend Servlet",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/create",
+                ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
+                ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
+        })
+public class AICreateServlet extends SlingAllMethodsServlet {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AICreateServlet.class);
+
+    /**
+     * Parameter to transmit a text on which ChatGPT is to operate - not as instructions but as data.
+     */
+    public static final String PARAMETER_TEXT = "text";
+
+    /**
+     * Parameter with a JCR path that is used as input text on which ChatGPT is to operate - not as instructions but as data.
+     */
+    public static final String PARAMETER_INPUTPATH = "inputPath";
+
+    /**
+     * Parameter to transmit a prompt on which ChatGPT is to operate - that is, the instructions.
+     */
+    public static final String PARAMETER_PROMPT = "prompt";
+
+    /**
+     * Parameter to transmit a chat history before the last prompt {@link #PARAMETER_PROMPT}. Format: array of serialized
+     * {@link GPTChatMessage}.
+     * E.g. <code>[{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}]</code>.
+     */
+    public static final String PARAMETER_CHATHISTORY = "chatHistory";
+
+    /**
+     * Optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
+     * That might lead to cutoff, as this is a hard limit and ChatGPT doesn't know about that during generation.
+     * So it's advisable to specify the desired text length in the prompt, too.
+     */
+    public static final String PARAMETER_MAXTOKENS = "maxtokens";
+
+    /**
+     * Optional boolean parameter that indicates the inputText and response are in HTML, not Markdown.
+     */
+    public static final String PARAMETER_RICHTEXT = "richText";
+
+    /**
+     * Description of intended response (generated text) length, optionally including maximum number of tokens,
+     * as e.g. in "1000|Several paragraphs of text".
+     */
+    public static final String PARAMETER_TEXTLENGTH = "textLength";
+
+    /**
+     * Session contains a map at this key that maps the streamids to the streaming handle.
+     */
+    public static final String SESSIONKEY_STREAMING = AICreateServlet.class.getName() + ".streaming";
+
+    /**
+     * The ID of the stream.
+     */
+    public static final String PARAMETER_STREAMID = "streamid";
+
+
+    @Reference
+    protected GPTChatCompletionService chatService;
+
+    @Reference
+    protected GPTContentCreationService contentCreationService;
+
+    @Reference
+    protected ApproximateMarkdownService markdownService;
+
+    protected BundleContext bundleContext;
+
+    protected Gson gson = new Gson();
+
+    @Activate
+    public void activate(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    /**
+     * Saves stream for streaming responses into session, to be retrieved with {@link #retrieveStream(String, SlingHttpServletRequest)}.
+     */
+    @SuppressWarnings("unchecked")
+    protected String saveStream(EventStream stream, SlingHttpServletRequest request) {
+        String streamId = UUID.randomUUID().toString();
+        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        if (streams == null) {
+            streams = (Map<String, EventStream>) (Map) CacheBuilder.newBuilder()
+                    .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).build().asMap();
+            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
+        }
+        streams.put(streamId, stream);
+        stream.setId(streamId);
+        return streamId;
+    }
+
+    protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
+        @SuppressWarnings("unchecked")
+        Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        EventStream stream = streams.get(streamId);
+        streams.remove(streamId); // using it more than once would lead to conflicts.
+        return stream;
+    }
+
+    /**
+     * Returns an event stream that was prepared by a previous operation, as a second request after a POST request returning
+     * a 303 redirect to this servlet, since only GET requests are supported by the EventStream class in browser.
+     * The event stream is stored in the session under the key {@link #SESSIONKEY_STREAMING} and is removed after
+     * the request.
+     * <p>
+     * In the event stream the generated response is put into 'data' . When the creation is finished, we create an event
+     * event 'finished' into the stream with data JSON like this: {"success":true,"data":{"result":{"finishreason":"STOP"}}}
+     * In case of errors, there will be an 'exception' event into the stream with data JSON like this: {"success":false,"title":"Internal error","messages":[{"level":"error","text":"something happened"}]}
+     */
+    @Override
+    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws IOException {
+        String streamId = request.getParameter(PARAMETER_STREAMID);
+        EventStream stream = retrieveStream(streamId, request);
+        if (stream == null) {
+            response.sendError(HttpServletResponse.SC_GONE, "Stream " + streamId + " not found (anymore?)");
+        } else {
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/event-stream");
+            response.setHeader("Cache-Control", "no-cache");
+            try (PrintWriter writer = response.getWriter()) {
+                stream.writeTo(writer);
+                if (stream.getWholeResponse() != null) {
+                    LOG.debug("Whole response for {} : {}", streamId, stream.getWholeResponse());
+                }
+            } catch (IOException | InterruptedException e) {
+                LOG.warn("Error writing to stream " + streamId, e);
+                Thread.currentThread().interrupt();
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error writing stream " + e);
+            }
+        }
+    }
+
+    protected Integer getOptionalInt(SlingHttpServletRequest request, SlingHttpServletResponse response, String parameterName) throws IOException {
+        String parameter = request.getParameter(parameterName);
+        if (parameter != null) {
+            try {
+                return Integer.parseInt(parameter);
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parameter " + parameterName + " must be a number");
+                throw new IllegalArgumentException("Parameter " + parameterName + " must be a number");
+            }
+        }
+        return null;
+    }
+
+    protected String getMandatoryParameter(SlingHttpServletRequest request, SlingHttpServletResponse response, String parameterName) throws IOException {
+        String parameter = request.getParameter(parameterName);
+        if (parameter == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parameter " + parameterName + " is mandatory");
+            throw new IllegalArgumentException("Parameter " + parameterName + " is mandatory");
+        }
+        return parameter;
+    }
+
+    /**
+     * Implements the content creation operation. Input parameters are:
+     * <ul>
+     *     <li>prompt: the prompt to execute</li>
+     *     <li>textLength: the maximum length of the generated text. If it starts with a number and a | then the number is
+     *     used as maxwords parameter, limiting the number of tokens, and the rest is transmitted in the prompt to ChatGPT.</li>
+     *     <li>inputPath: if a path is given, the markdown generated by the path is used as input</li>
+     *     <li>inputText: alternatively to the path, this text is used as input</li>
+     *     <li>chat: additional chat history before the prompt, as serialized {@link GPTChatMessage} array</li>
+     *     <li>richText: if true, the inputText and response are in HTML, not Markdown</li>
+     *     <li>maxtokens: optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
+     *     That might lead to cutoff, as this is a hard limit and ChatGPT doesn't know about that during generation.
+     *     So it's advisable to specify the desired text length in the prompt, too.</li>
+     * </ul>
+     * A successful response will return an HTTP 303 redirect to this servlet, with the streamid as parameter, which will deliver the result as event stream.
+     * Otherwise, it'll normally be an HTTP 400 with an error message.
+     */
+    @Override
+    protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
+        String prompt = getMandatoryParameter(request, response, PARAMETER_PROMPT);
+        String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
+        String inputPath = request.getParameter(PARAMETER_INPUTPATH);
+        String inputText = request.getParameter(PARAMETER_TEXT);
+        String chat = request.getParameter(PARAMETER_CHATHISTORY);
+        if (isNoneBlank(inputPath, inputText) || isAllBlank(inputPath, inputText)) {
+            LOG.warn("Exacly one of inputPath are inputText required, given where inputPath {} , inputText {}", isNotBlank(inputPath), isNotBlank(inputText));
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exactly one of inputPath and inputText needs to be given, given where inputPath " + isNotBlank(inputPath) + " , inputText " + isNotBlank(inputText));
+            return;
+        }
+        boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
+
+        int maxtokens = 1000; // some arbitrary default
+        if (isNotBlank(textLength)) {
+            Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
+            if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
+                maxtokens = Integer.parseInt(matcher.group(1));
+                textLength = matcher.group(2);
+            }
+        }
+        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response);
+
+        String fullPrompt = prompt;
+        if (isNotBlank(textLength)) {
+            fullPrompt = textLength + "\n\n" + fullPrompt;
+        }
+        if (richtext) {
+            fullPrompt = fullPrompt + "\n\n" +
+                    "Important: your response must not be Markdown but be completely in HTML and begin with <p>, lists be HTML <ul> or <ol> and so forth!";
+        }
+        if (isNotBlank(inputPath)) {
+            Resource resource = request.getResourceResolver().getResource(inputPath);
+            if (resource == null) {
+                LOG.warn("No resource found at {}", inputPath);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resource found at " + inputPath);
+                return;
+            } else {
+                inputText = markdownService.approximateMarkdown(resource);
+            }
+        }
+
+        EventStream callback = new EventStream();
+        String id = saveStream(callback, request);
+        if (isNotBlank(inputText)) {
+            contentCreationService.executePromptOnTextStreaming(fullPrompt, inputText, additionalParameters, callback);
+        } else {
+            contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
+        }
+
+        response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+        response.addHeader("Location", request.getRequestURI() + "?" + PARAMETER_STREAMID + "=" + id);
+    }
+
+    protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, HttpServletResponse response) throws IOException {
+        GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens);
+        additionalParameters = additionalParameters != null ? additionalParameters : new GPTChatRequest();
+        if (isNotBlank(chat)) {
+            try {
+                final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
+                    // empty
+                }.getType();
+
+                List<GPTChatMessage> messages = gson.fromJson(chat, listOfMyClassObject);
+                additionalParameters.addMessages(messages);
+            } catch (IllegalArgumentException | JsonSyntaxException e) {
+                LOG.warn("Invalid chat parameter: {}", chat, e);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid chat parameter: " + chat);
+                throw e;
+            }
+        }
+        return additionalParameters;
+    }
+
+}

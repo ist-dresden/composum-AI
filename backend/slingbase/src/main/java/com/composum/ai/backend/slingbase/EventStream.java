@@ -1,8 +1,9 @@
-package com.composum.ai.composum.bundle;
+package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Flow;
@@ -17,13 +18,8 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
-import com.composum.sling.core.servlet.Status;
 import com.google.gson.Gson;
 
-/**
- * @deprecated use slingbase EventStream
- */
-@Deprecated
 public class EventStream implements GPTCompletionCallback {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventStream.class);
@@ -58,7 +54,7 @@ public class EventStream implements GPTCompletionCallback {
 
     public void writeTo(PrintWriter writer) throws InterruptedException {
         while (true) {
-            String line = null;
+            String line;
             try {
                 line = queue.poll(60, TimeUnit.MINUTES); // XXX set to something sensible.
             } catch (InterruptedException e) {
@@ -86,16 +82,21 @@ public class EventStream implements GPTCompletionCallback {
         }
     }
 
+    /**
+     * Successfull conclusion; puts event 'finished' into the stream with data JSON like this:
+     * {"success":true,"data":{"result":{"finishreason":"STOP"}}}
+     */
     @Override
     public void onFinish(GPTFinishReason finishReason) {
         LOG.debug("EventStream.onFinish for {} : {}", id, finishReason);
         slowdown.flush();
         this.finishReason = finishReason;
-        Status status = new Status(null, null, LOG);
-        status.data(AIServlet.RESULTKEY).put(AIServlet.RESULTKEY_FINISHREASON, finishReason.name());
+        Map<String, Object> status = Map.of("success", true,
+                "data", Map.of(
+                        "result", Map.of("finishreason", finishReason.name())));
         queue.add("");
         queue.add("event: finished");
-        queue.add("data: " + status.getJsonString());
+        queue.add("data: " + gson.toJson(status));
         queue.add("");
         queue.add("");
         queue.add(QUEUEEND);
@@ -143,23 +144,29 @@ public class EventStream implements GPTCompletionCallback {
 
     protected void writeData(String data) {
         // data = XSS.filter(data); // OUCH - that breaks things sometimes and doesn't really work as the troublesome
-        // stuff could be spread out... TODO: find a better way to filter the output
+        // stuff could be spread out...
+        // TODO: find a better way to filter the output
         queue.add("data: " + gson.toJson(data));
         queue.add(""); // empty line to separate events and force processing of this event
         wholeResponse.append(data);
     }
 
+    /**
+     * Puts an 'exception' event into the stream with data JSON like this: {"success":false,"title":"Internal error","messages":[{"level":"error","text":"something happened"}]}
+     */
     @Override
     public void onError(Throwable throwable) {
         LOG.error("EventStream.onError for {} : {}", id, throwable.toString(), throwable);
         if (subscription != null) {
             subscription.cancel();
         }
-        Status status = new Status(null, null, LOG);
-        status.error("Internal error: " + throwable.toString(), throwable);
+        String errorDescription = throwable.toString();
+        Map<String, Object> status = Map.of("success", false,
+                "title", "Internal error",
+                "messages", List.of(Map.of("level", "error", "text", errorDescription)));
         queue.add("");
         queue.add("event: exception"); // do not use 'error' as event name as that is received when the connection is closed.
-        queue.add("data: " + status.getJsonString());
+        queue.add("data: " + gson.toJson(status));
         queue.add("");
         queue.add("");
         queue.add(QUEUEEND);

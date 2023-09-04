@@ -19,3 +19,37 @@ We will conform to the Javascript handling used AEM archetype and use ES6 module
 happens that some of the code could be used by both the Composum and AEM variant, we'll use the IIFE pattern used in 
 Composum, since ES6 module support wouldn't be easy to use in Composum as it'd need a separate frontend build since 
 the modules would have to be packed for use with Composum client libraries.
+
+## Structure of responses
+
+To make things compatible with the Composum Pages variant of Composum AI: if we generate a JSON response we generate 
+it in the same way as in Composum: e.g.
+{
+    "status": 200,
+    "success": true,
+    "warning": false,
+    "data": {
+        "result": {
+            "streamid": "7190c15e-bd98-4ceb-bd45-5e800b6370f0"
+        }
+    }
+}
+or in the error case:
+{
+  "status": 400,
+  "success": false,
+  "warning": false,
+  "title": "Error",
+  "messages": [
+    {
+      "level": "error",
+      "text": "error",
+      "rawText": "error",
+      "arguments": [
+        "arg1",
+        "arg2"
+      ],
+      "timestamp": <timestamp>
+    }
+  ]
+}
