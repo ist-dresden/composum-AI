@@ -16,7 +16,6 @@ class AICreate {
         this.runningxhr = $.ajax({
             url: Granite.HTTP.externalize(AICREATE_SERVLET),
             type: "POST",
-            dataType: "json",
             cache: false,
             data: data,
             success: this.ajaxSuccess.bind(this),
@@ -38,14 +37,14 @@ class AICreate {
     ajaxSuccess(data, status, jqXHR) {
         console.log("AICreate ajaxSuccess", arguments);
         this.runningxhr = undefined;
-        // the servlet returns a 303 redirect to the actual content
-        if (jqXHR.status === 303) {
+        // the servlet returns a 202 with a Location-redirect to the actual content
+        if (jqXHR.status === 202) {
             const location = jqXHR.getResponseHeader('Location');
             if (location) {
                 this.startEventStream(location);
             } else {
-                console.error("Bug: No Location header in 303 response", arguments);
-                this.errorCallback("Bug: No Location header in 303 response");
+                console.error("Bug: No Location header in 202 response", arguments);
+                this.errorCallback("Bug: No Location header in 202 response");
             }
         } else {
             console.error("Bug: Unexpected response code. ", arguments);
@@ -71,19 +70,19 @@ class AICreate {
 
     onStreamingMessage(eventSource, event) {
         console.log("AICreate onStreamingMessage", arguments);
-        this.streamingResult += event.data;
+        this.streamingResult += JSON.parse(event.data);
         this.streamingCallback(this.streamingResult);
-    }
-
-    onStreamingError(eventSource, event) {
-        console.log("AICreate onStreamingError", arguments);
-        this.errorCallback(event);
-        this.abortRunningCalls();
     }
 
     onStreamingFinished(event) {
         console.log("AICreate onStreamingFinished", arguments);
-        this.doneCallback(this.streamingResult, event);
+        this.doneCallback(this.streamingResult, JSON.parse(event.data));
+        this.abortRunningCalls();
+    }
+
+    onStreamingError(eventSource, event) {
+        console.log("AICreate onStreamingError", arguments);
+        this.errorCallback(event.data);
         this.abortRunningCalls();
     }
 

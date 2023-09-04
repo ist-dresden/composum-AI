@@ -153,7 +153,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
 
     /**
      * Returns an event stream that was prepared by a previous operation, as a second request after a POST request returning
-     * a 303 redirect to this servlet, since only GET requests are supported by the EventStream class in browser.
+     * a 202 with a 'Location' header  to this servlet, since only GET requests are supported by the EventStream class in browser.
      * The event stream is stored in the session under the key {@link #SESSIONKEY_STREAMING} and is removed after
      * the request.
      * <p>
@@ -164,6 +164,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     @Override
     protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws IOException {
         String streamId = request.getParameter(PARAMETER_STREAMID);
+        LOG.info("Retrieving stream {}", streamId);
         EventStream stream = retrieveStream(streamId, request);
         if (stream == null) {
             response.sendError(HttpServletResponse.SC_GONE, "Stream " + streamId + " not found (anymore?)");
@@ -220,7 +221,8 @@ public class AICreateServlet extends SlingAllMethodsServlet {
      *     That might lead to cutoff, as this is a hard limit and ChatGPT doesn't know about that during generation.
      *     So it's advisable to specify the desired text length in the prompt, too.</li>
      * </ul>
-     * A successful response will return an HTTP 303 redirect to this servlet, with the streamid as parameter, which will deliver the result as event stream.
+     * A successful response will return an HTTP 202 with a 'Location' header that is an URL to this servlet,
+     * with the streamid as parameter, which will deliver the result as event stream.
      * Otherwise, it'll normally be an HTTP 400 with an error message.
      */
     @Override
@@ -268,14 +270,16 @@ public class AICreateServlet extends SlingAllMethodsServlet {
 
         EventStream callback = new EventStream();
         String id = saveStream(callback, request);
+        LOG.info("Starting stream {}", id);
         if (isNotBlank(sourceText)) {
             contentCreationService.executePromptOnTextStreaming(fullPrompt, sourceText, additionalParameters, callback);
         } else {
             contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
         }
 
-        response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+        response.setStatus(HttpServletResponse.SC_ACCEPTED);
         response.addHeader("Location", request.getRequestURI() + "?" + PARAMETER_STREAMID + "=" + id);
+        LOG.info("Returning stream id {}", id);
     }
 
     protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, HttpServletResponse response) throws IOException {
