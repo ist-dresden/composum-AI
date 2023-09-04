@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.composum.chatgpt.base"},{"l":"com.composum.chatgpt.base.impl"},{"l":"com.composum.chatgpt.base.service"},{"l":"com.composum.chatgpt.base.service.chat"},{"l":"com.composum.chatgpt.base.service.chat.impl"}]
