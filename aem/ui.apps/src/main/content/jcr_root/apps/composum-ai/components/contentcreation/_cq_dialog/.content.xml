@@ -74,7 +74,6 @@
                                             fieldLabel="Source Content ('Data' for the instructions)" rows="15"
                                             name="./sourceContent" granite:class="composum-ai-source-content"/>
 
-                                    <!--
                                     <sourceText
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="cq/gui/components/authoring/dialog/richtext"
@@ -200,8 +199,6 @@
                                             </cui>
                                         </uiSettings>
                                     </sourceText>
-                                    -->
-
                                 </items>
                             </sourceFieldset>
                         </items>

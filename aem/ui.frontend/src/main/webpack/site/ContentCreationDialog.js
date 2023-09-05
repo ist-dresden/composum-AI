@@ -14,6 +14,12 @@ class ContentCreationDialog {
         this.bindActions();
         this.setSourceContentArea(oldContent);
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+        this.fullscreen();
+    }
+
+    fullscreen() {
+        this.dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
+        this.dialog.find('coral-dialog-footer').children().appendTo(this.dialog.find('coral-dialog-header div.cq-dialog-actions'));
     }
 
     findSingleElement(selector) {
