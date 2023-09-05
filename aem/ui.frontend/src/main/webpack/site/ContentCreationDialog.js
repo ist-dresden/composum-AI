@@ -5,11 +5,12 @@ import {AICreate} from './AICreate.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
-    constructor(dialog, path, oldContent) {
+    constructor(dialog, path, oldContent, writebackCallback) {
         console.log("ContentCreationDialog constructor ", arguments);
         this.path = path;
         this.dialog = $(dialog);
         this.oldContent = oldContent;
+        this.removeFormAction();
         this.assignElements();
         this.bindActions();
         this.setSourceContentArea(oldContent);
@@ -20,6 +21,13 @@ class ContentCreationDialog {
     fullscreen() {
         this.dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
         this.dialog.find('coral-dialog-footer').children().appendTo(this.dialog.find('coral-dialog-header div.cq-dialog-actions'));
+    }
+
+    removeFormAction() {
+        // we handle the submit ourselves.
+        let form = this.dialog.find('form');
+        form.removeAttr('action');
+        form.removeAttr('method');
     }
 
     findSingleElement(selector) {
@@ -198,7 +206,9 @@ class ContentCreationDialog {
 
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
-        // XXX
+        if (_.isFunction(this.writebackCallback)) {
+            this.writebackCallback(this.getResponseArea());
+        }
     }
 
 }

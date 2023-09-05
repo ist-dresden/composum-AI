@@ -37,7 +37,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
         }
     });
 
-    function showCreateDialog(path, content) {
+    function showCreateDialog(path, content, writebackCallback) {
         const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -52,7 +52,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
                 dialog.attr('id', dialogId);
                 dialog.appendTo('body');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(dialog, path, content);
+                new ContentCreationDialog(dialog, path, content, writebackCallback);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
@@ -91,7 +91,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
                 gearsEdit.click(function (event) {
                     console.log("createButton click", arguments);
                     const formAction = $(textarea).closest('form').attr('action');
-                    showCreateDialog(formAction, textarea.value);
+                    showCreateDialog(formAction, textarea.value, (newvalue) => $(textarea).val(newvalue));
                 });
             }
         );
