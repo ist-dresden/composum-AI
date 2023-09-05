@@ -10,6 +10,7 @@ class ContentCreationDialog {
         this.path = path;
         this.dialog = $(dialog);
         this.oldContent = oldContent;
+        this.writebackCallback = writebackCallback;
         this.removeFormAction();
         this.assignElements();
         this.bindActions();
@@ -206,7 +207,7 @@ class ContentCreationDialog {
 
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
-        if (_.isFunction(this.writebackCallback)) {
+        if (typeof this.writebackCallback == 'function') {
             this.writebackCallback(this.getResponseArea());
         }
     }

@@ -13,6 +13,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
     const ACTION_NAME = "ComposumAI";
     const CREATE_DIALOG_URL = "/mnt/override/apps/composum-ai/components/contentcreation/_cq_dialog.html/conf/composum-ai/settings/dialogs/contentcreation";
 
+    /*
     const composumAiAction = new Granite.author.ui.ToolbarAction({
         name: ACTION_NAME,
         icon: ACTION_ICON,
@@ -36,6 +37,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
             console.log("Composum AI action is registered");
         }
     });
+    */
 
     function showCreateDialog(path, content, writebackCallback) {
         const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
@@ -99,4 +101,11 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
 
     channel.on('coral-overlay:open', insertCreateButtons.bind(this));
 
-})(jQuery, jQuery(document), this);
+    channel.on("foundation-contentloaded", function (e) {
+        Coral.commons.ready(channel, function (component) {
+            insertCreateButtons(e);
+        });
+    });
+
+})
+(jQuery, jQuery(document), this);

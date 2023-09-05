@@ -83,7 +83,7 @@ module.exports = {
     {
       ...libsBaseConfig,
       name: 'clientlib-site',
-      categories: ['composum-ai.site', 'cq.authoring.editor.sites.page.hook'],
+      categories: ['composum-ai.site', 'cq.authoring.dialog'],
       dependencies: ['composum-ai.dependencies'],
       assets: {
         // Copy entrypoint scripts and stylesheets into the respective ClientLib
