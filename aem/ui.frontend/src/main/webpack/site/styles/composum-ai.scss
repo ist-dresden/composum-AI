@@ -1,0 +1,8 @@
+
+
+//== Move the create dialog icon a bit to the right to avoid overlapping with the help icon.
+//== we make that horribly specific to override the default coral style there
+
+.coral-Form--vertical .coral-Form-fieldwrapper .coral-Form-fieldinfo.composum-ai-iconshiftleft {
+    right: 18px;
+}

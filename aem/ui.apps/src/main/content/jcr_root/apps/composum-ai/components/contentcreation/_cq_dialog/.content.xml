@@ -9,7 +9,8 @@
           width="90%"
           suppressFormUiBehavior="{Boolean}true"
           mode="edit">
-    <content jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
+    <content jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container"
+             granite:class="composum-ai-dialog">
         <items jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured">
             <promptColumns
                     jcr:primaryType="nt:unstructured"
@@ -73,8 +74,7 @@
                                             fieldDescription="The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed."
                                             fieldLabel="Source Content ('Data' for the instructions)" rows="15"
                                             name="./sourceContent" granite:class="composum-ai-source-content"/>
-
-                                    <sourceText
+                                    <!-- <sourceText
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="cq/gui/components/authoring/dialog/richtext"
                                             fieldLabel="Source Text"
@@ -198,7 +198,7 @@
                                                         toolbar="[table#insertcolumn-before,table#insertcolumn-after,table#removecolumn,-,table#insertrow-before,table#insertrow-after,table#removerow,-,table#mergecells-right,table#mergecells-down,table#mergecells,table#splitcell-horizontal,table#splitcell-vertical,-,table#selectrow,table#selectcolumn,-,table#ensureparagraph,-,table#modifytableandcell,table#removetable,-,undo#undo,undo#redo,-,table#exitTableEditing,-]"/>
                                             </cui>
                                         </uiSettings>
-                                    </sourceText>
+                                    </sourceText> -->
                                 </items>
                             </sourceFieldset>
                         </items>

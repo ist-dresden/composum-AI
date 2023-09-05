@@ -20,7 +20,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
         order: "last",
         execute: function (editable) {
             console.log("aitoolbar execute", arguments);
-            showDialog(editable);
+            showCreateDialog(editable.path, retrieveContent(editable));
         },
         condition: function (editable) {
             console.log("aitoolbar editable", arguments);
@@ -37,7 +37,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
         }
     });
 
-    function showDialog(editable) {
+    function showCreateDialog(path, content) {
         const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -52,7 +52,7 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
                 dialog.attr('id', dialogId);
                 dialog.appendTo('body');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(editable, dialog, retrieveContent(editable));
+                new ContentCreationDialog(dialog, path, content);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
@@ -71,21 +71,28 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
 
     function insertCreateButtons(event) {
         console.log("insertCreateButton", arguments);
-        // find all coral-icon
-        // <coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS" icon="infoCircle" ... </coral-icon>
-        // and add another icon beside it
-        // To make sure we don't do that twice we add a data-comp-ai-iconsadded attribute to the infoCircle.
-        $(event.target).find('coral-icon[icon="infoCircle"][data-comp-ai-iconsadded!="true"]').each(
-            function (index, element) {
-                console.log("insertCreateButton element", element);
+        if ($(event.target).find('.composum-ai-dialog').size() > 0) {
+            return; // don't insert buttons into our own dialog
+        }
+        $(event.target).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
+            function (index, textarea) {
+                console.log("insertCreateButton textarea", textarea);
                 const gearsEdit = $(
                     '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" icon="gearsEdit" role="img" size="S">\n' +
                     '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
                     '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
                     '  </svg>\n' +
                     '</coral-icon>');
-                gearsEdit.insertBefore(element);
-                element.setAttribute('data-comp-ai-iconsadded', 'true');
+                if ($(textarea.parentElement).find('coral-icon').size() > 0) {
+                    gearsEdit.addClass('composum-ai-iconshiftleft');
+                }
+                gearsEdit.insertAfter(textarea);
+                textarea.setAttribute('data-comp-ai-iconsadded', 'true');
+                gearsEdit.click(function (event) {
+                    console.log("createButton click", arguments);
+                    const formAction = $(textarea).closest('form').attr('action');
+                    showCreateDialog(formAction, textarea.value);
+                });
             }
         );
     }

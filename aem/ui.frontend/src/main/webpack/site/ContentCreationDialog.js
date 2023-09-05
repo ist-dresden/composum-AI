@@ -5,9 +5,9 @@ import {AICreate} from './AICreate.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
-    constructor(editable, dialog, oldContent) {
+    constructor(dialog, path, oldContent) {
         console.log("ContentCreationDialog constructor ", arguments);
-        this.editable = editable;
+        this.path = path;
         this.dialog = $(dialog);
         this.oldContent = oldContent;
         this.assignElements();
@@ -84,10 +84,10 @@ class ContentCreationDialog {
                 this.setSourceContentArea(this.oldContent);
                 break;
             case 'component':
-                this.retrieveValue(this.editable.path, (value) => this.setSourceContentArea(value));
+                this.retrieveValue(this.path, (value) => this.setSourceContentArea(value));
                 break;
             case 'page':
-                this.retrieveValue(this.pagePath(this.editable.path), (value) => this.setSourceContentArea(value));
+                this.retrieveValue(this.pagePath(this.path), (value) => this.setSourceContentArea(value));
                 break;
             case '-':
                 break;
@@ -132,7 +132,13 @@ class ContentCreationDialog {
 
     /** The path until the /jcr:content */
     pagePath(path) {
-        return path.substring(0, path.lastIndexOf('/jcr:content') + '/jcr:content'.length);
+        if (path.lastIndexOf('/jcr:content') > 0) {
+            return path.substring(0, path.lastIndexOf('/jcr:content') + '/jcr:content'.length);
+        } else if (path.lastIndexOf('_jcr_content') > 0) {
+            return path.substring(0, path.lastIndexOf('_jcr_content') + '_jcr_content'.length);
+        } else {
+            return path;
+        }
     }
 
     onGenerateButtonClicked(event) {
