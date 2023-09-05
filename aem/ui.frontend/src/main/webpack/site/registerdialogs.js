@@ -3,7 +3,7 @@
  * Thanks to https://techforum.medium.com/how-to-connect-adobe-experience-manager-aem-with-chatgpt-312651291713 for hints!
  */
 
-import { ContentCreationDialog } from './ContentCreationDialog.js';
+import {ContentCreationDialog} from './ContentCreationDialog.js';
 
 (function ($, channel, window, undefined) {
     "use strict";
@@ -65,8 +65,31 @@ import { ContentCreationDialog } from './ContentCreationDialog.js';
             return editable.dom.find('.cmp-text').text();
         } else {
             console.error('dont know how to retrieve text from editable', editable);
+            debugger;
         }
-        debugger;
     }
+
+    function insertCreateButtons(event) {
+        console.log("insertCreateButton", arguments);
+        // find all coral-icon
+        // <coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS" icon="infoCircle" ... </coral-icon>
+        // and add another icon beside it
+        // To make sure we don't do that twice we add a data-comp-ai-iconsadded attribute to the infoCircle.
+        $(event.target).find('coral-icon[icon="infoCircle"][data-comp-ai-iconsadded!="true"]').each(
+            function (index, element) {
+                console.log("insertCreateButton element", element);
+                const gearsEdit = $(
+                    '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" icon="gearsEdit" role="img" size="S">\n' +
+                    '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
+                    '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
+                    '  </svg>\n' +
+                    '</coral-icon>');
+                gearsEdit.insertBefore(element);
+                element.setAttribute('data-comp-ai-iconsadded', 'true');
+            }
+        );
+    }
+
+    channel.on('coral-overlay:open', insertCreateButtons.bind(this));
 
 })(jQuery, jQuery(document), this);
