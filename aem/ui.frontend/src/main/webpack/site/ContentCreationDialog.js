@@ -39,6 +39,18 @@ class ContentCreationDialog {
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContentArea.on('change', this.onSourceContentAreaChanged.bind(this));
         this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
+        this.findSingleElement('.composum-ai-stop-button').on('click', function(){
+            this.createServlet.abortRunningCalls();
+            this.setLoading(false);
+        }.bind(this));
+        this.findSingleElement('.composum-ai-reset-button').on('click', function(){
+            this.$promptArea.val('');
+            this.setSourceContentArea(this.oldContent);
+            this.setResponseArea('');
+            this.onPredefinedPromptsChanged();
+            this.onContentSelectorChanged();
+        }.bind(this));
+        this.findSingleElement('.cq-dialog-submit').on('click', this.onSubmit.bind(this));
     }
 
     onPredefinedPromptsChanged(event) {
@@ -60,7 +72,7 @@ class ContentCreationDialog {
         const key = this.$contentSelector.val();
         switch (key) {
             case 'lastoutput':
-                this.setSourceContentArea(this.$responseArea.val());
+                this.setSourceContentArea(this.getResponseArea());
                 break;
             case 'widget':
                 this.setSourceContentArea(this.oldContent);
@@ -80,6 +92,14 @@ class ContentCreationDialog {
 
     setSourceContentArea(value) {
         this.$sourceContentArea.val(value);
+    }
+
+    setResponseArea(value) {
+        this.$responseArea.val(value);
+    }
+
+    getResponseArea() {
+        return this.$responseArea.val();
     }
 
     onSourceContentAreaChanged(event) {
@@ -111,28 +131,62 @@ class ContentCreationDialog {
 
     onGenerateButtonClicked(event) {
         console.log("onGenerateButtonClicked", arguments);
+        this.showError(undefined);
         const data = {
             prompt: this.$promptArea.val(),
             source: this.$sourceContentArea.val(),
             textLength: this.$textLengthSelector.val()
         };
         console.log("createContent", data);
+        this.setLoading(true);
         this.createServlet.createContent(data);
     }
 
     streamingCallback(data) {
         console.log("ContentCreationDialog streamingCallback", arguments);
-        this.$responseArea.val(data); // XXX
+        this.setResponseArea(data);
     }
 
     doneCallback(data) {
         console.log("ContentCreationDialog doneCallback", arguments);
-        this.$responseArea.val(data); // XXX
+        if (data && data.data && data.data.result && data.data.result.finishreason === 'STOP') {
+            this.showError('The generated content stopped because of the length restriction.');
+        } else {
+            this.showError(undefined);
+        }
+        this.setLoading(false);
     }
 
     errorCallback(data) {
         console.log("ContentCreationDialog errorCallback", arguments);
-        this.$responseArea.val(data); // XXX
+        this.showError(data);
+        this.setLoading(false);
+    }
+
+    setLoading(loading) {
+        if (loading) {
+            this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
+            this.findSingleElement('.composum-ai-loading').removeClass('hidden');
+        } else {
+            this.findSingleElement('.composum-ai-generate-button').removeAttr('disabled');
+            this.findSingleElement('.composum-ai-loading').addClass('hidden');
+        }
+    }
+
+    /** Shows the error text if error is given, hides it if it's falsy. */
+    showError(error) {
+        if (!error) {
+            this.findSingleElement('.composum-ai-error-columns').addClass('hidden');
+        } else {
+            console.error("ContentCreationDialog showError", arguments);
+            this.findSingleElement('.composum-ai-alert').text(error);
+            this.findSingleElement('.composum-ai-error-columns').removeClass('hidden');
+        }
+    }
+
+    onSubmit(event) {
+        console.log("ContentCreationDialog onSubmit", arguments);
+        // XXX
     }
 
 }

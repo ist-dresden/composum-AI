@@ -29,7 +29,8 @@
                                                        fieldLabel="Overwrite Input Prompt with Predefined Prompt"
                                                        fieldDescription="This replaces the prompt (that is, the instructions to be executed by the AI) by one of a number of predefined prompts you can use directly or modify to create your own prompt."
                                                        size="10"
-                                                       name="./predefinedPrompts" granite:class="composum-ai-predefined-prompts">
+                                                       name="./predefinedPrompts"
+                                                       granite:class="composum-ai-predefined-prompts">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
@@ -39,7 +40,8 @@
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                                 fieldLabel="Input Prompt (Instructions)"
                                                 fieldDescription="The instructions to the AI that will be applied to the source text. If you like some examples you can select one of the predefined prompts - that will replace the content of this field."
-                                                name="./promptArea" rows="15" granite:class="composum-ai-prompt-textarea">
+                                                name="./promptArea" rows="15"
+                                                granite:class="composum-ai-prompt-textarea">
                                     </promptArea>
                                 </items>
                             </promptFieldset>
@@ -58,7 +60,8 @@
                                                      sling:resourceType="granite/ui/components/coral/foundation/form/select"
                                                      fieldLabel="Overwrite Source Content with the text from ..."
                                                      fieldDescription="Select which text the AI receives in addition to your prompt, if any. This can serve basically as data for your request to generate new text or modify this given text, if your prompt requires that."
-                                                     name="./contentSelector" granite:class="composum-ai-content-selector">
+                                                     name="./contentSelector"
+                                                     granite:class="composum-ai-content-selector">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
@@ -227,7 +230,7 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     granite:title="Aborts the content generation."
                                     text="Stop" granite:class="composum-ai-stop-button"/>
-                            <button
+                            <reset
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     granite:class="composum-ai-reset-button"
@@ -236,19 +239,24 @@
                             <textlengthLabel
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/foundation/text"
+                                    granite:class="_coral-Tool"
                                     text="Text Length"/>
                             <textLengthSelector jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/select"
-                                                fieldLabel=""
                                                 fieldDescription="The desired approximate length of the generated text."
-                                                name="./textLengthSelector" granite:class="composum-ai-text-length-selector">
+                                                name="./textLengthSelector"
+                                                granite:class="composum-ai-text-length-selector _coral-Tool">
                                 <datasource
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
                                         path="/conf/composum-ai/settings/dialogs/contentcreation/textlengths"/>
                             </textLengthSelector>
+                            <loading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="coral-Wait coral-Wait--large composum-ai-loading hidden"/>
                         </primary>
-                        <secondary
+                        <!-- <secondary
                                 jcr:primaryType="nt:unstructured">
                             <resetHistory
                                     jcr:primaryType="nt:unstructured"
@@ -268,10 +276,24 @@
                                     class="composum-ai-forward"
                                     granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
                                     text="Forward" granite:class="composum-ai-forward-button"/>
-                        </secondary>
+                        </secondary> -->
                     </generateActionbar>
                 </items>
             </generateButtonFieldset>
+
+            <errorColumns
+                    jcr:primaryType="nt:unstructured"
+                    granite:class="composum-ai-error-columns hidden"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                <items jcr:primaryType="nt:unstructured">
+                    <alert
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/alert"
+                            granite:class="composum-ai-alert"
+                            variant="error"
+                            text="Your error message here."/>
+                </items>
+            </errorColumns>
 
             <contentSuggestion
                     jcr:primaryType="nt:unstructured"
@@ -291,7 +313,7 @@
                             fieldLabel=""
                             name="./content" granite:class="composum-ai-response-field"/>
 
-                    <saveActionbar
+                    <!-- <saveActionbar
                             jcr:primaryType="nt:unstructured"
                             margin="{Boolean}false"
                             sling:resourceType="granite/ui/components/coral/foundation/actionbar">
@@ -313,7 +335,7 @@
                                      fieldDescription="Replace the content of the editor of the component property you were editing when you opened this dialog with the created text."
                                      text="Replace"/>
                         </primary>
-                    </saveActionbar>
+                    </saveActionbar> -->
                 </items>
             </contentSuggestion>
         </items>
