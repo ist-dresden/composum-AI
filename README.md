@@ -23,7 +23,8 @@ creation, review, summarizing, chat, you name it.
 At the current state, Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html). 
 A port to 
 [Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
-is intended, since both share quite some commonality through being based on the
+is [currently in progress](https://github.com/ist-dresden/composum-AI/issues/15) - both share quite some 
+commonality through being based on the
 [Apache Sling](https://sling.apache.org/) platform.
 Where possible and appropriate, components will remain platform-agnostic.
 Since [OpenAI](https://openai.com/)'s chat completion API, also available through as
