@@ -79,6 +79,21 @@ headers and footers and breadcrumbs and the like. -> Don't do that for now.
 https://www.opax.ai/ ; needs configuration of Adobe Granite CSRF Filter with additional excluded path /bin/chat and
 modifying Opax configuration
 
+## Sidebar AI
+
+/libs/wcm/core/content/editor/jcr:content/sidepanels/edit contains the code for the sidepanel. 
+
+https://github.com/Adobe-Consulting-Services/acs-aem-samples/issues/41 :
+var $sidePanelEdit = $("#SidePanel").find(".js-sidePanel-edit"),
+    $tabs = $sidePanelEdit.data("tabs");
+
+//add the page itree iframe in new tab
+$tabs.addItem({
+  tabContent: "Page Browser",
+  panelContent: getPageContent(),
+  active: false
+});
+
 ## References
 
 - https://github.com/adobe/aem-project-archetype /

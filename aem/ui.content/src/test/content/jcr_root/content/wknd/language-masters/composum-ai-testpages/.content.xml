@@ -23,15 +23,15 @@
                         sling:resourceType="wknd/components/text"
                         text="&lt;p>Text before&lt;/p>&#xd;&#xa;"
                         textIsRich="true"/>
-                <contentcreation
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="composum-ai/components/contentcreation"/>
                 <helloworld
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="composum-ai/test/components/testdialog"/>
+                <contentcreation
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/components/contentcreation"/>
                 <helloworld2
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="composum-ai/test/components/contentcreation"/>
+                        sling:resourceType="composum-ai/components/sidebarai"/>
                 <text_1433451153
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/text"

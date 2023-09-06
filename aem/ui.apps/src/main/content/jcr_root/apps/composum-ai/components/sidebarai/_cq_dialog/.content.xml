@@ -1,0 +1,631 @@
+<jcr:root jcr:primaryType="nt:unstructured" sling:resourceType="cq/gui/components/authoring/dialog"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          helpPath="https://www.example.net/"
+          extraClientlibs="[]"
+          jcr:title="Composum AI Sidebar"
+          mode="edit">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+        <items
+                jcr:primaryType="nt:unstructured">
+            <tabs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    margin="{Boolean}true"
+                    maximized="{Boolean}true"
+                    orientation="vertical"
+                    size="L">
+                <items
+                        jcr:primaryType="nt:unstructured">
+                    <assetsTab
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            granite:class="sidepanel-tab sidepanel-tab-assets editor-AssetFinder"
+                            jcr:title="Assets">
+                        <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                headerTitle="Search Assets"/>
+                        <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                icon="asset"/>
+                        <items
+                                jcr:primaryType="nt:unstructured">
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    granite:class="sidepanel-tab-title"
+                                    level="2"
+                                    text="Assets"/>
+                            <filterPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="filter-panel">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <search
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="rail-view active"
+                                            view="search">
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <searchpanel
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                                    granite:class="coral-Form--vertical"
+                                                    granite:id="assetfinder-filter">
+                                                <items
+                                                        jcr:primaryType="nt:unstructured">
+                                                    <assettype
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                            granite:class="assetfilter type"
+                                                            emptyText="Images"
+                                                            name="assetfilter_type_selector"
+                                                            text="Images">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="General"/>
+                                                        <items
+                                                                jcr:primaryType="nt:unstructured"/>
+                                                    </assettype>
+                                                    <fulltext
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/coral/common/admin/customsearch/searchpredicates/fulltextpredicate"
+                                                            granite:id="assetsearch"
+                                                            emptyText="Filter"
+                                                            name="fulltext">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"/>
+                                                    </fulltext>
+                                                    <imagepath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_image_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/dam">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Images"/>
+                                                    </imagepath>
+                                                    <scene7path
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/coral/common/pathfields7"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            name="assetfilter_scene7_path">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Scene7"/>
+                                                    </scene7path>
+                                                    <manuscriptpath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            granite:comment="Manuscripts are deprecated in AEM 6.2. Use content fragments instead of manuscripts."
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_manuscript_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/dam">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Manuscripts"/>
+                                                    </manuscriptpath>
+                                                    <documentpath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_document_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/dam">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Documents"/>
+                                                    </documentpath>
+                                                    <videopath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_video_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/dam">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Videos"/>
+                                                    </videopath>
+                                                    <pagepath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_page_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Pages"/>
+                                                    </pagepath>
+                                                    <paragraphpath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Select page"
+                                                            fieldLabel="Path"
+                                                            name="assetfilter_paragraph_path"
+                                                            pickerSrc="/mnt/overlay/cq/gui/content/coral/common/form/pagefield/picker.html?path={value}"
+                                                            rootPath="/content"
+                                                            suggestionSrc="/mnt/overlay/cq/gui/content/coral/common/form/pagefield/suggestion{.offset,limit}.html?query={query}">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Paragraphs"/>
+                                                    </paragraphpath>
+                                                    <formassetpath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_form_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/dam/formsanddocuments">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Adaptive Forms"/>
+                                                    </formassetpath>
+                                                    <adaptivedocumentassetpath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_adaptiveDocument_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/dam/formsanddocuments">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Adaptive Documents"/>
+                                                    </adaptivedocumentassetpath>
+                                                    <designpackagepath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            name="assetfilter_designpackage_path"
+                                                            rootPath="/content/dam">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Design Packages"/>
+                                                    </designpackagepath>
+                                                    <s7conf
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                            granite:class="assetfilter s7"
+                                                            name="assetfilter_s7_selector"
+                                                            text="Configuration">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Scene7"/>
+                                                        <datasource
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="cq/gui/components/coral/common/s7confdatasource"/>
+                                                    </s7conf>
+                                                    <xfpath
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            granite:class="assetfilter path"
+                                                            emptyText="Enter path"
+                                                            fieldLabel="Path"
+                                                            filter="folder"
+                                                            name="assetfilter_xf_path"
+                                                            nodeTypes="nt:folder"
+                                                            rootPath="/content/experience-fragments">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="Experience Fragments"/>
+                                                    </xfpath>
+                                                </items>
+                                            </searchpanel>
+                                            <searchpanel2
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/foundation/container"
+                                                    id="assetfinder-filter-detail">
+                                                <items
+                                                        jcr:primaryType="nt:unstructured">
+                                                    <imagefilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/images"/>
+                                                    <scene7filters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/scene7"/>
+                                                    <manuscriptfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/manuscript"/>
+                                                    <documentfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/documents"/>
+                                                    <videofilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/videos"/>
+                                                    <pagefilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/pages"/>
+                                                    <paragraphfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/paragraphs"/>
+                                                    <productfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/products"/>
+                                                    <formAssetfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/form/formasset"/>
+                                                    <adaptiveDocumentAssetfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/form/adaptivedocumentasset"/>
+                                                    <xffilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/common/admin/includefacets"
+                                                            path="cq/search/facets/xf"/>
+                                                </items>
+                                            </searchpanel2>
+                                            <filterResultPanel
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/foundation/container"
+                                                    class="selected-filter-panel">
+                                                <items
+                                                        jcr:primaryType="nt:unstructured">
+                                                    <taglist
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/authoring/assetfinder/taglist"
+                                                            class="taglist"
+                                                            clearAll="true"
+                                                            name="assetfilter">
+                                                        <items
+                                                                jcr:primaryType="nt:unstructured"/>
+                                                    </taglist>
+                                                    <taglist-clearall
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/authoring/assetfinder/clearall"
+                                                            class="taglist-clearall"
+                                                            title="Clear All"/>
+                                                </items>
+                                            </filterResultPanel>
+                                        </items>
+                                    </search>
+                                </items>
+                            </filterPanel>
+                            <contentPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="content-panel editor-SidePanel-results">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <assetfinder
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="cq/gui/components/authoring/assetfinder"
+                                            class="assetfinder-content-container grid"/>
+                                    <emptyresult
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="emptyresult editor-SidePanel-resultMessage">
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <noresults
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="noresults"
+                                                    text="No results"/>
+                                            <retry
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="retry"
+                                                    text="Please try with another keyword"/>
+                                        </items>
+                                    </emptyresult>
+                                </items>
+                            </contentPanel>
+                        </items>
+                    </assetsTab>
+                    <componentsTab
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            granite:class="sidepanel-tab sidepanel-tab-components editor-ComponentBrowser"
+                            jcr:title="Components">
+                        <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                headerTitle="Search Components"/>
+                        <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                icon="treeExpandAll"/>
+                        <items
+                                jcr:primaryType="nt:unstructured">
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    granite:class="sidepanel-tab-title"
+                                    level="2"
+                                    text="Components"/>
+                            <filterPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="filter-panel coral-Form--vertical"
+                                    granite:id="components-filter">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <fulltext
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="cq/gui/components/coral/common/admin/customsearch/searchpredicates/fulltextpredicate"
+                                            emptyText="Filter"
+                                            name="fulltext">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"/>
+                                    </fulltext>
+                                    <componentsgroup
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            emptyText="Group"
+                                            name="componentfilter_group_selector"
+                                            text="All">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"/>
+                                    </componentsgroup>
+                                </items>
+                            </filterPanel>
+                            <contentPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="content-panel editor-SidePanel-results">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <emptyresult
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="emptyresult editor-SidePanel-resultMessage">
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <noresults
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="noresults"
+                                                    text="No results"/>
+                                            <retry
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="retry"
+                                                    text="Please try with another keyword"/>
+                                        </items>
+                                    </emptyresult>
+                                </items>
+                            </contentPanel>
+                            <componenttemplate
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="cq/gui/components/authoring/componentbrowser/templates/component"/>
+                        </items>
+                    </componentsTab>
+                    <contentTab
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            granite:class="sidepanel-tab sidepanel-tab-content editor-ContentTree"
+                            jcr:title="Content Tree">
+                        <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                headerTitle="Content Tree"/>
+                        <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                icon="layers"/>
+                        <items
+                                jcr:primaryType="nt:unstructured">
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    granite:class="sidepanel-tab-title"
+                                    level="2"
+                                    text="Content Tree"/>
+                            <contentPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="content-panel"/>
+                        </items>
+                    </contentTab>
+                    <remoteassetTab
+                            jcr:primaryType="nt:unstructured"
+                            jcr:mixinTypes="[granite:InternalArea]"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            granite:class="sidepanel-tab sidepanel-tab-remote-assets editor-RemoteAssetFinder"
+                            jcr:title="Connected Assets">
+                        <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                headerTitle="Search Connected Assets"/>
+                        <granite:rendercondition
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="dam/remoteassets/configured"/>
+                        <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                icon="cloud"/>
+                        <items
+                                jcr:primaryType="nt:unstructured">
+                            <origin
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="dam/remoteassets/components/remoteconfig"/>
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                    granite:class="sidepanel-tab-title"
+                                    text="Connected Assets"/>
+                            <filterPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="filter-panel">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <search
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="rail-view active"
+                                            view="search">
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <searchpanel
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                                    granite:class="coral-Form--vertical"
+                                                    granite:id="remote-assetfinder-filter">
+                                                <items
+                                                        jcr:primaryType="nt:unstructured">
+                                                    <fulltext
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/coral/common/admin/customsearch/searchpredicates/fulltextpredicate"
+                                                            granite:id="remoteassetsearch"
+                                                            emptyText="Filter"
+                                                            name="fulltext">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"/>
+                                                    </fulltext>
+                                                    <assettype
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                            granite:class="remote-assetfilter type"
+                                                            emptyText="Images"
+                                                            name="mimeType"
+                                                            text="Images">
+                                                        <granite:data
+                                                                jcr:primaryType="nt:unstructured"
+                                                                filterType="General"/>
+                                                        <items
+                                                                jcr:primaryType="nt:unstructured">
+                                                            <image
+                                                                    jcr:primaryType="nt:unstructured"
+                                                                    granite:id="remote-assetfilter-type image"
+                                                                    selected="{Boolean}true"
+                                                                    text="Images"
+                                                                    value="Images"/>
+                                                            <documents
+                                                                    jcr:primaryType="nt:unstructured"
+                                                                    granite:id="remote-assetfilter-type document"
+                                                                    text="Documents"
+                                                                    value="Documents"/>
+                                                        </items>
+                                                    </assettype>
+                                                </items>
+                                            </searchpanel>
+                                            <searchpanel2
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                                    granite:id="remote-assetfinder-filter-detail">
+                                                <items
+                                                        jcr:primaryType="nt:unstructured">
+                                                    <documentfilters
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="dam/remoteassets/components/includefacets"
+                                                            filterType="Documents">
+                                                        <content
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/foundation/contsys"
+                                                                jcr:title="Page Editor (Remote Documents search)"
+                                                                filterType="Documents"
+                                                                maxGeneratedOrder="20"
+                                                                predicatesConfig="/mnt/overlay/settings/cq/search/facets/formbuilderconfig/authoringpredicatetypes">
+                                                            <items
+                                                                    jcr:primaryType="nt:unstructured">
+                                                                <filetype
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="cq/gui/components/authoring/assetfinder/searchpredicates/optionspredicate"
+                                                                        class="remote-assetfilter-documents"
+                                                                        fieldLabel="Filetype"
+                                                                        filterType="fileType"
+                                                                        listOrder="2"
+                                                                        metaType="options"
+                                                                        name="jcr:content/metadata/dc:format"
+                                                                        optionPaths="[/libs/cq/gui/content/common/options/predicates/filetypes]"
+                                                                        singleSelect="{Boolean}false"
+                                                                        text="Filetype"/>
+                                                            </items>
+                                                        </content>
+                                                    </documentfilters>
+                                                </items>
+                                            </searchpanel2>
+                                        </items>
+                                    </search>
+                                </items>
+                            </filterPanel>
+                            <contentPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="remoteasset-content-panel editor-SidePanel-results">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <emptyresult
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="emptyresult editor-SidePanel-resultMessage">
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <noresults
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="noresults"
+                                                    text="No results"/>
+                                            <retry
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="retry"
+                                                    text="Please try with another keyword"/>
+                                        </items>
+                                    </emptyresult>
+                                    <errormsg
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="errormsg editor-SidePanel-resultMessage">
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <noresults
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="noresults"
+                                                    text="Couldn't connect to configured Connected Assets"/>
+                                            <retry
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    granite:class="retry"
+                                                    text="Potential SSL certificate issues or invalid Connected Assets URL/configuration. Please reach out to your administrator for assistance"/>
+                                        </items>
+                                    </errormsg>
+                                </items>
+                            </contentPanel>
+                        </items>
+                    </remoteassetTab>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>
