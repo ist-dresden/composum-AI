@@ -1,169 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-backend</artifactId>
-		<version>0.2.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.composum.chatgpt</groupId>
+        <artifactId>composum-chatgpt-integration-backend</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>composum-chatgpt-integration-backend-base</artifactId>
-	<packaging>bundle</packaging>
+    <artifactId>composum-chatgpt-integration-backend-base</artifactId>
+    <packaging>pom</packaging>
 
-	<name>Composum ChatGPT Integration::Backend::Base</name>
-	<description>
-		Basic functionality for ChatGPT integration, somewhat platform agnostic
-	</description>
-
-	<properties>
-		<wikitext.version>3.0.42</wikitext.version>
-	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.theokanning.openai-gpt3-java</groupId>
-			<artifactId>api</artifactId>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/com.knuddels/jtokkit -->
-		<dependency>
-		    <groupId>com.knuddels</groupId>
-		    <artifactId>jtokkit</artifactId>
-		    <version>0.5.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.mylyn.docs</groupId>
-			<artifactId>org.eclipse.mylyn.wikitext</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.mylyn.docs</groupId>
-			<artifactId>org.eclipse.mylyn.wikitext.markdown</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>1.15.4</version>
-		</dependency>
-
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-
-		<!-- Java Annotations -->
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
-
-		<!-- OSGi, Felix -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
-		</dependency>
-
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-		</dependency>
-
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Import-Package>
-							javax.annotation;version="[1,4)",
-							!javax.annotation.meta,
-							*
-						</Import-Package>
-						<Export-Package>
-							!com.composum.chatgpt.base.*.impl,
-							com.composum.chatgpt.base.*
-						</Export-Package>
-						<Embed-Dependency>
-							api*;groupId=com.theokanning.openai-gpt3-java,
-							jtokkit*;groupId=com.knuddels,
-							jsoup*,
-							org.eclipse.mylyn.wikitext*
-						</Embed-Dependency>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
-	<profiles>
-
-		<profile>
-			<id>uploadBundle</id>
-			<activation>
-				<property>
-					<name>upload.bundle</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.sling</groupId>
-						<artifactId>sling-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>install-bundle</id>
-								<phase>install</phase>
-								<goals>
-									<goal>install</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
-	</profiles>
+    <url>https://github.com/ist-dresden/composum-AI</url>
+    <!-- This is now a relocation pom to com.composum.ai:composum-ai-integration* -->
+    <distributionManagement>
+        <relocation>
+            <groupId>com.composum.ai</groupId>
+            <artifactId>composum-ai-integration-backend-base</artifactId>
+        </relocation>
+    </distributionManagement>
 
 </project>

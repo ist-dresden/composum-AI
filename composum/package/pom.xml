@@ -1,192 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-composum</artifactId>
-		<version>0.2.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.composum.chatgpt</groupId>
+        <artifactId>composum-chatgpt-integration-composum</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>composum-chatgpt-integration-composum-package</artifactId>
-	<packaging>content-package</packaging>
+    <artifactId>composum-chatgpt-integration-composum-package</artifactId>
+    <packaging>pom</packaging>
 
-	<name>Composum ChatGPT Integration::Composum::Package</name>
-	<description>
-		Composum specific package for ChatGPT Integration.
-		Contains the backend base bundle, the composum bundle and the code.
-	</description>
+    <url>https://github.com/ist-dresden/composum-AI</url>
+    <!-- This is now a relocation pom to com.composum.ai:composum-ai-integration* -->
+    <distributionManagement>
+        <relocation>
+            <groupId>com.composum.ai</groupId>
+            <artifactId>composum-ai-integration-composum-package</artifactId>
+        </relocation>
+    </distributionManagement>
 
-	<build>
-		<resources>
-
-			<resource>
-				<directory>src/main/content/jcr_root</directory>
-				<excludes>
-					<exclude>**/.vlt*</exclude>
-					<exclude>**/.DS_Store</exclude>
-					<exclude>**/.gitignore</exclude>
-					<exclude>**/*.scss</exclude>
-				</excludes>
-			</resource>
-
-			<resource>
-				<directory>${basedir}/src/main/content/META-INF</directory>
-				<targetPath>../vault-work/META-INF</targetPath>
-			</resource>
-
-			<resource>
-				<directory>target/generated-css/jcr_root</directory>
-				<excludes>
-					<exclude>**/*.map</exclude>
-					<exclude>**/mixins.css</exclude>
-					<exclude>**/variables.css</exclude>
-				</excludes>
-			</resource>
-
-		</resources>
-		<plugins>
-
-			<plugin>
-				<groupId>nl.geodienstencentrum.maven</groupId>
-				<artifactId>sass-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>generate-css</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>update-stylesheets</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>com.samaxes.maven</groupId>
-				<artifactId>minify-maven-plugin</artifactId>
-			</plugin>
-
-			<plugin>
-				<groupId>com.day.jcr.vault</groupId>
-				<artifactId>content-package-maven-plugin</artifactId>
-				<configuration>
-
-					<group>${package.group}</group>
-					<properties>
-						<createdBy>${package.company}</createdBy>
-					</properties>
-
-					<filters>
-						<filter>
-							<root>/libs/composum/chatgpt/pagesintegration</root>
-						</filter>
-						<filter>
-							<root>/libs/composum/chatgpt/install</root>
-							<includes>
-								<include>.*/composum-chatgpt-integration-backend-base.*\.jar</include>
-								<include>.*/composum-chatgpt-integration-composum-bundle.*\.jar</include>
-							</includes>
-						</filter>
-					</filters>
-
-					<embeddeds>
-						<embedded>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>composum-chatgpt-integration-backend-base</artifactId>
-							<target>/libs/composum/chatgpt/install</target>
-						</embedded>
-						<embedded>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
-							<target>/libs/composum/chatgpt/install</target>
-						</embedded>
-					</embeddeds>
-
-					<dependencies>
-						<dependency>
-							<group>com/composum/pages</group>
-							<name>composum-pages-stage-package</name>
-							<!-- Need WidgetTools and labelextensions mechanism from pages 1.5.1 -->
-							<version>1.5.1</version> --&gt;
-						</dependency>
-					</dependencies>
-
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</build>
-	<dependencies>
-
-		<!-- Composum -->
-		<dependency>
-			<groupId>com.composum.nodes</groupId>
-			<artifactId>composum-nodes-commons</artifactId>
-			<version>${composum.nodes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.composum.pages</groupId>
-			<artifactId>composum-pages-commons-bundle</artifactId>
-			<version>${composum.pages.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>composum-chatgpt-integration-backend-base</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<!-- Taglib support -->
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.scripting.jsp.taglib</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-		</dependency>
-
-	</dependencies>
-	<profiles>
-
-		<profile>
-			<id>installBundle</id>
-		</profile>
-		<profile>
-			<id>installPackage</id>
-			<activation>
-				<property>
-					<name>deploy.package</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.day.jcr.vault</groupId>
-						<artifactId>content-package-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>install-content-package</id>
-								<phase>install</phase>
-								<goals>
-									<goal>install</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>installTestContent</id>
-		</profile>
-
-	</profiles>
 </project>

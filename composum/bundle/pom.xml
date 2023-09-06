@@ -1,200 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration-composum</artifactId>
-		<version>0.2.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.composum.chatgpt</groupId>
+        <artifactId>composum-chatgpt-integration-composum</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
-	<packaging>bundle</packaging>
+    <artifactId>composum-chatgpt-integration-composum-bundle</artifactId>
+    <packaging>pom</packaging>
 
-	<name>Composum ChatGPT Integration::Composum::Bundle</name>
-	<description>
-		Composum specific bundle for ChatGPT integration
-	</description>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.composum.chatgpt</groupId>
-			<artifactId>composum-chatgpt-integration-backend-base</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<!--		&lt;!&ndash; Composum Pages &ndash;&gt;-->
-		<!--		<dependency>-->
-		<!--			<groupId>com.composum.pages</groupId>-->
-		<!--			<artifactId>composum-pages-commons-bundle</artifactId>-->
-		<!--			<version>${composum.pages.version}</version>-->
-		<!--		</dependency>-->
-
-		<!--		&lt;!&ndash; Composum Platform &ndash;&gt;-->
-		<!--		<dependency>-->
-		<!--			<groupId>com.composum.platform</groupId>-->
-		<!--			<artifactId>composum-platform-models-bundle</artifactId>-->
-		<!--			<version>${composum.platform.version}</version>-->
-		<!--		</dependency>-->
-		<!--		<dependency>-->
-		<!--			<groupId>com.composum.platform</groupId>-->
-		<!--			<artifactId>composum-platform-commons-bundle</artifactId>-->
-		<!--			<version>${composum.platform.version}</version>-->
-		<!--		</dependency>-->
-
-		<!-- Composum -->
-		<dependency>
-			<groupId>com.composum.nodes</groupId>
-			<artifactId>composum-nodes-commons</artifactId>
-			<version>${composum.nodes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.composum.pages</groupId>
-			<artifactId>composum-pages-commons-bundle</artifactId>
-			<version>${composum.pages.version}</version>
-		</dependency>
-
-		<!-- Other libraries -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-
-		<!-- Sling, JCR -->
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.jcr</groupId>
-			<artifactId>jcr</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-jcr-commons</artifactId>
-		</dependency>
-
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-
-		<!-- Java Annotations -->
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.tenant</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- OSGi, Felix -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
-		</dependency>
-
-		<!-- Web Application API -->
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-atinject_1.0_spec</artifactId>
-		</dependency>
-
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
-		</dependency>
-
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Import-Package>
-							javax.annotation.*;version="[1,4)",
-							!javax.annotation.meta,
-							*
-						</Import-Package>
-						<Export-Package>
-							com.composum.chatgpt.bundle.*
-						</Export-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
-	<profiles>
-
-		<profile>
-			<id>installBundle</id>
-		</profile>
-		<profile>
-			<id>installPackage</id>
-		</profile>
-		<profile>
-			<id>installTestContent</id>
-		</profile>
-
-	</profiles>
+    <url>https://github.com/ist-dresden/composum-AI</url>
+    <!-- This is now a relocation pom to com.composum.ai:composum-ai-integration* -->
+    <distributionManagement>
+        <relocation>
+            <groupId>com.composum.ai</groupId>
+            <artifactId>composum-ai-integration-composum-bundle</artifactId>
+        </relocation>
+    </distributionManagement>
 
 </project>

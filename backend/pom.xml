@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.composum.chatgpt</groupId>
-		<artifactId>composum-chatgpt-integration</artifactId>
-		<version>0.2.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.composum.chatgpt</groupId>
+        <artifactId>composum-chatgpt-integration</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>composum-chatgpt-integration-backend</artifactId>
-	<packaging>pom</packaging>
+    <artifactId>composum-chatgpt-integration-backend</artifactId>
+    <packaging>pom</packaging>
 
-	<name>Composum ChatGPT Integration::Backend</name>
-	<description>
-		Reactor for Composum ChatGPT Integration Backend modules.
-	</description>
+    <url>https://github.com/ist-dresden/composum-AI</url>
+    <!-- This is now a relocation pom to com.composum.ai:composum-ai-integration* -->
+    <distributionManagement>
+        <relocation>
+            <groupId>com.composum.ai</groupId>
+            <artifactId>composum-ai-integration-backend</artifactId>
+        </relocation>
+    </distributionManagement>
 
-	<modules>
-		<module>base</module>
-	</modules>
+    <modules>
+        <module>base</module>
+    </modules>
 
 </project>
