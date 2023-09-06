@@ -66,6 +66,7 @@ class ContentCreationDialog {
             this.onContentSelectorChanged();
         }.bind(this));
         this.findSingleElement('.cq-dialog-submit').on('click', this.onSubmit.bind(this));
+        this.findSingleElement('.cq-dialog-cancel').on('click', this.onCancel.bind(this));
     }
 
     onPredefinedPromptsChanged(event) {
@@ -210,6 +211,20 @@ class ContentCreationDialog {
         if (typeof this.writebackCallback == 'function') {
             this.writebackCallback(this.getResponseArea());
         }
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('removing dialog', this.dialog[0]);
+        // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
+        this.dialog[0].remove();
+    }
+
+    onCancel(event) {
+        console.log("ContentCreationDialog onCancel", arguments);
+        event.preventDefault();
+        event.stopPropagation();
+        // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
+        console.log('removing dialog', this.dialog[0]);
+        this.dialog[0].remove();
     }
 
 }
