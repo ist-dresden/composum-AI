@@ -218,17 +218,17 @@
                         <primary
                                 jcr:primaryType="nt:unstructured">
                             <generate
-                                    jcr:primaryType="nt:unstructured"
+                                    jcr:primaryType="nt:unstructured" icon="play"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     granite:title="Triggers the content generation according to the instructions and the source text. Please give that a couple of seconds."
                                     text="Generate" granite:class="composum-ai-generate-button"/>
                             <stop
-                                    jcr:primaryType="nt:unstructured"
+                                    jcr:primaryType="nt:unstructured" icon="stop"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     granite:title="Aborts the content generation."
                                     text="Stop" granite:class="composum-ai-stop-button"/>
                             <reset
-                                    jcr:primaryType="nt:unstructured"
+                                    jcr:primaryType="nt:unstructured" icon="delete"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     granite:class="composum-ai-reset-button"
                                     granite:title="Resets the form to the state when you opened it."
@@ -258,17 +258,17 @@
                             <resetHistory
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
-                                    class="composum-ai-reset-history"
+                                    class="composum-ai-reset-history" icon="deleteOutline"
                                     granite:title="Resets this form including the whole history."
                                     text="Reset History" granite:class="composum-ai-reset-history-button"/>
                             <back
-                                    jcr:primaryType="nt:unstructured"
+                                    jcr:primaryType="nt:unstructured" icon="back"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     class="composum-ai-back"
                                     granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
                                     text="Back" granite:class="composum-ai-back-button"/>
                             <forward
-                                    jcr:primaryType="nt:unstructured"
+                                    jcr:primaryType="nt:unstructured" icon="forward"
                                     sling:resourceType="granite/ui/components/coral/foundation/button"
                                     class="composum-ai-forward"
                                     granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."

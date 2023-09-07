@@ -5,10 +5,8 @@ import {AICreate} from './AICreate.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class SidePanelDialog {
-    constructor(dialog, path, pagePath) {
+    constructor(dialog) {
         console.log("SidePanelDialog constructor ", arguments);
-        this.path = path;
-        this.pagePath = pagePath;
         this.dialog = $(dialog);
         this.assignElements();
         this.bindActions();
@@ -18,128 +16,117 @@ class SidePanelDialog {
     findSingleElement(selector) {
         const $el = this.dialog.find(selector);
         if ($el.length !== 1) {
-            console.error('BUG! SidebarDialog: missing element for selector', selector, $el);
+            console.error('BUG! SidebarDialog: missing element for selector', selector, $el, $el.length);
         }
         return $el;
     }
 
     assignElements() {
-        this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefined-prompts');
-        this.$contentSelector = this.findSingleElement('.composum-ai-content-selector');
+        this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefinedprompts');
+        this.$contentSelector = this.findSingleElement('.composum-ai-contentselector');
+        this.$contentSelector.val('page');
+        this.$promptContainer = this.findSingleElement('.composum-ai-promptcontainer');
+        this.$promptTemplate = this.findSingleElement('.composum-ai-templates .composum-ai-prompt');
+        this.$responseTemplate = this.findSingleElement('.composum-ai-templates .composum-ai-response');
     }
 
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
-        this.findSingleElement('.composum-ai-promptcontainer').on('change', '.composum-ai-prompt', this.onPromptAreaChanged.bind(this));
-        this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
+        // only for the first prompt container:
+        this.findSingleElement('.composum-ai-promptcontainer .composum-ai-prompt').on('change', this.onFirstPromptAreaChanged.bind(this));
         this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
-        this.findSingleElement('.composum-ai-stop-button').on('click', function(){
+        this.findSingleElement('.composum-ai-stop-button').on('click', function () {
             this.createServlet.abortRunningCalls();
             this.setLoading(false);
         }.bind(this));
-        this.findSingleElement('.composum-ai-reset-button').on('click', function(){
-            // XXX
-            console.error('unimplemented: reset button');
+        this.findSingleElement('.composum-ai-reset-button').on('click', function () {
+            this.ensurePromptCount(1);
+            this.$promptContainer.find('.composum-ai-prompt').val('');
+            // delete all children of respomnse
+            this.$promptContainer.find('.composum-ai-response').children().remove();
         }.bind(this));
-        this.findSingleElement('.cq-dialog-submit').on('click', this.onSubmit.bind(this));
-        this.findSingleElement('.cq-dialog-cancel').on('click', this.onCancel.bind(this));
         // bind enter key (without any modifiers) in .composum-ai-promptcontainer .composum-ai-prompt to submit
-        this.findSingleElement('.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', function(event){
+        this.findSingleElement('.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
             if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
-                this.onSubmit(event);
+                this.onGenerateButtonClicked(event);
             }
-        });
+        }).bind(this));
+    }
+
+    /** Makes sure there are in composum-ai-promptcontainer exactly n composum-ai-prompt and composum-ai-response (alternating),
+     * either by deleting some or by copying some from the templates. */
+    ensurePromptCount(n) {
+        const currentCount = this.$promptContainer.find('.composum-ai-prompt').size();
+        if (currentCount < n) {
+            for (let i = currentCount; i < n; i++) {
+                this.$promptContainer.append(this.$promptTemplate.clone());
+                this.$promptContainer.append(this.$responseTemplate.clone());
+            }
+        } else {
+            for (let i = currentCount; i > n; i--) {
+                this.$promptContainer.find('.composum-ai-prompt:last').remove();
+                this.$promptContainer.find('.composum-ai-response:last').remove();
+            }
+        }
     }
 
     onPredefinedPromptsChanged(event) {
         console.log("onPredefinedPromptsChanged", arguments);
         const prompt = this.$predefinedPromptsSelector.val();
         if (prompt !== '-') {
-            this.$promptArea.val(prompt);
+            this.ensurePromptCount(1);
+            this.$promptContainer.find('.composum-ai-prompt').val(prompt);
         }
     }
 
-    onPromptAreaChanged(event) {
+    onFirstPromptAreaChanged(event) {
         console.log("onPromptAreaChanged", arguments);
         this.$predefinedPromptsSelector.val('-');
     }
 
-    onContentSelectorChanged(event) {
-        console.log("onContentSelectorChanged", arguments);
-        // possible values widget, component, page, lastoutput, -
+    getSelectedPath() {
         const key = this.$contentSelector.val();
         switch (key) {
-            case 'lastoutput':
-                this.setSourceContentArea(this.getResponseArea());
-                break;
-            case 'widget':
-                this.setSourceContentArea(this.oldContent);
-                break;
             case 'component':
-                this.retrieveValue(this.path, (value) => this.setSourceContentArea(value));
-                break;
+                const selectedEditable = Granite.author.selection.getCurrentActive();
+                return selectedEditable ? selectedEditable.path : Granite.author.ContentFrame.getContentPath();
             case 'page':
-                this.retrieveValue(this.pagePath(this.path), (value) => this.setSourceContentArea(value));
-                break;
-            case '-':
-                break;
+                return Granite.author.ContentFrame.getContentPath();
+            case '':
+                return undefined;
             default:
                 console.error('BUG! ContentCreationDialog: unknown content selector value', key);
         }
-    }
-
-    setSourceContentArea(value) {
-        this.$sourceContentArea.val(value);
-    }
-
-    setResponseArea(value) {
-        this.$responseArea.val(value);
-    }
-
-    getResponseArea() {
-        return this.$responseArea.val();
-    }
-
-    onSourceContentAreaChanged(event) {
-        console.log("onSourceContentAreaChanged", arguments);
-        this.$contentSelector.val('-');
-    }
-
-    retrieveValue(path, callback) {
-        $.ajax({
-            url: Granite.HTTP.externalize(APPROXIMATE_MARKDOWN_SERVLET + path),
-            type: "GET",
-            dataType: "text",
-            success: function (data) {
-                callback(data);
-            }.bind(this),
-            error: function (xhr, status, error) {
-                console.log("error loading approximate markdown", xhr, status, error);
-            }
-        });
-
-        // http://localhost:4502/bin/cpm/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
-        // http://localhost:4502/bin/cpm/ai/approximated.markdown/content/wknd/language-masters/composum-ai-testpages/jcr:content?_=1693499009746
-    }
-
-    /** The path until the /jcr:content */
-    pagePath(path) {
-        if (path.lastIndexOf('/jcr:content') > 0) {
-            return path.substring(0, path.lastIndexOf('/jcr:content') + '/jcr:content'.length);
-        } else if (path.lastIndexOf('_jcr_content') > 0) {
-            return path.substring(0, path.lastIndexOf('_jcr_content') + '_jcr_content'.length);
-        } else {
-            return path;
-        }
+        return undefined;
     }
 
     onGenerateButtonClicked(event) {
         console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
+        this.$promptContainer.find('.composum-ai-response:last').children().remove();
+        // collect chat history from all but the last .composum-ai-prompt and .composum-ai-response
+        const promptHistory = [];
+        this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
+            promptHistory.push($(element).val());
+        });
+        promptHistory.pop();
+        const responseHistory = [];
+        this.$promptContainer.find('.composum-ai-response').each(function (index, element) {
+            responseHistory.push(element.textContent);
+        });
+        responseHistory.pop();
+        // join promptHistory and responseHistory into a single array, format:
+        // [{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}, ...].
+        const history = [];
+        for (let i = 0; i < promptHistory.length; i++) {
+            history.push({"role": "USER", "content": promptHistory[i]});
+            history.push({"role": "ASSISTANT", "content": responseHistory[i]});
+        }
+
         const data = {
-            prompt: this.$promptArea.val(),
-            source: this.$sourceContentArea.val(),
-            textLength: this.$textLengthSelector.val()
+            prompt: this.$promptContainer.find('.composum-ai-prompt:last').val(),
+            chatHistory: JSON.stringify(history),
+            sourcePath: this.getSelectedPath()
         };
         console.log("createContent", data);
         this.setLoading(true);
@@ -148,10 +135,13 @@ class SidePanelDialog {
 
     streamingCallback(data) {
         console.log("ContentCreationDialog streamingCallback", arguments);
-        this.setResponseArea(data);
+        // set the text of the last div.composum-ai-response to the data
+        const lastResponse = this.$promptContainer.find('.composum-ai-response:last');
+        lastResponse.text(data);
     }
 
     doneCallback(data) {
+        this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').size() + 1);
         console.log("ContentCreationDialog doneCallback", arguments);
         if (data && data.data && data.data.result && data.data.result.finishreason === 'STOP') {
             this.showError('The generated content stopped because of the length restriction.');
@@ -186,27 +176,6 @@ class SidePanelDialog {
             this.findSingleElement('.composum-ai-alert').text(error);
             this.findSingleElement('.composum-ai-error-columns').removeClass('hidden');
         }
-    }
-
-    onSubmit(event) {
-        console.log("ContentCreationDialog onSubmit", arguments);
-        if (typeof this.writebackCallback == 'function') {
-            this.writebackCallback(this.getResponseArea());
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        console.log('removing dialog', this.dialog[0]);
-        // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
-        this.dialog[0].remove();
-    }
-
-    onCancel(event) {
-        console.log("ContentCreationDialog onCancel", arguments);
-        event.preventDefault();
-        event.stopPropagation();
-        // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
-        console.log('removing dialog', this.dialog[0]);
-        this.dialog[0].remove();
     }
 
 }

@@ -140,7 +140,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 const pagePath = Granite.author.ContentFrame.getContentPath();
                 const selectedEditable = Granite.author.selection.getCurrentActive();
                 const editablePath = selectedEditable ? selectedEditable.path : pagePath;
-                new SidePanelDialog(panel, editablePath, pagePath);
+                new SidePanelDialog(panel);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);

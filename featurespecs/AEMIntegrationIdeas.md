@@ -121,6 +121,12 @@ aria-label="description" size="S">
       </svg>
     </coral-icon>
 
+https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Icon.html#availableIcons
+
+Possible Icons for Sidebar Dialog :
+Run play , Stop stop , Reset / Clear  / deleteOutline , Reset / Clear History delete, Back back , Forward forward , 
+evtl fastForward
+
 ## Workarounds
 
 Fix for archetype needed:

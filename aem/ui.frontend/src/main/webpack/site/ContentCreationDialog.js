@@ -34,7 +34,7 @@ class ContentCreationDialog {
     findSingleElement(selector) {
         const $el = this.dialog.find(selector);
         if ($el.length !== 1) {
-            console.error('BUG! SidebarDialog: missing element for selector', selector, $el);
+            console.error('BUG! ContentCreationDialog: missing element for selector', selector, $el, $el.length);
         }
         return $el;
     }
