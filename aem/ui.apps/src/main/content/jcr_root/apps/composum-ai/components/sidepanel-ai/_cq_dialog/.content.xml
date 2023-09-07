@@ -20,7 +20,50 @@
                     size="L">
                 <items
                         jcr:primaryType="nt:unstructured">
-
+                    <sidepanelAI
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            granite:class="sidepanel-tab sidepanel-tab-assets editor-AssetFinder"
+                            jcr:title="Assets">
+                        <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                headerTitle="Composum AI"/>
+                        <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                icon="gearsEdit"/>
+                        <items
+                                jcr:primaryType="nt:unstructured">
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    granite:class="sidepanel-tab-title"
+                                    level="2"
+                                    text="Composum AI"/>
+                            <filterPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="filter-panel">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <predefPrompt
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            granite:class="predefinedprompt"
+                                            emptyText="Predefined Prompts"
+                                            name="predefinedprompt_selector"
+                                            text="Predefined Prompt">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                filterType="General"/>
+                                        <datasource
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
+                                                path="/conf/composum-ai/settings/dialogs/sidepanel-ai/predefinedprompts"/>
+                                    </predefPrompt>
+                                </items>
+                            </filterPanel>
+                        </items>
+                    </sidepanelAI>
                     <assetsTab
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/container"

@@ -2,9 +2,9 @@
 <!-- Created by com.composum.ai.composum.bundle.WritePredefinedPromptsInAEMFormat - can be used for updating, too. -->
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
           xmlns:nt="http://www.jcp.org/jcr/nt/1.0" jcr:primaryType="sling:OrderedFolder">
-    <___ jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+    <empty jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
          text="---"
-         value="-"></___>
+         value="-"></empty>
     <summarize jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                text="Summarize"
                value="Please summarize the text."></summarize>
