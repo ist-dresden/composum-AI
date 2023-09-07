@@ -11,7 +11,10 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
     const ACTION_ICON = "coral-Icon--gearsEdit";
     const ACTION_TITLE = "Coomposum AI Content Generation";
     const ACTION_NAME = "ComposumAI";
-    const CREATE_DIALOG_URL = "/mnt/override/apps/composum-ai/components/contentcreation/_cq_dialog.html/conf/composum-ai/settings/dialogs/contentcreation";
+    const CREATE_DIALOG_URL =
+        "/mnt/override/apps/composum-ai/components/contentcreation/_cq_dialog.html/conf/composum-ai/settings/dialogs/contentcreation";
+    const SIDEPANEL_DIALOG_URL =
+        "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
     /*
     const composumAiAction = new Granite.author.ui.ToolbarAction({
@@ -104,8 +107,36 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
     channel.on("foundation-contentloaded", function (e) {
         Coral.commons.ready(channel, function (component) {
             insertCreateButtons(e);
+            loadSidebarPanelDialog();
         });
     });
+
+    function loadSidebarPanelDialog() {
+        const dialogId = 'composumAI-sidebar-panel';
+        if ($(dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
+            return;
+        }
+        $.ajax({
+            url: SIDEPANEL_DIALOG_URL,
+            type: "GET",
+            dataType: "html",
+            success: function (data) {
+                // throw away HTML head and so forth:
+                const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
+                console.log("the dialog", dialog);
+                // the first tab and panel are the actual dialog content:
+                const tab = dialog.find('coral-tabview coral-tab').first();
+                const panel = dialog.find('coral-tabview coral-panel').first();
+                // now find tablist and panelstack in the #SidePanel:
+                const tabView = $('#SidePanel coral-tabview')[0];
+                tabView.tabList.items.add(tab[0]);
+                tabView.panelStack.items.add(panel[0]);
+            }.bind(this),
+            error: function (xhr, status, error) {
+                console.log("error loading create dialog", xhr, status, error);
+            }
+        });
+    }
 
 })
 (jQuery, jQuery(document), this);

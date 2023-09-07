@@ -23,8 +23,8 @@
                     <sidepanelAI
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/container"
-                            granite:class="sidepanel-tab sidepanel-tab-assets editor-AssetFinder composum-ai-dialog"
-                            jcr:title="Assets">
+                            granite:class="sidepanel-tab .sidepanel-tab-ai composum-ai-dialog coral-Form--vertical"
+                            jcr:title="Composum AI">
                         <granite:data
                                 jcr:primaryType="nt:unstructured"
                                 headerTitle="Composum AI"/>
@@ -74,18 +74,24 @@
                                                 filterType="General"/>
                                         <items
                                                 jcr:primaryType="nt:unstructured">
-                                            <none
-                                                    jcr:primaryType="nt:unstructured"
-                                                    text="No additional source text"
-                                                    value=""/>
                                             <currentPage
                                                     jcr:primaryType="nt:unstructured"
                                                     text="Add current page text"
-                                                    value="page"/>
+                                                    value="page"
+                                                    selected="false"
+                                            />
                                             <componentsgroup
                                                     jcr:primaryType="nt:unstructured"
                                                     text="Add selected component text"
-                                                    value="component"/>
+                                                    value="component"
+                                                    selected="false"
+                                            />
+                                            <none
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="No additional source text"
+                                                    value=""
+                                                    selected="false"
+                                            />
                                         </items>
                                     </contentSelector>
                                 </items>
@@ -93,6 +99,7 @@
                             <generateActionbar
                                     jcr:primaryType="nt:unstructured"
                                     margin="{Boolean}false"
+                                    granite:class="coral-Form-fieldwrapper"
                                     sling:resourceType="granite/ui/components/coral/foundation/actionbar">
                                 <primary
                                         jcr:primaryType="nt:unstructured">
@@ -132,7 +139,7 @@
                                             name="./prompt1" rows="5"/>
                                     <container
                                             jcr:primaryType="nt:unstructured"
-                                            granite:class="composum-ai-sidepanel-response"
+                                            granite:class="composum-ai-sidepanel-response coral-Form-fieldwrapper"
                                             sling:resourceType="granite/ui/components/coral/foundation/container">
                                         <items jcr:primaryType="nt:unstructured">
                                             <answer1
@@ -146,6 +153,7 @@
                             <historyActionbar
                                     jcr:primaryType="nt:unstructured"
                                     margin="{Boolean}false"
+                                    granite:class="coral-Form-fieldwrapper"
                                     sling:resourceType="granite/ui/components/coral/foundation/actionbar">
                                 <primary
                                         jcr:primaryType="nt:unstructured">
@@ -171,6 +179,10 @@
                             </historyActionbar>
                         </items>
                     </sidepanelAI>
+                    <empty
+                            jcr:primaryType="nt:unstructured" jcr:title="emp"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                    </empty>
                 </items>
             </tabs>
         </items>
