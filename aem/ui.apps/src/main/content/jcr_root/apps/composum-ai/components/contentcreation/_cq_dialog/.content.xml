@@ -41,7 +41,7 @@
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                                 fieldLabel="Input Prompt (Instructions)"
                                                 fieldDescription="The instructions to the AI that will be applied to the source text. If you like some examples you can select one of the predefined prompts - that will replace the content of this field."
-                                                name="./promptArea" rows="15"
+                                                name="./promptArea" rows="10"
                                                 granite:class="composum-ai-prompt-textarea">
                                     </promptArea>
                                 </items>
@@ -72,7 +72,7 @@
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             fieldDescription="The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed."
-                                            fieldLabel="Source Content ('Data' for the instructions)" rows="15"
+                                            fieldLabel="Source Content ('Data' for the instructions)" rows="10"
                                             name="./sourceContent" granite:class="composum-ai-source-content"/>
                                     <!-- <sourceText
                                             jcr:primaryType="nt:unstructured"
@@ -253,7 +253,7 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/container"
                                     granite:class="coral-Wait coral-Wait--large composum-ai-loading hidden"/>
                         </primary>
-                        <!-- <secondary
+                        <secondary
                                 jcr:primaryType="nt:unstructured">
                             <resetHistory
                                     jcr:primaryType="nt:unstructured"
@@ -273,7 +273,7 @@
                                     class="composum-ai-forward"
                                     granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
                                     text="Forward" granite:class="composum-ai-forward-button"/>
-                        </secondary> -->
+                        </secondary>
                     </generateActionbar>
                 </items>
             </generateButtonFieldset>

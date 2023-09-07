@@ -4,6 +4,7 @@
  */
 
 import {ContentCreationDialog} from './ContentCreationDialog.js';
+import {SidePanelDialog} from './SidePanelDialog.js';
 
 (function ($, channel, window, undefined) {
     "use strict";
@@ -121,16 +122,25 @@ import {ContentCreationDialog} from './ContentCreationDialog.js';
             type: "GET",
             dataType: "html",
             success: function (data) {
+                if ($(dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
+                    return; // double check because of possible race conditions
+                }
+
                 // throw away HTML head and so forth:
                 const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
                 console.log("the dialog", dialog);
                 // the first tab and panel are the actual dialog content:
                 const tab = dialog.find('coral-tabview coral-tab').first();
                 const panel = dialog.find('coral-tabview coral-panel').first();
+                panel.attr('id', dialogId);
                 // now find tablist and panelstack in the #SidePanel:
                 const tabView = $('#SidePanel coral-tabview')[0];
                 tabView.tabList.items.add(tab[0]);
                 tabView.panelStack.items.add(panel[0]);
+                const pagePath = Granite.author.ContentFrame.getContentPath();
+                const selectedEditable = Granite.author.selection.getCurrentActive();
+                const editablePath = selectedEditable ? selectedEditable.path : pagePath;
+                new SidePanelDialog(panel, editablePath, pagePath);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
