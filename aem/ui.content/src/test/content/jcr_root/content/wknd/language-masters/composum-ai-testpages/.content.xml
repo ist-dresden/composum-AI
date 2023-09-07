@@ -31,7 +31,7 @@
                         sling:resourceType="composum-ai/components/contentcreation"/>
                 <helloworld2
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="composum-ai/components/sidebarai"/>
+                        sling:resourceType="composum-ai/components/sidepanel-ai"/>
                 <text_1433451153
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/text"
