@@ -142,7 +142,42 @@ unfortunately ?debugClientLibs=true breaks the editor. Better configure Adobe Gr
 ## TODOs
 
 - move common Java code to slingbase
--
+
+## Richtexteditor
+
+https://www.bounteous.com/insights/2022/01/06/custom-rich-text-editor-plugins-adobe-experience-manager 
+https://experienceleague.adobe.com/docs/experience-manager-65/administering/operations/rich-text-editor.html?lang=en ->
+clientlib rte.coralui3 , /libs/cq/gui/components/authoring/dialog/richtext/clientlibs/rte/coralui3
+https://experienceleague.adobe.com/docs/experience-manager-core-components/using/wcm-components/text.html?lang=en
+https://github.com/adobe/aem-core-wcm-components/tree/main/content/src/content/jcr_root/apps/core/wcm/components/text/v2/text
+http://localhost:4502/bin/browser.html/libs/core/wcm/components/text/v2/text
+
+/libs/cq/gui/components/authoring/dialog/richtext/clientlibs/rte/coralui3/js/richtext.js
+
+!!! foundation-contentloaded
+.find(".cq-RichText>.cq-RichText-editable").data('rteinstance').getContent()
+Test on wcm editors, too!
+
+http://experience-aem.blogspot.com/2016/07/aem-62-touch-ui-rich-text-editor-inplace-editing-open-in-fullscreen-editing-start-event.html
+editing-start is triggered but I have trouble to catch it. TODO FIXME CONTINUE THIS 
+
+### icon
+
+
+<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" icon="gearsEdit" role="img" size="S">
+<svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
+<use xlink:href="#spectrum-icon-18-GearsEdit"></use>
+</svg>
+</coral-icon>
+
+<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton" type="button" 
+title="AI Content Creation" icon="gearsEdit" size="M"><coral-icon size="M" 
+class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation" 
+aria-label="AI Content Creation">
+      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
+        <use xlink:href="#spectrum-icon-18-GearsEdit"></use>
+      </svg>
+    </coral-icon><coral-button-label class="_coral-ActionButton-label"></coral-button-label></button>
 
 ## Misc
 

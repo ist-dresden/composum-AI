@@ -101,6 +101,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 });
             }
         );
+        registerContentDialogInRichtextEditor();
     }
 
     channel.on('coral-overlay:open', insertCreateButtons.bind(this));
@@ -109,6 +110,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         Coral.commons.ready(channel, function (component) {
             insertCreateButtons(e);
             loadSidebarPanelDialog();
+            initRteHooks();
         });
     });
 
@@ -141,6 +143,33 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
+            }
+        });
+    }
+
+    function initRteHooks() {
+        console.log('initRteHooks');
+        Granite.author.ContentFrame.getDocument().on('editing-start', registerContentDialogInRichtextEditor);
+    }
+
+    function registerContentDialogInRichtextEditor(event) {
+        console.log("registerContentDialogInRichtextEditor", arguments);
+        const button = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
+            '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
+            '    <coral-icon size="S"\n' +
+            '                class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
+            '                aria-label="AI Content Creation">\n' +
+            '        <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
+            '            <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
+            '        </svg>\n' +
+            '    </coral-icon>\n' +
+            '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
+            '</button>\n';
+        const buttongroups = $(document).find(".rte-ui > div > coral-buttongroup");
+       // loop over each buttongroup and add the button if it's not there yet:
+        buttongroups.each(function (index, buttongroup) {
+            if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
+                $(buttongroup).append(button);
             }
         });
     }
