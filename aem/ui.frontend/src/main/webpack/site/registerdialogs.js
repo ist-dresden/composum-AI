@@ -84,7 +84,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             function (index, textarea) {
                 console.log("insertCreateButton textarea", textarea);
                 const gearsEdit = $(
-                    '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" icon="gearsEdit" role="img" size="S">\n' +
+                    '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
                     '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
                     '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
                     '  </svg>\n' +
@@ -114,7 +114,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     function loadSidebarPanelDialog() {
         const dialogId = 'composumAI-sidebar-panel';
-        if ($(dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
+        if ($('#' + dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
             return;
         }
         $.ajax({
@@ -122,7 +122,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             type: "GET",
             dataType: "html",
             success: function (data) {
-                if ($(dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
+                if ($('#' + dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
                     return; // double check because of possible race conditions
                 }
 
@@ -137,9 +137,6 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 const tabView = $('#SidePanel coral-tabview')[0];
                 tabView.tabList.items.add(tab[0]);
                 tabView.panelStack.items.add(panel[0]);
-                const pagePath = Granite.author.ContentFrame.getContentPath();
-                const selectedEditable = Granite.author.selection.getCurrentActive();
-                const editablePath = selectedEditable ? selectedEditable.path : pagePath;
                 new SidePanelDialog(panel);
             }.bind(this),
             error: function (xhr, status, error) {

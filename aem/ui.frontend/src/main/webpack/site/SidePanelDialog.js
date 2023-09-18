@@ -104,28 +104,28 @@ class SidePanelDialog {
         console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
         this.$promptContainer.find('.composum-ai-response:last').children().remove();
-        // collect chat history from all but the last .composum-ai-prompt and .composum-ai-response
+        // collect chat history from .composum-ai-prompt and .composum-ai-response
         const promptHistory = [];
         this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
             promptHistory.push($(element).val());
         });
-        promptHistory.pop();
         const responseHistory = [];
         this.$promptContainer.find('.composum-ai-response').each(function (index, element) {
             responseHistory.push(element.textContent);
         });
-        responseHistory.pop();
         // join promptHistory and responseHistory into a single array, format:
         // [{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}, ...].
         const history = [];
         for (let i = 0; i < promptHistory.length; i++) {
-            history.push({"role": "USER", "content": promptHistory[i]});
+            if (i > 0) { // the first prompt is the initial prompt transmitted as prompt parameter
+                history.push({"role": "USER", "content": promptHistory[i]});
+            }
             history.push({"role": "ASSISTANT", "content": responseHistory[i]});
         }
 
         const data = {
-            prompt: this.$promptContainer.find('.composum-ai-prompt:last').val(),
-            chatHistory: JSON.stringify(history),
+            prompt: this.$promptContainer.find('.composum-ai-prompt:first').val(),
+            chat: JSON.stringify(history),
             sourcePath: this.getSelectedPath()
         };
         console.log("createContent", data);

@@ -73,11 +73,11 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     public static final String PARAMETER_PROMPT = "prompt";
 
     /**
-     * Parameter to transmit a chat history before the last prompt {@link #PARAMETER_PROMPT}. Format: array of serialized
+     * Parameter to transmit additional chat after the first prompt {@link #PARAMETER_PROMPT}. Format: array of serialized
      * {@link GPTChatMessage}.
-     * E.g. <code>[{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}]</code>.
+     * E.g. <code>[{"role":"ASSISTANT","content":"That's good."}, {"role":"USER","content":"Why exactly?"}, ]</code>.
      */
-    public static final String PARAMETER_CHATHISTORY = "chatHistory";
+    public static final String PARAMETER_CHAT = "chat";
 
     /**
      * Optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
@@ -231,7 +231,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
         String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
         String sourceText = request.getParameter(PARAMETER_SOURCE);
-        String chatHistory = request.getParameter(PARAMETER_CHATHISTORY);
+        String chat = request.getParameter(PARAMETER_CHAT);
         if (isNoneBlank(sourcePath, sourceText) || isAllBlank(sourcePath, sourceText)) {
             LOG.warn("Exacly one of sourcePath are sourceText required, given where sourcePath {} , sourceText {}", isNotBlank(sourcePath), isNotBlank(sourceText));
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exactly one of sourcePath and sourceText needs to be given, given where sourcePath " + isNotBlank(sourcePath) + " , sourceText " + isNotBlank(sourceText));
@@ -247,7 +247,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 textLength = matcher.group(2);
             }
         }
-        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chatHistory, response);
+        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response);
 
         String fullPrompt = prompt;
         if (isNotBlank(textLength)) {
