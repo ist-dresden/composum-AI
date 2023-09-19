@@ -154,7 +154,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
                 console.log("registerContentDialogInRichtextEditor path", path);
 
-                var path = $(event.target).find('form[action]').attr('action');
+                const formaction = $(event.target).find('form[action]').attr('action');
+                var path = undefined;
+                if (formaction.startsWith('/content')) {
+                    path = formaction;
+                }
+                path = path || $(buttongroup).closest('[data-path]').attr('data-path');
                 if (!path) {
                     for (var i = 0; i < Granite.author.editables.length; i++) {
                         var editable = Granite.author.editables[i];
@@ -175,6 +180,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     console.log("createButtonText click", arguments, path);
                     var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
                     rteinstance = rteinstance || $(event.target).data('rteinstance');
+                    rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
                     showCreateDialog(path, rteinstance.getContent(), (newvalue) => rteinstance.setContent(newvalue), true, isstacked);
                 });
             }
