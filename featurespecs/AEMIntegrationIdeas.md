@@ -47,6 +47,14 @@ http://localhost:4502/editor.html/content/dam/wknd/en/magazine/la-skateparks/ult
 Core components:
 https://experienceleague.adobe.com/docs/experience-manager-core-components/using/introduction.html?lang=en
 
+### Testpages
+
+http://localhost:4502/editor.html/content/wknd/language-masters/composum-ai-testpages.html
+http://localhost:4502/editor.html/content/experience-fragments/wknd/us/en/adventures/adventures-2021/master.html
+http://localhost:4502/editor.html/content/dam/wknd/en/adventures/ski-touring-mont-blanc/ski-touring-mont-blanc
+for testing textarea in content fragment: change to textarea
+http://localhost:4502/bin/browser.html/conf/wknd/settings/dam/cfm/models/adventure/_jcr_content/model/cq%3Adialog/content/items/1570129198953
+
 ## Resource -> approximate markdown transformation
 
 Special resource types of WKND:

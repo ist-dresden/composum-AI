@@ -16,6 +16,8 @@ class ContentCreationDialog {
         this.bindActions();
         this.setSourceContentArea(oldContent);
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+        this.showError();
+        this.setLoading(false);
         this.fullscreen();
     }
 

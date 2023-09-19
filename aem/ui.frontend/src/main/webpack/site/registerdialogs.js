@@ -69,6 +69,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
                 dialog.attr('id', dialogId);
                 dialog.appendTo('body');
+                $(dialog).trigger('foundation-contentloaded');
                 dialog.get()[0].show(); // call Coral function on the element.
                 new ContentCreationDialog(dialog, path, content, writebackCallback);
             }.bind(this),

@@ -79,7 +79,6 @@
                                             sling:resourceType="cq/gui/components/authoring/dialog/richtext"
                                             fieldLabel="Source Text"
                                             name="./sourceText"
-                                            customStart="{Boolean}true"
                                             useFixedInlineToolbar="{Boolean}true">
                                         <rtePlugins
                                                 jcr:primaryType="nt:unstructured">
@@ -303,7 +302,6 @@
                             sling:resourceType="cq/gui/components/authoring/dialog/richtext"
                             fieldLabel=""
                             name="./content"
-                            customStart="{Boolean}true"
                             useFixedInlineToolbar="{Boolean}true"
                     />
                     <content
