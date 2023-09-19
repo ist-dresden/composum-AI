@@ -78,7 +78,7 @@
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="cq/gui/components/authoring/dialog/richtext"
                                             fieldLabel="Source Text"
-                                            name="./sourceText
+                                            name="./sourceText"
                                             customStart="{Boolean}true"
                                             useFixedInlineToolbar="{Boolean}true">
                                         <rtePlugins
@@ -252,7 +252,7 @@
                             <loading
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container"
-                                    granite:class="coral-Wait coral-Wait--large composum-ai-loading hidden"/>
+                                    granite:class="coral-Wait coral-Wait--large composum-ai-loading"/>
                         </primary>
                         <secondary
                                 jcr:primaryType="nt:unstructured">
@@ -281,7 +281,7 @@
 
             <errorColumns
                     jcr:primaryType="nt:unstructured"
-                    granite:class="composum-ai-error-columns hidden"
+                    granite:class="composum-ai-error-columns"
                     sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
                 <items jcr:primaryType="nt:unstructured">
                     <alert

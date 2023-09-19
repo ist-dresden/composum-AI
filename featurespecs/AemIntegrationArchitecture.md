@@ -3,6 +3,46 @@
 This records the general decisions about the AEM integration - see [Ideas for AEM Integration](AEMIntegrationIdeas.md)
 for the discussion of various ideas and variants.
 
+## Scope
+
+In comparison to the Composum variant of Composum AI we will not port the page category dialog to AEM, since in AEM 
+tags are objects maintained in the JCR repository and work very much different, and also not the translation dialog, 
+since there are various tools to manage AEM translations and the way of working with multilingual sites is also 
+rather different to the Composum system.
+
+The AEM variant does thus provide the Content Creation Dialog and the Side Panel AI. 
+
+- The Side Panel AI is added to 
+the left side panel in the page editor, content fragment editor and experience fragment editor, and provides a 
+possibility for discussion with the AI. The user can select whether it's provided with a text representation of the 
+  shown page (or fragment), the selected component or just discuss without giving any additional input.
+- The Content Creation Dialog is integrated into several places where textareas or richtext editors are shown:
+    - text areas in component dialogs and content fragments (icon at the label besides the help icon)
+    - the toolbar of a richtext editor in pages, component dialogs, experience fragments or content fragments 
+      (additional icon in the toolbar)
+
+### Content Creation Dialog integration points
+
+AEM specific points are:
+- Integration into labels in rendered dialogs: textarea and richtext editor
+- Integration into toolbar in richtext editor embedded into the page / content fragment / experience fragment
+- Integration into textarea label in content fragment
+
+Important for all these points are:
+1. trigger for the hook that adds the icon and the binding
+2. how determine path of field / selected component / page/content fragment/experience fragment
+3. how to read content of textarea / richtext editor
+4. how to write content of textarea / richtext editor
+
+An additional complication are that there are several richtext editor components referring to several 
+different richtext editors available. 
+
+### Triggers
+
+For opening a dialog we can register for event "coral-overlay:open" at the `$(document)`. Also event 
+"foundation-contentloaded" is useful for reacting to changes (like inserting a new richtext component), so we'll use 
+it as well with insertion of the icons, if they aren't there yet.
+
 ## Dialog rendering
 
 We use the AEM standard way as far as possible. That means we use for a pop up dialog like the Content Creation
@@ -18,7 +58,8 @@ http://localhost:4502/mnt/override/apps/composum-ai/components/contentcreation/_
 We will conform to the Javascript handling used AEM archetype and use ES6 modules for AEM specific code. If it 
 happens that some of the code could be used by both the Composum and AEM variant, we'll use the IIFE pattern used in 
 Composum, since ES6 module support wouldn't be easy to use in Composum as it'd need a separate frontend build since 
-the modules would have to be packed for use with Composum client libraries.
+the modules would have to be packed for use with Composum client libraries. It seems fine to use Javascript classes, 
+though / that works in the Composum build system, too.
 
 ## Structure of responses
 

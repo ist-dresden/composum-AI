@@ -188,21 +188,21 @@ class ContentCreationDialog {
     setLoading(loading) {
         if (loading) {
             this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
-            this.findSingleElement('.composum-ai-loading').removeClass('hidden');
+            this.findSingleElement('.composum-ai-loading').show();
         } else {
             this.findSingleElement('.composum-ai-generate-button').removeAttr('disabled');
-            this.findSingleElement('.composum-ai-loading').addClass('hidden');
+            this.findSingleElement('.composum-ai-loading').hide();
         }
     }
 
     /** Shows the error text if error is given, hides it if it's falsy. */
     showError(error) {
         if (!error) {
-            this.findSingleElement('.composum-ai-error-columns').addClass('hidden');
+            this.findSingleElement('.composum-ai-error-columns').hide();
         } else {
             console.error("ContentCreationDialog showError", arguments);
             this.findSingleElement('.composum-ai-alert').text(error);
-            this.findSingleElement('.composum-ai-error-columns').removeClass('hidden');
+            this.findSingleElement('.composum-ai-error-columns').show();
         }
     }
 

@@ -9,9 +9,6 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 (function ($, channel, window, undefined) {
     "use strict";
 
-    const ACTION_ICON = "coral-Icon--gearsEdit";
-    const ACTION_TITLE = "Coomposum AI Content Generation";
-    const ACTION_NAME = "ComposumAI";
     const CREATE_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/contentcreation/_cq_dialog.html/conf/composum-ai/settings/dialogs/contentcreation";
     const SIDEPANEL_DIALOG_URL =
@@ -19,9 +16,9 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     /*
     const composumAiAction = new Granite.author.ui.ToolbarAction({
-        name: ACTION_NAME,
-        icon: ACTION_ICON,
-        text: ACTION_TITLE,
+        name: "ComposumAI",
+        icon: "coral-Icon--gearsEdit",
+        text: "Coomposum AI Content Generation",
         order: "last",
         execute: function (editable) {
             console.log("aitoolbar execute", arguments);
@@ -96,12 +93,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 textarea.setAttribute('data-comp-ai-iconsadded', 'true');
                 gearsEdit.click(function (event) {
                     console.log("createButton click", arguments);
-                    const formAction = $(textarea).closest('form').attr('action');
-                    showCreateDialog(formAction, textarea.value, (newvalue) => $(textarea).val(newvalue));
+                    const formPath = $(textarea).closest('form').attr('action');
+                    showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue));
                 });
             }
         );
-        registerContentDialogInRichtextEditor();
+        registerContentDialogInRichtextEditor(event);
     }
 
     channel.on('coral-overlay:open', insertCreateButtons.bind(this));
@@ -169,7 +166,22 @@ import {SidePanelDialog} from './SidePanelDialog.js';
        // loop over each buttongroup and add the button if it's not there yet:
         buttongroups.each(function (index, buttongroup) {
             if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
-                $(buttongroup).append(button);
+                const $button = $(button);
+                const target = event.target;
+                var path = undefined;
+                for (var i = 0; i < Granite.author.editables.length; i++) {
+                    var editable = Granite.author.editables[i];
+                    if (editable.dom[0] === target) {
+                        path = editable.path;
+                        break;
+                    }
+                }
+                console.log("registerContentDialogInRichtextEditor path", path);
+                $(buttongroup).append($button);
+                $button.click(function (event) {
+                    console.log("createButtonText click", arguments);
+                    showCreateDialog(path, target.innerHtml, (newvalue) => $(textarea).val(newvalue));
+                });
             }
         });
     }
