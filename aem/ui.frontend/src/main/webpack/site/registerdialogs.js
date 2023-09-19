@@ -14,120 +14,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     const SIDEPANEL_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
-    /*
-    // Deprecated way of registering the dialog: as a toolbar action. We keep it around for reference, since things aren't completely stable yet.
-
-    const composumAiAction = new Granite.author.ui.ToolbarAction({
-        name: "ComposumAI",
-        icon: "coral-Icon--gearsEdit",
-        text: "Coomposum AI Content Generation",
-        order: "last",
-        execute: function (editable) {
-            console.log("aitoolbar execute", arguments);
-            showCreateDialog(editable.path, retrieveContent(editable));
-        },
-        condition: function (editable) {
-            console.log("aitoolbar editable", arguments);
-            // TODO implement some condition where the dialog makes sence. On editable.designDialog?
-            return true;
-        },
-        isNonMulti: true,
-    });
-
-    channel.on("cq-layer-activated", function (event) {
-        if (event.layer === "Edit") {
-            Granite.author.EditorFrame.editableToolbar.registerAction("Composum-AI", composumAiAction);
-            console.log("Composum AI action is registered");
-        }
-    });
-    */
-
-    /**
-     * Opens a content creation dialog for the given field
-     * @param path the path of the edited field
-     * @param content the current content of the field
-     * @param writebackCallback a function that takes the new content and writes it back to the field
-     * @param isrichtext true if the field is a richtext field, false if it's a plain text field
-     */
-    function showCreateDialog(path, content, writebackCallback, isrichtext) {
-        const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
-
-        $.ajax({
-            url: CREATE_DIALOG_URL,
-            type: "GET",
-            dataType: "html",
-            success: function (data) {
-                // reload the dialog since otherwise we get an internal error in Coral on second show.
-                $(dialogId).remove();
-                // throw away HTML head and so forth:
-                const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
-                dialog.attr('id', dialogId);
-                dialog.appendTo('body');
-                dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(dialog, path, content, writebackCallback);
-            }.bind(this),
-            error: function (xhr, status, error) {
-                console.log("error loading create dialog", xhr, status, error);
-            }
-        });
-    }
-
-    function retrieveContent(editable) {
-        if (editable.dom.hasClass('text')) {
-            return editable.dom.find('.cmp-text').text();
-        } else {
-            console.error('dont know how to retrieve text from editable', editable);
-            debugger;
-        }
-    }
-
-    function insertCreateButtons(element) {
-        console.log("insertCreateButton", arguments);
-        if ($(element).find('.composum-ai-dialog').size() > 0) {
-            return; // don't insert buttons into our own dialog
-        }
-        $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
-            function (index, textarea) {
-                console.log("insertCreateButton textarea", textarea);
-                const gearsEdit = $(
-                    '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
-                    '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-                    '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-                    '  </svg>\n' +
-                    '</coral-icon>');
-                if ($(textarea.parentElement).find('coral-icon').size() > 0) {
-                    gearsEdit.addClass('composum-ai-iconshiftleft');
-                }
-                gearsEdit.insertAfter(textarea);
-                textarea.setAttribute('data-comp-ai-iconsadded', 'true');
-                gearsEdit.click(function (event) {
-                    console.log("createButton click", arguments);
-                    const formPath = $(textarea).closest('form').attr('action');
-                    showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue));
-                });
-            }
-        );
-        registerContentDialogInRichtextEditor(element);
-    }
-
-    // to keep it simple, we do a bit of overkill in registration: we check on various events that might be relevant
-    // whether the buttons are there, and if not, insert them. This is a bit wasteful, but it's simple and robust.
-
-    channel.on('cq-layer-activated coral-overlay:open foundation-contentloaded', waitForReadyAndInsert);
-
-    function waitForReadyAndInsert(event) {
-        console.log("waitForReadyAndInsert", event);
-        Coral.commons.ready(channel, () => insertButtonsInto(channel));
-        Coral.commons.ready(event.target, () => insertButtonsInto(event.target));
-    }
-
-    function insertButtonsInto(element) {
-        console.log("insertButtonsFor", element);
-        insertCreateButtons(element);
-        loadSidebarPanelDialog();
-        initRteHooks();
-    }
-
+    /** Loads the Sidebar Panel AI if it wasn't loaded already (and if there actually is a sidebar). */
     function loadSidebarPanelDialog() {
         const dialogId = 'composumAI-sidebar-panel';
         if ($('#' + dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
@@ -161,8 +48,86 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         });
     }
 
+    /**
+     * Opens a content creation dialog for the given field
+     * @param path the path of the edited field
+     * @param content the current content of the field
+     * @param writebackCallback a function that takes the new content and writes it back to the field
+     * @param isrichtext true if the field is a richtext field, false if it's a plain text field
+     */
+    function showCreateDialog(path, content, writebackCallback, isrichtext) {
+        const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
+
+        $.ajax({
+            url: CREATE_DIALOG_URL,
+            type: "GET",
+            dataType: "html",
+            success: function (data) {
+                // reload the dialog since otherwise we get an internal error in Coral on second show.
+                $(dialogId).remove();
+                // throw away HTML head and so forth:
+                const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
+                dialog.attr('id', dialogId);
+                dialog.appendTo('body');
+                dialog.get()[0].show(); // call Coral function on the element.
+                new ContentCreationDialog(dialog, path, content, writebackCallback);
+            }.bind(this),
+            error: function (xhr, status, error) {
+                console.log("error loading create dialog", xhr, status, error);
+            }
+        });
+    }
+
+    function insertCreateButtonsForTextareas(element) {
+        console.log("insertCreateButton", arguments);
+        if ($(element).find('.composum-ai-dialog').size() > 0) {
+            return; // don't insert buttons into our own dialog
+        }
+        $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
+            function (index, textarea) {
+                console.log("insertCreateButton textarea", textarea);
+                const gearsEdit = $(
+                    '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
+                    '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
+                    '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
+                    '  </svg>\n' +
+                    '</coral-icon>');
+                if ($(textarea.parentElement).find('coral-icon').size() > 0) {
+                    gearsEdit.addClass('composum-ai-iconshiftleft');
+                }
+                gearsEdit.insertAfter(textarea);
+                textarea.setAttribute('data-comp-ai-iconsadded', 'true');
+                gearsEdit.click(function (event) {
+                    console.log("createButton click", arguments);
+                    const formPath = $(textarea).closest('form').attr('action');
+                    showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue), false);
+                });
+            }
+        );
+        registerContentDialogInRichtextEditor(element);
+    }
+
+    // to keep it simple, we do a bit of overkill in registration: we check on various events that might be relevant
+    // whether the buttons are there, and if not, insert them. This is a bit wasteful, but it's simple and robust.
+
+    channel.on('cq-layer-activated coral-overlay:open foundation-contentloaded', waitForReadyAndInsert);
+
+    function waitForReadyAndInsert(event) {
+        console.log("waitForReadyAndInsert", event);
+        Coral.commons.ready(channel, () => insertButtonsInto(channel));
+        Coral.commons.ready(event.target, () => insertButtonsInto(event.target));
+    }
+
+    function insertButtonsInto(element) {
+        console.log("insertButtonsFor", element);
+        insertCreateButtonsForTextareas(element);
+        loadSidebarPanelDialog();
+        initRteHooks();
+    }
+
+    /** We have to modify the richtext editor toolbar when the richtext editor is activated.
+     * Strangely, the registration only worked if we do it pretty late, so we re-do it on various events and make it idempotent. */
     function initRteHooks() {
-        console.log('initRteHooks');
         Granite.author.ContentFrame.getDocument()
             .off('editing-start', registerContentDialogInRichtextEditor)
             .on('editing-start', registerContentDialogInRichtextEditor);
