@@ -55,7 +55,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * @param writebackCallback a function that takes the new content and writes it back to the field
      * @param isrichtext true if the field is a richtext field, false if it's a plain text field
      */
-    function showCreateDialog(path, content, writebackCallback, isrichtext) {
+    function showCreateDialog(path, content, writebackCallback, isrichtext, stackeddialog) {
         const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -71,7 +71,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 dialog.appendTo('body');
                 $(dialog).trigger('foundation-contentloaded');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(dialog, path, content, writebackCallback);
+                new ContentCreationDialog(dialog, path, content, writebackCallback, isrichtext, stackeddialog);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
@@ -101,7 +101,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 gearsEdit.click(function (event) {
                     console.log("createButton click", arguments);
                     const formPath = $(textarea).closest('form').attr('action');
-                    showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue), false);
+                    showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue), false, true);
                 });
             }
         );

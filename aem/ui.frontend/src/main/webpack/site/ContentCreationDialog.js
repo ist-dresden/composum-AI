@@ -5,12 +5,15 @@ import {AICreate} from './AICreate.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
-    constructor(dialog, path, oldContent, writebackCallback) {
+    constructor(dialog, path, oldContent, writebackCallback, isrichtext, stackeddialog) {
+        debugger;
         console.log("ContentCreationDialog constructor ", arguments);
         this.path = path;
         this.dialog = $(dialog);
         this.oldContent = oldContent;
         this.writebackCallback = writebackCallback;
+        this.isrichtext = isrichtext;
+        this.stackeddialog = stackeddialog;
         this.removeFormAction();
         this.assignElements();
         this.bindActions();
@@ -213,20 +216,23 @@ class ContentCreationDialog {
         if (typeof this.writebackCallback == 'function') {
             this.writebackCallback(this.getResponseArea());
         }
-        event.preventDefault();
-        event.stopPropagation();
-        console.log('removing dialog', this.dialog[0]);
-        // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
-        this.dialog[0].remove();
+        this.closeDialog(event);
     }
 
     onCancel(event) {
         console.log("ContentCreationDialog onCancel", arguments);
-        event.preventDefault();
-        event.stopPropagation();
-        // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
-        console.log('removing dialog', this.dialog[0]);
-        this.dialog[0].remove();
+        this.closeDialog(event);
+    }
+
+    closeDialog(event) {
+        if (this.stackeddialog) {
+            // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
+            event.preventDefault();
+            event.stopPropagation();
+            console.log('removing dialog', this.dialog[0]);
+            this.dialog[0].remove();
+        }
+        // else: let the dialog close itself.
     }
 
 }
