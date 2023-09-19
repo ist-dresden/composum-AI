@@ -112,13 +112,12 @@
                                             jcr:primaryType="nt:unstructured" icon="stop"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             granite:title="Aborts the content generation."
-                                            text="Stop" granite:class="composum-ai-stop-button"/>
+                                            granite:class="composum-ai-stop-button"/>
                                     <reset
                                             jcr:primaryType="nt:unstructured" icon="deleteOutline"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             granite:class="composum-ai-reset-button"
-                                            granite:title="Resets the form to the state when you opened it."
-                                            text="Reset"/>
+                                            granite:title="Resets the form to the state when you opened it."/>
                                     <loading
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/container"
@@ -210,13 +209,13 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             class="composum-ai-back"
                                             granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
-                                            text="Back" granite:class="composum-ai-back-button"/>
+                                            granite:class="composum-ai-back-button"/>
                                     <forward
                                             jcr:primaryType="nt:unstructured" icon="forward"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             class="composum-ai-forward"
                                             granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
-                                            text="Forward" granite:class="composum-ai-forward-button"/>
+                                            granite:class="composum-ai-forward-button"/>
                                 </primary>
                             </historyActionbar>
                         </items>

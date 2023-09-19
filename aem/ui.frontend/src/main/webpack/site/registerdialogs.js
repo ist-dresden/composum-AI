@@ -15,6 +15,8 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
     /*
+    // Deprecated way of registering the dialog: as a toolbar action. We keep it around for reference, since things aren't completely stable yet.
+
     const composumAiAction = new Granite.author.ui.ToolbarAction({
         name: "ComposumAI",
         icon: "coral-Icon--gearsEdit",
@@ -40,7 +42,14 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     });
     */
 
-    function showCreateDialog(path, content, writebackCallback) {
+    /**
+     * Opens a content creation dialog for the given field
+     * @param path the path of the edited field
+     * @param content the current content of the field
+     * @param writebackCallback a function that takes the new content and writes it back to the field
+     * @param isrichtext true if the field is a richtext field, false if it's a plain text field
+     */
+    function showCreateDialog(path, content, writebackCallback, isrichtext) {
         const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -72,12 +81,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         }
     }
 
-    function insertCreateButtons(event) {
+    function insertCreateButtons(element) {
         console.log("insertCreateButton", arguments);
-        if ($(event.target).find('.composum-ai-dialog').size() > 0) {
+        if ($(element).find('.composum-ai-dialog').size() > 0) {
             return; // don't insert buttons into our own dialog
         }
-        $(event.target).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
+        $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
             function (index, textarea) {
                 console.log("insertCreateButton textarea", textarea);
                 const gearsEdit = $(
@@ -98,18 +107,26 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 });
             }
         );
-        registerContentDialogInRichtextEditor(event);
+        registerContentDialogInRichtextEditor(element);
     }
 
-    channel.on('coral-overlay:open', insertCreateButtons.bind(this));
+    // to keep it simple, we do a bit of overkill in registration: we check on various events that might be relevant
+    // whether the buttons are there, and if not, insert them. This is a bit wasteful, but it's simple and robust.
 
-    channel.on("foundation-contentloaded", function (e) {
-        Coral.commons.ready(channel, function (component) {
-            insertCreateButtons(e);
-            loadSidebarPanelDialog();
-            initRteHooks();
-        });
-    });
+    channel.on('cq-layer-activated coral-overlay:open foundation-contentloaded', waitForReadyAndInsert);
+
+    function waitForReadyAndInsert(event) {
+        console.log("waitForReadyAndInsert", event);
+        Coral.commons.ready(channel, () => insertButtonsInto(channel));
+        Coral.commons.ready(event.target, () => insertButtonsInto(event.target));
+    }
+
+    function insertButtonsInto(element) {
+        console.log("insertButtonsFor", element);
+        insertCreateButtons(element);
+        loadSidebarPanelDialog();
+        initRteHooks();
+    }
 
     function loadSidebarPanelDialog() {
         const dialogId = 'composumAI-sidebar-panel';
@@ -146,10 +163,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     function initRteHooks() {
         console.log('initRteHooks');
-        Granite.author.ContentFrame.getDocument().on('editing-start', registerContentDialogInRichtextEditor);
+        Granite.author.ContentFrame.getDocument()
+            .off('editing-start', registerContentDialogInRichtextEditor)
+            .on('editing-start', registerContentDialogInRichtextEditor);
     }
 
-    function registerContentDialogInRichtextEditor(event) {
+    function registerContentDialogInRichtextEditor(element) {
         console.log("registerContentDialogInRichtextEditor", arguments);
         const button = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
             '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
@@ -163,11 +182,11 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
             '</button>\n';
         const buttongroups = $(document).find(".rte-ui > div > coral-buttongroup");
-       // loop over each buttongroup and add the button if it's not there yet:
+        // loop over each buttongroup and add the button if it's not there yet:
         buttongroups.each(function (index, buttongroup) {
             if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
                 const $button = $(button);
-                const target = event.target;
+                const target = element;
                 var path = undefined;
                 for (var i = 0; i < Granite.author.editables.length; i++) {
                     var editable = Granite.author.editables[i];
