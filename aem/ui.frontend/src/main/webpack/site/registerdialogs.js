@@ -105,7 +105,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 });
             }
         );
-        registerContentDialogInRichtextEditor(element);
+        registerContentDialogInRichtextEditor({target: element});
     }
 
     // to keep it simple, we do a bit of overkill in registration: we check on various events that might be relevant
@@ -134,7 +134,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             .on('editing-start', registerContentDialogInRichtextEditor);
     }
 
-    function registerContentDialogInRichtextEditor(element) {
+    function registerContentDialogInRichtextEditor(event) {
         console.log("registerContentDialogInRichtextEditor", arguments);
         const button = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
             '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
@@ -147,25 +147,35 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             '    </coral-icon>\n' +
             '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
             '</button>\n';
+
         const buttongroups = $(document).find(".rte-ui > div > coral-buttongroup");
         // loop over each buttongroup and add the button if it's not there yet:
         buttongroups.each(function (index, buttongroup) {
             if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
-                const $button = $(button);
-                const target = element;
-                var path = undefined;
-                for (var i = 0; i < Granite.author.editables.length; i++) {
-                    var editable = Granite.author.editables[i];
-                    if (editable.dom[0] === target) {
-                        path = editable.path;
-                        break;
+                console.log("registerContentDialogInRichtextEditor path", path);
+
+                var path = $(event.target).find('form[action]').attr('action');
+                if (!path) {
+                    for (var i = 0; i < Granite.author.editables.length; i++) {
+                        var editable = Granite.author.editables[i];
+                        if (editable.dom[0] === event.target) {
+                            path = editable.path;
+                            break;
+                        }
                     }
                 }
-                console.log("registerContentDialogInRichtextEditor path", path);
+                const isstacked = $(event.target).closest('coral-dialog').size() > 0;
+
+                if (!path) {
+                    debugger;
+                }
+                const $button = $(button);
                 $(buttongroup).append($button);
-                $button.click(function (event) {
-                    console.log("createButtonText click", arguments);
-                    showCreateDialog(path, target.innerHtml, (newvalue) => $(textarea).val(newvalue));
+                $button.click(function (clickevent) {
+                    console.log("createButtonText click", arguments, path);
+                    var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
+                    rteinstance = rteinstance || $(event.target).data('rteinstance');
+                    showCreateDialog(path, rteinstance.getContent(), (newvalue) => rteinstance.setContent(newvalue), true, isstacked);
                 });
             }
         });

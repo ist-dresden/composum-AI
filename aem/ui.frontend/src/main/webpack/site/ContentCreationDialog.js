@@ -6,7 +6,6 @@ const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
     constructor(dialog, path, oldContent, writebackCallback, isrichtext, stackeddialog) {
-        debugger;
         console.log("ContentCreationDialog constructor ", arguments);
         this.path = path;
         this.dialog = $(dialog);
