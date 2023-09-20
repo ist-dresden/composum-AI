@@ -56,8 +56,11 @@ dialog. The path of the element is `$(textarea).closest('form').attr('action')` 
 ### Rich text editor in dialog
 
 It seems normally the toolbar is initially visible, so we can already add the creation dialog button on 
-`coral-overlay:open`.
-In the Content Creation Dialog we trigger an `foundation-contentloaded` event, which activates the richtext editors. 
+`coral-overlay:open`. The button is integrated into all `.rte-ui > div > coral-buttongroup`; 
+
+
+BTW: In the Content Creation Dialog we need to trigger an `foundation-contentloaded` event, which activates the 
+richtext editors.
 
 ## Dialog rendering
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
-        xmlns:jcr="http://www.jcp.org/jcr/1.0"
-        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
-        jcr:primaryType="cq:Page">
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cq:Page">
     <jcr:content
             jcr:primaryType="cq:PageContent"
             sling:resourceType="wknd/components/page"
@@ -30,9 +30,9 @@
                 <testdialog
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="composum-ai/test/components/testdialog"
-                        sourceText="&lt;p>Give a little bit of&amp;nbsp;&lt;b>rich&lt;/b>&amp;nbsp;&lt;i>text&lt;/i>&lt;/p>&#xd;&#xa;&lt;ul>&#xd;&#xa;&lt;li>he&lt;/li>&#xd;&#xa;&lt;li>re&lt;/li>&#xd;&#xa;&lt;/ul>&#xd;&#xa;"
-                        text="The text is a markdown document titled &quot;Composum AI Testpages.&quot; It contains a brief introduction followed by a section titled &quot;The title of the test dialog,&quot; which includes the actual text of the test dialog. There is also some text before and after the test dialog section."
                         textIsRich="true"
+                        therichText="&lt;p>Give a little bit of &lt;b>rich&lt;/b> &lt;i>text&lt;/i>&lt;/p>&lt;ul>&lt;li>he&lt;/li>&lt;li>re&lt;/li>&lt;/ul>"
+                        thetext="This is, not surprising, some plain text which we have here.&#xd;&#xa;Another line of plain text."
                         title="The title of the test dialog"/>
                 <contentcreation
                         jcr:primaryType="nt:unstructured"
