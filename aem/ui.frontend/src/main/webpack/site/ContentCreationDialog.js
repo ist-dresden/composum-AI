@@ -5,12 +5,13 @@ import {AICreate} from './AICreate.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
-    constructor(dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog) {
+    constructor(dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog, onFinishCallback) {
         console.log("ContentCreationDialog constructor ", arguments);
         this.componentPath = componentPath;
         this.dialog = $(dialog);
         this.oldContent = oldContent;
         this.writebackCallback = writebackCallback;
+        this.onFinishCallback = onFinishCallback;
         this.isrichtext = isrichtext;
         this.stackeddialog = stackeddialog;
         this.removeFormAction();
@@ -212,10 +213,12 @@ class ContentCreationDialog {
 
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
-        if (typeof this.writebackCallback == 'function') {
-            this.writebackCallback(this.getResponseArea());
-        }
+        const response = this.getResponseArea();
         this.closeDialog(event);
+        // only after closing since dialog is now out of the way
+        if (typeof this.writebackCallback == 'function') {
+            this.writebackCallback(response);
+        }
     }
 
     onCancel(event) {
@@ -232,6 +235,9 @@ class ContentCreationDialog {
             this.dialog[0].remove();
         }
         // else: let the dialog close itself.
+        if (typeof this.onFinishCallback == 'function') {
+            this.onFinishCallback();
+        }
     }
 
 }

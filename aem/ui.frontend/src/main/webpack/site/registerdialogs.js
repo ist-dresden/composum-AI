@@ -56,8 +56,10 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * @param content the current content of the field
      * @param writebackCallback a function that takes the new content and writes it back to the field
      * @param isrichtext true if the field is a richtext field, false if it's a plain text field
+     * @param stackeddialog true if the dialog is stacked - we will just remove the dialog without causing any events to disturb the open dialogs
+     * @param onFinishCallback a function that is called when the dialog is closed
      */
-    function showCreateDialog(componentPath, content, writebackCallback, isrichtext, stackeddialog) {
+    function showCreateDialog(componentPath, content, writebackCallback, isrichtext, stackeddialog, onFinishCallback) {
         const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -73,7 +75,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 dialog.appendTo('body');
                 $(dialog).trigger('foundation-contentloaded');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(dialog, componentPath, content, writebackCallback, isrichtext, stackeddialog);
+                new ContentCreationDialog(dialog, componentPath, content, writebackCallback, isrichtext, stackeddialog, onFinishCallback);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
@@ -207,12 +209,13 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     clickevent.stopPropagation();
                     rteinstance.suspend();
                     showCreateDialog(path, rteinstance.getContent(), function (newvalue) {
-                        rteinstance.reactivate();
                         rteinstance.setContent(newvalue);
+                    }, true, true, function() {
+                        rteinstance.reactivate();
                         rteinstance.focus();
-                        $('.cq-dialog-backdrop').hide();
                         $('.cq-dialog-backdrop').removeClass('is-open');
-                    }, true, true);
+                        $('.cq-dialog-backdrop').hide();
+                    });
                 });
             }
         });
