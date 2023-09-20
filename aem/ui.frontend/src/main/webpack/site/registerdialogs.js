@@ -50,12 +50,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     /**
      * Opens a content creation dialog for the given field
-     * @param path the path of the edited field
+     * @param componentPath the path of the edited component
      * @param content the current content of the field
      * @param writebackCallback a function that takes the new content and writes it back to the field
      * @param isrichtext true if the field is a richtext field, false if it's a plain text field
      */
-    function showCreateDialog(path, content, writebackCallback, isrichtext, stackeddialog) {
+    function showCreateDialog(componentPath, content, writebackCallback, isrichtext, stackeddialog) {
         const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -71,7 +71,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 dialog.appendTo('body');
                 $(dialog).trigger('foundation-contentloaded');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(dialog, path, content, writebackCallback, isrichtext, stackeddialog);
+                new ContentCreationDialog(dialog, componentPath, content, writebackCallback, isrichtext, stackeddialog);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
@@ -101,22 +101,35 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 gearsEdit.click(function (event) {
                     console.log("createButton click", arguments);
                     const formPath = $(textarea).closest('form').attr('action');
-                    showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue), false, true);
+                    if (formPath && formPath.startsWith('/content')) {
+                        showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue), false, true);
+                    } else {
+                        console.error('Could not determine path of form for ', textarea && textarea.get());
+                    }
                 });
             }
         );
-        registerContentDialogInRichtextEditor({target: element});
     }
 
-    // to keep it simple, we do a bit of overkill in registration: we check on various events that might be relevant
-    // whether the buttons are there, and if not, insert them. This is a bit wasteful, but it's simple and robust.
+    channel.on('coral-overlay:open', prepareDialog);
 
-    channel.on('cq-layer-activated coral-overlay:open foundation-contentloaded', waitForReadyAndInsert);
+    function prepareDialog(event) {
+        console.log("prepareDialog", event.type, event.target);
+        Coral.commons.ready(event.target, function () {
+            insertCreateButtonsForTextareas(event.target);
+            registerContentDialogInRichtextEditors(event);
+        });
+    }
+
+    channel.on('cq-layer-activated', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
     function waitForReadyAndInsert(event) {
-        console.log("waitForReadyAndInsert", event);
-        Coral.commons.ready(channel, () => insertButtonsInto(channel));
-        Coral.commons.ready(event.target, () => insertButtonsInto(event.target));
+        console.log("waitForReadyAndInsert", event.type, event.target);
+        // Coral.commons.ready(channel, () => insertButtonsInto(channel));
+        Coral.commons.ready(event.target, function () {
+            insertButtonsInto(event.target);
+            registerContentDialogInRichtextEditors({target: event.target});
+        });
     }
 
     function insertButtonsInto(element) {
@@ -130,12 +143,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * Strangely, the registration only worked if we do it pretty late, so we re-do it on various events and make it idempotent. */
     function initRteHooks() {
         Granite.author.ContentFrame.getDocument()
-            .off('editing-start', registerContentDialogInRichtextEditor)
-            .on('editing-start', registerContentDialogInRichtextEditor);
+            .off('editing-start', registerContentDialogInRichtextEditors)
+            .on('editing-start', registerContentDialogInRichtextEditors);
     }
 
-    function registerContentDialogInRichtextEditor(event) {
-        console.log("registerContentDialogInRichtextEditor", arguments);
+    function registerContentDialogInRichtextEditors(event) {
+        console.log("registerContentDialogInRichtextEditors", arguments);
         const button = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
             '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
             '    <coral-icon size="S"\n' +
@@ -152,11 +165,11 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         // loop over each buttongroup and add the button if it's not there yet:
         buttongroups.each(function (index, buttongroup) {
             if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
-                console.log("registerContentDialogInRichtextEditor path", path);
+                console.log("registerContentDialogInRichtextEditors path", path);
 
                 const formaction = $(event.target).find('form[action]').attr('action');
                 var path = undefined;
-                if (formaction.startsWith('/content')) {
+                if (formaction && formaction.startsWith('/content')) {
                     path = formaction;
                 }
                 path = path || $(buttongroup).closest('[data-path]').attr('data-path');
@@ -181,7 +194,17 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
                     rteinstance = rteinstance || $(event.target).data('rteinstance');
                     rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
-                    showCreateDialog(path, rteinstance.getContent(), (newvalue) => rteinstance.setContent(newvalue), true, isstacked);
+                    console.log("rteinstance", rteinstance);
+                    console.log("origevent", event);
+                    clickevent.preventDefault();
+                    clickevent.stopPropagation();
+                    rteinstance.suspend();
+                    showCreateDialog(path, rteinstance.getContent(), function (newvalue) {
+                        rteinstance.reactivate();
+                        rteinstance.setContent(newvalue);
+                        $('.cq-dialog-backdrop').hide();
+                        $('.cq-dialog-backdrop').removeClass('is-open');
+                    }, true, true);
                 });
             }
         });

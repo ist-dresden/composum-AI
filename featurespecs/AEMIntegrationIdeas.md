@@ -192,3 +192,12 @@ aria-label="AI Content Creation">
 ### ui.frontend
 
 run 'npm run watch' for development.
+
+### Events
+
+possibly relevant, but found no need yet: cq-layer-activated foundation-contentloaded
+
+- coral-overlay:open Triggerred after the overlay is opened with show() or instance.open = true
+https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Overlay.html#Coral.Overlay:coral-overlay:open
+comes when dialog is opened, after foundation-contentloaded . coral-overlay:beforeopen doesn't work on RTE.
+  Argument: dialog

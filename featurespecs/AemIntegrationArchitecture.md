@@ -21,7 +21,7 @@ possibility for discussion with the AI. The user can select whether it's provide
     - the toolbar of a richtext editor in pages, component dialogs, experience fragments or content fragments 
       (additional icon in the toolbar)
 
-### Content Creation Dialog integration points
+## Content Creation Dialog integration points
 
 AEM specific points are:
 - Integration into labels in rendered dialogs: textarea and richtext editor
@@ -39,9 +39,25 @@ different richtext editors available.
 
 ### Triggers
 
-For opening a dialog we can register for event "coral-overlay:open" at the `$(document)`. Also event 
-"foundation-contentloaded" is useful for reacting to changes (like inserting a new richtext component), so we'll use 
-it as well with insertion of the icons, if they aren't there yet.
+For opening a dialog we can register for event "coral-overlay:open" at the `$(document)`. 
+Also event "foundation-contentloaded" might be useful for reacting to changes (like inserting a new richtext 
+component), so we'll use it as well with insertion of the icons, if they aren't there yet.
+
+### Side Panel AI
+
+On a 'cq-layer-activated' after Coral.commons.ready we load the dialog and insert it into the side panel.
+
+### textarea in dialog
+
+We register for event "coral-overlay:open" at the `$(document)`. It get's the coral-dialog as argument, where we can 
+look for textareas `div.coral-Form-fieldwrapper textarea.coral-Form-field` in it after Coral.commons.ready on the 
+dialog. The path of the element is `$(textarea).closest('form').attr('action')` , attribute is the `name` of the textarea.
+
+### Rich text editor in dialog
+
+It seems normally the toolbar is initially visible, so we can already add the creation dialog button on 
+`coral-overlay:open`.
+In the Content Creation Dialog we trigger an `foundation-contentloaded` event, which activates the richtext editors. 
 
 ## Dialog rendering
 

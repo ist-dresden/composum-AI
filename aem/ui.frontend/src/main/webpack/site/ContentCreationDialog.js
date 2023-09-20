@@ -5,9 +5,9 @@ import {AICreate} from './AICreate.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 class ContentCreationDialog {
-    constructor(dialog, path, oldContent, writebackCallback, isrichtext, stackeddialog) {
+    constructor(dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog) {
         console.log("ContentCreationDialog constructor ", arguments);
-        this.path = path;
+        this.componentPath = componentPath;
         this.dialog = $(dialog);
         this.oldContent = oldContent;
         this.writebackCallback = writebackCallback;
@@ -98,10 +98,10 @@ class ContentCreationDialog {
                 this.setSourceContentArea(this.oldContent);
                 break;
             case 'component':
-                this.retrieveValue(this.path, (value) => this.setSourceContentArea(value));
+                this.retrieveValue(this.componentPath, (value) => this.setSourceContentArea(value));
                 break;
             case 'page':
-                this.retrieveValue(this.pagePath(this.path), (value) => this.setSourceContentArea(value));
+                this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContentArea(value));
                 break;
             case '-':
                 break;
