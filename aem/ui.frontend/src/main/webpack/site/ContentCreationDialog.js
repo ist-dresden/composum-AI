@@ -4,8 +4,25 @@ import {AICreate} from './AICreate.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
+/**
+ * Represents the Content Creation Dialog.
+ */
+
 class ContentCreationDialog {
-    constructor(dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog, onFinishCallback) {
+
+    /**
+     * Creates a new ContentCreationDialog.
+     *
+     * @param {Object} options - The options for the dialog.
+     * @param {HTMLElement} options.dialog - The dialog element.
+     * @param {string} options.componentPath - The path of the edited component.
+     * @param {string} options.oldContent - The current content of the field.
+     * @param {Function} options.writebackCallback - A function that takes the new content and writes it back to the field.
+     * @param {boolean} options.isrichtext - True if the field is a richtext field, false if it's a plain text field.
+     * @param {boolean} options.stackeddialog - True if the dialog is stacked and we have to close the dialog ourselves without generating events to not disturb the underlying dialog.
+     * @param {Function} [options.onFinishCallback] - A function that is called when the dialog is closed.
+     */
+    constructor({dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog, onFinishCallback}) {
         console.log("ContentCreationDialog constructor ", arguments);
         this.componentPath = componentPath;
         this.dialog = $(dialog);
@@ -59,11 +76,11 @@ class ContentCreationDialog {
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContentArea.on('change', this.onSourceContentAreaChanged.bind(this));
         this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
-        this.findSingleElement('.composum-ai-stop-button').on('click', function(){
+        this.findSingleElement('.composum-ai-stop-button').on('click', function () {
             this.createServlet.abortRunningCalls();
             this.setLoading(false);
         }.bind(this));
-        this.findSingleElement('.composum-ai-reset-button').on('click', function(){
+        this.findSingleElement('.composum-ai-reset-button').on('click', function () {
             this.$promptArea.val('');
             this.setSourceContentArea(this.oldContent);
             this.setResponseArea('');

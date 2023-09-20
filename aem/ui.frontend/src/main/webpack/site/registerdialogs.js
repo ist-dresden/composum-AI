@@ -6,6 +6,13 @@
 import {ContentCreationDialog} from './ContentCreationDialog.js';
 import {SidePanelDialog} from './SidePanelDialog.js';
 
+/**
+ * Main function to handle the registration of custom dialogs and their interactions.
+ * @param {Object} $ - The jQuery object.
+ * @param {Object} channel - The event channel for Coral UI events.
+ * @param {Object} window - The global window object.
+ * @param {undefined} undefined - Ensures that undefined is truly undefined.
+ */
 (function ($, channel, window, undefined) {
     "use strict";
 
@@ -16,10 +23,13 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
-    /** Loads the Sidebar Panel AI if it wasn't loaded already (and if there actually is a sidebar). */
+
+    /**
+     * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
+     */
     function loadSidebarPanelDialog() {
         const dialogId = 'composumAI-sidebar-panel';
-        if ($('#' + dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
+        if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
             return;
         }
         $.ajax({
@@ -27,7 +37,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
             type: "GET",
             dataType: "html",
             success: function (data) {
-                if ($('#' + dialogId).size() > 0 || $('#SidePanel coral-tabview').size() === 0) {
+                if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
                     return; // double check because of possible race conditions
                 }
 
@@ -51,15 +61,11 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     }
 
     /**
-     * Opens a content creation dialog for the given field
-     * @param componentPath the path of the edited component
-     * @param content the current content of the field
-     * @param writebackCallback a function that takes the new content and writes it back to the field
-     * @param isrichtext true if the field is a richtext field, false if it's a plain text field
-     * @param stackeddialog true if the dialog is stacked - we will just remove the dialog without causing any events to disturb the open dialogs
-     * @param onFinishCallback a function that is called when the dialog is closed
+     * Opens a content creation dialog for the given field.
+     * @param parameters see ContentCreationDialog constructor
      */
-    function showCreateDialog(componentPath, content, writebackCallback, isrichtext, stackeddialog, onFinishCallback) {
+
+    function showCreateDialog(parameters) {
         const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
@@ -75,7 +81,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 dialog.appendTo('body');
                 $(dialog).trigger('foundation-contentloaded');
                 dialog.get()[0].show(); // call Coral function on the element.
-                new ContentCreationDialog(dialog, componentPath, content, writebackCallback, isrichtext, stackeddialog, onFinishCallback);
+                new ContentCreationDialog(parameters);
             }.bind(this),
             error: function (xhr, status, error) {
                 console.log("error loading create dialog", xhr, status, error);
@@ -90,16 +96,20 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         '  </svg>\n' +
         '</coral-icon>';
 
+    /**
+     * Inserts the AI content creation buttons for text areas in the provided element.
+     * @param {HTMLElement} element - The DOM element to search for textareas.
+     */
     function insertCreateButtonsForTextareas(element) {
         console.log("insertCreateButton", arguments);
-        if ($(element).find('.composum-ai-dialog').size() > 0) {
+        if ($(element).find('.composum-ai-dialog').length > 0) {
             return; // don't insert buttons into our own dialog
         }
         $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
             function (index, textarea) {
                 console.log("insertCreateButton textarea", textarea);
                 const gearsEdit = $(fieldlabeliconHTML);
-                if ($(textarea.parentElement).find('coral-icon').size() > 0) {
+                if ($(textarea.parentElement).find('coral-icon').length > 0) {
                     gearsEdit.addClass('composum-ai-iconshiftleft');
                 }
                 gearsEdit.insertAfter(textarea);
@@ -108,7 +118,13 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     console.log("createButton click", arguments);
                     const formPath = $(textarea).closest('form').attr('action');
                     if (formPath && formPath.startsWith('/content')) {
-                        showCreateDialog(formPath, textarea.value, (newvalue) => $(textarea).val(newvalue), false, true);
+                        showCreateDialog({
+                            componentPath: formPath,
+                            oldContent: textarea.value,
+                            writebackCallback: (newvalue) => $(textarea).val(newvalue),
+                            isrichtext: false,
+                            stackeddialog: true
+                        });
                     } else {
                         console.error('Could not determine path of form for ', textarea && textarea.get());
                     }
@@ -120,6 +136,10 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     // for dialogs coral-overlay:open, for content-fragments foundation-contentloaded
     channel.on('coral-overlay:open foundation-contentloaded', prepareDialog);
 
+    /**
+     * Prepares the dialog by inserting AI content creation buttons and registering the content dialog in richtext editors.
+     * @param {Event} event - The event triggering the preparation.
+     */
     function prepareDialog(event) {
         console.log("prepareDialog", event.type, event.target);
         Coral.commons.ready(event.target, function () {
@@ -130,8 +150,11 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     channel.on('cq-layer-activated', initRteHooks);
 
-    /** We have to modify the richtext editor toolbar when the richtext editor is activated.
-     * Strangely, the registration only worked if we do it pretty late, so we re-do it on various events and make it idempotent. */
+
+    /**
+     * Initializes hooks for the richtext editor when activated.
+     * @param {Event} event - The event indicating the activation of the RTE.
+     */
     function initRteHooks(event) {
         console.log("waitForReadyAndInsert", event.type, event.target);
         Coral.commons.ready(event.target, function () {
@@ -157,6 +180,10 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     /** Registers the content creation dialog in the richtext editor toolbar.
      * The event can either be an opening event for a dialog, or an editing-start for an RTE in the document. */
+    /**
+     * Registers the content creation dialog in the richtext editor toolbar.
+     * @param {Event} registerevent - The event triggering the registration.
+     */
     function registerContentDialogInRichtextEditors(registerevent) {
         console.log("registerContentDialogInRichtextEditors", registerevent.type, registerevent.target);
         if (registerevent.type === 'editing-start') {
@@ -166,10 +193,10 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         const buttongroups = $(document).find(".rte-ui > div > coral-buttongroup");
         // loop over each buttongroup and add the button if it's not there yet:
         buttongroups.each(function (index, buttongroup) {
-            if ($(buttongroup).closest('.composum-ai-dialog').size() > 0) {
+            if ($(buttongroup).closest('.composum-ai-dialog').length > 0) {
                 return; // don't insert buttons into our own dialogs
             }
-            if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
+            if ($(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
                 console.log("registerContentDialogInRichtextEditors path", path);
                 const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
                 var path = undefined;
@@ -208,13 +235,20 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     clickevent.preventDefault();
                     clickevent.stopPropagation();
                     rteinstance.suspend();
-                    showCreateDialog(path, rteinstance.getContent(), function (newvalue) {
-                        rteinstance.setContent(newvalue);
-                    }, true, true, function() {
-                        rteinstance.reactivate();
-                        rteinstance.focus();
-                        $('.cq-dialog-backdrop').removeClass('is-open');
-                        $('.cq-dialog-backdrop').hide();
+                    showCreateDialog({
+                        componentPath: path,
+                        oldContent: rteinstance.getContent(),
+                        writebackCallback: function (newvalue) {
+                            rteinstance.setContent(newvalue);
+                        },
+                        isrichtext: true,
+                        stackeddialog: true,
+                        onFinishCallback: function () {
+                            rteinstance.reactivate();
+                            rteinstance.focus();
+                            $('.cq-dialog-backdrop').removeClass('is-open');
+                            $('.cq-dialog-backdrop').hide();
+                        }
                     });
                 });
             }

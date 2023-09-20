@@ -56,7 +56,7 @@ class SidePanelDialog {
     /** Makes sure there are in composum-ai-promptcontainer exactly n composum-ai-prompt and composum-ai-response (alternating),
      * either by deleting some or by copying some from the templates. */
     ensurePromptCount(n) {
-        const currentCount = this.$promptContainer.find('.composum-ai-prompt').size();
+        const currentCount = this.$promptContainer.find('.composum-ai-prompt').length;
         if (currentCount < n) {
             for (let i = currentCount; i < n; i++) {
                 this.$promptContainer.append(this.$promptTemplate.clone());
@@ -141,7 +141,7 @@ class SidePanelDialog {
     }
 
     doneCallback(data) {
-        this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').size() + 1);
+        this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').length + 1);
         console.log("ContentCreationDialog doneCallback", arguments);
         if (data && data.data && data.data.result && data.data.result.finishreason === 'STOP') {
             this.showError('The generated content stopped because of the length restriction.');

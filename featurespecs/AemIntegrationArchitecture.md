@@ -87,7 +87,10 @@ during the `editor-start` event. It is also the carrier of the RTE object: `$(la
 
 ## Richtext editor in content fragment
 
-The toolbar is already visible. We can register the buttons on the foundation-contentloaded event.
+The toolbar is already visible. We can register the buttons on the foundation-contentloaded event. The richtext 
+editor object is to be found at 
+`$(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance')` 
+and the path is in a form action.
 
 ## Dialog rendering
 
