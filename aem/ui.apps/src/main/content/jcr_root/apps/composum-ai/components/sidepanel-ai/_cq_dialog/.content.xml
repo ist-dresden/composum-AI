@@ -8,6 +8,7 @@
           mode="edit">
     <content
             jcr:primaryType="nt:unstructured"
+            granite:class="composum-ai-dialog"
             sling:resourceType="granite/ui/components/coral/foundation/container">
         <items
                 jcr:primaryType="nt:unstructured">

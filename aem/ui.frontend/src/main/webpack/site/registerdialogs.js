@@ -14,6 +14,8 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     const SIDEPANEL_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
+    channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
+
     /** Loads the Sidebar Panel AI if it wasn't loaded already (and if there actually is a sidebar). */
     function loadSidebarPanelDialog() {
         const dialogId = 'composumAI-sidebar-panel';
@@ -56,7 +58,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * @param isrichtext true if the field is a richtext field, false if it's a plain text field
      */
     function showCreateDialog(componentPath, content, writebackCallback, isrichtext, stackeddialog) {
-        const dialogId = 'composumAI-dialog'; // possibly use editable.path to make it unique
+        const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
             url: CREATE_DIALOG_URL,
@@ -79,6 +81,13 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         });
     }
 
+    const fieldlabeliconHTML =
+        '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
+        '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
+        '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
+        '  </svg>\n' +
+        '</coral-icon>';
+
     function insertCreateButtonsForTextareas(element) {
         console.log("insertCreateButton", arguments);
         if ($(element).find('.composum-ai-dialog').size() > 0) {
@@ -87,12 +96,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
             function (index, textarea) {
                 console.log("insertCreateButton textarea", textarea);
-                const gearsEdit = $(
-                    '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
-                    '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-                    '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-                    '  </svg>\n' +
-                    '</coral-icon>');
+                const gearsEdit = $(fieldlabeliconHTML);
                 if ($(textarea.parentElement).find('coral-icon').size() > 0) {
                     gearsEdit.addClass('composum-ai-iconshiftleft');
                 }
@@ -111,7 +115,8 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         );
     }
 
-    channel.on('coral-overlay:open', prepareDialog);
+    // for dialogs coral-overlay:open, for content-fragments foundation-contentloaded
+    channel.on('coral-overlay:open foundation-contentloaded', prepareDialog);
 
     function prepareDialog(event) {
         console.log("prepareDialog", event.type, event.target);
@@ -121,79 +126,81 @@ import {SidePanelDialog} from './SidePanelDialog.js';
         });
     }
 
-    channel.on('cq-layer-activated', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
-
-    function waitForReadyAndInsert(event) {
-        console.log("waitForReadyAndInsert", event.type, event.target);
-        // Coral.commons.ready(channel, () => insertButtonsInto(channel));
-        Coral.commons.ready(event.target, function () {
-            insertButtonsInto(event.target);
-            registerContentDialogInRichtextEditors({target: event.target});
-        });
-    }
-
-    function insertButtonsInto(element) {
-        console.log("insertButtonsFor", element);
-        insertCreateButtonsForTextareas(element);
-        loadSidebarPanelDialog();
-        initRteHooks();
-    }
+    channel.on('cq-layer-activated', initRteHooks);
 
     /** We have to modify the richtext editor toolbar when the richtext editor is activated.
      * Strangely, the registration only worked if we do it pretty late, so we re-do it on various events and make it idempotent. */
-    function initRteHooks() {
-        Granite.author.ContentFrame.getDocument()
-            .off('editing-start', registerContentDialogInRichtextEditors)
-            .on('editing-start', registerContentDialogInRichtextEditors);
+    function initRteHooks(event) {
+        console.log("waitForReadyAndInsert", event.type, event.target);
+        Coral.commons.ready(event.target, function () {
+            Granite.author.ContentFrame.getDocument()
+                .off('editing-start', registerContentDialogInRichtextEditors)
+                .on('editing-start', registerContentDialogInRichtextEditors);
+        });
     }
 
-    function registerContentDialogInRichtextEditors(event) {
-        console.log("registerContentDialogInRichtextEditors", arguments);
-        const button = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
-            '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
-            '    <coral-icon size="S"\n' +
-            '                class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
-            '                aria-label="AI Content Creation">\n' +
-            '        <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-            '            <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-            '        </svg>\n' +
-            '    </coral-icon>\n' +
-            '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
-            '</button>\n';
+    const rtebuttonHTML = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
+        '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
+        '    <coral-icon size="S"\n' +
+        '                class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
+        '                aria-label="AI Content Creation">\n' +
+        '        <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
+        '            <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
+        '        </svg>\n' +
+        '    </coral-icon>\n' +
+        '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
+        '</button>\n';
+
+    var lastEditorStartTarget = undefined;
+
+    /** Registers the content creation dialog in the richtext editor toolbar.
+     * The event can either be an opening event for a dialog, or an editing-start for an RTE in the document. */
+    function registerContentDialogInRichtextEditors(registerevent) {
+        console.log("registerContentDialogInRichtextEditors", registerevent.type, registerevent.target);
+        if (registerevent.type === 'editing-start') {
+            lastEditorStartTarget = registerevent.target;
+        }
 
         const buttongroups = $(document).find(".rte-ui > div > coral-buttongroup");
         // loop over each buttongroup and add the button if it's not there yet:
         buttongroups.each(function (index, buttongroup) {
+            if ($(buttongroup).closest('.composum-ai-dialog').size() > 0) {
+                return; // don't insert buttons into our own dialogs
+            }
             if ($(buttongroup).find('.composum-ai-create-dialog-action').size() === 0) {
                 console.log("registerContentDialogInRichtextEditors path", path);
-
-                const formaction = $(event.target).find('form[action]').attr('action');
+                const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
                 var path = undefined;
                 if (formaction && formaction.startsWith('/content')) {
                     path = formaction;
                 }
                 path = path || $(buttongroup).closest('[data-path]').attr('data-path');
-                if (!path) {
-                    for (var i = 0; i < Granite.author.editables.length; i++) {
-                        var editable = Granite.author.editables[i];
-                        if (editable.dom[0] === event.target) {
-                            path = editable.path;
-                            break;
-                        }
-                    }
-                }
-                const isstacked = $(event.target).closest('coral-dialog').size() > 0;
-
-                if (!path) {
-                    debugger;
-                }
-                const $button = $(button);
+                const $button = $(rtebuttonHTML);
                 $(buttongroup).append($button);
                 $button.click(function (clickevent) {
-                    console.log("createButtonText click", arguments, path);
+                    console.log("createButtonText click", typeof clickevent.type, clickevent.target);
+                    var componentPath = path;
+                    // in case of rte in content it's difficult to find the path from the button or current state,
+                    // so we determine it from the last editor start event:
+                    if (!componentPath && lastEditorStartTarget) {
+                        for (var i = 0; i < Granite.author.editables.length; i++) {
+                            var editable = Granite.author.editables[i];
+                            if (editable.dom[0] === lastEditorStartTarget) {
+                                componentPath = editable.path;
+                                break;
+                            }
+                        }
+                    }
+                    if (!componentPath) { // FIXME
+                        debugger;
+                    }
+
                     var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
-                    rteinstance = rteinstance || $(event.target).data('rteinstance');
+                    rteinstance = rteinstance || $(lastEditorStartTarget).data('rteinstance');
                     rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
+                    if (!rteinstance) {
+                        debugger; // FIXME
+                    }
                     console.log("rteinstance", rteinstance);
                     console.log("origevent", event);
                     clickevent.preventDefault();
@@ -202,6 +209,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     showCreateDialog(path, rteinstance.getContent(), function (newvalue) {
                         rteinstance.reactivate();
                         rteinstance.setContent(newvalue);
+                        rteinstance.focus();
                         $('.cq-dialog-backdrop').hide();
                         $('.cq-dialog-backdrop').removeClass('is-open');
                     }, true, true);

@@ -201,3 +201,5 @@ possibly relevant, but found no need yet: cq-layer-activated foundation-contentl
 https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Overlay.html#Coral.Overlay:coral-overlay:open
 comes when dialog is opened, after foundation-contentloaded . coral-overlay:beforeopen doesn't work on RTE.
   Argument: dialog
+
+- editing-start triggered in CUI.Richtext.js
