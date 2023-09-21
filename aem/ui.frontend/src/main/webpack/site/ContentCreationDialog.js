@@ -34,11 +34,11 @@ class ContentCreationDialog {
         this.removeFormAction();
         this.assignElements();
         this.bindActions();
-        this.setSourceContent(oldContent);
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
         this.showError();
         this.setLoading(false);
         this.fullscreen();
+        setTimeout(() => this.setSourceContent(oldContent), 300); // delay because rte editor might not be ready.
     }
 
     fullscreen() {
@@ -162,7 +162,9 @@ class ContentCreationDialog {
 
     retrieveValue(path, callback) {
         $.ajax({
-            url: Granite.HTTP.externalize(APPROXIMATE_MARKDOWN_SERVLET + path),
+            url: Granite.HTTP.externalize(APPROXIMATE_MARKDOWN_SERVLET + path
+                + "?richtext=" + this.isrichtext
+            ),
             type: "GET",
             dataType: "text",
             success: function (data) {

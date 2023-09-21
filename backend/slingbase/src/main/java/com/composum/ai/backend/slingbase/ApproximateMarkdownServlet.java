@@ -2,12 +2,12 @@ package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -20,6 +20,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 
 /**
  * Renders an approximate markdown representation of the text content of a page / resource.
@@ -39,16 +41,33 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);
 
+    /**
+     * If given, the servlet returns simple HTML, as a richtext editor would give, instead.
+     */
+    // TODO: integrate that into the ApproximateMarkdownService as we convert to markdown and then back th HTML for richtext, but no time ATM.
+    public static final String PARAM_RICHTEXT = "richtext";
+
     @Reference
     ApproximateMarkdownService approximateMarkdownService;
+
+    @Reference
+    protected GPTChatCompletionService chatService;
 
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         RequestPathInfo info = request.getRequestPathInfo();
         String path = info.getSuffix();
+        String richtext = request.getParameter(PARAM_RICHTEXT);
         Resource resource = request.getResourceResolver().getResource(path);
-        response.setContentType("text/plain");
-        approximateMarkdownService.approximateMarkdown(resource, response.getWriter());
+        if (Boolean.TRUE.toString().equalsIgnoreCase(richtext)) {
+            response.setContentType("text/html");
+            StringBuilderWriter writer = new StringBuilderWriter();
+            approximateMarkdownService.approximateMarkdown(resource, new PrintWriter(writer));
+            response.getWriter().write(chatService.markdownToHtml(writer.toString()));
+        } else {
+            response.setContentType("text/plain");
+            approximateMarkdownService.approximateMarkdown(resource, response.getWriter());
+        }
     }
 
 }

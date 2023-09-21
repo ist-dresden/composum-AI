@@ -90,7 +90,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     public void approximateMarkdown(@Nullable Resource resource, @Nonnull PrintWriter out) {
         if (resource == null || resource.getName().equals("i18n")) {
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
-            // FIXME(hps,26.05.23) this might lead to trouble if the user edits a non-default language first. Join with translations?
+            // TODO(hps,26.05.23) this might lead to trouble if the user edits a non-default language first. Join with translations?
             // Also it's not quite clear what language we should take.
             return;
         }
