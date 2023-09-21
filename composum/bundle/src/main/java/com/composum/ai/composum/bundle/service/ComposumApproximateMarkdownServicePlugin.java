@@ -46,7 +46,7 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
         boolean isPage = resource.getResourceType().equals("composum/pages/components/page");
         if (isPage) {
             String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
-            out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
+            out.println("Content of page " + path + " :\n\n");
 
             String title = resource.getValueMap().get("jcr:title", String.class);
             String description = resource.getValueMap().get("jcr:description", String.class);

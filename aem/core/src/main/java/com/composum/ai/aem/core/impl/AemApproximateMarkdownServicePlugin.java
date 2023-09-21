@@ -70,7 +70,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         boolean isPage = Objects.equals(vm.get(JcrConstants.JCR_PRIMARYTYPE, String.class), "cq:PageContent");
         if (isPage) {
             String path = resource.getParent().getPath(); // we don't want the content node's path but the parent's
-            out.println("Content of page " + path + " in markdown syntax starts now:\n\n");
+            out.println("Content of page " + path + " :\n\n");
 
             String title = vm.get(JCR_TITLE, String.class);
             if (StringUtils.isNotBlank(title)) {
