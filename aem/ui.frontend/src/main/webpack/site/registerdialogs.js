@@ -81,6 +81,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 dialog.appendTo('body');
                 $(dialog).trigger('foundation-contentloaded');
                 dialog.get()[0].show(); // call Coral function on the element.
+                parameters.dialog = dialog;
                 new ContentCreationDialog(parameters);
             }.bind(this),
             error: function (xhr, status, error) {
@@ -234,10 +235,11 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     console.log("origevent", event);
                     clickevent.preventDefault();
                     clickevent.stopPropagation();
+                    const oldContent = rteinstance.getContent();
                     rteinstance.suspend();
                     showCreateDialog({
-                        componentPath: path,
-                        oldContent: rteinstance.getContent(),
+                        componentPath,
+                        oldContent,
                         writebackCallback: function (newvalue) {
                             rteinstance.setContent(newvalue);
                         },

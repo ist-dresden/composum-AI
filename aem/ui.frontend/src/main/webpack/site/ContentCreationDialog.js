@@ -42,7 +42,7 @@ class ContentCreationDialog {
     }
 
     fullscreen() {
-        this.$dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
+        this.$dialog.find('form').addClass('_coral-Dialog--fullscreenTakeover');
         this.$dialog.find('coral-dialog-footer').children().appendTo(this.$dialog.find('coral-dialog-header div.cq-dialog-actions'));
     }
 
@@ -56,6 +56,7 @@ class ContentCreationDialog {
     findSingleElement(selector) {
         const $el = this.$dialog.find(selector);
         if ($el.length !== 1) {
+            debugger;
             console.error('BUG! ContentCreationDialog: missing element for selector', selector, $el, $el.length);
         }
         return $el;
@@ -65,9 +66,11 @@ class ContentCreationDialog {
         this.$prompt = this.findSingleElement('.composum-ai-prompt-textarea');
         this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefined-prompts');
         this.$contentSelector = this.findSingleElement('.composum-ai-content-selector');
-        this.$sourceContent = this.isrichtext ? this.findSingleElement('.composum-ai-source-richtext') : this.findSingleElement('.composum-ai-source-plaintext');
+        this.$sourceContent = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-source-richtext'))
+            : this.findSingleElement('.composum-ai-source-plaintext');
         this.$textLengthSelector = this.findSingleElement('.composum-ai-text-length-selector');
-        this.$response = this.isrichtext ? this.findSingleElement('.composum-ai-response-richtext') : this.findSingleElement('.composum-ai-response-plaintext');
+        this.$response = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-response-richtext'))
+            : this.findSingleElement('.composum-ai-response-plaintext');
     }
 
     bindActions() {
@@ -128,20 +131,30 @@ class ContentCreationDialog {
         }
     }
 
+    getRte($element) {
+        const rte = $element.find('.cq-RichText-editable').data('rteinstance');
+        if (!rte) {
+            debugger;
+        }
+        return rte;
+    }
+
     setSourceContent(value) {
-        this.$sourceContent.val(value);
+        debugger;
+        this.isrichtext ? this.$sourceContent.setContent(value) : this.$sourceContent.val(value);
     }
 
     getSourceContent() {
-        return this.$sourceContent.val();
+        debugger;
+        return this.isrichtext ? this.$sourceContent.getContent() : this.$sourceContent.val();
     }
 
     setResponse(value) {
-        this.$response.val(value);
+        this.isrichtext ? this.$response.setContent(value) : this.$response.val(value);
     }
 
     getResponse() {
-        return this.$response.val();
+        return this.isrichtext ? this.$response.getContent() : this.$response.val();
     }
 
     onSourceContentChanged(event) {
