@@ -65,9 +65,9 @@ class ContentCreationDialog {
         this.$promptArea = this.findSingleElement('.composum-ai-prompt-textarea');
         this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefined-prompts');
         this.$contentSelector = this.findSingleElement('.composum-ai-content-selector');
-        this.$sourceContentArea = this.findSingleElement('.composum-ai-source-content');
+        this.$sourceContentArea = this.findSingleElement('.composum-ai-source-plaintext');
         this.$textLengthSelector = this.findSingleElement('.composum-ai-text-length-selector');
-        this.$responseArea = this.findSingleElement('.composum-ai-response-field');
+        this.$responseArea = this.findSingleElement('.composum-ai-response-plaintext');
     }
 
     bindActions() {
