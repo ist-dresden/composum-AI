@@ -133,20 +133,24 @@ class SidePanelDialog {
         this.createServlet.createContent(data);
     }
 
-    streamingCallback(data) {
+    streamingCallback(text) {
         console.log("ContentCreationDialog streamingCallback", arguments);
         // set the text of the last div.composum-ai-response to the data
         const lastResponse = this.$promptContainer.find('.composum-ai-response:last');
-        lastResponse.text(data);
+        lastResponse.text(text);
     }
 
-    doneCallback(data) {
+    doneCallback(text, event) {
         this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').length + 1);
         console.log("ContentCreationDialog doneCallback", arguments);
-        if (data && data.data && data.data.result && data.data.result.finishreason === 'STOP') {
+        const finishreason = event && event.data && event.data.result && event.data.result.finishreason;
+        if (finishreason === 'LENGTH') {
             this.showError('The generated content stopped because of the length restriction.');
-        } else {
+        } else if (finishreason === 'STOP') {
             this.showError(undefined);
+        } else {
+            console.log("Unknown finishreason in ", event);
+            this.showError("Internal error in text generation");
         }
         this.setLoading(false);
     }
@@ -172,8 +176,9 @@ class SidePanelDialog {
         if (!error) {
             this.findSingleElement('.composum-ai-error-columns').addClass('hidden');
         } else {
+            debugger;
             console.error("ContentCreationDialog showError", arguments);
-            this.findSingleElement('.composum-ai-alert').text(error);
+            this.findSingleElement('.composum-ai-alert coral-alert-content').text(error);
             this.findSingleElement('.composum-ai-error-columns').removeClass('hidden');
         }
     }

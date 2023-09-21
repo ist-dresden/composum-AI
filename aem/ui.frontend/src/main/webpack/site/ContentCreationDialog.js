@@ -216,17 +216,22 @@ class ContentCreationDialog {
         this.$dialog.find('.composum-ai-content-suggestion')[0].scrollIntoView();
     }
 
-    streamingCallback(data) {
+    streamingCallback(text) {
         console.log("ContentCreationDialog streamingCallback", arguments);
-        this.setResponse(data);
+        this.setResponse(text);
     }
 
-    doneCallback(data) {
+    doneCallback(text, event) {
         console.log("ContentCreationDialog doneCallback", arguments);
-        if (data && data.data && data.data.result && data.data.result.finishreason === 'STOP') {
+        this.streamingCallback(text);
+        const finishreason = event && event.data && event.data.result && event.data.result.finishreason;
+        if (finishreason === 'LENGTH') {
             this.showError('The generated content stopped because of the length restriction.');
-        } else {
+        } else if (finishreason === 'STOP') {
             this.showError(undefined);
+        } else {
+            console.log("Unknown finishreason in ", event);
+            this.showError("Internal error in text generation");
         }
         this.setLoading(false);
     }
