@@ -7,13 +7,13 @@
          value="-"></empty>
     <summarize jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                text="Summarize"
-               value="Please summarize the text."></summarize>
+               value="As the author, please eloquently summarize the text in the style the text is written."></summarize>
     <introduction jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                   text="Introduction"
-                  value="Please write an introduction for the text."></introduction>
+                  value="Please write an eloquent introduction for the text, in the style the text is written."></introduction>
     <conclusion jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                 text="Conclusion"
-                value="Please write a conclusion for the text."></conclusion>
+                value="Please write an eloquent conclusion for the text, in the style the text is written."></conclusion>
     <expand jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
             text="Expand"
             value="Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style."></expand>

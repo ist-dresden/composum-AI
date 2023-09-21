@@ -70,9 +70,7 @@ public class AemApproximateMarkdownServicePluginTest {
                         "category", "test, dummy"));
 
         service.approximateMarkdown(component, printWriter);
-        String expectedOutput = "Content of page /content/parent/path :\n" +
-                "\n" +
-                "\n" +
+        String expectedOutput =
                 "# myPage\n\n" +
                 "The best page!\n";
         assertThat(writer.toString(), is(expectedOutput));

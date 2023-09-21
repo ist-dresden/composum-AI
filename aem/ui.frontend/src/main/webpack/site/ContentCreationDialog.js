@@ -140,12 +140,10 @@ class ContentCreationDialog {
     }
 
     setSourceContent(value) {
-        debugger;
         this.isrichtext ? this.$sourceContent.setContent(value) : this.$sourceContent.val(value);
     }
 
     getSourceContent() {
-        debugger;
         return this.isrichtext ? this.$sourceContent.getContent() : this.$sourceContent.val();
     }
 
@@ -240,6 +238,7 @@ class ContentCreationDialog {
         if (!error) {
             this.findSingleElement('.composum-ai-error-columns').hide();
         } else {
+            debugger;
             console.error("ContentCreationDialog showError", arguments);
             this.findSingleElement('.composum-ai-alert').text(error);
             this.findSingleElement('.composum-ai-error-columns').show();

@@ -89,10 +89,7 @@ public class ComposumApproximateMarkdownServicePluginTest {
                 "category", "test, dummy"));
 
         service.approximateMarkdown(component, printWriter);
-        String expectedOutput = "Content of page /content/parent/path :\n" +
-                "\n" +
-                "\n" +
-                "# myPage\n\n" +
+        String expectedOutput = "# myPage\n\n" +
                 "The best page!\n";
         assertEquals(expectedOutput, writer.toString());
     }

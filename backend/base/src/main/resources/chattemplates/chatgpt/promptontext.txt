@@ -5,7 +5,7 @@ Delimit it with three backticks.
 ---------- assistant ----------
 ```${text}```
 ---------- user ----------
-The following instruction is specifically about the text you've just retrieved and displayed. Whenever I refer to "the text", I'm referencing this exact piece of content. Please keep this in mind while executing the following prompt:
+The following instruction is specifically about the text you've just retrieved and displayed. Whenever I refer to "the text", I'm referencing this exact piece of content. Do not mention the prompt or instructions, print only the result. Please keep this in mind while executing the following prompt:
 PROMPT:
 
 ${prompt}

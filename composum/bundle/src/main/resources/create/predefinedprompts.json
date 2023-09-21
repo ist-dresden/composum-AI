@@ -1,8 +1,8 @@
 {
   "---": "",
-  "Summarize": "Please summarize the text.",
-  "Introduction": "Please write an introduction for the text.",
-  "Conclusion": "Please write a conclusion for the text.",
+  "Summarize": "As the author, please eloquently summarize the text.",
+  "Introduction": "Please write an eloquent introduction for the text, in the style the text is written.",
+  "Conclusion": "Please write an eloquent conclusion for the text, in the style the text is written.",
   "Expand": "Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style.",
   "Extend": "Please extend the text with more details and elaboration while maintaining the current tone and style.",
   "Abstract": "Please write an abstract for the text that provides a concise overview of the key points and main themes.",
