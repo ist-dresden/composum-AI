@@ -25,7 +25,7 @@ class ContentCreationDialog {
     constructor({dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog, onFinishCallback}) {
         console.log("ContentCreationDialog constructor ", arguments);
         this.componentPath = componentPath;
-        this.dialog = $(dialog);
+        this.$dialog = $(dialog);
         this.oldContent = oldContent;
         this.writebackCallback = writebackCallback;
         this.onFinishCallback = onFinishCallback;
@@ -34,7 +34,7 @@ class ContentCreationDialog {
         this.removeFormAction();
         this.assignElements();
         this.bindActions();
-        this.setSourceContentArea(oldContent);
+        this.setSourceContent(oldContent);
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
         this.showError();
         this.setLoading(false);
@@ -42,19 +42,19 @@ class ContentCreationDialog {
     }
 
     fullscreen() {
-        this.dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
-        this.dialog.find('coral-dialog-footer').children().appendTo(this.dialog.find('coral-dialog-header div.cq-dialog-actions'));
+        this.$dialog.find('form').addClass(' _coral-Dialog--fullscreenTakeover');
+        this.$dialog.find('coral-dialog-footer').children().appendTo(this.$dialog.find('coral-dialog-header div.cq-dialog-actions'));
     }
 
     removeFormAction() {
         // we handle the submit ourselves.
-        let form = this.dialog.find('form');
+        let form = this.$dialog.find('form');
         form.removeAttr('action');
         form.removeAttr('method');
     }
 
     findSingleElement(selector) {
-        const $el = this.dialog.find(selector);
+        const $el = this.$dialog.find(selector);
         if ($el.length !== 1) {
             console.error('BUG! ContentCreationDialog: missing element for selector', selector, $el, $el.length);
         }
@@ -62,28 +62,28 @@ class ContentCreationDialog {
     }
 
     assignElements() {
-        this.$promptArea = this.findSingleElement('.composum-ai-prompt-textarea');
+        this.$prompt = this.findSingleElement('.composum-ai-prompt-textarea');
         this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefined-prompts');
         this.$contentSelector = this.findSingleElement('.composum-ai-content-selector');
-        this.$sourceContentArea = this.findSingleElement('.composum-ai-source-plaintext');
+        this.$sourceContent = this.isrichtext ? this.findSingleElement('.composum-ai-source-richtext') : this.findSingleElement('.composum-ai-source-plaintext');
         this.$textLengthSelector = this.findSingleElement('.composum-ai-text-length-selector');
-        this.$responseArea = this.findSingleElement('.composum-ai-response-plaintext');
+        this.$response = this.isrichtext ? this.findSingleElement('.composum-ai-response-richtext') : this.findSingleElement('.composum-ai-response-plaintext');
     }
 
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
-        this.$promptArea.on('change', this.onPromptAreaChanged.bind(this));
+        this.$prompt.on('change', this.onPromptChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
-        this.$sourceContentArea.on('change', this.onSourceContentAreaChanged.bind(this));
+        this.$sourceContent.on('change', this.onSourceContentChanged.bind(this));
         this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
         this.findSingleElement('.composum-ai-stop-button').on('click', function () {
             this.createServlet.abortRunningCalls();
             this.setLoading(false);
         }.bind(this));
         this.findSingleElement('.composum-ai-reset-button').on('click', function () {
-            this.$promptArea.val('');
-            this.setSourceContentArea(this.oldContent);
-            this.setResponseArea('');
+            this.$prompt.val('');
+            this.setSourceContent(this.oldContent);
+            this.setResponse('');
             this.onPredefinedPromptsChanged();
             this.onContentSelectorChanged();
         }.bind(this));
@@ -95,12 +95,12 @@ class ContentCreationDialog {
         console.log("onPredefinedPromptsChanged", arguments);
         const prompt = this.$predefinedPromptsSelector.val();
         if (prompt !== '-') {
-            this.$promptArea.val(prompt);
+            this.$prompt.val(prompt);
         }
     }
 
-    onPromptAreaChanged(event) {
-        console.log("onPromptAreaChanged", arguments);
+    onPromptChanged(event) {
+        console.log("onPromptChanged", arguments);
         this.$predefinedPromptsSelector.val('-');
     }
 
@@ -110,16 +110,16 @@ class ContentCreationDialog {
         const key = this.$contentSelector.val();
         switch (key) {
             case 'lastoutput':
-                this.setSourceContentArea(this.getResponseArea());
+                this.setSourceContent(this.getResponse());
                 break;
             case 'widget':
-                this.setSourceContentArea(this.oldContent);
+                this.setSourceContent(this.oldContent);
                 break;
             case 'component':
-                this.retrieveValue(this.componentPath, (value) => this.setSourceContentArea(value));
+                this.retrieveValue(this.componentPath, (value) => this.setSourceContent(value));
                 break;
             case 'page':
-                this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContentArea(value));
+                this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContent(value));
                 break;
             case '-':
                 break;
@@ -128,20 +128,24 @@ class ContentCreationDialog {
         }
     }
 
-    setSourceContentArea(value) {
-        this.$sourceContentArea.val(value);
+    setSourceContent(value) {
+        this.$sourceContent.val(value);
     }
 
-    setResponseArea(value) {
-        this.$responseArea.val(value);
+    getSourceContent() {
+        return this.$sourceContent.val();
     }
 
-    getResponseArea() {
-        return this.$responseArea.val();
+    setResponse(value) {
+        this.$response.val(value);
     }
 
-    onSourceContentAreaChanged(event) {
-        console.log("onSourceContentAreaChanged", arguments);
+    getResponse() {
+        return this.$response.val();
+    }
+
+    onSourceContentChanged(event) {
+        console.log("onSourceContentChanged", arguments);
         this.$contentSelector.val('-');
     }
 
@@ -177,8 +181,8 @@ class ContentCreationDialog {
         console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
         const data = {
-            prompt: this.$promptArea.val(),
-            source: this.$sourceContentArea.val(),
+            prompt: this.$prompt.val(),
+            source: this.getSourceContent(),
             textLength: this.$textLengthSelector.val()
         };
         console.log("createContent", data);
@@ -188,7 +192,7 @@ class ContentCreationDialog {
 
     streamingCallback(data) {
         console.log("ContentCreationDialog streamingCallback", arguments);
-        this.setResponseArea(data);
+        this.setResponse(data);
     }
 
     doneCallback(data) {
@@ -230,7 +234,7 @@ class ContentCreationDialog {
 
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
-        const response = this.getResponseArea();
+        const response = this.getResponse();
         this.closeDialog(event);
         // only after closing since dialog is now out of the way
         if (typeof this.writebackCallback == 'function') {
@@ -248,8 +252,8 @@ class ContentCreationDialog {
             // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
             event.preventDefault();
             event.stopPropagation();
-            console.log('removing dialog', this.dialog[0]);
-            this.dialog[0].remove();
+            console.log('removing dialog', this.$dialog[0]);
+            this.$dialog[0].remove();
         }
         // else: let the dialog close itself.
         if (typeof this.onFinishCallback == 'function') {
