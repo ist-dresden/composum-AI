@@ -232,9 +232,9 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
         String sourceText = request.getParameter(PARAMETER_SOURCE);
         String chat = request.getParameter(PARAMETER_CHAT);
-        if (isNoneBlank(sourcePath, sourceText) || isAllBlank(sourcePath, sourceText)) {
-            LOG.warn("Exacly one of sourcePath are sourceText required, given where sourcePath {} , sourceText {}", isNotBlank(sourcePath), isNotBlank(sourceText));
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exactly one of sourcePath and sourceText needs to be given, given where sourcePath " + isNotBlank(sourcePath) + " , sourceText " + isNotBlank(sourceText));
+        if (isNoneBlank(sourcePath, sourceText)) {
+            LOG.warn("Cannot use both sourcePath and sourceText");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Cannot use both sourcePath and sourceText.");
             return;
         }
         boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));

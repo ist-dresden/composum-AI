@@ -43,7 +43,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
                 // throw away HTML head and so forth:
                 const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
-                console.log("the dialog", dialog);
+                console.log("found dialog", dialog);
                 // the first tab and panel are the actual dialog content:
                 const tab = dialog.find('coral-tabview coral-tab').first();
                 const panel = dialog.find('coral-tabview coral-panel').first();
