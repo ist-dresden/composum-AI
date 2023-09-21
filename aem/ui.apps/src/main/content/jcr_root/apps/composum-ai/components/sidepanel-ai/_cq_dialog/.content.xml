@@ -192,7 +192,7 @@
                                 </items>
                             </templates>
 
-                            <historyActionbar
+                            <!-- <historyActionbar
                                     jcr:primaryType="nt:unstructured"
                                     margin="{Boolean}false"
                                     granite:class="coral-Form-fieldwrapper"
@@ -218,7 +218,7 @@
                                             granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
                                             granite:class="composum-ai-forward-button"/>
                                 </primary>
-                            </historyActionbar>
+                            </historyActionbar> -->
                         </items>
                     </sidepanelAI>
                     <empty
