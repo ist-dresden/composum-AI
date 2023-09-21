@@ -201,6 +201,7 @@ class ContentCreationDialog {
         console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
+        this.$dialog.find('.composum-ai-content-suggestion')[0].scrollIntoView();
     }
 
     streamingCallback(data) {

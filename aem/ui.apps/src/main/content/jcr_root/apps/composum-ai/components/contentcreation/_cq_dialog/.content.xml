@@ -309,7 +309,7 @@
 
             <contentSuggestion
                     jcr:primaryType="nt:unstructured"
-                    jcr:title="Content Suggestion"
+                    jcr:title="Content Suggestion" granite:class="composum-ai-content-suggestion"
                     sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
                 <items jcr:primaryType="nt:unstructured">
                     <responsePlaintext
