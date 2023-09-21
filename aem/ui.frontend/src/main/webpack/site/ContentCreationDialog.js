@@ -38,6 +38,7 @@ class ContentCreationDialog {
         this.showError();
         this.setLoading(false);
         this.fullscreen();
+        this.onPromptChanged();
         setTimeout(() => this.setSourceContent(oldContent), 300); // delay because rte editor might not be ready.
     }
 
@@ -71,6 +72,7 @@ class ContentCreationDialog {
         this.$textLengthSelector = this.findSingleElement('.composum-ai-text-length-selector');
         this.$response = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-response-richtext'))
             : this.findSingleElement('.composum-ai-response-plaintext');
+        this.$generateButton = this.findSingleElement('.composum-ai-generate-button');
     }
 
     bindActions() {
@@ -89,6 +91,7 @@ class ContentCreationDialog {
             this.setResponse('');
             this.onPredefinedPromptsChanged();
             this.onContentSelectorChanged();
+            this.onPromptChanged();
         }.bind(this));
         this.findSingleElement('.cq-dialog-submit').on('click', this.onSubmit.bind(this));
         this.findSingleElement('.cq-dialog-cancel').on('click', this.onCancel.bind(this));
@@ -99,12 +102,18 @@ class ContentCreationDialog {
         const prompt = this.$predefinedPromptsSelector.val();
         if (prompt !== '-') {
             this.$prompt.val(prompt);
+            this.onPromptChanged();
         }
     }
 
-    onPromptChanged(event) {
+    onPromptChanged() {
         console.log("onPromptChanged", arguments);
         this.$predefinedPromptsSelector.val('-');
+        if (this.$prompt.val() && this.$prompt.val().trim().length > 0) {
+            this.$generateButton.removeAttr('disabled');
+        } else {
+            this.$generateButton.attr('disabled', 'disabled');
+        }
     }
 
     onContentSelectorChanged(event) {
@@ -123,6 +132,9 @@ class ContentCreationDialog {
                 break;
             case 'page':
                 this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContent(value));
+                break;
+            case 'empty':
+                this.setSourceContent('');
                 break;
             case '-':
                 break;

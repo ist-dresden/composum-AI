@@ -295,7 +295,7 @@
 
             <errorColumns
                     jcr:primaryType="nt:unstructured"
-                    granite:class="composum-ai-error-columns" granite:hidden="{Boolean}true"
+                    granite:class="composum-ai-error-columns"
                     sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
                 <items jcr:primaryType="nt:unstructured">
                     <alert

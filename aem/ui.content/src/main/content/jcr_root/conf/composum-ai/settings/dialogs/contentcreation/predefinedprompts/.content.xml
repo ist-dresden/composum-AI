@@ -38,7 +38,7 @@
 "></question>
     <improve jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
              text="Improve"
-             value="Please improve the text into a businesslike informative style.
+             value="Print improved version of the text into a businesslike informative style.
 Do also fix orthographical and grammar errors."></improve>
     <seo_description jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                      text="SEO Description"

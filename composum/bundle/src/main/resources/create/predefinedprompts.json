@@ -10,7 +10,7 @@
   "10 headline suggestions": "Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.",
   "10 headline + subheadline suggestions": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style.",
   "Question": "Please answer the following question based on the given text:\n",
-  "Improve": "Please improve the text into a businesslike informative style.\nDo also fix orthographical and grammar errors.",
+  "Improve": "Print improved version of the text into a businesslike informative style.\nDo also fix orthographical and grammar errors.",
   "SEO Description": "Please create a description for a web page with the following text, usable for search engine optimization (SEO).",
   "Teaser": "Please write a brief, engaging teaser for the text. It should pique the reader's interest and encourage them to read the full content.",
   "Rewrite for Different Audience": "Please rewrite the text to suit a different audience: \n",
