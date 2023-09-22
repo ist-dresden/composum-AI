@@ -1,6 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
+import {errorText} from './common.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
@@ -257,10 +258,10 @@ class ContentCreationDialog {
         if (!error) {
             this.findSingleElement('.composum-ai-error-columns').hide();
         } else {
-            debugger;
             console.error("ContentCreationDialog showError", arguments);
-            this.findSingleElement('.composum-ai-alert').text(error);
+            this.findSingleElement('.composum-ai-alert').text(errorText(error));
             this.findSingleElement('.composum-ai-error-columns').show();
+            debugger;
         }
     }
 

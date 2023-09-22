@@ -1,11 +1,11 @@
 {
+  "Summary": "Please provide a brief summary of the main points and themes in the text.",
+  "Question": "Please answer the following question based on the given text:\n",
   "Simplification Suggestions": "Identify and print parts of the text that could be simplified or made easier to understand, and suggest alternative wording.",
   "Content Flow": "Analyze the flow of the content. Does it progress logically? Is there a clear introduction, body, and conclusion?",
   "Review": "Check whether there is a good text flow, and whether there are contradictions or repetitions and redundancy in the text, inconsistent style or tone and stylistic problems. Check for long and complicated sentences that could be made simpler and more understandable. Give suggestions for improvement. Be picky.",
-  "Question": "Please answer the following question based on the given text:\n",
   "10 headline suggestions": "Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.",
   "10 headline + subheading suggestions": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style.",
-  "Summary": "Please provide a brief summary of the main points and themes in the text.",
   "Sentiment Analysis": "Analyze the sentiment conveyed by the text. Is it positive, negative, or neutral? How strong is the sentiment?",
   "AIDA Content Audit": "Review the provided text and suggest improvements following the AIDA model (Attention, Interest, Desire, and Action). Point out areas where attention-grabbing, interest building, desire amplification, or call-to-action might be lacking and provide suggestions to enhance each aspect.",
   "BAB Content Audit": "Review the provided text and suggest improvements following the BAB Before-After-Bridge) model. Provide suggestions to enhance the 'Before' situation, 'After' vision, and 'Bridge' solution, making sure the reader can clearly see the transformation and the role our product/service plays in it.",

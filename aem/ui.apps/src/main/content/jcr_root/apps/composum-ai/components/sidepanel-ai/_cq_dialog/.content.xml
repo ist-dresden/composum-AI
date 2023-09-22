@@ -108,7 +108,7 @@
                                             jcr:primaryType="nt:unstructured" icon="play"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             granite:title="Triggers the content generation according to the instructions and the source text. Please give that a couple of seconds."
-                                            text="Generate" granite:class="composum-ai-generate-button"/>
+                                            granite:class="composum-ai-generate-button"/>
                                     <stop
                                             jcr:primaryType="nt:unstructured" icon="stop"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"

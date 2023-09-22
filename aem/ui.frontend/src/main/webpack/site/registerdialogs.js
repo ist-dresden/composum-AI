@@ -198,7 +198,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 return; // don't insert buttons into our own dialogs
             }
             if ($(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
-                console.log("registerContentDialogInRichtextEditors path", path);
+                // console.log("registerContentDialogInRichtextEditors path", path);
                 const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
                 var path = undefined;
                 if (formaction && formaction.startsWith('/content')) {

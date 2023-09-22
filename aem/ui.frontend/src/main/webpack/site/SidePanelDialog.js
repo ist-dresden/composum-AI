@@ -1,6 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
+import {errorText, contentFragmentPath} from './common.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
@@ -10,6 +11,9 @@ class SidePanelDialog {
         this.dialog = $(dialog);
         this.assignElements();
         this.bindActions();
+        this.showError(null);
+        this.setLoading(false);
+        this.findSingleElement('.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
     }
 
@@ -52,12 +56,14 @@ class SidePanelDialog {
                 this.onGenerateButtonClicked(event);
             }
         }).bind(this));
+        this.setLoading(false);
     }
 
     /** Makes sure there are in composum-ai-promptcontainer exactly n composum-ai-prompt and composum-ai-response (alternating),
      * either by deleting some or by copying some from the templates. If n < 0 we remove that many, but keep at least one. */
     ensurePromptCount(n) {
         const currentCount = this.$promptContainer.find('.composum-ai-prompt').length;
+        console.log("ensurePromptCount", n, currentCount);
         n = n < 0 ? Math.max(currentCount + n, 1) : n === 0 ? 1 : n;
         if (currentCount < n) {
             for (let i = currentCount; i < n; i++) {
@@ -95,12 +101,14 @@ class SidePanelDialog {
         if (prompt !== '-') {
             this.ensurePromptCount(1);
             this.$promptContainer.find('.composum-ai-prompt').val(prompt);
+            this.setAutomaticGenerateButtonState();
         }
     }
 
     onPromptAreaChanged(event) {
         console.log("onPromptAreaChanged", arguments);
         this.$predefinedPromptsSelector.val('-');
+        this.setAutomaticGenerateButtonState();
     }
 
     // TODO: possibly use resize on typing https://stackoverflow.com/questions/454202/creating-a-textarea-with-auto-resize/77155208
@@ -128,26 +136,41 @@ class SidePanelDialog {
 
     getSelectedPath() {
         const key = this.$contentSelector.val();
+        var contentPath = Granite.author.ContentFrame.getContentPath();
+        if (!contentPath || !contentPath.startsWith('/')) {
+            contentPath = contentFragmentPath();
+        }
+        var path;
         switch (key) {
             case 'component':
                 const selectedEditable = Granite.author.selection.getCurrentActive();
-                return selectedEditable ? selectedEditable.path : Granite.author.ContentFrame.getContentPath();
+                path = selectedEditable ? selectedEditable.path : contentPath;
+                break;
             case 'page':
-                return Granite.author.ContentFrame.getContentPath();
+                path = contentPath;
+                break;
             case '':
-                return undefined;
+                path = undefined;
+                break;
             default:
-                console.error('BUG! ContentCreationDialog: unknown content selector value', key);
+                console.error('BUG! SidePanelDialog: unknown content selector value', key);
+                break;
         }
-        return undefined;
+        console.log("SidePanelDialog getSelectedPath", key, path);
+        return path;
     }
 
     onGenerateButtonClicked(event) {
         console.log("onGenerateButtonClicked", arguments);
+        this.shrinkOnBlur(event);
         this.showError(undefined);
         this.removeLastEmptyPrompts();
         this.removePromptsAfterEventSource(event);
         this.$promptContainer.find('.composum-ai-response:last').text('');
+        this.$promptContainer.find('.composum-ai-response:last')[0].scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
         // collect chat history from .composum-ai-prompt and .composum-ai-response
         const promptHistory = [];
         this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
@@ -179,7 +202,7 @@ class SidePanelDialog {
     }
 
     streamingCallback(text) {
-        // console.log("ContentCreationDialog streamingCallback", arguments);
+        // console.log("SidePanelDialog streamingCallback", arguments);
         // set the text of the last div.composum-ai-response to the data
         const lastResponse = this.$promptContainer.find('.composum-ai-response:last');
         lastResponse.text(text);
@@ -188,7 +211,7 @@ class SidePanelDialog {
     doneCallback(text, event) {
         this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').length + 1);
         this.$promptContainer.find('.composum-ai-prompt:last').focus();
-        console.log("ContentCreationDialog doneCallback", arguments);
+        console.log("SidePanelDialog doneCallback", arguments);
         const finishreason = event && event.data && event.data.result && event.data.result.finishreason;
         if (finishreason === 'LENGTH') {
             this.showError('The generated content stopped because of the length restriction.');
@@ -202,7 +225,7 @@ class SidePanelDialog {
     }
 
     errorCallback(data) {
-        console.log("ContentCreationDialog errorCallback", arguments);
+        console.log("SidePanelDialog errorCallback", arguments);
         this.showError(data);
         this.setLoading(false);
     }
@@ -210,23 +233,30 @@ class SidePanelDialog {
     setLoading(loading) {
         if (loading) {
             this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
-            this.findSingleElement('.composum-ai-loading').removeClass('hidden');
+            this.findSingleElement('.composum-ai-loading').show();
         } else {
+            this.setAutomaticGenerateButtonState();
+            this.findSingleElement('.composum-ai-loading').hide();
+        }
+    }
+
+    setAutomaticGenerateButtonState() {
+        if (this.$promptContainer.find('.composum-ai-prompt').val()) {
             this.findSingleElement('.composum-ai-generate-button').removeAttr('disabled');
-            this.findSingleElement('.composum-ai-loading').addClass('hidden');
+        } else {
+            this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
         }
     }
 
     /** Shows the error text if error is given, hides it if it's falsy. */
     showError(error) {
         if (!error) {
-            this.findSingleElement('.composum-ai-error-columns').addClass('hidden');
+            this.findSingleElement('.composum-ai-error-columns').hide();
         } else {
-            console.error("ContentCreationDialog showError", arguments);
+            console.error("SidePanelDialog showError", arguments);
+            this.findSingleElement('.composum-ai-alert coral-alert-content').text(errorText(error));
+            this.findSingleElement('.composum-ai-error-columns').show();
             debugger;
-            const errorText = typeof error === 'string' ? error : JSON.stringify(error);
-            this.findSingleElement('.composum-ai-alert coral-alert-content').text(errorText);
-            this.findSingleElement('.composum-ai-error-columns').removeClass('hidden');
         }
     }
 
