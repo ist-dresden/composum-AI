@@ -97,6 +97,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (!ResourceUtil.normalize(resource.getPath()).startsWith("/content/")) {
             throw new IllegalArgumentException("For security reasons the resource must be in /content but is: " + resource.getPath());
         }
+        if (!resource.getPath().contains("/jcr:content") && resource.getChild("jcr:content") != null) {
+            resource = resource.getChild("jcr:content");
+        }
         ApproximateMarkdownServicePlugin.PluginResult pluginResult = executePlugins(resource, out);
         boolean printEmptyLine = false;
         if (pluginResult == NOT_HANDLED) {

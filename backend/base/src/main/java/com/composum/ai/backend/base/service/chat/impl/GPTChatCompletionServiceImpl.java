@@ -349,7 +349,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             try {
                 callback.onError(throwable);
             } finally {
-                subscription.cancel();
+                if (null != subscription) {
+                    subscription.cancel();
+                }
             }
         }
 

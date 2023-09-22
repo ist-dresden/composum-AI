@@ -188,50 +188,62 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                 String[] elementNames = resource.getValueMap().get("elementNames", String[].class);
                 Resource referencedResource = resource.getResourceResolver().getResource(reference);
                 if (referencedResource != null) {
-                    Resource dataNode = referencedResource.getChild("jcr:content/data");
-                    Map<String, String> elementLabels = new HashMap<>();
-                    Map<String, Integer> listOrder = new HashMap<>();
-                    findElementLabels(dataNode, elementLabels, listOrder);
-                    if (referencedResource.getChild("jcr:content/data/" + variation) != null) {
-                        referencedResource = referencedResource.getChild("jcr:content/data/" + variation);
-                    } else {
-                        LOG.warn("Content fragment {} referenced in {} does not have a variation named {}.", reference, resource.getPath(), variation);
-                    }
-                    ValueMap vm = referencedResource.getValueMap();
-                    if (elementNames == null) {
-                        elementNames = listOrder.entrySet().stream()
-                                .sorted(Map.Entry.comparingByValue())
-                                .map(Map.Entry::getKey)
-                                .toArray(String[]::new);
-                        if (elementNames.length == 0) {
-                            // all attributes that are not jcr: and don't end with _LastModified
-                            elementNames = vm.keySet().stream()
-                                    .filter(key -> !key.startsWith("jcr:") && !key.contains("@"))
-                                    .toArray(String[]::new);
-                        }
-                    }
-                    for (String elementName : elementNames) {
-                        String value = vm.get(elementName, String.class);
-                        String contentType = vm.get(elementName + "@ContentType", String.class);
-                        if (StringUtils.isNotBlank(value)) {
-                            if ("text/html".equals(contentType)) {
-                                value = service.getMarkdown(value);
-                            }
-                            String label = elementLabels.get(elementName);
-                            if (StringUtils.isNotBlank(label)) {
-                                out.println(label + ": " + value);
-                            } else {
-                                out.println(value);
-                            }
-                        }
-                    }
+                    renderReferencedContentFragment(resource, out, service, referencedResource, variation, reference, elementNames);
                 } else {
                     LOG.warn("Resource {} referenced from {} attribute {} not found.", reference, resource.getPath(), "fragmentPath");
                 }
             }
             return true;
+        } else if (resource.getPath().startsWith("/content/dam") && Boolean.TRUE == resource.getValueMap().get("contentFragment", Boolean.class)) {
+            // somewhat dubious: master might not the right one, but we don't have the variation name.
+            renderReferencedContentFragment(resource, out, service, resource.getParent(), "master", resource.getPath(), null);
+            return true;
         }
         return false;
+    }
+
+    private void renderReferencedContentFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service, Resource referencedResource, String variation, String reference, String[] elementNames) {
+        Resource dataNode = referencedResource.getChild("jcr:content/data");
+        String title = referencedResource.getValueMap().get("jcr:content/jcr:title", String.class);
+        if (StringUtils.isNotBlank(title)) {
+            out.println("## " + title);
+        }
+        Map<String, String> elementLabels = new HashMap<>();
+        Map<String, Integer> listOrder = new HashMap<>();
+        findElementLabels(dataNode, elementLabels, listOrder);
+        if (referencedResource.getChild("jcr:content/data/" + variation) != null) {
+            referencedResource = referencedResource.getChild("jcr:content/data/" + variation);
+        } else {
+            LOG.warn("Content fragment {} referenced in {} does not have a variation named {}.", reference, resource.getPath(), variation);
+        }
+        ValueMap vm = referencedResource.getValueMap();
+        if (elementNames == null) {
+            elementNames = listOrder.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .toArray(String[]::new);
+            if (elementNames.length == 0) {
+                // all attributes that are not jcr: and don't end with _LastModified
+                elementNames = vm.keySet().stream()
+                        .filter(key -> !key.startsWith("jcr:") && !key.contains("@"))
+                        .toArray(String[]::new);
+            }
+        }
+        for (String elementName : elementNames) {
+            String value = vm.get(elementName, String.class);
+            String contentType = vm.get(elementName + "@ContentType", String.class);
+            if (StringUtils.isNotBlank(value)) {
+                if ("text/html".equals(contentType)) {
+                    value = service.getMarkdown(value);
+                }
+                String label = elementLabels.get(elementName);
+                if (StringUtils.isNotBlank(label)) {
+                    out.println(label + ": " + value);
+                } else {
+                    out.println(value);
+                }
+            }
+        }
     }
 
     /**
