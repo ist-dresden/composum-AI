@@ -42,44 +42,44 @@ module.exports = {
   context: BUILD_DIR,
   clientLibRoot: CLIENTLIB_DIR,
   libs: [
-    {
-      ...libsBaseConfig,
-      name: 'clientlib-dependencies',
-      categories: ['composum-ai.dependencies'],
-      assets: {
-        // Copy entrypoint scripts and stylesheets into the respective ClientLib
-        // directories
-        js: {
-          cwd: 'clientlib-dependencies',
-          files: ['**/*.js'],
-          flatten: false
-        },
-        css: {
-          cwd: 'clientlib-dependencies',
-          files: ['**/*.css'],
-          flatten: false
-        }
-      }
-    },
-    {
-      ...libsBaseConfig,
-      name: 'clientlib-dependencies',
-      categories: ['composum-ai.dependencies'],
-      assets: {
-        // Copy entrypoint scripts and stylesheets into the respective ClientLib
-        // directories
-        js: {
-          cwd: 'clientlib-dependencies',
-          files: ['**/*.js'],
-          flatten: false
-        },
-        css: {
-          cwd: 'clientlib-dependencies',
-          files: ['**/*.css'],
-          flatten: false
-        }
-      }
-    },
+    // {
+    //   ...libsBaseConfig,
+    //   name: 'clientlib-dependencies',
+    //   categories: ['composum-ai.dependencies'],
+    //   assets: {
+    //     // Copy entrypoint scripts and stylesheets into the respective ClientLib
+    //     // directories
+    //     js: {
+    //       cwd: 'clientlib-dependencies',
+    //       files: ['**/*.js'],
+    //       flatten: false
+    //     },
+    //     css: {
+    //       cwd: 'clientlib-dependencies',
+    //       files: ['**/*.css'],
+    //       flatten: false
+    //     }
+    //   }
+    // },
+    // {
+    //   ...libsBaseConfig,
+    //   name: 'clientlib-dependencies',
+    //   categories: ['composum-ai.dependencies'],
+    //   assets: {
+    //     // Copy entrypoint scripts and stylesheets into the respective ClientLib
+    //     // directories
+    //     js: {
+    //       cwd: 'clientlib-dependencies',
+    //       files: ['**/*.js'],
+    //       flatten: false
+    //     },
+    //     css: {
+    //       cwd: 'clientlib-dependencies',
+    //       files: ['**/*.css'],
+    //       flatten: false
+    //     }
+    //   }
+    // },
     {
       ...libsBaseConfig,
       name: 'clientlib-site',

@@ -1,3 +1,0 @@
-#base=js
-
-composum-ai-hook.js
