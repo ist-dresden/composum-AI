@@ -78,7 +78,7 @@ class ContentCreationDialog {
 
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
-        this.$prompt.on('change', this.onPromptChanged.bind(this));
+        this.$prompt.on('change input', this.onPromptChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContent.on('change', this.onSourceContentChanged.bind(this));
         this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));

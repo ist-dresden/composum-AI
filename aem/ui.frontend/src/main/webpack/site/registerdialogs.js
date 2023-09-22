@@ -260,6 +260,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                         stackeddialog: true,
                         onFinishCallback: function () {
                             rteinstance.reactivate();
+                            rteinstance.setContent(oldContent);
                             rteinstance.focus();
                             $('.cq-dialog-backdrop').removeClass('is-open');
                             $('.cq-dialog-backdrop').hide();
