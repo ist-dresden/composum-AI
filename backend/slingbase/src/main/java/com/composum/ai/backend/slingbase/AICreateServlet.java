@@ -146,6 +146,9 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
         @SuppressWarnings("unchecked")
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
+        if (streams == null) {
+            return null;
+        }
         EventStream stream = streams.get(streamId);
         streams.remove(streamId); // using it more than once would lead to conflicts.
         return stream;
@@ -227,6 +230,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
      */
     @Override
     protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
+        LOG.info("Starting content creation");
         String prompt = getMandatoryParameter(request, response, PARAMETER_PROMPT);
         String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
         String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);

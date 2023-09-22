@@ -1,6 +1,7 @@
 {
   "org.apache.sling.commons.log.names": [
-    "com.composum.ai.aem"
+    "com.composum.ai.aem",
+    "com.composum.ai.backend.slingbase"
   ],
   "org.apache.sling.commons.log.level": "DEBUG",
   "org.apache.sling.commons.log.file": "logs/error.log",

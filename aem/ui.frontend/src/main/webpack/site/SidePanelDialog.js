@@ -41,11 +41,13 @@ class SidePanelDialog {
         this.$promptContainer.on('focus', '.composum-ai-prompt', this.expandOnFocus);
         this.$promptContainer.on('blur', '.composum-ai-prompt', this.shrinkOnBlur);
         this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
-        this.findSingleElement('.composum-ai-stop-button').on('click', function () {
+        this.findSingleElement('.composum-ai-stop-button').on('click', function (event) {
+            event.preventDefault();
             this.createServlet.abortRunningCalls();
             this.setLoading(false);
         }.bind(this));
-        this.findSingleElement('.composum-ai-reset-button').on('click', function () {
+        this.findSingleElement('.composum-ai-reset-button').on('click', function (event) {
+            event.preventDefault();
             this.ensurePromptCount(1);
             this.$promptContainer.find('.composum-ai-prompt').val('');
             this.$promptContainer.find('.composum-ai-response').text('');
@@ -162,6 +164,7 @@ class SidePanelDialog {
 
     onGenerateButtonClicked(event) {
         console.log("onGenerateButtonClicked", arguments);
+        event.preventDefault();
         this.shrinkOnBlur(event);
         this.showError(undefined);
         this.removeLastEmptyPrompts();
