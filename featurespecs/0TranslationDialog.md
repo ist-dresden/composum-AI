@@ -198,11 +198,11 @@ The dialog is rendered with `/libs/composum/pages/options/ai/dialogs/translate/t
 `com.composum.ai.composum.bundle.AIDialogServlet` and uses model
 `model.com.composum.ai.composum.bundle.ChatGPTTranslationDialogModel` .
 The URL is e.g.
-`/bin/cpm/platform/ai/dialog.translationDialog.html/content/ist/software/home/test/_jcr_content/jcr:description?propertypath=jcr:description&pages.locale=de`
+`/bin/cpm/ai/dialog.translationDialog.html/content/ist/software/home/test/_jcr_content/jcr:description?propertypath=jcr:description&pages.locale=de`
 
 The Javascript class TranslationDialog in `/libs/composum/pages/options/ai/js/chatgpt.js` triggers the loading
 of the dialog and does call `com.composum.ai.composum.bundle.AIServlet.TranslateOperation` with
-`/bin/cpm/platform/ai/authoring.translate.json` for the translation.
+`/bin/cpm/ai/authoring.translate.json` for the translation.
 
 ## Test cases
 

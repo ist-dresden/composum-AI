@@ -40,7 +40,7 @@ import com.composum.sling.core.util.XSS;
         })
 public class AIDialogServlet extends AbstractServiceServlet {
 
-    public static final String SERVLET_PATH = "/bin/cpm/platform/ai/dialog";
+    public static final String SERVLET_PATH = "/bin/cpm/ai/dialog";
 
     private static final Logger LOG = LoggerFactory.getLogger(AIDialogServlet.class);
 
@@ -58,15 +58,15 @@ public class AIDialogServlet extends AbstractServiceServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
+        // e.g. http://localhost:9090/bin/cpm/ai/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/translate"));
-        // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
-        // or http://localhost:9090/bin/cpm/platform/ai/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
+        // e.g. http://localhost:9090/bin/cpm/ai/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
+        // or http://localhost:9090/bin/cpm/ai/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/categorize"));
-        // e.g. http://localhost:9090/bin/cpm/platform/ai/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
+        // e.g. http://localhost:9090/bin/cpm/ai/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/create"));
 
-        // primarily for help http://localhost:9090/bin/cpm/platform/ai/dialog.sidebarDialog.help.html
+        // primarily for help http://localhost:9090/bin/cpm/ai/dialog.sidebarDialog.help.html
         operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.sidebarDialog, new ShowDialogOperation("composum/pages/options/ai/tools/sidebar"));
     }
 

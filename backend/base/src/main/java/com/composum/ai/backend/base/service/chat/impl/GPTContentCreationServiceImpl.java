@@ -129,7 +129,12 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
             return "";
         }
         GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, additionalParameters);
-        return chatCompletionService.getSingleChatCompletion(request);
+        String singleChatCompletion = chatCompletionService.getSingleChatCompletion(request);
+        // we quote the text in promptontext.json , which leads sometimes to ChatGPT repeating that in the output.
+        if (singleChatCompletion.startsWith("```") && singleChatCompletion.endsWith("```")) {
+            singleChatCompletion = singleChatCompletion.substring(3, singleChatCompletion.length() - 3);
+        }
+        return singleChatCompletion;
     }
 
     protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, @Nullable GPTChatRequest additionalParameters) {

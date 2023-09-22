@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.composum.ai</groupId>
+		<artifactId>composum-ai-integration-backend</artifactId>
+		<version>0.4.2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>composum-ai-integration-backend-slingbase</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>Composum AI::Backend::SlingBase</name>
+	<description>
+		Common Functionality for Composum AI specific to Sling but would be useable in both Composum and AEM and similar.
+	</description>
+
+	<properties>
+		<wikitext.version>3.0.42</wikitext.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.composum.ai</groupId>
+			<artifactId>composum-ai-integration-backend-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- Other libraries -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<!-- Sling, JCR -->
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-commons</artifactId>
+		</dependency>
+
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
+		<!-- Java Annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+
+		<!-- OSGi, Felix -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+		</dependency>
+
+		<!-- JUnit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							javax.annotation;version="[1,4)",
+							!javax.annotation.meta,
+							*
+						</Import-Package>
+						<Export-Package>
+							!com.composum.ai.backend.slingbase.impl,
+							!com.composum.ai.backend.slingbase.*.impl,
+							com.composum.ai.backend.slingbase.*
+						</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+
+		<profile>
+			<id>installBundle</id>
+		</profile>
+		<profile>
+			<id>installPackage</id>
+		</profile>
+		<profile>
+			<id>installTestContent</id>
+		</profile>
+
+	</profiles>
+
+</project>

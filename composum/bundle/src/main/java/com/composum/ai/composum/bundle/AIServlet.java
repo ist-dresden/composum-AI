@@ -48,6 +48,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.composum.bundle.model.TranslationDialogModel;
 import com.composum.sling.core.BeanContext;
 import com.composum.sling.core.ResourceHandle;
@@ -69,7 +70,7 @@ import com.google.gson.reflect.TypeToken;
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Backend Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/platform/ai/authoring",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/authoring",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
@@ -100,7 +101,7 @@ public class AIServlet extends AbstractServiceServlet {
     /**
      * Optional numerical parameter limiting the number of words to be generated. That might lead to cutoff or actual wordcount, depending on the operation, and is usually only quite approximate.
      */
-    public static final String PARAMETER_MAXWORDS = "maxtokens";
+    public static final String PARAMETER_MAXWORDS = "maxwords";
 
     /**
      * Optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
@@ -169,7 +170,7 @@ public class AIServlet extends AbstractServiceServlet {
     public static final String RESULTKEY_STREAMID = "streamid";
 
     /**
-     * Session contains a map at this key thqt maps the streamids to the streaming handle.
+     * Session contains a map at this key that maps the streamids to the streaming handle.
      */
     public static final String SESSIONKEY_STREAMING = AIServlet.class.getName() + ".streaming";
 
@@ -255,7 +256,9 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected EventStream retrieveStream(String streamId, SlingHttpServletRequest request) {
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
-        return streams.get(streamId);
+        EventStream stream = streams.get(streamId);
+        streams.remove(streamId);
+        return stream;
     }
 
     protected abstract class AbstractGPTServletOperation implements ServletOperation {
@@ -303,7 +306,7 @@ public class AIServlet extends AbstractServiceServlet {
      * a list containing the translation as (currently) a single string.
      * We use a list since it might be sensible to create multiple translation variants in the future, if requested.
      */
-    // http://localhost:9090/bin/cpm/platform/ai/authoring.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
+    // http://localhost:9090/bin/cpm/ai/authoring.translate.json?sourceLanguage=en&targetLanguage=de&text=Hello%20World
     public class TranslateOperation extends AbstractGPTServletOperation {
 
         @Override

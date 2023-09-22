@@ -13,7 +13,7 @@
         ai.const = ai.const || {};
         ai.const.url = ai.const.url || {};
         ai.const.url.create = {
-            createDialog: '/bin/cpm/platform/ai/dialog.creationDialog.html'
+            createDialog: '/bin/cpm/ai/dialog.creationDialog.html'
         }
 
         ai.openCreationDialog = _.debounce(function (event) {

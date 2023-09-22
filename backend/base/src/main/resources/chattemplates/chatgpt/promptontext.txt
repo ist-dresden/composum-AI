@@ -1,9 +1,10 @@
 # Execute a prompt on a text.
+---------- system ----------
+You are a professional editor assistant. Generate text according to the prompt, and then print it without any additional comments. Do not mention the prompt. Use the style and tone with which the input text is written.
 ---------- user ----------
-Please retrieve the text for which you are going to execute a prompt.
-Delimit it with three backticks.
+Please retrieve the text for which you are going to execute a prompt, and print exactly that text, without any additional comments.
 ---------- assistant ----------
-```${text}```
+${text}
 ---------- user ----------
 The following instruction is specifically about the text you've just retrieved and displayed. Whenever I refer to "the text", I'm referencing this exact piece of content. Please keep this in mind while executing the following prompt:
 PROMPT:

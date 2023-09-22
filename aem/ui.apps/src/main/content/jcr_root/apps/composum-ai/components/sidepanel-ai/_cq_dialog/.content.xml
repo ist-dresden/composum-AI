@@ -1,0 +1,232 @@
+<jcr:root jcr:primaryType="nt:unstructured" sling:resourceType="cq/gui/components/authoring/dialog"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          helpPath="https://www.example.net/"
+          extraClientlibs="[]"
+          jcr:title="Composum AI Side Panel AI"
+          mode="edit">
+    <content
+            jcr:primaryType="nt:unstructured"
+            granite:class="composum-ai-dialog"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+        <items
+                jcr:primaryType="nt:unstructured">
+            <tabs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    margin="{Boolean}true"
+                    maximized="{Boolean}true"
+                    orientation="vertical"
+                    size="L">
+                <items
+                        jcr:primaryType="nt:unstructured">
+                    <sidepanelAI
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            granite:class="sidepanel-tab .sidepanel-tab-ai composum-ai-dialog coral-Form--vertical"
+                            jcr:title="Composum AI">
+                        <granite:data
+                                jcr:primaryType="nt:unstructured"
+                                headerTitle="Composum AI"/>
+                        <parentConfig
+                                jcr:primaryType="nt:unstructured"
+                                icon="gearsEdit"/>
+                        <items
+                                jcr:primaryType="nt:unstructured">
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/heading"
+                                    granite:class="sidepanel-tab-title"
+                                    level="2"
+                                    text="Composum AI"/>
+                            <filterPanel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    granite:class="filter-panel">
+                                <items
+                                        jcr:primaryType="nt:unstructured">
+                                    <predefPrompt
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            granite:class="composum-ai-predefinedprompts"
+                                            fieldDescription="You can select a predefined prompt that will overwrite the first prompt field and then edit that, or just write your own prompt."
+                                            emptyText="Overwrite with Predefined Prompt"
+                                            name="predefinedprompt_selector"
+                                            text="Predefined Prompt">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                filterType="General"/>
+                                        <datasource
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
+                                                path="/conf/composum-ai/settings/dialogs/sidepanel-ai/predefinedprompts"/>
+                                    </predefPrompt>
+                                    <contentSelector
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            granite:class="composum-ai-contentselector"
+                                            emptyText="Content Selector"
+                                            name="assetfilter_type_selector"
+                                            fieldDescription="The additional content you want the AI to consider according to your prompt, if any."
+                                            text="Content Selector">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                filterType="General"/>
+                                        <items
+                                                jcr:primaryType="nt:unstructured">
+                                            <currentPage
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Add current page text"
+                                                    value="page"
+                                                    selected="true"
+                                            />
+                                            <componentsgroup
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Add selected component text"
+                                                    value="component"
+                                                    selected="false"
+                                            />
+                                            <none
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="No additional source text"
+                                                    value=""
+                                                    selected="false"
+                                            />
+                                        </items>
+                                    </contentSelector>
+                                </items>
+                            </filterPanel>
+                            <generateActionbar
+                                    jcr:primaryType="nt:unstructured"
+                                    margin="{Boolean}false"
+                                    granite:class="coral-Form-fieldwrapper"
+                                    sling:resourceType="granite/ui/components/coral/foundation/actionbar">
+                                <primary
+                                        jcr:primaryType="nt:unstructured">
+                                    <generate
+                                            jcr:primaryType="nt:unstructured" icon="play"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            granite:title="Triggers the content generation according to the instructions and the source text. Please give that a couple of seconds."
+                                            granite:class="composum-ai-generate-button"/>
+                                    <stop
+                                            jcr:primaryType="nt:unstructured" icon="stop"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            granite:title="Aborts the content generation."
+                                            granite:class="composum-ai-stop-button"/>
+                                    <reset
+                                            jcr:primaryType="nt:unstructured" icon="deleteOutline"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            granite:class="composum-ai-reset-button"
+                                            granite:title="Resets the form to the state when you opened it."/>
+                                    <loading
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                                            granite:class="coral-Wait coral-Wait--large composum-ai-loading hidden"/>
+                                </primary>
+                            </generateActionbar>
+
+                            <errorColumns
+                                    jcr:primaryType="nt:unstructured"
+                                    granite:class="composum-ai-error-columns hidden"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <alert
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/alert"
+                                            granite:class="coral-Form-fieldwrapper composum-ai-alert"
+                                            variant="error"
+                                            text="Your error message here."/>
+                                </items>
+                            </errorColumns>
+
+                            <prompts
+                                    jcr:primaryType="nt:unstructured"
+                                    granite:class="composum-ai-promptcontainer"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <prompt1
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            granite:class="composum-ai-prompt"
+                                            fieldDescription="Your question / request to the AI"
+                                            emptyText="Please enter your question or request to the AI and then press enter to submit."
+                                            name="./prompt1" rows="5"/>
+                                    <container
+                                            jcr:primaryType="nt:unstructured"
+                                            granite:class="composum-ai-response coral-Form-fieldwrapper"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <answer1
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    text="Hi!&#10;I am the Composum Side Panel AI! Please give me some instructions or use one of the predefined prompts, and maybe select the text I should carry out the instructions. I can also help you through the other AI dialogs accessible through the icons in the field-labels of text areas in the component dialogs."/>
+                                        </items>
+                                    </container>
+                                </items>
+                            </prompts>
+
+                            <templates
+                                    jcr:primaryType="nt:unstructured"
+                                    granite:class="composum-ai-templates hidden"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <prompt1
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            granite:class="composum-ai-prompt"
+                                            fieldDescription="Your followup question / request to the AI"
+                                            emptyText="Please enter a followup request. If you want to start over, you can just change the first prompt or use the reset button."
+                                            name="./prompt" rows="5"/>
+                                    <container
+                                            jcr:primaryType="nt:unstructured"
+                                            granite:class="composum-ai-response coral-Form-fieldwrapper"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <answer1
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/text"
+                                                    text=""/>
+                                        </items>
+                                    </container>
+                                </items>
+                            </templates>
+
+                            <!-- <historyActionbar
+                                    jcr:primaryType="nt:unstructured"
+                                    margin="{Boolean}false"
+                                    granite:class="coral-Form-fieldwrapper"
+                                    sling:resourceType="granite/ui/components/coral/foundation/actionbar">
+                                <primary
+                                        jcr:primaryType="nt:unstructured">
+                                    <resetHistory
+                                            jcr:primaryType="nt:unstructured" icon="deleteOutline"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            class="composum-ai-reset-history"
+                                            granite:title="Resets this form including the whole history."
+                                            text="History Reset" granite:class="composum-ai-reset-history-button"/>
+                                    <back
+                                            jcr:primaryType="nt:unstructured" icon="back"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            class="composum-ai-back"
+                                            granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
+                                            granite:class="composum-ai-back-button"/>
+                                    <forward
+                                            jcr:primaryType="nt:unstructured" icon="forward"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            class="composum-ai-forward"
+                                            granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
+                                            granite:class="composum-ai-forward-button"/>
+                                </primary>
+                            </historyActionbar> -->
+                        </items>
+                    </sidepanelAI>
+                    <empty
+                            jcr:primaryType="nt:unstructured" jcr:title="emp"
+                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                    </empty>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>

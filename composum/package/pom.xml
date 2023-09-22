@@ -84,6 +84,7 @@
 							<root>/libs/composum/pages/install</root>
 							<includes>
 								<include>.*/composum-ai-integration-backend-base.*\.jar</include>
+								<include>.*/composum-ai-integration-backend-slingbase.*\.jar</include>
 								<include>.*/composum-ai-integration-composum-bundle.*\.jar</include>
 							</includes>
 						</filter>
@@ -101,6 +102,11 @@
 						<embedded>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>composum-ai-integration-backend-base</artifactId>
+							<target>/libs/composum/pages/install</target>
+						</embedded>
+						<embedded>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>composum-ai-integration-backend-slingbase</artifactId>
 							<target>/libs/composum/pages/install</target>
 						</embedded>
 						<embedded>
@@ -142,6 +148,12 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>composum-ai-integration-backend-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>composum-ai-integration-backend-slingbase</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

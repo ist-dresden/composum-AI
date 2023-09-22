@@ -20,6 +20,10 @@ import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.servlet.Status;
 import com.google.gson.Gson;
 
+/**
+ * @deprecated use slingbase EventStream
+ */
+@Deprecated
 public class EventStream implements GPTCompletionCallback {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventStream.class);

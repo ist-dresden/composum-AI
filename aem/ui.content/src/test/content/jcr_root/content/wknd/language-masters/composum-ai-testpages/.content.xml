@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="wknd/components/page"
+            cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
+            jcr:description="The text is a markdown document titled &quot;Composum AI Testpages.&quot; It starts with a brief introduction and contains a section titled &quot;The title of the test dialog.&quot; The text before and after this section is not included in the summary."
+            jcr:title="Composum AI Testpages"
+            pwaCachestrategy="staleWhileRevalidate"
+            pwaDisplay="standalone"
+            pwaOrientation="any">
+        <root
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="wknd/components/container"
+                layout="responsiveGrid">
+            <container
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="wknd/components/container"
+                    cq:styleIds="[1554340406437]"
+                    layout="responsiveGrid">
+                <text
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/text"
+                        text="&lt;p>Text before&lt;/p>&#xd;&#xa;"
+                        textIsRich="true"/>
+                <testdialog
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/test/components/testdialog"
+                        textIsRich="true"
+                        therichText="&lt;p>Give a little bit of &lt;b>rich&lt;/b> &lt;i>text&lt;/i>&lt;/p>&lt;ul>&lt;li>he&lt;/li>&lt;li>re&lt;/li>&lt;/ul>"
+                        thetext="This is, not surprising, some plain text which we have here.&#xd;&#xa;Another line of plain text."
+                        title="The title of the test dialog"/>
+                <contentcreation
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/components/contentcreation"/>
+                <sidepanelai
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="composum-ai/components/sidepanel-ai"/>
+                <text_1433451153
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/text"
+                        text="&lt;p>Text after&lt;/p>&#xd;&#xa;"
+                        textIsRich="true"/>
+                <contentfragment
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/contentfragment"
+                        displayMode="multi"
+                        fragmentPath="/content/dam/wknd/en/adventures/ski-touring-mont-blanc/ski-touring-mont-blanc"
+                        paragraphScope="all"
+                        text="Ski Touring Mont Blanc Title Ski Touring Mont Blanc Description If you’re a slopes enthusiast, you know that one run in the backcountry is worth ten in the front country. This adventure includes 5 days of ski touring topped off with the ascent of Mont Blanc, the highest point in Western Europe. An acclimatization phase of the trip will prepare the team physically and mentally for a two-day summit attempt. During this phase, some of the classic routes around Chamonix will be explored. The final two days we’ll take the summit of Mont Blanc via the Arete Royal and Dome Du Goute. Adventure Type Overnight Trip Trip Length 5 Days Activity Skiing Group Size 3-4 Difficulty Advanced Price $2600 USD Primary Image /content/dam/wknd/en/adventures/ski-touring-mont-blanc/AdobeStock_291339093.jpeg Itinerary Day 1 Arrive in Chamonix and meet up with our group at the chalet in the afternoon. Your guides will take you through the plan for the week and will discuss logistics, equipment, conditions and guidelines. Day 2 Our first ski day is usually at the Grands Montets where there are some excellent runs from the top lift station. During the afternoon your guide will do a short ski tour and run a mountain awareness session on avalanche rescue. Day 3 A second day ski tour from the Argentiere hut typically you will head to the Col du Tour Noir on the Glacier des Amethystes, usually a 4 hour run. Then we’ll return to the hut for a second night. Day 4 Starting from the hut you will ski tour the Col du Passon and enjoy a long ski descent to the village of Le Tour. Return to the chalet for a well deserved shower and dinner. Day 5 Summit ascent. A leisurely start before the Aiguille du Midi cable car and ascent to the Grand Mulets Refuge. This is a 3hr ski tour to the hut where you stay overnight. What to Bring When choosing clothing for ski touring you want to think light, warm, and versatile. Weather can change from warm and sunny in the afternoon to frigid bone-chilling temperatures in the evening. Be prepared to switch from carrying most of your clothes and gear in your rucksack to avoid the heat to wearing nearly everything you have to keep warm! Preparing for the unpredictable conditions is definitely part of the adventure! Headwear: warm hat, sun-cap, or wide-brim hat for sun protection, ski helmet, snow cap/beanie. An outer shell jacket made of waterproof and breathable material like Gore-Tex. One with a hood is preferable to avoid letting snow inside. Multiple layers of thin fleece - rather than a single thick layer. Multiple layers allow for easy adding or removing of layers depending on the temperature and activity. Insulation layer like a down or Primaloft jacket is a good item to have ready to wear in the event of cold weather, it can live in your rucksack as a spare layer and can come in very handy for sudden changes in the weather. A pair of thermal base layer pants under a shell. As with all ski touring trips, you’ll want to go with all-mountain/freeride skis, ski touring boots and ski touring bindings. Dedicated ski touring boots or hybrid freeride boots are required for all touring trips to make it easier and more comfortable to walk uphill."
+                        variationName="master"/>
+                <experiencefragment
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/experiencefragment"
+                        fragmentVariationPath="/content/experience-fragments/wknd/us/en/adventures/adventures-2021/master"/>
+            </container>
+        </root>
+    </jcr:content>
+</jcr:root>

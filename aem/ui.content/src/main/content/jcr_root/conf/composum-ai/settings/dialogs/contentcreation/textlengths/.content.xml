@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created by com.composum.ai.composum.bundle.WriteTextLengths - can be used for updating, too. -->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" jcr:primaryType="sling:OrderedFolder">
+    <___ jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+         text="---"
+         value=""></___>
+    <one_line jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+              text="one line"
+              value="100|Your response should be exactly one line of text."></one_line>
+    <one_sentence jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                  text="one sentence"
+                  value="100|Your response should contain one sentence of text."></one_sentence>
+    <one_paragraph jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                   text="one paragraph"
+                   value="300|Your response should contain one paragraph of text."></one_paragraph>
+    <several_paragraphs jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                        text="several paragraphs"
+                        value="750|Your response should contain several paragraphs of text."></several_paragraphs>
+</jcr:root>
