@@ -1,6 +1,13 @@
-# Sample AEM project template
+# AEM version for Composum AI
 
-This is a project template for AEM-based applications. It is intended as a best-practice set of examples as well as a potential starting point to develop your own functionality.
+This provides the Composum AI for use in the AEM author host. (There is no point in deploying this in the publisher 
+so far, as it is currently exclusively supporting the author.) You'll find the Composum AI documentation in 
+[../](../) and [../featurespecs](../featurespecs) .
+
+The project structure is based on the AEM archetype version 37, with most unused parts removed, but we'll keep some 
+around to ease further extensions.
+
+The rest of this file is from the archetype, for reference, as most of that still applies.
 
 ## Modules
 
