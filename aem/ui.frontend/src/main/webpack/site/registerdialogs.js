@@ -21,13 +21,20 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     const SIDEPANEL_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
-    channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
+    /** We currently disable it for content fragments, as there are issues with the rich text editor and the action bar. :-( */
+    function isDisabled() {
+        return Granite.author.ContentFrame.contentURL.toString().indexOf('/content/dam') >= 0;
+    }
 
+    channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
     /**
      * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
      */
     function loadSidebarPanelDialog() {
+        if (isDisabled()) {
+            return;
+        }
         const dialogId = 'composumAI-sidebar-panel';
         if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
             return;
@@ -142,6 +149,9 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * @param {Event} event - The event triggering the preparation.
      */
     function prepareDialog(event) {
+        if (isDisabled()) {
+            return;
+        }
         console.log("prepareDialog", event.type, event.target);
         Coral.commons.ready(event.target, function () {
             insertCreateButtonsForTextareas(event.target);
@@ -157,6 +167,9 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * @param {Event} event - The event indicating the activation of the RTE.
      */
     function initRteHooks(event) {
+        if (isDisabled()) {
+            return;
+        }
         console.log("waitForReadyAndInsert", event.type, event.target);
         Coral.commons.ready(event.target, function () {
             Granite.author.ContentFrame.getDocument()
