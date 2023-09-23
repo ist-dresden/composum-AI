@@ -19,7 +19,7 @@
 		<groupId>com.composum.meta.ist</groupId>
 		<artifactId>parent-root</artifactId>
 		<version>1.7.1</version>
-		<relativePath></relativePath>
+		<relativePath />
 	</parent>
   <groupId>com.composum.ai.aem</groupId>
   <artifactId>composum-ai</artifactId>
@@ -346,7 +346,7 @@ Bundle-DocURL:
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -366,7 +366,7 @@ Bundle-DocURL:
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -387,7 +387,7 @@ Bundle-DocURL:
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -509,6 +509,60 @@ Bundle-DocURL:
         </pluginManagement>
       </build>
     </profile>
+
+    <profile>
+        <!-- profile to release the artifacts for the public repository -->
+        <id>nexus-staging</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <serverId>${release.repository.id}</serverId>
+                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                        <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.6</version>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                            <configuration>
+                                <keyname>info@composum.com</keyname>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <gpgArguments>
+                            <!-- necessary for avoiding password prompt in Github Action -->
+                            <arg>--batch</arg>
+                            <arg>--pinentry-mode</arg>
+                            <arg>loopback</arg>
+                            <arg>-v</arg>
+                        </gpgArguments>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </build>
+    </profile>
+
   </profiles>
   <!-- ====================================================================== -->
   <!-- D E P E N D E N C I E S -->
