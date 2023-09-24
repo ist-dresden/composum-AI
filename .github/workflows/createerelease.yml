@@ -141,6 +141,15 @@ jobs:
       run: |
         $MVNCMD release:perform -DlocalCheckout=true -DdeployAtEnd=true "-Dgoals=clean install package source:jar javadoc:jar deploy" "-Darguments=-DdeployAtEnd=true"
 
+    - name: Debug Perform release
+      if: ${{ job.status != 'success' }}
+      env:
+        OSSRH_USER: ${{ secrets.OSSRH_USER  }}
+        OSSRH_PASSWD: ${{ secrets.OSSRH_PASSWD  }}
+        GPG_PASSPHRASE : ${{ secrets.GPG_PASSPHRASE }}
+      run: |
+        $MVNCMD -X release:perform -DlocalCheckout=true -DdeployAtEnd=true "-Dgoals=clean install package source:jar javadoc:jar deploy" "-Darguments=-DdeployAtEnd=true"
+
     - name: Git Status after perform
       if: always()
       run: |
