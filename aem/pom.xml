@@ -27,6 +27,13 @@
   <version>0.5.0-SNAPSHOT</version>
   <name>Composum AI::AEM</name>
   <description>Composum AI AEM variant</description>
+  <url>${siteurl}</url>
+  <scm>
+      <connection>scm:git:${giturl}</connection>
+      <developerConnection>scm:git:${giturl}</developerConnection>
+      <url>${giturl}</url>
+      <tag>HEAD</tag>
+  </scm>
   <modules>
     <module>all</module>
     <module>core</module>
@@ -52,6 +59,9 @@
     <aem.sdk.api>2023.7.12874.20230726T072051Z-230702</aem.sdk.api>
     <aemanalyser.version>1.4.10</aemanalyser.version>
     <componentGroupName>Composum AI</componentGroupName>
+
+    <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
+    <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
 
     <release.repository.id>ossrh</release.repository.id>
     <release.repository.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</release.repository.url>
