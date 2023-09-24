@@ -99,18 +99,21 @@
 					<failOnError>true</failOnError>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>auto-clean</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+			<!-- This is in the aem archetype, but when this is here we get an error during release creation: 8-{}
+			 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-gpg-plugin:3.0.1:sign (sign-artifacts) on project composum-ai.all: The project artifact has not been assembled yet. Please do not invoke this goal before the lifecycle phase "package". -> [Help 1]
+			 -->
+<!--			<plugin>-->
+<!--				<artifactId>maven-clean-plugin</artifactId>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>auto-clean</id>-->
+<!--						<phase>initialize</phase>-->
+<!--						<goals>-->
+<!--							<goal>clean</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
 			<plugin>
 				<groupId>com.adobe.aem</groupId>
 				<artifactId>aemanalyser-maven-plugin</artifactId>
