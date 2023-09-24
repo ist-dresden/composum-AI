@@ -32,7 +32,7 @@
     <!-- ====================================================================== -->
     <artifactId>composum-ai.ui.apps</artifactId>
     <packaging>content-package</packaging>
-    <name>Composum AI - UI apps</name>
+    <name>Composum AI::AEM::UI apps</name>
     <description>UI apps package for Composum AI</description>
 
     <!-- ====================================================================== -->
