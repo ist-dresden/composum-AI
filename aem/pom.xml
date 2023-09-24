@@ -524,56 +524,6 @@ Bundle-DocURL:
         </pluginManagement>
       </build>
     </profile>
-
-    <profile>
-        <!-- profile to release the artifacts for the public repository -->
-        <id>nexus-staging</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <serverId>${release.repository.id}</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <!--
-                            As we switch to releasing via Github, we do not want the stuff to be immediately released, since
-                            we want things to be as resilient as possible: the git push of the release commits
-                            happens only after things are successfully uploaded to sonatype and the release happens only after the git push.
-                            A release can then be triggered by mvn nexus-staging:release in target/checkout , or in the Nexus UI.
-                        -->
-                        <autoReleaseAfterClose>${release.autoReleaseAfterClose}</autoReleaseAfterClose>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>sign-artifacts</id>
-                            <goals>
-                                <goal>sign</goal>
-                            </goals>
-                            <configuration>
-                                <keyname>${release.keyname}</keyname>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-            </plugins>
-        </build>
-    </profile>
-
   </profiles>
   <!-- ====================================================================== -->
   <!-- D E P E N D E N C I E S -->
