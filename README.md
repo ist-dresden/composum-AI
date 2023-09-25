@@ -1,8 +1,8 @@
 # Composum AI
 
-Fast and flexible, 
-Composum empowers you,
-Content blooms with ease.
+> Fast and flexible,<br>
+Composum empowers you,<br>
+Content blooms with ease.<br>
 -- ChatGPT
 
 ## Basic idea
