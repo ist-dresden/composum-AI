@@ -20,11 +20,9 @@ All of there provide APIs that allow
 them to be used very flexibly in a lot of ways that are useful for supporting a CMS - for translation, content 
 creation, review, summarizing, chat, you name it.
 
-At the current state, Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html). 
-A port to 
-[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
-is [currently in progress](https://github.com/ist-dresden/composum-AI/issues/15) - both share quite some 
-commonality through being based on the
+Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html). There is also a version for 
+[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html),
+though yet somewhat experimental. Both share quite some commonality through being based on the
 [Apache Sling](https://sling.apache.org/) platform.
 Where possible and appropriate, components will remain platform-agnostic.
 Since [OpenAI](https://openai.com/)'s chat completion API, also available through as
@@ -36,18 +34,16 @@ data security rules. It's likely that in time there will also be LLM that can be
 
 ## Current status
 
-In our 
-[first release](https://github.com/ist-dresden/composum-AI/releases/tag/composum-chatgpt-integration-0.1.1)
-we have implemented the following dialogs that help with editing in Composum Pages:
+There are the following dialogs that help with editing in Composum Pages:
 
 - a translation dialog that can be opened on any edited textfield in multilingual websites and suggests translations
-  of the text of a component into other languages
-- the text of page descriptions and summaries, keywords, navigation title
+  of the text of a component into other languages the text of page descriptions and summaries, keywords, navigation title
 - a multi purpose content creation dialog that can support you by creating text for any edited text fields. The text
   can be created either from a user supplied prompt, or by applying a (user supplied or predefined) ChatGPT prompt
   to the existing text of the page / component. That way, one could create summaries of the page, or extracts wrt. a
   topic, overviews, orjust request suggestions to reformulate or expand user supplied text fragments, ... Your
   imagination is the limit.
+- an side panel AI that you can chat with and use to analyze the text content of the current page and get suggestions.
 - a page category dialog with suggestions for page categories (that are used as SEO keywords)
 
 ## Try it out!
