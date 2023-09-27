@@ -4,3 +4,12 @@
 - Keine Probleme erwähnen.
 - Skip: Copilot Demo
 - Bei ChatGPT Fachkonzept nur Resultat zeigen und Prozess erwähnen
+
+## Recheck Talk-Struktur
+
+Intro
+Worum gehts
+Über mich
+
+
+## Features to show off
