@@ -27,9 +27,10 @@
             let isRichText = widget && !!widget.richText;
             let url = ai.const.url.create.createDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
+            let isNew = $target.closest("form").attr("action") && $target.closest("form").attr("action").endsWith("/*");
             core.openFormDialog(url, ai.CreateDialog, {
                 widget: widget, isRichText: isRichText,
-                componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
+                componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property, isNew
             });
         }, 1000, true);
 
@@ -51,6 +52,7 @@
                 this.pagePath = options.pagePath;
                 this.componentPropertyPath = options.componentPropertyPath;
                 this.streaming = typeof (EventSource) !== "undefined";
+                this.isNew = options.isNew;
 
                 this.$predefinedPrompts = this.$el.find('.predefined-prompts');
                 this.$contentSelect = this.$el.find('.content-selector');
@@ -83,15 +85,21 @@
                     this.$alert.text('Bug, please report: no widget found for ' + this.componentPropertyPath);
                 }
 
-                this.history = ai.createDialogStates[this.componentPropertyPath];
-                console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
-                if (!this.history) {
+                if (!this.isNew) {
+                    this.history = ai.createDialogStates[this.componentPropertyPath];
+                    console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
+                    if (!this.history) {
+                        this.history = [];
+                        ai.createDialogStates[this.componentPropertyPath] = this.history;
+                    }
+                    this.historyPosition = this.history.length - 1;
+                    if (this.historyPosition >= 0) {
+                        this.restoreStateFromMap(this.history[this.historyPosition]);
+                    }
+                } else {
+                    // new unsaved component instances are indistinguishable, so we don't save their state
                     this.history = [];
-                    ai.createDialogStates[this.componentPropertyPath] = this.history;
-                }
-                this.historyPosition = this.history.length - 1;
-                if (this.historyPosition >= 0) {
-                    this.restoreStateFromMap(this.history[this.historyPosition]);
+                    this.historyPosition = -1;
                 }
 
                 if (this.isRichText) {
