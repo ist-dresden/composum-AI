@@ -120,6 +120,9 @@ class ContentCreationDialog {
 
     }
 
+    /** Creates a map containing the status of all fields. */
+    makeStatus() XXX
+
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
         this.$prompt.on('change input', this.onPromptChanged.bind(this));
