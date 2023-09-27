@@ -15,7 +15,7 @@
 - check there
 
 
-## Testing
+## Local testing of releasing
 
 Starting with parent release 1.7, the release creation is meant to be done automatically in github actions. There are two kinds of workflow: in Nodes at .github/workflows/createrelease.yml (meant to be copied to all the other Github projects) it builds the whole tree in the project, but for composum-meta .github/workflows/createrelease.yml does permit to select a subdirectory, as there are several trees (ist/parent and assembly) with different release schedules.
 To check release creation locally in a dry run, you can use the following command lines:

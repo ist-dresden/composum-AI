@@ -11,8 +11,8 @@
   backend base services.
 - package : /libs content for integration with Composum Pages : components, javascript ; deploys base and bundle
 
-## aem (planned)
+## aem
 
-- ui.core : OSGI bundle providing the code to integrate the backend services with AEM
-- ui.apps : /libs content for integration with AEM editor
-- all : A single "uber"-package deploying everything necessary for integration into AEM
+- aem/ui.core : OSGI bundle providing the code to integrate the backend services with AEM
+- aem/ui.apps : /libs content for integration with AEM editor
+- aem/all : A single "uber"-package deploying everything necessary for integration into AEM
