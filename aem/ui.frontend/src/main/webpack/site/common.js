@@ -32,4 +32,15 @@ function contentFragmentPath() {
     return suffix;
 }
 
-export { errorText, contentFragmentPath };
+/** To make sure the dialogs have the right elements, we log an error and call the debugger if a mandatory element in a dialog is not found (Bug!) */
+function findSingleElement($dialog, selector)
+{
+    const $el = $dialog.find(selector);
+    if ($el.length !== 1) {
+        console.error('BUG! Dialog missing element for selector', $dialog.get(), selector, $el, $el.length);
+        debugger;
+    }
+    return $el;
+}
+
+export {errorText, contentFragmentPath, findSingleElement};
