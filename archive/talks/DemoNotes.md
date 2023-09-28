@@ -7,15 +7,16 @@ Versionsliste; in Releases zusammengefasst.
 Slideshow mit lebenden Slides
 
 ## Site
-Baum, Komponenten einer Seite, Komponentenauswahl, Releaseverwaltung
+Baum, Komponenten einer Seite, Komponentenauswahl, nicht: Releaseverwaltung
 
 Slideshow mit lebenden Slides
 Browser die Details der JCR Darstellung anschauen und bei Bedarf editieren kann.
 
-## Deno AI
+## Demo AI
 
 ## Übersetzungsassistent
 http://localhost:9090/bin/pages.html/content/ist/composum/home/platform#
+en+fr!
 
 ## Seitenkategorien
 http://localhost:9090/bin/pages.html/content/ist/composum/home/platform#
