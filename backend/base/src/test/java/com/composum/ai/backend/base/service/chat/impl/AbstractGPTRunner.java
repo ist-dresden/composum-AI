@@ -43,6 +43,11 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public String temperature() {
+                return null;
+            }
+
+            @Override
             public int requestTimeout() {
                 return 60;
             }

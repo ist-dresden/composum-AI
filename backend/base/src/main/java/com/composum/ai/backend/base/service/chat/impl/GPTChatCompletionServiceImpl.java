@@ -136,6 +136,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
     private long requestTimeout;
     private long connectionTimeout;
+    private Double temperature;
 
     @Reference
     protected ThreadPoolManager threadPoolManager;
@@ -153,6 +154,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
+        try {
+            this.temperature = config != null && !StringUtil.isBlank(config.temperature()) ? Double.valueOf(config.temperature()) : null;
+        } catch (NumberFormatException e) {
+            LOG.error("Cannot parse temperature {}", config.temperature(), e);
+            this.temperature = null;
+        }
         if (config == null || !config.disable()) {
             this.apiKey = retrieveOpenAIKey(config);
         } else {
@@ -189,6 +196,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.mapper = null;
         this.bundleContext = null;
         this.templates.clear();
+        this.temperature = null;
     }
 
     private static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
@@ -561,6 +569,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
                 .model(defaultModel)
                 .messages(messages)
+                .temperature(temperature)
                 .maxTokens(request.getMaxTokens())
                 .stream(streaming ? Boolean.TRUE : null)
                 .build();
@@ -662,6 +671,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
         String defaultModel();
+
+        @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")
+        String temperature();
 
         @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "" + DEFAULTVALUE_CONNECTIONTIMEOUT)
         int connectionTimeout();

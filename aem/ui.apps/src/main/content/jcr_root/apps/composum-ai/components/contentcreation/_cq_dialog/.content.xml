@@ -268,6 +268,7 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/container"
                                     granite:class="coral-Wait coral-Wait--large composum-ai-loading"/>
                         </primary>
+                        <!-- TODO: implement history
                         <secondary
                                 jcr:primaryType="nt:unstructured">
                             <resetHistory
@@ -289,6 +290,7 @@
                                     granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
                                     text="Forward" granite:class="composum-ai-forward-button"/>
                         </secondary>
+                        -->
                     </generateActionbar>
                 </items>
             </generateButtonFieldset>
