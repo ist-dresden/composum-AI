@@ -67,7 +67,7 @@ class DialogHistory {
     /** If the dialog status was changed wrt. the last restored or saved state, we create a new history entry at the end of the list. */
     maybeSaveToHistory(noModifyIndex) {
         const status = this.getDialogStatus();
-        var saveNeeded = false;
+        var saveNeeded = this.historyIndex < 0;
         if (this.historyIndex >= 0) {
             // compare with last entry
             const lastStatus = this.historyList[this.historyIndex];

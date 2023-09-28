@@ -66,15 +66,15 @@ class ContentCreationDialog {
     }
 
     assignElements() {
-        this.$prompt = this.findSingleElement('.composum-ai-prompt-textarea');
-        this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefined-prompts');
-        this.$contentSelector = this.findSingleElement('.composum-ai-content-selector');
-        this.$sourceContent = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-source-richtext'))
-            : this.findSingleElement('.composum-ai-source-plaintext');
-        this.$textLengthSelector = this.findSingleElement('.composum-ai-text-length-selector');
-        this.$response = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-response-richtext'))
-            : this.findSingleElement('.composum-ai-response-plaintext');
-        this.$generateButton = this.findSingleElement('.composum-ai-generate-button');
+        this.$prompt = findSingleElement(this.$dialog, '.composum-ai-prompt-textarea');
+        this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefined-prompts');
+        this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-content-selector');
+        this.$sourceContent = this.isrichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-source-richtext'))
+            : findSingleElement(this.$dialog, '.composum-ai-source-plaintext');
+        this.$textLengthSelector = findSingleElement(this.$dialog, '.composum-ai-text-length-selector');
+        this.$response = this.isrichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-response-richtext'))
+            : findSingleElement(this.$dialog, '.composum-ai-response-plaintext');
+        this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
     }
 
     getDialogStatus() {
@@ -82,14 +82,18 @@ class ContentCreationDialog {
             prompt: this.$prompt.val(),
             source: this.getSourceContent(),
             textLength: this.$textLengthSelector.val(),
+            contentSelector: this.$contentSelector.val(),
+            predefinedPrompts: this.$predefinedPromptsSelector.val(),
             response: this.getResponse()
         };
     }
 
     setDialogStatus(status) {
+        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
+        this.$contentSelector.val(status.contentSelector);
+        this.$textLengthSelector.val(status.textLength);
         this.$prompt.val(status.prompt);
         this.setSourceContent(status.source);
-        this.$textLengthSelector.val(status.textLength);
         this.setResponse(status.response);
     }
 
@@ -240,8 +244,8 @@ class ContentCreationDialog {
     }
 
     doneCallback(text, event) {
-        console.log("ContentCreationDialog doneCallback", arguments);
         this.streamingCallback(text);
+        console.log("ContentCreationDialog doneCallback", arguments);
         const finishreason = event && event.data && event.data.result && event.data.result.finishreason;
         if (finishreason === 'LENGTH') {
             this.showError('The generated content stopped because of the length restriction.');
