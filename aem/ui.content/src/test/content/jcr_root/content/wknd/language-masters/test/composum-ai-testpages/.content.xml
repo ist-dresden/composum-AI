@@ -9,7 +9,7 @@
             sling:resourceType="wknd/components/page"
             cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
             jcr:description="The text is a markdown document titled &quot;Composum AI Testpages.&quot; It starts with a brief introduction and contains a section titled &quot;The title of the test dialog.&quot; The text before and after this section is not included in the summary."
-            jcr:title="Composum AI Testpages"
+            jcr:title="Composum AI Testpage"
             pwaCachestrategy="staleWhileRevalidate"
             pwaDisplay="standalone"
             pwaOrientation="any">
