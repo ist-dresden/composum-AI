@@ -27,3 +27,8 @@
 - history usage
 - chat to rewrite
 - ask questions possible
+
+## Demo Story:
+Create a blog:
+1. Sidebar: ideas for outline, evtl. rewrite
+2. 
