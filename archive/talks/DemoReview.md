@@ -5,13 +5,25 @@
 - Skip: Copilot Demo
 - Bei ChatGPT Fachkonzept nur Resultat zeigen und Prozess erwähnen
 
-## Recheck Talk-Struktur
-
-Intro
-Worum gehts
-Über mich
-
-
 ## Features to show off
+- translation
+- SEO categories
+- Side panel:
+  - create blog outline
+  - chat!
+  - rewrite
+  - question
+  - CTA Suggestions (? geht auch an Seite)
+  - ? headline suggestions
+- Content Creation:
+  - predefined prompts conversion - incl. fixing
+  - 10 headline suggestions: component / page
+  - page description summary; rewrite prompt: As the author, please eloquently summarize the text, focusing on what 
+    information this page provides.
 
-- 
+
+## Messages:
+- prompt rewriting useful
+- history usage
+- chat to rewrite
+- ask questions possible
