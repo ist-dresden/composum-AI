@@ -1,19 +1,22 @@
+!! Erklärung Aufbau Composum
+Componentenleiste!
+
 ## Demo Story: finish AI description and create a blog
 - AI description
   - Sidebar
     - content gap analysis!
-    - What could use cases for the content creation assistant be?
+    - (What could use cases for the content creation assistant be?)
     - Make a real short example for improving a text, unrelated to the current text. Make the original text dumb.
-    - How are the dialogs integrated into Composum Pages?
+    - (How are the dialogs integrated into Composum Pages?)
   - Page: page properties
-    - Category assitant
+    - (Category assistant)
     - Description:
       - Summary.
       - As the author, please eloquently summarize the text. Important: make clear what the purpose and scope of this page is.
-      - Teaser.
-      - History.
+      - (Teaser.)
+      - (History.)
   - Sidebar AI:
-    - Make an outline for a short blog announcing the new Composum AI.
+    - (Make an outline for a short blog announcing the new Composum AI.)
 - Blog:
   - neue Seite erzeugen
   - Spec paste
