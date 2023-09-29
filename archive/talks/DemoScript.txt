@@ -16,9 +16,9 @@ Componentenleiste!
       - (Teaser.)
       - (History.)
   - Sidebar AI:
-    - (Make an outline for a short blog announcing the new Composum AI.)
+    - ( Make an outline for a short blog announcing the new Composum AI.
 - Blog:
-  - neue Seite erzeugen
+  - ( neue Seite erzeugen
   - Spec paste
   - Make a short description of the content creation dialog that gives a short overview what the user can do.
   - Describe the dialog from the users perspective. Use passive voice and a businesslike informative style.
@@ -34,3 +34,4 @@ Componentenleiste!
 - AEM Content Creation
   - Explain approximated text
   - Please rewrite the text to suit a different audience: ducks
+  - make that pirate speak
