@@ -21,16 +21,19 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.impl.ApproximateMarkdownServiceImpl;
 import com.google.common.collect.ImmutableMap;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
+import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
 /**
  * Like ApproximateMarkdownServiceImplTest but with Composum specific stuff.
  */
+@ExtendWith(AemContextExtension.class)
 public class AemApproximateMarkdownServicePluginTest {
 
     private ApproximateMarkdownServiceImpl service;
@@ -72,7 +75,7 @@ public class AemApproximateMarkdownServicePluginTest {
         service.approximateMarkdown(component, printWriter);
         String expectedOutput =
                 "# myPage\n\n" +
-                "The best page!\n";
+                        "The best page!\n";
         assertThat(writer.toString(), is(expectedOutput));
     }
 
