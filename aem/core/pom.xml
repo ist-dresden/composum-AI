@@ -85,9 +85,21 @@ Import-Package: javax.annotation;version=0.0.0,*
 			<artifactId>slf4j-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.adobe.aem</groupId>
 			<artifactId>aem-sdk-api</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>com.adobe.aem</groupId>
+			<artifactId>uber-jar</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.composum.ai</groupId>
