@@ -1,6 +1,9 @@
 import {findSingleElement} from './common.js';
 
 /** A class that helps to manage the dialog history.
+ * We create a new entry on large changes (like overwriting the prompt with a predefined prompt or dialog reset) and
+ * upon finishing the answer. Each time we check whether exactly that history has already been saved.
+ *
  * The dialog should have buttons with the following classes:
  * - composum-ai-reset-history-button : resets the history
  * - composum-ai-back-button : goes back in the history
@@ -44,6 +47,7 @@ class DialogHistory {
         this.historyList = [];
         this.historyIndex = -1;
         this.setDialogStatus({}); // clears dialog status
+        this.updateButtons();
     }
 
     back() {

@@ -55,6 +55,7 @@ class SidePanelDialog {
         // bind enter key (without any modifiers) in .composum-ai-promptcontainer .composum-ai-prompt to submit
         this.findSingleElement('.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
             if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+                event.preventDefault();
                 this.onGenerateButtonClicked(event);
             }
         }).bind(this));

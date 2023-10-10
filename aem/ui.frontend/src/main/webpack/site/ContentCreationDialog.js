@@ -117,10 +117,17 @@ class ContentCreationDialog {
         }.bind(this));
         findSingleElement(this.$dialog, '.cq-dialog-submit').on('click', this.onSubmit.bind(this));
         findSingleElement(this.$dialog, '.cq-dialog-cancel').on('click', this.onCancel.bind(this));
+        this.$prompt.on('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                event.preventDefault();
+                this.onGenerateButtonClicked(event);
+            }
+        });
     }
 
     onPredefinedPromptsChanged(event) {
         console.log("onPredefinedPromptsChanged", arguments);
+        this.history.maybeSaveToHistory();
         const prompt = this.$predefinedPromptsSelector.val();
         if (prompt !== '-') {
             this.$prompt.val(prompt);
@@ -130,6 +137,7 @@ class ContentCreationDialog {
 
     onPromptChanged() {
         console.log("onPromptChanged", arguments);
+        this.history.maybeSaveToHistory();
         this.$predefinedPromptsSelector.val('-');
         if (this.$prompt.val() && this.$prompt.val().trim().length > 0) {
             this.$generateButton.removeAttr('disabled');
@@ -239,7 +247,7 @@ class ContentCreationDialog {
     }
 
     streamingCallback(text) {
-        console.log("ContentCreationDialog streamingCallback", arguments);
+        // console.log("ContentCreationDialog streamingCallback", arguments);
         this.setResponse(text);
     }
 
@@ -303,6 +311,8 @@ class ContentCreationDialog {
     }
 
     closeDialog(event) {
+        console.log("ContentCreationDialog closeDialog", arguments);
+        this.history.maybeSaveToHistory();
         if (this.stackeddialog) {
             // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
             event.preventDefault();
