@@ -2,8 +2,12 @@
 
 import {AICreate} from './AICreate.js';
 import {errorText, contentFragmentPath} from './common.js';
+import {DialogHistory} from './DialogHistory.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
+
+/** Keeps dialog histories per path. */
+const historyMap = {};
 
 class SidePanelDialog {
     constructor(dialog) {
@@ -15,6 +19,13 @@ class SidePanelDialog {
         this.setLoading(false);
         this.findSingleElement('.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+
+        const historyPath = this.getContentPath();
+        if (!historyMap[historyPath]) {
+            historyMap[historyPath] = [];
+        }
+        this.history = new DialogHistory(this.dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
+        this.history.restoreFromLastOfHistory();
     }
 
     findSingleElement(selector) {
@@ -45,9 +56,11 @@ class SidePanelDialog {
             event.preventDefault();
             this.createServlet.abortRunningCalls();
             this.setLoading(false);
+            this.history.maybeSaveToHistory();
         }.bind(this));
         this.findSingleElement('.composum-ai-reset-button').on('click', function (event) {
             event.preventDefault();
+            this.history.maybeSaveToHistory();
             this.ensurePromptCount(1);
             this.$promptContainer.find('.composum-ai-prompt').val('');
             this.$promptContainer.find('.composum-ai-response').text('');
@@ -60,6 +73,34 @@ class SidePanelDialog {
             }
         }).bind(this));
         this.setLoading(false);
+    }
+
+    getDialogStatus() {
+        return {
+            predefinedPrompts: this.$predefinedPromptsSelector.val(),
+            contentSelector: this.$contentSelector.val(),
+            promptCount: this.$promptContainer.find('.composum-ai-prompt').length,
+            prompts: this.$promptContainer.find('.composum-ai-prompt').map(function () {
+                return $(this).val();
+            }).get(),
+            responses: this.$promptContainer.find('.composum-ai-response').map(function () {
+                return $(this).text();
+            }).get()
+        };
+    }
+
+    setDialogStatus(status) {
+        console.log("SidePanelDialog setDialogStatus", status);
+        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
+        this.$contentSelector.val(status.contentSelector);
+        this.ensurePromptCount(status.promptCount);
+        this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
+            $(element).val(status.prompts[index]);
+        });
+        this.$promptContainer.find('.composum-ai-response').each(function (index, element) {
+            $(element).text(status.responses[index]);
+        });
+        this.setAutomaticGenerateButtonState();
     }
 
     /** Makes sure there are in composum-ai-promptcontainer exactly n composum-ai-prompt and composum-ai-response (alternating),
@@ -109,7 +150,7 @@ class SidePanelDialog {
     }
 
     onPromptAreaChanged(event) {
-        console.log("onPromptAreaChanged", arguments);
+        // console.log("onPromptAreaChanged", arguments); // on each key press
         this.$predefinedPromptsSelector.val('-');
         this.setAutomaticGenerateButtonState();
     }
@@ -139,10 +180,7 @@ class SidePanelDialog {
 
     getSelectedPath() {
         const key = this.$contentSelector.val();
-        var contentPath = Granite.author.ContentFrame.getContentPath();
-        if (!contentPath || !contentPath.startsWith('/')) {
-            contentPath = contentFragmentPath();
-        }
+        var contentPath = this.getContentPath();
         var path;
         switch (key) {
             case 'component':
@@ -161,6 +199,14 @@ class SidePanelDialog {
         }
         console.log("SidePanelDialog getSelectedPath", key, path);
         return path;
+    }
+
+    getContentPath() {
+        var contentPath = Granite.author.ContentFrame.getContentPath();
+        if (!contentPath || !contentPath.startsWith('/')) {
+            contentPath = contentFragmentPath();
+        }
+        return contentPath;
     }
 
     onGenerateButtonClicked(event) {
@@ -186,18 +232,18 @@ class SidePanelDialog {
         });
         // join promptHistory and responseHistory into a single array, format:
         // [{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}, ...].
-        const history = [];
+        const chatHistory = [];
         for (let i = 0; i < promptHistory.length; i++) {
             if (i > 0) { // the first prompt is the initial prompt transmitted as prompt parameter
-                history.push({"role": "USER", "content": promptHistory[i]});
+                chatHistory.push({"role": "USER", "content": promptHistory[i]});
             }
-            history.push({"role": "ASSISTANT", "content": responseHistory[i]});
+            chatHistory.push({"role": "ASSISTANT", "content": responseHistory[i]});
         }
-        history.pop(); // remove empty assistant message at the end
+        chatHistory.pop(); // remove empty assistant message at the end
 
         const data = {
             prompt: this.$promptContainer.find('.composum-ai-prompt:first').val(),
-            chat: JSON.stringify(history),
+            chat: JSON.stringify(chatHistory),
             sourcePath: this.getSelectedPath()
         };
         console.log("createContent", data);
@@ -226,6 +272,7 @@ class SidePanelDialog {
             this.showError("Internal error in text generation");
         }
         this.setLoading(false);
+        this.history.maybeSaveToHistory();
     }
 
     errorCallback(data) {
@@ -267,5 +314,3 @@ class SidePanelDialog {
 }
 
 export {SidePanelDialog};
-
-console.log("SidePanelDialog.js loaded", SidePanelDialog);

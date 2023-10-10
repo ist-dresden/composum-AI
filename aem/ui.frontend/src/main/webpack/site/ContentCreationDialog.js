@@ -7,7 +7,7 @@ import {DialogHistory} from './DialogHistory.js';
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
 /** Keeps dialog histories per path. */
-var historyMap = {};
+const historyMap = {};
 
 /**
  * Represents the Content Creation Dialog.

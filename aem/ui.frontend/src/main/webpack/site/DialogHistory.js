@@ -84,8 +84,8 @@ class DialogHistory {
             // compare with last entry
             const lastStatus = this.historyList[this.historyIndex];
             saveNeeded = !_.isEqual(status, lastStatus);
-            // compare with entry at historyIndex
-            if (!saveNeeded && this.historyIndex >= 0 && this.historyIndex < this.historyList.length - 1) {
+            // if different, we compare with entry at historyIndex to see whether the status was saved there
+            if (saveNeeded && this.historyIndex >= 0 && this.historyIndex < this.historyList.length - 1) {
                 const lastRestoredStatus = this.historyList[this.historyIndex + 1];
                 saveNeeded = !_.isEqual(status, lastRestoredStatus);
             }
