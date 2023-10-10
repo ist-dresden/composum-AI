@@ -4,3 +4,13 @@ AEM 6.5
 Historie
 Help-Pages
 Announcement, Installation, Doc überarbeiten
+
+http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI : approx. markdown???
+http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI description translation???
+
+Approx. Markdown change:
+ignore all attribute with : in them except jcr:title etc., all nodes with : in name, all "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target
+sling:resourceType .*/image
+Print as 'attribute: value\n'
+
+ignore: align, fileReference, target, style, element
