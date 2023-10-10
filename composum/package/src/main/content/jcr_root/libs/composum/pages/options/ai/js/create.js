@@ -435,4 +435,4 @@
     })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);
-//ChatGPTTask: do not store the state of the dialog persistently through closing the dialog when the component path ends with /* (literally a star)
+// TODO(hps,10.10.23) do not store the state of the dialog persistently through closing the dialog when the component path ends with /* (literally a star)

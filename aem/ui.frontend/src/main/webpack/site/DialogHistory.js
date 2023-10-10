@@ -68,6 +68,14 @@ class DialogHistory {
         }
     }
 
+    restoreFromLastOfHistory() {
+        this.historyIndex = this.historyList.length - 1;
+        if (this.historyIndex >= 0) {
+            this.setDialogStatus(this.historyList[this.historyIndex]);
+            this.updateButtons();
+        }
+    }
+
     /** If the dialog status was changed wrt. the last restored or saved state, we create a new history entry at the end of the list. */
     maybeSaveToHistory(noModifyIndex) {
         const status = this.getDialogStatus();
@@ -77,7 +85,7 @@ class DialogHistory {
             const lastStatus = this.historyList[this.historyIndex];
             saveNeeded = !_.isEqual(status, lastStatus);
             // compare with entry at historyIndex
-            if (!saveNeeded && this.historyIndex >= 0 && this.historyIndex < this.historyList.length) {
+            if (!saveNeeded && this.historyIndex >= 0 && this.historyIndex < this.historyList.length - 1) {
                 const lastRestoredStatus = this.historyList[this.historyIndex + 1];
                 saveNeeded = !_.isEqual(status, lastRestoredStatus);
             }

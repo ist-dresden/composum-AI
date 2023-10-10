@@ -41,16 +41,20 @@ class ContentCreationDialog {
         this.assignElements();
         this.bindActions();
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
-        this.showError();
-        this.setLoading(false);
-        this.fullscreen();
-        this.onPromptChanged();
-        setTimeout(() => this.setSourceContent(oldContent), 300); // delay because rte editor might not be ready.
         const historyPath = property ? componentPath + '/' + property : componentPath;
         if (!historyMap[historyPath]) {
             historyMap[historyPath] = [];
         }
         this.history = new DialogHistory(this.$dialog, () => this.getDialogStatus(), (status) => this.setDialogStatus(status), historyMap[historyPath]);
+
+        this.showError();
+        this.setLoading(false);
+        this.fullscreen();
+        this.onPromptChanged();
+        setTimeout(() => {
+            this.setSourceContent(oldContent);
+            this.history.restoreFromLastOfHistory();
+        }, 300); // delay because rte editor might not be ready.
     }
 
     fullscreen() {
@@ -103,18 +107,20 @@ class ContentCreationDialog {
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContent.on('change', this.onSourceContentChanged.bind(this));
         findSingleElement(this.$dialog, '.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
-        findSingleElement(this.$dialog, '.composum-ai-stop-button').on('click', function () {
+        findSingleElement(this.$dialog, '.composum-ai-stop-button').on('click', () => {
             this.createServlet.abortRunningCalls();
             this.setLoading(false);
-        }.bind(this));
-        findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', function () {
+            this.history.maybeSaveToHistory();
+        });
+        findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', () => {
+            this.history.maybeSaveToHistory();
             this.$prompt.val('');
             this.setSourceContent(this.oldContent);
             this.setResponse('');
             this.onPredefinedPromptsChanged();
             this.onContentSelectorChanged();
             this.onPromptChanged();
-        }.bind(this));
+        });
         findSingleElement(this.$dialog, '.cq-dialog-submit').on('click', this.onSubmit.bind(this));
         findSingleElement(this.$dialog, '.cq-dialog-cancel').on('click', this.onCancel.bind(this));
         this.$prompt.on('keydown', (event) => {
@@ -127,17 +133,16 @@ class ContentCreationDialog {
 
     onPredefinedPromptsChanged(event) {
         console.log("onPredefinedPromptsChanged", arguments);
-        this.history.maybeSaveToHistory();
         const prompt = this.$predefinedPromptsSelector.val();
         if (prompt !== '-') {
+            // this.history.maybeSaveToHistory(); // debatable: doesn't make sense if user just skips through the list.
             this.$prompt.val(prompt);
             this.onPromptChanged();
         }
     }
 
     onPromptChanged() {
-        console.log("onPromptChanged", arguments);
-        this.history.maybeSaveToHistory();
+        // console.log("onPromptChanged", arguments); // on every keypress
         this.$predefinedPromptsSelector.val('-');
         if (this.$prompt.val() && this.$prompt.val().trim().length > 0) {
             this.$generateButton.removeAttr('disabled');
@@ -148,7 +153,6 @@ class ContentCreationDialog {
 
     onContentSelectorChanged(event) {
         console.log("onContentSelectorChanged", arguments);
-        // possible values widget, component, page, lastoutput, -
         const key = this.$contentSelector.val();
         switch (key) {
             case 'lastoutput':
@@ -169,7 +173,7 @@ class ContentCreationDialog {
             case '-':
                 break;
             default:
-                console.error('BUG! ContentCreationDialog: unknown content selector value', key);
+                this.showError('Unknown content selector value ' + key);
         }
     }
 
@@ -209,11 +213,12 @@ class ContentCreationDialog {
             ),
             type: "GET",
             dataType: "text",
-            success: function (data) {
+            success: (data) => {
                 callback(data);
-            }.bind(this),
-            error: function (xhr, status, error) {
-                console.log("error loading approximate markdown", xhr, status, error);
+            },
+            error: (xhr, status, error) => {
+                console.error("error loading approximate markdown", xhr, status, error);
+                this.showError(errorText(status + " " + error));
             }
         });
 
@@ -295,6 +300,7 @@ class ContentCreationDialog {
         }
     }
 
+    /** Dialog submit: overwrite calling richtext editor / textarea in dialog */
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
         const response = this.getResponse();
@@ -305,6 +311,7 @@ class ContentCreationDialog {
         }
     }
 
+    /** Dialog cancel: just closes dialog. */
     onCancel(event) {
         console.log("ContentCreationDialog onCancel", arguments);
         this.closeDialog(event);

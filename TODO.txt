@@ -4,6 +4,8 @@ AEM 6.5
 Historie
 Help-Pages
 Announcement, Installation, Doc überarbeiten
+Append button
+Refactor Aprrox Markdown for HTML
 
 http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI : approx. markdown???
 http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI description translation???

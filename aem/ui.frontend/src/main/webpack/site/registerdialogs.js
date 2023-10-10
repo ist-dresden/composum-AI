@@ -125,9 +125,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 gearsEdit.click(function (event) {
                     console.log("createButton click", arguments);
                     const formPath = $(textarea).closest('form').attr('action');
+                    var property = $(textarea).attr('name');
+                    property = property && property.startsWith('./') && property.substring(2);
                     if (formPath && formPath.startsWith('/content')) {
                         showCreateDialog({
                             componentPath: formPath,
+                            property,
                             oldContent: textarea.value,
                             writebackCallback: (newvalue) => $(textarea).val(newvalue),
                             isrichtext: false,
@@ -218,6 +221,8 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     path = formaction;
                 }
                 path = path || $(buttongroup).closest('[data-path]').attr('data-path');
+                var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+                property = property && property.startsWith('./') && property.substring(2);
                 const $button = $(rtebuttonHTML);
                 $(buttongroup).append($button);
                 $button.click(function (clickevent) {
@@ -252,6 +257,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     rteinstance.suspend();
                     showCreateDialog({
                         componentPath,
+                        property,
                         oldContent,
                         writebackCallback: function (newvalue) {
                             rteinstance.setContent(newvalue);
