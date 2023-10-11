@@ -100,3 +100,7 @@ architectural decisions.
 [Project structure](./ProjectStructure.md) describes the module structure of the project.
 
 [ChatGPT API Analysis](./ChatGPTAPI.md) contains a discussion of the ChatGPT API wrt. our project.
+
+## Thanks
+
+Thanks to [OPAX](https://github.com/jaketracey/opax) for ideas for prompts.
