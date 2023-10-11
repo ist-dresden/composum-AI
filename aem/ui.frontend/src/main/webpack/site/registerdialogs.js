@@ -25,8 +25,21 @@ import {SidePanelDialog} from './SidePanelDialog.js';
      * and layout issues with the action bar. :-(
      * Also, we only allow /content for security reasons. */
     function isDisabled() {
+        if (document.location.pathname === '/mnt/overlay/wcm/core/content/sites/properties.html' &&
+            document.location.search.startsWith('?item=/content/')) {
+            return false; // page properties
+        }
         const contentUrl = Granite.author && Granite.author.ContentFrame && Granite.author.ContentFrame.contentURL;
-        return !contentUrl || !contentUrl.startsWith('/content/') || contentUrl.startsWith('/content/dam/');
+        if (!contentUrl) {
+            return true;
+        }
+        if (contentUrl.startsWith('/content/dam/')) {
+            return true; // content fragments are not supported yet
+        }
+        if (contentUrl.startsWith('/content/')) {
+            return false;
+        }
+        return true;
     }
 
     channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
