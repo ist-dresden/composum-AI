@@ -54,7 +54,7 @@
                     this.findSingleElemenet('.forward-button').click(this.forwardButtonClicked.bind(this));
                     this.findSingleElemenet('.generate-button').click(this.generateButtonClicked.bind(this));
                     this.$el.on('keypress', '.promptcontainer textarea', (e) => {
-                        if (e.which === 13 && (e.ctrlKey || e.metaKey)) {
+                        if (e.which === 13 && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
                             this.promptChanged(e);
                             // bind 'Control-Enter' or 'Command-Enter' in the textarea to the generate button
                             this.generateButtonClicked(e);

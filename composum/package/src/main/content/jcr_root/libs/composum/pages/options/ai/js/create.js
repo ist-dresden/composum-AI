@@ -87,7 +87,6 @@
 
                 if (!this.isNew) {
                     this.history = ai.createDialogStates[this.componentPropertyPath];
-                    console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
                     if (!this.history) {
                         this.history = [];
                         ai.createDialogStates[this.componentPropertyPath] = this.history;
@@ -110,8 +109,13 @@
 
                 this.$el.find('#promptTextarea').mouseleave(this.adjustButtonStates.bind(this));
                 this.$el.find('.generate-container').mouseenter(this.adjustButtonStates.bind(this));
-
                 this.adjustButtonStates();
+
+                this.$el.find('#promptTextarea').keydown((event) => {
+                    if (event.which === 13 && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                        this.generateButtonClicked(event);
+                    }
+                });
             },
 
             adjustButtonStates: function () {
@@ -283,10 +287,10 @@
             },
 
             generateSuccess: function (data) {
-                this.setLoading(false);
                 const statusOK = data.status && data.status >= 200 && data.status < 300 && data.data && data.data.result;
                 if (statusOK && data.data.result.text) {
                     console.log("Success generating text: ", data);
+                    this.setLoading(false);
                     let value = data.data.result.text;
                     this.setResult(value);
                     this.saveState();
