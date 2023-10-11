@@ -1,10 +1,10 @@
-/** A class that opens a dialog with a help text retrieved via a given URL. */
+/** A class that opens a dialog with a help text retrieved via a given URL in the event target. */
 class HelpPage {
     constructor(event) {
         console.log('HelpPage constructor', event);
         event.preventDefault();
         event.stopPropagation();
-        this.url = $(event.target).data('href').substring(1);
+        this.url = $(event.target).data('href');
         this.id = 'composum-ai-help-dialog-' + this.url.replace(/[^a-zA-Z0-9]+/g, '-');
         this.dialog = document.getElementById(this.id);
     }
@@ -22,7 +22,7 @@ class HelpPage {
                     innerHTML: '<div class="helpcontent"></div>'
                 },
                 footer: {
-                    innerHTML:'<button is="coral-button" variant="primary" coral-close size="M">' + Granite.I18n.get('Ok') + '</button>'
+                    innerHTML: '<button is="coral-button" variant="primary" coral-close size="M">' + Granite.I18n.get('Ok') + '</button>'
                 }
             });
             document.body.appendChild(this.dialog);
