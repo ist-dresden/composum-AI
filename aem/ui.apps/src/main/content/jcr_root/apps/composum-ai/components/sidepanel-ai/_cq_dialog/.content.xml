@@ -122,7 +122,7 @@
                                     <loading
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/container"
-                                            granite:class="coral-Wait coral-Wait--large composum-ai-loading hidden"/>
+                                            granite:class="coral-Wait coral-Wait--large composum-ai-loading"/>
                                 </primary>
                             </generateActionbar>
 
