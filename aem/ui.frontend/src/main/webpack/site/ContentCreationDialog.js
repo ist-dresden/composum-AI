@@ -3,6 +3,7 @@
 import {AICreate} from './AICreate.js';
 import {errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
+import {HelpPage} from './HelpPage.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
 
@@ -129,6 +130,7 @@ class ContentCreationDialog {
                 this.onGenerateButtonClicked(event);
             }
         });
+        findSingleElement(this.$dialog, '.cq-dialog-help').on('click', (event) => new HelpPage(event).show());
     }
 
     onPredefinedPromptsChanged(event) {
