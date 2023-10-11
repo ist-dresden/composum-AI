@@ -83,11 +83,11 @@ class DialogHistory {
         if (this.historyIndex >= 0) {
             // compare with last entry
             const lastStatus = this.historyList[this.historyIndex];
-            saveNeeded = !_.isEqual(status, lastStatus);
+            saveNeeded = !this.deepEquals(status, lastStatus);
             // if different, we compare with entry at historyIndex to see whether the status was saved there
             if (saveNeeded && this.historyIndex >= 0 && this.historyIndex < this.historyList.length - 1) {
                 const lastRestoredStatus = this.historyList[this.historyIndex + 1];
-                saveNeeded = !_.isEqual(status, lastRestoredStatus);
+                saveNeeded = !this.deepEquals(status, lastRestoredStatus);
             }
         }
         if (saveNeeded) {
@@ -97,6 +97,32 @@ class DialogHistory {
             }
             this.updateButtons();
         }
+    }
+
+    /** Same as _.isEqual, but that's not available everywhere. */
+    deepEquals(obj1, obj2) {
+        if (typeof obj1 !== typeof obj2) {
+            return false;
+        }
+
+        if (typeof obj1 !== 'object' || obj1 === null) {
+            return obj1 === obj2;
+        }
+
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+
+        for (const key of keys1) {
+            if (!this.deepEquals(obj1[key], obj2[key])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

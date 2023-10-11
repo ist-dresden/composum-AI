@@ -23,7 +23,8 @@ import {SidePanelDialog} from './SidePanelDialog.js';
 
     /** We currently disable it for content fragments, as there are issues with the rich text editor and the action bar. :-( */
     function isDisabled() {
-        return Granite.author.ContentFrame.contentURL.toString().indexOf('/content/dam') >= 0;
+        return Granite.author && Granite.author.ContentFrame && Granite.author.ContentFrame.contentURL &&
+            Granite.author.ContentFrame.contentURL.toString().indexOf('/content/dam') >= 0;
     }
 
     channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
