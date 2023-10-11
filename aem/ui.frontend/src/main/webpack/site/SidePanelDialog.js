@@ -1,7 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {contentFragmentPath, errorText} from './common.js';
+import {contentFragmentPath, errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
@@ -12,39 +12,31 @@ const historyMap = {};
 class SidePanelDialog {
     constructor(dialog) {
         console.log("SidePanelDialog constructor ", arguments, this);
-        this.dialog = $(dialog);
+        this.$dialog = $(dialog);
         this.assignElements();
         this.bindActions();
         this.showError(null);
         this.setLoading(false);
-        this.findSingleElement('.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
+        findSingleElement(this.$dialog, '.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
 
         const historyPath = this.getContentPath();
         if (!historyMap[historyPath]) {
             historyMap[historyPath] = [];
         }
-        this.history = new DialogHistory(this.dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
+        this.history = new DialogHistory(this.$dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
         this.history.restoreFromLastOfHistory();
     }
 
-    findSingleElement(selector) {
-        const $el = this.dialog.find(selector);
-        if ($el.length !== 1) {
-            console.error('BUG! SidebarDialog: missing element for selector', selector, $el, $el.length);
-        }
-        return $el;
-    }
-
     assignElements() {
-        this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefinedprompts');
-        this.$contentSelector = this.findSingleElement('.composum-ai-contentselector');
+        this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefinedprompts');
+        this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-contentselector');
         this.$contentSelector.val('page');
-        this.$promptContainer = this.findSingleElement('.composum-ai-promptcontainer');
-        this.$promptTemplate = this.findSingleElement('.composum-ai-templates .composum-ai-prompt');
-        this.$responseTemplate = this.findSingleElement('.composum-ai-templates .composum-ai-response');
-        this.$stopButton = this.findSingleElement('.composum-ai-stop-button');
-        this.$generateButton = this.findSingleElement('.composum-ai-generate-button');
+        this.$promptContainer = findSingleElement(this.$dialog, '.composum-ai-promptcontainer');
+        this.$promptTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-prompt');
+        this.$responseTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-response');
+        this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
+        this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
     }
 
     bindActions() {
@@ -55,9 +47,9 @@ class SidePanelDialog {
         this.$promptContainer.on('blur', '.composum-ai-prompt', this.shrinkOnBlur);
         this.$generateButton.on('click', this.onGenerateButtonClicked.bind(this));
         this.$stopButton.on('click', this.onStopClicked.bind(this));
-        this.findSingleElement('.composum-ai-reset-button').on('click', this.resetForm.bind(this));
+        findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', this.resetForm.bind(this));
         // bind enter key (without any modifiers) in .composum-ai-promptcontainer .composum-ai-prompt to submit
-        this.findSingleElement('.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
+        findSingleElement(this.$dialog, '.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
             if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
                 event.preventDefault();
                 this.onGenerateButtonClicked(event);
@@ -297,11 +289,11 @@ class SidePanelDialog {
         if (loading) {
             this.$generateButton.attr('disabled', 'disabled');
             this.$stopButton.removeAttr('disabled');
-            this.findSingleElement('.composum-ai-loading').show();
+            findSingleElement(this.$dialog, '.composum-ai-loading').show();
         } else {
             this.setAutomaticGenerateButtonState();
             this.$stopButton.attr('disabled', 'disabled');
-            this.findSingleElement('.composum-ai-loading').hide();
+            findSingleElement(this.$dialog, '.composum-ai-loading').hide();
         }
     }
 
@@ -316,11 +308,11 @@ class SidePanelDialog {
     /** Shows the error text if error is given, hides it if it's falsy. */
     showError(error) {
         if (!error) {
-            this.findSingleElement('.composum-ai-error-columns').hide();
+            findSingleElement(this.$dialog, '.composum-ai-error-columns').hide();
         } else {
             console.error("SidePanelDialog showError", arguments);
-            this.findSingleElement('.composum-ai-alert coral-alert-content').text(errorText(error));
-            this.findSingleElement('.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-alert coral-alert-content').text(errorText(error));
+            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
             debugger;
         }
     }
