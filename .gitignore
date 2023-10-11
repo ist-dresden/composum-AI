@@ -29,3 +29,5 @@ target
 # Other stuff
 *.orig
 /tags
+
+.cgptdevbench/llmsearch.db
