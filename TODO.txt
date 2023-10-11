@@ -1,9 +1,12 @@
-Enter in Composum Variante
-Markdown to HTML transformation in sidebar
-Help-Pages
-Historie -> DONE
 Announcement, Installation, Doc überarbeiten
 Refactor Aprrox Markdown for HTML
+AEM for content fragments?
+
+Done:
+Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.
+implement AEM Historie -> DONE
+Help-Pages -> done for creation assistant; for the side panel ai the help buttons and the initial text should be enough for now.
+Enter in Composum Variante
 
 Deferred:
 AEM 6.5

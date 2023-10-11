@@ -21,10 +21,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     const SIDEPANEL_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
-    /** We currently disable it for content fragments, as there are issues with the rich text editor and the action bar. :-( */
+    /** We currently disable it for content fragments, as there are issues with the rich text editor
+     * and layout issues with the action bar. :-(
+     * Also, we only allow /content for security reasons. */
     function isDisabled() {
-        return Granite.author && Granite.author.ContentFrame && Granite.author.ContentFrame.contentURL &&
-            Granite.author.ContentFrame.contentURL.toString().indexOf('/content/dam') >= 0;
+        const contentUrl = Granite.author && Granite.author.ContentFrame && Granite.author.ContentFrame.contentURL;
+        return !contentUrl || !contentUrl.startsWith('/content/') || contentUrl.startsWith('/content/dam/');
     }
 
     channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
