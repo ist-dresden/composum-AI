@@ -267,7 +267,8 @@ class ContentCreationDialog {
         const data = {
             prompt: this.$prompt.val(),
             source: this.getSourceContent(),
-            textLength: this.$textLengthSelector.val()
+            textLength: this.$textLengthSelector.val(),
+            richText: this.isrichtext,
         };
         console.log("createContent", data);
         this.setLoading(true);
