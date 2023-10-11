@@ -1,3 +1,4 @@
+Tell ChatGPT when we expect HTML.
 Announcement, Installation, Doc überarbeiten
 Refactor Aprrox Markdown for HTML
 AEM for content fragments?

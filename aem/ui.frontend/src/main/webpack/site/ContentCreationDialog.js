@@ -329,18 +329,26 @@ class ContentCreationDialog {
     /** Dialog submit: overwrite calling richtext editor / textarea in dialog */
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
-        const response = this.getResponse();
-        this.closeDialog(event);
-        // only after closing since dialog is now out of the way
-        if (typeof this.writebackCallback == 'function') {
-            this.writebackCallback(response);
+        try {
+            const response = this.getResponse();
+            this.closeDialog(event);
+            // only after closing since dialog is now out of the way
+            if (typeof this.writebackCallback == 'function') {
+                this.writebackCallback(response);
+            }
+        } catch (e) { // better than crashing the whole page
+            console.error("Error in onSubmit", e);
         }
     }
 
     /** Dialog cancel: just closes dialog. */
     onCancel(event) {
-        console.log("ContentCreationDialog onCancel", arguments);
-        this.closeDialog(event);
+        try {
+            console.log("ContentCreationDialog onCancel", arguments);
+            this.closeDialog(event);
+        } catch (e) { // better than crashing the whole page
+            console.error("Error in onCancel", e);
+        }
     }
 
     closeDialog(event) {
