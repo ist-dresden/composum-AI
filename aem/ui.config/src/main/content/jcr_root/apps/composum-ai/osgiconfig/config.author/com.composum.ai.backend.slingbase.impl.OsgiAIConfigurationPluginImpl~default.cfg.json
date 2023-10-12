@@ -1,0 +1,18 @@
+{
+  "services":[
+    "create",
+    "sidepanel"
+  ],
+  "allowedPaths":[
+    "/content/.*"
+  ],
+  "allowedUsers":[
+    ".*"
+  ],
+  "deniedPaths":[
+    "/content/dam/.*"
+  ],
+  "allowedViews":[
+    ".*"
+  ]
+}
