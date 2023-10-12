@@ -36,7 +36,7 @@ We should prepare a plugin mechanism to be extensible.
 - we will heavily rely on regular expressions, but allow lists of regular expressions to give a better overview.
   There should be regular expressions for "allow" and "deny" for each category.
 - There should be a Apache Sling servlet com.composum.ai.backend.slingbase.AIConfigurationServlet available with a
-  GET operation that /bin/cpm/ai/config that takes the path to be edited as suffix and has a editorurl parameter for
+  GET operation that /bin/cpm/ai/config that takes the path to be edited as suffix and has a editorUrl parameter for
   the path of the URL in the browser. It should use a AIConfigurationService implemented in
   com.composum.ai.backend.slingbase.impl.AIConfigurationServiceImpl. The plugin interface should be  
   com.composum.ai.backend.slingbase.AIConfigurationPlugin .
@@ -51,7 +51,7 @@ We should prepare a plugin mechanism to be extensible.
     - This servlet interacts with the `AIConfigurationService` to check which services are allowed, based on the path
       and editor URL provided.
     - returns a JSON of allowed services (dialogs) like
-      `{ allowedservices: { sidepanel: true, creation: true } }`
+      `{ allowedServices: { sidepanel: true, creation: true } }`
       , not allowed services are not listed.
 
 2. **AIConfigurationService**

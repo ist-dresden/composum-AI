@@ -35,11 +35,11 @@ import com.google.gson.GsonBuilder;
  * </ul>
  *
  * <h2>Response</h2>
- * <p>Returns a JSON object with a key "allowedservices" that contains a list of AI services that are allowed
+ * <p>Returns a JSON object with a key "allowedServices" that contains a list of AI services that are allowed
  * for the given content path and editor URL. For example:</p>
  * <pre>
  * {
- *     "allowedservices": {"sidepanel": true, "create": true}
+ *     "allowedServices": {"sidepanel": true, "create": true}
  * }
  * </pre>
  *
@@ -63,7 +63,7 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
     /**
      * Parameter that gives the editor URL to check the permissions for.
      */
-    public static final String PARAM_EDITORURL = "editorurl";
+    public static final String PARAM_EDITORURL = "editorUrl";
 
     /**
      * Content Creation Dialog
