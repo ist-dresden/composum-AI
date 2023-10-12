@@ -82,7 +82,7 @@ We should prepare a plugin mechanism to be extensible.
     - **OsgiAIConfiguration** - an @interface for OsgiAIConfigurationPlugin that represents a AI configuration. It may
       have fields like allowedUsers, deniedUsers, allowedPaths, deniedPaths, allowedViews, deniedViews, services and is
       used via configuration factory
-      @Designate(factory = true) from OsgiAIConfigurationPlugin .
+      @Designate(..., factory = true) from OsgiAIConfigurationPlugin .
 
 ## OsgiAIConfiguration attributes
 
