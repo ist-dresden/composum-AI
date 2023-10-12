@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -74,6 +75,7 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
     }
 
     @Override
+    @Nonnull
     public Set<String> allowedServices(SlingHttpServletRequest request, String contentPath, String editorUrl) {
         Set<String> allowedServices = new HashSet<>();
         try {
