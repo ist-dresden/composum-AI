@@ -62,10 +62,10 @@ class AICreate {
         this.abortRunningCalls();
         this.streamingResult = "";
         this.eventSource = new EventSource(location);
-        this.eventSource.onmessage = this.onStreamingMessage.bind(this, this.eventSource);
-        this.eventSource.onerror = this.onStreamingError.bind(this, this.eventSource);
-        this.eventSource.addEventListener('finished', this.onStreamingFinished.bind(this));
-        this.eventSource.addEventListener('exception', this.onStreamingException.bind(this));
+        this.eventSource.onmessage = (event) => this.onStreamingMessage(this.eventSource, event);
+        this.eventSource.onerror = (event) => this.onStreamingError(this.eventSource, event);
+        this.eventSource.addEventListener('finished', (event) => this.onStreamingFinished(event));
+        this.eventSource.addEventListener('exception', (event) => this.onStreamingException(event));
     }
 
     onStreamingMessage(eventSource, event) {

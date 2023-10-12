@@ -1,0 +1,26 @@
+Restrictions
+Announcement, Installation, Doc überarbeiten
+Refactor Aprrox Markdown for HTML
+AEM for content fragments?
+
+Done:
+Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.
+implement AEM Historie -> DONE
+Help-Pages -> done for creation assistant; for the side panel ai the help buttons and the initial text should be enough for now.
+Enter in Composum Variante
+Tell ChatGPT when we expect HTML.
+
+Deferred:
+AEM 6.5
+Append button (?)
+
+Approx Markdown improvement
+http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI : approx. markdown???
+http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI description translation???
+
+Approx. Markdown change:
+ignore all attribute with : in them except jcr:title etc., all nodes with : in name, all "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target
+sling:resourceType .*/image
+Print as 'attribute: value\n'
+
+ignore: align, fileReference, target, style, element

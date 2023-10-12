@@ -52,13 +52,19 @@
     <sling.password>admin</sling.password>
     <vault.user>admin</vault.user>
     <vault.password>admin</vault.password>
-    <frontend-maven-plugin.version>1.12.0</frontend-maven-plugin.version>
+
+    <!-- https://mvnrepository.com/artifact/com.github.eirslett/frontend-maven-plugin -->
+    <frontend-maven-plugin.version>1.14.0</frontend-maven-plugin.version>
     <bnd.version>5.1.2</bnd.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <aem.sdk.api>2023.7.12874.20230726T072051Z-230702</aem.sdk.api>
-    <aemanalyser.version>1.4.10</aemanalyser.version>
     <componentGroupName>Composum AI</componentGroupName>
+
+    <!-- https://mvnrepository.com/artifact/com.adobe.aem/aemanalyser-maven-plugin -->
+    <aemanalyser.version>1.5.8</aemanalyser.version>
+    <aem.sdk.api>2023.7.12874.20230726T072051Z-230702</aem.sdk.api>
+    <aem.uber.jar.version>6.5.7</aem.uber.jar.version> <!-- 6.5.8 is last one with sources -->
+    <osgi.version>6.0.0</osgi.version>
 
     <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
     <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
@@ -530,12 +536,44 @@ Bundle-DocURL:
   <!-- ====================================================================== -->
   <dependencyManagement>
     <dependencies>
+      <!-- https://mvnrepository.com/artifact/com.adobe.aem/uber-jar -->
+      <dependency>
+        <groupId>com.adobe.aem</groupId>
+        <artifactId>uber-jar</artifactId>
+        <version>${aem.uber.jar.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <!-- We use an aem uber-jar as dependency to ensure backwards compatibility with AEM 6.5
       <dependency>
         <groupId>com.adobe.aem</groupId>
         <artifactId>aem-sdk-api</artifactId>
         <version>${aem.sdk.api}</version>
         <scope>provided</scope>
+      </dependency> -->
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi.cmpn</artifactId>
+        <version>${osgi.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi.core</artifactId>
+        <version>${osgi.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi.annotation</artifactId>
+        <version>${osgi.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.component.annotations</artifactId>
+        <version>1.4.0</version>
+        <scope>provided</scope>
+      </dependency>
+
       <!-- Testing -->
       <dependency>
         <groupId>org.junit</groupId>

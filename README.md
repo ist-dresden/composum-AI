@@ -1,9 +1,11 @@
 # Composum AI
 
-Fast and flexible, 
-Composum empowers you,
-Content blooms with ease.
+> Fast and flexible,<br>
+Composum empowers you,<br>
+Content blooms with ease.<br>
 -- ChatGPT
+
+[Click for a 2.5min demonstration video](https://github.com/ist-dresden/composum-AI/assets/999184/18595f2a-e0b5-49f3-bc4c-65d6a8bc93f6)
 
 ## Basic idea
 
@@ -20,11 +22,9 @@ All of there provide APIs that allow
 them to be used very flexibly in a lot of ways that are useful for supporting a CMS - for translation, content 
 creation, review, summarizing, chat, you name it.
 
-At the current state, Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html). 
-A port to 
-[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
-is [currently in progress](https://github.com/ist-dresden/composum-AI/issues/15) - both share quite some 
-commonality through being based on the
+Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html). There is also a version for 
+[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html),
+though yet somewhat experimental. Both share quite some commonality through being based on the
 [Apache Sling](https://sling.apache.org/) platform.
 Where possible and appropriate, components will remain platform-agnostic.
 Since [OpenAI](https://openai.com/)'s chat completion API, also available through as
@@ -36,19 +36,24 @@ data security rules. It's likely that in time there will also be LLM that can be
 
 ## Current status
 
-In our 
-[first release](https://github.com/ist-dresden/composum-AI/releases/tag/composum-chatgpt-integration-0.1.1)
-we have implemented the following dialogs that help with editing in Composum Pages:
+For a quick view of the Composum Pages variant, please compare the 
+[Composum blog entry](https://www.composum.com/home/blog/pages/composumAI.html) about it and the more detailed
+[documentation](https://www.composum.com/home/pages/editing/Composum-AI.html).
+
+There are the following dialogs that help with editing in Composum Pages:
 
 - a translation dialog that can be opened on any edited textfield in multilingual websites and suggests translations
-  of the text of a component into other languages
-- the text of page descriptions and summaries, keywords, navigation title
+  of the text of a component into other languages the text of page descriptions and summaries, keywords, navigation title
 - a multi purpose content creation dialog that can support you by creating text for any edited text fields. The text
   can be created either from a user supplied prompt, or by applying a (user supplied or predefined) ChatGPT prompt
   to the existing text of the page / component. That way, one could create summaries of the page, or extracts wrt. a
   topic, overviews, orjust request suggestions to reformulate or expand user supplied text fragments, ... Your
   imagination is the limit.
+- an side panel AI that you can chat with and use to analyze the text content of the current page and get suggestions.
 - a page category dialog with suggestions for page categories (that are used as SEO keywords)
+
+For the AEM version we omit the translation dialog (as AEM has it's own frequently used mechanisms) and the page 
+category dialog, as AEM tags work quite differently.
 
 ## Try it out!
 
@@ -62,13 +67,17 @@ You will need an [OpenAI API key](https://platform.openai.com/account/api-keys) 
 that in the [Felix Console configuration tab](http://localhost:8080/system/console/configMgr) at "GPT Chat
 Completion Service".
 
+For AEM, there is a
+[package on maven central](https://central.sonatype.com/artifact/com.composum.ai.aem/composum-ai.all) to deploy. You 
+will need to configure an OpenAI API key as well.
+
+Please compare the release notes of the 
+[latest release](https://github.com/ist-dresden/composum-AI/releases/) for more instructions.
+
 ## Further ideas in investigation
 
-- A dialog that is focused on a providing ChatGPT supported feedback about the page / components etc., which can be
-  used for grammar / spelling checks, reviews, general suggestions etc.
 - possibly support of the user when searching the site using natural language
 - possibly support of the user by answering questions about the site content
-- possibly augment support AEM with the provided services.
 
 ## Development with ChatGPT and Github Copilot
 
@@ -78,7 +87,8 @@ Copilot IntelliJ plugin, for speeding up development. Some outcomes of that:
 - The [feature creation process](featurespecs/FeatureCreationProcess.md) massively improves the quality and speed of
   specifying a feature and thinking it through. See the [feature specification directory](featurespecs/) for
   examples of that.
-- Speeding up the development is ongoing, but Github Copilot certainly speeds up a lot of things.
+- Speeding up the development is ongoing, but Github Copilot and ChatGPT certainly
+[speed up a lot of things](http://www.stoerr.net/blog/2023-05-25-developmentWithChatGPTAndCopilot.html).
 
 ## More project documentation
 
@@ -90,3 +100,7 @@ architectural decisions.
 [Project structure](./ProjectStructure.md) describes the module structure of the project.
 
 [ChatGPT API Analysis](./ChatGPTAPI.md) contains a discussion of the ChatGPT API wrt. our project.
+
+## Thanks
+
+Thanks to [OPAX](https://github.com/jaketracey/opax) for ideas for prompts.

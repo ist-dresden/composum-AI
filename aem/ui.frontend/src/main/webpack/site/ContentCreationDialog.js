@@ -1,9 +1,14 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {errorText} from './common.js';
+import {errorText, findSingleElement} from './common.js';
+import {DialogHistory} from './DialogHistory.js';
+import {HelpPage} from './HelpPage.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
+
+/** Keeps dialog histories per path. */
+const historyMap = {};
 
 /**
  * Represents the Content Creation Dialog.
@@ -17,13 +22,23 @@ class ContentCreationDialog {
      * @param {Object} options - The options for the dialog.
      * @param {HTMLElement} options.dialog - The dialog element.
      * @param {string} options.componentPath - The path of the edited component.
+     * @param {string} options.property - The name of the edited property.
      * @param {string} options.oldContent - The current content of the field.
      * @param {Function} options.writebackCallback - A function that takes the new content and writes it back to the field.
      * @param {boolean} options.isrichtext - True if the field is a richtext field, false if it's a plain text field.
      * @param {boolean} options.stackeddialog - True if the dialog is stacked and we have to close the dialog ourselves without generating events to not disturb the underlying dialog.
      * @param {Function} [options.onFinishCallback] - A function that is called when the dialog is closed.
      */
-    constructor({dialog, componentPath, oldContent, writebackCallback, isrichtext, stackeddialog, onFinishCallback}) {
+    constructor({
+                    dialog,
+                    componentPath,
+                    property,
+                    oldContent,
+                    writebackCallback,
+                    isrichtext,
+                    stackeddialog,
+                    onFinishCallback
+                }) {
         console.log("ContentCreationDialog constructor ", arguments);
         this.componentPath = componentPath;
         this.$dialog = $(dialog);
@@ -36,11 +51,20 @@ class ContentCreationDialog {
         this.assignElements();
         this.bindActions();
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+        const historyPath = property ? componentPath + '/' + property : componentPath;
+        if (!historyMap[historyPath]) {
+            historyMap[historyPath] = [];
+        }
+        this.history = new DialogHistory(this.$dialog, () => this.getDialogStatus(), (status) => this.setDialogStatus(status), historyMap[historyPath]);
+
         this.showError();
         this.setLoading(false);
         this.fullscreen();
         this.onPromptChanged();
-        setTimeout(() => this.setSourceContent(oldContent), 300); // delay because rte editor might not be ready.
+        setTimeout(() => {
+            this.setSourceContent(oldContent);
+            this.history.restoreFromLastOfHistory();
+        }, 300); // delay because rte editor might not be ready.
     }
 
     fullscreen() {
@@ -55,25 +79,45 @@ class ContentCreationDialog {
         form.removeAttr('method');
     }
 
-    findSingleElement(selector) {
-        const $el = this.$dialog.find(selector);
-        if ($el.length !== 1) {
-            debugger;
-            console.error('BUG! ContentCreationDialog: missing element for selector', selector, $el, $el.length);
-        }
-        return $el;
+    assignElements() {
+        this.$prompt = findSingleElement(this.$dialog, '.composum-ai-prompt-textarea');
+        this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefined-prompts');
+        this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-content-selector');
+        this.$sourceContent = this.isrichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-source-richtext'))
+            : findSingleElement(this.$dialog, '.composum-ai-source-plaintext');
+        this.$textLengthSelector = findSingleElement(this.$dialog, '.composum-ai-text-length-selector');
+        this.$response = this.isrichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-response-richtext'))
+            : findSingleElement(this.$dialog, '.composum-ai-response-plaintext');
+        this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
+        this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
     }
 
-    assignElements() {
-        this.$prompt = this.findSingleElement('.composum-ai-prompt-textarea');
-        this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefined-prompts');
-        this.$contentSelector = this.findSingleElement('.composum-ai-content-selector');
-        this.$sourceContent = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-source-richtext'))
-            : this.findSingleElement('.composum-ai-source-plaintext');
-        this.$textLengthSelector = this.findSingleElement('.composum-ai-text-length-selector');
-        this.$response = this.isrichtext ? this.getRte(this.findSingleElement('.composum-ai-response-richtext'))
-            : this.findSingleElement('.composum-ai-response-plaintext');
-        this.$generateButton = this.findSingleElement('.composum-ai-generate-button');
+    getDialogStatus() {
+        return {
+            prompt: this.$prompt.val(),
+            source: this.getSourceContent(),
+            textLength: this.$textLengthSelector.val(),
+            contentSelector: this.$contentSelector.val(),
+            predefinedPrompts: this.$predefinedPromptsSelector.val(),
+            response: this.getResponse()
+        };
+    }
+
+    setDialogStatus(status) {
+        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
+        this.$contentSelector.val(status.contentSelector);
+        this.$textLengthSelector.val(status.textLength);
+        this.$prompt.val(status.prompt);
+        if (status.source) {
+            this.setSourceContent(status.source);
+        } else {
+            this.setSourceContent(this.oldContent);
+        }
+        this.setResponse(status.response);
+        this.onPredefinedPromptsChanged();
+        this.onContentSelectorChanged();
+        this.onPromptChanged();
+
     }
 
     bindActions() {
@@ -81,36 +125,48 @@ class ContentCreationDialog {
         this.$prompt.on('change input', this.onPromptChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContent.on('change', this.onSourceContentChanged.bind(this));
-        this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
-        this.findSingleElement('.composum-ai-stop-button').on('click', function () {
-            this.createServlet.abortRunningCalls();
-            this.setLoading(false);
-        }.bind(this));
-        this.findSingleElement('.composum-ai-reset-button').on('click', function () {
-            this.$prompt.val('');
-            this.setSourceContent(this.oldContent);
-            this.setResponse('');
-            this.onPredefinedPromptsChanged();
-            this.onContentSelectorChanged();
-            this.onPromptChanged();
-        }.bind(this));
-        this.findSingleElement('.cq-dialog-submit').on('click', this.onSubmit.bind(this));
-        this.findSingleElement('.cq-dialog-cancel').on('click', this.onCancel.bind(this));
+        this.$generateButton.on('click', this.onGenerateButtonClicked.bind(this));
+        findSingleElement(this.$dialog, '.composum-ai-stop-button').on('click', this.onStopClicked.bind(this));
+        findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', this.resetForm.bind(this));
+        findSingleElement(this.$dialog, '.cq-dialog-submit').on('click', this.onSubmit.bind(this));
+        findSingleElement(this.$dialog, '.cq-dialog-cancel').on('click', this.onCancel.bind(this));
+        this.$prompt.on('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                event.preventDefault();
+                this.onGenerateButtonClicked(event);
+            }
+        });
+        findSingleElement(this.$dialog, '.cq-dialog-help').on('click', (event) => new HelpPage(event).show());
+    }
+
+    resetForm(event) {
+        this.onStopClicked(event);
+        this.setDialogStatus({});
+    }
+
+    onStopClicked(event) {
+        this.createServlet.abortRunningCalls();
+        this.setLoading(false);
+        this.history.maybeSaveToHistory();
     }
 
     onPredefinedPromptsChanged(event) {
         console.log("onPredefinedPromptsChanged", arguments);
-        const prompt = this.$predefinedPromptsSelector.val();
-        if (prompt !== '-') {
-            this.$prompt.val(prompt);
+        const predefinedPrompt = this.$predefinedPromptsSelector.val();
+        if (predefinedPrompt !== '-') {
+            // this.history.maybeSaveToHistory(); // debatable: doesn't make sense if user just skips through the list.
+            this.$prompt.val(predefinedPrompt);
             this.onPromptChanged();
         }
     }
 
     onPromptChanged() {
-        console.log("onPromptChanged", arguments);
-        this.$predefinedPromptsSelector.val('-');
-        if (this.$prompt.val() && this.$prompt.val().trim().length > 0) {
+        // console.log("onPromptChanged", arguments); // on every keypress
+        let prompt = this.$prompt.val();
+        if (this.$predefinedPromptsSelector.val() !== prompt) {
+            this.$predefinedPromptsSelector.val('-');
+        }
+        if (prompt && prompt.trim().length > 0) {
             this.$generateButton.removeAttr('disabled');
         } else {
             this.$generateButton.attr('disabled', 'disabled');
@@ -119,7 +175,6 @@ class ContentCreationDialog {
 
     onContentSelectorChanged(event) {
         console.log("onContentSelectorChanged", arguments);
-        // possible values widget, component, page, lastoutput, -
         const key = this.$contentSelector.val();
         switch (key) {
             case 'lastoutput':
@@ -140,7 +195,7 @@ class ContentCreationDialog {
             case '-':
                 break;
             default:
-                console.error('BUG! ContentCreationDialog: unknown content selector value', key);
+                this.showError('Unknown content selector value ' + key);
         }
     }
 
@@ -153,7 +208,8 @@ class ContentCreationDialog {
     }
 
     setSourceContent(value) {
-        this.isrichtext ? this.$sourceContent.setContent(value) : this.$sourceContent.val(value);
+        const thevalue = value || '';
+        this.isrichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
     }
 
     getSourceContent() {
@@ -161,7 +217,8 @@ class ContentCreationDialog {
     }
 
     setResponse(value) {
-        this.isrichtext ? this.$response.setContent(value) : this.$response.val(value);
+        const thevalue = value || '';
+        this.isrichtext ? this.$response.setContent(thevalue) : this.$response.val(thevalue);
     }
 
     getResponse() {
@@ -180,11 +237,12 @@ class ContentCreationDialog {
             ),
             type: "GET",
             dataType: "text",
-            success: function (data) {
+            success: (data) => {
                 callback(data);
-            }.bind(this),
-            error: function (xhr, status, error) {
-                console.log("error loading approximate markdown", xhr, status, error);
+            },
+            error: (xhr, status, error) => {
+                console.error("error loading approximate markdown", xhr, status, error);
+                this.showError(errorText(status + " " + error));
             }
         });
 
@@ -209,7 +267,8 @@ class ContentCreationDialog {
         const data = {
             prompt: this.$prompt.val(),
             source: this.getSourceContent(),
-            textLength: this.$textLengthSelector.val()
+            textLength: this.$textLengthSelector.val(),
+            richText: this.isrichtext,
         };
         console.log("createContent", data);
         this.setLoading(true);
@@ -218,13 +277,13 @@ class ContentCreationDialog {
     }
 
     streamingCallback(text) {
-        console.log("ContentCreationDialog streamingCallback", arguments);
+        // console.log("ContentCreationDialog streamingCallback", arguments);
         this.setResponse(text);
     }
 
     doneCallback(text, event) {
-        console.log("ContentCreationDialog doneCallback", arguments);
         this.streamingCallback(text);
+        console.log("ContentCreationDialog doneCallback", arguments);
         const finishreason = event && event.data && event.data.result && event.data.result.finishreason;
         if (finishreason === 'LENGTH') {
             this.showError('The generated content stopped because of the length restriction.');
@@ -235,6 +294,7 @@ class ContentCreationDialog {
             this.showError("Internal error in text generation");
         }
         this.setLoading(false);
+        this.history.maybeSaveToHistory();
     }
 
     errorCallback(data) {
@@ -245,42 +305,56 @@ class ContentCreationDialog {
 
     setLoading(loading) {
         if (loading) {
-            this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
-            this.findSingleElement('.composum-ai-loading').show();
+            this.$generateButton.attr('disabled', 'disabled');
+            this.$stopButton.removeAttr('disabled');
+            findSingleElement(this.$dialog, '.composum-ai-loading').show();
         } else {
-            this.findSingleElement('.composum-ai-generate-button').removeAttr('disabled');
-            this.findSingleElement('.composum-ai-loading').hide();
+            this.$generateButton.removeAttr('disabled');
+            this.$stopButton.attr('disabled', 'disabled');
+            findSingleElement(this.$dialog, '.composum-ai-loading').hide();
         }
     }
 
     /** Shows the error text if error is given, hides it if it's falsy. */
     showError(error) {
         if (!error) {
-            this.findSingleElement('.composum-ai-error-columns').hide();
+            findSingleElement(this.$dialog, '.composum-ai-error-columns').hide();
         } else {
             console.error("ContentCreationDialog showError", arguments);
-            this.findSingleElement('.composum-ai-alert').text(errorText(error));
-            this.findSingleElement('.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-alert').text(errorText(error));
+            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
             debugger;
         }
     }
 
+    /** Dialog submit: overwrite calling richtext editor / textarea in dialog */
     onSubmit(event) {
         console.log("ContentCreationDialog onSubmit", arguments);
-        const response = this.getResponse();
-        this.closeDialog(event);
-        // only after closing since dialog is now out of the way
-        if (typeof this.writebackCallback == 'function') {
-            this.writebackCallback(response);
+        try {
+            const response = this.getResponse();
+            this.closeDialog(event);
+            // only after closing since dialog is now out of the way
+            if (typeof this.writebackCallback == 'function') {
+                this.writebackCallback(response);
+            }
+        } catch (e) { // better than crashing the whole page
+            console.error("Error in onSubmit", e);
         }
     }
 
+    /** Dialog cancel: just closes dialog. */
     onCancel(event) {
-        console.log("ContentCreationDialog onCancel", arguments);
-        this.closeDialog(event);
+        try {
+            console.log("ContentCreationDialog onCancel", arguments);
+            this.closeDialog(event);
+        } catch (e) { // better than crashing the whole page
+            console.error("Error in onCancel", e);
+        }
     }
 
     closeDialog(event) {
+        console.log("ContentCreationDialog closeDialog", arguments);
+        this.history.maybeSaveToHistory();
         if (this.stackeddialog) {
             // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.
             event.preventDefault();

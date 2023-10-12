@@ -122,7 +122,7 @@
                                     <loading
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/container"
-                                            granite:class="coral-Wait coral-Wait--large composum-ai-loading hidden"/>
+                                            granite:class="coral-Wait coral-Wait--large composum-ai-loading"/>
                                 </primary>
                             </generateActionbar>
 
@@ -192,7 +192,7 @@
                                 </items>
                             </templates>
 
-                            <!-- <historyActionbar
+                            <historyActionbar
                                     jcr:primaryType="nt:unstructured"
                                     margin="{Boolean}false"
                                     granite:class="coral-Form-fieldwrapper"
@@ -204,7 +204,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             class="composum-ai-reset-history"
                                             granite:title="Resets this form including the whole history."
-                                            text="History Reset" granite:class="composum-ai-reset-history-button"/>
+                                            text="History" granite:class="composum-ai-reset-history-button"/>
                                     <back
                                             jcr:primaryType="nt:unstructured" icon="back"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
@@ -218,7 +218,7 @@
                                             granite:title="You can make multiple tries to generate content and switch back and forth in a history of the dialog settings and the AI generated texts."
                                             granite:class="composum-ai-forward-button"/>
                                 </primary>
-                            </historyActionbar> -->
+                            </historyActionbar>
                         </items>
                     </sidepanelAI>
                     <empty

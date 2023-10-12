@@ -1,10 +1,11 @@
 # Next steps in the implementation
 
+- Update AEM dialog with history
+- AEM announcement and installation and usage description
+- AEM 6.5 version
+- Update Pages content creation dialog with separate content field like AEM
 - Check where it should appear and where not - extend tag.
     - Autor, key Felder
-- Base text as explicit field filled on ddl choice
-    - Base text ("data")
-    - Prompt ("instructions")
 - API key in site configuration? Tenant configuration?
 - (Explain: why isn't it there in edit styles)
   
@@ -14,7 +15,6 @@
 
 ## Small bugs
 
-- Doppelklick darf Dialog nicht mehrfach öffnen!
 - Stacked Modals: scroll des untersten?
 - Bug, please report: no widget found for /content/ist/composum/home/pages/setup/jcr:
   content/main/row/column-0/section/codeblock/code

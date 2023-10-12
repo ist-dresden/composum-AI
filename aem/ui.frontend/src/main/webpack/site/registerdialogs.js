@@ -21,9 +21,25 @@ import {SidePanelDialog} from './SidePanelDialog.js';
     const SIDEPANEL_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
 
-    /** We currently disable it for content fragments, as there are issues with the rich text editor and the action bar. :-( */
+    /** We currently disable it for content fragments, as there are issues with the rich text editor
+     * and layout issues with the action bar. :-(
+     * Also, we only allow /content for security reasons. */
     function isDisabled() {
-        return Granite.author.ContentFrame.contentURL.toString().indexOf('/content/dam') >= 0;
+        if (document.location.pathname === '/mnt/overlay/wcm/core/content/sites/properties.html' &&
+            document.location.search.startsWith('?item=/content/')) {
+            return false; // page properties
+        }
+        const contentUrl = Granite.author && Granite.author.ContentFrame && Granite.author.ContentFrame.contentURL;
+        if (!contentUrl) {
+            return true;
+        }
+        if (contentUrl.startsWith('/content/dam/')) {
+            return true; // content fragments are not supported yet
+        }
+        if (contentUrl.startsWith('/content/')) {
+            return false;
+        }
+        return true;
     }
 
     channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
@@ -125,9 +141,12 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                 gearsEdit.click(function (event) {
                     console.log("createButton click", arguments);
                     const formPath = $(textarea).closest('form').attr('action');
+                    var property = $(textarea).attr('name');
+                    property = property && property.startsWith('./') && property.substring(2);
                     if (formPath && formPath.startsWith('/content')) {
                         showCreateDialog({
                             componentPath: formPath,
+                            property,
                             oldContent: textarea.value,
                             writebackCallback: (newvalue) => $(textarea).val(newvalue),
                             isrichtext: false,
@@ -218,6 +237,8 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     path = formaction;
                 }
                 path = path || $(buttongroup).closest('[data-path]').attr('data-path');
+                var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+                property = property && property.startsWith('./') && property.substring(2);
                 const $button = $(rtebuttonHTML);
                 $(buttongroup).append($button);
                 $button.click(function (clickevent) {
@@ -252,6 +273,7 @@ import {SidePanelDialog} from './SidePanelDialog.js';
                     rteinstance.suspend();
                     showCreateDialog({
                         componentPath,
+                        property,
                         oldContent,
                         writebackCallback: function (newvalue) {
                             rteinstance.setContent(newvalue);

@@ -1,37 +1,42 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {errorText, contentFragmentPath} from './common.js';
+import {contentFragmentPath, errorText, findSingleElement} from './common.js';
+import {DialogHistory} from './DialogHistory.js';
 
 const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
+
+/** Keeps dialog histories per path. */
+const historyMap = {};
 
 class SidePanelDialog {
     constructor(dialog) {
         console.log("SidePanelDialog constructor ", arguments, this);
-        this.dialog = $(dialog);
+        this.$dialog = $(dialog);
         this.assignElements();
         this.bindActions();
         this.showError(null);
         this.setLoading(false);
-        this.findSingleElement('.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
+        findSingleElement(this.$dialog, '.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
-    }
 
-    findSingleElement(selector) {
-        const $el = this.dialog.find(selector);
-        if ($el.length !== 1) {
-            console.error('BUG! SidebarDialog: missing element for selector', selector, $el, $el.length);
+        const historyPath = this.getContentPath();
+        if (!historyMap[historyPath]) {
+            historyMap[historyPath] = [];
         }
-        return $el;
+        this.history = new DialogHistory(this.$dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
+        this.history.restoreFromLastOfHistory();
     }
 
     assignElements() {
-        this.$predefinedPromptsSelector = this.findSingleElement('.composum-ai-predefinedprompts');
-        this.$contentSelector = this.findSingleElement('.composum-ai-contentselector');
+        this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefinedprompts');
+        this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-contentselector');
         this.$contentSelector.val('page');
-        this.$promptContainer = this.findSingleElement('.composum-ai-promptcontainer');
-        this.$promptTemplate = this.findSingleElement('.composum-ai-templates .composum-ai-prompt');
-        this.$responseTemplate = this.findSingleElement('.composum-ai-templates .composum-ai-response');
+        this.$promptContainer = findSingleElement(this.$dialog, '.composum-ai-promptcontainer');
+        this.$promptTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-prompt');
+        this.$responseTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-response');
+        this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
+        this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
     }
 
     bindActions() {
@@ -40,25 +45,66 @@ class SidePanelDialog {
         this.$promptContainer.on('change input', '.composum-ai-prompt', this.onPromptAreaChanged.bind(this));
         this.$promptContainer.on('focus', '.composum-ai-prompt', this.expandOnFocus);
         this.$promptContainer.on('blur', '.composum-ai-prompt', this.shrinkOnBlur);
-        this.findSingleElement('.composum-ai-generate-button').on('click', this.onGenerateButtonClicked.bind(this));
-        this.findSingleElement('.composum-ai-stop-button').on('click', function (event) {
-            event.preventDefault();
-            this.createServlet.abortRunningCalls();
-            this.setLoading(false);
-        }.bind(this));
-        this.findSingleElement('.composum-ai-reset-button').on('click', function (event) {
-            event.preventDefault();
-            this.ensurePromptCount(1);
-            this.$promptContainer.find('.composum-ai-prompt').val('');
-            this.$promptContainer.find('.composum-ai-response').text('');
-        }.bind(this));
+        this.$generateButton.on('click', this.onGenerateButtonClicked.bind(this));
+        this.$stopButton.on('click', this.onStopClicked.bind(this));
+        findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', this.resetForm.bind(this));
         // bind enter key (without any modifiers) in .composum-ai-promptcontainer .composum-ai-prompt to submit
-        this.findSingleElement('.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
+        findSingleElement(this.$dialog, '.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
             if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+                event.preventDefault();
                 this.onGenerateButtonClicked(event);
             }
         }).bind(this));
         this.setLoading(false);
+    }
+
+    onStopClicked(event) {
+        console.log("onStopClicked", arguments);
+        if (event) {
+            event.preventDefault();
+        }
+        this.createServlet.abortRunningCalls();
+        this.setLoading(false);
+        this.history.maybeSaveToHistory();
+    }
+
+    resetForm(event) {
+        this.onStopClicked(event);
+        this.setDialogStatus({});
+    }
+
+    getDialogStatus() {
+        return {
+            predefinedPrompts: this.$predefinedPromptsSelector.val(),
+            contentSelector: this.$contentSelector.val(),
+            promptCount: this.$promptContainer.find('.composum-ai-prompt').length,
+            prompts: this.$promptContainer.find('.composum-ai-prompt').map(function () {
+                return $(this).val();
+            }).get(),
+            responses: this.$promptContainer.find('.composum-ai-response').map(function () {
+                return $(this).text();
+            }).get()
+        };
+    }
+
+    setDialogStatus(status) {
+        console.log("SidePanelDialog setDialogStatus", status);
+        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
+        this.$contentSelector.val(status.contentSelector);
+        if (status.promptCount) {
+            this.ensurePromptCount(status.promptCount);
+            this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
+                $(element).val(status.prompts[index]);
+            });
+            this.$promptContainer.find('.composum-ai-response').each(function (index, element) {
+                $(element).text(status.responses[index]);
+            });
+        } else {
+            this.ensurePromptCount(1);
+            this.$promptContainer.find('.composum-ai-prompt').val('');
+            this.$promptContainer.find('.composum-ai-response').text('');
+        }
+        this.setAutomaticGenerateButtonState();
     }
 
     /** Makes sure there are in composum-ai-promptcontainer exactly n composum-ai-prompt and composum-ai-response (alternating),
@@ -108,7 +154,7 @@ class SidePanelDialog {
     }
 
     onPromptAreaChanged(event) {
-        console.log("onPromptAreaChanged", arguments);
+        // console.log("onPromptAreaChanged", arguments); // on each key press
         this.$predefinedPromptsSelector.val('-');
         this.setAutomaticGenerateButtonState();
     }
@@ -138,10 +184,7 @@ class SidePanelDialog {
 
     getSelectedPath() {
         const key = this.$contentSelector.val();
-        var contentPath = Granite.author.ContentFrame.getContentPath();
-        if (!contentPath || !contentPath.startsWith('/')) {
-            contentPath = contentFragmentPath();
-        }
+        var contentPath = this.getContentPath();
         var path;
         switch (key) {
             case 'component':
@@ -162,6 +205,14 @@ class SidePanelDialog {
         return path;
     }
 
+    getContentPath() {
+        var contentPath = Granite.author.ContentFrame.getContentPath();
+        if (!contentPath || !contentPath.startsWith('/')) {
+            contentPath = contentFragmentPath();
+        }
+        return contentPath;
+    }
+
     onGenerateButtonClicked(event) {
         console.log("onGenerateButtonClicked", arguments);
         event.preventDefault();
@@ -171,8 +222,8 @@ class SidePanelDialog {
         this.removePromptsAfterEventSource(event);
         this.$promptContainer.find('.composum-ai-response:last').text('');
         this.$promptContainer.find('.composum-ai-response:last')[0].scrollIntoView({
-          behavior: "smooth",
-          block: "center"
+            behavior: "smooth",
+            block: "center"
         });
         // collect chat history from .composum-ai-prompt and .composum-ai-response
         const promptHistory = [];
@@ -185,18 +236,18 @@ class SidePanelDialog {
         });
         // join promptHistory and responseHistory into a single array, format:
         // [{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}, ...].
-        const history = [];
+        const chatHistory = [];
         for (let i = 0; i < promptHistory.length; i++) {
             if (i > 0) { // the first prompt is the initial prompt transmitted as prompt parameter
-                history.push({"role": "USER", "content": promptHistory[i]});
+                chatHistory.push({"role": "USER", "content": promptHistory[i]});
             }
-            history.push({"role": "ASSISTANT", "content": responseHistory[i]});
+            chatHistory.push({"role": "ASSISTANT", "content": responseHistory[i]});
         }
-        history.pop(); // remove empty assistant message at the end
+        chatHistory.pop(); // remove empty assistant message at the end
 
         const data = {
             prompt: this.$promptContainer.find('.composum-ai-prompt:first').val(),
-            chat: JSON.stringify(history),
+            chat: JSON.stringify(chatHistory),
             sourcePath: this.getSelectedPath()
         };
         console.log("createContent", data);
@@ -225,6 +276,7 @@ class SidePanelDialog {
             this.showError("Internal error in text generation");
         }
         this.setLoading(false);
+        this.history.maybeSaveToHistory();
     }
 
     errorCallback(data) {
@@ -235,30 +287,32 @@ class SidePanelDialog {
 
     setLoading(loading) {
         if (loading) {
-            this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
-            this.findSingleElement('.composum-ai-loading').show();
+            this.$generateButton.attr('disabled', 'disabled');
+            this.$stopButton.removeAttr('disabled');
+            findSingleElement(this.$dialog, '.composum-ai-loading').show();
         } else {
             this.setAutomaticGenerateButtonState();
-            this.findSingleElement('.composum-ai-loading').hide();
+            this.$stopButton.attr('disabled', 'disabled');
+            findSingleElement(this.$dialog, '.composum-ai-loading').hide();
         }
     }
 
     setAutomaticGenerateButtonState() {
         if (this.$promptContainer.find('.composum-ai-prompt').val()) {
-            this.findSingleElement('.composum-ai-generate-button').removeAttr('disabled');
+            this.$generateButton.removeAttr('disabled');
         } else {
-            this.findSingleElement('.composum-ai-generate-button').attr('disabled', 'disabled');
+            this.$generateButton.attr('disabled', 'disabled');
         }
     }
 
     /** Shows the error text if error is given, hides it if it's falsy. */
     showError(error) {
         if (!error) {
-            this.findSingleElement('.composum-ai-error-columns').hide();
+            findSingleElement(this.$dialog, '.composum-ai-error-columns').hide();
         } else {
             console.error("SidePanelDialog showError", arguments);
-            this.findSingleElement('.composum-ai-alert coral-alert-content').text(errorText(error));
-            this.findSingleElement('.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-alert coral-alert-content').text(errorText(error));
+            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
             debugger;
         }
     }
@@ -266,5 +320,3 @@ class SidePanelDialog {
 }
 
 export {SidePanelDialog};
-
-console.log("SidePanelDialog.js loaded", SidePanelDialog);

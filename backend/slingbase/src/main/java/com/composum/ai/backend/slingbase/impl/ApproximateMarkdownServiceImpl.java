@@ -64,7 +64,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
             if (entry.getValue() instanceof String) {
                 String value = (String) entry.getValue();
-                if (!TEXT_ATTRIBUTES.contains(value) && value.matches(".*\\s+.*\\s+.*\\s+.*")) {
+                if (!TEXT_ATTRIBUTES.contains(entry.getKey()) && value.matches(".*\\s+.*\\s+.*\\s+.*")) {
                     // check whether we forgot something
                     LOG.info("Ignoring text attribute {} in {}", entry.getKey(), resource.getPath());
                 }

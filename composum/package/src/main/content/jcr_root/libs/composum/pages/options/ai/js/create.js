@@ -27,9 +27,10 @@
             let isRichText = widget && !!widget.richText;
             let url = ai.const.url.create.createDialog + core.encodePath(path + '/' + property) +
                 "?propertypath=" + encodeURIComponent(propertypath) + "&pages.locale=" + pages.getLocale() + "&richtext=" + isRichText;
+            let isNew = $target.closest("form").attr("action") && $target.closest("form").attr("action").endsWith("/*");
             core.openFormDialog(url, ai.CreateDialog, {
                 widget: widget, isRichText: isRichText,
-                componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property
+                componentPath: path, pagePath: pagePath, componentPropertyPath: path + '/' + property, isNew
             });
         }, 1000, true);
 
@@ -51,6 +52,7 @@
                 this.pagePath = options.pagePath;
                 this.componentPropertyPath = options.componentPropertyPath;
                 this.streaming = typeof (EventSource) !== "undefined";
+                this.isNew = options.isNew;
 
                 this.$predefinedPrompts = this.$el.find('.predefined-prompts');
                 this.$contentSelect = this.$el.find('.content-selector');
@@ -83,15 +85,20 @@
                     this.$alert.text('Bug, please report: no widget found for ' + this.componentPropertyPath);
                 }
 
-                this.history = ai.createDialogStates[this.componentPropertyPath];
-                console.log('History for ', this.componentPropertyPath, ' used.'); // FIXME remove this.
-                if (!this.history) {
+                if (!this.isNew) {
+                    this.history = ai.createDialogStates[this.componentPropertyPath];
+                    if (!this.history) {
+                        this.history = [];
+                        ai.createDialogStates[this.componentPropertyPath] = this.history;
+                    }
+                    this.historyPosition = this.history.length - 1;
+                    if (this.historyPosition >= 0) {
+                        this.restoreStateFromMap(this.history[this.historyPosition]);
+                    }
+                } else {
+                    // new unsaved component instances are indistinguishable, so we don't save their state
                     this.history = [];
-                    ai.createDialogStates[this.componentPropertyPath] = this.history;
-                }
-                this.historyPosition = this.history.length - 1;
-                if (this.historyPosition >= 0) {
-                    this.restoreStateFromMap(this.history[this.historyPosition]);
+                    this.historyPosition = -1;
                 }
 
                 if (this.isRichText) {
@@ -102,8 +109,13 @@
 
                 this.$el.find('#promptTextarea').mouseleave(this.adjustButtonStates.bind(this));
                 this.$el.find('.generate-container').mouseenter(this.adjustButtonStates.bind(this));
-
                 this.adjustButtonStates();
+
+                this.$el.find('#promptTextarea').keydown((event) => {
+                    if (event.which === 13 && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                        this.generateButtonClicked(event);
+                    }
+                });
             },
 
             adjustButtonStates: function () {
@@ -275,10 +287,10 @@
             },
 
             generateSuccess: function (data) {
-                this.setLoading(false);
                 const statusOK = data.status && data.status >= 200 && data.status < 300 && data.data && data.data.result;
                 if (statusOK && data.data.result.text) {
                     console.log("Success generating text: ", data);
+                    this.setLoading(false);
                     let value = data.data.result.text;
                     this.setResult(value);
                     this.saveState();
@@ -427,3 +439,4 @@
     })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 
 })(window);
+// TODO(hps,10.10.23) do not store the state of the dialog persistently through closing the dialog when the component path ends with /* (literally a star)
