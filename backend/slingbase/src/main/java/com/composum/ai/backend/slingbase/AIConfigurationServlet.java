@@ -51,6 +51,7 @@ import com.google.gson.GsonBuilder;
  *
  * @see com.composum.ai.backend.slingbase.AIConfigurationService
  */
+// http://localhost:4502/bin/cpm/ai/config.json/content/wknd/us/en/magazine/_jcr_content?editorurl=/editor.html/content/wknd/us/en/magazine.html
 @Component(service = {Servlet.class},
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Configuration Servlet",
