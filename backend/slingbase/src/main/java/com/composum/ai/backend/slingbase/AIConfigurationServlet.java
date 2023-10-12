@@ -3,6 +3,7 @@ package com.composum.ai.backend.slingbase;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 
@@ -95,8 +96,10 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
         String contentPath = request.getRequestPathInfo().getSuffix();
         String editorUrl = request.getParameter(PARAM_EDITORURL);
         Set<String> allowedServices = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
+        Map<String, Boolean> allowedServicesMap = allowedServices.stream()
+                .collect(Collectors.toMap(service -> service, service -> true));
         response.setContentType("application/json");
-        Map<String, Set<String>> jsonResponse = Map.of("allowedServices", allowedServices);
+        Map<String, Map<String, Boolean>> jsonResponse = Map.of("allowedServices", allowedServicesMap);
         response.getWriter().write(gson.toJson(jsonResponse));
     }
 

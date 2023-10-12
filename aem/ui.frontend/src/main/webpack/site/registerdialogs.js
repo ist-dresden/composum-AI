@@ -29,7 +29,7 @@ import {AIConfig} from './AIConfig.js';
      * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
      */
     function loadSidebarPanelDialog() {
-        config.ifEnabled('sidepanel', () => {
+        aiconfig.ifEnabled('sidepanel', () => {
             const dialogId = 'composumAI-sidebar-panel';
             if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
                 return;
@@ -149,7 +149,7 @@ import {AIConfig} from './AIConfig.js';
      */
     function prepareDialog(event) {
         console.log("prepareDialog", event.type, event.target);
-        config.ifEnabled('create', () => {
+        aiconfig.ifEnabled('create', () => {
             Coral.commons.ready(event.target, function () {
                 insertCreateButtonsForTextareas(event.target);
                 registerContentDialogInRichtextEditors(event);
@@ -166,7 +166,7 @@ import {AIConfig} from './AIConfig.js';
      */
     function initRteHooks(event) {
         console.log("waitForReadyAndInsert", event.type, event.target);
-        config.ifEnabled('create', () => {
+        aiconfig.ifEnabled('create', () => {
             Coral.commons.ready(event.target, function () {
                 Granite.author.ContentFrame.getDocument()
                     .off('editing-start', registerContentDialogInRichtextEditors)
