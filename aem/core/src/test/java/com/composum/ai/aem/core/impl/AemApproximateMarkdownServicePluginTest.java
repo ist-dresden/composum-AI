@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
@@ -47,10 +48,8 @@ public class AemApproximateMarkdownServicePluginTest {
     @BeforeEach
     public void setUp() {
         context = new AemContext(ResourceResolverType.JCR_MOCK);
-        config = mock(ApproximateMarkdownServiceImpl.Config.class);
-        when(config.textAttributes()).thenReturn(new String[]{"jcr:title", "jcr:description"});
-        when(config.labelledAttributePatternDeny()).thenReturn(new String[]{".*:.*"});
-        when(config.labelledAttributePatternAllow()).thenReturn(new String[]{".*"});
+        config = mock(ApproximateMarkdownServiceImpl.Config.class,
+                withSettings().defaultAnswer(invocation -> invocation.getMethod().getDefaultValue()));
         when(config.labelledAttributeOrder()).thenReturn(new String[]{"thefirst", "asecond"});
         service = new ApproximateMarkdownServiceImpl() {
             {

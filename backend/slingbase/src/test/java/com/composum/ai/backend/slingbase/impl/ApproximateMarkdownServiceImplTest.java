@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,9 +21,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.google.common.collect.ImmutableMap;
@@ -46,10 +44,8 @@ public class ApproximateMarkdownServiceImplTest {
     @Before
     public void setUp() {
         service = new ApproximateMarkdownServiceImpl();
-        config = mock(ApproximateMarkdownServiceImpl.Config.class);
-        when(config.textAttributes()).thenReturn(new String[]{"jcr:title", "jcr:description", "title", "text"});
-        when(config.labelledAttributePatternDeny()).thenReturn(new String[]{".*:.*"});
-        when(config.labelledAttributePatternAllow()).thenReturn(new String[]{".*"});
+        config = mock(ApproximateMarkdownServiceImpl.Config.class,
+                withSettings().defaultAnswer(invocation -> invocation.getMethod().getDefaultValue()));
         when(config.labelledAttributeOrder()).thenReturn(new String[]{"thefirst", "asecond"});
         service.activate(config);
 
@@ -94,8 +90,8 @@ public class ApproximateMarkdownServiceImplTest {
         String markdown = service.getMarkdown(str);
         assertEquals("**This** is *a* test string.", markdown.trim());
     }
-    
-    
+
+
     @Test
     public void testLabelledAttributes() {
         Resource component = createMockResource("nt:unstructured",

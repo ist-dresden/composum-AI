@@ -3,6 +3,7 @@ package com.composum.ai.composum.bundle.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,8 +44,8 @@ public class ComposumApproximateMarkdownServicePluginTest {
     public void setUp() {
         config = mock(ApproximateMarkdownServiceImpl.Config.class);
         when(config.textAttributes()).thenReturn(new String[]{"jcr:title", "jcr:description", "title", "text"});
-        when(config.labelledAttributePatternDeny()).thenReturn(new String[]{".*:.*"});
-        when(config.labelledAttributePatternAllow()).thenReturn(new String[]{".*"});
+        config = mock(ApproximateMarkdownServiceImpl.Config.class,
+                withSettings().defaultAnswer(invocation -> invocation.getMethod().getDefaultValue()));
         when(config.labelledAttributeOrder()).thenReturn(new String[]{"thefirst", "asecond"});
         service = new ApproximateMarkdownServiceImpl() {
             {

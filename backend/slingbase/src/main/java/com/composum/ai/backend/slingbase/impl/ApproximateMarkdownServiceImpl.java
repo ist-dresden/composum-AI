@@ -89,15 +89,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
 
     private static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServiceImpl.class);
-    /**
-     * Pattern that matches an opening html tag and captures the tag name.
-     */
-    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(ext|a|sly|strong|code|em|language|type|p|br|div|path|u|ul|attributes|li|ol)(\\s+[^>]*)?>", Pattern.CASE_INSENSITIVE);
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
-
-    protected final Set<String> htmltags = new HashSet<>();
 
     // List of ApproximateMarkdownServicePlugin dynamically injected by OSGI
     @Nonnull
@@ -121,8 +115,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @Override
     public String approximateMarkdown(@Nullable Resource resource) {
         try (StringWriter s = new StringWriter()) {
-            try (PrintWriter p = new PrintWriter(s)) {
-                approximateMarkdown(resource, p);
+            try (PrintWriter out = new PrintWriter(s)) {
+                approximateMarkdown(resource, out);
             }
             return s.toString();
         } catch (IOException e) {
@@ -290,16 +284,20 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
         @AttributeDefinition(name = "Labeled Attribute Pattern Deny",
                 description = "Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list.")
-        String[] labelledAttributePatternDeny() default {".*:.*"};
+        String[] labelledAttributePatternDeny() default {".*:.*", "layout", "backgroundColor", "color"};
 
         @AttributeDefinition(name = "Labelled Attribute Order",
                 description = "List of labelled attributes that come first if they are present, in the given order.")
-        String[] labelledAttributeOrder() default {};
+        String[] labelledAttributeOrder() default {"cq:panelTitle"};
 
     }
 
 
     // debugging code; remove after it works.
+
+    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(ext|a|sly|strong|code|em|language|type|p|br|div|path|u|ul|attributes|li|ol)(\\s+[^>]*)?>", Pattern.CASE_INSENSITIVE);
+
+    protected final Set<String> htmltags = new HashSet<>();
 
     /**
      * This is debugging code we needed to gather information for the implementation; we keep it around for now.
@@ -318,9 +316,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             if (entry.getValue() instanceof String) {
                 String value = (String) entry.getValue();
                 if (value.matches(".*\\s+.*\\s+.*\\s+.*")) {
-                    out.println(resource.getPath() + " [" + resourceTypeForChildren + "] " + subpathForAttributes + entry.getKey() + ": " + value);
+                    // out.println(resource.getPath() + " [" + resourceTypeForChildren + "] " + subpathForAttributes + entry.getKey() + ": " + value);
                     // out.println("[" + resourceTypeForChildren + "] " + subpathForAttributes + entry.getKey() + ": " + value);
-                    // out.println("[" + resourceTypeForChildren + "] " + subpathForAttributes + entry.getKey());
+                    out.println("[" + resourceTypeForChildren + "] " + subpathForAttributes + entry.getKey());
                     // out.println(entry.getKey() + " [" + resourceTypeForChildren + "] " + subpathForAttributes + entry.getKey());
                     captureHtmlTags(value);
                 }
