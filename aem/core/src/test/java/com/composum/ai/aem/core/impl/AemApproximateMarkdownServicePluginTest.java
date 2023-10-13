@@ -42,16 +42,23 @@ public class AemApproximateMarkdownServicePluginTest {
     private PrintWriter printWriter;
 
     private AemContext context;
+    private ApproximateMarkdownServiceImpl.Config config;
 
     @BeforeEach
     public void setUp() {
         context = new AemContext(ResourceResolverType.JCR_MOCK);
+        config = mock(ApproximateMarkdownServiceImpl.Config.class);
+        when(config.textAttributes()).thenReturn(new String[]{"jcr:title", "jcr:description"});
+        when(config.labelledAttributePatternDeny()).thenReturn(new String[]{".*:.*"});
+        when(config.labelledAttributePatternAllow()).thenReturn(new String[]{".*"});
+        when(config.labelledAttributeOrder()).thenReturn(new String[]{"thefirst", "asecond"});
         service = new ApproximateMarkdownServiceImpl() {
             {
                 chatCompletionService = mock(GPTChatCompletionService.class);
                 plugins = Collections.singletonList(new AemApproximateMarkdownServicePlugin());
                 when(chatCompletionService.htmlToMarkdown(anyString()))
                         .then(invocation -> "markdownOf(" + invocation.getArgument(0) + ")");
+                this.activate(config);
             }
         };
         writer = new StringWriter();
@@ -78,6 +85,27 @@ public class AemApproximateMarkdownServicePluginTest {
                         "The best page!\n";
         assertThat(writer.toString(), is(expectedOutput));
     }
+
+    @Test
+    public void testLabelledAttributes() {
+        component = createMockResource("nt:unstructured",
+                ImmutableMap.of("jcr:title", "unlabelled",
+                        "asecond", "Should be the second labelled attribute",
+                        "thefirst", "the first labelled attribute",
+                        "unmentioned", "other lattr",
+                        "is:ignored", "denied"
+                ));
+
+        service.approximateMarkdown(component, printWriter);
+        String expectedOutput =
+                "## unlabelled\n" +
+                        "thefirst: the first labelled attribute\n" +
+                        "asecond: Should be the second labelled attribute\n" +
+                        "unmentioned: other lattr\n" +
+                        "\n";
+        assertThat(writer.toString(), is(expectedOutput));
+    }
+
 
     private Resource createMockResource(String resourceType, Map<String, Object> attributes) {
         Map<String, Object> props = new HashMap<>(attributes);

@@ -1,6 +1,8 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import static com.composum.ai.backend.slingbase.AllowDenyMatcherUtil.allowDenyCheck;
 import static com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult.NOT_HANDLED;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,17 +16,23 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.slingbase.AllowDenyMatcherUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 
@@ -32,6 +40,7 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
  * Implementation for {@link ApproximateMarkdownService}.
  */
 @Component
+@Designate(ocd = ApproximateMarkdownServiceImpl.Config.class)
 public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownService {
 
     public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = Map.of(
@@ -40,11 +49,32 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             "subtitle", "### "
             // , "code", "```" handled in extra method
     );
-    public static final List<String> TEXT_ATTRIBUTES = List.of(
-            "jcr:title", "title", "subtitle", "linkTitle", "jcr:description", "text",
-            /* "code", */ "copyright", // code component; code is handled in extra method
-            "defaultValue", "exampleCode", "suffix", "exampleResult", "footer" // for servlet component
-    );
+
+    /**
+     * A list of attributes that are output (in that ordering) without any label, each on a line for itself.
+     */
+    @Nonnull
+    protected List<String> textAttributes;
+
+    /**
+     * A list of labelled attributes that come first if they are present, in the given order.
+     */
+    protected List<String> labelledAttributeOrder;
+
+    /**
+     * A pattern which attributes have to be output with a label: the attribute name, a colon and a space and then the
+     * trimmed attribute value followed by newline.
+     */
+    @Nullable
+    protected Pattern labeledAttributePatternAllow;
+
+    /**
+     * A pattern matching exceptions for {@link #labeledAttributePatternAllow}.
+     */
+    @Nullable
+    protected Pattern labeledAttributePatternDeny;
+
+
     private static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServiceImpl.class);
     /**
      * Pattern that matches an opening html tag and captures the tag name.
@@ -53,18 +83,20 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
-    protected Set<String> htmltags = new HashSet<>();
+
+    protected final Set<String> htmltags = new HashSet<>();
 
     // List of ApproximateMarkdownServicePlugin dynamically injected by OSGI
     @Nonnull
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, service = ApproximateMarkdownServicePlugin.class)
     protected volatile List<ApproximateMarkdownServicePlugin> plugins;
 
-    protected static void logUnhandledAttributes(Resource resource) {
+    protected void logUnhandledAttributes(Resource resource) {
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
             if (entry.getValue() instanceof String) {
                 String value = (String) entry.getValue();
-                if (!TEXT_ATTRIBUTES.contains(entry.getKey()) && value.matches(".*\\s+.*\\s+.*\\s+.*")) {
+                if (!textAttributes.contains(entry.getKey()) && value.matches(".*\\s+.*\\s+.*\\s+.*") &&
+                        !allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
                     // check whether we forgot something
                     LOG.info("Ignoring text attribute {} in {}", entry.getKey(), resource.getPath());
                 }
@@ -91,7 +123,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (resource == null || resource.getName().equals("i18n")) {
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
             // TODO(hps,26.05.23) this might lead to trouble if the user edits a non-default language first. Join with translations?
-            // Also it's not quite clear what language we should take.
+            // Also it'd be not quite clear what language we should take.
             return;
         }
         if (!ResourceUtil.normalize(resource.getPath()).startsWith("/content/")) {
@@ -103,10 +135,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         ApproximateMarkdownServicePlugin.PluginResult pluginResult = executePlugins(resource, out);
         boolean printEmptyLine = false;
         if (pluginResult == NOT_HANDLED) {
-            handleCodeblock(resource, out);
-            for (String attributename : TEXT_ATTRIBUTES) {
+            for (String attributename : textAttributes) {
                 String value = resource.getValueMap().get(attributename, String.class);
-                if (value != null) {
+                if (isNotBlank(value)) {
                     String prefix = ATTRIBUTE_TO_MARKDOWN_PREFIX.getOrDefault(attributename, "");
                     String markdown;
                     if ("text".equals(attributename) && resource.getValueMap().get("textIsRich") != null) {
@@ -120,6 +151,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                     printEmptyLine = true;
                 }
             }
+            handleCodeblock(resource, out);
+            handleLabeledAttributes(resource, out);
         }
         if (printEmptyLine) {
             out.println();
@@ -157,12 +190,81 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     protected void handleCodeblock(Resource resource, PrintWriter out) {
         String code = resource.getValueMap().get("code", String.class);
-        if (StringUtils.isNotBlank(code)) {
+        if (isNotBlank(code)) {
             out.println("```\n");
             out.println(code.trim());
             out.println("\n```\n");
         }
     }
+
+    protected void handleLabeledAttributes(Resource resource, PrintWriter out) {
+        if (labeledAttributePatternAllow == null) {
+            return;
+        }
+        for (String attributename : labelledAttributeOrder) {
+            String value = resource.getValueMap().get(attributename, String.class);
+            if (isNotBlank(value)) {
+                out.println(attributename + ": " + getMarkdown(value));
+            }
+        }
+        for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
+            if (labelledAttributeOrder.contains(entry.getKey()) || textAttributes.contains(entry.getKey())) {
+                continue;
+            }
+            if (entry.getValue() instanceof String) {
+                String value = (String) entry.getValue();
+                if (isNotBlank(value) &&
+                        allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
+                    out.println(entry.getKey() + ": " + getMarkdown(value));
+                }
+            }
+        }
+    }
+
+    @Activate
+    @Modified
+    protected void activate(Config config) {
+        LOG.info("Activated with configuration {}", config);
+        textAttributes = List.of(config.textAttributes());
+        labeledAttributePatternAllow = AllowDenyMatcherUtil.joinPatternsIntoAnyMatcher(config.labelledAttributePatternAllow());
+        labeledAttributePatternDeny = AllowDenyMatcherUtil.joinPatternsIntoAnyMatcher(config.labelledAttributePatternDeny());
+        labelledAttributeOrder = List.of(config.labelledAttributeOrder());
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        LOG.info("Deactivated.");
+    }
+
+    /**
+     * Configuration class Config that allows us to configure TEXT_ATTRIBUTES.
+     */
+    @ObjectClassDefinition(name = "Composum AI Approximate Markdown Service Configuration", description = "Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.")
+    public @interface Config {
+
+        @AttributeDefinition(name = "Text Attributes",
+                description = "List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text.", defaultValue = {
+                "jcr:title", "title", "subtitle", "linkTitle", "jcr:description", "text",
+                /* "code", */ "copyright", // code component; code is handled in extra method
+                "defaultValue", "exampleCode", "suffix", "exampleResult", "footer" // for servlet component
+        })
+        String[] textAttributes() default {};
+
+        // these will be joined with | and then compiled as a pattern
+        @AttributeDefinition(name = "Labeled Attribute Pattern Allow",
+                description = "Regular expressions for attributes that are output with a label. If not present, none will be output except the text attributes.")
+        String[] labelledAttributePatternAllow() default {".*"};
+
+        @AttributeDefinition(name = "Labeled Attribute Pattern Deny",
+                description = "Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list.")
+        String[] labelledAttributePatternDeny() default {".*:.*"};
+
+        @AttributeDefinition(name = "Labelled Attribute Order",
+                description = "List of labelled attributes that come first if they are present, in the given order.")
+        String[] labelledAttributeOrder() default {};
+
+    }
+
 
     // debugging code; remove after it works.
 
