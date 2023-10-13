@@ -292,7 +292,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
         @AttributeDefinition(name = "Labeled Attribute Pattern Deny",
                 description = "Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list.")
-        String[] labelledAttributePatternDeny() default {".*:.*", "layout", "backgroundColor", "color"};
+        String[] labelledAttributePatternDeny() default {".*:.*", "layout", "backgroundColor", "color", "textColor", "template",
+                "theme", "variation", "buttonSymbol", "columns", "icon", "elementType", "textAlignment", "alignment",
+                "linkTarget", "interval", "fileReference", "height", "width", "textIsRich", "style",
+                "padding.*", ".*[cC]ss[cC]lass.*"};
 
         @AttributeDefinition(name = "Labelled Attribute Order",
                 description = "List of labelled attributes that come first if they are present, in the given order.")
