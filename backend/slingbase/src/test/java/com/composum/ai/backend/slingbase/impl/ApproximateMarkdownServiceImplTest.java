@@ -105,9 +105,10 @@ public class ApproximateMarkdownServiceImplTest {
         service.approximateMarkdown(component, printWriter);
         String expectedOutput =
                 "## unlabelled\n" +
-                        "thefirst: the first labelled attribute\n" +
-                        "asecond: Should be the second labelled attribute\n" +
-                        "unmentioned: other lattr\n" +
+                        "\n" +
+                        "thefirst: the first labelled attribute <br>\n" +
+                        "asecond: Should be the second labelled attribute <br>\n" +
+                        "unmentioned: other lattr <br>\n" +
                         "\n";
         assertThat(writer.toString(), is(expectedOutput));
     }
@@ -124,7 +125,7 @@ public class ApproximateMarkdownServiceImplTest {
 
         service.approximateMarkdown(component, printWriter);
         String expectedOutput =
-                "thefirst: this is there\n" +
+                "thefirst: this is there <br>\n" +
                         "\n";
         assertThat(writer.toString(), is(expectedOutput));
     }

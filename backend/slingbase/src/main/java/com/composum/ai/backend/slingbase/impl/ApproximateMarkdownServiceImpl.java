@@ -158,8 +158,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                     printEmptyLine = true;
                 }
             }
-            printEmptyLine = handleCodeblock(resource, out) || printEmptyLine;
-            printEmptyLine = handleLabeledAttributes(resource, out) || printEmptyLine;
+            printEmptyLine = handleCodeblock(resource, out, printEmptyLine);
+            printEmptyLine = handleLabeledAttributes(resource, out, printEmptyLine);
         }
         if (printEmptyLine) {
             out.println();
@@ -195,7 +195,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         return markdown;
     }
 
-    protected boolean handleCodeblock(Resource resource, PrintWriter out) {
+    protected boolean handleCodeblock(Resource resource, PrintWriter out, boolean printEmptyLine) {
         String code = resource.getValueMap().get("code", String.class);
         if (isNotBlank(code)) {
             out.println("```\n");
@@ -203,18 +203,22 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             out.println("\n```\n");
             return true;
         }
-        return false;
+        return printEmptyLine;
     }
 
-    protected boolean handleLabeledAttributes(Resource resource, PrintWriter out) {
+    protected boolean handleLabeledAttributes(Resource resource, PrintWriter out, boolean printEmptyLine) {
         if (labeledAttributePatternAllow == null) {
             return false;
         }
-        boolean printEmptyLine = false;
+        boolean firstline = true;
         for (String attributename : labelledAttributeOrder) {
             String value = resource.getValueMap().get(attributename, String.class);
             if (isNotBlank(value)) {
-                out.println(attributename + ": " + getMarkdown(value));
+                if (printEmptyLine && firstline) {
+                    out.println();
+                    firstline = false;
+                }
+                out.println(attributename + ": " + getMarkdown(value) + " <br>");
                 printEmptyLine = true;
             }
         }
@@ -226,7 +230,11 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                 String value = (String) entry.getValue();
                 if (isNotBlank(value) && admissibleValue(value) &&
                         allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
-                    out.println(entry.getKey() + ": " + getMarkdown(value));
+                    if (printEmptyLine && firstline) {
+                        out.println();
+                        firstline = false;
+                    }
+                    out.println(entry.getKey() + ": " + getMarkdown(value) + " <br>");
                     printEmptyLine = true;
                 }
             }
