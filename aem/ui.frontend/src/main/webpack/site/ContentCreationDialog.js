@@ -70,6 +70,7 @@ class ContentCreationDialog {
     fullscreen() {
         this.$dialog.find('form').addClass('_coral-Dialog--fullscreenTakeover');
         this.$dialog.find('coral-dialog-footer').children().appendTo(this.$dialog.find('coral-dialog-header div.cq-dialog-actions'));
+        this.$dialog.find('.composum-ai-prompt-columns .u-coral-padding').removeClass('u-coral-padding');
     }
 
     removeFormAction() {
