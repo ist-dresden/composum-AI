@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Activate;
@@ -49,6 +52,16 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             "subtitle", "### "
             // , "code", "```" handled in extra method
     );
+
+    /**
+     * Ignored values for labelled output: "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target .
+     */
+    protected final static Pattern IGNORED_VALUE_PATTERN = Pattern.compile("true|false|[0-9][0-9]?[0-9]?|/(conf|content|etc)/.*|\\{Boolean\\}(true|false)|inherit|blank|target|h[0-9]|div|p");
+
+    /**
+     * We ignore nodes named i18n or renditions and nodes starting with rep:, dam:, cq:
+     */
+    protected final static Pattern IGNORED_NODE_NAMES = Pattern.compile("i18n|renditions|rep:.*|dam:.*|cq:.*");
 
     /**
      * A list of attributes that are output (in that ordering) without any label, each on a line for itself.
@@ -120,7 +133,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     @Override
     public void approximateMarkdown(@Nullable Resource resource, @Nonnull PrintWriter out) {
-        if (resource == null || resource.getName().equals("i18n")) {
+        if (resource == null || IGNORED_NODE_NAMES.matcher(resource.getName()).matches()) {
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
             // TODO(hps,26.05.23) this might lead to trouble if the user edits a non-default language first. Join with translations?
             // Also it'd be not quite clear what language we should take.
@@ -151,8 +164,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                     printEmptyLine = true;
                 }
             }
-            handleCodeblock(resource, out);
-            handleLabeledAttributes(resource, out);
+            printEmptyLine = handleCodeblock(resource, out) || printEmptyLine;
+            printEmptyLine = handleLabeledAttributes(resource, out) || printEmptyLine;
         }
         if (printEmptyLine) {
             out.println();
@@ -188,23 +201,27 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         return markdown;
     }
 
-    protected void handleCodeblock(Resource resource, PrintWriter out) {
+    protected boolean handleCodeblock(Resource resource, PrintWriter out) {
         String code = resource.getValueMap().get("code", String.class);
         if (isNotBlank(code)) {
             out.println("```\n");
             out.println(code.trim());
             out.println("\n```\n");
+            return true;
         }
+        return false;
     }
 
-    protected void handleLabeledAttributes(Resource resource, PrintWriter out) {
+    protected boolean handleLabeledAttributes(Resource resource, PrintWriter out) {
         if (labeledAttributePatternAllow == null) {
-            return;
+            return false;
         }
+        boolean printEmptyLine = false;
         for (String attributename : labelledAttributeOrder) {
             String value = resource.getValueMap().get(attributename, String.class);
             if (isNotBlank(value)) {
                 out.println(attributename + ": " + getMarkdown(value));
+                printEmptyLine = true;
             }
         }
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
@@ -213,22 +230,38 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             }
             if (entry.getValue() instanceof String) {
                 String value = (String) entry.getValue();
-                if (isNotBlank(value) &&
+                if (isNotBlank(value) && admissibleValue(value) &&
                         allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
                     out.println(entry.getKey() + ": " + getMarkdown(value));
+                    printEmptyLine = true;
                 }
             }
         }
+        return printEmptyLine;
+    }
+
+    /**
+     * We do not print pure numbers, booleans and some special strings since those are likely attributes determining the component layout, not actual text that is printed.
+     * all "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target .
+     */
+    protected boolean admissibleValue(Object object) {
+        if (object instanceof String) {
+            String value = (String) object;
+            return !IGNORED_VALUE_PATTERN.matcher(value).matches();
+        }
+        return false;
     }
 
     @Activate
     @Modified
     protected void activate(Config config) {
         LOG.info("Activated with configuration {}", config);
-        textAttributes = List.of(config.textAttributes());
+        textAttributes = Stream.of(config.textAttributes())
+                .filter(StringUtils::isNotBlank).collect(Collectors.toList());
         labeledAttributePatternAllow = AllowDenyMatcherUtil.joinPatternsIntoAnyMatcher(config.labelledAttributePatternAllow());
         labeledAttributePatternDeny = AllowDenyMatcherUtil.joinPatternsIntoAnyMatcher(config.labelledAttributePatternDeny());
-        labelledAttributeOrder = List.of(config.labelledAttributeOrder());
+        labelledAttributeOrder = Stream.of(config.labelledAttributeOrder())
+                .filter(StringUtils::isNotBlank).collect(Collectors.toList());
     }
 
     @Deactivate
@@ -243,12 +276,12 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     public @interface Config {
 
         @AttributeDefinition(name = "Text Attributes",
-                description = "List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text.", defaultValue = {
+                description = "List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text.")
+        String[] textAttributes() default {
                 "jcr:title", "title", "subtitle", "linkTitle", "jcr:description", "text",
                 /* "code", */ "copyright", // code component; code is handled in extra method
                 "defaultValue", "exampleCode", "suffix", "exampleResult", "footer" // for servlet component
-        })
-        String[] textAttributes() default {};
+        };
 
         // these will be joined with | and then compiled as a pattern
         @AttributeDefinition(name = "Labeled Attribute Pattern Allow",

@@ -86,27 +86,6 @@ public class AemApproximateMarkdownServicePluginTest {
         assertThat(writer.toString(), is(expectedOutput));
     }
 
-    @Test
-    public void testLabelledAttributes() {
-        component = createMockResource("nt:unstructured",
-                ImmutableMap.of("jcr:title", "unlabelled",
-                        "asecond", "Should be the second labelled attribute",
-                        "thefirst", "the first labelled attribute",
-                        "unmentioned", "other lattr",
-                        "is:ignored", "denied"
-                ));
-
-        service.approximateMarkdown(component, printWriter);
-        String expectedOutput =
-                "## unlabelled\n" +
-                        "thefirst: the first labelled attribute\n" +
-                        "asecond: Should be the second labelled attribute\n" +
-                        "unmentioned: other lattr\n" +
-                        "\n";
-        assertThat(writer.toString(), is(expectedOutput));
-    }
-
-
     private Resource createMockResource(String resourceType, Map<String, Object> attributes) {
         Map<String, Object> props = new HashMap<>(attributes);
         props.put("sling:resourceType", resourceType);

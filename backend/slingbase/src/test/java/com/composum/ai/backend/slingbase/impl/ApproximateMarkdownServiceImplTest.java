@@ -1,5 +1,7 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -19,16 +21,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Test for {@link ApproximateMarkdownServiceImpl}, mostly generated with the AI and then fixed.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ApproximateMarkdownServiceImplTest {
 
+    private ApproximateMarkdownServiceImpl.Config config;
     private ApproximateMarkdownServiceImpl service;
     private StringWriter writer;
     private PrintWriter printWriter;
@@ -42,7 +46,13 @@ public class ApproximateMarkdownServiceImplTest {
     @Before
     public void setUp() {
         service = new ApproximateMarkdownServiceImpl();
-        // mock service.chatCompletionService
+        config = mock(ApproximateMarkdownServiceImpl.Config.class);
+        when(config.textAttributes()).thenReturn(new String[]{"jcr:title", "jcr:description", "title", "text"});
+        when(config.labelledAttributePatternDeny()).thenReturn(new String[]{".*:.*"});
+        when(config.labelledAttributePatternAllow()).thenReturn(new String[]{".*"});
+        when(config.labelledAttributeOrder()).thenReturn(new String[]{"thefirst", "asecond"});
+        service.activate(config);
+
         service.chatCompletionService = mock(GPTChatCompletionService.class);
         writer = new StringWriter();
         printWriter = new PrintWriter(writer);
@@ -83,6 +93,44 @@ public class ApproximateMarkdownServiceImplTest {
         when(service.chatCompletionService.htmlToMarkdown(str)).thenReturn("**This** is *a* test string.");
         String markdown = service.getMarkdown(str);
         assertEquals("**This** is *a* test string.", markdown.trim());
+    }
+    
+    
+    @Test
+    public void testLabelledAttributes() {
+        Resource component = createMockResource("nt:unstructured",
+                ImmutableMap.of("jcr:title", "unlabelled",
+                        "asecond", "Should be the second labelled attribute",
+                        "thefirst", "the first labelled attribute",
+                        "unmentioned", "other lattr",
+                        "is:ignored", "denied"
+                ));
+
+        service.approximateMarkdown(component, printWriter);
+        String expectedOutput =
+                "## unlabelled\n" +
+                        "thefirst: the first labelled attribute\n" +
+                        "asecond: Should be the second labelled attribute\n" +
+                        "unmentioned: other lattr\n" +
+                        "\n";
+        assertThat(writer.toString(), is(expectedOutput));
+    }
+
+    @Test
+    public void testLabelledAttributesIgnoredValues() {
+        Resource component = createMockResource("nt:unstructured",
+                ImmutableMap.of(
+                        "thefirst", "this is there",
+                        "ignoredValue1", "true",
+                        "ignoredValue2", "123",
+                        "is:ignored", "denied"
+                ));
+
+        service.approximateMarkdown(component, printWriter);
+        String expectedOutput =
+                "thefirst: this is there\n" +
+                        "\n";
+        assertThat(writer.toString(), is(expectedOutput));
     }
 
     private Resource createMockResource(String resourceType, Map<String, Object> attributes) {
