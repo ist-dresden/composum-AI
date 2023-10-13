@@ -1,6 +1,6 @@
-Restrictions
+Restrictions : ??? component
 Announcement, Installation, Doc überarbeiten
-Refactor Aprrox Markdown for HTML
+Refactor Aprox Markdown for HTML: from HTML plugin , write richtext modus
 AEM for content fragments?
 
 Done:
