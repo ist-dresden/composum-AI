@@ -1,7 +1,7 @@
 package com.composum.ai.backend.slingbase.impl;
 
-import static com.composum.ai.backend.slingbase.AllowDenyMatcherUtil.allowDenyCheck;
 import static com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult.NOT_HANDLED;
+import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.allowDenyCheck;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;

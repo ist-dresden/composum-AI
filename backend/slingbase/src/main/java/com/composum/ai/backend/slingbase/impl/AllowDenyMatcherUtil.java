@@ -1,4 +1,4 @@
-package com.composum.ai.backend.slingbase;
+package com.composum.ai.backend.slingbase.impl;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;

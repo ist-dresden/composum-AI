@@ -1,6 +1,5 @@
 # Next steps in the implementation
 
-- Update AEM dialog with history
 - AEM announcement and installation and usage description
 - AEM 6.5 version
 - Update Pages content creation dialog with separate content field like AEM
@@ -81,3 +80,4 @@
 - DONE: use library to count the tokens -> JTokkit
 - DONE: save scroll position, scroll the chat field to the top.
 - DONE Somehow implement streaming to make result more responsive.
+- DONE: Update AEM dialog with history

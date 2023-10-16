@@ -1,4 +1,4 @@
-package com.composum.ai.backend.slingbase;
+package com.composum.ai.backend.slingbase.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 
@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+
+import com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil;
 
 public class AllowDenyMatcherUtilTest {
 
