@@ -2,10 +2,10 @@ package com.composum.ai.backend.slingbase.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * A plugin for the {@link com.composum.ai.backend.slingbase.ApproximateMarkdownService} that transforms the rendered
@@ -60,6 +62,13 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
     protected Pattern allowedResourceTypePattern;
     protected Pattern deniedResourceTypePattern;
 
+    /**
+     * ResourceTypes we ignore since their rendering uses unsupported methods.
+     * Blacklisting for only 1h since there might be a deployment in the meantime.
+     */
+    protected Cache<String, Boolean> blacklistedResourceType =
+            CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build();
+
     @NotNull
     @Override
     public PluginResult maybeHandle(
@@ -70,12 +79,17 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             return PluginResult.NOT_HANDLED;
         }
         String resourceType = resource.getResourceType();
+        if (Boolean.TRUE.equals(blacklistedResourceType.getIfPresent(resourceType) != null)) {
+            return PluginResult.NOT_HANDLED;
+        }
+
         if (allowedResourceTypePattern != null && allowedResourceTypePattern.matcher(resourceType).matches()) {
             if (deniedResourceTypePattern == null || deniedResourceTypePattern.matcher(resourceType).matches()) {
                 LOG.debug("Resourcetype {} denied", resourceType);
                 return PluginResult.NOT_HANDLED;
             }
             LOG.debug("Resourcetype {} allowed", resourceType);
+
             try {
                 String html = renderedAsHTML(resource, request, response);
                 String markdown = service.getMarkdown(html);
@@ -87,11 +101,31 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
                 }
                 return PluginResult.HANDLED_ALL;
             } catch (ServletException | IOException | RuntimeException e) {
+                if (isBecauseOfUnsupportedOperation(e)) {
+                    LOG.warn("Blacklisting because of using unsupported operations: resource type {}", resource.getResourceType());
+                    blacklistedResourceType.put(resourceType, true);
+                    return PluginResult.NOT_HANDLED;
+                }
                 LOG.error("Error rendering resource {} with resource type {}", resource.getPath(), resource.getResourceType(), e);
                 return PluginResult.NOT_HANDLED;
             }
         }
         return PluginResult.NOT_HANDLED;
+    }
+
+    protected boolean isBecauseOfUnsupportedOperation(Throwable e) {
+        if (e instanceof UnsupportedOperationCalled) {
+            return true;
+        }
+        if (e.getCause() != null && e.getCause() != e && isBecauseOfUnsupportedOperation(e.getCause())) {
+            return true;
+        }
+        for (Throwable throwable : e.getSuppressed()) {
+            if (throwable != e && isBecauseOfUnsupportedOperation(throwable)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -118,8 +152,11 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         StringBuilderWriter writer = new StringBuilderWriter();
         try (PrintWriter printWriter = new PrintWriter(writer)) {
             SlingHttpServletResponse wrappedResponse = new CapturingResponse(response, printWriter, resource.getPath());
-            SlingHttpServletRequest wrappedRequest = new NonModifyingRequestWrapper(request, resource.getPath());
+            NonModifyingRequestWrapper wrappedRequest = new NonModifyingRequestWrapper(request, resource.getPath());
             request.getRequestDispatcher(resource.getPath() + ".html").include(wrappedRequest, wrappedResponse);
+            if (wrappedRequest.hadInvalidOperation) { // if that exception has been swallowed
+                throw new UnsupportedOperationCalled();
+            }
         }
         return writer.toString();
     }
@@ -282,6 +319,8 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
 
         private final String debuginfo;
 
+        protected boolean hadInvalidOperation;
+
         /**
          * Either Object[0] for a removed attribute or new Object{attributevalue} for changed object.
          */
@@ -292,9 +331,10 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             this.debuginfo = debuginfo;
         }
 
-        protected UnsupportedOperationException logAndThrow(String error) {
+        protected UnsupportedOperationCalled logAndThrow(String error) {
             LOG.warn("Unsupported method called for {} : {}", debuginfo, error);
-            throw new UnsupportedOperationException(error);
+            hadInvalidOperation = true;
+            throw new UnsupportedOperationCalled();
         }
 
         // Methods we think are too dangerous to use since they might modify the request, so we mostly throw an exception.
@@ -353,20 +393,20 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         }
 
         @Override
-        public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+        public void setCharacterEncoding(String env) {
             LOG.debug("ignoring NonModifyingRequestWrapper.setCharacterEncoding {}", env);
             // ignore, though somewhat doubtfully
         }
 
         @Override
         public void setAttribute(String name, Object o) {
-            LOG.debug("emulating NonModifyingRequestWrapper.setAttribute {} for {}", name, debuginfo);
+            LOG.trace("emulating NonModifyingRequestWrapper.setAttribute {} for {}", name, debuginfo);
             changedAttributes.put(name, new Object[]{o});
         }
 
         @Override
         public void removeAttribute(String name) {
-            LOG.debug("emulating NonModifyingRequestWrapper.removeAttribute {} for {}", name, debuginfo);
+            LOG.trace("emulating NonModifyingRequestWrapper.removeAttribute {} for {}", name, debuginfo);
             changedAttributes.put(name, new Object[0]);
         }
 
@@ -397,5 +437,18 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         public AsyncContext getAsyncContext() {
             throw logAndThrow("Not implemented: NonModifyingRequestWrapper.getAsyncContext");
         }
+
+        @Override
+        public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+            throw logAndThrow("Not implemented: NonModifyingRequestWrapper.adaptTo " + type);
+        }
+
+    }
+
+    /**
+     * Thrown when unsupported operation was called that requires blacklisting.
+     */
+    protected static class UnsupportedOperationCalled extends RuntimeException {
+        // empty
     }
 }
