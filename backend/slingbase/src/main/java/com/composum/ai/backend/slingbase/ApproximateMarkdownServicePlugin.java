@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
 /**
@@ -33,7 +35,9 @@ public interface ApproximateMarkdownServicePlugin {
      * @return what is already handled by this plugin. It is possible to write to the PrintWriter in any case.
      */
     @Nonnull
-    PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service);
+    PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out,
+                             @Nonnull ApproximateMarkdownService service,
+                             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response);
 
     /**
      * Returns true when the sling:resourceType or one of the sling:resourceSuperType of the sling:resourceType match the pattern.

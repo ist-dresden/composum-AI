@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -19,6 +21,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.mockito.Mockito;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.impl.ApproximateMarkdownServiceImpl;
@@ -30,6 +33,8 @@ public class ComposumApproximateMarkdownServicePluginTest {
 
     private ApproximateMarkdownServiceImpl.Config config;
     private ApproximateMarkdownServiceImpl service;
+    private SlingHttpServletRequest request = Mockito.mock(SlingHttpServletRequest.class);
+    private SlingHttpServletResponse response = Mockito.mock(SlingHttpServletResponse.class);
     private Resource component;
     private StringWriter writer;
     private PrintWriter printWriter;
@@ -62,7 +67,7 @@ public class ComposumApproximateMarkdownServicePluginTest {
     @Test
     public void testTableHandlingWithNonTableResource() {
         component = createMockResource("not/table", new HashMap<>());
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         assertEquals("", writer.toString());
     }
 
@@ -77,7 +82,7 @@ public class ComposumApproximateMarkdownServicePluginTest {
         row2Builder.resource("r2c1", "sling:resourceType", "composum/pages/components/composed/table/cell", "text", "r2c1");
         row2Builder.resource("r2c2", "sling:resourceType", "composum/pages/components/composed/table/cell", "text", "r2c2");
 
-        service.approximateMarkdown(table, printWriter);
+        service.approximateMarkdown(table, printWriter, request, response);
         String expectedOutput = "#### Test Table\n\n" +
                 "| r1c1 | r1c2 |  |\n" +
                 "| r2c1 | r2c2 |  |\n" +
@@ -88,7 +93,7 @@ public class ComposumApproximateMarkdownServicePluginTest {
     @Test
     public void testPageHandlingWithNonPageResource() {
         component = createMockResource("not/page", new HashMap<>());
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         assertEquals("", writer.toString());
     }
 
@@ -98,7 +103,7 @@ public class ComposumApproximateMarkdownServicePluginTest {
                 "jcr:description", "The best page!",
                 "category", "test, dummy"));
 
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "# myPage\n\n" +
                 "The best page!\n";
         assertEquals(expectedOutput, writer.toString());

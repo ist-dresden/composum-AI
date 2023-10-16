@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
 /**
@@ -17,10 +19,13 @@ public interface ApproximateMarkdownService {
      * That is rather heuristically - it cannot faithfully represent the page, but will probably be enough to generate summaries, keywords and so forth.
      *
      * @param resource the resource to render to markdown. Caution: if this is not the content resource of a page but the cpp:Page, the markdown will contain all subpages as well!
+     * @param request
+     * @param response
      * @return the markdown representation
      */
     @Nonnull
-    String approximateMarkdown(@Nullable Resource resource);
+    String approximateMarkdown(@Nullable Resource resource,
+                               @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response);
 
     /**
      * Generates a text formatted with markdown that heuristically represents the text content of a page or resource, mainly for use with the AI.
@@ -28,8 +33,11 @@ public interface ApproximateMarkdownService {
      *
      * @param resource the resource to render to markdown. Caution: if this is not the content resource of a page but the cpp:Page, the markdown will contain all subpages as well!
      * @param out      destination where the markdown rendering will be written.
+     * @param request
+     * @param response
      */
-    void approximateMarkdown(@Nullable Resource resource, PrintWriter out);
+    void approximateMarkdown(@Nullable Resource resource, @Nonnull PrintWriter out,
+                             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response);
 
     /**
      * Returns a markdown representation of an attribute value, which might be plain text or HTML. We determine whether

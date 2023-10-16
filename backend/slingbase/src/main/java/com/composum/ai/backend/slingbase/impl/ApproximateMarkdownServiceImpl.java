@@ -19,6 +19,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Activate;
@@ -35,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
-import com.composum.ai.backend.slingbase.AllowDenyMatcherUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 
@@ -113,10 +114,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     @Nonnull
     @Override
-    public String approximateMarkdown(@Nullable Resource resource) {
+    public String approximateMarkdown(@Nullable Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response) {
         try (StringWriter s = new StringWriter()) {
             try (PrintWriter out = new PrintWriter(s)) {
-                approximateMarkdown(resource, out);
+                approximateMarkdown(resource, out, request, response);
             }
             return s.toString();
         } catch (IOException e) {
@@ -126,7 +127,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     }
 
     @Override
-    public void approximateMarkdown(@Nullable Resource resource, @Nonnull PrintWriter out) {
+    public void approximateMarkdown(
+            @Nullable Resource resource, @Nonnull PrintWriter out,
+            @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         if (resource == null || IGNORED_NODE_NAMES.matcher(resource.getName()).matches()) {
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
             // TODO(hps,26.05.23) this might lead to trouble if the user edits a non-default language first. Join with translations?
@@ -139,7 +142,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (!resource.getPath().contains("/jcr:content") && resource.getChild("jcr:content") != null) {
             resource = resource.getChild("jcr:content");
         }
-        ApproximateMarkdownServicePlugin.PluginResult pluginResult = executePlugins(resource, out);
+        ApproximateMarkdownServicePlugin.PluginResult pluginResult = executePlugins(resource, out, request, response);
         boolean printEmptyLine = false;
         if (pluginResult == NOT_HANDLED) {
             for (String attributename : textAttributes) {
@@ -165,15 +168,18 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             out.println();
         }
         if (pluginResult == NOT_HANDLED || pluginResult == ApproximateMarkdownServicePlugin.PluginResult.HANDLED_ATTRIBUTES) {
-            resource.getChildren().forEach(child -> approximateMarkdown(child, out));
+            resource.getChildren().forEach(child -> approximateMarkdown(child, out, request, response));
         }
         logUnhandledAttributes(resource);
     }
 
     @Nonnull
-    protected ApproximateMarkdownServicePlugin.PluginResult executePlugins(@Nonnull Resource resource, @Nonnull PrintWriter out) {
+    protected ApproximateMarkdownServicePlugin.PluginResult executePlugins(
+            @Nonnull Resource resource, @Nonnull PrintWriter out,
+            @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         for (ApproximateMarkdownServicePlugin plugin : plugins) {
-            ApproximateMarkdownServicePlugin.PluginResult pluginResult = plugin.maybeHandle(resource, out, this);
+            ApproximateMarkdownServicePlugin.PluginResult pluginResult =
+                    plugin.maybeHandle(resource, out, this, request, response);
             if (pluginResult != null && pluginResult != NOT_HANDLED) {
                 return pluginResult;
             }

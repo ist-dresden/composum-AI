@@ -16,6 +16,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Component;
@@ -47,14 +49,18 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     protected static final Pattern CONTENTFRAGMENT_TYPES = Pattern.compile("core/wcm/components/contentfragment/v./contentfragment");
 
     @Override
-    public @Nonnull PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out, @Nonnull ApproximateMarkdownService service) {
+    public @Nonnull PluginResult maybeHandle(
+            @Nonnull Resource resource, @Nonnull PrintWriter out,
+            @Nonnull ApproximateMarkdownService service,
+            @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         if (resourceRendersAsComponentMatching(resource, FULLY_IGNORED_TYPES)) {
             return PluginResult.HANDLED_ALL;
         }
         if (pageHandling(resource, out, service)) {
             return PluginResult.HANDLED_ATTRIBUTES;
         }
-        if (handleTeaser(resource, out, service) || handleExperienceFragment(resource, out, service) || handleContentFragment(resource, out, service)) {
+        if (handleTeaser(resource, out, service) || handleExperienceFragment(resource, out, service, request, response)
+                || handleContentFragment(resource, out, service)) {
             return PluginResult.HANDLED_ALL;
         }
         return PluginResult.NOT_HANDLED;
@@ -153,7 +159,8 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
      *
      * @see "https://github.com/adobe/aem-core-wcm-components/blob/main/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v2/experiencefragment/README.md"
      */
-    protected boolean handleExperienceFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
+    protected boolean handleExperienceFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service,
+                                               SlingHttpServletRequest request, SlingHttpServletResponse response) {
         if (resourceRendersAsComponentMatching(resource, EXPERIENCEFRAGMENT_TYPES)) {
             String reference = resource.getValueMap().get("fragmentVariationPath", String.class);
             if (StringUtils.startsWith(reference, "/content/")) {
@@ -165,7 +172,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                             referencedResource = referencedResource.getChild("root");
                         }
                     }
-                    service.approximateMarkdown(referencedResource, out);
+                    service.approximateMarkdown(referencedResource, out, request, response);
                 } else {
                     LOG.warn("Resource {} referenced from {} attribute {} not found.", reference, resource.getPath(), "fragmentVariationPath");
                 }
@@ -202,7 +209,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         return false;
     }
 
-    private void renderReferencedContentFragment(Resource resource, PrintWriter out, ApproximateMarkdownService service, Resource referencedResource, String variation, String reference, String[] elementNames) {
+    private void renderReferencedContentFragment(
+            Resource resource, PrintWriter out, ApproximateMarkdownService service,
+            Resource referencedResource, String variation, String reference, String[] elementNames) {
         Resource dataNode = referencedResource.getChild("jcr:content/data");
         String title = referencedResource.getValueMap().get("jcr:content/jcr:title", String.class);
         if (StringUtils.isNotBlank(title)) {

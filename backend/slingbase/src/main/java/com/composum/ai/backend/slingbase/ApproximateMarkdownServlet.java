@@ -62,11 +62,11 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         if (Boolean.TRUE.toString().equalsIgnoreCase(richtext)) {
             response.setContentType("text/html");
             StringBuilderWriter writer = new StringBuilderWriter();
-            approximateMarkdownService.approximateMarkdown(resource, new PrintWriter(writer));
+            approximateMarkdownService.approximateMarkdown(resource, new PrintWriter(writer), request, response);
             response.getWriter().write(chatService.markdownToHtml(writer.toString()));
         } else {
             response.setContentType("text/plain");
-            approximateMarkdownService.approximateMarkdown(resource, response.getWriter());
+            approximateMarkdownService.approximateMarkdown(resource, response.getWriter(), request, response);
         }
     }
 
