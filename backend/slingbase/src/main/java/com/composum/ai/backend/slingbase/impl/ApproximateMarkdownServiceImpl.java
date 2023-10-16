@@ -1,5 +1,6 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import static com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult.HANDLED_ATTRIBUTES;
 import static com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult.NOT_HANDLED;
 import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.allowDenyCheck;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult;
 
 /**
  * Implementation for {@link ApproximateMarkdownService}.
@@ -142,7 +144,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (!resource.getPath().contains("/jcr:content") && resource.getChild("jcr:content") != null) {
             resource = resource.getChild("jcr:content");
         }
-        ApproximateMarkdownServicePlugin.PluginResult pluginResult = executePlugins(resource, out, request, response);
+        PluginResult pluginResult = executePlugins(resource, out, request, response);
         boolean printEmptyLine = false;
         if (pluginResult == NOT_HANDLED) {
             for (String attributename : textAttributes) {
@@ -167,18 +169,18 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (printEmptyLine) {
             out.println();
         }
-        if (pluginResult == NOT_HANDLED || pluginResult == ApproximateMarkdownServicePlugin.PluginResult.HANDLED_ATTRIBUTES) {
+        if (pluginResult == NOT_HANDLED || pluginResult == HANDLED_ATTRIBUTES) {
             resource.getChildren().forEach(child -> approximateMarkdown(child, out, request, response));
         }
         logUnhandledAttributes(resource);
     }
 
     @Nonnull
-    protected ApproximateMarkdownServicePlugin.PluginResult executePlugins(
+    protected PluginResult executePlugins(
             @Nonnull Resource resource, @Nonnull PrintWriter out,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         for (ApproximateMarkdownServicePlugin plugin : plugins) {
-            ApproximateMarkdownServicePlugin.PluginResult pluginResult =
+            PluginResult pluginResult =
                     plugin.maybeHandle(resource, out, this, request, response);
             if (pluginResult != null && pluginResult != NOT_HANDLED) {
                 return pluginResult;
@@ -312,7 +314,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     // debugging code; remove after it works.
 
-    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(ext|a|sly|strong|code|em|language|type|p|br|div|path|u|ul|attributes|li|ol)(\\s+[^>]*)?>", Pattern.CASE_INSENSITIVE);
+    protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(ext|a|sly|strong|code|em|language|type|p|br|div|path|u|ul|attributes|li|ol|h[1-6]|b|i)(\\s+[^>]*)?>", Pattern.CASE_INSENSITIVE);
 
     protected final Set<String> htmltags = new HashSet<>();
 

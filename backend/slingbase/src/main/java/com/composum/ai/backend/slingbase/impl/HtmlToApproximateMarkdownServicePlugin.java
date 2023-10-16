@@ -3,7 +3,9 @@ package com.composum.ai.backend.slingbase.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -24,6 +26,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.SlingHttpServletResponseWrapper;
 import org.jetbrains.annotations.NotNull;
@@ -63,6 +66,9 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             @NotNull Resource resource, @NotNull PrintWriter out,
             @NotNull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (isIgnoredNode(resource)) {
+            return PluginResult.NOT_HANDLED;
+        }
         String resourceType = resource.getResourceType();
         if (allowedResourceTypePattern != null && allowedResourceTypePattern.matcher(resourceType).matches()) {
             if (deniedResourceTypePattern == null || deniedResourceTypePattern.matcher(resourceType).matches()) {
@@ -74,19 +80,34 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
                 String html = renderedAsHTML(resource, request, response);
                 String markdown = service.getMarkdown(html);
                 if (StringUtils.isBlank(markdown)) {
-                    LOG.debug("No markdown generated for {} with resoure type {}", resource.getPath(), resource.getResourceType());
+                    LOG.debug("No markdown generated for {} with resource type {}", resource.getPath(), resource.getResourceType());
                 } else {
-                    LOG.debug("Markdown generated for {} with resoure type {}:\n{}", resource.getPath(), resource.getResourceType(), markdown);
+                    LOG.debug("Markdown generated for {} with resource type {}:\n{}", resource.getPath(), resource.getResourceType(), markdown);
                     out.println(markdown);
                 }
                 return PluginResult.HANDLED_ALL;
             } catch (ServletException | IOException | RuntimeException e) {
-                LOG.error("Error rendering resource {} with resoure type {}", resource.getPath(), resource.getResourceType(), e);
+                LOG.error("Error rendering resource {} with resource type {}", resource.getPath(), resource.getResourceType(), e);
                 return PluginResult.NOT_HANDLED;
             }
         }
         return PluginResult.NOT_HANDLED;
     }
+
+    /**
+     * We start with depth 3 since the higher nodes often contain headers, navigation and such that don't help for ChatGPT.
+     */
+    protected boolean isIgnoredNode(@Nonnull Resource resource) {
+        if (ResourceUtil.getParent(resource.getPath(), 2) == null) {
+            return true;
+        }
+        if (resource.getName().equals("jcr:content") || resource.getParent().getName().equals("jcr:content")
+                || resource.getParent().getParent().getName().equals("jcr:content")) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * We render the resource into a mock response and capture and return the generated HTML.
@@ -98,7 +119,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         try (PrintWriter printWriter = new PrintWriter(writer)) {
             SlingHttpServletResponse wrappedResponse = new CapturingResponse(response, printWriter, resource.getPath());
             SlingHttpServletRequest wrappedRequest = new NonModifyingRequestWrapper(request, resource.getPath());
-            request.getRequestDispatcher(resource.getPath()).include(wrappedRequest, wrappedResponse);
+            request.getRequestDispatcher(resource.getPath() + ".html").include(wrappedRequest, wrappedResponse);
         }
         return writer.toString();
     }
@@ -118,7 +139,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         this.deniedResourceTypePattern = null;
     }
 
-    @ObjectClassDefinition(name = "Composum AI Html To Approximate Markdown Service Plugin", description = "A plugin for the ApproximateMarkdownService that transforms the rendered HTML of components to markdown, which can work better than trying to guess the text content from the JCR representation (as is the default) but probably doesn't work for all components. So it can be enabled for some sling resource types by regex.")
+    @ObjectClassDefinition(name = "Composum AI Html To Approximate Markdown Service Plugin", description = "A plugin for the ApproximateMarkdownService that transforms the rendered HTML of components to markdown, which can work better than trying to guess the text content from the JCR representation (as is the default) but probably doesn't work for all components. So it can be enabled for some sling resource types by regex. We will not use this for the first two levels below the page, as that could include unwanted stuff like headers and footers.")
     protected @interface Config {
 
         @AttributeDefinition(name = "Allowed resource types", description = "Regular expressions for allowed resource types. If not present, no resource types are allowed.") String[] allowedResourceTypes() default {".*"};
@@ -258,7 +279,13 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
      * Wraps the request to make sure nothing is modified.
      */
     protected static class NonModifyingRequestWrapper extends SlingHttpServletRequestWrapper {
+
         private final String debuginfo;
+
+        /**
+         * Either Object[0] for a removed attribute or new Object{attributevalue} for changed object.
+         */
+        private Map<String, Object[]> changedAttributes = new HashMap<>();
 
         public NonModifyingRequestWrapper(SlingHttpServletRequest wrappedRequest, String debuginfo) {
             super(wrappedRequest);
@@ -327,19 +354,33 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
 
         @Override
         public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
-            // ignore
+            LOG.debug("ignoring NonModifyingRequestWrapper.setCharacterEncoding {}", env);
+            // ignore, though somewhat doubtfully
         }
 
         @Override
         public void setAttribute(String name, Object o) {
-            LOG.debug("NonModifyingRequestWrapper.setAttribute {} for {}", name, debuginfo);
-            // ignore
+            LOG.debug("emulating NonModifyingRequestWrapper.setAttribute {} for {}", name, debuginfo);
+            changedAttributes.put(name, new Object[]{o});
         }
 
         @Override
         public void removeAttribute(String name) {
-            LOG.debug("NonModifyingRequestWrapper.removeAttribute {} for {}", name, debuginfo);
-            // ignore
+            LOG.debug("emulating NonModifyingRequestWrapper.removeAttribute {} for {}", name, debuginfo);
+            changedAttributes.put(name, new Object[0]);
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            Object[] change = changedAttributes.get(name);
+            if (change != null) {
+                if (change.length == 0) {
+                    return null;
+                } else {
+                    return change[0];
+                }
+            }
+            return super.getAttribute(name);
         }
 
         @Override
