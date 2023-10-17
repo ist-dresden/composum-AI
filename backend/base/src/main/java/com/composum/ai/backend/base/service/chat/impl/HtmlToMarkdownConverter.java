@@ -3,6 +3,7 @@ package com.composum.ai.backend.base.service.chat.impl;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -30,9 +31,11 @@ public class HtmlToMarkdownConverter {
     private static final Map<String, String> HEADER_TAGS = Map.of("h1", "# ", "h2", "## ", "h3",
             "### ", "h4", "#### ", "h5", "##### ", "h6", "###### ");
 
-    private final String indentStep = "    ";
+    // continued indentation. Two spaces since four would be code block
+    private final String indentStep = "  ";
 
-    private String indentation = "";
+    // continued indentation that is inserted before a continuation line
+    private String continuedIndentation = "";
 
     private StringBuilder sb = new StringBuilder();
 
@@ -47,7 +50,7 @@ public class HtmlToMarkdownConverter {
     private void convertNode(Node node) {
         if (node instanceof TextNode) {
             TextNode textNode = (TextNode) node;
-            sb.append(textNode.text());
+            insertText(textNode.text());
         } else if (node instanceof Element) {
             Element element = (Element) node;
             convertElement(element);
@@ -56,14 +59,30 @@ public class HtmlToMarkdownConverter {
         }
     }
 
-    private void convertChildren(Node node) {
+    /**
+     * Split text into lines to add indentation before each line.
+     */
+    protected void insertText(String text) {
+        if (text != null) {
+            String splitText = text.lines()
+                    .map(String::trim)
+                    .collect(Collectors.joining(continuedIndentation + "\n"));
+            sb.append(splitText);
+        }
+    }
+
+    protected void convertChildren(Node node) {
         for (Node child : node.childNodes()) {
             convertNode(child);
         }
     }
 
+    /**
+     * Convention: a block level element has to print a newline before itself, also after itself.
+     */
     private void convertElement(Element element) {
         String tagName = element.tagName().toLowerCase();
+        String oldindentation;
         switch (tagName) {
             case "a":
                 sb.append("[");
@@ -112,42 +131,48 @@ public class HtmlToMarkdownConverter {
                 break;
 
             case "pre": // TODO: a pre code nesting would be wrong.
-                sb.append("```\n");
-                sb.append(element.html());
+                sb.append("\n```\n");
+                sb.append(element.html().replaceAll("\\s+$", ""));
                 sb.append("\n```\n");
                 break;
 
             case "p":
+                sb.append("\n");
                 convertChildren(element);
-                sb.append("\n\n");
+                sb.append("\n");
                 break;
 
             case "br":
                 sb.append("\n");
                 break;
 
-            case "ul": // TODO: list nesting isn't handled properly here.
+            case "ul":
+                oldindentation = continuedIndentation;
+                continuedIndentation += indentStep;
                 for (Element li : element.children()) {
-                    sb.append("- ");
+                    sb.append("\n" + oldindentation + "- ");
                     convertChildren(li);
-                    sb.append("\n");
                 }
                 sb.append("\n");
+                continuedIndentation = oldindentation;
                 break;
 
-            case "ol": // TODO: list nesting isn't handled properly here.
+            case "ol":
+                oldindentation = continuedIndentation;
+                continuedIndentation += indentStep;
                 int i = 1;
                 for (Element li : element.children()) {
+                    sb.append("\n" + oldindentation);
                     sb.append(i++);
                     sb.append(". ");
                     convertChildren(li);
-                    sb.append("\n");
                 }
                 sb.append("\n");
+                continuedIndentation = oldindentation;
                 break;
 
             case "li":
-                throw new UnsupportedOperationException("Bug: li should be handled by ul or ol");
+                throw new UnsupportedOperationException("Bug: li outside of ul or ol");
 
             case "img":
                 sb.append("![");
@@ -170,6 +195,8 @@ public class HtmlToMarkdownConverter {
                 break;
 
             case "hr":
+                sb.append("\n");
+                sb.append(continuedIndentation);
                 sb.append("---\n");
                 break;
 
@@ -189,30 +216,32 @@ public class HtmlToMarkdownConverter {
                 // **term**
                 // definition
                 //
-                sb.append("<dl>\n");
+                oldindentation = continuedIndentation;
+                continuedIndentation += indentStep;
+                sb.append("\n" + oldindentation + "<dl>");
                 convertChildren(element);
-                sb.append("</dl>\n");
+                sb.append("\n" + oldindentation + "</dl>\n");
+                continuedIndentation = oldindentation;
                 break;
 
             case "dt":
-                sb.append("  <dt>");
+                sb.append("\n" + continuedIndentation + "<dt>");
                 convertChildren(element);
-                sb.append("</dt>\n");
+                sb.append("</dt>");
                 break;
 
             case "dd":
-                sb.append("  <dd>");
+                sb.append("\n" + continuedIndentation + "<dd>");
                 convertChildren(element);
-                sb.append("</dd>\n");
+                sb.append("</dd>");
                 break;
 
             case "blockquote":
-                sb.append("> ");
-                String[] lines = element.html().split("\n");
-                for (String line : lines) {
-                    sb.append(line);
-                    sb.append("\n> ");
-                }
+                sb.append("\n");
+                oldindentation = continuedIndentation;
+                continuedIndentation += "> ";
+                sb.append(oldindentation + "> ");
+                convertChildren(element);
                 sb.append("\n");
                 break;
 
@@ -234,7 +263,6 @@ public class HtmlToMarkdownConverter {
                 LOG.warn("Unknown tag {}", tagName);
                 missingTags.add(tagName);
                 LOG.warn("Currently unsupported tags: {}", missingTags);
-                // blockquote, dd, dl, dt, input
                 convertChildren(element);
                 break;
         }

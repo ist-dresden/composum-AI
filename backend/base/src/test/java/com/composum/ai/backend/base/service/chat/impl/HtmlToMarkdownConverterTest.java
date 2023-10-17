@@ -43,14 +43,14 @@ public class HtmlToMarkdownConverterTest {
         // String html = "<pre><code>public static void main(String[] args) {\n System.out.println(\"Hello World!\");\n}</code></pre>";
         String html = "<pre>public static void main(String[] args) {\n System.out.println(\"Hello World!\");\n}</pre>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("```\npublic static void main(String[] args) {\n System.out.println(\"Hello World!\");\n}\n```\n"));
+        ec.checkThat(markdown, is("\n```\npublic static void main(String[] args) {\n System.out.println(\"Hello World!\");\n}\n```\n"));
     }
 
     @Test
     public void testConvertTagP() {
         String html = "<p>This is a paragraph.</p>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("This is a paragraph.\n\n"));
+        ec.checkThat(markdown, is("\nThis is a paragraph.\n"));
     }
 
     @Test
@@ -71,14 +71,14 @@ public class HtmlToMarkdownConverterTest {
     public void testConvertTagUl() {
         String html = "<ul><li>One</li><li>Two</li><li>Three</li></ul>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("- One\n- Two\n- Three\n\n"));
+        ec.checkThat(markdown, is("\n- One\n- Two\n- Three\n"));
     }
 
     @Test
     public void testConvertTagOl() {
         String html = "<ol><li>One</li><li>Two</li><li>Three</li></ol>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("1. One\n2. Two\n3. Three\n\n"));
+        ec.checkThat(markdown, is("\n1. One\n2. Two\n3. Three\n"));
     }
 
     @Test
@@ -183,7 +183,7 @@ public class HtmlToMarkdownConverterTest {
     public void testConvertTagHr() {
         String html = "<hr>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("---\n"));
+        ec.checkThat(markdown, is("\n---\n"));
     }
 
     @Test
@@ -197,14 +197,14 @@ public class HtmlToMarkdownConverterTest {
     public void testConvertTagDlDtDd() {
         String html = "<dl><dt>Term 1</dt><dd>Definition 1</dd><dt>Term 2</dt><dd>Definition 2</dd></dl>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("<dl>\n  <dt>Term 1</dt>\n  <dd>Definition 1</dd>\n  <dt>Term 2</dt>\n  <dd>Definition 2</dd>\n</dl>\n"));
+        ec.checkThat(markdown, is("\n<dl>\n  <dt>Term 1</dt>\n  <dd>Definition 1</dd>\n  <dt>Term 2</dt>\n  <dd>Definition 2</dd>\n</dl>\n"));
     }
 
     @Test
     public void testConvertTagBlockquote() {
         String html = "<blockquote>This is a blockquote.</blockquote>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("> This is a blockquote.\n> \n"));
+        ec.checkThat(markdown, is("\n> This is a blockquote.\n"));
     }
 
 }
