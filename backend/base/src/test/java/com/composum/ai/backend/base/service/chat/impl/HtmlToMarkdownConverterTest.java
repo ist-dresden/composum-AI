@@ -18,9 +18,12 @@ public class HtmlToMarkdownConverterTest {
 
     @Test
     public void testConvertTagA() {
-        String html = "<a href=\"http://example.com\">click here</a>";
-        String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("[click here](http://example.com)"));
+        ec.checkThat(converter.convert("<a href=\"http://example.com\">click here</a>"),
+                is("[click here](http://example.com)"));
+
+        // alt text
+        ec.checkThat(converter.convert("<a href=\"http://example.com\" alt=\"An example link\">click here</a>"),
+                is("[click here](http://example.com \"An example link\")"));
     }
 
     @Test

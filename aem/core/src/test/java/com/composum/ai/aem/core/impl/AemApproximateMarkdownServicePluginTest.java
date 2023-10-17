@@ -86,7 +86,7 @@ public class AemApproximateMarkdownServicePluginTest {
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput =
                 "# myPage\n\n" +
-                        "The best page!\n";
+                        "The best page!\n\n";
         assertThat(writer.toString(), is(expectedOutput));
     }
 

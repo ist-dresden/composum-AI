@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.jsoup.Jsoup;
+import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -38,7 +39,8 @@ public class HtmlToMarkdownConverter {
     /**
      * Important table attributes we need to keep.
      */
-    private static final List<String> TABLE_ATTRIBUTES = List.of("border", "colspan", "rowspan", "align", "valign", "scope");
+    private static final List<String> TABLE_ATTRIBUTES = List.of("border", "colspan", "rowspan",
+            "align", "valign", "scope", "cellpadding", "cellspacing", "width", "height", "bgcolor");
 
     // continued indentation. Two spaces since four would be code block
     private final String indentStep = "  ";
@@ -50,6 +52,8 @@ public class HtmlToMarkdownConverter {
 
     @Nonnull
     public String convert(@Nullable String html) {
+        sb.setLength(0);
+        continuedIndentation = "";
         if (html != null) {
             Document doc = Jsoup.parseBodyFragment(html);
             convertElement(doc.body());
@@ -102,6 +106,15 @@ public class HtmlToMarkdownConverter {
                 convertChildren(element);
                 sb.append("](");
                 sb.append(element.attr("href"));
+                String title = element.attr("title");
+                if (StringUtil.isBlank(title)) {
+                    title = element.attr("alt");
+                }
+                if (!StringUtil.isBlank(title)) {
+                    sb.append(" \"");
+                    sb.append(title.replaceAll("\"", "\\\""));
+                    sb.append("\"");
+                }
                 sb.append(")");
                 break;
 

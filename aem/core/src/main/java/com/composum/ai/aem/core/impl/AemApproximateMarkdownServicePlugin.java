@@ -88,6 +88,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             }
             outputIfNotBlank(out, vm, "shortDescription", service);
             outputIfNotBlank(out, vm, JCR_DESCRIPTION, service);
+            out.println();
         }
         return isPage;
     }

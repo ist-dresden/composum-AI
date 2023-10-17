@@ -69,6 +69,7 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
             if (StringUtils.isNotBlank(description)) {
                 out.println(helper.getMarkdown(description));
             }
+            out.println();
         }
         return isPage;
     }
