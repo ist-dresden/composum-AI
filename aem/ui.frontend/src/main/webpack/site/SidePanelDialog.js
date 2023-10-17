@@ -4,8 +4,6 @@ import {AICreate} from './AICreate.js';
 import {contentFragmentPath, errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 
-const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
-
 /** Keeps dialog histories per path. */
 const historyMap = {};
 

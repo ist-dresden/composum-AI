@@ -28,24 +28,21 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
  * The Sling way would be to create markdown.jsp for each component, but that would be quite an effort with all existing
  * Pages components, and since the markdown representation is only for retrieving text for suggesting keywords and
  * summarizing, keywording etc. we just go with a simple approach for now, which just might be good enough.
+ * There can be plugins for the markdown conversion: see {@link ApproximateMarkdownServicePlugin}.
+ * Can also be used to get the result as richtext by giving a .html suffix instead of .md.
  */
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Approximated Markdown Servlet",
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/approximated.markdown",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/approximated",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })
-// curl -u admin:admin http://localhost:9090/bin/cpm/ai/approximated.markdown.md/content/ist/composum/home/platform/_jcr_content
-// http://localhost:4502/bin/cpm/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
+// curl -u admin:admin http://localhost:9090/bin/cpm/ai/approximated.md/content/ist/composum/home/platform/_jcr_content
+// http://localhost:4502/bin/cpm/ai/approximated.md/content/wknd/us/en/magazine/_jcr_content
 public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);
 
-    /**
-     * If given, the servlet returns simple HTML, as a richtext editor would give, instead.
-     */
-    // TODO: integrate that into the ApproximateMarkdownService as we convert to markdown and then back th HTML for richtext, but no time ATM.
-    public static final String PARAM_RICHTEXT = "richtext";
 
     @Reference
     ApproximateMarkdownService approximateMarkdownService;
@@ -57,12 +54,13 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         RequestPathInfo info = request.getRequestPathInfo();
         String path = info.getSuffix();
-        String richtext = request.getParameter(PARAM_RICHTEXT);
+        boolean richtext = "html".equalsIgnoreCase(info.getExtension()) || "htm".equalsIgnoreCase(info.getExtension());
         Resource resource = request.getResourceResolver().getResource(path);
-        if (Boolean.TRUE.toString().equalsIgnoreCase(richtext)) {
+        if (richtext) {
             response.setContentType("text/html");
             StringBuilderWriter writer = new StringBuilderWriter();
             approximateMarkdownService.approximateMarkdown(resource, new PrintWriter(writer), request, response);
+            // TODO: integrate that into the ApproximateMarkdownService as we convert to markdown and then back th HTML for richtext, but no time ATM.
             response.getWriter().write(chatService.markdownToHtml(writer.toString()));
         } else {
             response.setContentType("text/plain");

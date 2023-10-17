@@ -32,6 +32,7 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.SlingHttpServletResponseWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -56,7 +57,9 @@ import com.google.common.cache.CacheBuilder;
  * trying to guess it from the JCR representation, as is the default.
  */
 @Designate(ocd = HtmlToApproximateMarkdownServicePlugin.Config.class)
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = Constants.SERVICE_RANKING + ":Integer=-1000"
+)
 public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(HtmlToApproximateMarkdownServicePlugin.class);
