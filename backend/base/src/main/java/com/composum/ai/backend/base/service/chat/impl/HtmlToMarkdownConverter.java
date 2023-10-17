@@ -1,5 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -33,6 +34,11 @@ public class HtmlToMarkdownConverter {
 
     private static final Map<String, String> HEADER_TAGS = Map.of("h1", "# ", "h2", "## ", "h3",
             "### ", "h4", "#### ", "h5", "##### ", "h6", "###### ");
+
+    /**
+     * Important table attributes we need to keep.
+     */
+    private static final List<String> TABLE_ATTRIBUTES = List.of("border", "colspan", "rowspan", "align", "valign", "scope");
 
     // continued indentation. Two spaces since four would be code block
     private final String indentStep = "  ";
@@ -253,7 +259,7 @@ public class HtmlToMarkdownConverter {
             case "ins":
             case "sub":
             case "sup":
-                // use HTML syntax
+                // use embedded HTML syntax
                 sb.append("<").append(tagName).append(">");
                 convertChildren(element);
                 sb.append("</").append(tagName).append(">");
@@ -272,6 +278,27 @@ public class HtmlToMarkdownConverter {
             case "meta":
             case "nav":
                 // ignore the content, too
+                break;
+
+            // rudimentary support for tables
+            case "table":
+            case "thead":
+            case "tbody":
+            case "tfoot":
+            case "tr":
+            case "td":
+            case "th":
+                // use embedded HTML syntax
+                sb.append("<").append(tagName);
+                for (String attr : TABLE_ATTRIBUTES) {
+                    String value = element.attr(attr);
+                    if (!value.isBlank()) {
+                        sb.append(" ").append(attr).append("=\"").append(value).append("\"");
+                    }
+                }
+                sb.append(">");
+                convertChildren(element);
+                sb.append("</").append(tagName).append(">");
                 break;
 
             default:

@@ -2,7 +2,6 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -303,5 +302,50 @@ public class HtmlToMarkdownConverterTest {
         ec.checkThat(converter.sb.toString(), is("xabcd"));
     }
 
+    @Test
+    public void testTable1() {
+        String html = "<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></table>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<table><tbody><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></tbody></table>"));
+    }
+
+    @Test
+    public void testTable2() {
+        String html = "<table border=\"1\">\n" +
+                "    <thead>\n" +
+                "        <tr>\n" +
+                "            <th scope=\"col\">Header 1</th>\n" +
+                "            <th scope=\"col\">Header 2</th>\n" +
+                "            <th scope=\"col\" colspan=\"2\">Header 3 (spanning two columns)</th>\n" +
+                "        </tr>\n" +
+                "    </thead>\n" +
+                "    <tbody valign=\"top\">\n" +
+                "        <tr>\n" +
+                "            <td align=\"left\" rowspan=\"2\">Data 1 (spans two rows)</td>\n" +
+                "            <td align=\"center\">Data 2</td>\n" +
+                "            <td align=\"right\">Data 3.1</td>\n" +
+                "            <td align=\"left\">Data 3.2</td>\n" +
+                "        </tr>\n" +
+                "        <tr>\n" +
+                "            <th scope=\"row\">Row Header</th>\n" +
+                "            <td colspan=\"2\" align=\"center\">Data 4 (spans two columns)</td>\n" +
+                "        </tr>\n" +
+                "    </tbody>\n" +
+                "    <tfoot>\n" +
+                "        <tr>\n" +
+                "            <td colspan=\"4\" align=\"center\">Footer spanning all columns</td>\n" +
+                "        </tr>\n" +
+                "    </tfoot>\n" +
+                "</table>\n";
+        String markdown = converter.convert(html);
+        System.out.println(markdown);
+        ec.checkThat(markdown, is("<table border=\"1\"> " +
+                "<thead> <tr> <th scope=\"col\">Header 1</th> <th scope=\"col\">Header 2</th> <th colspan=\"2\" scope=\"col\">Header 3 (spanning two columns)</th> </tr> </thead> " +
+                "<tbody valign=\"top\"> " +
+                "<tr> <td rowspan=\"2\" align=\"left\">Data 1 (spans two rows)</td> <td align=\"center\">Data 2</td> <td align=\"right\">Data 3.1</td> <td align=\"left\">Data 3.2</td> </tr> " +
+                "<tr> <th scope=\"row\">Row Header</th> <td colspan=\"2\" align=\"center\">Data 4 (spans two columns)</td> </tr> " +
+                "</tbody> " +
+                "<tfoot> <tr> <td colspan=\"4\" align=\"center\">Footer spanning all columns</td> </tr> </tfoot> </table> "));
+    }
 
 }
