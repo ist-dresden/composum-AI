@@ -1,5 +1,3 @@
-
-
 //== Move the create dialog icon a bit to the right to avoid overlapping with the help icon.
 //== we make that horribly specific to override the default coral style there
 
@@ -9,4 +7,28 @@
 
 #composumAI-sidebar-panel .composum-ai-response {
     white-space: break-spaces;
+}
+
+.composum-ai-dialog .composum-ai-prompt-columns {
+
+    .coral-FixedColumn-column {
+        width: auto;
+        flex: 1;
+    }
+
+    .coral-Form-fieldset .coral-Form-fieldset-legend {
+        margin-top: 0;
+    }
+
+    .coral-Form-fieldset {
+        margin-bottom: 0;
+    }
+
+}
+
+.cq-Dialog:not([fullscreen]) .composum-ai-dialog .composum-ai-prompt-columns {
+    .cq-RichText-editable {
+        height: 11.5rem;
+    }
+
 }

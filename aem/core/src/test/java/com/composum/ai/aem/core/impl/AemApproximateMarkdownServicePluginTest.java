@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
@@ -16,12 +17,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.impl.ApproximateMarkdownServiceImpl;
@@ -37,21 +41,28 @@ import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 public class AemApproximateMarkdownServicePluginTest {
 
     private ApproximateMarkdownServiceImpl service;
+    private SlingHttpServletRequest request = Mockito.mock(SlingHttpServletRequest.class);
+    private SlingHttpServletResponse response = Mockito.mock(SlingHttpServletResponse.class);
     private Resource component;
     private StringWriter writer;
     private PrintWriter printWriter;
 
     private AemContext context;
+    private ApproximateMarkdownServiceImpl.Config config;
 
     @BeforeEach
     public void setUp() {
         context = new AemContext(ResourceResolverType.JCR_MOCK);
+        config = mock(ApproximateMarkdownServiceImpl.Config.class,
+                withSettings().defaultAnswer(invocation -> invocation.getMethod().getDefaultValue()));
+        when(config.labelledAttributeOrder()).thenReturn(new String[]{"thefirst", "asecond"});
         service = new ApproximateMarkdownServiceImpl() {
             {
                 chatCompletionService = mock(GPTChatCompletionService.class);
                 plugins = Collections.singletonList(new AemApproximateMarkdownServicePlugin());
                 when(chatCompletionService.htmlToMarkdown(anyString()))
                         .then(invocation -> "markdownOf(" + invocation.getArgument(0) + ")");
+                this.activate(config);
             }
         };
         writer = new StringWriter();
@@ -61,7 +72,7 @@ public class AemApproximateMarkdownServicePluginTest {
     @Test
     public void testPageHandlingWithNonPageResource() {
         component = createMockResource("not/page", new HashMap<>());
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         assertEquals("", writer.toString());
     }
 
@@ -72,10 +83,10 @@ public class AemApproximateMarkdownServicePluginTest {
                         "jcr:description", "The best page!",
                         "category", "test, dummy"));
 
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput =
                 "# myPage\n\n" +
-                        "The best page!\n";
+                        "The best page!\n\n";
         assertThat(writer.toString(), is(expectedOutput));
     }
 
@@ -117,7 +128,7 @@ public class AemApproximateMarkdownServicePluginTest {
                 "    \"sling:resourceType\": \"wknd/components/page\"\n" +
                 "  }\n" +
                 "}");
-        service.approximateMarkdown(teaser, printWriter);
+        service.approximateMarkdown(teaser, printWriter, request, response);
         String expectedOutput = "Downhill Skiing Wyoming\n" +
                 "markdownOf(<p>A skiers paradise far from crowds and close to nature with terrain so vast it appears uncharted.</p>\n" +
                 ")\n" +
@@ -135,7 +146,7 @@ public class AemApproximateMarkdownServicePluginTest {
         component = createMockResource("core/wcm/components/experiencefragment/v1/experiencefragment",
                 ImmutableMap.of("fragmentVariationPath", "/content/experience-fragments/foo/master"));
 
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "## thetitle\n\n";
         assertEquals(expectedOutput, writer.toString());
     }
@@ -149,7 +160,7 @@ public class AemApproximateMarkdownServicePluginTest {
                 ImmutableMap.of("fragmentPath", "/content/dam/cf/foo",
                         "variationName", "variation", "elementNames", new String[]{"a", "b"}));
 
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "theA\n" +
                 "markdownOf(<p>theB</p>)\n";
         assertEquals(expectedOutput, writer.toString());
@@ -185,7 +196,7 @@ public class AemApproximateMarkdownServicePluginTest {
         component = createMockResource("core/wcm/components/contentfragment/v1/contentfragment",
                 ImmutableMap.of("fragmentPath", "/content/dam/cf/foo"));
 
-        service.approximateMarkdown(component, printWriter);
+        service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "An B: theB\n" +
                 "An A: theA\n";
         assertEquals(expectedOutput, writer.toString());

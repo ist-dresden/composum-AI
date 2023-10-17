@@ -62,6 +62,9 @@
 								<include>
 									.*/com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.*
 								</include>
+								<include>
+									.*/com.composum.ai.backend.slingbase.impl.HtmlToApproximateMarkdownServicePlugin.*
+								</include>
 							</includes>
 						</filter>
 

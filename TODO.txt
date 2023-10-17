@@ -1,14 +1,13 @@
-Restrictions
+Restrictions : ??? component
 Announcement, Installation, Doc überarbeiten
-Refactor Aprrox Markdown for HTML
 AEM for content fragments?
 
 Done:
 Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.
 implement AEM Historie -> DONE
-Help-Pages -> done for creation assistant; for the side panel ai the help buttons and the initial text should be enough for now.
-Enter in Composum Variante
-Tell ChatGPT when we expect HTML.
+Help-Pages -> DONE for creation assistant; for the side panel ai the help buttons and the initial text should be enough for now.
+Enter in Composum Variante -> DONE
+Tell ChatGPT when we expect HTML. -> DONE
 
 Deferred:
 AEM 6.5

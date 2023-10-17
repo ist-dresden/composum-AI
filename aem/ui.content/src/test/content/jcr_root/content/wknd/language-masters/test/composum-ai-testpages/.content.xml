@@ -25,11 +25,16 @@
                 <text
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/text"
-                        text="&lt;p>Text before&lt;/p>&#xd;&#xa;"
+                        text="&lt;p style=&quot;text-align: left;&quot;>Normal&amp;nbsp;&lt;b>bold&lt;/b>&amp;nbsp;&lt;i>italic&lt;/i>&amp;nbsp;&lt;u>underlined&lt;/u>&amp;nbsp;text&lt;/p>&#xd;&#xa;&lt;table cellpadding=&quot;1&quot; cellspacing=&quot;0&quot; border=&quot;1&quot; width=&quot;128&quot; height=&quot;36&quot;>&#xd;&#xa;&lt;caption>The caption&lt;/caption>&#xd;&#xa;&lt;tbody>&lt;tr>&lt;th scope=&quot;col&quot;>head1&lt;/th>&#xd;&#xa;&lt;th scope=&quot;col&quot;>head2&lt;/th>&#xd;&#xa;&lt;th scope=&quot;col&quot;>head3&lt;/th>&#xd;&#xa;&lt;/tr>&lt;tr>&lt;th scope=&quot;row&quot;>row1&lt;/th>&#xd;&#xa;&lt;td>row2&lt;/td>&#xd;&#xa;&lt;td>row3&lt;/td>&#xd;&#xa;&lt;/tr>&lt;/tbody>&lt;/table>&#xd;&#xa;&lt;p style=&quot;text-align: left;&quot;>Left aligned&lt;/p>&#xd;&#xa;&lt;p style=&quot;text-align: center;&quot;>centered&lt;/p>&#xd;&#xa;&lt;p style=&quot;text-align: right;&quot;>right aligned&lt;/p>&#xd;&#xa;&lt;p style=&quot;text-align: justify;&quot;>This is justified.&amp;nbsp;&lt;a title=&quot;alternative text&quot; href=&quot;https://www.example.net&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;>This is justified.&lt;/a>&amp;nbsp;This is justified.&amp;nbsp;&lt;a href=&quot;/content/wknd/us/en/magazine.html&quot;>This is justified.&lt;/a>&amp;nbsp;This is justified.&amp;nbsp;This is justified.&amp;nbsp;This is justified.&amp;nbsp;This is justified.&amp;nbsp;This is justified. &amp;nbsp;&lt;/p>&#xd;&#xa;&lt;h1>Heading 1&lt;/h1>&#xd;&#xa;&lt;h6>Heading 6&lt;/h6>&#xd;&#xa;&lt;blockquote>a quoted quote quoting quotations let us see whether that is a block quote and what happens if it has several lines because that's interesting&lt;/blockquote>&#xd;&#xa;&lt;hr>&#xd;&#xa;&#xd;&#xa;&lt;p>&amp;nbsp;&lt;/p>&#xd;&#xa;&lt;pre>&#xd;&#xa;Preformatted text&#xd;&#xa;&lt;/pre>&#xd;&#xa;&lt;p>&amp;nbsp;&lt;/p>&#xd;&#xa;&lt;p style=&quot;text-align: center;&quot;>&amp;nbsp;&lt;/p>&#xd;&#xa;"
                         textIsRich="true"/>
+                <title
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/title"
+                        jcr:title="Composum AI Testpage"/>
                 <testdialog
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="composum-ai/test/components/testdialog"
+                        text="Thisisatext"
                         textIsRich="true"
                         therichText="&lt;p>Give a little bit of &lt;b>rich&lt;/b> &lt;i>text&lt;/i>&lt;/p>&lt;ul>&lt;li>he&lt;/li>&lt;li>re&lt;/li>&lt;/ul>"
                         thetext="This is, not surprising, some plain text which we have here.&#xd;&#xa;Another line of plain text."
@@ -56,7 +61,8 @@
                 <experiencefragment
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/experiencefragment"
-                        fragmentVariationPath="/content/experience-fragments/wknd/us/en/adventures/adventures-2021/master"/>
+                        fragmentVariationPath="/content/experience-fragments/wknd/us/en/adventures/adventures-2021/master"
+                        text="New Adventures for 2021 Go somewhere incredible next year. This past year was challenging on a number of levels but we've got your back. We've made several changes and improvements to all the adventures to make them safer, more flexible and as stress-free as possible. All adventures offer a no-hassle cancellation, fully refundable, no questions asked. New! Bali Surf Camp Surfing in Bali is on the bucket list of every surfer - whether you're a beginner or someone who's been surfing for decades, there will be a break to cater to your ability. Bali offers warm water, tropical vibes, awesome breaks and low cost expenses. Bali Surf Camp"/>
             </container>
         </root>
     </jcr:content>

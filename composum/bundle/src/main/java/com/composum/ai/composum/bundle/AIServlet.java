@@ -512,7 +512,7 @@ public class AIServlet extends AbstractServiceServlet {
                     if (resource == null) {
                         status.error("No resource found at " + inputPath);
                     } else {
-                        inputText = markdownService.approximateMarkdown(resource);
+                        inputText = markdownService.approximateMarkdown(resource, request, response);
                     }
                 }
                 if (status.isValid()) {

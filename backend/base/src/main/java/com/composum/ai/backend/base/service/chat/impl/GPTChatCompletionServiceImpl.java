@@ -652,7 +652,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         if (html == null || html.isBlank()) {
             return "";
         }
-        return new HtmlToMarkdownConverter().convert(html);
+        return new HtmlToMarkdownConverter().convert(html).trim();
     }
 
     @ObjectClassDefinition(name = "GPT Chat Completion Service",

@@ -1,6 +1,5 @@
 package com.composum.ai.backend.slingbase;
 
-import static org.apache.commons.lang3.StringUtils.isAllBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -268,7 +267,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resource found at " + sourcePath);
                 return;
             } else {
-                sourceText = markdownService.approximateMarkdown(resource);
+                sourceText = markdownService.approximateMarkdown(resource, request, response);
             }
         }
 

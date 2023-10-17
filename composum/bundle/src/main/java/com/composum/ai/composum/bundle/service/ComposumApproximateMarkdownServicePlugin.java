@@ -8,8 +8,11 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,16 +23,22 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 /**
  * Special handling for composum/pages/components/page and components
  */
-@Component(service = ApproximateMarkdownServicePlugin.class)
+@Component(service = ApproximateMarkdownServicePlugin.class,
+        // higher priority than HtmlToApproximateMarkdownServicePlugin since this does a better job on tables
+        property = Constants.SERVICE_RANKING + ":Integer=2000"
+)
 public class ComposumApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComposumApproximateMarkdownServicePlugin.class);
 
     @Override
-    public @NotNull PluginResult maybeHandle(@NotNull Resource resource, @NotNull PrintWriter out, @Nonnull ApproximateMarkdownService service) {
+    public @NotNull PluginResult maybeHandle(
+            @NotNull Resource resource, @NotNull PrintWriter out,
+            @Nonnull ApproximateMarkdownService service,
+            @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         boolean wasHandledAsPage = pageHandling(resource, out, service);
         boolean wasHandledAsTable = !wasHandledAsPage && tableHandling(resource, out, service);
-        handleContentReference(resource, out, service);
+        handleContentReference(resource, out, service, request, response);
         if (wasHandledAsPage) {
             return PluginResult.HANDLED_ATTRIBUTES;
         } else if (wasHandledAsTable) {
@@ -60,6 +69,7 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
             if (StringUtils.isNotBlank(description)) {
                 out.println(helper.getMarkdown(description));
             }
+            out.println();
         }
         return isPage;
     }
@@ -91,12 +101,13 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
         return isTable;
     }
 
-    protected void handleContentReference(Resource resource, PrintWriter out, ApproximateMarkdownService service) {
+    protected void handleContentReference(Resource resource, PrintWriter out, ApproximateMarkdownService service,
+                                          SlingHttpServletRequest request, SlingHttpServletResponse response) {
         String reference = resource.getValueMap().get("contentReference", String.class);
         if (StringUtils.startsWith(reference, "/content/")) {
             Resource referencedResource = resource.getResourceResolver().getResource(reference);
             if (referencedResource != null) {
-                service.approximateMarkdown(referencedResource, out);
+                service.approximateMarkdown(referencedResource, out, request, response);
             } else {
                 LOG.info("Resource {} referenced from {} not found.", reference, resource.getPath());
             }

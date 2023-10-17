@@ -5,7 +5,7 @@ import {errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
-const APPROXIMATE_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated.markdown.md';
+const APPROXIMATED_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated';
 
 /** Keeps dialog histories per path. */
 const historyMap = {};
@@ -70,6 +70,7 @@ class ContentCreationDialog {
     fullscreen() {
         this.$dialog.find('form').addClass('_coral-Dialog--fullscreenTakeover');
         this.$dialog.find('coral-dialog-footer').children().appendTo(this.$dialog.find('coral-dialog-header div.cq-dialog-actions'));
+        this.$dialog.find('.composum-ai-prompt-columns .u-coral-padding').removeClass('u-coral-padding');
     }
 
     removeFormAction() {
@@ -232,8 +233,9 @@ class ContentCreationDialog {
 
     retrieveValue(path, callback) {
         $.ajax({
-            url: Granite.HTTP.externalize(APPROXIMATE_MARKDOWN_SERVLET + path
-                + "?richtext=" + this.isrichtext
+            url: Granite.HTTP.externalize(APPROXIMATED_MARKDOWN_SERVLET
+                + (this.isrichtext ? '.html' : '.md')
+                + path
             ),
             type: "GET",
             dataType: "text",
@@ -246,8 +248,8 @@ class ContentCreationDialog {
             }
         });
 
-        // http://localhost:4502/bin/cpm/ai/approximated.markdown.md/content/wknd/us/en/magazine/_jcr_content
-        // http://localhost:4502/bin/cpm/ai/approximated.markdown/content/wknd/language-masters/composum-ai-testpages/jcr:content?_=1693499009746
+        // http://localhost:4502/bin/cpm/ai/approximated.md/content/wknd/us/en/magazine/_jcr_content
+        // http://localhost:4502/bin/cpm/ai/approximated.html/content/wknd/us/en/magazine/_jcr_content
     }
 
     /** The path until the /jcr:content */
