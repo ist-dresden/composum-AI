@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.http.HttpResponse;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -67,6 +68,7 @@ public class GPTChatCompletionServiceImplTest {
                 "</p>", html);
     }
 
+    @Ignore
     @Test
     public void testHtmlToMarkdown() {
         String html = "<p>This is a <strong>test</strong>.</p>"

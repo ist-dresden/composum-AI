@@ -276,5 +276,32 @@ public class HtmlToMarkdownConverterTest {
         ec.checkThat(markdown, is("<sup>This is superscript text.</sup> and<sup>this</sup>too."));
     }
 
+    @Test
+    public void testEndsWith() {
+        converter.sb.setLength(0);
+        converter.ensureEmptyOrEndsWith("");
+        ec.checkThat(converter.sb.toString(), is(""));
+
+        converter.sb.setLength(0);
+        converter.sb.append("x");
+        converter.ensureEmptyOrEndsWith("a");
+        ec.checkThat(converter.sb.toString(), is("xa"));
+        converter.ensureEmptyOrEndsWith("a");
+        ec.checkThat(converter.sb.toString(), is("xa"));
+
+        converter.sb.setLength(0);
+        converter.sb.append("x");
+        converter.ensureEmptyOrEndsWith("ab");
+        ec.checkThat(converter.sb.toString(), is("xab"));
+        converter.ensureEmptyOrEndsWith("ab");
+        ec.checkThat(converter.sb.toString(), is("xab"));
+
+        converter.sb.setLength(0);
+        converter.sb.append("x");
+        converter.sb.append("ab");
+        converter.ensureEmptyOrEndsWith("abcd");
+        ec.checkThat(converter.sb.toString(), is("xabcd"));
+    }
+
 
 }

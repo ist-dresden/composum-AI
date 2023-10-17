@@ -40,7 +40,7 @@ public class HtmlToMarkdownConverter {
     // continued indentation that is inserted before a continuation line
     private String continuedIndentation = "";
 
-    private StringBuilder sb = new StringBuilder();
+    protected StringBuilder sb = new StringBuilder();
 
     @Nonnull
     public String convert(@Nullable String html) {
@@ -189,6 +189,7 @@ public class HtmlToMarkdownConverter {
             case "h4":
             case "h5":
             case "h6":
+                ensureEmptyOrEndsWith("\n\n");
                 String prefix = HEADER_TAGS.get(tagName);
                 sb.append(prefix);
                 convertChildren(element);
@@ -280,6 +281,28 @@ public class HtmlToMarkdownConverter {
                 LOG.warn("Currently unsupported tags: {}", missingTags);
                 convertChildren(element);
                 break;
+        }
+    }
+
+    /**
+     * We ensure sb is either empty or that it ends with the given suffix.
+     */
+    protected void ensureEmptyOrEndsWith(@Nonnull String suffix) {
+        if (sb.length() == 0) {
+            return;
+        }
+        // find the longest prefix of suffix (incl. suffix itself) that sb already ends with
+        String alreadyEnding = null;
+        for (int i = 0; i <= suffix.length(); i++) {
+            String prefix = suffix.substring(0, i);
+            if (sb.length() >= prefix.length() && prefix.equals(sb.substring(sb.length() - i))) {
+                alreadyEnding = prefix;
+            }
+        }
+        if (alreadyEnding != null) {
+            sb.append(suffix.substring(alreadyEnding.length()));
+        } else {
+            sb.append(suffix);
         }
     }
 }
