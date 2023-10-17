@@ -24,6 +24,7 @@ import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
@@ -36,6 +37,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -58,6 +60,9 @@ import com.google.common.cache.CacheBuilder;
 public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(HtmlToApproximateMarkdownServicePlugin.class);
+
+    @Reference
+    private AdapterManager adapterManager;
 
     protected Pattern allowedResourceTypePattern;
     protected Pattern deniedResourceTypePattern;
@@ -98,11 +103,12 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
                 } else {
                     LOG.debug("Markdown generated for {} with resource type {}:\n{}", resource.getPath(), resource.getResourceType(), markdown);
                     out.println(markdown);
+                    out.println();
                 }
                 return PluginResult.HANDLED_ALL;
             } catch (ServletException | IOException | RuntimeException e) {
                 if (isBecauseOfUnsupportedOperation(e)) {
-                    LOG.warn("Blacklisting because of using unsupported operations: resource type {}", resource.getResourceType());
+                    LOG.warn("Blacklisting because of using unsupported operations: resource type {} (at {})", resource.getResourceType(), resource.getPath());
                     blacklistedResourceType.put(resourceType, true);
                     return PluginResult.NOT_HANDLED;
                 }
@@ -315,10 +321,11 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
     /**
      * Wraps the request to make sure nothing is modified.
      */
-    protected static class NonModifyingRequestWrapper extends SlingHttpServletRequestWrapper {
+    protected class NonModifyingRequestWrapper extends SlingHttpServletRequestWrapper {
 
         private final String debuginfo;
 
+        protected boolean inAdaptTo;
         protected boolean hadInvalidOperation;
 
         /**
@@ -440,7 +447,15 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
 
         @Override
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-            throw logAndThrow("Not implemented: NonModifyingRequestWrapper.adaptTo " + type);
+            if (inAdaptTo) {
+                throw logAndThrow("Loop in NonModifyingRequestWrapper.adaptTo " + type);
+            }
+            try {
+                inAdaptTo = true; // make sure the adaptermanager doesn't just call adaptTo again - we'll have to give up then.
+                return adapterManager.getAdapter(this, type);
+            } finally {
+                inAdaptTo = false;
+            }
         }
 
     }
