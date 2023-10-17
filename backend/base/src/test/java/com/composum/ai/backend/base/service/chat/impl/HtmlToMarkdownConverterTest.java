@@ -144,7 +144,40 @@ public class HtmlToMarkdownConverterTest {
         ec.checkThat(markdown, is("# This is a heading 1\n"));
     }
 
-    // ... similar tests for h2, h3, h4, h5, h6
+    @Test
+    public void testConvertTagH2() {
+        String html = "<h2>This is a heading 2</h2>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("## This is a heading 2\n"));
+    }
+
+    @Test
+    public void testConvertTagH3() {
+        String html = "<h3>This is a heading 3</h3>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("### This is a heading 3\n"));
+    }
+
+    @Test
+    public void testConvertTagH4() {
+        String html = "<h4>This is a heading 4</h4>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("#### This is a heading 4\n"));
+    }
+
+    @Test
+    public void testConvertTagH5() {
+        String html = "<h5>This is a heading 5</h5>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("##### This is a heading 5\n"));
+    }
+
+    @Test
+    public void testConvertTagH6() {
+        String html = "<h6>This is a heading 6</h6>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("###### This is a heading 6\n"));
+    }
 
     @Test
     public void testConvertTagHr() {
