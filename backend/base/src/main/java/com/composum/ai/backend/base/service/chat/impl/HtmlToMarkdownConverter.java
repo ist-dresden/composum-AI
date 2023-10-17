@@ -1,5 +1,9 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,9 +25,14 @@ public class HtmlToMarkdownConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(HtmlToMarkdownConverter.class);
 
-    private final int indentSize = 4;
+    private static Set<String> missingTags = new ConcurrentSkipListSet<>();
 
-    private int indent;
+    private static final Map<String, String> HEADER_TAGS = Map.of("h1", "# ", "h2", "## ", "h3",
+            "### ", "h4", "#### ", "h5", "##### ", "h6", "###### ");
+
+    private final String indentStep = "    ";
+
+    private String indentation = "";
 
     private StringBuilder sb = new StringBuilder();
 
@@ -65,10 +74,35 @@ public class HtmlToMarkdownConverter {
                 break;
 
             case "em":
+                sb.append("_");
+                convertChildren(element);
+                sb.append("_");
+                break;
+
+            case "b":
             case "strong":
                 sb.append("**");
-                sb.append(element.html().replaceAll("\\s+", "**"));
+                convertChildren(element);
                 sb.append("**");
+                break;
+
+            case "i":
+                sb.append("*");
+                convertChildren(element);
+                sb.append("*");
+                break;
+
+            case "u":
+                sb.append("_");
+                sb.append(element.html().replaceAll("\\s+", "_"));
+                sb.append("_");
+                break;
+
+            case "del":
+            case "s":
+                sb.append("~~");
+                convertChildren(element);
+                sb.append("~~");
                 break;
 
             case "code":
@@ -77,7 +111,7 @@ public class HtmlToMarkdownConverter {
                 sb.append("`");
                 break;
 
-            case "pre":
+            case "pre": // TODO: a pre code nesting would be wrong.
                 sb.append("```\n");
                 sb.append(element.html());
                 sb.append("\n```\n");
@@ -92,13 +126,7 @@ public class HtmlToMarkdownConverter {
                 sb.append("\n");
                 break;
 
-            case "u":
-                sb.append("_");
-                sb.append(element.html().replaceAll("\\s+", "_"));
-                sb.append("_");
-                break;
-
-            case "ul":
+            case "ul": // TODO: list nesting isn't handled properly here.
                 for (Element li : element.children()) {
                     sb.append("- ");
                     convertChildren(li);
@@ -107,7 +135,7 @@ public class HtmlToMarkdownConverter {
                 sb.append("\n");
                 break;
 
-            case "ol":
+            case "ol": // TODO: list nesting isn't handled properly here.
                 int i = 1;
                 for (Element li : element.children()) {
                     sb.append(i++);
@@ -121,15 +149,92 @@ public class HtmlToMarkdownConverter {
             case "li":
                 throw new UnsupportedOperationException("Bug: li should be handled by ul or ol");
 
+            case "img":
+                sb.append("![");
+                sb.append(element.attr("alt"));
+                sb.append("](");
+                sb.append(element.attr("src"));
+                sb.append(")");
+                break;
+
+            case "h1":
+            case "h2":
+            case "h3":
+            case "h4":
+            case "h5":
+            case "h6":
+                String prefix = HEADER_TAGS.get(tagName);
+                sb.append(prefix);
+                convertChildren(element);
+                sb.append("\n");
+                break;
+
+            case "hr":
+                sb.append("---\n");
+                break;
+
+            case "input":
+                String type = element.attr("type");
+                String placeholder = element.attr("placeholder");
+                sb.append("[Input: Type=");
+                sb.append(type.isEmpty() ? "text" : type);
+                if (!placeholder.isEmpty()) {
+                    sb.append(", Placeholder=");
+                    sb.append(placeholder);
+                }
+                sb.append("]");
+                break;
+
+            case "dl": // there is no markdown for dl, so we just use embedded HTML. Possibly it could also be
+                // **term**
+                // definition
+                //
+                sb.append("<dl>\n");
+                convertChildren(element);
+                sb.append("</dl>\n");
+                break;
+
+            case "dt":
+                sb.append("  <dt>");
+                convertChildren(element);
+                sb.append("</dt>\n");
+                break;
+
+            case "dd":
+                sb.append("  <dd>");
+                convertChildren(element);
+                sb.append("</dd>\n");
+                break;
+
+            case "blockquote":
+                sb.append("> ");
+                String[] lines = element.html().split("\n");
+                for (String line : lines) {
+                    sb.append(line);
+                    sb.append("\n> ");
+                }
+                sb.append("\n");
+                break;
+
             case "#root":
             case "html":
             case "body":
+            case "span":
+            case "div":
                 convertChildren(element);
+                break;
+
+            case "noscript":
+            case "meta":
+            case "nav":
                 break;
 
             default:
                 // ignore tags we do not know
                 LOG.warn("Unknown tag {}", tagName);
+                missingTags.add(tagName);
+                LOG.warn("Currently unsupported tags: {}", missingTags);
+                // blockquote, dd, dl, dt, input
                 convertChildren(element);
                 break;
         }
