@@ -67,6 +67,10 @@ public class HtmlToMarkdownConverter {
             String splitText = text.lines()
                     .map(String::trim)
                     .collect(Collectors.joining(continuedIndentation + "\n"));
+            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '\n') {
+                // only happens if we have mixed text and block level elements within a block level element
+                sb.append(continuedIndentation);
+            }
             sb.append(splitText);
         }
     }
@@ -159,12 +163,11 @@ public class HtmlToMarkdownConverter {
 
             case "ol":
                 oldindentation = continuedIndentation;
-                continuedIndentation += indentStep;
                 int i = 1;
                 for (Element li : element.children()) {
-                    sb.append("\n" + oldindentation);
-                    sb.append(i++);
-                    sb.append(". ");
+                    String prefix = (i++) + ". ";
+                    continuedIndentation = oldindentation + prefix.replaceAll(".", " ");
+                    sb.append("\n" + oldindentation + prefix);
                     convertChildren(li);
                 }
                 sb.append("\n");
@@ -237,12 +240,13 @@ public class HtmlToMarkdownConverter {
                 break;
 
             case "blockquote":
-                sb.append("\n");
                 oldindentation = continuedIndentation;
                 continuedIndentation += "> ";
-                sb.append(oldindentation + "> ");
+                sb.append("\n");
+                sb.append(continuedIndentation);
                 convertChildren(element);
                 sb.append("\n");
+                continuedIndentation = oldindentation;
                 break;
 
             case "#root":

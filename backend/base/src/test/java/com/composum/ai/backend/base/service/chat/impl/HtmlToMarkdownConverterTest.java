@@ -2,6 +2,7 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -202,9 +203,35 @@ public class HtmlToMarkdownConverterTest {
 
     @Test
     public void testConvertTagBlockquote() {
-        String html = "<blockquote>This is a blockquote.</blockquote>";
+        String html = "<blockquote>This is a blockquote.\nAnother line</blockquote>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("\n> This is a blockquote.\n"));
+        // unfortunately jsoup joins the lines.
+        ec.checkThat(markdown, is("\n> This is a blockquote. Another line\n"));
+    }
+
+    @Test
+    public void testConvertTagNesting() {
+        String html = "<blockquote>This<blockquote>is a</blockquote>blockquote.<ul><li>one</li><li>two</li></ul></blockquote>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("\n" +
+                "> This\n" +
+                "> > is a\n" +
+                "> blockquote.\n" +
+                "> - one\n" +
+                "> - two\n" +
+                "\n"));
+    }
+
+    @Test
+    public void testConvertTagListNesting() {
+        String html = "<ol><li><ul><li>one</li><li>two</li></ul></li><li>three</li></ol>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("\n" +
+                "1. \n" +
+                "   - one\n" +
+                "   - two\n" +
+                "\n" + // that is unfortunate but hard to avoid and doesn't seem to really hurt.
+                "2. three\n"));
     }
 
 }
