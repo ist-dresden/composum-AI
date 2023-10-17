@@ -20,6 +20,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,10 @@ import com.day.crx.JcrConstants;
 /**
  * Special handling for cq:PageContent and components
  */
-@Component(service = ApproximateMarkdownServicePlugin.class)
+@Component(service = ApproximateMarkdownServicePlugin.class,
+        // lower priority than HtmlToApproximateMarkdownServicePlugin since that does do a better job on experience fragments / content fragments if enabled
+        property = Constants.SERVICE_RANKING + ":Integer=2000"
+)
 public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(AemApproximateMarkdownServicePlugin.class);

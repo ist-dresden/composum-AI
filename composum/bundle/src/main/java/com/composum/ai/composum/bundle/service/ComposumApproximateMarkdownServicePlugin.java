@@ -12,6 +12,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,10 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 /**
  * Special handling for composum/pages/components/page and components
  */
-@Component(service = ApproximateMarkdownServicePlugin.class)
+@Component(service = ApproximateMarkdownServicePlugin.class,
+        // higher priority than HtmlToApproximateMarkdownServicePlugin since this does a better job on tables
+        property = Constants.SERVICE_RANKING + ":Integer=2000"
+)
 public class ComposumApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComposumApproximateMarkdownServicePlugin.class);

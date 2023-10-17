@@ -58,7 +58,7 @@ import com.google.common.cache.CacheBuilder;
  */
 @Designate(ocd = HtmlToApproximateMarkdownServicePlugin.Config.class)
 @Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
-        property = Constants.SERVICE_RANKING + ":Integer=-1000"
+        property = Constants.SERVICE_RANKING + ":Integer=1000"
 )
 public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
