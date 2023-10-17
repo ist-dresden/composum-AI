@@ -102,4 +102,76 @@ public class HtmlToMarkdownConverterTest {
         ec.checkThat(markdown, is(""));
     }
 
+    @Test
+    public void testConvertTagEm() {
+        String html = "<em>This is emphasized text.</em>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("_This is emphasized text._"));
+    }
+
+    @Test
+    public void testConvertTagI() {
+        String html = "<i>This is italic text.</i>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("*This is italic text.*"));
+    }
+
+    @Test
+    public void testConvertTagDel() {
+        String html = "<del>This is deleted text.</del>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("~~This is deleted text.~~"));
+    }
+
+    @Test
+    public void testConvertTagS() {
+        String html = "<s>This is strikethrough text.</s>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("~~This is strikethrough text.~~"));
+    }
+
+    @Test
+    public void testConvertTagImg() {
+        String html = "<img src=\"http://example.com/image.jpg\" alt=\"An example image\">";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("![An example image](http://example.com/image.jpg)"));
+    }
+
+    @Test
+    public void testConvertTagH1() {
+        String html = "<h1>This is a heading 1</h1>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("# This is a heading 1\n"));
+    }
+
+    // ... similar tests for h2, h3, h4, h5, h6
+
+    @Test
+    public void testConvertTagHr() {
+        String html = "<hr>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("---\n"));
+    }
+
+    @Test
+    public void testConvertTagInput() {
+        String html = "<input type=\"text\" placeholder=\"Enter text\">";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("[Input: Type=text, Placeholder=Enter text]"));
+    }
+
+    @Test
+    public void testConvertTagDlDtDd() {
+        String html = "<dl><dt>Term 1</dt><dd>Definition 1</dd><dt>Term 2</dt><dd>Definition 2</dd></dl>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<dl>\n  <dt>Term 1</dt>\n  <dd>Definition 1</dd>\n  <dt>Term 2</dt>\n  <dd>Definition 2</dd>\n</dl>\n"));
+    }
+
+    @Test
+    public void testConvertTagBlockquote() {
+        String html = "<blockquote>This is a blockquote.</blockquote>";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("> This is a blockquote.\n> \n"));
+    }
+
 }
