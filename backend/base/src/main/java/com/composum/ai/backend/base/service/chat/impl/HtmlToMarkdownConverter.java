@@ -5,6 +5,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -39,7 +42,8 @@ public class HtmlToMarkdownConverter {
 
     private StringBuilder sb = new StringBuilder();
 
-    public String convert(String html) {
+    @Nonnull
+    public String convert(@Nullable String html) {
         if (html != null) {
             Document doc = Jsoup.parseBodyFragment(html);
             convertElement(doc.body());
@@ -65,7 +69,6 @@ public class HtmlToMarkdownConverter {
     protected void insertText(String text) {
         if (text != null) {
             String splitText = text.lines()
-                    .map(String::trim)
                     .collect(Collectors.joining(continuedIndentation + "\n"));
             if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '\n') {
                 // only happens if we have mixed text and block level elements within a block level element
@@ -97,6 +100,7 @@ public class HtmlToMarkdownConverter {
                 break;
 
             case "em":
+            case "u":
                 sb.append("_");
                 convertChildren(element);
                 sb.append("_");
@@ -113,12 +117,6 @@ public class HtmlToMarkdownConverter {
                 sb.append("*");
                 convertChildren(element);
                 sb.append("*");
-                break;
-
-            case "u":
-                sb.append("_");
-                sb.append(element.html().replaceAll("\\s+", "_"));
-                sb.append("_");
                 break;
 
             case "del":
@@ -249,17 +247,30 @@ public class HtmlToMarkdownConverter {
                 continuedIndentation = oldindentation;
                 break;
 
+            case "mark":
+            case "small":
+            case "ins":
+            case "sub":
+            case "sup":
+                // use HTML syntax
+                sb.append("<").append(tagName).append(">");
+                convertChildren(element);
+                sb.append("</").append(tagName).append(">");
+                break;
+
             case "#root":
             case "html":
             case "body":
             case "span":
             case "div":
+                // ignore the tag
                 convertChildren(element);
                 break;
 
             case "noscript":
             case "meta":
             case "nav":
+                // ignore the content, too
                 break;
 
             default:

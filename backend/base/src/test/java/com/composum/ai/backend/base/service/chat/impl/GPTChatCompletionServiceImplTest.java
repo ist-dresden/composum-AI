@@ -71,19 +71,19 @@ public class GPTChatCompletionServiceImplTest {
     public void testHtmlToMarkdown() {
         String html = "<p>This is a <strong>test</strong>.</p>"
                 + "<p>Another paragraph with a <a href=\"http://example.com\">link</a>.</p>"
-                + "<p>A paragraph with <em>emphasis is this</em>.</p>"
+                + "<p>A paragraph with <b>bold is this</b>.</p>"
                 + "<p>A paragraph with <u>underlined text</u>.</p>"
                 + "<p>A paragraph with <code>code fragment</code>.</p>"
                 + "<ul><li>Item 1</li><li>Item 2</li></ul>"
                 + "<ol><li>Item 1</li><li>Item 2</li></ol>"
                 + "<pre>\na code block with several lines\n</pre>";
-        String expected = "This is a **test**.\n" +
+        String expected = "\nThis is a **test**.\n" +
                 "\n" +
                 "Another paragraph with a [link](http://example.com).\n" +
                 "\n" +
-                "A paragraph with **emphasis**is**this**.\n" +
+                "A paragraph with **bold is this**.\n" +
                 "\n" +
-                "A paragraph with _underlined_text_.\n" +
+                "A paragraph with _underlined text_.\n" +
                 "\n" +
                 "A paragraph with `code fragment`.\n" +
                 "\n" +

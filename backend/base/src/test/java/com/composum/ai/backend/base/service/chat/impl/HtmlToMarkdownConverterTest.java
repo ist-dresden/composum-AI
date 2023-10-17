@@ -65,7 +65,7 @@ public class HtmlToMarkdownConverterTest {
     public void testConvertTagU() {
         String html = "<u>This is underlined text.</u>";
         String markdown = converter.convert(html);
-        ec.checkThat(markdown, is("_This_is_underlined_text._"));
+        ec.checkThat(markdown, is("_This is underlined text._"));
     }
 
     @Test
@@ -129,6 +129,13 @@ public class HtmlToMarkdownConverterTest {
         String html = "<s>This is strikethrough text.</s>";
         String markdown = converter.convert(html);
         ec.checkThat(markdown, is("~~This is strikethrough text.~~"));
+    }
+
+    @Test
+    public void testConvertTagMixedSerialB_S_I() {
+        String html = "This is <b>bold</b> <i>emphasized</i> text i<b>n</b>n<em>e</em>rwords";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("This is **bold** *emphasized* text i**n**n_e_rwords"));
     }
 
     @Test
@@ -233,5 +240,41 @@ public class HtmlToMarkdownConverterTest {
                 "\n" + // that is unfortunate but hard to avoid and doesn't seem to really hurt.
                 "2. three\n"));
     }
+
+    @Test
+    public void testConvertTagMark() {
+        String html = "<mark>This is marked text.</mark> and<mark>this</mark>too.";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<mark>This is marked text.</mark> and<mark>this</mark>too."));
+    }
+
+    @Test
+    public void testConvertTagSmall() {
+        String html = "<small>This is small text.</small> and<small>this</small>too.";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<small>This is small text.</small> and<small>this</small>too."));
+    }
+
+    @Test
+    public void testConvertTagIns() {
+        String html = "<ins>This is inserted text.</ins> and<ins>this</ins>too.";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<ins>This is inserted text.</ins> and<ins>this</ins>too."));
+    }
+
+    @Test
+    public void testConvertTagSub() {
+        String html = "<sub>This is subscript text.</sub> and<sub>this</sub>too.";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<sub>This is subscript text.</sub> and<sub>this</sub>too."));
+    }
+
+    @Test
+    public void testConvertTagSup() {
+        String html = "<sup>This is superscript text.</sup> and<sup>this</sup>too.";
+        String markdown = converter.convert(html);
+        ec.checkThat(markdown, is("<sup>This is superscript text.</sup> and<sup>this</sup>too."));
+    }
+
 
 }
