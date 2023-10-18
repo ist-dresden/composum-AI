@@ -72,7 +72,7 @@ import {AIConfig} from './AIConfig.js';
         const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
         $.ajax({
-            url: CREATE_DIALOG_URL + "?richtext=" + parameters.isrichtext,
+            url: CREATE_DIALOG_URL + "?richtext=" + parameters.isRichtext,
             type: "GET",
             dataType: "html",
             success: function (data) {
@@ -129,7 +129,7 @@ import {AIConfig} from './AIConfig.js';
                             property,
                             oldContent: textarea.value,
                             writebackCallback: (newvalue) => $(textarea).val(newvalue),
-                            isrichtext: false,
+                            isRichtext: false,
                             stackeddialog: true
                         });
                     } else {
@@ -256,7 +256,7 @@ import {AIConfig} from './AIConfig.js';
                         writebackCallback: function (newvalue) {
                             rteinstance.setContent(newvalue);
                         },
-                        isrichtext: true,
+                        isRichtext: true,
                         stackeddialog: true,
                         onFinishCallback: function () {
                             rteinstance.reactivate();

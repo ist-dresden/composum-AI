@@ -25,7 +25,7 @@ class ContentCreationDialog {
      * @param {string} options.property - The name of the edited property.
      * @param {string} options.oldContent - The current content of the field.
      * @param {Function} options.writebackCallback - A function that takes the new content and writes it back to the field.
-     * @param {boolean} options.isrichtext - True if the field is a richtext field, false if it's a plain text field.
+     * @param {boolean} options.isRichtext - True if the field is a richtext field, false if it's a plain text field.
      * @param {boolean} options.stackeddialog - True if the dialog is stacked and we have to close the dialog ourselves without generating events to not disturb the underlying dialog.
      * @param {Function} [options.onFinishCallback] - A function that is called when the dialog is closed.
      */
@@ -35,7 +35,7 @@ class ContentCreationDialog {
                     property,
                     oldContent,
                     writebackCallback,
-                    isrichtext,
+                    isRichtext,
                     stackeddialog,
                     onFinishCallback
                 }) {
@@ -45,7 +45,7 @@ class ContentCreationDialog {
         this.oldContent = oldContent;
         this.writebackCallback = writebackCallback;
         this.onFinishCallback = onFinishCallback;
-        this.isrichtext = isrichtext;
+        this.isRichtext = isRichtext;
         this.stackeddialog = stackeddialog;
         this.removeFormAction();
         this.assignElements();
@@ -84,10 +84,10 @@ class ContentCreationDialog {
         this.$prompt = findSingleElement(this.$dialog, '.composum-ai-prompt-textarea');
         this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefined-prompts');
         this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-content-selector');
-        this.$sourceContent = this.isrichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-source-richtext'))
+        this.$sourceContent = this.isRichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-source-richtext'))
             : findSingleElement(this.$dialog, '.composum-ai-source-plaintext');
         this.$textLengthSelector = findSingleElement(this.$dialog, '.composum-ai-text-length-selector');
-        this.$response = this.isrichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-response-richtext'))
+        this.$response = this.isRichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-response-richtext'))
             : findSingleElement(this.$dialog, '.composum-ai-response-plaintext');
         this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
         this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
@@ -210,20 +210,20 @@ class ContentCreationDialog {
 
     setSourceContent(value) {
         const thevalue = value || '';
-        this.isrichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
+        this.isRichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
     }
 
     getSourceContent() {
-        return this.isrichtext ? this.$sourceContent.getContent() : this.$sourceContent.val();
+        return this.isRichtext ? this.$sourceContent.getContent() : this.$sourceContent.val();
     }
 
     setResponse(value) {
         const thevalue = value || '';
-        this.isrichtext ? this.$response.setContent(thevalue) : this.$response.val(thevalue);
+        this.isRichtext ? this.$response.setContent(thevalue) : this.$response.val(thevalue);
     }
 
     getResponse() {
-        return this.isrichtext ? this.$response.getContent() : this.$response.val();
+        return this.isRichtext ? this.$response.getContent() : this.$response.val();
     }
 
     onSourceContentChanged(event) {
@@ -234,7 +234,7 @@ class ContentCreationDialog {
     retrieveValue(path, callback) {
         $.ajax({
             url: Granite.HTTP.externalize(APPROXIMATED_MARKDOWN_SERVLET
-                + (this.isrichtext ? '.html' : '.md')
+                + (this.isRichtext ? '.html' : '.md')
                 + path
             ),
             type: "GET",
@@ -270,7 +270,7 @@ class ContentCreationDialog {
             prompt: this.$prompt.val(),
             source: this.getSourceContent(),
             textLength: this.$textLengthSelector.val(),
-            richText: this.isrichtext,
+            richText: this.isRichtext,
         };
         console.log("createContent", data);
         this.setLoading(true);
