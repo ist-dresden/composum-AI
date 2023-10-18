@@ -1,6 +1,6 @@
 {
   "---": "",
-  "Summarize": "As the author, please eloquently summarize the text.",
+  "Summarize": "As the author, summarize the text by capturing its main ideas in the style the text is written. Ensure it's much shorter than the original. Identify the purpose and goal of the text, pinpoint key points of all topical sections. Write clear and simply, ensuring accuracy and completeness.",
   "Introduction": "Please write an eloquent introduction for the text, in the style the text is written.",
   "Conclusion": "Please write an eloquent conclusion for the text, in the style the text is written.",
   "Expand": "Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style.",
