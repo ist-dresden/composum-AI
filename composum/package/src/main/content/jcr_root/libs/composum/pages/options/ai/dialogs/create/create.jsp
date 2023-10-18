@@ -93,7 +93,7 @@
                                             </c:when>
                                             <c:otherwise>
                                                 <textarea id="sourcePlaintext" name="sourcePlaintext"
-                                                          class="form-control source-textarea"
+                                                          class="form-control ai-source-field"
                                                           rows="5"></textarea>
                                             </c:otherwise>
                                         </c:choose>

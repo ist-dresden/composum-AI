@@ -82,6 +82,21 @@
             };
         };
 
+        /** Creates a printable text from various error variants. */
+        ai.errorText = function (error) {
+            var text;
+            if (typeof error === 'string') {
+                text = error;
+            } else if (error.data && typeof error.data === 'string') {
+                text = error.data;
+            } else if (error.data) {
+                text = JSON.stringify(error.data);
+            } else {
+                text = error instanceof Error ? error.message : JSON.stringify(error);
+            }
+            return text;
+        };
+
         ai.openHelpDialog = function (event) {
             event.preventDefault();
             let $button = $(event.target);
