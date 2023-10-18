@@ -7,10 +7,7 @@ const pendingCallsCache = new Map();
 
 class AIConfig {
 
-    /** Checks whether the named service is actually enabled for the current user, editor type and content URL. */
-    ifEnabled(service, callbackIfEnabled) {
-        // console.log("AIConfig ifEnabled", service);
-        const editorUrl = window.location.pathname;
+    getContentURL() {
         let contentURL = Granite?.author?.ContentFrame?.contentURL;
         // if contentURL is not set, we check whether there is an item= parameter in the document.location.search
         if (!contentURL) {
@@ -20,8 +17,15 @@ class AIConfig {
                 contentURL = itemParam[1];
             }
         }
-        const cachekey = editorUrl + "|||" + contentURL;
+        return contentURL;
+    }
 
+    /** Checks whether the named service is actually enabled for the current user, editor type and content URL. */
+    ifEnabled(service, callbackIfEnabled) {
+        // console.log("AIConfig ifEnabled", service);
+        const editorUrl = window.location.pathname;
+        let contentURL = this.getContentURL();
+        const cachekey = editorUrl + "|||" + contentURL;
         const result = enabledServicesCache.get(cachekey);
         if (result) {
             if (result[service]) {
