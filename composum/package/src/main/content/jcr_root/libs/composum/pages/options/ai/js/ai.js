@@ -23,19 +23,20 @@
         // all dialogs create their own subnodes in ai.const.url to put that into several files.
         ai.const.url.general = {
             authoring: '/bin/cpm/ai/authoring',
-            markdown: '/bin/cpm/ai/approximated'
+            markdown: '/bin/cpm/ai/approximated',
+            config: '/bin/cpm/ai/config'
         };
 
         /** Will be called from Pages after a dialog is rendered via the dialogplugins hook.
          * Thus we bind ourselves into our buttons rendered into the dialog by the labelextension.jsp */
         ai.dialogInitializeView = function (dialog, $element) {
             // console.log('ai.dialogInitializeView', dialog, $element);
-            let $translationButtons = $element.find('.widget-ai-action.action-translate');
-            $translationButtons.click(ai.openTranslateDialog);
-            let $categorizeButtons = $element.find('.widget-ai-action.action-pagecategories');
-            $categorizeButtons.click(ai.openCategorizeDialog);
-            let $createButtons = $element.find('.widget-ai-action.action-create');
-            $createButtons.click(ai.openCreationDialog);
+                let $translationButtons = $element.find('.widget-ai-action.action-translate');
+                $translationButtons.click(ai.openTranslateDialog);
+                let $categorizeButtons = $element.find('.widget-ai-action.action-pagecategories');
+                $categorizeButtons.click(ai.openCategorizeDialog);
+                let $createButtons = $element.find('.widget-ai-action.action-create');
+                $createButtons.click(ai.openCreationDialog);
         };
 
         /** Looks for the actual text input or textarea that belongs to the labelextension. */
@@ -173,6 +174,58 @@
 
             $header.on("mousedown", handleMouseDown);
         };
+
+        const enabledServicesCache = new Map();
+        const pendingCallsCache = new Map();
+
+        /** Checks whether the named service is actually enabled for the current user, editor type and content URL. */
+        ai.ifEnabled = function (service, callbackIfEnabled) {
+            // console.log("AIConfig ifEnabled", service);
+            const editorUrl = window.location.pathname;
+            let contentURL = pages.editFrame.currentPath;
+            const cachekey = editorUrl + "|||" + contentURL;
+            const result = enabledServicesCache.get(cachekey);
+            if (result) {
+                if (result[service]) {
+                    // console.log("AIConfig ifEnabled cached and true", service, cachekey);
+                    callbackIfEnabled();
+                } else {
+                    // console.log("AIConfig ifEnabled cached and false", service, cachekey);
+                }
+            } else {
+                const call = pendingCallsCache.get(cachekey) || $.ajax({
+                    url: ai.const.url.general.config + ".json" + core.encodePath(contentURL),
+                    type: "GET",
+                    cache: false,
+                    data: {editorUrl: editorUrl},
+                    dataType: "json"
+                }).fail((jqXHR, textStatus, errorThrown) => {
+                    console.error("AIConfig ajaxError", jqXHR, textStatus, errorThrown);
+                    debugger;
+                }).done(data => {
+                    console.log("AIConfig ifEnabled ajaxSuccess", service, editorUrl, contentURL, data);
+                    if (data?.allowedServices) {
+                        enabledServicesCache.set(cachekey, data.allowedServices);
+                    } else {
+                        console.error("AIConfig: Unexpected response", data);
+                        debugger;
+                    }
+                }).always(() => {
+                    pendingCallsCache.delete(cachekey);
+                });
+                pendingCallsCache.set(cachekey, call);
+
+                call.done(data => {
+                    if (data?.allowedServices) {
+                        const allowed = data.allowedServices[service];
+                        // console.log("AIConfig ifEnabled allowed", service, cachekey, allowed);
+                        if (allowed) {
+                            callbackIfEnabled();
+                        }
+                    }
+                });
+            }
+        }
 
     })(window.composum.ai, window.composum.pages.dialogs, window.composum.pages, window.core, CPM.core.components);
 

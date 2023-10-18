@@ -11,7 +11,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
+import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
@@ -107,7 +109,11 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
 
     protected List<String> userAndGroupsOfUser(SlingHttpServletRequest request) throws RepositoryException {
         List<String> authorizableNames = new ArrayList<>();
-        UserManager userManager = Objects.requireNonNull(request.getResourceResolver().adaptTo(UserManager.class));
+        UserManager userManager = request.getResourceResolver().adaptTo(UserManager.class);
+        if (userManager == null) { // fallback for plain Apache Sling
+            JackrabbitSession session = ((JackrabbitSession) request.getResourceResolver().adaptTo(Session.class));
+            userManager = Objects.requireNonNull(session.getUserManager());
+        }
         Principal userPrincipal = request.getUserPrincipal();
         authorizableNames.add(userPrincipal.getName());
         Authorizable user = userManager.getAuthorizable(userPrincipal);

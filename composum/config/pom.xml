@@ -65,6 +65,9 @@
 								<include>
 									.*/com.composum.ai.backend.slingbase.impl.HtmlToApproximateMarkdownServicePlugin.*
 								</include>
+								<include>
+									.*/com.composum.ai.backend.slingbase.impl.OsgiAIConfigurationPluginImpl~default.*
+								</include>
 							</includes>
 						</filter>
 
