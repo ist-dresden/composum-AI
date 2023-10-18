@@ -66,6 +66,8 @@
                 this.$response = this.$el.find('.ai-response-field');
                 this.$sourceContent = this.$el.find('.ai-source-field');
 
+                this.setSourceContent(this.widget.getValue());
+
                 this.$el.find('.back-button').click(this.backButtonClicked.bind(this));
                 this.$el.find('.forward-button').click(this.forwardButtonClicked.bind(this));
                 this.$el.find('.generate-button').click(this.generateButtonClicked.bind(this)).prop('disabled', true);
@@ -244,7 +246,7 @@
             retrieveValue(path, callback) {
                 $.ajax({
                     url: ai.const.url.create.approximated +
-                        (this.isrichtext ? '.html' : '.md') + core.encodePath(path),
+                        (this.isRichText ? '.html' : '.md') + core.encodePath(path),
                     type: "GET",
                     dataType: "text",
                     success: (data) => {
@@ -303,6 +305,7 @@
             generateButtonClicked: function (event) {
                 event.preventDefault();
                 this.setLoading(true);
+                this.$response[0].scrollIntoView();
 
                 const that = this;
 
@@ -311,27 +314,14 @@
                     that.runningxhr = xhr;
                 }
 
-                let contentSelect = this.$contentSelect.val();
                 let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
-                var inputText;
-                var inputPath;
-                if (contentSelect === 'widget') {
-                    inputText = this.widget.getValue();
-                } else if (contentSelect === 'page') {
-                    inputPath = this.pagePath;
-                } else if (contentSelect === 'component') {
-                    inputPath = this.componentPath;
-                } else if (contentSelect === 'lastoutput') {
-                    inputText = this.getResponse();
-                }
+                let source = this.getSourceContent();
 
                 let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
-                        contentSelect: contentSelect,
                         textLength: textLength,
-                        inputText: inputText,
-                        inputPath: inputPath,
+                        inputText: source,
                         streaming: this.streaming,
                         richText: this.isRichText,
                         prompt: prompt

@@ -52,7 +52,7 @@
                                         </label>
                                         <textarea id="promptTextarea" name="prompt"
                                                   class="form-control prompt-textarea"
-                                                  rows="5"></textarea>
+                                                  rows="10"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -94,7 +94,7 @@
                                             <c:otherwise>
                                                 <textarea id="sourcePlaintext" name="sourcePlaintext"
                                                           class="form-control ai-source-field"
-                                                          rows="5"></textarea>
+                                                          rows="10"></textarea>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
