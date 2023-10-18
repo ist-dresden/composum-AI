@@ -25,68 +25,95 @@
                         <div class="alert alert-danger alert-text generalalert" style="display: none;"></div>
                     </div>
 
-                    <div class="panel panel-default mb-3">
-                        <div class="panel-heading" title="${cpn:i18n(slingRequest,'Input Prompt')}">
-                            <cpn:text i18n="true">Input Prompt</cpn:text>
+                    <div class="row">
+                        <div class="col col-md-6">
+                            <div class="panel panel-default mb-3">
+                                <div class="panel-heading" title="${cpn:i18n(slingRequest,'Input Prompt')}">
+                                    <cpn:text i18n="true">Input Prompt</cpn:text>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-group"
+                                         title="${cpn:i18n(slingRequest,'This replaces the prompt (that is, the instructions to be executed by the AI) by one of a number of predefined prompts you can use directly or modify to create your own prompt.')}">
+                                        <label for="predefinedPrompts">
+                                            <cpn:text i18n="true">Predefined Prompts (Instructions)</cpn:text>
+                                        </label>
+                                        <select id="predefinedPrompts" name="predefined"
+                                                class="form-control predefined-prompts">
+                                            <c:forEach items="${model.predefinedPrompts}" var="predefinedPrompt">
+                                                <option value="${predefinedPrompt.value}">${predefinedPrompt.key}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group"
+                                         title="${cpn:i18n(slingRequest,'Your request to the AI. If you like some examples you can select one of the predefined prompts - that will replace the content of this field.')}">
+                                        <label for="promptTextarea">
+                                            <cpn:text i18n="true">Input Prompt (Instructions)</cpn:text>
+                                        </label>
+                                        <textarea id="promptTextarea" name="prompt"
+                                                  class="form-control prompt-textarea"
+                                                  rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="panel-body">
-                            <div class="form-row">
-                                <div class="form-group col-md-4"
-                                     title="${cpn:i18n(slingRequest,'This replaces the prompt (that is, the instructions to be executed by the AI) by one of a number of predefined prompts you can use directly or modify to create your own prompt.')}">
-                                    <label for="predefinedPrompts">
-                                        <cpn:text i18n="true">Predefined Prompts (Instructions)</cpn:text>
-                                    </label>
-                                    <select id="predefinedPrompts" name="predefined"
-                                            class="form-control predefined-prompts">
-                                        <c:forEach items="${model.predefinedPrompts}" var="predefinedPrompt">
-                                            <option value="${predefinedPrompt.value}">${predefinedPrompt.key}</option>
-                                        </c:forEach>
-                                    </select>
+                        <div class="col col-md-6">
+                            <div class="panel panel-default mb-3">
+                                <div class="panel-heading" title="${cpn:i18n(slingRequest,'Source')}">
+                                    <cpn:text i18n="true">Source</cpn:text>
                                 </div>
+                                <div class="panel-body">
+                                    <div class="form-group"
+                                         title="${cpn:i18n(slingRequest,'Select which text the AI receives in addition to your prompt, if any. This can serve basically as data for your request to generate new text or modify this given text, if your prompt requires that.')}">
+                                        <label for="contentSelector">
+                                            <cpn:text
+                                                    i18n="true">Overwrite Source Content with the text from ...</cpn:text>
+                                        </label>
+                                        <select id="contentSelector" name="contentSelect"
+                                                class="form-control content-selector">
+                                            <c:forEach items="${model.contentSelectors}" var="contentSelector">
+                                                <option value="${contentSelector.key}">${contentSelector.value}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
 
-                                <div class="form-group col-md-4"
-                                     title="${cpn:i18n(slingRequest,'Select which text the AI receives in addition to your prompt, if any. This can serve basically as data for your request to generate new text or modify this given text, if your prompt requires that.')}">
-                                    <label for="contentSelector">
-                                        <cpn:text i18n="true">Base Text ("Data" for the instructions)</cpn:text>
-                                    </label>
-                                    <select id="contentSelector" name="contentSelect"
-                                            class="form-control content-selector">
-                                        <c:forEach items="${model.contentSelectors}" var="contentSelector">
-                                            <option value="${contentSelector.key}">${contentSelector.value}</option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-
-                                <div class="form-group col-md-4">
-                                    <label for="textLengthSelector"
-                                           title="${cpn:i18n(slingRequest,'The desired approximate length of the generated text.')}">
-                                        <cpn:text i18n="true">Text Length</cpn:text>
-                                    </label>
-                                    <select id="textLengthSelector" name="textLength"
-                                            class="form-control text-length-selector">
-                                        <c:forEach items="${model.textLengths}" var="textLength">
-                                            <option value="${textLength.value}">${textLength.key}</option>
-                                        </c:forEach>
-                                    </select>
+                                    <div class="form-group"
+                                         title="${cpn:i18n(slingRequest,'The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed.')}">
+                                        <label for="promptTextarea">
+                                            <cpn:text i18n="true">Source Text</cpn:text>
+                                        </label>
+                                        <c:choose>
+                                            <c:when test="${model.isRichText}">
+                                                <cpp:widgetForm cssBase="composum-pages-options-ai-dialogs-create"
+                                                                cssAdd="ai-source-field">
+                                                    <cpp:widget id="sourceText" type="richtext"
+                                                                hint="${cpn:i18n(slingRequest,'The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed.')}"
+                                                                modelClass="com.composum.ai.composum.bundle.model.CreateDialogModel"/>
+                                                </cpp:widgetForm>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <textarea id="sourcePlaintext" name="sourcePlaintext"
+                                                          class="form-control source-textarea"
+                                                          rows="5"></textarea>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="form-group">
-                                <label for="promptTextarea"
-                                       title="${cpn:i18n(slingRequest,'Your request to the AI. If you like some examples you can select one of the predefined prompts - that will replace the content of this field.')}">
-                                    <cpn:text i18n="true">Input Prompt (Instructions)</cpn:text>
-                                </label>
-                                <textarea id="promptTextarea" name="prompt" class="form-control prompt-textarea"
-                                          rows="5"></textarea>
-                            </div>
-
-                            <div class="row align-items-center">
-                                <div class="col-md-6 generate-container">
+                        <%-- Generate button panel --%>
+                    <div class="panel panel-default mb-3">
+                        <div class="panel-body align-items-center">
+                            <div class="row">
+                                <div class="col col-md-8 generate-container">
                                     <button type="button" class="btn btn-primary generate-button"
                                             title="${cpn:i18n(slingRequest,'Triggers the text generation - please give that a couple of seconds.')}">
                                         <cpn:text i18n="true">Generate</cpn:text>
                                     </button>
-                                    <button type="button" class="btn btn-primary stop-button" disabled="disabled"
+                                    <button type="button" class="btn btn-primary stop-button"
+                                            disabled="disabled"
                                             title="${cpn:i18n(slingRequest,'Stops the text generation.')}">
                                         <cpn:text i18n="true">Stop</cpn:text>
                                     </button>
@@ -94,11 +121,26 @@
                                             title="${cpn:i18n(slingRequest,'Resets this form.')}">
                                         <cpn:text i18n="true">Reset</cpn:text>
                                     </button>
+                                    &nbsp;
+                                    <div class="form-inline"
+                                         title="${cpn:i18n(slingRequest,'The desired approximate length of the generated text.')}">
+                                        <div class="form-group">
+                                            <label for="textLengthSelector" class="inline-width">
+                                                <cpn:text i18n="true">Text Length</cpn:text>
+                                            </label>
+                                            <select id="textLengthSelector" name="textLength"
+                                                    class="text-length-selector">
+                                                <c:forEach items="${model.textLengths}" var="textLength">
+                                                    <option value="${textLength.value}">${textLength.key}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="loading-indicator" style="display: none;">
                                         <i class="fa fa-2x fa-spinner fa-pulse fa-fw"></i>
                                     </div>
                                 </div>
-                                <div class="col-md-6 text-right">
+                                <div class="col col-md-4 text-right">
                                     <button type="button" class="btn btn-secondary reset-history-button"
                                             title="${cpn:i18n(slingRequest,'Resets this form including the whole history.')}">
                                         <cpn:text i18n="true">Reset History</cpn:text>
