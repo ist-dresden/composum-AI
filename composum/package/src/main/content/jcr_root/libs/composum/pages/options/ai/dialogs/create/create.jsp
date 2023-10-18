@@ -170,7 +170,7 @@
                                         <cpp:widgetForm disabled="true"
                                                         cssBase="composum-pages-options-ai-dialogs-create"
                                                         cssAdd="ai-response-field">
-                                            <cpp:widget type="richtext"
+                                            <cpp:widget type="richtext" height="fit-content"
                                                         modelClass="com.composum.ai.composum.bundle.model.CreateDialogModel"/>
                                         </cpp:widgetForm>
                                     </c:when>

@@ -144,6 +144,14 @@
         margin-left: 5px;
     }
 
+    .ai-source-field .composum-widgets-richtext {
+
+        .trumbowyg-editor {
+            height: 12.5em;
+            overflow-y: auto;
+        }
+    }
+
 }
 
 .composum-pages-options-ai-dialogs-help {
