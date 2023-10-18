@@ -87,7 +87,6 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
         Set<String> allowedServices = new HashSet<>();
         try {
             List<String> userAndGroups = userAndGroupsOfUser(request);
-            userAndGroups.add(request.getUserPrincipal().getName());
             // A user is allowed if his username or any of the groups he is in matches the allowedUsers regexes and
             // none of them matches the deniedUsers regexes.
             boolean userAllowed = false;
