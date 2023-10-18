@@ -141,7 +141,8 @@
                     'contentSelect': this.$contentSelect.val(),
                     'textLength': this.$textLength.val(),
                     'prompt': this.$prompt.val(),
-                    'result': this.getResponse()
+                    'result': this.getResponse(),
+                    'source': this.getSourceContent()
                 };
             },
 
@@ -166,6 +167,7 @@
                 this.$textLength.val(map['textLength']);
                 this.$prompt.val(map['prompt']);
                 this.setResponse(map['result']);
+                this.setSourceContent(map['source']);
                 this.adjustButtonStates();
             },
 
@@ -367,6 +369,9 @@
                     this.$response.val(value || '');
                 }
                 this.adjustButtonStates();
+                if (this.$contentSelect.val() === 'lastoutput') {
+                    this.$contentSelect.val('-');
+                }
             },
 
             getResponse: function () {
