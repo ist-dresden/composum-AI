@@ -1,4 +1,3 @@
-Restrictions : ??? component
 Announcement, Installation, Doc überarbeiten
 AEM for content fragments?
 
@@ -8,6 +7,7 @@ implement AEM Historie -> DONE
 Help-Pages -> DONE for creation assistant; for the side panel ai the help buttons and the initial text should be enough for now.
 Enter in Composum Variante -> DONE
 Tell ChatGPT when we expect HTML. -> DONE
+Restrictions : ??? component -> DONE (except component)
 
 Deferred:
 AEM 6.5

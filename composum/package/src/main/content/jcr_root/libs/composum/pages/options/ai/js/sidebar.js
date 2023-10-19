@@ -69,7 +69,7 @@
                     this.initialState = this.makeSaveStateMap();
 
                     this.history = ai.sidebarDialogStates[this.pagePath];
-                    console.log('History for ', this.pagePath, ' used.'); // FIXME remove this.
+                    console.log('History for ', this.pagePath, ' used.');
                     if (!this.history) {
                         this.history = [];
                         ai.sidebarDialogStates[this.pagePath] = this.history;

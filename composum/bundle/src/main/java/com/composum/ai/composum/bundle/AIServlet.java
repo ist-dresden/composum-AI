@@ -207,8 +207,7 @@ public class AIServlet extends AbstractServiceServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        // FIXME(hps,19.04.23) only use POST later, but for now, GET is easier to test
-        for (ServletOperationSet.Method method : List.of(GET, POST)) {
+        for (ServletOperationSet.Method method : List.of(POST)) {
             operations.setOperation(method, Extension.json, Operation.translate,
                     new TranslateOperation());
             operations.setOperation(method, Extension.json, Operation.keywords,

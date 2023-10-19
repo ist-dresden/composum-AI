@@ -32,7 +32,7 @@ We should prepare a plugin mechanism to be extensible.
 ## Implementation decisions
 
 - If the AI is rolled out for various sites, we need to have additive configurations. Thus restrictions have to be "
-  enable XXX for YYY" which can be implemented by a OSGI configuration factory with suitable configurations.
+  enable A for B" which can be implemented by a OSGI configuration factory with suitable configurations.
 - we will heavily rely on regular expressions, but allow lists of regular expressions to give a better overview.
   There should be regular expressions for "allow" and "deny" for each category.
 - There should be a Apache Sling servlet com.composum.ai.backend.slingbase.AIConfigurationServlet available with a
@@ -86,10 +86,10 @@ We should prepare a plugin mechanism to be extensible.
 
 ## OsgiAIConfiguration attributes
 
-For the relevant configurations we will have allowedXXX and deniedXXX attributes, both String[] of regular expressions.
-A service is only allowed when
-there is an allowedXXX matching it, and no deniedXXX matching it in the configuration. For the planned restrictions
-we need the following attributes:
+For the relevant configurations we will have allowedSomething and deniedSomething attributes,
+both String[] of regular expressions. A service is only allowed when
+there is an allowedSomething matching it, and no deniedXXX matching it in the configuration. For the planned
+restrictions we need the following attributes:
 
 - **allowedUsers** and **deniedUsers**: Lists of regular expressions that match usernames or user groups which determine
   if they are allowed or not allowed to use the AI services.

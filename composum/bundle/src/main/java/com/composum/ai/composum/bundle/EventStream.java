@@ -60,7 +60,7 @@ public class EventStream implements GPTCompletionCallback {
         while (true) {
             String line = null;
             try {
-                line = queue.poll(60, TimeUnit.MINUTES); // XXX set to something sensible.
+                line = queue.poll(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 onError(e);
                 throw e;
@@ -99,9 +99,6 @@ public class EventStream implements GPTCompletionCallback {
         queue.add("");
         queue.add("");
         queue.add(QUEUEEND);
-        /* XXX Not sure whether this is necessary. if (subscription != null) {
-            subscription.cancel();
-        } */
         if (null != getWholeResponse()) {
             wholeResponseListeners.forEach(listener -> listener.accept(getWholeResponse()));
         }
