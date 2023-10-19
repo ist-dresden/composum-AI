@@ -4,7 +4,7 @@ class HelpPage {
         console.log('HelpPage constructor', event);
         event.preventDefault();
         event.stopPropagation();
-        this.url = $(event.target).data('href');
+        this.url = $(event.target).data('href') || $(event.target).parent().data('href');
         this.id = 'composum-ai-help-dialog-' + this.url.replace(/[^a-zA-Z0-9]+/g, '-');
         this.dialog = document.getElementById(this.id);
     }

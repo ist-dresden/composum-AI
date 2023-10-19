@@ -119,6 +119,15 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             granite:class="composum-ai-reset-button"
                                             granite:title="Resets the form to the state when you opened it."/>
+                                    <help
+                                            jcr:primaryType="nt:unstructured" icon="help"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            granite:class="composum-ai-help-button"
+                                            granite:title="Resets the form to the state when you opened it.">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                href="/conf/composum-ai/settings/dialogs/sidepanel-ai/help.html"/>
+                                    </help>
                                     <loading
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/container"
