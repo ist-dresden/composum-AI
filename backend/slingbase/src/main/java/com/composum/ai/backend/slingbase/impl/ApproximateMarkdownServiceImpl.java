@@ -52,7 +52,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = Map.of(
             "jcr:title", "## ",
             "title", "## ",
-            "subtitle", "### "
+            "subtitle", "### ",
+            "cq:panelTitle", "#### "
             // , "code", "```" handled in extra method
     );
 
@@ -288,7 +289,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         @AttributeDefinition(name = "Text Attributes",
                 description = "List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text.")
         String[] textAttributes() default {
-                "jcr:title", "title", "subtitle", "linkTitle", "jcr:description", "text",
+                "jcr:title", "title", "subtitle", "linkTitle", "jcr:description", "text", "cq:panelTitle",
                 /* "code", */ "copyright", // code component; code is handled in extra method
                 "defaultValue", "exampleCode", "suffix", "exampleResult", "footer" // for servlet component
         };
@@ -307,7 +308,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
         @AttributeDefinition(name = "Labelled Attribute Order",
                 description = "List of labelled attributes that come first if they are present, in the given order.")
-        String[] labelledAttributeOrder() default {"cq:panelTitle"};
+        String[] labelledAttributeOrder() default {};
 
     }
 
