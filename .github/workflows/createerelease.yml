@@ -39,7 +39,7 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         maven-version: 3.8.7
-        # deliberately not: cache: maven
+        cache: maven # somewhat doubtful, but let's see whether this creates problems.
 
     - name: Dump event context for debugging
       continue-on-error: true  # Debugging output only, and this annoyingly fails when the commit messge has a (
