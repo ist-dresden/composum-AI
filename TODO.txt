@@ -1,5 +1,10 @@
 Announcement, Installation, Doc überarbeiten
 AEM for content fragments?
+URL as base text , inner links
+Append button for AEM
+Multi-lingual?
+??? AEMaaCS deployment; configuration????
+https://cloud.composum.com/bin/pages.html/content/ist/composum/home/blog/pages/composumAI/composumAI-AEM
 
 Done:
 Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.
