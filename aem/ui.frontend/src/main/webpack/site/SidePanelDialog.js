@@ -3,6 +3,7 @@
 import {AICreate} from './AICreate.js';
 import {contentFragmentPath, errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
+import {HelpPage} from './HelpPage.js';
 
 /** Keeps dialog histories per path. */
 const historyMap = {};
@@ -54,6 +55,7 @@ class SidePanelDialog {
             }
         }).bind(this));
         this.setLoading(false);
+        findSingleElement(this.$dialog, '.composum-ai-help-button').on('click', (event) => new HelpPage(event).show());
     }
 
     onStopClicked(event) {

@@ -3,5 +3,6 @@
   "component": "The component you were editing, including subcomponents",
   "page": "Current page text",
   "lastoutput": "Current suggestion shown in this dialog (for iterative improvement)",
-  "": "No text is added to your prompt"
+  "empty": "No text is added to your prompt",
+  "-": "Hand-edited source content"
 }

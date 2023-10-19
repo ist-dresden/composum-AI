@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.composum.ai.backend.slingbase.AIConfigurationServlet;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
 import com.composum.pages.commons.model.Page;
@@ -53,7 +55,7 @@ public class LabelExtensionModel extends AbstractModel {
     private EditWidgetTag widget;
     private Model model;
     private GPTChatCompletionService chatCompletionService;
-    private String aivisible;
+    private AIConfigurationService aiConfigurationService;
 
     protected Boolean visibilityByKey(@Nonnull LabelExtensionVisibilityKey assistantKey) {
         Object attributeRaw = widget.getAttributeSet().get(ATTRIBUTE_AIVISIBLE);
@@ -67,6 +69,7 @@ public class LabelExtensionModel extends AbstractModel {
         if (context.getAttribute(EditWidgetTag.WIDGET_VAR, Object.class) instanceof EditWidgetTag) {
             widget = context.getAttribute(EditWidgetTag.WIDGET_VAR, EditWidgetTag.class);
             chatCompletionService = context.getService(GPTChatCompletionService.class);
+            aiConfigurationService = context.getService(AIConfigurationService.class);
             if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled()) {
                 model = (Model) widget.getModel();
                 valid = true;
@@ -103,6 +106,9 @@ public class LabelExtensionModel extends AbstractModel {
         boolean visible = valid && widget.isI18n() && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
         visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.TRANSLATE));
+        visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
+                        context.getRequest().getRequestURI())
+                .contains(AIConfigurationServlet.SERVICE_TRANSLATE);
         if (visible) {
             Resource propertyResource = getResource().getChild(widget.getProperty());
             if (propertyResource == null) {
@@ -126,6 +132,9 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && !Boolean.FALSE.equals(visibilityByKey);
         visible = visible && (Boolean.TRUE.equals(visibilityByKey) || !isIgnoredProperty());
         visible = visible && List.of("textfield", "textarea", "codearea", "richtext").contains(widget.getWidgetType());
+        visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
+                        context.getRequest().getRequestURI())
+                .contains(AIConfigurationServlet.SERVICE_CREATE);
         return visible;
     }
 
@@ -137,6 +146,9 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && "category".equals(widget.getProperty());
         visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.CATEGORIZE));
         visible = visible && ResourceUtil.isResourceType(model.getResource(), "composum/pages/components/page");
+        visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
+                        context.getRequest().getRequestURI())
+                .contains(AIConfigurationServlet.SERVICE_CATEGORIZE);
         return visible;
     }
 

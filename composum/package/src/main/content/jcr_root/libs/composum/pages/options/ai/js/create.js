@@ -13,7 +13,8 @@
         ai.const = ai.const || {};
         ai.const.url = ai.const.url || {};
         ai.const.url.create = {
-            createDialog: '/bin/cpm/ai/dialog.creationDialog.html'
+            createDialog: '/bin/cpm/ai/dialog.creationDialog.html',
+            approximated: '/bin/cpm/ai/approximated'
         }
 
         ai.openCreationDialog = _.debounce(function (event) {
@@ -63,6 +64,9 @@
 
                 this.$spinner = this.$el.find('.loading-indicator');
                 this.$response = this.$el.find('.ai-response-field');
+                this.$sourceContent = this.$el.find('.ai-source-field');
+
+                this.setSourceContent(this.widget.getValue());
 
                 this.$el.find('.back-button').click(this.backButtonClicked.bind(this));
                 this.$el.find('.forward-button').click(this.forwardButtonClicked.bind(this));
@@ -73,6 +77,9 @@
 
                 this.$el.find('.predefined-prompts').change(this.predefinedPromptsChanged.bind(this));
                 this.$prompt.change(this.promptChanged.bind(this));
+
+                this.$contentSelect.change(this.contentSelectChanged.bind(this));
+                this.$sourceContent.change(this.sourceChanged.bind(this));
 
                 this.$el.find('.replace-button').click(this.replaceButtonClicked.bind(this));
                 this.$el.find('.append-button').click(this.appendButtonClicked.bind(this));
@@ -122,12 +129,7 @@
                 this.$el.find('.back-button').prop('disabled', this.historyPosition <= 0);
                 this.$el.find('.forward-button').prop('disabled', this.historyPosition >= this.history.length - 1);
                 this.$el.find('.generate-button').prop('disabled', !this.$prompt.val());
-                let responseVal;
-                if (this.isRichText) {
-                    responseVal = core.widgetOf(this.$response.find('textarea')).getValue();
-                } else {
-                    responseVal = this.$response.val();
-                }
+                let responseVal = this.getResponse();
                 this.$el.find('.replace-button').prop('disabled', !responseVal);
                 this.$el.find('.append-button').prop('disabled', !responseVal);
             },
@@ -139,7 +141,8 @@
                     'contentSelect': this.$contentSelect.val(),
                     'textLength': this.$textLength.val(),
                     'prompt': this.$prompt.val(),
-                    'result': this.getResult()
+                    'result': this.getResponse(),
+                    'source': this.getSourceContent()
                 };
             },
 
@@ -163,7 +166,8 @@
                 this.$contentSelect.val(map['contentSelect']);
                 this.$textLength.val(map['textLength']);
                 this.$prompt.val(map['prompt']);
-                this.setResult(map['result']);
+                this.setResponse(map['result']);
+                this.setSourceContent(map['source']);
                 this.adjustButtonStates();
             },
 
@@ -190,6 +194,71 @@
                 this.$predefinedPrompts.val(this.$predefinedPrompts.find('option:first').val());
                 this.adjustButtonStates();
                 return false;
+            },
+
+            contentSelectChanged: function (event) {
+                console.log("contentSelectChanged", arguments);
+                event.preventDefault();
+                let contentSelect = this.$contentSelect.val();
+                const key = this.$contentSelect.val();
+                switch (key) {
+                    case 'lastoutput':
+                        this.setSourceContent(this.getResponse());
+                        break;
+                    case 'widget':
+                        this.setSourceContent(this.widget.getValue());
+                        break;
+                    case 'component':
+                        this.retrieveValue(this.componentPath, (value) => this.setSourceContent(value));
+                        break;
+                    case 'page':
+                        this.retrieveValue(this.pagePath, (value) => this.setSourceContent(value));
+                        break;
+                    case 'empty':
+                        this.setSourceContent('');
+                        break;
+                    case '-':
+                        break;
+                    default:
+                        this.showError('Unknown content selector value ' + key);
+                }
+            },
+
+            sourceChanged: function (event) {
+                event.preventDefault();
+                this.$contentSelect.val('-');
+            },
+
+            setSourceContent(value) {
+                if (this.isRichText) {
+                    core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
+                } else {
+                    this.$sourceContent.val(value || '');
+                }
+            },
+
+            getSourceContent() {
+                if (this.isRichText) {
+                    return core.widgetOf(this.$sourceContent.find('textarea')).getValue();
+                } else {
+                    return this.$sourceContent.val();
+                }
+            },
+
+            retrieveValue(path, callback) {
+                $.ajax({
+                    url: ai.const.url.create.approximated +
+                        (this.isRichText ? '.html' : '.md') + core.encodePath(path),
+                    type: "GET",
+                    dataType: "text",
+                    success: (data) => {
+                        callback(data);
+                    },
+                    error: (xhr, status, error) => {
+                        console.error("error loading approximate markdown", xhr, status, error);
+                        this.showError(status + " " + error);
+                    }
+                });
             },
 
             resetHistoryButtonClicked: function (event) {
@@ -238,6 +307,7 @@
             generateButtonClicked: function (event) {
                 event.preventDefault();
                 this.setLoading(true);
+                this.$response[0].scrollIntoView();
 
                 const that = this;
 
@@ -246,27 +316,14 @@
                     that.runningxhr = xhr;
                 }
 
-                let contentSelect = this.$contentSelect.val();
                 let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
-                var inputText;
-                var inputPath;
-                if (contentSelect === 'widget') {
-                    inputText = this.widget.getValue();
-                } else if (contentSelect === 'page') {
-                    inputPath = this.pagePath;
-                } else if (contentSelect === 'component') {
-                    inputPath = this.componentPath;
-                } else if (contentSelect === 'lastoutput') {
-                    inputText = this.getResult();
-                }
+                let source = this.getSourceContent();
 
                 let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
-                        contentSelect: contentSelect,
                         textLength: textLength,
-                        inputText: inputText,
-                        inputPath: inputPath,
+                        inputText: source,
                         streaming: this.streaming,
                         richText: this.isRichText,
                         prompt: prompt
@@ -292,7 +349,7 @@
                     console.log("Success generating text: ", data);
                     this.setLoading(false);
                     let value = data.data.result.text;
-                    this.setResult(value);
+                    this.setResponse(value);
                     this.saveState();
                 } else if (statusOK && data.data.result.streamid) {
                     const streamid = data.data.result.streamid;
@@ -304,7 +361,7 @@
                 }
             },
 
-            setResult: function (value) {
+            setResponse: function (value) {
                 if (this.isRichText) {
                     core.widgetOf(this.$response.find('textarea')).setValue(value || '');
                     this.$response.attr('data-fullresponse', value); // for debugging
@@ -312,9 +369,12 @@
                     this.$response.val(value || '');
                 }
                 this.adjustButtonStates();
+                if (this.$contentSelect.val() === 'lastoutput') {
+                    this.$contentSelect.val('-');
+                }
             },
 
-            getResult: function () {
+            getResponse: function () {
                 if (this.isRichText) {
                     return core.widgetOf(this.$response.find('textarea')).getValue();
                 } else {
@@ -325,13 +385,21 @@
             generateError: function (jqXHR, textStatus, errorThrown) {
                 this.setLoading(false);
                 console.error("Error generating text: ", arguments);
-                this.$alert.html("Error generating text: " + JSON.stringify(arguments));
-                this.$alert.show();
+                this.showError("Error generating text: " + JSON.stringify(arguments));
+            },
+
+            showError(error) {
+                if (error) {
+                    this.$alert.text(error);
+                    this.$alert.show();
+                } else {
+                    this.$alert.hide();
+                }
             },
 
             replaceButtonClicked: function (event) {
                 event.preventDefault();
-                const result = this.getResult();
+                const result = this.getResponse();
                 if (this.isRichText) {
                     this.widget.setValue(result);
                 } else {
@@ -345,7 +413,7 @@
 
             appendButtonClicked: function (event) {
                 event.preventDefault();
-                const result = this.getResult();
+                const result = this.getResponse();
                 let previousValue = this.widget.getValue();
                 previousValue = previousValue ? previousValue.trim() + "\n\n" : "";
                 if (this.isRichText) {
@@ -390,7 +458,7 @@
             onStreamingMessage: function (eventSource, event) {
                 // console.log('onStreamingMessage', arguments);
                 this.streamingResult += JSON.parse(event.data);
-                this.setResult(this.streamingResult);
+                this.setResponse(this.streamingResult);
             },
 
             onStreamingError: function (eventSource, event) {
@@ -398,8 +466,7 @@
                 this.eventSource.close();
                 this.abortRunningCalls();
                 this.setLoading(false);
-                this.$alert.text('Connection failed.');
-                this.$alert.show();
+                this.showError('Connection failed.');
             },
 
             onStreamingFinished: function (event) {
@@ -429,8 +496,7 @@
                 this.eventSource.close();
                 this.setLoading(false);
                 this.abortRunningCalls();
-                this.$alert.text(event.data);
-                this.$alert.show();
+                this.showError(JSON.stringify(event.data));
             }
 
         });

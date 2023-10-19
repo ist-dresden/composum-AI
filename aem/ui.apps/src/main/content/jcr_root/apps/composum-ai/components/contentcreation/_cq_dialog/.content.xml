@@ -90,7 +90,8 @@
                                             <sourceRichtext
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="cq/gui/components/authoring/dialog/richtext"
-                                                    fieldLabel="Source Text"
+                                                    fieldLabel="Source Content ('Data' for the instructions)"
+                                                    fieldDescription="The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed."
                                                     name="./sourceText"
                                                     useFixedInlineToolbar="{Boolean}true">
                                                 <granite:rendercondition

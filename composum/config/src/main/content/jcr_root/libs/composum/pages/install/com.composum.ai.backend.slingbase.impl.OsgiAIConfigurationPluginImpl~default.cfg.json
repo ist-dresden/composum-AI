@@ -1,0 +1,19 @@
+{
+  "services": [
+    "categorize",
+    "create",
+    "sidepanel",
+    "translate"
+  ],
+  "allowedUsers": [
+    ".*"
+  ],
+  "allowedPaths": [
+    "/content/.*"
+  ],
+  "deniedPaths": [
+  ],
+  "allowedViews": [
+    ".*"
+  ]
+}

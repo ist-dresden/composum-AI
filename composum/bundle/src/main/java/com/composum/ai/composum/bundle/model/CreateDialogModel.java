@@ -56,6 +56,6 @@ public class CreateDialogModel extends AbstractModel {
      * Doing fit-content just adapts to the content and you can scroll the whole dialog, anyway.
      */
     public String getHeight() {
-        return "fit-content";
+        return null;
     }
 }
