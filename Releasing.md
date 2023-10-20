@@ -2,6 +2,7 @@
 
 ## Checklist
 
+- local check according to [testcase list](featurespecs/Testcases.md)
 - Run release workflow in github actions
 - wait > 30min until release is
   on https://repo1.maven.org/maven2/com/composum/ai/composum-ai-integration-composum-package/
@@ -13,7 +14,6 @@
 - check on test.composum.com
 - deploy on cloud.composum.com
 - check there
-
 
 ## Local testing of releasing
 
