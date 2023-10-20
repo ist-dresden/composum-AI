@@ -29,38 +29,43 @@ import {AIConfig} from './AIConfig.js';
      * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
      */
     function loadSidebarPanelDialog() {
-        aiconfig.ifEnabled('sidepanel', () => {
-            const dialogId = 'composumAI-sidebar-panel';
-            if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
-                return;
-            }
-            $.ajax({
-                url: SIDEPANEL_DIALOG_URL,
-                type: "GET",
-                dataType: "html",
-                success: function (data) {
-                    if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
-                        return; // double check because of possible race conditions
-                    }
-
-                    // throw away HTML head and so forth:
-                    const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
-                    console.log("found dialog", dialog);
-                    // the first tab and panel are the actual dialog content:
-                    const tab = dialog.find('coral-tabview coral-tab').first();
-                    const panel = dialog.find('coral-tabview coral-panel').first();
-                    panel.attr('id', dialogId);
-                    // now find tablist and panelstack in the #SidePanel:
-                    const tabView = $('#SidePanel coral-tabview')[0];
-                    tabView.tabList.items.add(tab[0]);
-                    tabView.panelStack.items.add(panel[0]);
-                    new SidePanelDialog(panel);
-                }.bind(this),
-                error: function (xhr, status, error) {
-                    console.log("error loading create dialog", xhr, status, error);
+        try {
+            aiconfig.ifEnabled('sidepanel', () => {
+                const dialogId = 'composumAI-sidebar-panel';
+                if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
+                    return;
                 }
+                $.ajax({
+                    url: SIDEPANEL_DIALOG_URL,
+                    type: "GET",
+                    dataType: "html",
+                    success: function (data) {
+                        if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
+                            return; // double check because of possible race conditions
+                        }
+
+                        // throw away HTML head and so forth:
+                        const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
+                        console.log("found dialog", dialog);
+                        // the first tab and panel are the actual dialog content:
+                        const tab = dialog.find('coral-tabview coral-tab').first();
+                        const panel = dialog.find('coral-tabview coral-panel').first();
+                        panel.attr('id', dialogId);
+                        // now find tablist and panelstack in the #SidePanel:
+                        const tabView = $('#SidePanel coral-tabview')[0];
+                        tabView.tabList.items.add(tab[0]);
+                        tabView.panelStack.items.add(panel[0]);
+                        new SidePanelDialog(panel);
+                    }.bind(this),
+                    error: function (xhr, status, error) {
+                        console.log("error loading create dialog", xhr, status, error);
+                    }
+                });
             });
-        });
+        } catch (e) {
+            console.error("error loading sidebar panel dialog", e);
+            debugger;
+        }
     }
 
     /**
@@ -149,12 +154,17 @@ import {AIConfig} from './AIConfig.js';
      */
     function prepareDialog(event) {
         console.log("prepareDialog", event.type, event.target);
-        aiconfig.ifEnabled('create', () => {
-            Coral.commons.ready(event.target, function () {
-                insertCreateButtonsForTextareas(event.target);
-                registerContentDialogInRichtextEditors(event);
+        try {
+            aiconfig.ifEnabled('create', () => {
+                Coral.commons.ready(event.target, function () {
+                    insertCreateButtonsForTextareas(event.target);
+                    registerContentDialogInRichtextEditors(event);
+                });
             });
-        });
+        } catch (e) {
+            console.error("error preparing dialog", event, e);
+            debugger;
+        }
     }
 
     channel.on('cq-layer-activated', initRteHooks);
@@ -166,13 +176,18 @@ import {AIConfig} from './AIConfig.js';
      */
     function initRteHooks(event) {
         console.log("waitForReadyAndInsert", event.type, event.target);
-        aiconfig.ifEnabled('create', () => {
-            Coral.commons.ready(event.target, function () {
-                Granite.author.ContentFrame.getDocument()
-                    .off('editing-start', registerContentDialogInRichtextEditors)
-                    .on('editing-start', registerContentDialogInRichtextEditors);
+        try {
+            aiconfig.ifEnabled('create', () => {
+                Coral.commons.ready(event.target, function () {
+                    Granite.author.ContentFrame.getDocument()
+                        .off('editing-start', registerContentDialogInRichtextEditors)
+                        .on('editing-start', registerContentDialogInRichtextEditors);
+                });
             });
-        });
+        } catch (e) {
+            console.error("error initializing RTE hooks", event, e);
+            debugger;
+        }
     }
 
     const rtebuttonHTML = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
