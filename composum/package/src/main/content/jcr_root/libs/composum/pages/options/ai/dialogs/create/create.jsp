@@ -176,7 +176,7 @@
                                     </c:when>
                                     <c:otherwise>
                                         <textarea name="response"
-                                                  class="form-control ai-response-field" rows="10"></textarea>
+                                                  class="form-control ai-response-field" rows="25"></textarea>
                                     </c:otherwise>
                                 </c:choose>
                             </div>

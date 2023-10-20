@@ -17,7 +17,13 @@
             <text
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
-                    fieldLabel="Some plain text"
+                    fieldLabel="Description"
+                    name="./thetext"/>
+            <text2
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                    fieldLabel="Description with help"
+                    fieldDescription="A text area for which a creation dialog icon appears besides the help icon."
                     name="./thetext"/>
             <richText
                     jcr:primaryType="nt:unstructured"
