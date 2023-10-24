@@ -24,7 +24,7 @@ public interface AIConfigurationPlugin {
      * @see AIConfigurationServlet#SERVICE_TRANSLATE
      */
     @Nullable
-    Set<String> allowedServices(SlingHttpServletRequest request, String contentPath, String editorUrl);
+    Set<String> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl);
 
     /**
      * Reads the GPTConfiguration from sling context aware configurations.
@@ -35,6 +35,6 @@ public interface AIConfigurationPlugin {
      * @throws IllegalArgumentException if none of the paths is a /content/ path.
      */
     @Nullable
-    GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) throws IllegalArgumentException;
+    GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
 
 }

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -18,8 +20,6 @@ import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -116,7 +116,7 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
      */
     @Nullable
     @Override
-    public GPTConfiguration getGPTConfiguration(@NotNull SlingHttpServletRequest request, @NotNull String contentPath) throws IllegalArgumentException {
+    public GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
         return null;
     }
 

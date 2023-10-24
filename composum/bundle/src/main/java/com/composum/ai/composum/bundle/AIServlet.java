@@ -43,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
-import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
@@ -172,9 +171,9 @@ public class AIServlet extends AbstractServiceServlet {
     public static final String RESULTKEY_STREAMID = "streamid";
 
     /**
-     * Parameter for the path of the page, for determining the configuration.
+     * Parameter containing the path of the page, for determining the configuration.
      */
-    public static final String PARAMETER_PAGEPATH = "pagePath";
+    public static final String PARAMETER_CONFIGBASEPATH = "configBasePath";
 
     /**
      * Session contains a map at this key that maps the streamids to the streaming handle.
@@ -275,8 +274,8 @@ public class AIServlet extends AbstractServiceServlet {
         @Override
         public final void doIt(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response, @Nullable ResourceHandle resource) throws RepositoryException, IOException, ServletException {
             Status status = new Status(request, response, LOG);
-            String pagePath = status.getRequiredParameter(PARAMETER_PAGEPATH, null, "No pagePath given");
-            GPTConfiguration config = configurationService.getGPTConfiguration(request, pagePath);
+            String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
+            GPTConfiguration config = configurationService.getGPTConfiguration(request, configBasePath);
 
             try {
                 performOperation(status, request, response, config);

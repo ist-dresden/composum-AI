@@ -35,6 +35,6 @@ public interface AIConfigurationService {
      * @throws IllegalArgumentException if none of the paths is a /content/ path.
      */
     @Nullable
-    GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) throws IllegalArgumentException;
+    GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
 
 }

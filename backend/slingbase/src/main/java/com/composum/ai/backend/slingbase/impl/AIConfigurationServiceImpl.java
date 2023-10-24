@@ -55,7 +55,7 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     }
 
     @Override
-    public GPTConfiguration getGPTConfiguration(@NotNull SlingHttpServletRequest request, @NotNull String contentPath) throws IllegalArgumentException {
+    public GPTConfiguration getGPTConfiguration(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
         for (AIConfigurationPlugin plugin : plugins) {
             try {
                 GPTConfiguration configuration = plugin.getGPTConfiguration(request, contentPath);

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -33,9 +34,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
@@ -81,7 +82,8 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     /**
      * Optional numerical parameter limiting the number of tokens (about 3/4 english word on average) to be generated.
      * That might lead to cutoff, as this is a hard limit and ChatGPT doesn't know about that during generation.
-     * So it's advisable to specify the desired text length in the prompt, too.
+     * So it's advisable to specify the desired text length in the prompt, too. - Note there is an alternative in
+     * {@link #PARAMETER_TEXTLENGTH}.
      */
     public static final String PARAMETER_MAXTOKENS = "maxtokens";
 
@@ -106,15 +108,19 @@ public class AICreateServlet extends SlingAllMethodsServlet {
      */
     public static final String PARAMETER_STREAMID = "streamid";
 
-
-    @Reference
-    protected GPTChatCompletionService chatService;
+    /**
+     * Parameter containing the path of the page, for determining the configuration.
+     */
+    public static final String PARAMETER_CONFIGBASEPATH = "configBasePath";
 
     @Reference
     protected GPTContentCreationService contentCreationService;
 
     @Reference
     protected ApproximateMarkdownService markdownService;
+
+    @Reference
+    protected AIConfigurationService configurationService;
 
     protected BundleContext bundleContext;
 
@@ -234,6 +240,8 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
         String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
         String sourceText = request.getParameter(PARAMETER_SOURCE);
+        String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
+        GPTConfiguration config = configurationService.getGPTConfiguration(request, configBasePath);
         String chat = request.getParameter(PARAMETER_CHAT);
         if (isNoneBlank(sourcePath, sourceText)) {
             LOG.warn("Cannot use both sourcePath and sourceText");
@@ -241,8 +249,10 @@ public class AICreateServlet extends SlingAllMethodsServlet {
             return;
         }
         boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
+        GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
+        Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
 
-        int maxtokens = 1000; // some arbitrary default
+        int maxtokens = maxTokensParam != null ? maxTokensParam : 1000; // some arbitrary default
         if (isNotBlank(textLength)) {
             Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
             if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
@@ -250,7 +260,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 textLength = matcher.group(2);
             }
         }
-        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response);
+        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response, mergedConfig);
 
         String fullPrompt = prompt;
         if (isNotBlank(textLength)) {
@@ -285,8 +295,9 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         LOG.info("Returning stream id {}", id);
     }
 
-    protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, HttpServletResponse response) throws IOException {
-        GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens);
+    @Nonnull
+    protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, HttpServletResponse response, GPTConfiguration config) throws IOException {
+        GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens).setConfiguration(config);
         additionalParameters = additionalParameters != null ? additionalParameters : new GPTChatRequest();
         if (isNotBlank(chat)) {
             try {
