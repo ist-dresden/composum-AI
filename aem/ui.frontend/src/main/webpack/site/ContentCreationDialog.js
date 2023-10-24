@@ -271,6 +271,7 @@ class ContentCreationDialog {
             source: this.getSourceContent(),
             textLength: this.$textLengthSelector.val(),
             richText: this.isRichtext,
+            configBasePath: this.pagePath(this.componentPath)
         };
         console.log("createContent", data);
         this.setLoading(true);
