@@ -18,6 +18,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.google.common.base.Strings;
 
@@ -43,12 +44,12 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      */
     @Nonnull
     @Override
-    public String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage, boolean richtext) {
+    public String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage, @Nullable GPTConfiguration configuration) {
         if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(sourceLanguage) || Strings.isNullOrEmpty(targetLanguage)) {
             return "";
         }
 
-        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, richtext);
+        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
         String response = chatCompletionService.getSingleChatCompletion(request);
         response = response.trim();
         LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
@@ -56,23 +57,23 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     }
 
     @Override
-    public void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, boolean richtext, @Nonnull GPTCompletionCallback callback) throws GPTException {
+    public void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration, @Nonnull GPTCompletionCallback callback) throws GPTException {
         if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(sourceLanguage) || Strings.isNullOrEmpty(targetLanguage)) {
             throw new IllegalArgumentException("Empty text or languages");
         }
 
-        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, richtext);
+        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
         chatCompletionService.streamingChatCompletion(request, callback);
     }
 
     public static final Pattern HTML_TAG_AT_START = Pattern.compile("\\A\\s*(<[^>]*>)");
 
-    private GPTChatRequest makeRequest(String text, String sourceLanguage, String targetLanguage, boolean richtext) {
+    private GPTChatRequest makeRequest(String text, String sourceLanguage, String targetLanguage, @Nullable GPTConfiguration configuration) {
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
         String addition = "";
-        if (richtext) {
+        if (configuration != null && configuration.isHtml()) {
             Matcher m = HTML_TAG_AT_START.matcher(text);
             String firstTag = "<p>";
             if (m.find()) {

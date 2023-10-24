@@ -103,6 +103,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     public static final String COMPOSUM_AI_CHAT_GPT = "Composum-AI-ChatGPT";
 
+    /**
+     * The OpenAI Key for accessing ChatGPT; system default if not given in request.
+     */
     private String apiKey;
     private String defaultModel;
 

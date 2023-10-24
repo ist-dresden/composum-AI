@@ -26,7 +26,7 @@ public class RunGPTCreateDescriptionImpl extends AbstractGPTRunner {
     }
 
     private void printDescriptionFor(String text, int maxWords) {
-        String result = service.generateDescription(text, maxWords);
+        String result = service.generateDescription(text, maxWords, null);
         // print parameters and result
         System.out.printf("%ndescription for '%s': %n%s%n%n", text, result);
     }

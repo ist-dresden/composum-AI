@@ -18,6 +18,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 
@@ -55,12 +56,12 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
 
     @Nonnull
     @Override
-    public List<String> generateKeywords(@Nullable String text) {
+    public List<String> generateKeywords(@Nullable String text, @Nullable GPTConfiguration configuration) {
         if (text == null || text.isBlank()) {
             return List.of();
         }
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_MAKEKEYWORDS);
-        GPTChatRequest request = new GPTChatRequest();
+        GPTChatRequest request = new GPTChatRequest(configuration);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText));
         request.addMessages(messages);
@@ -78,12 +79,12 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
 
     @Nonnull
     @Override
-    public String generateDescription(@Nullable String text, int maxwords) {
+    public String generateDescription(@Nullable String text, int maxwords, @Nullable GPTConfiguration configuration) {
         if (text == null || text.isBlank()) {
             return "";
         }
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_MAKEDESCRIPTION);
-        GPTChatRequest request = new GPTChatRequest();
+        GPTChatRequest request = new GPTChatRequest(configuration);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         int maxtokens = 150;
         Map<String, String> placeholders = new HashMap<>();
