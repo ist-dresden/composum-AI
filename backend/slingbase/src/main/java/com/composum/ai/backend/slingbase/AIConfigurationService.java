@@ -34,6 +34,7 @@ public interface AIConfigurationService {
      * @param contentPath if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/
      * @throws IllegalArgumentException if none of the paths is a /content/ path.
      */
+    @Nullable
     GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) throws IllegalArgumentException;
 
 }

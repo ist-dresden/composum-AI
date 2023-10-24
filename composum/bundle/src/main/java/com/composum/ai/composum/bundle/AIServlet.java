@@ -46,8 +46,10 @@ import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.composum.bundle.model.TranslationDialogModel;
 import com.composum.sling.core.BeanContext;
@@ -170,12 +172,14 @@ public class AIServlet extends AbstractServiceServlet {
     public static final String RESULTKEY_STREAMID = "streamid";
 
     /**
+     * Parameter for the path of the page, for determining the configuration.
+     */
+    public static final String PARAMETER_PAGEPATH = "pagePath";
+
+    /**
      * Session contains a map at this key that maps the streamids to the streaming handle.
      */
     public static final String SESSIONKEY_STREAMING = AIServlet.class.getName() + ".streaming";
-
-    @Reference
-    protected GPTChatCompletionService chatService;
 
     @Reference
     protected GPTTranslationService translationService;
@@ -185,6 +189,9 @@ public class AIServlet extends AbstractServiceServlet {
 
     @Reference
     protected ApproximateMarkdownService markdownService;
+
+    @Reference
+    protected AIConfigurationService configurationService;
 
     protected BundleContext bundleContext;
 
@@ -268,9 +275,11 @@ public class AIServlet extends AbstractServiceServlet {
         @Override
         public final void doIt(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response, @Nullable ResourceHandle resource) throws RepositoryException, IOException, ServletException {
             Status status = new Status(request, response, LOG);
+            String pagePath = status.getRequiredParameter(PARAMETER_PAGEPATH, null, "No pagePath given");
+            GPTConfiguration config = configurationService.getGPTConfiguration(request, pagePath);
 
             try {
-                performOperation(status, request, response);
+                performOperation(status, request, response, config);
             } catch (GPTException e) {
                 status.error("Error accessing ChatGPT", e);
                 status.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -282,7 +291,8 @@ public class AIServlet extends AbstractServiceServlet {
             status.sendJson();
         }
 
-        protected abstract void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response);
+        protected abstract void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                                 @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config);
 
         protected Integer getOptionalInt(Status status, SlingHttpServletRequest request, String parameterName) {
             String parameter = request.getParameter(parameterName);
@@ -299,8 +309,8 @@ public class AIServlet extends AbstractServiceServlet {
 
     /**
      * Servlet representation of {@link GPTTranslationService}, specifically
-     * {@link GPTTranslationService#singleTranslation(String, String, String, boolean)} and the streaming version,
-     * with arguments text, sourceLanguage, targetLanguage, {@value #PARAMETER_RICHTEXT} .
+     * {@link GPTTranslationService#singleTranslation(String, String, String, GPTConfiguration)} and the streaming version,
+     * with arguments text, sourceLanguage, targetLanguage, {@value #PARAMETER_RICHTEXT}, pagePath .
      * Input are the parameters text, sourceLanguage, targetLanguage, output is in data.result.translation
      * a list containing the translation as (currently) a single string.
      * We use a list since it might be sensible to create multiple translation variants in the future, if requested.
@@ -309,7 +319,8 @@ public class AIServlet extends AbstractServiceServlet {
     public class TranslateOperation extends AbstractGPTServletOperation {
 
         @Override
-        protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                        @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String text = XSS.filter(request.getParameter(PARAMETER_TEXT));
             String path = request.getParameter(PARAMETER_PATH);
             if (isBlank(path)) {
@@ -323,6 +334,7 @@ public class AIServlet extends AbstractServiceServlet {
             String targetLanguage = request.getParameter("targetLanguage");
             boolean streaming = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_STREAMING));
             boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
+            GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
             if (isNoneBlank(path, property)) {
                 ResourceResolver resolver = request.getResourceResolver();
                 Resource nodeResource = resolver.getResource(path);
@@ -361,7 +373,7 @@ public class AIServlet extends AbstractServiceServlet {
                     translation = cached;
                 }
                 if (!streaming && isBlank(translation)) {
-                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage, richtext);
+                    translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage, mergedConfig);
                     translation = XSS.filter(translation);
                     // translationCache.put(cachekey, translation);
                 }
@@ -373,7 +385,7 @@ public class AIServlet extends AbstractServiceServlet {
                         // translationCache.put(cachekey, XSS.filter(result));
                     });
                     String id = saveStream(callback, request);
-                    translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, richtext, callback);
+                    translationService.streamingSingleTranslation(text, sourceLanguage, targetLanguage, mergedConfig, callback);
                     status.data(RESULTKEY).put(RESULTKEY_STREAMID, id);
                 }
             }
@@ -382,16 +394,17 @@ public class AIServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link GPTContentCreationService#generateKeywords(String)} with argument text.
+     * Servlet representation of {@link GPTContentCreationService#generateKeywords(String, GPTConfiguration)} with argument text.
      * Input parameters is text, output is in data.result.keywords a list of keywords.
      */
     public class KeywordsOperation extends AbstractGPTServletOperation {
 
         @Override
-        protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                        @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             if (status.isValid()) {
-                List<String> result = contentCreationService.generateKeywords(text);
+                List<String> result = contentCreationService.generateKeywords(text, config);
                 result = result.stream().map(XSS::filter).collect(Collectors.toList());
                 status.data(RESULTKEY).put(RESULTKEY_KEYWORDS, result);
             }
@@ -400,18 +413,19 @@ public class AIServlet extends AbstractServiceServlet {
     }
 
     /**
-     * Servlet representation of {@link GPTContentCreationService#generateDescription(String, int)} with arguments text and maxwords.
+     * Servlet representation of {@link GPTContentCreationService#generateDescription(String, int, GPTConfiguration)} with arguments text and maxwords.
      * Input parameters is text and the optional numeric parameter maxwords,
      * output is in data.result.description a string containing the description.
      */
     public class DescriptionOperation extends AbstractGPTServletOperation {
 
         @Override
-        protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                        @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             Integer maxwords = getOptionalInt(status, request, PARAMETER_MAXWORDS);
             if (status.isValid()) {
-                String result = contentCreationService.generateDescription(text, maxwords != null ? maxwords : -1);
+                String result = contentCreationService.generateDescription(text, maxwords != null ? maxwords : -1, config);
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_DESCRIPTION, result);
             }
@@ -428,11 +442,13 @@ public class AIServlet extends AbstractServiceServlet {
     public class PromptOperation extends AbstractGPTServletOperation {
 
         @Override
-        protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                        @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
             Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePrompt(prompt, GPTChatRequest.ofMaxTokens(maxtokens));
+                String result = contentCreationService.executePrompt(prompt,
+                        GPTChatRequest.ofMaxTokens(maxtokens).setConfiguration(config));
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -449,12 +465,14 @@ public class AIServlet extends AbstractServiceServlet {
     public class PromptOnTextOperation extends AbstractGPTServletOperation {
 
         @Override
-        protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                        @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT, null, "No prompt given");
             String text = status.getRequiredParameter(PARAMETER_TEXT, null, "No text given");
             Integer maxtokens = getOptionalInt(status, request, PARAMETER_MAXTOKENS);
             if (status.isValid()) {
-                String result = contentCreationService.executePromptOnText(prompt, text, GPTChatRequest.ofMaxTokens(maxtokens));
+                String result = contentCreationService.executePromptOnText(prompt, text,
+                        GPTChatRequest.ofMaxTokens(maxtokens).setConfiguration(config));
                 result = XSS.filter(result);
                 status.data(RESULTKEY).put(RESULTKEY_TEXT, result);
             }
@@ -474,7 +492,8 @@ public class AIServlet extends AbstractServiceServlet {
     public class CreateOperation extends AbstractGPTServletOperation {
 
         @Override
-        protected void performOperation(Status status, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
+                                        @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT,
                     Pattern.compile("(?s).*\\S.*"), "No prompt given");
             boolean streaming = "true".equals(request.getParameter(PARAMETER_STREAMING));
@@ -495,7 +514,7 @@ public class AIServlet extends AbstractServiceServlet {
                     textLength = matcher.group(2);
                 }
             }
-            GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, status);
+            GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, status, config);
 
             if (status.isValid()) {
                 String fullPrompt = prompt;
@@ -538,8 +557,8 @@ public class AIServlet extends AbstractServiceServlet {
             }
         }
 
-        protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, Status status) {
-            GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens);
+        protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, Status status, GPTConfiguration config) {
+            GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens).setConfiguration(config);
             additionalParameters = additionalParameters != null ? additionalParameters : new GPTChatRequest();
             if (isNotBlank(chat)) {
                 try {

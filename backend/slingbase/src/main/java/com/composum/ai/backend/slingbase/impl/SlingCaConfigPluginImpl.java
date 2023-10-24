@@ -1,7 +1,5 @@
 package com.composum.ai.backend.slingbase.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,21 +50,13 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
             throw new IllegalArgumentException("Path " + resource.getPath() + " is not a /content/ path");
         }
 
-        ConfigurationBuilder confBuilder = resource.adaptTo(ConfigurationBuilder.class);
-        Collection<OpenAIConfig> configs = confBuilder.asCollection(OpenAIConfig.class);
-        // Hack since strangely configs is empty in the test, but not the result of confBuilder.as .
-        configs = new ArrayList<>(configs);
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
         OpenAIConfig config = confBuilder.as(OpenAIConfig.class);
-        configs.add(config);
-
         GPTConfiguration result = null;
-        String key = configs.stream()
-                .filter(Objects::nonNull)
-                .filter(k -> StringUtils.isNotBlank(k.openaikey()))
-                .findFirst()
-                .map(OpenAIConfig::openaikey)
-                .orElse(null);
-        LOG.debug("found key: {}", key != null);
-        return key != null ? new GPTConfiguration(key, null) : null;
+        if (StringUtils.isNotBlank(config.openaikey())) {
+            result = new GPTConfiguration(config.openaikey(), null);
+        }
+        LOG.debug("found key: {}", result);
+        return result;
     }
 }

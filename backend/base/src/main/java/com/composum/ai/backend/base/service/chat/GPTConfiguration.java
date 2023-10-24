@@ -2,6 +2,7 @@ package com.composum.ai.backend.base.service.chat;
 
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.jsoup.internal.StringUtil;
@@ -77,6 +78,14 @@ public class GPTConfiguration {
     @Nullable
     public static GPTConfiguration merge(@Nullable GPTConfiguration first, @Nullable GPTConfiguration second) {
         return first != null ? first.merge(second) : second;
+    }
+
+    /**
+     * Returns {@link #HTML} if richText is true, {@link #MARKDOWN} otherwise.
+     */
+    @Nonnull
+    public static GPTConfiguration ofRichText(boolean richText) {
+        return new GPTConfiguration(null, richText ? AnswerType.HTML : AnswerType.MARKDOWN);
     }
 
     @Override

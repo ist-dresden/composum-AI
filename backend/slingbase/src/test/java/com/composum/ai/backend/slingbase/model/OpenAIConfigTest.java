@@ -31,11 +31,6 @@ public class OpenAIConfigTest {
         OpenAIConfig config = configurationBuilder.as(OpenAIConfig.class);
 
         assertEquals("test-api-key", config.openaikey());
-
-        Collection<OpenAIConfig> configs = configurationBuilder.asCollection(OpenAIConfig.class);
-        // HUH???? Why is this empty? Let's see whether that happens also in the server.
-        assertEquals(0, configs.size());
-        // assertEquals("test-api-key-global", configs.iterator().next().openaikey());
     }
 
     @Test
@@ -49,10 +44,6 @@ public class OpenAIConfigTest {
         OpenAIConfig config = configurationBuilder.as(OpenAIConfig.class);
 
         assertEquals("test-api-key-global", config.openaikey());
-
-        Collection<OpenAIConfig> configs = configurationBuilder.asCollection(OpenAIConfig.class);
-        assertEquals(0, configs.size()); // HUH???
-        // assertEquals("test-api-key-global", configs.iterator().next().openaikey());
     }
 
 }
