@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
@@ -93,7 +94,7 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        String contentPath = request.getRequestPathInfo().getSuffix();
+        String contentPath = StringUtils.removeEnd(request.getRequestPathInfo().getSuffix(), ".html");
         String editorUrl = request.getParameter(PARAM_EDITORURL);
         Set<String> allowedServices = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
         Map<String, Boolean> allowedServicesMap = allowedServices.stream()

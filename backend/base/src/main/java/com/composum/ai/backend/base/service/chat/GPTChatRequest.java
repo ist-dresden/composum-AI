@@ -143,6 +143,7 @@ public class GPTChatRequest {
         return "GPTChatRequest{" +
                 "messages=" + messages +
                 ", maxTokens=" + maxTokens +
+                ", configuration=" + configuration +
                 '}';
     }
 

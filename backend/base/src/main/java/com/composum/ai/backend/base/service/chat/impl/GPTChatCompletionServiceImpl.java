@@ -247,7 +247,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             String jsonRequest = createJsonRequest(request, false);
             LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
 
-            HttpRequest httpRequest = makeRequest(jsonRequest);
+            HttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
             HttpResponse<String> response = performCall(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             ChatCompletionResult result = mapper.readValue(response.body(), ChatCompletionResult.class);
@@ -274,11 +274,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    private HttpRequest makeRequest(String jsonRequest) {
+    private HttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().isBlank() ? gptConfiguration.getApiKey() : this.apiKey;
         return HttpRequest.newBuilder()
                 .uri(URI.create(CHAT_COMPLETION_URL))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + apiKey)
+                .header("Authorization", "Bearer " + actualApiKey)
                 .timeout(Duration.ofSeconds(requestTimeout))
                 .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                 .build();
@@ -295,7 +296,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
             LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
 
-            HttpRequest httpRequest = makeRequest(jsonRequest);
+            HttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
 
             performCallAsync(httpRequest, new ResponseLineSubscriber(callback, id), 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
