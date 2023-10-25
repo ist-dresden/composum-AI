@@ -2,6 +2,7 @@ package com.composum.ai.backend.base.service.chat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -145,4 +146,16 @@ public class GPTChatRequest {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GPTChatRequest)) return false;
+        GPTChatRequest that = (GPTChatRequest) o;
+        return Objects.equals(getMessages(), that.getMessages()) && Objects.equals(getMaxTokens(), that.getMaxTokens()) && Objects.equals(getConfiguration(), that.getConfiguration());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getMessages(), getMaxTokens(), getConfiguration());
+    }
 }

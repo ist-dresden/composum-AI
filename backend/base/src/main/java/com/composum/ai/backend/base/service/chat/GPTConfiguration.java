@@ -89,6 +89,17 @@ public class GPTConfiguration {
     }
 
     @Override
+    public String toString() {
+        return "GPTConfiguration{" +
+                "answerType=" + getAnswerType() +
+                ", apiKey='" + (StringUtil.isBlank(getApiKey()) ? "" : "(hidden)") + '\'' +
+                '}';
+    }
+
+    public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, AnswerType.MARKDOWN);
+    public static final GPTConfiguration HTML = new GPTConfiguration(null, AnswerType.HTML);
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof GPTConfiguration)) return false;
@@ -100,16 +111,4 @@ public class GPTConfiguration {
     public int hashCode() {
         return Objects.hash(getApiKey(), getAnswerType());
     }
-
-    @Override
-    public String toString() {
-        return "GPTConfiguration{" +
-                "answerType=" + getAnswerType() +
-                ", apiKey='" + (StringUtil.isBlank(getApiKey()) ? "" : "(hidden)") + '\'' +
-                '}';
-    }
-
-    public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, AnswerType.MARKDOWN);
-    public static final GPTConfiguration HTML = new GPTConfiguration(null, AnswerType.HTML);
-
 }
