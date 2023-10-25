@@ -50,6 +50,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -145,6 +146,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected ThreadPoolManager threadPoolManager;
 
     protected ThreadPool executor;
+    protected boolean disabled;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
@@ -163,7 +165,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.error("Cannot parse temperature {}", config.temperature(), e);
             this.temperature = null;
         }
-        if (config == null || !config.disable()) {
+        this.disabled = config != null && config.disabled();
+        if (!disabled) {
             this.apiKey = retrieveOpenAIKey(config);
         } else {
             LOG.info("ChatGPT is disabled.");
@@ -206,7 +209,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         String apiKey = null;
         if (config != null) {
             apiKey = config.openAiApiKey();
-            if (apiKey != null && !apiKey.isBlank()) {
+            if (apiKey != null && !apiKey.isBlank() && !apiKey.startsWith("$[secret")) {
                 LOG.info("Using OpenAI API key from configuration.");
                 return apiKey.trim();
             }
@@ -224,12 +227,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
         apiKey = System.getenv(OPENAI_API_KEY);
         if (apiKey != null && !apiKey.isBlank()) {
-            LOG.info("Using OpenAI API key from environment variable {}.", OPENAI_API_KEY);
+            LOG.info("Using OpenAI API key from environment variable {}.");
             return apiKey.trim();
         }
         apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
         if (apiKey != null && !apiKey.isBlank()) {
-            LOG.info("Using OpenAI API key from system property {}.", OPENAI_API_KEY_SYSPROP);
+            LOG.info("Using OpenAI API key from system property {}.");
             return apiKey.trim();
         }
         return null;
@@ -588,7 +591,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     public boolean isEnabled() {
-        return apiKey != null && !apiKey.isEmpty();
+        return !disabled;
+    }
+
+    @Override
+    public boolean isEnabled(GPTConfiguration gptConfig) {
+        return isEnabled() && (
+                apiKey != null && !apiKey.isBlank() ||
+                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().isBlank()
+        );
     }
 
     @Nonnull
@@ -658,12 +669,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         return new HtmlToMarkdownConverter().convert(html).trim();
     }
 
-    @ObjectClassDefinition(name = "GPT Chat Completion Service",
+    @ObjectClassDefinition(name = "Composum AI GPT Chat Completion Service",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
         @AttributeDefinition(name = "Disable the GPT Chat Completion Service", description = "Disable the GPT Chat Completion Service", defaultValue = "false")
-        boolean disable();
+        boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
 
         @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
         String openAiApiKey();

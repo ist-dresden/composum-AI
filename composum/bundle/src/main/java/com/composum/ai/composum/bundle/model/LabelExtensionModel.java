@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.AIConfigurationServlet;
 import com.composum.pages.commons.model.AbstractModel;
@@ -70,7 +71,8 @@ public class LabelExtensionModel extends AbstractModel {
             widget = context.getAttribute(EditWidgetTag.WIDGET_VAR, EditWidgetTag.class);
             chatCompletionService = context.getService(GPTChatCompletionService.class);
             aiConfigurationService = context.getService(AIConfigurationService.class);
-            if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled()) {
+            GPTConfiguration gptConfig = aiConfigurationService != null ? aiConfigurationService.getGPTConfiguration(context.getRequest(), getPath()) : null;
+            if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled(gptConfig)) {
                 model = (Model) widget.getModel();
                 valid = true;
             }

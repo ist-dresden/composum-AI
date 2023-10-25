@@ -41,7 +41,7 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
-            public boolean disable() {
+            public boolean disabled() {
                 return false;
             }
 

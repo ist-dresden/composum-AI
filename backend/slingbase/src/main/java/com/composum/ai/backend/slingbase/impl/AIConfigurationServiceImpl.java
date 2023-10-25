@@ -16,6 +16,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
@@ -31,24 +32,30 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     protected volatile List<AIConfigurationPlugin> plugins;
 
+    @Reference
+    protected GPTChatCompletionService chatCompletionService;
+
     /**
      * Union of the plugin's results.
      */
     @Override
     @Nullable
     public Set<String> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
+        GPTConfiguration gptConfiguration = getGPTConfiguration(request, contentPath);
         Set<String> allowedServices = new HashSet<>();
-        for (AIConfigurationPlugin plugin : plugins) {
-            try {
-                Set<String> services = plugin.allowedServices(request, contentPath, editorUrl);
-                if (services != null) {
-                    allowedServices.addAll(services);
-                    if (!services.isEmpty()) {
-                        LOG.info("Plugin {} allowed services {}", plugin.getClass(), services);
+        if (chatCompletionService.isEnabled(gptConfiguration)) {
+            for (AIConfigurationPlugin plugin : plugins) {
+                try {
+                    Set<String> services = plugin.allowedServices(request, contentPath, editorUrl);
+                    if (services != null) {
+                        allowedServices.addAll(services);
+                        if (!services.isEmpty()) {
+                            LOG.info("Plugin {} allowed services {}", plugin.getClass(), services);
+                        }
                     }
+                } catch (Exception e) {
+                    LOG.error("Error in AIConfigurationPlugin with {}", plugin.getClass(), e);
                 }
-            } catch (Exception e) {
-                LOG.error("Error in AIConfigurationPlugin with {}", plugin.getClass(), e);
             }
         }
         return allowedServices;

@@ -4,7 +4,9 @@ import static org.apache.sling.testing.mock.caconfig.ContextPlugins.CACONFIG;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.security.Principal;
@@ -23,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 
 /**
@@ -36,13 +39,15 @@ public class AIConfigurationServiceImplTest {
 
     private OsgiAIConfigurationPluginImpl osgiAIConfigurationPlugin = new OsgiAIConfigurationPluginImpl();
     private SlingCaConfigPluginImpl slingCaConfigPlugin = new SlingCaConfigPluginImpl();
-    private OsgiAIConfiguration osgiCfg = Mockito.mock(OsgiAIConfiguration.class);
+    private OsgiAIConfiguration osgiCfg = mock(OsgiAIConfiguration.class);
+    private GPTChatCompletionService chatCompletionService = mock(GPTChatCompletionService.class);
 
-    private Principal principal = Mockito.mock(Principal.class);
-    private UserManager userManager = Mockito.mock(UserManager.class);
+    private Principal principal = mock(Principal.class);
+    private UserManager userManager = mock(UserManager.class);
 
     private AIConfigurationServiceImpl service = new AIConfigurationServiceImpl() {{
         this.plugins = List.of(slingCaConfigPlugin, osgiAIConfigurationPlugin);
+        this.chatCompletionService = AIConfigurationServiceImplTest.this.chatCompletionService;
     }};
 
     @Before
@@ -56,6 +61,8 @@ public class AIConfigurationServiceImplTest {
         when(osgiCfg.allowedUsers()).thenReturn(new String[]{"theuser"});
         when(osgiCfg.allowedViews()).thenReturn(new String[]{".*"});
         osgiAIConfigurationPlugin.activate(osgiCfg);
+
+        when(chatCompletionService.isEnabled(any())).thenReturn(true);
     }
 
     protected SlingHttpServletRequest getRequest() {
@@ -67,6 +74,7 @@ public class AIConfigurationServiceImplTest {
 
     @Test
     public void testAllow() {
+        context.request().setResource(context.create().resource("/content/allowed/path"));
         Set<String> allowed = service.allowedServices(getRequest(), "/content/allowed/path", "whatever");
         assertThat(allowed.size(), is((1)));
         assertThat(allowed, CoreMatchers.hasItem("create"));
@@ -74,9 +82,11 @@ public class AIConfigurationServiceImplTest {
 
     @Test
     public void testDeny() {
+        context.request().setResource(context.create().resource("/content/allowed/denied/path"));
         Set<String> allowed = service.allowedServices(getRequest(), "/content/allowed/denied/path", "whatever");
         assertThat(allowed.size(), is((0)));
 
+        context.request().setResource(context.create().resource("/content/other/path"));
         allowed = service.allowedServices(getRequest(), "/content/other/path", null);
         assertThat(allowed.size(), is((0)));
     }

@@ -32,3 +32,8 @@ configuration auditing, configuration validation.
 We will discuss the structure of storing the configuration in the JCR and the model classes for that.
 
 ### Configuration in the JCR, using sling context aware configuration
+
+## References
+
+- [Sling Context Aware Configuration](https://sling.apache.org/documentation/bundles/context-aware-configuration/context-aware-configuration.html)
+- [Secrets in the AEMaaCS cloud](https://experienceleague.adobe.com/docs/experience-manager-cloud-service/content/implementing/deploying/configuring-osgi.html?lang=en)
