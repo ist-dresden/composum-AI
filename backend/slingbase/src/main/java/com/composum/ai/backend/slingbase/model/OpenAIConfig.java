@@ -8,6 +8,6 @@ import org.apache.sling.caconfig.annotation.Property;
 public @interface OpenAIConfig {
 
     @Property(label = "OpenAI API Key", description = "OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
-    String openaikey() default "";
+    String openAiApiKey();
 
 }
