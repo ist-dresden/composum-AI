@@ -19,7 +19,7 @@ public interface GPTContentCreationService {
      * @return A list of generated keywords, possibly empty.
      */
     @Nonnull
-    List<String> generateKeywords(@Nullable String text) throws GPTException;
+    List<String> generateKeywords(@Nullable String text, @Nullable GPTConfiguration configuration) throws GPTException;
 
     /**
      * Generates a description from the given text.
@@ -29,7 +29,7 @@ public interface GPTContentCreationService {
      * @return A generated description, possibly empty.
      */
     @Nonnull
-    String generateDescription(@Nullable String text, int maxwords) throws GPTException;
+    String generateDescription(@Nullable String text, int maxwords, @Nullable GPTConfiguration configuration) throws GPTException;
 
     /**
      * Executes a given prompt from the user using ChatGPT.

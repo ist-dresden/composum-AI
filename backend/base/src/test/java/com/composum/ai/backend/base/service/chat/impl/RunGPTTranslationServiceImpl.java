@@ -2,6 +2,8 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import java.io.IOException;
 
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+
 /**
  * Tries an actual call to ChatGPT. Since that costs money (though much less than a cent), needs a secret key and takes a couple of seconds,
  * we don't do that as an JUnit test.
@@ -34,7 +36,8 @@ public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
     }
 
     private void doTranslation(String text, String from, String to, boolean richText) {
-        String result = translationService.singleTranslation(text, from, to, richText);
+        String result = translationService.singleTranslation(text, from, to,
+                richText ? GPTConfiguration.HTML : GPTConfiguration.MARKDOWN);
         // print parameters and result
         System.out.printf("%n%ntranslation of '%s' from %s to %s: %s%n%n", text, from, to, result);
     }

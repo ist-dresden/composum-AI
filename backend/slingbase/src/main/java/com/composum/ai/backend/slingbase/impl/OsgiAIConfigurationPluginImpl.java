@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -19,6 +20,7 @@ import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -27,6 +29,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 
 /**
@@ -60,7 +63,9 @@ import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
  * @see AIConfigurationPlugin
  * @see OsgiAIConfiguration
  */
-@Component
+@Component(
+        property = Constants.SERVICE_RANKING + ":Integer=2000"
+)
 @Designate(ocd = OsgiAIConfiguration.class, factory = true)
 public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
 
@@ -82,7 +87,7 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
     }
 
     @Override
-    @Nonnull
+    @Nullable
     public Set<String> allowedServices(SlingHttpServletRequest request, String contentPath, String editorUrl) {
         Set<String> allowedServices = new HashSet<>();
         try {
@@ -106,6 +111,15 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
         return allowedServices;
     }
 
+    /**
+     * Not implemented here.
+     */
+    @Nullable
+    @Override
+    public GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+        return null;
+    }
+
     protected List<String> userAndGroupsOfUser(SlingHttpServletRequest request) throws RepositoryException {
         List<String> authorizableNames = new ArrayList<>();
         UserManager userManager = request.getResourceResolver().adaptTo(UserManager.class);
@@ -127,9 +141,11 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
     }
 
     protected boolean matchesAny(String value, String[] patterns) {
-        for (String pattern : patterns) {
-            if (value.matches(pattern)) {
-                return true;
+        if (patterns != null) {
+            for (String pattern : patterns) {
+                if (value.matches(pattern)) {
+                    return true;
+                }
             }
         }
         return false;

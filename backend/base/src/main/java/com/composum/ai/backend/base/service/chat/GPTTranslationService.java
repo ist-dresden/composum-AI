@@ -14,12 +14,12 @@ public interface GPTTranslationService {
      * Translate the text from the target to destination language, either Java locale name or language name.
      */
     @Nonnull
-    String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage, boolean richtext) throws GPTException;
+    String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage, @Nullable GPTConfiguration configuration) throws GPTException;
 
 
     /**
      * Translate the text from the target to destination language, either Java locale name or language name.
      */
-    void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, boolean richtext, @Nonnull GPTCompletionCallback callback) throws GPTException;
+    void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
 }

@@ -71,6 +71,6 @@ public class CategorizeDialogModel extends AbstractModel {
         Resource pageResource = getContainingPage().getResource();
         String markdown = markdownService.approximateMarkdown(ResourceHandle.use(pageResource).getContentResource(), getContext().getRequest(), getContext().getResponse());
         GPTContentCreationService contentCreationService = Objects.requireNonNull(context.getService(GPTContentCreationService.class));
-        return contentCreationService.generateKeywords(markdown);
+        return contentCreationService.generateKeywords(markdown, null);
     }
 }

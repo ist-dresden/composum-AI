@@ -27,7 +27,7 @@ public class RunGPTCreateKeywordsImpl extends AbstractGPTRunner {
     }
 
     private void printKeywordsFor(String text) {
-        List<String> result = service.generateKeywords(text);
+        List<String> result = service.generateKeywords(text, null);
         // print parameters and result
         System.out.printf("%n%nkeywords for '%s': %s%n%n", text, result);
     }

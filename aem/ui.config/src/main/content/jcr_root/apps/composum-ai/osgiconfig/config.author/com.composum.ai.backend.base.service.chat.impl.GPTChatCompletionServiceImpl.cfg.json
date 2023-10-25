@@ -1,0 +1,3 @@
+{
+  "openAiApiKey": "$[secret:OPENAI_API_KEY]"
+}

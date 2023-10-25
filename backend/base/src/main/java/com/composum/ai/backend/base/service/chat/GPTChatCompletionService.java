@@ -75,4 +75,9 @@ public interface GPTChatCompletionService {
      */
     boolean isEnabled();
 
+    /**
+     * Checks whether {@link #isEnabled()} and whether gptConfig enables executing GPT calls.
+     * (That is currently whether there is an api key either globally or in the gptConfig).
+     */
+    boolean isEnabled(GPTConfiguration gptConfig);
 }

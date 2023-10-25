@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -40,6 +42,19 @@ public class GPTChatMessage {
                 "role=" + role +
                 ", text='" + content + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GPTChatMessage)) return false;
+        GPTChatMessage that = (GPTChatMessage) o;
+        return getRole() == that.getRole() && Objects.equals(getContent(), that.getContent());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getRole(), getContent());
     }
 
 }

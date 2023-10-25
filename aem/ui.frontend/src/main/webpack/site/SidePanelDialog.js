@@ -248,7 +248,8 @@ class SidePanelDialog {
         const data = {
             prompt: this.$promptContainer.find('.composum-ai-prompt:first').val(),
             chat: JSON.stringify(chatHistory),
-            sourcePath: this.getSelectedPath()
+            sourcePath: this.getSelectedPath(),
+            configBasePath: this.getContentPath()
         };
         console.log("createContent", data);
         this.setLoading(true);

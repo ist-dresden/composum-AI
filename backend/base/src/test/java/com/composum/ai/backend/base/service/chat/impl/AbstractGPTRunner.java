@@ -18,12 +18,18 @@ public abstract class AbstractGPTRunner {
 
     protected ThreadPoolManager mockThreadPoolManager = Mockito.mock(ThreadPoolManager.class);
 
+    protected DefaultThreadPool defaultThreadPool;
+
     protected void setup() throws IOException {
         chatCompletionService = new GPTChatCompletionServiceImpl() {{
             this.threadPoolManager = mockThreadPoolManager;
         }};
-        Mockito.when(mockThreadPoolManager.get(COMPOSUM_AI_CHAT_GPT))
-                .thenReturn(new DefaultThreadPool(COMPOSUM_AI_CHAT_GPT, null));
+        Mockito.when(mockThreadPoolManager.get(COMPOSUM_AI_CHAT_GPT)).thenAnswer(invocation -> {
+            if (defaultThreadPool == null) {
+                defaultThreadPool = new DefaultThreadPool(COMPOSUM_AI_CHAT_GPT, null);
+            }
+            return defaultThreadPool;
+        });
         // read key from file ~/.openaiapi
         Path filePath = Paths.get(System.getProperty("user.home"), ".openaiapi");
         String apiKey = Files.readString(filePath);
@@ -35,7 +41,7 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
-            public boolean disable() {
+            public boolean disabled() {
                 return false;
             }
 
@@ -69,6 +75,12 @@ public abstract class AbstractGPTRunner {
                 return 20;
             }
         }, null);
+    }
+
+    protected void shutdown() {
+        if (defaultThreadPool != null) {
+            defaultThreadPool.shutdown();
+        }
     }
 
 }
