@@ -54,7 +54,7 @@ public class GPTChatMessage {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRole(), getContent());
+        return Objects.hash(getRole() != null ? getRole().toString() : "", getContent());
     }
 
 }
