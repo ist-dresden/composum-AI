@@ -69,6 +69,20 @@ public class AllowDenyMatcherUtil {
         return false;
     }
 
+    public static boolean matchesAny(String value, List<String> patterns) {
+        if (patterns != null) {
+            for (String pattern : patterns) {
+                if (pattern != null && value.matches(pattern)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Collects the username and all groups the user belongs to (either explicitly or inherited).
+     */
     public static List<String> userAndGroupsOfUser(SlingHttpServletRequest request) throws RepositoryException {
         List<String> authorizableNames = new ArrayList<>();
         UserManager userManager = request.getResourceResolver().adaptTo(UserManager.class);

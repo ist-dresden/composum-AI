@@ -1,7 +1,13 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 
@@ -75,9 +81,20 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String contentPath = StringUtils.removeEnd(request.getRequestPathInfo().getSuffix(), ".html");
         String editorUrl = request.getParameter(PARAM_EDITORURL);
-        GPTPermissionInfo result = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
+        GPTPermissionInfo permissionInfo = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
+        @Deprecated
+        // FIXME(hps,26.10.23) remove this; for backwards compatibility until frontend is adapted completely
+        final Map<String, Boolean> allowedServices = new HashMap<>();
+        if (permissionInfo != null) {
+            permissionInfo.getServicePermissions().stream()
+                    .filter(Objects::nonNull)
+                    .map(GPTPermissionInfo.GPTPermissionInfoItem::getServices)
+                    .filter(Objects::nonNull)
+                    .flatMap(List::stream)
+                    .forEach(service -> allowedServices.put(service, true));
+        }
         response.setContentType("application/json");
-        Map<String, GPTPermissionInfo> jsonResponse = Map.of("allowed", result);
+        Map<String, Object> jsonResponse = Map.of("allowed", permissionInfo, "allowedServices", allowedServices);
         response.getWriter().write(gson.toJson(jsonResponse));
     }
 

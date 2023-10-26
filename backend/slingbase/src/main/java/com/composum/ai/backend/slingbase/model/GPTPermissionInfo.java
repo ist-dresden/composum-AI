@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil;
+
 /**
  * Permission information that can be used to determine whether a page or component permits services as the side panel
  * AI or the content creation assistant. Is used as a JSON return object - thus we are mutable and have getters / setters.
@@ -40,6 +42,21 @@ public class GPTPermissionInfo {
 
     public void setServicePermissions(List<GPTPermissionInfoItem> servicePermissions) {
         this.servicePermissions = servicePermissions;
+    }
+
+    /**
+     * Checks whether this allows the given service for the given resourceType
+     */
+    public boolean allows(@Nullable String service, @Nullable String resourceType) {
+        if (service == null || resourceType == null || servicePermissions == null || servicePermissions.isEmpty()) {
+            return false;
+        }
+        for (GPTPermissionInfoItem servicePermission : servicePermissions) {
+            if (servicePermission != null && servicePermission.allows(service, resourceType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -109,6 +126,15 @@ public class GPTPermissionInfo {
                     ", allowedComponents=" + allowedComponents +
                     ", deniedComponents=" + deniedComponents +
                     '}';
+        }
+
+        public boolean allows(String service, String resourceType) {
+            if (services == null || !services.contains(service)) {
+                return false;
+            }
+            boolean allowed = AllowDenyMatcherUtil.matchesAny(resourceType, getAllowedComponents());
+            boolean denied = allowed && AllowDenyMatcherUtil.matchesAny(resourceType, getDeniedComponents());
+            return allowed && !denied;
         }
 
         /**

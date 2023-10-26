@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil;
+import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
 import com.composum.pages.commons.model.Page;
@@ -57,6 +58,7 @@ public class LabelExtensionModel extends AbstractModel {
     private Model model;
     private GPTChatCompletionService chatCompletionService;
     private AIConfigurationService aiConfigurationService;
+    private GPTPermissionInfo permissionInfo;
 
     protected Boolean visibilityByKey(@Nonnull LabelExtensionVisibilityKey assistantKey) {
         Object attributeRaw = widget.getAttributeSet().get(ATTRIBUTE_AIVISIBLE);
@@ -75,6 +77,7 @@ public class LabelExtensionModel extends AbstractModel {
             if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled(gptConfig)) {
                 model = (Model) widget.getModel();
                 valid = true;
+                permissionInfo = aiConfigurationService.allowedServices(context.getRequest(), getPath(), context.getRequest().getRequestURI());
             }
         }
         LOG.info("initializeWithResource valid={}", valid);
@@ -108,9 +111,7 @@ public class LabelExtensionModel extends AbstractModel {
         boolean visible = valid && widget.isI18n() && !widget.isMulti();
         visible = visible && List.of("textfield", "textarea", "richtext").contains(widget.getWidgetType());
         visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.TRANSLATE));
-        visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
-                        context.getRequest().getRequestURI())
-                .contains(GPTPermissionInfo.SERVICE_TRANSLATE);
+        visible = visible && isServiceEnabled(GPTPermissionInfo.SERVICE_TRANSLATE);
         if (visible) {
             Resource propertyResource = getResource().getChild(widget.getProperty());
             if (propertyResource == null) {
@@ -134,9 +135,7 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && !Boolean.FALSE.equals(visibilityByKey);
         visible = visible && (Boolean.TRUE.equals(visibilityByKey) || !isIgnoredProperty());
         visible = visible && List.of("textfield", "textarea", "codearea", "richtext").contains(widget.getWidgetType());
-        visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
-                        context.getRequest().getRequestURI())
-                .contains(GPTPermissionInfo.SERVICE_CREATE);
+        visible = visible && isServiceEnabled(GPTPermissionInfo.SERVICE_CREATE);
         return visible;
     }
 
@@ -148,10 +147,16 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && "category".equals(widget.getProperty());
         visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.CATEGORIZE));
         visible = visible && ResourceUtil.isResourceType(model.getResource(), "composum/pages/components/page");
-        visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
-                        context.getRequest().getRequestURI())
-                .contains(GPTPermissionInfo.SERVICE_CATEGORIZE);
+        visible = visible && isServiceEnabled(GPTPermissionInfo.SERVICE_CATEGORIZE);
         return visible;
+    }
+
+    protected boolean isServiceEnabled(String serviceName) {
+        if (permissionInfo == null || permissionInfo.getServicePermissions().isEmpty()) {
+            return false;
+        }
+        String resourceType = this.getResource().getResourceType();
+        return permissionInfo.allows(serviceName, resourceType);
     }
 
     /**
