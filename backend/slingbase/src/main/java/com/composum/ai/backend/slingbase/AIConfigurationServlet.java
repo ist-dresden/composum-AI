@@ -94,7 +94,7 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
                     .forEach(service -> allowedServices.put(service, true));
         }
         response.setContentType("application/json");
-        Map<String, Object> jsonResponse = Map.of("allowed", permissionInfo, "allowedServices", allowedServices);
+        Map<String, Object> jsonResponse = Map.of("permissionInfo", permissionInfo, "allowedServices", allowedServices);
         response.getWriter().write(gson.toJson(jsonResponse));
     }
 

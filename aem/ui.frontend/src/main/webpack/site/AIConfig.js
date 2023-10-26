@@ -5,8 +5,55 @@ const AICONFIG_SERVLET = '/bin/cpm/ai/config';
 const enabledServicesCache = new Map();
 const pendingCallsCache = new Map();
 
+/**
+ * Checks whether for the given response of the configuration service the service is enabled.
+ * If the resourcetype isn't given, we just check whether the service is allowed *somewhere*.
+ */
+// data looks like this:
+// {
+//   "allowedServices": {
+//     "sidepanel": true,
+//     "create": true
+//   },
+//   "permissionInfo": {
+//     "servicePermissions": [
+//       {
+//         "services": [
+//           "create",
+//           "sidepanel"
+//         ],
+//         "allowedComponents": [
+//           ".*"
+//         ],
+//         "deniedComponents": []
+//       }
+//     ]
+//   }
+// }
 function checkAllowed(data, service, resourceType) {
-    return data?.allowedServices[service];
+    // for all allowed.servicePermissions that contain the service, check whether the resourceType is allowed
+    let result = false;
+    const permissions = data?.permissionInfo?.servicePermissions;
+    if (!permissions) {
+        return result;
+    }
+    result = permissions.some(perm => {
+        if (!perm.services.includes(service)) {
+            return false;
+        }
+
+        if (!resourceType) {
+            return true;
+        }
+
+        if (perm.deniedComponents.find(denied => resourceType.match(denied))) {
+            return false;
+        }
+
+        return !!perm.allowedComponents.find(allowed => resourceType.match(allowed));
+    });
+
+    return result;
 }
 
 class AIConfig {
