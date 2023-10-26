@@ -5,6 +5,10 @@ const AICONFIG_SERVLET = '/bin/cpm/ai/config';
 const enabledServicesCache = new Map();
 const pendingCallsCache = new Map();
 
+function checkAllowed(data, service, resourceType) {
+    return data?.allowedServices[service];
+}
+
 class AIConfig {
 
     getContentURL() {
@@ -21,15 +25,15 @@ class AIConfig {
     }
 
     /** Checks whether the named service is actually enabled for the current user, editor type and content URL. */
-    ifEnabled(service, callbackIfEnabled) {
-        // console.log("AIConfig ifEnabled", service);
+    ifEnabled(service, resourceType, callbackIfEnabled) {
+        console.log("AIConfig ifEnabled", arguments);
         try {
             const editorUrl = window.location.pathname;
             let contentURL = this.getContentURL();
             const cachekey = editorUrl + "|||" + contentURL;
             const result = enabledServicesCache.get(cachekey);
             if (result) {
-                if (result[service]) {
+                if (checkAllowed(result, service, resourceType)) {
                     // console.log("AIConfig ifEnabled cached and true", service, cachekey);
                     callbackIfEnabled();
                 } else {
@@ -48,7 +52,7 @@ class AIConfig {
                 }).done(data => {
                     console.log("AIConfig ifEnabled ajaxSuccess", service, editorUrl, contentURL, data);
                     if (data?.allowedServices) {
-                        enabledServicesCache.set(cachekey, data.allowedServices);
+                        enabledServicesCache.set(cachekey, data);
                     } else {
                         console.error("AIConfig: Unexpected response", data);
                         debugger;
@@ -59,7 +63,7 @@ class AIConfig {
                 pendingCallsCache.set(cachekey, call);
 
                 call.done(data => {
-                    if (data?.allowedServices) {
+                    if (checkAllowed(data, service, resourceType)) {
                         const allowed = data.allowedServices[service];
                         // console.log("AIConfig ifEnabled allowed", service, cachekey, allowed);
                         if (allowed) {
