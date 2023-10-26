@@ -139,7 +139,8 @@
                         <!-- TODO that breaks intellij build :-( So we have to do it by hand -->
                         <!-- <_plugin>org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin</_plugin> -->
                         <Sling-ContextAware-Configuration-Classes>
-                            com.composum.ai.backend.slingbase.model.OpenAIConfig
+                            com.composum.ai.backend.slingbase.model.OpenAIConfig,
+                            com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration
                         </Sling-ContextAware-Configuration-Classes>
                     </instructions>
                 </configuration>

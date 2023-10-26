@@ -78,11 +78,13 @@ We should prepare a plugin mechanism to be extensible.
       Configuration Admin service.
     - It might leverage regular expressions for "allow" and "deny" configurations for each category.
 
-6. **OsgiAIConfiguration**:
-    - **OsgiAIConfiguration** - an @interface for OsgiAIConfigurationPlugin that represents a AI configuration. It may
+6. **GPTPermissionConfiguration**:
+    - **GPTPermissionConfiguration** - an @interface for OsgiAIConfigurationPlugin that represents a AI
+      configuration. It may
       have fields like allowedUsers, deniedUsers, allowedPaths, deniedPaths, allowedViews, deniedViews, services and is
       used via configuration factory
       @Designate(..., factory = true) from OsgiAIConfigurationPlugin .
+      Also used for Sling Context Aware Configuration as an alternative.
 
 ## OsgiAIConfiguration attributes
 

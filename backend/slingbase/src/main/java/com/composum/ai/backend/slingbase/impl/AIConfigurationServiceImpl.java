@@ -1,11 +1,12 @@
 package com.composum.ai.backend.slingbase.impl;
 
-import java.util.HashSet;
+import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.matchesAny;
+
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,8 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 
 /**
  * The default implementation of the AIConfigurationService.
@@ -40,17 +43,22 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
      */
     @Override
     @Nullable
-    public Set<String> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
+    public GPTPermissionInfo allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
         GPTConfiguration gptConfiguration = getGPTConfiguration(request, contentPath);
-        Set<String> allowedServices = new HashSet<>();
+        GPTPermissionInfo result = null;
         if (chatCompletionService.isEnabled(gptConfiguration)) {
             for (AIConfigurationPlugin plugin : plugins) {
                 try {
-                    Set<String> services = plugin.allowedServices(request, contentPath, editorUrl);
-                    if (services != null) {
-                        allowedServices.addAll(services);
-                        if (!services.isEmpty()) {
-                            LOG.info("Plugin {} allowed services {}", plugin.getClass(), services);
+                    List<GPTPermissionConfiguration> configs = plugin.allowedServices(request, contentPath);
+                    if (configs != null) {
+                        for (GPTPermissionConfiguration config : configs) {
+                            if (basicCheck(config, request, contentPath, editorUrl)) {
+                                GPTPermissionInfo permissionInfo = GPTPermissionInfo.from(config);
+                                result = GPTPermissionInfo.mergeAdditively(result, permissionInfo);
+                                if (configs != null) {
+                                    LOG.info("Plugin {} allowed services {}", plugin.getClass(), permissionInfo);
+                                }
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -58,7 +66,32 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
                 }
             }
         }
-        return allowedServices;
+        return result;
+    }
+
+    /**
+     * Determines whether the configuration allows access wrt. user, page and view
+     */
+    protected boolean basicCheck(GPTPermissionConfiguration config, SlingHttpServletRequest request, String contentPath, String editorUrl) {
+        boolean allowed = false;
+        try {
+            List<String> userAndGroups = AllowDenyMatcherUtil.userAndGroupsOfUser(request);
+            // A user is allowed if his username or any of the groups he is in matches the allowedUsers regexes and
+            // none of them matches the deniedUsers regexes.
+            boolean userAllowed = false;
+            boolean userDenied = false;
+            for (String userOrGroup : userAndGroups) {
+                userAllowed = userAllowed || matchesAny(userOrGroup, config.allowedUsers());
+                userDenied = userDenied || matchesAny(userOrGroup, config.deniedUsers());
+            }
+            boolean pathAllowed = matchesAny(contentPath, config.allowedPaths()) && !matchesAny(contentPath, config.deniedPaths());
+            boolean viewAllowed = matchesAny(editorUrl, config.allowedViews()) && !matchesAny(editorUrl, config.deniedViews());
+            allowed = userAllowed && !userDenied && pathAllowed && viewAllowed;
+        } catch (RepositoryException | RuntimeException e) {
+            LOG.error("Error determining allowed services for {} {} {}", request.getRemoteUser(), contentPath, editorUrl, e);
+        }
+        return allowed;
+
     }
 
     @Override

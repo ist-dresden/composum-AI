@@ -1,10 +1,24 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.jackrabbit.api.JackrabbitSession;
+import org.apache.jackrabbit.api.security.user.Authorizable;
+import org.apache.jackrabbit.api.security.user.Group;
+import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
  * Utilities for matching allow / deny String[] pattern collections.
@@ -43,4 +57,35 @@ public class AllowDenyMatcherUtil {
         return allowPattern.matcher(value).matches();
     }
 
+
+    public static boolean matchesAny(String value, String[] patterns) {
+        if (patterns != null) {
+            for (String pattern : patterns) {
+                if (value.matches(pattern)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static List<String> userAndGroupsOfUser(SlingHttpServletRequest request) throws RepositoryException {
+        List<String> authorizableNames = new ArrayList<>();
+        UserManager userManager = request.getResourceResolver().adaptTo(UserManager.class);
+        if (userManager == null) { // fallback for plain Apache Sling
+            JackrabbitSession session = ((JackrabbitSession) request.getResourceResolver().adaptTo(Session.class));
+            userManager = Objects.requireNonNull(session.getUserManager());
+        }
+        Principal userPrincipal = request.getUserPrincipal();
+        authorizableNames.add(userPrincipal.getName());
+        Authorizable user = userManager.getAuthorizable(userPrincipal);
+        if (user instanceof User) {
+            User userInstance = (User) user;
+            Iterator<Group> groups = userInstance.memberOf();
+            while (groups.hasNext()) {
+                authorizableNames.add(groups.next().getID());
+            }
+        }
+        return authorizableNames;
+    }
 }

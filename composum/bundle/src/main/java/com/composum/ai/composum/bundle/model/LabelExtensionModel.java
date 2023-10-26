@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
-import com.composum.ai.backend.slingbase.AIConfigurationServlet;
 import com.composum.pages.commons.model.AbstractModel;
 import com.composum.pages.commons.model.Model;
 import com.composum.pages.commons.model.Page;
@@ -110,7 +110,7 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && !Boolean.FALSE.equals(visibilityByKey(LabelExtensionVisibilityKey.TRANSLATE));
         visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
                         context.getRequest().getRequestURI())
-                .contains(AIConfigurationServlet.SERVICE_TRANSLATE);
+                .contains(GPTPermissionInfo.SERVICE_TRANSLATE);
         if (visible) {
             Resource propertyResource = getResource().getChild(widget.getProperty());
             if (propertyResource == null) {
@@ -136,7 +136,7 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && List.of("textfield", "textarea", "codearea", "richtext").contains(widget.getWidgetType());
         visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
                         context.getRequest().getRequestURI())
-                .contains(AIConfigurationServlet.SERVICE_CREATE);
+                .contains(GPTPermissionInfo.SERVICE_CREATE);
         return visible;
     }
 
@@ -150,7 +150,7 @@ public class LabelExtensionModel extends AbstractModel {
         visible = visible && ResourceUtil.isResourceType(model.getResource(), "composum/pages/components/page");
         visible = visible && aiConfigurationService.allowedServices(context.getRequest(), getPath(),
                         context.getRequest().getRequestURI())
-                .contains(AIConfigurationServlet.SERVICE_CATEGORIZE);
+                .contains(GPTPermissionInfo.SERVICE_CATEGORIZE);
         return visible;
     }
 
