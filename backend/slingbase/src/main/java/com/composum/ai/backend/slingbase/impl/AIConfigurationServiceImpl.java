@@ -8,7 +8,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -72,7 +74,7 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     /**
      * Determines whether the configuration allows access wrt. user, page and view
      */
-    protected boolean basicCheck(GPTPermissionConfiguration config, SlingHttpServletRequest request, String contentPath, String editorUrl) {
+    protected boolean basicCheck(@Nonnull GPTPermissionConfiguration config, SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
         boolean allowed = false;
         try {
             List<String> userAndGroups = AllowDenyMatcherUtil.userAndGroupsOfUser(request);
@@ -87,12 +89,38 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
             boolean pathAllowed = matchesAny(contentPath, config.allowedPaths()) && !matchesAny(contentPath, config.deniedPaths());
             boolean viewAllowed = matchesAny(editorUrl, config.allowedViews()) && !matchesAny(editorUrl, config.deniedViews());
             allowed = userAllowed && !userDenied && pathAllowed && viewAllowed;
+            allowed = allowed && pageAllowed(request, contentPath, config);
         } catch (RepositoryException | RuntimeException e) {
             LOG.error("Error determining allowed services for {} {} {}", request.getRemoteUser(), contentPath, editorUrl, e);
         }
         return allowed;
-
     }
+
+    protected boolean pageAllowed(SlingHttpServletRequest request, String contentPath, GPTPermissionConfiguration config) {
+        Resource resource = request.getResourceResolver().getResource(contentPath);
+        if (resource == null) {
+            LOG.warn("Resource {} not found", contentPath);
+            return false;
+        }
+        // go to next transitive parent jcr:content node - the page containing the component
+        Resource page = resource;
+        if (page.getChild(JcrConstants.JCR_CONTENT) != null) {
+            page = page.getChild(JcrConstants.JCR_CONTENT);
+        }
+        while (page != null && !JcrConstants.JCR_CONTENT.equals(page.getName())) {
+            page = page.getParent();
+        }
+        if (page == null) {
+            LOG.warn("No page found for resource {}", resource.getPath());
+            return false;
+        }
+        String template = page.getValueMap().get("cq:template", String.class); // AEM
+        if (template == null) {
+            template = page.getValueMap().get("template", String.class); // Composum
+        }
+        return matchesAny(template, config.allowedPageTemplates()) && !matchesAny(template, config.deniedPageTemplates());
+    }
+
 
     @Override
     public GPTConfiguration getGPTConfiguration(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {

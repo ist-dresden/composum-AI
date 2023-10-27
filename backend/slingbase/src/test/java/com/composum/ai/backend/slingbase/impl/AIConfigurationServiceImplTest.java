@@ -42,6 +42,7 @@ public class AIConfigurationServiceImplTest {
 
     private OsgiAIConfigurationPluginImpl osgiAIConfigurationPlugin = new OsgiAIConfigurationPluginImpl();
     private SlingCaConfigPluginImpl slingCaConfigPlugin = new SlingCaConfigPluginImpl();
+    private SlingCaConfigPluginImpl.Config caconfig = mock(SlingCaConfigPluginImpl.Config.class);
     private GPTPermissionConfiguration osgiCfg = mock(GPTPermissionConfiguration.class);
     private GPTChatCompletionService chatCompletionService = mock(GPTChatCompletionService.class);
 
@@ -65,7 +66,12 @@ public class AIConfigurationServiceImplTest {
         when(osgiCfg.allowedViews()).thenReturn(new String[]{".*"});
         when(osgiCfg.allowedComponents()).thenReturn(new String[]{".*"});
         when(osgiCfg.deniedComponents()).thenReturn(new String[0]);
+        when(osgiCfg.allowedPageTemplates()).thenReturn(new String[]{".*"});
+        when(osgiCfg.deniedPageTemplates()).thenReturn(new String[0]);
         osgiAIConfigurationPlugin.activate(osgiCfg);
+
+        when(caconfig.enabled()).thenReturn(true);
+        slingCaConfigPlugin.activate(caconfig);
 
         when(chatCompletionService.isEnabled(any())).thenReturn(true);
     }
@@ -79,31 +85,31 @@ public class AIConfigurationServiceImplTest {
 
     @Test
     public void testAllow() {
-        context.request().setResource(context.create().resource("/content/allowed/path"));
-        GPTPermissionInfo allowed = service.allowedServices(getRequest(), "/content/allowed/path", "whatever");
+        context.request().setResource(context.create().resource("/content/allowed/jcr:content/path"));
+        GPTPermissionInfo allowed = service.allowedServices(getRequest(), "/content/allowed/jcr:content/path", "whatever");
         assertThat(allowed.getServicePermissions().size(), is((1)));
         assertThat(allowed.getServicePermissions().get(0).getServices(), CoreMatchers.hasItem("create"));
     }
 
     @Test
     public void testDeny() {
-        context.request().setResource(context.create().resource("/content/allowed/denied/path"));
-        GPTPermissionInfo allowed = service.allowedServices(getRequest(), "/content/allowed/denied/path", "whatever");
+        context.request().setResource(context.create().resource("/content/allowed/denied/jcr:content/path"));
+        GPTPermissionInfo allowed = service.allowedServices(getRequest(), "/content/allowed/denied/jcr:content/path", "whatever");
         assertThat(allowed, nullValue());
 
-        context.request().setResource(context.create().resource("/content/other/path"));
-        allowed = service.allowedServices(getRequest(), "/content/other/path", null);
+        context.request().setResource(context.create().resource("/content/other/jcr:content/path"));
+        allowed = service.allowedServices(getRequest(), "/content/other/jcr:content/path", null);
         assertThat(allowed, nullValue());
     }
 
     @Test
     public void testGetConfiguration() {
-        context.request().setResource(context.create().resource("/content/allowed/path"));
+        context.request().setResource(context.create().resource("/content/allowed/jcr:content/path"));
         String key = "thekey";
         // set up sling configuration for the path with key
         context.create().resource("/conf/global/sling:configs/com.composum.ai.backend.slingbase.model.OpenAIConfig",
                 "openAiApiKey", key);
-        GPTConfiguration config = service.getGPTConfiguration(getRequest(), "/content/allowed/path");
+        GPTConfiguration config = service.getGPTConfiguration(getRequest(), "/content/allowed/jcr:content/path");
         assertThat(config, notNullValue());
         assertThat(config.getApiKey(), is(key));
     }

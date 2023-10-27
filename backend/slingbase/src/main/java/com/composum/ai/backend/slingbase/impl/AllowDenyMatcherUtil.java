@@ -1,5 +1,7 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,7 +63,7 @@ public class AllowDenyMatcherUtil {
     public static boolean matchesAny(String value, String[] patterns) {
         if (patterns != null) {
             for (String pattern : patterns) {
-                if (value.matches(pattern)) {
+                if (defaultString(value).matches(pattern)) {
                     return true;
                 }
             }
@@ -72,7 +74,7 @@ public class AllowDenyMatcherUtil {
     public static boolean matchesAny(String value, List<String> patterns) {
         if (patterns != null) {
             for (String pattern : patterns) {
-                if (pattern != null && value.matches(pattern)) {
+                if (pattern != null && defaultString(value).matches(pattern)) {
                     return true;
                 }
             }

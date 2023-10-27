@@ -70,4 +70,13 @@ public @interface GPTPermissionConfiguration {
     @Property(label = "Denied Components", description = "Regular expressions for denied resource types of components. Takes precedence over allowed components.")
     String[] deniedComponents() default {};
 
+    // allowed and denied page templates . name: allowedPageTemplates, deniedPageTemplates . default: all allowed, none denied
+    @AttributeDefinition(name = "Allowed Page Templates", description = "Regular expressions for allowed page templates. If not present, all page templates are allowed.")
+    @Property(label = "Allowed Page Templates", description = "Regular expressions for allowed page templates. If not present, all page templates are allowed.")
+    String[] allowedPageTemplates() default {".*"};
+
+    @AttributeDefinition(name = "Denied Page Templates", description = "Regular expressions for denied page templates. Takes precedence over allowed page templates.")
+    @Property(label = "Denied Page Templates", description = "Regular expressions for denied page templates. Takes precedence over allowed page templates.")
+    String[] deniedPageTemplates() default {};
+
 }
