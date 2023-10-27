@@ -12,7 +12,13 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +34,18 @@ import com.composum.ai.backend.slingbase.model.OpenAIConfig;
 @Component(
         property = Constants.SERVICE_RANKING + ":Integer=1000"
 )
+@Designate(ocd = SlingCaConfigPluginImpl.Config.class)
 public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(SlingCaConfigPluginImpl.class);
+    private boolean enabled;
 
     @Override
     @Nullable
     public List<GPTPermissionConfiguration> allowedServices(SlingHttpServletRequest request, String contentPath) {
+        if (!enabled) {
+            return null;
+        }
         LOG.debug("allowedServices({}, {})", request.getResource().getPath(), contentPath);
         Resource resource = determineResource(request, contentPath);
 
@@ -47,6 +58,9 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
     @Nullable
     @Override
     public GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) throws IllegalArgumentException {
+        if (!enabled) {
+            return null;
+        }
         LOG.debug("getGPTConfiguration({}, {})", request.getResource().getPath(), contentPath);
         Resource resource = determineResource(request, contentPath);
 
@@ -74,4 +88,25 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         }
         return resource;
     }
+
+    @Activate
+    @Modified
+    public void activate(Config config) {
+        LOG.info("Activated with configuration {}", config);
+        this.enabled = config.enabled();
+    }
+
+    @Deactivate
+    public void deactivate() {
+        LOG.info("Deactivated.");
+        this.enabled = false;
+    }
+
+    @ObjectClassDefinition(name = "Composum AI SlingCaConfig Plugin", description = "Allows enabling / disabling the Sling Context Aware Configuration of the Composum AI.")
+    public @interface Config {
+
+        @AttributeDefinition(name = "Enabled", description = "Whether the Sling Context Aware Configuration of the Composum AI is enabled.")
+        boolean enabled() default true;
+    }
+
 }
