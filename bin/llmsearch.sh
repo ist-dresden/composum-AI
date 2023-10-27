@@ -17,4 +17,5 @@ if [[ ! -f .cgptdevbench/llmsearch.db ]] || [[ $(find .cgptdevbench/llmsearch.db
   # echo finished database update
 fi
 
-llm similar til -d .cgptdevbench/llmsearch.db -n 10 -c "$*" | fgrep -v /node_modules/
+llm similar til -d .cgptdevbench/llmsearch.db -n 20 -c "$*" | fgrep -v /node_modules/
+

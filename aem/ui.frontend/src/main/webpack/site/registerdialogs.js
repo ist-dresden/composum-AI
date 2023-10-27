@@ -21,6 +21,8 @@ import {AIConfig} from './AIConfig.js';
         "/mnt/override/apps/composum-ai/components/contentcreation/_cq_dialog.html/conf/composum-ai/settings/dialogs/contentcreation";
     const SIDEPANEL_DIALOG_URL =
         "/mnt/override/apps/composum-ai/components/sidepanel-ai/_cq_dialog.html/conf/composum-ai/settings/dialogs/sidepanel-ai";
+    const SERVICE_CREATE = 'create';
+    const SERVICE_SIDEPANEL = 'sidepanel';
     const aiconfig = new AIConfig();
 
     channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
@@ -30,7 +32,7 @@ import {AIConfig} from './AIConfig.js';
      */
     function loadSidebarPanelDialog() {
         try {
-            aiconfig.ifEnabled('sidepanel', undefined, () => {
+            aiconfig.ifEnabled(SERVICE_SIDEPANEL, undefined, () => {
                 const dialogId = 'composumAI-sidebar-panel';
                 if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
                     return;
@@ -117,29 +119,35 @@ import {AIConfig} from './AIConfig.js';
         $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
             function (index, textarea) {
                 console.log("insertCreateButton textarea", textarea);
-                const gearsEdit = $(fieldlabeliconHTML);
-                if ($(textarea.parentElement).find('coral-icon').length > 0) {
-                    gearsEdit.addClass('composum-ai-iconshiftleft');
+                const resourceType = $(textarea).closest('coral-dialog-content').find('input[name="./sling:resourceType"]').val();
+                if (!resourceType) {
+                    debugger;
                 }
-                gearsEdit.insertAfter(textarea);
-                textarea.setAttribute('data-comp-ai-iconsadded', 'true');
-                gearsEdit.click(function (event) {
-                    console.log("createButton click", arguments);
-                    const formPath = $(textarea).closest('form').attr('action');
-                    var property = $(textarea).attr('name');
-                    property = property && property.startsWith('./') && property.substring(2);
-                    if (formPath && formPath.startsWith('/content')) {
-                        showCreateDialog({
-                            componentPath: formPath,
-                            property,
-                            oldContent: textarea.value,
-                            writebackCallback: (newvalue) => $(textarea).val(newvalue),
-                            isRichtext: false,
-                            stackeddialog: true
-                        });
-                    } else {
-                        console.error('Could not determine path of form for ', textarea && textarea.get());
+                aiconfig.ifEnabled(SERVICE_CREATE, resourceType, () => {
+                    const gearsEdit = $(fieldlabeliconHTML);
+                    if ($(textarea.parentElement).find('coral-icon').length > 0) {
+                        gearsEdit.addClass('composum-ai-iconshiftleft'); // help icon is there
                     }
+                    gearsEdit.insertAfter(textarea);
+                    textarea.setAttribute('data-comp-ai-iconsadded', 'true');
+                    gearsEdit.click(function (event) {
+                        console.log("createButton click", arguments);
+                        const formPath = $(textarea).closest('form').attr('action');
+                        var property = $(textarea).attr('name');
+                        property = property && property.startsWith('./') && property.substring(2);
+                        if (formPath && formPath.startsWith('/content')) {
+                            showCreateDialog({
+                                componentPath: formPath,
+                                property,
+                                oldContent: textarea.value,
+                                writebackCallback: (newvalue) => $(textarea).val(newvalue),
+                                isRichtext: false,
+                                stackeddialog: true
+                            });
+                        } else {
+                            console.error('Could not determine path of form for ', textarea && textarea.get());
+                        }
+                    });
                 });
             }
         );
@@ -155,7 +163,7 @@ import {AIConfig} from './AIConfig.js';
     function prepareDialog(event) {
         console.log("prepareDialog", event.type, event.target);
         try {
-            aiconfig.ifEnabled('create', undefined, () => {
+            aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                 Coral.commons.ready(event.target, function () {
                     insertCreateButtonsForTextareas(event.target);
                     registerContentDialogInRichtextEditors(event);
@@ -177,7 +185,7 @@ import {AIConfig} from './AIConfig.js';
     function initRteHooks(event) {
         console.log("waitForReadyAndInsert", event.type, event.target);
         try {
-            aiconfig.ifEnabled('create', undefined, () => {
+            aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                 Coral.commons.ready(event.target, function () {
                     Granite.author.ContentFrame.getDocument()
                         .off('editing-start', registerContentDialogInRichtextEditors)
@@ -232,6 +240,8 @@ import {AIConfig} from './AIConfig.js';
                 path = path || $(buttongroup).closest('[data-path]').attr('data-path');
                 var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
                 property = property && property.startsWith('./') && property.substring(2);
+                console.log("registerContentDialogInRichtextEditors path", path, "property", property, ' at ', registerevent.type, ' last target ', determineEditableFromElement(lastEditorStartTarget));
+                debugger;
                 const $button = $(rtebuttonHTML);
                 $(buttongroup).append($button);
                 $button.click(function (clickevent) {
@@ -240,13 +250,8 @@ import {AIConfig} from './AIConfig.js';
                     // in case of rte in content it's difficult to find the path from the button or current state,
                     // so we determine it from the last editor start event:
                     if (!componentPath && lastEditorStartTarget) {
-                        for (var i = 0; i < Granite.author.editables.length; i++) {
-                            var editable = Granite.author.editables[i];
-                            if (editable.dom[0] === lastEditorStartTarget) {
-                                componentPath = editable.path;
-                                break;
-                            }
-                        }
+                        var editable = determineEditableFromElement(lastEditorStartTarget);
+                        componentPath = editable && editable.path;
                     }
                     if (!componentPath) { // FIXME
                         debugger;
@@ -284,6 +289,24 @@ import {AIConfig} from './AIConfig.js';
                 });
             }
         });
+    }
+
+    /** Determines the "most specific" editable containing the DOM element, in the sense of editable.dom[0].contains(element).
+     * This logic prevents a container being found instead of the contained editables. */
+    function determineEditableFromElement(element) {
+        var bestEditable = undefined;
+        for (var i = 0; i < Granite.author.editables.length; i++) {
+            var editable = Granite.author.editables[i];
+            // if it doesn't contain the element, continue
+            if (!editable.dom[0].contains(element)) {
+                continue;
+            }
+            if (bestEditable && bestEditable.dom[0].contains(editable.dom[0])) {
+                continue;
+            }
+            bestEditable = editable;
+        }
+        return bestEditable;
     }
 
 })

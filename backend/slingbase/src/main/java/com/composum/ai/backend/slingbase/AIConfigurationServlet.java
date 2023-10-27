@@ -1,13 +1,10 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 
@@ -80,6 +77,9 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String contentPath = StringUtils.removeEnd(request.getRequestPathInfo().getSuffix(), ".html");
+        if (StringUtils.startsWith(contentPath, "/mnt/overlay")) {
+            contentPath = "/content" + StringUtils.removeStart(contentPath, "/mnt/overlay");
+        }
         String editorUrl = request.getParameter(PARAM_EDITORURL);
         GPTPermissionInfo permissionInfo = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
         @Deprecated
@@ -94,7 +94,13 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
                     .forEach(service -> allowedServices.put(service, true));
         }
         response.setContentType("application/json");
-        Map<String, Object> jsonResponse = Map.of("permissionInfo", permissionInfo, "allowedServices", allowedServices);
+        Map<String, Object> jsonResponse = new HashMap<>();
+        if (permissionInfo != null) {
+            jsonResponse.put("permissionInfo", permissionInfo);
+        }
+        if (allowedServices != null) {
+            jsonResponse.put("allowedServices", allowedServices);
+        }
         response.getWriter().write(gson.toJson(jsonResponse));
     }
 

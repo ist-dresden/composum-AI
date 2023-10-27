@@ -67,6 +67,9 @@ class AIConfig {
             if (itemParam) {
                 contentURL = itemParam[1];
             }
+        } else if (contentURL.startsWith("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html")) {
+            // weird case in content fragment editor where that URL is just wrong. Remove that prefix.
+            contentURL = contentURL.replace("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html", "");
         }
         return contentURL;
     }
