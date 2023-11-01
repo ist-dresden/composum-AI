@@ -121,7 +121,7 @@ import {AIConfig} from './AIConfig.js';
                 console.log("insertCreateButton textarea", textarea);
                 const resourceType = $(textarea).closest('coral-dialog-content').find('input[name="./sling:resourceType"]').val();
                 if (!resourceType) {
-                    debugger;
+                    // debugger;
                 }
                 aiconfig.ifEnabled(SERVICE_CREATE, resourceType, () => {
                     const gearsEdit = $(fieldlabeliconHTML);
@@ -241,7 +241,7 @@ import {AIConfig} from './AIConfig.js';
                 var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
                 property = property && property.startsWith('./') && property.substring(2);
                 console.log("registerContentDialogInRichtextEditors path", path, "property", property, ' at ', registerevent.type, ' last target ', determineEditableFromElement(lastEditorStartTarget));
-                debugger;
+                // debugger;
                 const $button = $(rtebuttonHTML);
                 $(buttongroup).append($button);
                 $button.click(function (clickevent) {
