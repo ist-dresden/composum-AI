@@ -9,6 +9,10 @@ fi
 progdir=$(dirname "$progfile")/..
 cd $progdir
 
+key=$1
+shift
+echo searching at key $1 for "$*"
+
 # if .cgptdevbench/llmsearch.db does not exist or is older than a week
 # then update it using bin/llmupdatedb.sh
 if [[ ! -f .cgptdevbench/llmsearch.db ]] || [[ $(find .cgptdevbench/llmsearch.db -mtime +7) ]]; then
@@ -17,5 +21,4 @@ if [[ ! -f .cgptdevbench/llmsearch.db ]] || [[ $(find .cgptdevbench/llmsearch.db
   # echo finished database update
 fi
 
-llm similar til -d .cgptdevbench/llmsearch.db -n 20 -c "$*" | fgrep -v /node_modules/
-
+llm similar $key -d .cgptdevbench/llmsearch.db -n 20 -c "$*" | fgrep -v /node_modules/

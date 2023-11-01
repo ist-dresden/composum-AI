@@ -11,7 +11,9 @@ cd $progdir
 # STORE="--store"
 STORE=""
 
-llm embed-multi til -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/*.md'
-llm embed-multi til -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.java'
-llm embed-multi til -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.js'
-llm embed-multi til -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.html'
+set -vx
+llm embed-multi md -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/*.md'
+llm embed-multi java -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.java'
+llm embed-multi js -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.js'
+llm embed-multi html -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.html'
+llm embed-multi jsp -d .cgptdevbench/llmsearch.db -m minilm $STORE --files . '**/src/**/*.jsp'
