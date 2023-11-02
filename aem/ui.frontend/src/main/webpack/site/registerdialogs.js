@@ -176,7 +176,7 @@ try {
             }
         }
 
-        channel.on('cq-layer-activated', initRteHooks);
+        channel.on('cq-layer-activated foundation-contentloaded', initRteHooks);
 
 
         /**
@@ -188,9 +188,13 @@ try {
             try {
                 aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                     Coral.commons.ready(event.target, function () {
-                        Granite.author.ContentFrame.getDocument()
-                            .off('editing-start', registerContentDialogInRichtextEditors)
-                            .on('editing-start', registerContentDialogInRichtextEditors);
+                        channel.off('editing-start', onRteEditingStartRegisterButton)
+                            .on('editing-start', onRteEditingStartRegisterButton);
+                        Granite?.author?.ContentFrame?.getDocument()
+                            ?.off('editing-start', registerContentDialogInRichtextEditors)
+                            ?.on('editing-start', registerContentDialogInRichtextEditors)
+                            ?.off('editing-start', onRteEditingStartRegisterButton)
+                            ?.on('editing-start', onRteEditingStartRegisterButton);
                     });
                 });
             } catch (e) {
@@ -294,6 +298,38 @@ try {
             });
         }
 
+        /** editing-start event is received for an richtext editor - we have to register the button. */
+        function onRteEditingStartRegisterButton(event) {
+            const target = event.target;
+            let editable = Granite?.author?.selection?.getCurrentActive() ||
+                determineEditableFromElement(target); // when in content frame
+            // we have to determine the componentPath and resourceType right now to see whether the button is enabled.
+            // the rteinstance and the property name can also be determined later if we don't get them right now
+            let componentPath = undefined;
+            let resourceType = undefined;
+            let propertyName = undefined;
+            let rteinstance = undefined;
+            console.log("onRteEditingStartRegisterButton", event.type, target, editable);
+            // if (!editable && $(target).closest('coral-dialog.rte-fullscreen-dialog')[0]) { // maximized rte
+            // editable = Granite.author.selection.getCurrentActive();
+            // }
+            if (editable) {
+                componentPath = editable.path;
+                resourceType = editable.type;
+            } else if ($(target).closest('form.content-fragment-editor')[0]) {
+                let editorDiv = $(target).closest('div#Editor');
+                componentPath = editorDiv.data('path');
+                // no resourcetype available on content fragments
+            } else if ($(target).closest('form.cq-dialog')[0]) {
+                let dialogForm = $(target).closest('form.cq-dialog');
+                componentPath = dialogForm.attr('action');
+                resourceType = dialogForm.find('input[name="./sling:resourceType"]').val();
+                propertyName = $(target).closest('div.richtext-container').find('input[type="hidden"][data-cq-richtext-input]').attr('name');
+                rteinstance = $(target).data('rteinstance');
+            }
+            debugger;
+        }
+
         /** Determines the "most specific" editable containing the DOM element, in the sense of editable.dom[0].contains(element).
          * This logic prevents a container being found instead of the contained editable. */
         function determineEditableFromElement(element) {
@@ -304,7 +340,7 @@ try {
                 if (!editable.dom[0].contains(element)) {
                     continue;
                 }
-                if (bestEditable && bestEditable.dom[0].contains(editable.dom[0])) {
+                if (bestEditable && !bestEditable.dom[0].contains(editable.dom[0])) {
                     continue;
                 }
                 bestEditable = editable;
