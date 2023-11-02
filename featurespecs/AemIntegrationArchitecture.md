@@ -95,7 +95,8 @@ object: `$(lastEditorStartTarget).data('rteinstance')`
 The toolbar is already visible. We can register the buttons on the foundation-contentloaded event. The richtext
 editor object is to be found at
 `$(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance')`
-and the path is in a form action.
+and the path is in a form action. resource type isn't really applicable - we might use data/cq:model which is
+checkable in the Java code, but that's more like the page template.
 
 ### Dialog rendering
 
@@ -119,32 +120,39 @@ though / that works in the Composum build system, too.
 
 To make things compatible with the Composum Pages variant of Composum AI: if we generate a JSON response we generate
 it in the same way as in Composum: e.g.
+
+```json
 {
-"status": 200,
-"success": true,
-"warning": false,
-"data": {
-"result": {
-"streamid": "7190c15e-bd98-4ceb-bd45-5e800b6370f0"
+  "status": 200,
+  "success": true,
+  "warning": false,
+  "data": {
+    "result": {
+      "streamid": "7190c15e-bd98-4ceb-bd45-5e800b6370f0"
+    }
+  }
 }
-}
-}
+```
+
 or in the error case:
+
+```json
 {
-"status": 400,
-"success": false,
-"warning": false,
-"title": "Error",
-"messages": [
-{
-"level": "error",
-"text": "error",
-"rawText": "error",
-"arguments": [
-"arg1",
-"arg2"
-],
-"timestamp": <timestamp>
+  "status": 400,
+  "success": false,
+  "warning": false,
+  "title": "Error",
+  "messages": [
+    {
+      "level": "error",
+      "text": "error",
+      "rawText": "error",
+      "arguments": [
+        "arg1",
+        "arg2"
+      ],
+      "timestamp": <timestamp>
+    }
+  ]
 }
-]
-}
+```

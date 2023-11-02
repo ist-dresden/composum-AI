@@ -56,30 +56,30 @@ function checkAllowed(data, service, resourceType) {
     return result;
 }
 
-class AIConfig {
-
-    getContentURL() {
-        let contentURL = Granite?.author?.ContentFrame?.contentURL;
-        // if contentURL is not set, we check whether there is an item= parameter in the document.location.search
-        if (!contentURL) {
-            const search = window.location.search;
-            const itemParam = search?.match(/item=([^&]*)/);
-            if (itemParam) {
-                contentURL = itemParam[1];
-            }
-        } else if (contentURL.startsWith("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html")) {
-            // weird case in content fragment editor where that URL is just wrong. Remove that prefix.
-            contentURL = contentURL.replace("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html", "");
+function getContentURL() {
+    let contentURL = Granite?.author?.ContentFrame?.contentURL;
+    // if contentURL is not set, we check whether there is an item= parameter in the document.location.search
+    if (!contentURL) {
+        const search = window.location.search;
+        const itemParam = search?.match(/item=([^&]*)/);
+        if (itemParam) {
+            contentURL = itemParam[1];
         }
-        return contentURL;
+    } else if (contentURL.startsWith("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html")) {
+        // weird case in content fragment editor where that URL is just wrong. Remove that prefix.
+        contentURL = contentURL.replace("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html", "");
     }
+    return contentURL;
+}
+
+class AIConfig {
 
     /** Checks whether the named service is actually enabled for the current user, editor type and content URL. */
     ifEnabled(service, resourceType, callbackIfEnabled) {
-        console.log("AIConfig ifEnabled", arguments);
+        // console.log("AIConfig ifEnabled", arguments);
         try {
             const editorUrl = window.location.pathname;
-            let contentURL = this.getContentURL();
+            let contentURL = getContentURL();
             const cachekey = editorUrl + "|||" + contentURL;
             const result = enabledServicesCache.get(cachekey);
             if (result) {
@@ -100,7 +100,7 @@ class AIConfig {
                     console.error("AIConfig ajaxError", jqXHR, textStatus, errorThrown);
                     debugger;
                 }).done(data => {
-                    console.log("AIConfig ifEnabled ajaxSuccess", service, editorUrl, contentURL, data);
+                    // console.log("AIConfig ifEnabled ajaxSuccess", service, editorUrl, contentURL, data);
                     if (data?.allowedServices) {
                         enabledServicesCache.set(cachekey, data);
                     } else {
@@ -119,6 +119,8 @@ class AIConfig {
                         if (allowed) {
                             callbackIfEnabled();
                         }
+                    } else {
+                        // console.log("AIConfig ifEnabled not allowed", service, cachekey);
                     }
                 });
             }

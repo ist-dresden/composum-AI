@@ -230,68 +230,72 @@ try {
                     return; // don't insert buttons into our own dialogs
                 }
                 if ($(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
-                    // console.log("registerContentDialogInRichtextEditors path", path);
-                    const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
-                    var path = undefined;
-                    if (formaction && formaction.startsWith('/content')) {
-                        path = formaction;
-                    }
-                    path = path || $(buttongroup).closest('[data-path]').attr('data-path');
-                    var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
-                    property = property && property.startsWith('./') && property.substring(2);
-                    console.log("registerContentDialogInRichtextEditors path", path, "property", property, 'last target', determineEditableFromElement(lastEditorStartTarget));
-                    // debugger;
-                    const $button = $(rtebuttonHTML);
-                    $(buttongroup).append($button);
-                    $button.click(function (clickevent) {
-                        console.log("createButtonText click", typeof clickevent.type, clickevent.target);
-                        var componentPath = path;
-                        // in case of rte in content it's difficult to find the path from the button or current state,
-                        // so we determine it from the last editor start event:
-                        if (!componentPath && lastEditorStartTarget) {
-                            var editable = determineEditableFromElement(lastEditorStartTarget);
-                            componentPath = editable && editable.path;
-                        }
-                        if (!componentPath) { // FIXME
-                            debugger;
-                        }
-
-                        var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
-                        rteinstance = rteinstance || $(lastEditorStartTarget).data('rteinstance');
-                        rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
-                        if (!rteinstance) {
-                            debugger; // FIXME
-                        }
-                        console.log("rteinstance", rteinstance);
-                        console.log("origevent", registerevent);
-                        clickevent.preventDefault();
-                        clickevent.stopPropagation();
-                        const oldContent = rteinstance.getContent();
-                        rteinstance.suspend();
-                        showCreateDialog({
-                            componentPath,
-                            property,
-                            oldContent,
-                            writebackCallback: function (newvalue) {
-                                rteinstance.setContent(newvalue);
-                            },
-                            isRichtext: true,
-                            stackeddialog: true,
-                            onFinishCallback: function () {
-                                rteinstance.reactivate();
-                                rteinstance.setContent(oldContent);
-                                rteinstance.focus();
-                                $('.cq-dialog-backdrop').removeClass('is-open');
-                                $('.cq-dialog-backdrop').hide();
-                            }
-                        });
-                    });
+                    registerContentDialogInRichtextEditor(buttongroup);
                 }
             });
         }
 
+        /** Registers the content creation dialog in the richtext editor toolbar */
+        function registerContentDialogInRichtextEditor(buttongroup) {
+            // console.log("registerContentDialogInRichtextEditors path", path);
+            const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
+            var path = undefined;
+            if (formaction && formaction.startsWith('/content')) {
+                path = formaction;
+            }
+            path = path || $(buttongroup).closest('[data-path]').attr('data-path');
+            var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+            property = property && property.startsWith('./') && property.substring(2);
+            console.log("registerContentDialogInRichtextEditors path", path, "property", property, 'last target', determineEditableFromElement(lastEditorStartTarget));
+            // debugger;
+            const $button = $(rtebuttonHTML);
+            $(buttongroup).append($button);
+            $button.click(function (clickevent) {
+                console.log("createButtonText click", typeof clickevent.type, clickevent.target);
+                var componentPath = path;
+                // in case of rte in content it's difficult to find the path from the button or current state,
+                // so we determine it from the last editor start event:
+                if (!componentPath && lastEditorStartTarget) {
+                    var editable = determineEditableFromElement(lastEditorStartTarget);
+                    componentPath = editable && editable.path;
+                }
+                if (!componentPath) { // FIXME
+                    debugger;
+                }
+
+                var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
+                rteinstance = rteinstance || $(lastEditorStartTarget).data('rteinstance');
+                rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
+                if (!rteinstance) {
+                    debugger; // FIXME
+                }
+                console.log("rteinstance", rteinstance);
+                clickevent.preventDefault();
+                clickevent.stopPropagation();
+                const oldContent = rteinstance.getContent();
+                rteinstance.suspend();
+                showCreateDialog({
+                    componentPath,
+                    property,
+                    oldContent,
+                    writebackCallback: function (newvalue) {
+                        rteinstance.setContent(newvalue);
+                    },
+                    isRichtext: true,
+                    stackeddialog: true,
+                    onFinishCallback: function () {
+                        rteinstance.reactivate();
+                        rteinstance.setContent(oldContent);
+                        rteinstance.focus();
+                        $('.cq-dialog-backdrop').removeClass('is-open');
+                        $('.cq-dialog-backdrop').hide();
+                    }
+                });
+            });
+        }
+
         /** Determines the "most specific" editable containing the DOM element, in the sense of editable.dom[0].contains(element).
-         * This logic prevents a container being found instead of the contained editables. */
+         * This logic prevents a container being found instead of the contained editable. */
         function determineEditableFromElement(element) {
             var bestEditable = undefined;
             for (var i = 0; i < Granite.author.editables.length; i++) {
