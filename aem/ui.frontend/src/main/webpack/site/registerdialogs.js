@@ -214,9 +214,7 @@ try {
         var lastEditorStartTarget = undefined;
 
         /** Registers the content creation dialog in the richtext editor toolbar.
-         * The event can either be an opening event for a dialog, or an editing-start for an RTE in the document. */
-        /**
-         * Registers the content creation dialog in the richtext editor toolbar.
+         * The event can either be an opening event for a dialog, or an editing-start for an RTE in the document.
          * @param {Event} registerevent - The event triggering the registration.
          */
         function registerContentDialogInRichtextEditors(registerevent) {
@@ -241,7 +239,7 @@ try {
                     path = path || $(buttongroup).closest('[data-path]').attr('data-path');
                     var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
                     property = property && property.startsWith('./') && property.substring(2);
-                    console.log("registerContentDialogInRichtextEditors path", path, "property", property, ' at ', registerevent.type, ' last target ', determineEditableFromElement(lastEditorStartTarget));
+                    console.log("registerContentDialogInRichtextEditors path", path, "property", property, 'last target', determineEditableFromElement(lastEditorStartTarget));
                     // debugger;
                     const $button = $(rtebuttonHTML);
                     $(buttongroup).append($button);
@@ -265,7 +263,7 @@ try {
                             debugger; // FIXME
                         }
                         console.log("rteinstance", rteinstance);
-                        console.log("origevent", event);
+                        console.log("origevent", registerevent);
                         clickevent.preventDefault();
                         clickevent.stopPropagation();
                         const oldContent = rteinstance.getContent();
