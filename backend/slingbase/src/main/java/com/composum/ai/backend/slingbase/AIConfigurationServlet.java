@@ -82,8 +82,6 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
         }
         String editorUrl = request.getParameter(PARAM_EDITORURL);
         GPTPermissionInfo permissionInfo = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
-        @Deprecated
-        // FIXME(hps,26.10.23) remove this; for backwards compatibility until frontend is adapted completely
         final Map<String, Boolean> allowedServices = new HashMap<>();
         if (permissionInfo != null) {
             permissionInfo.getServicePermissions().stream()

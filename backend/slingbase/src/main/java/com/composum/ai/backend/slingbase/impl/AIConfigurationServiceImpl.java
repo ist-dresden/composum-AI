@@ -11,6 +11,7 @@ import javax.jcr.RepositoryException;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -114,9 +115,13 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
             LOG.warn("No page found for resource {}", resource.getPath());
             return false;
         }
-        String template = page.getValueMap().get("cq:template", String.class); // AEM
+        ValueMap valueMap = page.getValueMap();
+        String template = valueMap.get("cq:template", String.class); // AEM
         if (template == null) {
-            template = page.getValueMap().get("template", String.class); // Composum
+            template = valueMap.get("template", String.class); // Composum
+        }
+        if (template == null) { // for content fragments we use the cq:model
+            template = valueMap.get("data/cq:model", String.class);
         }
         return matchesAny(template, config.allowedPageTemplates()) && !matchesAny(template, config.deniedPageTemplates());
     }
