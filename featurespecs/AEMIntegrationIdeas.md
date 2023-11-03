@@ -238,11 +238,10 @@ possibly relevant, but found no need yet: cq-layer-activated foundation-contentl
 
 cq-sidepanel-loaded -> loadSidebarPanelDialog
 
-cq-layer-activated -> initRteHooks registers registerContentDialogInRichtextEditors for editing-start on
+cq-layer-activated -> initRteHooks registers onRteEditingStart for editing-start on
 Granite.author.ContentFrame.getDocument()
 
-coral-overlay:open foundation-contentloaded -> prepareDialog -> (insertCreateButtonsForTextareas ,
-registerContentDialogInRichtextEditors)
+coral-overlay:open foundation-contentloaded -> prepareDialog -> insertCreateButtonsForTextareas
 
 ##### Processing
 

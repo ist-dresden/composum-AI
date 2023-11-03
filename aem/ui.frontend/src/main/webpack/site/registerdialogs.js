@@ -26,8 +26,6 @@ try {
         const SERVICE_SIDEPANEL = 'sidepanel';
         const aiconfig = new AIConfig();
 
-        const old = false; // XXX
-
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
         /**
@@ -169,7 +167,6 @@ try {
                 aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                     Coral.commons.ready(event.target, function () {
                         insertCreateButtonsForTextareas(event.target);
-                        registerContentDialogInRichtextEditors(event);
                     });
                 });
             } catch (e) {
@@ -193,8 +190,6 @@ try {
                         channel.off('editing-start', onRteEditingStart)
                             .on('editing-start', onRteEditingStart);
                         Granite?.author?.ContentFrame?.getDocument()
-                            ?.off('editing-start', registerContentDialogInRichtextEditors)
-                            ?.on('editing-start', registerContentDialogInRichtextEditors)
                             ?.off('editing-start', onRteEditingStart)
                             ?.on('editing-start', onRteEditingStart);
                     });
@@ -217,94 +212,8 @@ try {
             '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
             '</button>\n';
 
-        var lastEditorStartTarget = undefined;
-
-        /** Registers the content creation dialog in the richtext editor toolbar.
-         * The event can either be an opening event for a dialog, or an editing-start for an RTE in the document.
-         * @param {Event} registerevent - The event triggering the registration.
-         */
-        function registerContentDialogInRichtextEditors(registerevent) {
-            console.log("registerContentDialogInRichtextEditors", registerevent.type, registerevent.target);
-            if (registerevent.type === 'editing-start') {
-                lastEditorStartTarget = registerevent.target;
-            }
-
-            const buttongroups = $(document).find(".rte-ui > div > coral-buttongroup");
-            // loop over each buttongroup and add the button if it's not there yet:
-            buttongroups.each(function (index, buttongroup) {
-                if ($(buttongroup).closest('.composum-ai-dialog').length > 0) {
-                    return; // don't insert buttons into our own dialogs
-                }
-                if ($(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
-                    registerContentDialogInRichtextEditor(buttongroup);
-                }
-            });
-        }
-
-        /** Registers the content creation dialog in the richtext editor toolbar */
-        function registerContentDialogInRichtextEditor(buttongroup) {
-            if (!old) return; // XXX
-
-            // console.log("registerContentDialogInRichtextEditors path", path);
-            const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
-            var path = undefined;
-            if (formaction && formaction.startsWith('/content')) {
-                path = formaction;
-            }
-            path = path || $(buttongroup).closest('[data-path]').attr('data-path');
-            var property = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
-            property = property && property.startsWith('./') && property.substring(2);
-            console.log("registerContentDialogInRichtextEditors path", path, "property", property, 'last target', determineEditableFromElement(lastEditorStartTarget));
-            // debugger;
-            const $button = $(rtebuttonHTML);
-            $(buttongroup).append($button);
-            $button.click(function (clickevent) {
-                console.log("createButtonText click", typeof clickevent.type, clickevent.target);
-                var componentPath = path;
-                // in case of rte in content it's difficult to find the path from the button or current state,
-                // so we determine it from the last editor start event:
-                if (!componentPath && lastEditorStartTarget) {
-                    var editable = determineEditableFromElement(lastEditorStartTarget);
-                    componentPath = editable && editable.path;
-                }
-                if (!componentPath) { // FIXME
-                    debugger;
-                }
-
-                debugger;
-                var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
-                rteinstance = rteinstance || $(lastEditorStartTarget).data('rteinstance');
-                rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
-                if (!rteinstance) {
-                    debugger; // FIXME
-                }
-                console.log("rteinstance", rteinstance);
-                clickevent.preventDefault();
-                clickevent.stopPropagation();
-                const oldContent = rteinstance.getContent();
-                rteinstance.suspend();
-                showCreateDialog({
-                    componentPath,
-                    property,
-                    oldContent,
-                    writebackCallback: function (newvalue) {
-                        rteinstance.setContent(newvalue);
-                    },
-                    isRichtext: true,
-                    stackeddialog: true,
-                    onFinishCallback: function () {
-                        rteinstance.reactivate();
-                        rteinstance.setContent(oldContent);
-                        rteinstance.focus();
-                        $('.cq-dialog-backdrop').removeClass('is-open').hide();
-                    }
-                });
-            });
-        }
-
         /** editing-start event is received for an richtext editor - we have to register the button. */
         function onRteEditingStart(event) {
-            if (old) return; // XXX
             let $target = $(event.target);
             if ($target.closest('.composum-ai-dialog').length > 0) {
                 return; // don't insert buttons into our own dialog
@@ -317,10 +226,11 @@ try {
             let resourceType = undefined;
             let propertyName = undefined;
             let rteinstance = $target.data('rteinstance') || $target.data('richText');
+            if (!rteinstance) {
+                debugger; // FIXME
+            }
             console.log("onRteEditingStart", event.type, event.target, editable);
-            // if (!editable && $(target).closest('coral-dialog.rte-fullscreen-dialog')[0]) { // maximized rte
-            // editable = Granite.author.selection.getCurrentActive();
-            // }
+
             if (editable) {
                 componentPath = editable.path;
                 resourceType = editable.type;
@@ -335,23 +245,24 @@ try {
                 propertyName = $target.closest('div.richtext-container')
                     .find('input[type="hidden"][data-cq-richtext-input]').attr('name');
             }
+
             aiconfig.ifEnabled(SERVICE_CREATE, resourceType,
                 () => insertCreateButtons(event.target, editable, componentPath, resourceType, propertyName, rteinstance)
             );
         }
 
         function insertCreateButtons(target, editable, componentPath, resourceType, propertyName, rteinstance) {
-            console.log("insertCreateButtons", arguments);
+            // console.log("insertCreateButtons", arguments);
             let buttongroups = channel.find('#InlineEditingUI .rte-ui > div > coral-buttongroup, coral-dialog[fullscreen] .rte-ui > div > coral-buttongroup');
             const $target = $(target);
-            if ($target.hasClass('cq-RichText-editable')) {
+            if ($target.hasClass('cq-RichText-editable')) { // maximized editor
                 buttongroups = buttongroups.add($target.parent().find('.rte-ui > div > coral-buttongroup').get());
             }
-            if ($target.hasClass('cfm-multieditor-richtext-editor')) {
+            if ($target.hasClass('cfm-multieditor-richtext-editor')) { // content fragment editor
                 buttongroups = buttongroups.add($target.closest('div[data-form-view-container]').find('.rte-ui > div > coral-buttongroup'));
             }
             if (buttongroups.length === 0) {
-                debugger;
+                console.log("Warning: no buttongroups found", target, editable, componentPath, resourceType, propertyName, rteinstance);
             }
             buttongroups.each(function (index, buttongroup) {
                 if ($(buttongroup).closest('.composum-ai-dialog').length === 0 &&
@@ -368,21 +279,9 @@ try {
             $button.click(function (clickevent) {
                 console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
 
-                // rteinstance = rteinstance || editable && $(editable.dom).data('rteinstance');
-                // rteinstance = rteinstance || $(target).data('rteinstance');
-                // rteinstance = rteinstance || $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
-                // rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
-                if (!rteinstance) {
-                    debugger; // FIXME
-                }
-
                 propertyName = propertyName || $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
                 propertyName = propertyName && propertyName.startsWith('./') && propertyName.substring(2);
-                if (!propertyName) {
-                    console.log('XXXnoPropertyName');
-                    // debugger;
-                }
-                // propertyName = propertyName || 'text'; // normal case for an rte - when it's a inline rte in the content it's really hard to find out.
+                propertyName = propertyName || 'text'; // normal case for a rte - when it's an inline rte in the content it's really hard to find out.
 
                 clickevent.preventDefault();
                 clickevent.stopPropagation();
