@@ -26,6 +26,8 @@ try {
         const SERVICE_SIDEPANEL = 'sidepanel';
         const aiconfig = new AIConfig();
 
+        const old = false; // XXX
+
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
         /**
@@ -188,13 +190,13 @@ try {
             try {
                 aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                     Coral.commons.ready(event.target, function () {
-                        channel.off('editing-start', onRteEditingStartRegisterButton)
-                            .on('editing-start', onRteEditingStartRegisterButton);
+                        channel.off('editing-start', onRteEditingStart)
+                            .on('editing-start', onRteEditingStart);
                         Granite?.author?.ContentFrame?.getDocument()
                             ?.off('editing-start', registerContentDialogInRichtextEditors)
                             ?.on('editing-start', registerContentDialogInRichtextEditors)
-                            ?.off('editing-start', onRteEditingStartRegisterButton)
-                            ?.on('editing-start', onRteEditingStartRegisterButton);
+                            ?.off('editing-start', onRteEditingStart)
+                            ?.on('editing-start', onRteEditingStart);
                     });
                 });
             } catch (e) {
@@ -241,6 +243,8 @@ try {
 
         /** Registers the content creation dialog in the richtext editor toolbar */
         function registerContentDialogInRichtextEditor(buttongroup) {
+            if (!old) return; // XXX
+
             // console.log("registerContentDialogInRichtextEditors path", path);
             const formaction = $(buttongroup).closest('form[action]').attr('action'); // if rte in dialog
             var path = undefined;
@@ -267,6 +271,7 @@ try {
                     debugger;
                 }
 
+                debugger;
                 var rteinstance = $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
                 rteinstance = rteinstance || $(lastEditorStartTarget).data('rteinstance');
                 rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
@@ -291,46 +296,119 @@ try {
                         rteinstance.reactivate();
                         rteinstance.setContent(oldContent);
                         rteinstance.focus();
-                        $('.cq-dialog-backdrop').removeClass('is-open');
-                        $('.cq-dialog-backdrop').hide();
+                        $('.cq-dialog-backdrop').removeClass('is-open').hide();
                     }
                 });
             });
         }
 
         /** editing-start event is received for an richtext editor - we have to register the button. */
-        function onRteEditingStartRegisterButton(event) {
-            const target = event.target;
+        function onRteEditingStart(event) {
+            if (old) return; // XXX
+            let $target = $(event.target);
+            if ($target.closest('.composum-ai-dialog').length > 0) {
+                return; // don't insert buttons into our own dialog
+            }
             let editable = Granite?.author?.selection?.getCurrentActive() ||
-                determineEditableFromElement(target); // when in content frame
+                determineEditableFromElement(event.target); // when in content frame
             // we have to determine the componentPath and resourceType right now to see whether the button is enabled.
             // the rteinstance and the property name can also be determined later if we don't get them right now
             let componentPath = undefined;
             let resourceType = undefined;
             let propertyName = undefined;
-            let rteinstance = undefined;
-            console.log("onRteEditingStartRegisterButton", event.type, target, editable);
+            let rteinstance = $target.data('rteinstance') || $target.data('richText');
+            console.log("onRteEditingStart", event.type, event.target, editable);
             // if (!editable && $(target).closest('coral-dialog.rte-fullscreen-dialog')[0]) { // maximized rte
             // editable = Granite.author.selection.getCurrentActive();
             // }
             if (editable) {
                 componentPath = editable.path;
                 resourceType = editable.type;
-            } else if ($(target).closest('form.content-fragment-editor')[0]) {
-                let editorDiv = $(target).closest('div#Editor');
+            } else if ($target.closest('form.content-fragment-editor')[0]) {
+                let editorDiv = $target.closest('div#Editor');
                 componentPath = editorDiv.data('path');
                 // no resourcetype available on content fragments
-            } else if ($(target).closest('form.cq-dialog')[0]) {
-                let dialogForm = $(target).closest('form.cq-dialog');
+            } else if ($target.closest('form.cq-dialog')[0]) {
+                let dialogForm = $target.closest('form.cq-dialog');
                 componentPath = dialogForm.attr('action');
                 resourceType = dialogForm.find('input[name="./sling:resourceType"]').val();
-                propertyName = $(target).closest('div.richtext-container').find('input[type="hidden"][data-cq-richtext-input]').attr('name');
-                rteinstance = $(target).data('rteinstance');
+                propertyName = $target.closest('div.richtext-container')
+                    .find('input[type="hidden"][data-cq-richtext-input]').attr('name');
             }
-            debugger;
+            aiconfig.ifEnabled(SERVICE_CREATE, resourceType,
+                () => insertCreateButtons(event.target, editable, componentPath, resourceType, propertyName, rteinstance)
+            );
         }
 
-        /** Determines the "most specific" editable containing the DOM element, in the sense of editable.dom[0].contains(element).
+        function insertCreateButtons(target, editable, componentPath, resourceType, propertyName, rteinstance) {
+            console.log("insertCreateButtons", arguments);
+            let buttongroups = channel.find('#InlineEditingUI .rte-ui > div > coral-buttongroup, coral-dialog[fullscreen] .rte-ui > div > coral-buttongroup');
+            const $target = $(target);
+            if ($target.hasClass('cq-RichText-editable')) {
+                buttongroups = buttongroups.add($target.parent().find('.rte-ui > div > coral-buttongroup').get());
+            }
+            if ($target.hasClass('cfm-multieditor-richtext-editor')) {
+                buttongroups = buttongroups.add($target.closest('div[data-form-view-container]').find('.rte-ui > div > coral-buttongroup'));
+            }
+            if (buttongroups.length === 0) {
+                debugger;
+            }
+            buttongroups.each(function (index, buttongroup) {
+                if ($(buttongroup).closest('.composum-ai-dialog').length === 0 &&
+                    $(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
+                    registerContentDialogInToolbar(buttongroup, target, editable, componentPath, resourceType, propertyName, rteinstance);
+                }
+            });
+        }
+
+        /** Registers the content creation dialog in the richtext editor toolbar */
+        function registerContentDialogInToolbar(buttongroup, target, editable, componentPath, resourceType, propertyName, rteinstance) {
+            const $button = $(rtebuttonHTML);
+            $(buttongroup).append($button);
+            $button.click(function (clickevent) {
+                console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
+
+                // rteinstance = rteinstance || editable && $(editable.dom).data('rteinstance');
+                // rteinstance = rteinstance || $(target).data('rteinstance');
+                // rteinstance = rteinstance || $(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data('rteinstance');
+                // rteinstance = rteinstance || $(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance');
+                if (!rteinstance) {
+                    debugger; // FIXME
+                }
+
+                propertyName = propertyName || $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+                propertyName = propertyName && propertyName.startsWith('./') && propertyName.substring(2);
+                if (!propertyName) {
+                    console.log('XXXnoPropertyName');
+                    // debugger;
+                }
+                // propertyName = propertyName || 'text'; // normal case for an rte - when it's a inline rte in the content it's really hard to find out.
+
+                clickevent.preventDefault();
+                clickevent.stopPropagation();
+                const oldContent = rteinstance.getContent();
+                rteinstance.suspend();
+                showCreateDialog({
+                    componentPath,
+                    property: propertyName,
+                    oldContent,
+                    writebackCallback: function (newvalue) {
+                        rteinstance.setContent(newvalue);
+                    },
+                    isRichtext: true,
+                    stackeddialog: true,
+                    onFinishCallback: function () {
+                        rteinstance.reactivate();
+                        rteinstance.setContent(oldContent);
+                        rteinstance.focus();
+                        $('.cq-dialog-backdrop').removeClass('is-open').hide();
+                    }
+                });
+            });
+        }
+
+        /** Determines the "most specific" editable containing the DOM element, in the sense of
+         * editable.dom[0].contains(element).
          * This logic prevents a container being found instead of the contained editable. */
         function determineEditableFromElement(element) {
             var bestEditable = undefined;
