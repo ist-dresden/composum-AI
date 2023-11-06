@@ -272,7 +272,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
                 List<Resource> modelResources = listModelResources(new ArrayList<>(), cqModel);
                 for (Resource r : modelResources) {
                     String name = r.getValueMap().get("name", String.class);
-                    String fieldLabel = r.getValueMap().get("fieldLabel", String.class);
+                    String fieldLabel = r.getValueMap().get("fieldLabel",
+                            r.getValueMap().get("fieldDescription",
+                                    r.getValueMap().get("cfm-element", name)));
                     String listOrderString = r.getValueMap().get("listOrder", String.class);
                     if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(fieldLabel)) {
                         labels.put(name, fieldLabel);
@@ -293,7 +295,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
 
     // recursively search all cq:model descendants for elements with fieldLabel and name
     protected List<Resource> listModelResources(List<Resource> list, Resource traversed) {
-        if (traversed.getValueMap().get("fieldLabel") != null && traversed.getValueMap().get("name") != null) {
+        if (traversed.getValueMap().get("name") != null) {
             list.add(traversed);
         } else {
             for (Resource child : traversed.getChildren()) {
