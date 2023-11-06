@@ -14,7 +14,10 @@ import com.composum.ai.backend.slingbase.impl.OsgiAIConfigurationPluginImpl;
  * in the case of OSGI it is used as a configuration factory, in the case of SlingCAC it is used as a collection.
  */
 @ObjectClassDefinition(name = "Composum AI Permission Configuration", description = "A configuration for allowed AI services. " +
-        "There can be multiple configurations, and the allowed services are aggregated.")
+        "There can be multiple configurations, and the allowed services are aggregated.\n" +
+        "There is a fallback configuration that is used if no other configuration is found, " +
+        "and a factory for multiple configurations which override the fallback configuration if present. " +
+        "If configured, Sling Context Aware Configuration takes precedence over OSGI configuration.")
 @Configuration(label = "Composum AI Permission Configuration", description = "A configuration for allowed AI services. " +
         "There can be multiple configurations, and the allowed services are aggregated.",
         collection = true,

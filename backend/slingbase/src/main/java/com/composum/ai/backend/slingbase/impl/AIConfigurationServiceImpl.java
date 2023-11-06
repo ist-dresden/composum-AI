@@ -28,7 +28,34 @@ import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 
 /**
- * The default implementation of the AIConfigurationService.
+ * Collects the configurations from {@link AIConfigurationPlugin}s and aggregates them.
+ *
+ * <p>
+ * The primary responsibility of this class is to determine which AI services are allowed based on various parameters such as:
+ * <ul>
+ *     <li>The user or user group making the request.</li>
+ *     <li>The content path being accessed or edited.</li>
+ *     <li>The URL of the editor in the browser.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * The configurations are defined as OSGI configurations and can be dynamically modified at runtime. Each configuration specifies:
+ * <ul>
+ *     <li>Allowed and denied users or user groups.</li>
+ *     <li>Allowed and denied content paths.</li>
+ *     <li>Allowed and denied views (based on the URL).</li>
+ *     <li>The specific AI services that the configuration applies to.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * When determining the allowed services, this implementation checks all the available configurations and aggregates the results.
+ * A service is considered allowed if it matches any of the "allowed" regular expressions and does not match any of the "denied" regular expressions.
+ * </p>
+ *
+ * @see AIConfigurationPlugin
+ * @see GPTPermissionConfiguration
  */
 @Component(service = AIConfigurationService.class)
 public class AIConfigurationServiceImpl implements AIConfigurationService {
