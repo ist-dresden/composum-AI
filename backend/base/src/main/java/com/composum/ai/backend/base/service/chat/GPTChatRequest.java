@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
@@ -68,12 +69,16 @@ public class GPTChatRequest {
         return this;
     }
 
-    @Nullable
+    /**
+     * Returns a new request with either maxTokens set if that's given, or just an empty request.
+     */
+    @Nonnull
     public static GPTChatRequest ofMaxTokens(@Nullable Integer maxTokens) {
+        GPTChatRequest result = new GPTChatRequest();
         if (maxTokens != null && maxTokens > 0) {
-            return new GPTChatRequest().setMaxTokens(maxTokens);
+            result.setMaxTokens(maxTokens);
         }
-        return null;
+        return result;
     }
 
     /**

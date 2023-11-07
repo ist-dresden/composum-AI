@@ -298,7 +298,6 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     @Nonnull
     protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, HttpServletResponse response, GPTConfiguration config) throws IOException {
         GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens).setConfiguration(config);
-        additionalParameters = additionalParameters != null ? additionalParameters : new GPTChatRequest();
         if (isNotBlank(chat)) {
             try {
                 final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
