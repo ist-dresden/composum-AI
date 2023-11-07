@@ -671,7 +671,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         return new HtmlToMarkdownConverter().convert(html).trim();
     }
 
-    @ObjectClassDefinition(name = "Composum AI GPT Chat Completion Service",
+    @ObjectClassDefinition(name = "Composum AI OpenAI Configuration",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
