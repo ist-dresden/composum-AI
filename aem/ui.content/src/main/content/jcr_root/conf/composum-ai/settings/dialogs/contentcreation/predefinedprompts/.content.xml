@@ -7,13 +7,13 @@
          value="-"></empty>
     <summarize jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                text="Summarize"
-               value="As the author, summarize the text by capturing its main ideas in the style the text is written. Ensure it's much shorter than the original. Identify the purpose and goal of the text, pinpoint key points of all topical sections. Write clear and simply, ensuring accuracy and completeness."></summarize>
+               value="As the author, summarize the text by capturing its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Identify the purpose and goal of the text, pinpoint key points of all topical sections. Write clear and simply, ensuring accuracy and completeness."></summarize>
     <introduction jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                   text="Introduction"
-                  value="Please write an eloquent introduction for the text, in the style the text is written."></introduction>
+                  value="Please write an eloquent introduction for the text, in the style the text is written, as it could be put in front of the text."></introduction>
     <conclusion jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                 text="Conclusion"
-                value="Please write an eloquent conclusion for the text, in the style the text is written."></conclusion>
+                value="Please write an eloquent conclusion for the text, in the style the text is written, as it could be put after the text."></conclusion>
     <expand jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
             text="Expand"
             value="Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style."></expand>
@@ -22,7 +22,7 @@
             value="Please extend the text with more details and elaboration while maintaining the current tone and style."></extend>
     <abstract jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
               text="Abstract"
-              value="Please write an abstract for the text that provides a concise overview of the key points and main themes."></abstract>
+              value="Please write an abstract for the text that provides a concise overview of the key points and main themes, as it could be put in front of the text."></abstract>
     <headline jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
               text="Headline"
               value="Please write a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style."></headline>
@@ -45,14 +45,14 @@ Do also fix orthographical and grammar errors."></improve>
                      value="Please create a description for a web page with the following text, usable for search engine optimization (SEO)."></seo_description>
     <teaser jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
             text="Teaser"
-            value="Please write a brief, engaging teaser for the text. It should pique the reader's interest and encourage them to read the full content."></teaser>
+            value="Please write a brief, engaging teaser for the text, as it could be used for a link to the text. It should pique the reader's interest and encourage them to read the full content."></teaser>
     <rewrite_for_different_audience jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                                     text="Rewrite for Different Audience"
                                     value="Please rewrite the text to suit a different audience:
 "></rewrite_for_different_audience>
     <bullet_point_summary jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                           text="Bullet Point Summary"
-                          value="Please summarize the main points of the text as a list of bullet points."></bullet_point_summary>
+                          value="Please summarize the main points of the text as a list of bullet points, as it could be put in front of the text."></bullet_point_summary>
     <bab_framework_text jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                         text="BAB Framework Text"
                         value="Please write a complete text using the Before-After-Bridge (BAB) framework. Start by describing the problem, then envision the improvements, and finally introduce the solution that makes this transformation possible."></bab_framework_text>
@@ -61,7 +61,7 @@ Do also fix orthographical and grammar errors."></improve>
                          value="Please write a complete text using the AIDA framework. Start by capturing attention, then generate interest, induce desire, and finally, call for action."></aida_framework_text>
     <slogan jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
             text="Slogan"
-            value="Based on the given text, please create a catchy and memorable slogan that captures its main theme."></slogan>
+            value="Based on the given text, please create a catchy and memorable slogan that captures its main theme. Output it as it could be put in front of the text."></slogan>
     <cta jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
          text="CTA"
          value="Based on the text, create a call to action that encourages the reader to take the next step, and clearly conveys the unique value proposition to the reader."></cta>
