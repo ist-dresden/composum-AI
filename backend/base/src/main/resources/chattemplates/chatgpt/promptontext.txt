@@ -6,7 +6,7 @@ Please retrieve the text for which you are going to execute a prompt, and print 
 ---------- assistant ----------
 ${text}
 ---------- user ----------
-The following instruction is specifically about the text you've just retrieved and displayed. Whenever I refer to "the text", I'm referencing this exact piece of content. Please keep this in mind while executing the following prompt:
+The following instruction is specifically about the text you've just retrieved and displayed. Whenever I refer to "the text" or "the page", I'm referencing this exact piece of content. Please keep this in mind while executing the following prompt:
 PROMPT:
 
 ${prompt}
