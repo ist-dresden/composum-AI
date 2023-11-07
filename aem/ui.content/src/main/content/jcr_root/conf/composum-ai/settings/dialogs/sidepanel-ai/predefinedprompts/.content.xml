@@ -14,7 +14,7 @@
 "></question>
     <simplification_suggestions jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                                 text="Simplification Suggestions"
-                                value="Identify and print parts of the text that could be simplified or made easier to understand, and suggest alternative wording."></simplification_suggestions>
+                                value="Identify parts of the text that could be simplified or made easier to understand. Name those parts and make suggestions for alternative wording."></simplification_suggestions>
     <content_flow jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                   text="Content Flow"
                   value="Analyze the flow of the content. Does it progress logically? Is there a clear introduction, body, and conclusion?"></content_flow>
