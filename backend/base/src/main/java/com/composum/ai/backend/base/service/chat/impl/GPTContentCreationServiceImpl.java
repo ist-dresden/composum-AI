@@ -47,9 +47,9 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     /**
      * To respect limits of ChatGPT we replace in texts longer than this many words we replace the middle with [...]
      * TODO: use an intelligent algorithm to determine this limit, but that's pretty hard for executePromptOnText.
-     * 3000 would collide with the 1000 token default for maxtokens, so we use 2800.
+     * We assume a 16k model and leave some room for the answer.
      */
-    protected static final int MAXTOKENS = 2800;
+    protected static final int MAXTOKENS = 14000;
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
