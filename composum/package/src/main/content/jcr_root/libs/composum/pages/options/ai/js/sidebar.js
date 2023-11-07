@@ -231,6 +231,7 @@
                 this.adjustChatCount(0);
                 this.$prompt.val(predefinedPrompt);
                 this.adjustButtonStates();
+                this.lastChangedPrompt = event.target;
                 return false;
             },
 
@@ -256,6 +257,7 @@
                         this.$el.find('.ai-response.chat').last().find('.ai-response-text').text('');
                     }
                 }
+                this.lastChangedPrompt = event.target;
                 return false;
             },
 
@@ -299,20 +301,22 @@
                 this.$el.find('.stop-button').prop('disabled', !loading);
             },
 
-            /** Format  [{"role":"ASSISTANT","content":"Answer 1"},{"role":"USER","content":"Another question"}] for AIServlet chat parameter.
+            /** Format  [{"role":"assistant","content":"Answer 1"},{"role":"user","content":"Another question"}] for AIServlet chat parameter.
              * Contains the first response (as that fits the conversation model) the other .chat items. */
             getChat: function () {
                 let chat = [];
                 let firstResponse = this.$el.find('.ai-response.first .ai-response-text').text();
-                chat.push({"role": "ASSISTANT", "content": firstResponse});
+                if (firstResponse) {
+                    chat.push({"role": "assistant", "content": firstResponse});
+                }
                 this.$el.find('.chat').each(function (index, element) {
                     let $element = $(element);
                     if ($element.hasClass('promptcontainer')) {
                         let value = $element.find('textarea').val();
-                        chat.push({"role": "USER", "content": value});
+                        chat.push({"role": "user", "content": value});
                     } else {
                         let responseText = $element.find('.ai-response-text').text();
-                        chat.push({"role": "ASSISTANT", "content": responseText});
+                        chat.push({"role": "assistant", "content": responseText});
                     }
                 });
                 return chat;
@@ -322,8 +326,11 @@
             generateButtonClicked: function (event) {
                 console.log('generateButtonClicked', event);
                 event.preventDefault();
+                if (this.lastChangedPrompt) {
+                    $(this.lastChangedPrompt).trigger('change');
+                }
                 let that = this;
-                setTimeout(() => that.generate(), 100);
+                setTimeout(() => that.generate(), 200);
             },
 
             generate: function () {
@@ -358,7 +365,6 @@
                         inputText: inputText,
                         inputPath: inputPath,
                         streaming: this.streaming,
-                        textLength: "0|",
                         prompt: this.$prompt.val(),
                         chat: JSON.stringify(chat)
                     }, {dataType: 'json', xhrconsumer: consumeXhr},

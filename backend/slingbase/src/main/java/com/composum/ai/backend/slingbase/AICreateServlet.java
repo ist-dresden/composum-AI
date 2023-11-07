@@ -75,7 +75,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     /**
      * Parameter to transmit additional chat after the first prompt {@link #PARAMETER_PROMPT}. Format: array of serialized
      * {@link GPTChatMessage}.
-     * E.g. <code>[{"role":"ASSISTANT","content":"That's good."}, {"role":"USER","content":"Why exactly?"}, ]</code>.
+     * E.g. <code>[{"role":"assistant","content":"That's good."}, {"role":"user","content":"Why exactly?"}, ]</code>.
      */
     public static final String PARAMETER_CHAT = "chat";
 

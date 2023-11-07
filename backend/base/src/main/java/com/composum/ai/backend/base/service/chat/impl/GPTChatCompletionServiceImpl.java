@@ -563,7 +563,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected String createJsonRequest(GPTChatRequest request, boolean streaming) throws JsonProcessingException {
         List<ChatMessage> messages = new ArrayList<>();
         for (GPTChatMessage message : request.getMessages()) {
-            messages.add(new ChatMessage(message.getRole().toString(), message.getContent()));
+            String role = message.getRole().toString();
+            messages.add(new ChatMessage(role, message.getContent()));
         }
         while (!messages.isEmpty() && StringUtil.isBlank(messages.get(messages.size() - 1).getContent())) {
             LOG.debug("Removing empty last message."); // suspicious - likely misusage of the API

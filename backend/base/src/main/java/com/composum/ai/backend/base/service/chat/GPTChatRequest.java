@@ -17,6 +17,7 @@ public class GPTChatRequest {
 
     private static final Logger LOG = LoggerFactory.getLogger(GPTChatRequest.class);
 
+    @Nonnull
     private final List<GPTChatMessage> messages = new ArrayList<>();
     private Integer maxTokens;
     private GPTConfiguration configuration;
@@ -25,7 +26,9 @@ public class GPTChatRequest {
     }
 
     public GPTChatRequest(List<GPTChatMessage> messages) {
-        this.messages.addAll(messages);
+        if (messages != null) {
+            this.messages.addAll(messages);
+        }
     }
 
     public GPTChatRequest(GPTConfiguration configuration) {
@@ -55,6 +58,7 @@ public class GPTChatRequest {
     /**
      * Returns the chat messages set with {@link #addMessage(GPTMessageRole, String)}.
      */
+    @Nonnull
     public List<GPTChatMessage> getMessages() {
         return messages;
     }
