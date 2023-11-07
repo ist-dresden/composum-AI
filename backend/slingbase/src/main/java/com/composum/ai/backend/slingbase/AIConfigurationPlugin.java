@@ -1,6 +1,6 @@
 package com.composum.ai.backend.slingbase;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
+import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 
 public interface AIConfigurationPlugin {
 
@@ -16,15 +18,14 @@ public interface AIConfigurationPlugin {
      *
      * @param request     The SlingHttpServletRequest representing the current request.
      * @param contentPath The path of the content being edited.
-     * @param editorUrl   The URL of the editor in the browser.
      * @return A set of allowed services; null if this plugin doesn't implement this method.
-     * @see AIConfigurationServlet#SERVICE_CATEGORIZE
-     * @see AIConfigurationServlet#SERVICE_CREATE
-     * @see AIConfigurationServlet#SERVICE_SIDEPANEL
-     * @see AIConfigurationServlet#SERVICE_TRANSLATE
+     * @see GPTPermissionInfo#SERVICE_CATEGORIZE
+     * @see GPTPermissionInfo#SERVICE_CREATE
+     * @see GPTPermissionInfo#SERVICE_SIDEPANEL
+     * @see GPTPermissionInfo#SERVICE_TRANSLATE
      */
     @Nullable
-    Set<String> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl);
+    List<GPTPermissionConfiguration> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath);
 
     /**
      * Reads the GPTConfiguration from sling context aware configurations.

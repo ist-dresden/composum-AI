@@ -63,36 +63,42 @@ On a 'cq-sidepanel-loaded' after Coral.commons.ready we load the dialog and inse
 We register for event "coral-overlay:open" at the `$(document)`. It get's the coral-dialog as argument, where we can
 look for textareas `div.coral-Form-fieldwrapper textarea.coral-Form-field` in it after Coral.commons.ready on the
 dialog. The path of the component is `$(textarea).closest('form').attr('action')` , attribute is the `name` of the
-textarea.
+textarea. For permission checking, the resource type is in an input with name ./sling:resourceType in the closest
+coral-dialog-content. (Function insertCreateButtonsForTextareas in registerdialogs.js)
 
 ### Richtext editor in dialog
 
 It seems normally the toolbar is initially visible, so we can already add the creation dialog button on
-`coral-overlay:open`. The button is integrated into all `.rte-ui > div > coral-buttongroup`. From the buttongroup
+`coral-overlay:open` on the coral-dialog.
+The button is integrated into all `.rte-ui > div > coral-buttongroup`. From the buttongroup
 the actual editor can be found with `$(buttongroup).closest('.cq-RichText').find('.cq-RichText-editable').data
 ('rteinstance')` and the path of the component is `$(textarea).closest('form').attr('action')` , attribute is the
-attribute `name` at the editor.
+attribute `name` at the editor. For permission checking, the resource type is in an input with name ./sling:resourceType
+in the closest coral-dialog-content.
+(Alternative: an editing-start event is triggered before that on each rte div.)
 
 BTW: In the Content Creation Dialog we need to trigger an `foundation-contentloaded` event, which activates the
 richtext editors.
 
-## Richtext editor in content (normal text component)
+### Richtext editor in content (normal text component)
 
 The toolbar is not visible until the user clicks on the editor. Thus, we have to listen for the `editing-start` event;
-we register the hook for that on cq-layer-activated. The `editing-start` has as target the content element, so we 
-cannot use that to find the editor which lives in another frame. We ignore that and search for the `.rte-ui > div > 
+we register the hook for that on cq-layer-activated. The `editing-start` has as target the content element, so we
+cannot use that to find the editor which lives in another frame. We ignore that and search for the `.rte-ui > div >
 coral-buttongroup` in $(document) instead, and add buttons if they aren't there and register click events for them.
-It seems, however, difficult to find data about the edited element, so we save that `lastEditorStartTarget` 
-during the `editor-start` event. It is also the carrier of the RTE object: `$(lastEditorStartTarget).data('rteinstance')`
+It seems, however, difficult to find data about the edited element, so we save that `lastEditorStartTarget`
+during the `editor-start` event. It is also the carrier of the RTE
+object: `$(lastEditorStartTarget).data('rteinstance')`
 
-## Richtext editor in content fragment
+### Richtext editor in content fragment
 
-The toolbar is already visible. We can register the buttons on the foundation-contentloaded event. The richtext 
-editor object is to be found at 
-`$(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance')` 
-and the path is in a form action.
+The toolbar is already visible. We can register the buttons on the foundation-contentloaded event. The richtext
+editor object is to be found at
+`$(buttongroup).closest('[data-form-view-container=true]').find('[data-cfm-richtext-editable=true]').data('rteinstance')`
+and the path is in a form action. resource type isn't really applicable - we might use data/cq:model which is
+checkable in the Java code, but that's more like the page template.
 
-## Dialog rendering
+### Dialog rendering
 
 We use the AEM standard way as far as possible. That means we use for a pop up dialog like the Content Creation
 Dialog a TouchUI Dialog (Coral 3). It will be triggered from Javascript, though, so it can likely be a static URL.
@@ -114,32 +120,39 @@ though / that works in the Composum build system, too.
 
 To make things compatible with the Composum Pages variant of Composum AI: if we generate a JSON response we generate
 it in the same way as in Composum: e.g.
+
+```json
 {
-"status": 200,
-"success": true,
-"warning": false,
-"data": {
-"result": {
-"streamid": "7190c15e-bd98-4ceb-bd45-5e800b6370f0"
+  "status": 200,
+  "success": true,
+  "warning": false,
+  "data": {
+    "result": {
+      "streamid": "7190c15e-bd98-4ceb-bd45-5e800b6370f0"
+    }
+  }
 }
-}
-}
+```
+
 or in the error case:
+
+```json
 {
-"status": 400,
-"success": false,
-"warning": false,
-"title": "Error",
-"messages": [
-{
-"level": "error",
-"text": "error",
-"rawText": "error",
-"arguments": [
-"arg1",
-"arg2"
-],
-"timestamp": <timestamp>
+  "status": 400,
+  "success": false,
+  "warning": false,
+  "title": "Error",
+  "messages": [
+    {
+      "level": "error",
+      "text": "error",
+      "rawText": "error",
+      "arguments": [
+        "arg1",
+        "arg2"
+      ],
+      "timestamp": <timestamp>
+    }
+  ]
 }
-]
-}
+```

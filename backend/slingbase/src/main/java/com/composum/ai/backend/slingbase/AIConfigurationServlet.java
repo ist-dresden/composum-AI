@@ -1,9 +1,10 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import javax.servlet.Servlet;
 
@@ -17,6 +18,7 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -67,26 +69,6 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
      */
     public static final String PARAM_EDITORURL = "editorUrl";
 
-    /**
-     * Content Creation Dialog
-     */
-    public static final String SERVICE_CREATE = "create";
-
-    /**
-     * Side Panel AI
-     */
-    public static final String SERVICE_SIDEPANEL = "sidepanel";
-
-    /**
-     * Only for Composum: translation.
-     */
-    public static final String SERVICE_TRANSLATE = "translate";
-
-    /**
-     * Only for composum: categorization.
-     */
-    public static final String SERVICE_CATEGORIZE = "categorize";
-
     @Reference
     private AIConfigurationService aiConfigurationService;
 
@@ -95,12 +77,28 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String contentPath = StringUtils.removeEnd(request.getRequestPathInfo().getSuffix(), ".html");
+        if (StringUtils.startsWith(contentPath, "/mnt/overlay")) {
+            contentPath = "/content" + StringUtils.removeStart(contentPath, "/mnt/overlay");
+        }
         String editorUrl = request.getParameter(PARAM_EDITORURL);
-        Set<String> allowedServices = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
-        Map<String, Boolean> allowedServicesMap = allowedServices.stream()
-                .collect(Collectors.toMap(service -> service, service -> true));
+        GPTPermissionInfo permissionInfo = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
+        final Map<String, Boolean> allowedServices = new HashMap<>();
+        if (permissionInfo != null) {
+            permissionInfo.getServicePermissions().stream()
+                    .filter(Objects::nonNull)
+                    .map(GPTPermissionInfo.GPTPermissionInfoItem::getServices)
+                    .filter(Objects::nonNull)
+                    .flatMap(List::stream)
+                    .forEach(service -> allowedServices.put(service, true));
+        }
         response.setContentType("application/json");
-        Map<String, Map<String, Boolean>> jsonResponse = Map.of("allowedServices", allowedServicesMap);
+        Map<String, Object> jsonResponse = new HashMap<>();
+        if (permissionInfo != null) {
+            jsonResponse.put("permissionInfo", permissionInfo);
+        }
+        if (allowedServices != null) {
+            jsonResponse.put("allowedServices", allowedServices);
+        }
         response.getWriter().write(gson.toJson(jsonResponse));
     }
 

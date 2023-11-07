@@ -65,7 +65,8 @@ Special resource types of WKND:
       (variationName or master)
     - evtl. text attribute if present?
     - example http://localhost:4502/bin/browser.
-      html/content/wknd/us/en/adventures/colorado-rock-climbing/_jcr_content/root/container/container_fixed/container/contentfragment 
+      html/content/wknd/us/en/adventures/colorado-rock-climbing/_
+      jcr_content/root/container/container_fixed/container/contentfragment
 - OK: wknd/components/experiencefragment : fragmentVariationPath , ??? childnodes
 - OK: wknd/components/teaser -> core/wcm/components/teaser/v1/teaser -> core/wcm/components/image : descriptionFromPage
   , titleFromPage , pretitle ,
@@ -89,17 +90,17 @@ modifying Opax configuration
 
 ## Sidebar AI
 
-/libs/wcm/core/content/editor/jcr:content/sidepanels/edit contains the code for the sidepanel. 
+/libs/wcm/core/content/editor/jcr:content/sidepanels/edit contains the code for the sidepanel.
 
 https://github.com/Adobe-Consulting-Services/acs-aem-samples/issues/41 :
 var $sidePanelEdit = $("#SidePanel").find(".js-sidePanel-edit"),
-    $tabs = $sidePanelEdit.data("tabs");
+$tabs = $sidePanelEdit.data("tabs");
 
 //add the page itree iframe in new tab
 $tabs.addItem({
-  tabContent: "Page Browser",
-  panelContent: getPageContent(),
-  active: false
+tabContent: "Page Browser",
+panelContent: getPageContent(),
+active: false
 });
 
 ## References
@@ -121,18 +122,18 @@ https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/
 
 For dialog calls content dialog: https://spectrum.adobe.com/page/icons/ MagicWand oder auch GearsEdit
 
-<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS" icon="infocircle" tabindex="0" 
-aria-describedby="description_bc498e27-76c6-4923-8968-8e7f8f68a3d7" alt="description" role="img" 
+<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS" icon="infocircle" tabindex="0"
+aria-describedby="description_bc498e27-76c6-4923-8968-8e7f8f68a3d7" alt="description" role="img"
 aria-label="description" size="S">
-      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
-        <use xlink:href="#spectrum-icon-24-MagicWand"></use>
-      </svg>
-    </coral-icon>
+<svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
+<use xlink:href="#spectrum-icon-24-MagicWand"></use>
+</svg>
+</coral-icon>
 
 https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Icon.html#availableIcons
 
 Possible Icons for Sidebar Dialog :
-Run play , Stop stop , Reset / Clear  / deleteOutline , Reset / Clear History delete, Back back , Forward forward , 
+Run play , Stop stop , Reset / Clear / deleteOutline , Reset / Clear History delete, Back back , Forward forward ,
 evtl fastForward
 
 ## Workarounds
@@ -147,13 +148,9 @@ see https://experienceleague.adobe.com/docs/experience-manager-65/developing/int
 http://localhost:4502/libs/granite/ui/content/dumplibs.test.html?categories=cq.authoring.editor.sites.page.hook
 unfortunately ?debugClientLibs=true breaks the editor. Better configure Adobe Granite HTML Library Manager
 
-## TODOs
-
-- move common Java code to slingbase
-
 ## Richtexteditor
 
-https://www.bounteous.com/insights/2022/01/06/custom-rich-text-editor-plugins-adobe-experience-manager 
+https://www.bounteous.com/insights/2022/01/06/custom-rich-text-editor-plugins-adobe-experience-manager
 https://experienceleague.adobe.com/docs/experience-manager-65/administering/operations/rich-text-editor.html?lang=en ->
 clientlib rte.coralui3 , /libs/cq/gui/components/authoring/dialog/richtext/clientlibs/rte/coralui3
 https://experienceleague.adobe.com/docs/experience-manager-core-components/using/wcm-components/text.html?lang=en
@@ -167,10 +164,9 @@ http://localhost:4502/bin/browser.html/libs/core/wcm/components/text/v2/text
 Test on wcm editors, too!
 
 http://experience-aem.blogspot.com/2016/07/aem-62-touch-ui-rich-text-editor-inplace-editing-open-in-fullscreen-editing-start-event.html
-editing-start is triggered but I have trouble to catch it. TODO FIXME CONTINUE THIS 
+editing-start is triggered but I have trouble to catch it. TODO FIXME CONTINUE THIS
 
 ### icon
-
 
 <coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" icon="gearsEdit" role="img" size="S">
 <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
@@ -178,28 +174,83 @@ editing-start is triggered but I have trouble to catch it. TODO FIXME CONTINUE T
 </svg>
 </coral-icon>
 
-<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton" type="button" 
-title="AI Content Creation" icon="gearsEdit" size="M"><coral-icon size="M" 
-class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation" 
+<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton" type="button"
+title="AI Content Creation" icon="gearsEdit" size="M"><coral-icon size="M"
+class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation"
 aria-label="AI Content Creation">
-      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
-        <use xlink:href="#spectrum-icon-18-GearsEdit"></use>
-      </svg>
-    </coral-icon><coral-button-label class="_coral-ActionButton-label"></coral-button-label></button>
+<svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
+<use xlink:href="#spectrum-icon-18-GearsEdit"></use>
+</svg>
+</coral-icon><coral-button-label class="_coral-ActionButton-label"></coral-button-label></button>
 
-## Misc
-
-### ui.frontend
+## ui.frontend
 
 run 'npm run watch' for development.
 
-### Events
+## Events
 
 possibly relevant, but found no need yet: cq-layer-activated foundation-contentloaded
 
 - coral-overlay:open Triggerred after the overlay is opened with show() or instance.open = true
-https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Overlay.html#Coral.Overlay:coral-overlay:open
-comes when dialog is opened, after foundation-contentloaded . coral-overlay:beforeopen doesn't work on RTE.
+  https://developer.adobe.com/experience-manager/reference-materials/6-5/coral-ui/coralui3/Coral.Overlay.html#Coral.Overlay:coral-overlay:open
+  comes when dialog is opened, after foundation-contentloaded . coral-overlay:beforeopen doesn't work on RTE.
   Argument: dialog
 
 - editing-start triggered in CUI.Richtext.js
+
+### Event flow
+
+- Page editor [1](http://localhost:4502/editor.
+  html/content/wknd/language-masters/test/composum-ai-testpages.html)
+  or [2](http://localhost:4502/editor.html/content/wknd/language-masters/en/faqs.html)
+- [Page properties](http://localhost:4502/mnt/overlay/wcm/core/content/sites/properties.html?item=/content/wknd/language-masters/en/faqs)
+- [Experience fragment](http://localhost:4502/editor.
+  html/content/experience-fragments/wknd/us/en/adventures/adventures-2021/master.html)
+- (not functional
+  yet): [Content fragment](http://localhost:4502/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html/content/dam/wknd/en/adventures/ski-touring-mont-blanc/ski-touring-mont-blanc)
+
+1. Page editor
+    - richttext in document:
+        - content frame editing-start on edited div.text
+    - richtext editor in dialog
+        - editor frame foundation-contentloaded on coral-dialog
+        - editor frame dialog-ready on document
+        - editor frame editing-start on each div.cq-Richtext-editable
+        - editor frame coral-overlay:open on coral-dialog
+
+2. Page properties
+    - foundation-contentloaded on document
+
+3. Experience fragment editor
+    - editor frame foundation-contentloaded and cq-layer-activated on document
+    - richtext in experience fragment:
+        - content frame editing-start on div.text
+    - richtext in experience fragment going fullscreen
+        - editor frame editing-start on div.rte-editor
+
+4. Content fragment editor
+    - foundation-content-loaded on document
+    - editing-start on div.cfm-multieditor-richtext-editor
+
+### registerdialogs.js flow
+
+#### Registration
+
+cq-sidepanel-loaded -> loadSidebarPanelDialog
+
+cq-layer-activated -> initRteHooks registers onRteEditingStart for editing-start on
+Granite.author.ContentFrame.getDocument()
+
+coral-overlay:open foundation-contentloaded -> prepareDialog -> insertCreateButtonsForTextareas
+
+##### Processing
+
+The major problem are the richtext editors: the create button has to be inserted, and the component path and resource
+type, and the property name have to be found out, and the reteinstance has to be determined when the button is clicked.
+
+Button creation is triggered on
+
+After the editing-start the toolbar is there, but it's a bit difficult
+to find it / see what it is for, as there are several places.
+
+1.
