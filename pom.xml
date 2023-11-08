@@ -32,8 +32,17 @@
     </issueManagement>
     <distributionManagement>
         <site>
-            <id>github-site</id>
-            <url>https://ist-dresden.github.io/composum-AI/</url>
+            <id>api.composum.com</id>
+            <!--
+                We do not actually use scp for that, but that determines the relative links in the directory structure.
+                Since we need to specify that in the aem module again, we specify it here, too, to protect against parent
+                changes.
+                For some reason this needs a /var/www/composum/api/public/ prefix or the structure on site:stage is broken.
+                Since this is not connected to ../pom.xml but the site should be integrated, we need to specify this here.
+             -->
+            <url>
+                scp://api.composum.com/var/www/composum/api/public/parent-2/parent-2-public/composum-platform/composum-ai-integration/
+            </url>
         </site>
     </distributionManagement>
 
