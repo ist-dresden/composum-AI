@@ -12,15 +12,15 @@
     </bannerLeft> -->
 
     <body>
-        <menu name="Overview">
+        <!-- <menu name="Overview">
             <item name="Introduction" href="index.html"/>
             <item name="Installation" href="installation.html"/>
             <item name="Configuration" href="configuration.html"/>
             <item name="Usage" href="usage.html"/>
-        </menu>
-        <menu ref="parent"/>
-        <menu ref="modules"/>
-        <menu ref="reports"/>
+        </menu> -->
+        <menu ref="parent" inherit="bottom" inheritAsRef="false"/>
+        <menu ref="modules" inherit="bottom" inheritAsRef="false"/>
+        <menu ref="reports" inherit="bottom" inheritAsRef="false"/>
     </body>
 
     <!-- Good for a start, but we should probably switch to reflow 2 , which is work, though. -->

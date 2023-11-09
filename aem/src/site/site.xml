@@ -18,9 +18,9 @@
     </custom>
 
     <body>
-        <menu ref="parent"/>
-        <menu ref="modules"/>
-        <menu ref="reports"/>
+        <menu ref="parent" inherit="bottom" inheritAsRef="false"/>
+        <menu ref="modules" inherit="bottom" inheritAsRef="false"/>
+        <menu ref="reports" inherit="bottom" inheritAsRef="false"/>
     </body>
 
 </project>
