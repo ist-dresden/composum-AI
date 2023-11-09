@@ -1,1 +1,4 @@
-/* You can override this file with your own styles */
+/** The fluido-skin https icon is quite annoying - replace it. */
+a.externalLink[href^=https] {
+    background: url('../images/internet-web-browser.png') right center no-repeat;
+}
