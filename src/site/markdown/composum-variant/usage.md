@@ -22,41 +22,39 @@ The integration of generative AI into Composum Pages empowers content creators t
 efficiently. Technical details, specifications and so forth you can find on
 the [project's Github repository](https://github.com/ist-dresden/composum-AI).
 
-![Img1](../image/ai/video/QuickDemo-poster.png)
-
 # A quick demo
 
-![Quick Demo video](../image/ai/video/QuickDemo.mp4)
+![Img1](../image/ai/video/QuickDemo-poster.png)
+
+[Quick Demo video](../image/ai/video/QuickDemo.mp4)
 
 # How to access the Composum AI
 
-![Accessing the AI dialogs](../image/ai/dialogs/AI-DialogAccess.png)
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AI-DialogAccess.png" alt="Accessing the AI dialogs" width="500" />
+</div>
 
 When editing the components in Composum, there are a couple of icons that are present in the title of the fields of the
 component. A click on one of these icons opens the corresponding dialog.
 
-### Content Creation Assistant
+- ![creation icon](../image/ai/icons/IconCreation.png) **Content Creation Assistant**: For text fields the content
+  creation assistant offers its help.
+- ![sidebar AI icon](../image/ai/icons/IconSidebar.png) **Sidebar AI**: The sidebar AI can support you by reviewing the
+  text of the page under various aspects, find typos or answer questions in a chat.
+- ![translation icon](../image/ai/icons/IconTagging.png) **Translation assistant**: If for the given field there is a
+  text in one or more different languages, the translation assistant icon is available.
+- ![tagging icon](../image/ai/icons/IconTagging.png) **Page category assistant**: When editing page properties, the page
+  category assistant suggests SEO keywords based on the content of the page.
 
-For text fields the content creation assistant offers its help.
-
-### Sidebar AI
-
-The sidebar AI can support you by reviewing the text of the page under various aspects, find typos or answer questions
-in a chat.
-
-### Translation assistant
-
-If for the given field there is a text in one or more different languages, the translation assistant icon is available.
-
-### Page category assistant
-
-When editing page properties, the page category assistant suggests SEO keywords based on the content of the page.
+<div style="clear: both;"></div>
 
 # The assistants
 
-## The translation assistant
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AI-TranslationAssistant.png" alt="Translation Assistant" width="500" />
+</div>
 
-![Translation Assistant](../image/ai/dialogs/AI-TranslationAssistant.png)
+## The translation assistant
 
 The Translation Dialog is a feature in Composum Pages that allows users to easily translate text attributes into
 different languages. When editing a page, users may encounter a text field with a translation icon. By clicking on this
@@ -67,16 +65,26 @@ The dialog includes elements such as a source language selector, a translation d
 an error message display, and a loading indicator. The Translation Dialog aims to provide a user-friendly and intuitive
 way for users to efficiently manage translations of text attributes in Composum Pages.
 
-## The page category assistant
+<div style="clear: both;"></div>
 
-![Page Category Assistant](../image/ai/dialogs/AI-PageCategorySuggestions.png)
+<div style="float: left; margin-right: 20px;">
+    <img src="../image/ai/dialogs/AI-PageCategorySuggestions.png" alt="Page Category Assistant" width="300" />
+</div>
+
+## The page category assistant
 
 The page category assistant displays the current categories along with suggestions of the AI. After the AI suggestions
 have been generated, you can select or deselect current categories and suggestions as needed, and then save or abort. If
 you feel the need to add further categories or edit them, please select 'Accept' and use the original page properties
 dialog for further modification. The page categories can then enhance the SEO potential of the page.
 
+<div style="clear: both;"></div>
+
 # The content creation assistant
+
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AI-ContentCreationAssistant.png" alt="Content Creation Assistant" width="500" />
+</div>
 
 This dialog is probably the most powerful and flexible tool Composum AI offers. The user is able to provide a prompt
 that describes what content should be generated and how it should look like, and can select a source from which to
@@ -117,7 +125,7 @@ The predefined prompts are valuable as they are, but please take them as an insp
 - **SEO Description:** The AI creates a description for a web page with the given text, usable for search engine
   optimization (SEO).
 
-![Content Creation Assistant](../image/ai/dialogs/AI-ContentCreationAssistant.png)
+<div style="clear: both;"></div>
 
 ### Tips and Tricks for using the Content Creation Assistant
 
@@ -141,6 +149,12 @@ Even though that's not the primary use of the assistant, you can (creatively) us
 general questions, or have it use the page content to answer your questions. Just open the assistant on any text field
 in the page, use "current page text" as base text or even "no text" and ask away. Of course you might want to press "
 Cancel" after such use.
+
+<div style="clear: both;"></div>
+
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AI-Sidebar-AI.png" alt="Sidebar AI" width="400" />
+</div>
 
 # The Sidebar AI
 
@@ -185,8 +199,6 @@ just retry), and it is possible to use a chat to ask further questions about the
 the bottom of reach response appears a new prompt input field, where it's possible to continue in a conversation. There
 is, however, a limit in the length of conversations, so it's better to start fresh when the topic is changed. You can
 always go back using the history, and even continue the old conversation, which will be saved as a new history entry.
-
-![Sidebar AI](../image/ai/dialogs/AI-Sidebar-AI.png)
 
 ### Tips and Tricks for the Sidebar AI
 
