@@ -79,8 +79,167 @@
         </header>
         <main id="bodyColumn"  class="span10" >
 <h1>Usage of the Composum AI for AEM</h1>
-<p><a class="externalLink" href="https://www.composum.com/home/blog/AEM/composumAI-AEM.html">Our blog</a> gives a nice overview over the
-functionality.</p>
+<ul>
+<li><a href="#How_to_access_the_content_creation_assistant">How to access the content creation assistant</a></li>
+<li><a href="#The_content_creation_assistant">The content creation assistant</a>
+<ul>
+<li><a href="#Text_sources_.28base_text.29">Text sources (base text)</a></li>
+<li><a href="#Predefined_prompts">Predefined prompts</a></li>
+<li><a href="#Tips_and_Tricks_for_using_the_Content_Creation_Assistant">Tips and Tricks for using the Content Creation Assistant</a></li></ul></li>
+<li><a href="#The_Side_Panel_AI">The Side Panel AI</a>
+<ul>
+<li><a href="#Text_sources_.28base_text.29">Text sources (base text)</a></li>
+<li><a href="#Predefined_prompts">Predefined prompts</a></li>
+<li><a href="#Using_the_Chat_feature">Using the Chat feature</a></li></ul></li>
+<li><a href="#Conclusion">Conclusion</a></li></ul>
+
+<p>Large language models like <a class="externalLink" href="https://chat.openai.com/">ChatGPT</a> increasingly provide often near human level capabilities
+in using languages, and exhibit serious reasoning capabilities and offer an incredible breadth of general knowledge. The
+Composum AI provides the editor in Adobe AEM with a seamless integration that allows analysing content, content
+generation and transformation according to the users wishes. It integrates two assistant dialogs with different focus
+and capabilities. Both of them offer a library with various prompt examples that can be used as is or modified into
+processing / analysis instructions to process page parts or the whole page text, or external texts into summaries,
+introductions, conclusions, rewrite texts, generate suggestions for extending texts, phrases, headlines and so forth.</p><section>
+<h2><a name="How_to_access_the_content_creation_assistant"></a>How to access the content creation assistant</h2>
+
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AEMCCDialogIntegration.png" alt="Content Creation Dialog Integration" width="350" />
+</div>
+
+<p>There are two ways to access content creation dialog. If the Composum AI is enabled, you will find a new icon (gears and
+pen) in the toolbar of richtext editors. It will call up the Content Creation Dialog. The content created with it can
+then either replace the richtext editor's content and be edited further or the edit be aborted, if needed, or the dialog
+can be cancelled, returning to an unmodified richtext editor.</p>
+<p>The dialogs are currently accessible in the AEM page editor, the page properties and the experience fragment editor.</p>
+
+<div style="clear: both;"></div>
+</section><section>
+<h2><a name="The_content_creation_assistant"></a>The content creation assistant</h2>
+
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AEMContentCreationDialog.png" alt="Content Creation Dialog" width="500" />
+</div>
+
+<p>This dialog provides access to a powerful and flexible tool the Composum AI offers for creating content.</p>
+<p>First, it allows you to select a base text for the AI to draw from. That can be the text field you were editing when
+calling up the dialog, it can be the text content of the component you were editing or the text content of the current
+page. But you can also take the last output of the AI, to have it refine the text iteratively, paste in an external text
+or just describe what you need without providing any additional base text.</p>
+<p>Then you can either select one from a range of predefined prompts, like Summarize, Introduction, Conclusion, Expand,
+Headline suggestions, Improve, &#x2026;, and apply these. You are invited to modify or extend the prompt you selected, or
+create your entirely own request to the AI.</p>
+<p>A history in the dialog supports you to switch back and forth between your requests, so it's easy to retry and switch
+back if the first generated text was better.</p>
+<p>As the last step, you can replace the edited component field by the generated text, or cancel the operation. The calling
+dialog / the richtext editor from which the content creation was called will still be open for editing.</p><section>
+<h3><a name="Text_sources_.28base_text.29"></a>Text sources (base text)</h3>
+<p>Selecting one of these options replaces the &#x2018;Source&#x2019; text area with the chosen text.</p>
+<ul>
+
+<li><b>Text field:</b> The AI is provided with the text contained in the field you were editing.</li>
+<li><b>Component:</b> The text content of the component you were editing, including subcomponents. Useful e.g. for suggesting
+headlines for components or sections.</li>
+<li><b>Current Page:</b> The text content of the current page. Useful e.g. for writing summaries, introductions, page
+descriptions
+etc.</li>
+<li><b>Last Output:</b> The current content suggestion shown in this dialog, for iterative improvement of a text.</li>
+<li><b>Hand edited content:</b> You can provide your own text as a base for the AI to work with.</li>
+<li><b>No Text Added:</b> If you like to generate text by just giving the AI some instructions that do not refer to any
+current text content, this is your choice.</li>
+</ul></section><section>
+<h3><a name="Predefined_prompts"></a>Predefined prompts</h3>
+<p>The predefined prompts are valuable as they are, but please take them as an inspiration what you can do with the
+text. Some examples are:</p>
+<ul>
+
+<li><b>Summarize:</b> The selected text is summarized.</li>
+<li><b>Introduction:</b> The AI writes an introduction for the text.</li>
+<li><b>Conclusion:</b> The AI writes a conclusion for the text.</li>
+<li><b>Expand:</b> The AI uses the provided notes as inspiration to write a text that expresses the main ideas and themes
+present in a businesslike informative style.</li>
+<li><b>Headline:</b> The AI writes a headline for the text in a businesslike informative style.</li>
+<li><b>10 headline suggestions:</b> The AI provides10 headline suggestions for the text in a businesslike informative style.</li>
+<li><b>10 headline + subheadline suggestions:</b> The AI provides10 headline and subheading suggestions for the text in a
+businesslike informative style.</li>
+<li><b>Question:</b> The AI answers a question based on the given text.</li>
+<li><b>Improve:</b> The AI improves the text into a businesslike informative style, fixing orthographical and grammar errors.</li>
+<li><b>SEO Description:</b> The AI creates a description for a web page with the given text, usable for search engine
+optimization (SEO).</li>
+</ul></section><section>
+<h3><a name="Tips_and_Tricks_for_using_the_Content_Creation_Assistant"></a>Tips and Tricks for using the Content Creation Assistant</h3>
+<p>To use the make an excerpt from or rewrite of an existing text, you can copy and paste that text into the existing
+dialog field and select the text field as base text, or paste it into the content suggestion field and select that as
+base text, and then specify in the prompt what you want to be done.</p>
+<p>The dialog can be maximized to accomodate more text, and there is also a help window accessible with the &#x201c;?&#x201d; icon.</p>
+<p>If you are not satisfied with the generated text, there are several ways to improve it:</p>
+<ul>
+
+<li>You can simply retry by pressing the &#x201c;Generate&#x201d; button again.</li>
+<li>You can add hints to the prompt how the text should be written. For example &#x201c;Use passive voice and an informative
+style.&#x201d; or &#x201c;Make the text engaging and motivating.&#x201d;</li>
+</ul>
+<p>If you want to generate headlines for a component, you could select the component's text as base text and use the &#x201c;10
+suggestions for headline&#x201d; prompt. Generally, to get ideas for short texts it can be a good idea to ask the AI to list a
+number of suggestions.</p>
+<p>Even though that's not the primary use of the assistant, you can (creatively) use it to get answers from the AI about
+general questions, or have it use the page content to answer your questions. Just open the assistant on any text field
+in the page, use &#x201c;current page text&#x201d; as base text or even &#x201c;no text&#x201d; and ask away. Of course you might want to press &quot;
+Cancel&quot; after such use.</p>
+
+<div style="clear: both;"></div>
+</section></section><section>
+<h2><a name="The_Side_Panel_AI"></a>The Side Panel AI</h2>
+
+<div style="float: right; margin-left: 20px;">
+    <img src="../image/ai/dialogs/AEMSidePanelAI.png" alt="Side panel AI" width="300" />
+</div>
+
+<p>The Sidebar AI is a complement to the content creation assistant whose primary focus is not on content generation, but
+employing the AI's reasoning capabilities to generate reports about the text content of the page or individual
+components. Its purpose is to assist you in improving the content or seek explanations through a chat with the AI.</p>
+<p>Similar to the Content Creation Assistant, the Sidebar AI enables you to select a base text for the AI to work with,
+such as the current page's text, or the text content of a selected component along with its subcomponents. Then you can
+either select one of a range of predefined prompts, or write your own request to the AI. The predefined prompts range
+from text / content flow review, suggestions for simplification, to suggestions for &#x201c;call to action&#x201d; phrases, and, of
+course, you can provide your own. If you are not yet satisfied with the result, you can both modify the prompt and try
+again, or ask for further refinement or additional information in a chat like fashion.</p><section>
+<h3><a name="Text_sources_.28base_text.29"></a>Text sources (base text)</h3>
+<ul>
+
+<li><b>Page:</b> The text content of the current page.</li>
+<li><b>Component:</b> The text content of the selected component including subcomponents.</li>
+<li><b>No additional source:</b> If you like to discuss / chat without referring to any current text content, this is your
+choice.</li>
+</ul></section><section>
+<h3><a name="Predefined_prompts"></a>Predefined prompts</h3>
+<p>We collected a number of prompts that might be useful for you when improving the text. As always, please feel free to
+extend / clarify / refine them, or to write your own requests. Among them are</p>
+<ul>
+
+<li><b>Review:</b> The text is checked for good text flow, contradictions, repetitions, redundancy, etc.</li>
+<li><b>Content Flow:</b> Checks for problems with the flow of the tex</li>
+<li><b>Question:</b> The AI answers a question based on the provided text.</li>
+<li><b>10 headline suggestions:</b> Ten headline suggestions for the text are generated using a businesslike informative
+style.</li>
+<li><b>Summary:</b> A brief summary of the main points and themes in the text is generated.</li>
+<li><b>Simplification Suggestions:</b> Identifies parts of the text that could be simplified and provides alternative
+suggestions..</li>
+<li><b>CTA Suggestions:</b> Five distinct call-to-action (CTA) phrases are suggested to motivate further engagement with the
+content or brand.</li>
+<li><b>Content Gap Analysis:</b> Tries to identify relevant topics or subtopics that are not covered.</li>
+<li><b>Relevance Evaluation:</b> The content of the text is evaluated to determine if it is relevant to a specific topic or
+purpose.</li>
+</ul></section><section>
+<h3><a name="Using_the_Chat_feature"></a>Using the Chat feature</h3>
+<p>In this dialog there are several ways to improve the result. It is possible to edit the prompt and resend it (or even
+just retry), and it is possible to use a chat to ask further questions about the response and have the AI elaborate. At
+the bottom of reach response appears a new prompt input field, where it's possible to continue in a conversation. There
+is, however, a limit in the length of conversations, so it's better to start fresh when the topic is changed. You can
+always go back using the history, and even continue the old conversation, which will be saved as a new history entry.</p></section></section><section>
+<h2><a name="Conclusion"></a>Conclusion</h2>
+<p>The Composum AI module brings you many new abilities for AI text generation and analysis to the AEM author, supported by
+large language models like ChatGPT in a seamless integration into Composum Pages. Please give it a try, tell us what you
+think, and enjoy using it creatively for your site!</p></section>
         </main>
       </div>
     </div>

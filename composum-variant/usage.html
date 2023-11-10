@@ -79,6 +79,25 @@
         </header>
         <main id="bodyColumn"  class="span10" >
 <h1>Usage of the Composum AI for Composum Pages</h1>
+<ul>
+<li><a href="#A_quick_demo">A quick demo</a></li>
+<li><a href="#How_to_access_the_Composum_AI">How to access the Composum AI</a></li>
+<li><a href="#The_assistants">The assistants</a>
+<ul>
+<li><a href="#The_translation_assistant">The translation assistant</a></li></ul></li>
+<li><a href="#The_page_category_assistant">The page category assistant</a>
+<ul>
+<li><a href="#The_content_creation_assistant">The content creation assistant</a></li>
+<li><a href="#Text_sources_.28base_text.29">Text sources (base text)</a></li>
+<li><a href="#Predefined_prompts">Predefined prompts</a></li>
+<li><a href="#Tips_and_Tricks_for_using_the_Content_Creation_Assistant">Tips and Tricks for using the Content Creation Assistant</a></li></ul></li>
+<li><a href="#The_Sidebar_AI">The Sidebar AI</a>
+<ul>
+<li><a href="#Text_sources_.28base_text.29">Text sources (base text)</a></li>
+<li><a href="#Predefined_prompts">Predefined prompts</a></li>
+<li><a href="#Using_the_Chat_feature">Using the Chat feature</a></li></ul></li>
+<li><a href="#Conclusion">Conclusion</a></li></ul>
+
 <p>The advance of generative artificial intelligence (AI) for texts has revolutionized content creation, providing new
 opportunities and efficiencies for content management systems (CMS) like Composum Pages. With the emergence of tools
 like Composum AI, the power of AI can now be harnessed to support content creation in a way that was not possible
@@ -95,11 +114,11 @@ suggestions and options for categorizing pages, Composum AI optimizes the SEO po
 visibility and search engine rankings.</p>
 <p>The integration of generative AI into Composum Pages empowers content creators to generate and optimize content more
 efficiently. Technical details, specifications and so forth you can find on
-the <a class="externalLink" href="https://github.com/ist-dresden/composum-AI">project's Github repository</a>.</p>
-<h1>A quick demo</h1>
+the <a class="externalLink" href="https://github.com/ist-dresden/composum-AI">project's Github repository</a>.</p><section>
+<h2><a name="A_quick_demo"></a>A quick demo</h2>
 <p><img src="../image/ai/video/QuickDemo-poster.png" alt="Img1" /></p>
-<p><a href="../image/ai/video/QuickDemo.mp4">Quick Demo video</a></p>
-<h1>How to access the Composum AI</h1>
+<p><a href="../image/ai/video/QuickDemo.mp4">Quick Demo video</a></p></section><section>
+<h2><a name="How_to_access_the_Composum_AI"></a>How to access the Composum AI</h2>
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-DialogAccess.png" alt="Accessing the AI dialogs" width="500" />
@@ -120,14 +139,14 @@ category assistant suggests SEO keywords based on the content of the page.</li>
 </ul>
 
 <div style="clear: both;"></div>
-
-<h1>The assistants</h1>
+</section><section>
+<h2><a name="The_assistants"></a>The assistants</h2>
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-TranslationAssistant.png" alt="Translation Assistant" width="500" />
 </div>
 <section>
-<h2><a name="The_translation_assistant"></a>The translation assistant</h2>
+<h3><a name="The_translation_assistant"></a>The translation assistant</h3>
 <p>The Translation Dialog is a feature in Composum Pages that allows users to easily translate text attributes into
 different languages. When editing a page, users may encounter a text field with a translation icon. By clicking on this
 icon, the Translation Dialog opens. In the dialog, users can see the texts for all languages that have translations for
@@ -142,7 +161,7 @@ way for users to efficiently manage translations of text attributes in Composum 
 <div style="float: left; margin-right: 20px;">
     <img src="../image/ai/dialogs/AI-PageCategorySuggestions.png" alt="Page Category Assistant" width="300" />
 </div>
-</section><section>
+</section></section><section>
 <h2><a name="The_page_category_assistant"></a>The page category assistant</h2>
 <p>The page category assistant displays the current categories along with suggestions of the AI. After the AI suggestions
 have been generated, you can select or deselect current categories and suggestions as needed, and then save or abort. If
@@ -150,8 +169,8 @@ you feel the need to add further categories or edit them, please select &#x2018;
 dialog for further modification. The page categories can then enhance the SEO potential of the page.</p>
 
 <div style="clear: both;"></div>
-
-<h1>The content creation assistant</h1>
+<section>
+<h3><a name="The_content_creation_assistant"></a>The content creation assistant</h3>
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-ContentCreationAssistant.png" alt="Content Creation Assistant" width="500" />
@@ -164,21 +183,25 @@ needed. A press of the &#x201c;Generate&#x201d; button triggers the content gene
 switch back and forth in a history of generated content for this field, to select the best attempt.</p>
 <p>There is also an optional dropdown menu from which text length recommendations can be selected. Additionally, the dialog
 is resizable to accommodate large amounts of text, and it displays a loading indicator to indicate when the system is
-processing a prompt.</p><section>
+processing a prompt.</p></section><section>
 <h3><a name="Text_sources_.28base_text.29"></a>Text sources (base text)</h3>
+<p>Selecting one of these options replaces the &#x2018;Source&#x2019; text area with the chosen text.</p>
 <ul>
 
 <li><b>Widget:</b> The AI is provided with the text contained in the field you were editing.</li>
 <li><b>Component:</b> The text content of the component you were editing, including subcomponents. Useful e.g. for suggesting
 headlines for components or sections.</li>
-<li><b>Page:</b> The text content of the current page. Useful e.g. for writing summaries, introductions, page descriptions
+<li><b>Current Page:</b> The text content of the current page. Useful e.g. for writing summaries, introductions, page
+descriptions
 etc.</li>
 <li><b>Last Output:</b> The current content suggestion shown in this dialog, for iterative improvement of a text.</li>
+<li><b>Hand edited content:</b> You can provide your own text as a base for the AI to work with.</li>
 <li><b>No Text Added:</b> If you like to generate text by just giving the AI some instructions that do not refer to any
 current text content, this is your choice.</li>
 </ul></section><section>
 <h3><a name="Predefined_prompts"></a>Predefined prompts</h3>
-<p>The predefined prompts are valuable as they are, but please take them as an inspiration what you can do with the text.</p>
+<p>The predefined prompts are valuable as they are, but please take them as an inspiration what you can do with the
+text. Some examples are:</p>
 <ul>
 
 <li><b>Summarize:</b> The selected text is summarized.</li>
@@ -223,19 +246,21 @@ Cancel&quot; after such use.</p>
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-Sidebar-AI.png" alt="Sidebar AI" width="400" />
 </div>
-
-<h1>The Sidebar AI</h1>
+</section></section><section>
+<h2><a name="The_Sidebar_AI"></a>The Sidebar AI</h2>
 <p>The Sidebar AI can serve as a complementary addition to the content creation assistant. It's primary focus is not so
 much content creation, but to use the AI to generate reports about the text content of the page or individual components
 that can help you improve it, or provide you with the possibility to ask questions about it's responses in a chat
 format.</p>
 <p>There is also a number of predefined prompts you could select, but you are invited to modify them or write your own
-requests to the AI. The dialog also has a history, which is specific to the displayed page.</p></section><section>
+requests to the AI. The dialog also has a history, which is specific to the displayed page.</p><section>
 <h3><a name="Text_sources_.28base_text.29"></a>Text sources (base text)</h3>
 <ul>
 
 <li><b>Page:</b> The text content of the current page.</li>
 <li><b>Component:</b> The text content of the selected component including subcomponents.</li>
+<li><b>No additional source:</b> If you like to discuss / chat without referring to any current text content, this is your
+choice.</li>
 </ul></section><section>
 <h3><a name="Predefined_prompts"></a>Predefined prompts</h3>
 <p>We collected a number of prompts that might be useful for you when improving the text. As always, please feel free to
@@ -255,18 +280,17 @@ content or brand.</li>
 <li><b>Content Gap Analysis:</b> Tries to identify relevant topics or subtopics that are not covered.</li>
 <li><b>Relevance Evaluation:</b> The content of the text is evaluated to determine if it is relevant to a specific topic or
 purpose.</li>
-<li><b>Proofread:</b> The text is checked for spelling, grammar, punctuation errors. This might need a couple of retries,
-though.</li>
 </ul></section><section>
 <h3><a name="Using_the_Chat_feature"></a>Using the Chat feature</h3>
 <p>In this dialog there are several ways to improve the result. It is possible to edit the prompt and resend it (or even
 just retry), and it is possible to use a chat to ask further questions about the response and have the AI elaborate. At
 the bottom of reach response appears a new prompt input field, where it's possible to continue in a conversation. There
 is, however, a limit in the length of conversations, so it's better to start fresh when the topic is changed. You can
-always go back using the history, and even continue the old conversation, which will be saved as a new history entry.</p></section><section>
-<h3><a name="Tips_and_Tricks_for_the_Sidebar_AI"></a>Tips and Tricks for the Sidebar AI</h3>
-<p>Currently, ChatGPT has some trouble with some of the prompts, especially proofreading (though it can help even there) -
-it might be necessary to retry sending the prompt.</p></section></section>
+always go back using the history, and even continue the old conversation, which will be saved as a new history entry.</p></section></section><section>
+<h2><a name="Conclusion"></a>Conclusion</h2>
+<p>The Composum AI module brings you many new abilities for AI text generation and analysis to the AEM author, supported by
+large language models like ChatGPT in a seamless integration into Composum Pages. Please give it a try, tell us what you
+think, and enjoy using it creatively for your site!</p></section>
         </main>
       </div>
     </div>
