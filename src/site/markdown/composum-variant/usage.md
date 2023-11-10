@@ -1,5 +1,7 @@
 # Usage of the Composum AI for Composum Pages
 
+<!-- MACRO{toc|fromDepth=1|toDepth=2} -->
+
 The advance of generative artificial intelligence (AI) for texts has revolutionized content creation, providing new
 opportunities and efficiencies for content management systems (CMS) like Composum Pages. With the emergence of tools
 like Composum AI, the power of AI can now be harnessed to support content creation in a way that was not possible
@@ -22,13 +24,13 @@ The integration of generative AI into Composum Pages empowers content creators t
 efficiently. Technical details, specifications and so forth you can find on
 the [project's Github repository](https://github.com/ist-dresden/composum-AI).
 
-# A quick demo
+## A quick demo
 
 ![Img1](../image/ai/video/QuickDemo-poster.png)
 
 [Quick Demo video](../image/ai/video/QuickDemo.mp4)
 
-# How to access the Composum AI
+## How to access the Composum AI
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-DialogAccess.png" alt="Accessing the AI dialogs" width="500" />
@@ -48,13 +50,13 @@ component. A click on one of these icons opens the corresponding dialog.
 
 <div style="clear: both;"></div>
 
-# The assistants
+## The assistants
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-TranslationAssistant.png" alt="Translation Assistant" width="500" />
 </div>
 
-## The translation assistant
+### The translation assistant
 
 The Translation Dialog is a feature in Composum Pages that allows users to easily translate text attributes into
 different languages. When editing a page, users may encounter a text field with a translation icon. By clicking on this
@@ -80,7 +82,7 @@ dialog for further modification. The page categories can then enhance the SEO po
 
 <div style="clear: both;"></div>
 
-# The content creation assistant
+### The content creation assistant
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AI-ContentCreationAssistant.png" alt="Content Creation Assistant" width="500" />
@@ -98,18 +100,23 @@ processing a prompt.
 
 ### Text sources (base text)
 
+Selecting one of these options replaces the 'Source' text area with the chosen text.
+
 - **Widget:** The AI is provided with the text contained in the field you were editing.
 - **Component:** The text content of the component you were editing, including subcomponents. Useful e.g. for suggesting
   headlines for components or sections.
-- **Page:** The text content of the current page. Useful e.g. for writing summaries, introductions, page descriptions
+- **Current Page:** The text content of the current page. Useful e.g. for writing summaries, introductions, page
+  descriptions
   etc.
 - **Last Output:** The current content suggestion shown in this dialog, for iterative improvement of a text.
+- **Hand edited content:** You can provide your own text as a base for the AI to work with.
 - **No Text Added:** If you like to generate text by just giving the AI some instructions that do not refer to any
   current text content, this is your choice.
 
 ### Predefined prompts
 
-The predefined prompts are valuable as they are, but please take them as an inspiration what you can do with the text.
+The predefined prompts are valuable as they are, but please take them as an inspiration what you can do with the
+text. Some examples are:
 
 - **Summarize:** The selected text is summarized.
 - **Introduction:** The AI writes an introduction for the text.
@@ -156,7 +163,7 @@ Cancel" after such use.
     <img src="../image/ai/dialogs/AI-Sidebar-AI.png" alt="Sidebar AI" width="400" />
 </div>
 
-# The Sidebar AI
+## The Sidebar AI
 
 The Sidebar AI can serve as a complementary addition to the content creation assistant. It's primary focus is not so
 much content creation, but to use the AI to generate reports about the text content of the page or individual components
@@ -170,6 +177,8 @@ requests to the AI. The dialog also has a history, which is specific to the disp
 
 - **Page:** The text content of the current page.
 - **Component:** The text content of the selected component including subcomponents.
+- **No additional source:** If you like to discuss / chat without referring to any current text content, this is your
+  choice.
 
 ### Predefined prompts
 
@@ -189,8 +198,6 @@ extend / clarify / refine them, or to write your own requests. Among them are
 - **Content Gap Analysis:** Tries to identify relevant topics or subtopics that are not covered.
 - **Relevance Evaluation:** The content of the text is evaluated to determine if it is relevant to a specific topic or
   purpose.
-- **Proofread:** The text is checked for spelling, grammar, punctuation errors. This might need a couple of retries,
-  though.
 
 ### Using the Chat feature
 
@@ -200,7 +207,8 @@ the bottom of reach response appears a new prompt input field, where it's possib
 is, however, a limit in the length of conversations, so it's better to start fresh when the topic is changed. You can
 always go back using the history, and even continue the old conversation, which will be saved as a new history entry.
 
-### Tips and Tricks for the Sidebar AI
+## Conclusion
 
-Currently, ChatGPT has some trouble with some of the prompts, especially proofreading (though it can help even there) -
-it might be necessary to retry sending the prompt.
+The Composum AI module brings you many new abilities for AI text generation and analysis to the AEM author, supported by
+large language models like ChatGPT in a seamless integration into Composum Pages. Please give it a try, tell us what you
+think, and enjoy using it creatively for your site!
