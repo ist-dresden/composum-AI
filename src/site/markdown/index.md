@@ -82,6 +82,11 @@ will need to configure an OpenAI API key as well.
 Please compare the release notes of the
 [latest release](https://github.com/ist-dresden/composum-AI/releases/) for more instructions.
 
+## License
+
+Composum AI is open source and uses the MIT license. So you have many freedoms to use it. But please be sure to sent us
+some feedback!
+
 ## Thanks
 
 Thanks to [OPAX](https://github.com/jaketracey/opax) for ideas for prompts.
