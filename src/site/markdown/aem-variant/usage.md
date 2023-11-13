@@ -5,12 +5,20 @@
 Large language models like [ChatGPT](https://chat.openai.com/) increasingly provide often near human level capabilities
 in using languages, and exhibit serious reasoning capabilities and offer an incredible breadth of general knowledge. The
 Composum AI provides the editor in Adobe AEM with a seamless integration that allows analysing content, content
-generation and transformation according to the users wishes. It integrates two assistant dialogs with different focus
-and capabilities. Both of them offer a library with various prompt examples that can be used as is or modified into
-processing / analysis instructions to process page parts or the whole page text, or external texts into summaries,
-introductions, conclusions, rewrite texts, generate suggestions for extending texts, phrases, headlines and so forth.
+generation and transformation according to the users wishes.
+The Composum AI for AEM provides the editor in Adobe AEM with a seamless AI integration that allows analysing
+text content, content generation and transformation according to the users wishes. It provides two assistant dialogs
+It integrates two assistant dialogs with different focus
+and capabilities, which are documented in the following sections:
 
-## How to access the content creation assistant
+- the **Content Creation Assistant** can be called from component dialogs and richtext editors and is focused on
+  creating textual content that can be integrated into your pages,
+- the **Side Panel AI** can be called from the page editor and the experience fragment editor and is focused on
+  analysing, discussing and improving the content of your pages.
+
+## The content creation assistant
+
+### How to access the content creation assistant
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AEMCCDialogIntegration.png" alt="Content Creation Dialog Integration" 
@@ -26,7 +34,7 @@ The dialogs are currently accessible in the AEM page editor, the page properties
 
 <div style="clear: both;"></div>
 
-## The content creation assistant
+### Functionality of the content creation assistant
 
 <div style="float: right; margin-left: 20px;">
     <img src="../image/ai/dialogs/AEMContentCreationDialog.png" alt="Content Creation Dialog" width="500" />

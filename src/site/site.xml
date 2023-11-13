@@ -25,18 +25,21 @@
         <menu name="Overview">
             <item name="Introduction" href="index.html"/>
             <item name="Development documentation" href="development.html"/>
+            <item name="Sources on Github" href="https://github.com/ist-dresden/composum-AI"/>
+            <item name="Releases / Changes" href="https://github.com/ist-dresden/composum-AI/releases/"/>
+            <item name="Issue Tracker" href="https://github.com/ist-dresden/composum-AI/issues"/>
             <item name="Contact Us" href="https://www.composum.com/home/contact.html"/>
         </menu>
         <menu name="AEM-Variant">
-            <item name="Introduction" href="aem-variant/index.html"/>
+            <item name="Overview" href="aem-variant/index.html"/>
             <item name="Installation" href="aem-variant/installation.html"/>
             <!--  <item name="Configuration" href="aem-variant/configuration.html"/> -->
             <item name="Usage" href="aem-variant/usage.html"/>
         </menu>
         <menu name="Composum-Variant">
-            <item name="Introduction" href="composum-variant/index.html"/>
+            <item name="Overview" href="composum-variant/index.html"/>
             <item name="Installation" href="composum-variant/installation.html"/>
-            <!-- <item name="Configuration" href="composum-variant/configuration.html"/> -->
+            <item name="Configuration" href="composum-variant/configuration.html"/>
             <item name="Usage" href="composum-variant/usage.html"/>
         </menu>
         <menu ref="parent" inherit="bottom"/>
