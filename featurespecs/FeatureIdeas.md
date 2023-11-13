@@ -1,6 +1,7 @@
 # Feature ideas
 
-This is just a wild unfiltered brainstorming type list of ideas that could be supported here, not actually planned. 
+This is just a wild unfiltered brainstorming type list of ideas that could be supported here, not (yet?) actually
+planned. You might also find some features here that were already integrated.
 
 ## Sidebar features
 
@@ -112,8 +113,7 @@ ChatGPT with predefined prompt plus an user specified prompt combined.
 
 ### Remote ideas for the future
 
-- somehow use a chat for something
-- ChatGPT roleplaying as some kind of user, clicking on links etc. to find some information
+- ChatGPT role playing as some kind of user, clicking on links etc. to find some information
 - **Content Comparisons**: Users can compare different versions of a component or page with ChatGPT and get 
   recommendations on which version is more effective or engaging.
 - Summarize content release changes

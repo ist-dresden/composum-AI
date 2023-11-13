@@ -1,5 +1,7 @@
 # Ideas for AEM Integration
 
+This is a half sorted collection of detail ideas for future reference.
+
 ## Testsetup
 
 AEM Cloud SDK with WKND Site https://wknd.site/

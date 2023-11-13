@@ -6,7 +6,9 @@ Create picture of first frame with
 ffmpeg -i QuickDemo.mp4 -vframes 1 QuickDemo-poster.png
 !! Filename of picture shouldn't be exactly as movie
 
-## Quick Demo
+## Composum
+
+### Quick Composum Demo
 
 Intro Picture?
 9 - Translation2.mov - Translate
@@ -20,7 +22,7 @@ Intro Picture?
 
 4 - Fixed
 
-##  Chat ideas
+### Chat demo ideas
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/pages/setup
 Give me a docker command line that starts pages on port 9090 in the background.
 
