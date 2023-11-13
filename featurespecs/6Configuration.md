@@ -7,6 +7,7 @@ Status: partially specified and implemented - only the API key
 We need a way to configure the application for several points:
 
 - the API key for OpenAI
+- permission configuraiton for which users / groups / pages / components / templates / views which AI dialog is enabled
 - the rate limiting
 - the prompt library
 
@@ -15,7 +16,7 @@ but all these configurations can be site-specific, or even user-specific. So it'
 configuration in the JCR repository that is inherited from parent pages and takes precedence over OSGI configuration
 if present.
 
-As a first step, we will only implement the API key configuration.
+As a first step, we will only implement the API key configuration and permission configuration.
 
 ## Basic implementation decisions
 
@@ -31,7 +32,7 @@ configuration auditing, configuration validation.
 
 ## Implementation details
 
-### Configuration in the JCR, using sling context aware configuration
+### OpenAI key configuration
 
 package com.composum.ai.backend.slingbase.model;
 
@@ -68,6 +69,36 @@ the API key in the JCR repository has the following possibilities:
   com.composum.ai.backend.slingbase.model.OpenAIConfig in
   the corresponding /conf/.../sling:configs node.
 - otherwise you'd have to set up Sling Context Aware Configuration for the page tree in question.
+
+### Permission configuration
+
+We use a fallback hierarchy for the permission configuration:
+
+- Sling Context Aware Configuration
+- an OSGI configuration factory at "Composum AI Permission Configuration"
+- a single OSGI configuration at "Composum AI Permission Configuration" that is the default configuration when
+  nothing else is found
+
+For the sling context aware configuration, we have a configuration list at
+`com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration` .
+with the following properties:
+
+| Configuration Key    | Description                                                                                                                                                                    | Default Value                            |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|
+| services             | List of services to which this configuration applies. Possible values are: "categorize", "create", "sidepanel", "translate" . For AEM only create and sidepanel are supported. | categorize, create, sidepanel, translate |
+| allowedUsers         | Regular expressions for allowed users or user groups. If not present, no user is allowed from this configuration.                                                              | .*                                       |
+| deniedUsers          | Regular expressions for denied users or user groups. Takes precedence over allowed users.                                                                                      |                                          |
+| allowedPaths         | Regular expressions for allowed content paths. If not present, no paths are allowed.                                                                                           | /content/.*                              |
+| deniedPaths          | Regular expressions for denied content paths. Takes precedence over allowed paths.                                                                                             | /content/dam/.*                          |
+| allowedViews         | Regular expressions for allowed views - that is, for URLs like /editor.html/.* . If not present, no views are allowed. Use .* to allow all views.                              | .*                                       |
+| deniedViews          | Regular expressions for denied views. Takes precedence over allowed views.                                                                                                     |                                          |
+| allowedComponents    | Regular expressions for allowed resource types of components. If not present, no components are allowed.                                                                       | .*                                       |
+| deniedComponents     | Regular expressions for denied resource types of components. Takes precedence over allowed components.                                                                         |                                          |
+| allowedPageTemplates | Regular expressions for allowed page templates. If not present, all page templates are allowed.                                                                                | .*                                       |
+| deniedPageTemplates  | Regular expressions for denied page templates. Takes precedence over allowed page templates.                                                                                   |                                          |
+
+It is possible to create several list entries allowing a subset of the services (dialogs) for a subset of users,
+sites, components and so forth. Permissions are additive.
 
 ## References
 
