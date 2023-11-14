@@ -1,10 +1,9 @@
-AEMaaCS Konfigurationsart einarbeiten
-Announcement, Installation, Doc überarbeiten
+# List of minor Todos
+
 AEM for content fragments?
 URL as base text , inner links
 Append button for AEM
 Multi-lingual?
-??? AEMaaCS deployment; configuration????
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/blog/pages/composumAI/composumAI-AEM
 
 Done:
@@ -14,14 +13,13 @@ Help-Pages -> DONE for creation assistant; for the side panel ai the help button
 Enter in Composum Variante -> DONE
 Tell ChatGPT when we expect HTML. -> DONE
 Restrictions : ??? component -> DONE (except component)
+AEMaaCS Konfigurationsart einarbeiten
+Announcement, Installation, Doc überarbeiten
+AEMaaCS deployment; configuration
 
 Deferred:
 AEM 6.5
 Append button (?)
-
-Approx Markdown improvement
-http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI : approx. markdown???
-http://localhost:9090/bin/pages.html/content/ist/restricted/home/products/Composum-AI description translation???
 
 Approx. Markdown change:
 ignore all attribute with : in them except jcr:title etc., all nodes with : in name, all "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target

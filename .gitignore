@@ -31,3 +31,5 @@ target
 /tags
 
 .cgptdevbench/llmsearch.db
+.linklint
+.lycheecache

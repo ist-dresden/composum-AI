@@ -1,3 +1,7 @@
 Todos for the site documentation
 
 fix project url in maven repo. Or point it to maven site?
+
+Link check:
+linkchecker linklint -http -host https://ist-dresden.github.io/composum-AI/ /#/# -doc .
+https://www.brokenlinkcheck.com/broken-links.php
