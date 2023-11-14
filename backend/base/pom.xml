@@ -15,6 +15,7 @@
     <description>
         Basic functionality for Composum AI, somewhat platform agnostic
     </description>
+    <url>${siteurl}</url>
 
     <properties>
         <wikitext.version>3.0.42</wikitext.version>

@@ -15,6 +15,7 @@
     <description>
         Configuration for Composum specific package for Composum AI.
     </description>
+    <url>${siteurl}</url>
 
     <properties>
         <openai.api.key>${env.OPENAI_API_KEY}</openai.api.key>

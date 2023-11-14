@@ -15,6 +15,7 @@
 	<description>
 		Reactor for Composum AI Integration Frontend modules.
 	</description>
+	<url>${siteurl}</url>
 
 	<properties>
 		<composum.nodes.version>4.2.1</composum.nodes.version>

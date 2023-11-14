@@ -25,6 +25,7 @@
 	<artifactId>composum-ai.core</artifactId>
 	<name>Composum AI::AEM::Core</name>
 	<description>Core bundle for Composum AI</description>
+	<url>${siteurl}</url>
 	<build>
 		<plugins>
 			<plugin>
