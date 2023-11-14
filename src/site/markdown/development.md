@@ -1,9 +1,16 @@
+# Development
+
+## Links
+
+- [Composum AI Sources on Github](https://github.com/ist-dresden/composum-AI)
+- [Releases / Changes](https://github.com/ist-dresden/composum-AI/releases/)
+- [Issue Tracker](https://github.com/ist-dresden/composum-AI/issues)
+- [IST on Github](https://github.com/ist-dresden/)
+
 ## More project documentation
 
-## In project documentation
-
 The [project sources](https://github.com/ist-dresden/composum-AI) contain much development documentation in various
-documentation files. In particular:
+documentation files. For instance:
 
 - [featurespecs/](https://github.com/ist-dresden/composum-AI/tree/develop/featurespecs) contains documentations for
   the various features, as well as more general specifications and idea collections.
@@ -14,7 +21,7 @@ documentation files. In particular:
 - [Next steps](https://github.com/ist-dresden/composum-AI/blob/develop/NextSteps.md) contains a sketch of the next steps
   that could be taken.
 
-The [Composum AI issues](https://github.com/ist-dresden/composum-AI/issues) however contains more
+The [Composum AI issues](https://github.com/ist-dresden/composum-AI/issues) however contains the more
 concrete plans for enhancing it, and is a place where you are very welcome to place suggestions and bug reports.
 
 ## Development with ChatGPT and Github Copilot

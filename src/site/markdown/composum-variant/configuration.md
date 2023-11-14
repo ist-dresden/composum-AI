@@ -12,7 +12,7 @@ Generally, the configuration has several levels of fallbacks. If present,
 overrides all other configuration methods. That falls back to an OSGI configuration, for which there are sometimes
 other fallbacks.
 
-## OpenAI API Key
+## OpenAI API Key and general configuration
 
 <div style="float: right; margin-left: 20px;">
    <a href="../image/ai/configuration/OpenAiConfiguration.png">
@@ -29,7 +29,7 @@ For the OpenAI key there is a fallback hierarchy:
 
 - Sling Context Aware Configuration with the configuration class
   `com.composum.ai.backend.slingbase.model.OpenAIConfig`
-- OSGI configuration at "Composum AI GPT Chat Completion Service"
+- OSGI configuration at "Composum AI GPT Chat Completion Service" / "Composum AI OpenAI Configuration"
 - Environment variable OPENAI_API_KEY
 - System property openai.api.key
 
@@ -59,6 +59,8 @@ desired, a global default can be set at e.g.
 }
 ```
 
+where sk-****** should be replaced by the actual OpenAI API key.
+
 <div style="clear: both;"></div>
 
 ## AI Permission Configuration
@@ -87,8 +89,8 @@ that forbids everything for sites where sling context aware configuration is not
 add configurations for the parts where it is allowed.
 
 For the sling context aware configuration, we have a configuration list at
-`com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration` .
-with the following properties:
+`com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration` , which is also used in the OSGI configuration.
+It has the following properties:
 
 | Configuration Key    | Description                                                                                                                                                                    | Default Value                            |
 |----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|
