@@ -15,6 +15,7 @@
 	<description>
 		Reactor for Composum AI Integration Backend modules.
 	</description>
+	<url>${siteurl}</url>
 
 	<modules>
 		<module>base</module>

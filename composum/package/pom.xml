@@ -16,6 +16,7 @@
 		Composum specific package for Composum AI.
 		Contains the backend base bundle, the composum bundle and the code.
 	</description>
+	<url>${siteurl}</url>
 
 	<build>
 		<resources>

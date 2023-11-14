@@ -15,6 +15,7 @@
 	<description>
 		Composum specific bundle for Composum AI
 	</description>
+	<url>${siteurl}</url>
 
 	<dependencies>
 		<dependency>

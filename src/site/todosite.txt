@@ -1,0 +1,3 @@
+Todos for the site documentation
+
+fix project url in maven repo. Or point it to maven site?

@@ -2,7 +2,7 @@
 
 ## Checklist
 
-- local check according to [testcase list](featurespecs/Testcases.md)
+- local check according to [testcase list](featurespecs/Testcases.md) in both Composum and AEM
 - Run release workflow in github actions
 - wait > 30min until release is
   on https://repo1.maven.org/maven2/com/composum/ai/composum-ai-integration-composum-package/

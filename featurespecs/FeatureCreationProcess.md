@@ -1,4 +1,4 @@
-# Some ideas how to go on creating a feature with ChatGPT support.
+# A process how to create feature (new dialog) with ChatGPT support.
 
 In [ContentCreationDialog.md](1ContentCreationDialog.md) there is an example feature that has been specified using a
 dialog with ChatGPT, and later implemented with it's help. Here are some ideas how to do something like that.

@@ -15,6 +15,7 @@
     <description>
 		Common Functionality for Composum AI specific to Sling but would be useable in both Composum and AEM and similar.
     </description>
+    <url>${siteurl}</url>
 
     <properties>
         <wikitext.version>3.0.42</wikitext.version>

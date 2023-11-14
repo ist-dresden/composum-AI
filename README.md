@@ -1,9 +1,14 @@
-# Composum AI
+# Composum AI - AI-powered content creation integrated in your CMS
 
 > Fast and flexible,<br>
-Composum empowers you,<br>
-Content blooms with ease.<br>
--- ChatGPT
+> Composum empowers you,<br>
+> Content blooms with ease.<br>
+> -- ChatGPT
+
+We provide several content creation assistants that are tightly integrated into
+[Composum Pages](https://www.composum.com/) or
+[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
+putting the power of AI supported content creation at your fingertips.
 
 [Click for a 2.5min demonstration video](https://github.com/ist-dresden/composum-AI/assets/999184/18595f2a-e0b5-49f3-bc4c-65d6a8bc93f6)
 
@@ -22,28 +27,34 @@ All of there provide APIs that allow
 them to be used very flexibly in a lot of ways that are useful for supporting a CMS - for translation, content 
 creation, review, summarizing, chat, you name it.
 
-Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html). There is also a version for 
-[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html),
-though yet somewhat experimental. Both share quite some commonality through being based on the
+Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html) and
+[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html). Both
+share quite some commonality through being based on the
 [Apache Sling](https://sling.apache.org/) platform.
 Where possible and appropriate, components will remain platform-agnostic.
 Since [OpenAI](https://openai.com/)'s chat completion API, also available through as
 [Microsoft Azure OpenAI service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/)
 is already commercially available at scale, competitively priced and arguably the most powerful system at the moment,
-we currently use it as backend. As other systems become commercially available, we intend to provide alternative 
-backends using these, too, especially as those might be preferred by European customers because of stricter privacy and 
+we currently use it as backend. If there is demand, we intend to provide alternative backends using other systems
+as they become commercially available,
+especially as those might be preferred by European customers because of stricter privacy and
 data security rules. It's likely that in time there will also be LLM that can be run on premise.
 
-## Current status
+## Functionality
 
 For a quick view of the Composum Pages variant, please compare the 
 [Composum blog entry](https://www.composum.com/home/blog/pages/composumAI.html) about it and the more detailed
-[documentation](https://www.composum.com/home/pages/editing/Composum-AI.html).
+[documentation](https://www.composum.com/home/pages/editing/Composum-AI.html); for the AEM variant there is also a
+[blog entry](https://www.composum.com/home/blog/AEM/composumAI-AEM.html)
+presenting the functionality.
 
-There are the following dialogs that help with editing in Composum Pages:
+There are the following dialogs that help with editing in Composum Pages. For the AEM version we omit the translation
+dialog (as AEM has it's own frequently used mechanisms) and the page
+category dialog, as AEM tags work quite differently.
 
 - a translation dialog that can be opened on any edited textfield in multilingual websites and suggests translations
-  of the text of a component into other languages the text of page descriptions and summaries, keywords, navigation title
+  of the text of a component into other languages the text of page descriptions and summaries, keywords, navigation
+  title
 - a multi purpose content creation dialog that can support you by creating text for any edited text fields. The text
   can be created either from a user supplied prompt, or by applying a (user supplied or predefined) ChatGPT prompt
   to the existing text of the page / component. That way, one could create summaries of the page, or extracts wrt. a
@@ -51,9 +62,6 @@ There are the following dialogs that help with editing in Composum Pages:
   imagination is the limit.
 - an side panel AI that you can chat with and use to analyze the text content of the current page and get suggestions.
 - a page category dialog with suggestions for page categories (that are used as SEO keywords)
-
-For the AEM version we omit the translation dialog (as AEM has it's own frequently used mechanisms) and the page 
-category dialog, as AEM tags work quite differently.
 
 ## Try it out!
 
@@ -92,8 +100,6 @@ Copilot IntelliJ plugin, for speeding up development. Some outcomes of that:
 
 ## More project documentation
 
-[Next steps](./NextSteps.md) contains a sketch of the next steps to be taken.
-
 [Architecture](./Architecture.md) contains a description of the chosen project architecture and records
 architectural decisions.
 
@@ -101,6 +107,8 @@ architectural decisions.
 
 [ChatGPT API Analysis](./ChatGPTAPI.md) contains a discussion of the ChatGPT API wrt. our project.
 
+[Next steps](./NextSteps.md) contains a sketch of the next steps to be taken.
+
 ## Thanks
 
-Thanks to [OPAX](https://github.com/jaketracey/opax) for ideas for prompts.
+Thanks to [OPAX](https://github.com/jaketracey/opax) for many ideas for prompts.

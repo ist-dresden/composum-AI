@@ -33,6 +33,7 @@
     <artifactId>composum-ai.ui.frontend</artifactId>
     <packaging>pom</packaging>
     <name>Composum AI::AEM::UI Frontend</name>
+    <url>${siteurl}</url>
 
 
     <!-- ====================================================================== -->

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.composum.platform</groupId>
-		<artifactId>composum-platform</artifactId>
-		<version>1.7.0</version>
-	</parent>
+    <parent>
+        <groupId>com.composum.platform</groupId>
+        <artifactId>composum-platform</artifactId>
+        <version>1.7.0</version>
+    </parent>
 
     <groupId>com.composum.ai</groupId>
     <artifactId>composum-ai-integration</artifactId>
@@ -25,12 +26,31 @@
         <url>${giturl}</url>
         <tag>HEAD</tag>
     </scm>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/ist-dresden/composum-AI/issues/</url>
+    </issueManagement>
+    <distributionManagement>
+        <site>
+            <id>api.composum.com</id>
+            <!--
+                We do not actually use scp for that, but that determines the relative links in the directory structure.
+                Since we need to specify that in the aem module again, we specify it here, too, to protect against parent
+                changes.
+                For some reason this needs a /var/www/composum/api/public/ prefix or the structure on site:stage is broken.
+                Since this is not connected to ../pom.xml but the site should be integrated, we need to specify this here.
+             -->
+            <url>
+                scp://api.composum.com/var/www/composum/api/public/parent-2/parent-2-public/composum-platform/composum-ai-integration/
+            </url>
+        </site>
+    </distributionManagement>
 
-	<modules>
-		<module>backend</module>
-		<module>composum</module>
-		<module>aem</module>
-	</modules>
+    <modules>
+        <module>backend</module>
+        <module>composum</module>
+        <module>aem</module>
+    </modules>
 
     <properties>
         <package.group>com/composum/ai</package.group>
@@ -48,4 +68,55 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- === For generating the site === -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.12.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>execute-shell-script</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bin/generate_sitemap.sh</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <developers>
+        <developer>
+            <id>hp.stoerr</id>
+            <name>Hans-Peter Störr</name>
+            <email>hp.stoerr@ist-software.com</email>
+            <organization>IST GmbH Dresden</organization>
+            <organizationUrl>http://www.ist-software.com</organizationUrl>
+        </developer>
+        <developer>
+            <id>r.wunsch</id>
+            <name>Ralf Wunsch</name>
+            <email>r.wunsch@ist-software.com</email>
+            <organization>IST GmbH Dresden</organization>
+            <organizationUrl>http://www.ist-software.com</organizationUrl>
+        </developer>
+    </developers>
+
 </project>
