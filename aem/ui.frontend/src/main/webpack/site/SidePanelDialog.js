@@ -235,13 +235,13 @@ class SidePanelDialog {
             responseHistory.push(element.textContent);
         });
         // join promptHistory and responseHistory into a single array, format:
-        // [{"role":"USER","content":"Hi!"}, {"role":"ASSISTANT","content":"Hi! How can I help you?"}, ...].
+        // [{"role":"user","content":"Hi!"}, {"role":"assistant","content":"Hi! How can I help you?"}, ...].
         const chatHistory = [];
         for (let i = 0; i < promptHistory.length; i++) {
             if (i > 0) { // the first prompt is the initial prompt transmitted as prompt parameter
-                chatHistory.push({"role": "USER", "content": promptHistory[i]});
+                chatHistory.push({"role": "user", "content": promptHistory[i]});
             }
-            chatHistory.push({"role": "ASSISTANT", "content": responseHistory[i]});
+            chatHistory.push({"role": "assistant", "content": responseHistory[i]});
         }
         chatHistory.pop(); // remove empty assistant message at the end
 

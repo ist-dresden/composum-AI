@@ -148,7 +148,7 @@
                 this.findSingleElemenet('.promptcontainer.first textarea').val(map['firstprompt']);
                 this.findSingleElemenet('.first .ai-response-text').text(map['firstresponse'] || '');
                 let chatCount = (map['chat'] || []).filter(function (chatitem) {
-                    return chatitem.role === 'USER';
+                    return chatitem.role === 'user';
                 }).length;
                 this.adjustChatCount(0);
                 this.adjustChatCount(chatCount);
@@ -157,7 +157,7 @@
                 for (let i = 1; map.chat && i < map.chat.length; i++) {
                     let chatitem = map['chat'][i];
                     let chatField = chatFields.eq(i - 1);
-                    if (chatitem.role === 'USER') {
+                    if (chatitem.role === 'user') {
                         chatField.find('textarea').val(chatitem.content);
                     } else {
                         chatField.find('.ai-response-text').text(chatitem.content || '');
@@ -195,6 +195,7 @@
             /** If numberOfChats is smaller than the current number of chat fields, remove those.
              * If it's larger, add by copying .airesponse.first and .promptcontainer.template and clearing the texts. */
             adjustChatCount: function (numberOfChats) {
+                console.log('adjustChatCount', numberOfChats);
                 let numberOfExistingChats = this.getChatCount();
                 if (numberOfExistingChats < numberOfChats) {
                     let $promptTemplate = this.$el.find('.promptcontainertemplate');
