@@ -88,7 +88,7 @@ class SidePanelDialog {
     }
 
     setDialogStatus(status) {
-        console.log("SidePanelDialog setDialogStatus", status);
+        // console.log("SidePanelDialog setDialogStatus", status);
         this.$predefinedPromptsSelector.val(status.predefinedPrompts);
         this.$contentSelector.val(status.contentSelector);
         if (status.promptCount) {
@@ -111,7 +111,7 @@ class SidePanelDialog {
      * either by deleting some or by copying some from the templates. If n < 0 we remove that many, but keep at least one. */
     ensurePromptCount(n) {
         const currentCount = this.$promptContainer.find('.composum-ai-prompt').length;
-        console.log("ensurePromptCount", n, currentCount);
+        // console.log("ensurePromptCount", n, currentCount);
         n = n < 0 ? Math.max(currentCount + n, 1) : n === 0 ? 1 : n;
         if (currentCount < n) {
             for (let i = currentCount; i < n; i++) {

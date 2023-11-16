@@ -23,14 +23,40 @@ Intro Picture?
 4 - Fixed
 
 ### Chat demo ideas
+
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/pages/setup
 Give me a docker command line that starts pages on port 9090 in the background.
 
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/blog/pages/composumAI
-Make 10 suggestions for short (max. 10 second) video clips that demonstrate the capabilities of the AI described in this Blog.
+Make 10 suggestions for short (max. 10 second) video clips that demonstrate the capabilities of the AI described in this
+Blog.
 
-Make 10 suggestions for headlines of max. 3 words that describe what happens in the clips. For instance: "Create Ideas", "Translate", "Tag"
+Make 10 suggestions for headlines of max. 3 words that describe what happens in the clips. For instance: "Create
+Ideas", "Translate", "Tag"
 
-Make 10 suggestions for headlines of max. 3 words that describe what happens in the clips. For instance: "Create Ideas", "Translate", "Tag"
+Make 10 suggestions for headlines of max. 3 words that describe what happens in the clips. For instance: "Create
+Ideas", "Translate", "Tag"
 
 Create descriptions of suggestions for short (max. 10 second) video clips that demonstrate these capabilities of the AI.
+
+### AEM Demo
+
+http://localhost:4502/sites.html/content/wknd/language-masters/en
+
+Wichtige features: page description, richtext editor in text, textarea and richtext in dialog, richtext in
+experience fragment, chat, history
+Relevant components: teaser, text, embed (HTML)
+?? make a table / JSON
+?? wichtige prompts:
+
+- rich text editor in text http://localhost:4502/sites.html/content/wknd/language-masters/en - intro
+- page properties http://localhost:4502/sites.html/content/wknd/language-masters/en - abstract
+- content transformation:
+    - Create a table with the data from the text
+    - http://localhost:4502/editor.html/content/wknd/language-masters/en/about-us.html Make a list of contributor names
+- teaser description
+- copy in web page, summarize
+- chat:
+    - FAQ:
+        - Give 5 suggestions in the form of a FAQ that could be answered - only the question.
+        - Suggest an answer for question 4
