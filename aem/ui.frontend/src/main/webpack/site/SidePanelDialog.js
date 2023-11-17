@@ -89,7 +89,7 @@ class SidePanelDialog {
 
     setDialogStatus(status) {
         // console.log("SidePanelDialog setDialogStatus", status);
-        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
+        this.$predefinedPromptsSelector.val(status.predefinedPrompts || 'page');
         this.$contentSelector.val(status.contentSelector);
         if (status.promptCount) {
             this.ensurePromptCount(status.promptCount);
