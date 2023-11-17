@@ -26,7 +26,7 @@ the [project's Github repository](https://github.com/ist-dresden/composum-AI).
 
 ## A quick demo
 
-![Img1](../image/ai/video/QuickDemo-poster.png)
+![Img1](../image/ai/video/QuickDemo-poster.jpg)
 
 [Quick Demo video](../image/ai/video/QuickDemo.mp4)
 

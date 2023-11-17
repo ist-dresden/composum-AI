@@ -64,15 +64,21 @@ Relevant components: teaser, text, embed (HTML)
 Snippets for AEM Quick Demo:
 [AEMSidebarAndContentCreation.png](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEMSidebarAndContentCreation.png)
 Intro picture, title "Composum AI for AEM"
+
 [AEM-Text-Generate-Content.mov](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEM-Text-Generate-Content.mov)
 "Create Content" - content creation dialog on inline text, incl. page length
+
 [AEM-Dialog-Teaser-External-Content.mov](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEM-Dialog-Teaser-External-Content.mov)
 "Transform external content" - content creation dialog from dialog, external input
+
 [AEM-Page-Description-incl-History.mov](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEM-Page-Description-incl-History.mov)
 "Summarize" , "Choose from History"
+
 [AEM-Content-Transformation-Table.mov](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEM-Content-Transformation-Table.mov)
 "Rewrite" - content creation dialog on inline text
+
 [AEM-Configurability.mov](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEM-Configurability.mov)
 title: "Configurable"
+
 [AEM-Chat.mov](..%2Farchive%2Fvideos%2Faemquickdemo%2Fparts%2FAEM-Chat.mov)
 Side panel AI, title: "Side Panel AI: analyze, discuss, suggest"

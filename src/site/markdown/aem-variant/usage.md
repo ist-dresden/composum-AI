@@ -16,6 +16,12 @@ and capabilities, which are documented in the following sections:
 - the **Side Panel AI** can be called from the page editor and the experience fragment editor and is focused on
   analysing, discussing and improving the content of your pages.
 
+## A quick demo
+
+![Img1](../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg)
+
+[Quick Demo video](../image/ai/video/ComposumAIforAEMQuickDemo.mp4)
+
 ## The content creation assistant
 
 ### How to access the content creation assistant

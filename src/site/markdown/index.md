@@ -10,7 +10,9 @@ We provide several content creation assistants that are tightly integrated into
 [Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
 putting the power of AI supported content creation at your fingertips.
 
-[Click for a 2.5min demonstration video](https://github.com/ist-dresden/composum-AI/assets/999184/18595f2a-e0b5-49f3-bc4c-65d6a8bc93f6)
+Click for a 2.5min demonstration video of
+[Composum AI for Composum Pages](image/ai/video/QuickDemo.mp4) or
+[Composum AI for Adobe Experience Manager (AEM)](image/ai/video/ComposumAIforAEMQuickDemo.mp4).
 
 ## Basic idea
 
