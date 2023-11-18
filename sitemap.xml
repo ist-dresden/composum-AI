@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://ist-dresden.github.io/composum-AI/aem-variant/index.html</loc>
+    <lastmod>2023-11-17</lastmod>
+  </url>
+  <url>
     <loc>https://ist-dresden.github.io/composum-AI/aem-variant/installation.html</loc>
     <lastmod>2023-11-17</lastmod>
   </url>
@@ -9,12 +13,12 @@
     <lastmod>2023-11-17</lastmod>
   </url>
   <url>
-    <loc>https://ist-dresden.github.io/composum-AI/aem-variant/index.html</loc>
-    <lastmod>2023-11-17</lastmod>
-  </url>
-  <url>
     <loc>https://ist-dresden.github.io/composum-AI/aem-variant/usage.html</loc>
     <lastmod>2023-11-18</lastmod>
+  </url>
+  <url>
+    <loc>https://ist-dresden.github.io/composum-AI/composum-variant/index.html</loc>
+    <lastmod>2023-11-17</lastmod>
   </url>
   <url>
     <loc>https://ist-dresden.github.io/composum-AI/composum-variant/installation.html</loc>
@@ -25,19 +29,15 @@
     <lastmod>2023-11-17</lastmod>
   </url>
   <url>
-    <loc>https://ist-dresden.github.io/composum-AI/composum-variant/index.html</loc>
-    <lastmod>2023-11-17</lastmod>
-  </url>
-  <url>
     <loc>https://ist-dresden.github.io/composum-AI/composum-variant/usage.html</loc>
     <lastmod>2023-11-18</lastmod>
   </url>
   <url>
-    <loc>https://ist-dresden.github.io/composum-AI/development.html</loc>
+    <loc>https://ist-dresden.github.io/composum-AI/index.html</loc>
     <lastmod>2023-11-17</lastmod>
   </url>
   <url>
-    <loc>https://ist-dresden.github.io/composum-AI/index.html</loc>
+    <loc>https://ist-dresden.github.io/composum-AI/development.html</loc>
     <lastmod>2023-11-17</lastmod>
   </url>
 </urlset>
