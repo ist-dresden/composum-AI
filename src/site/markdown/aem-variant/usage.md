@@ -18,9 +18,15 @@ and capabilities, which are documented in the following sections:
 
 ## A quick demo
 
-![Img1](../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg)
-
-[Quick Demo video](../image/ai/video/ComposumAIforAEMQuickDemo.mp4)
+<a href="../image/ai/video/ComposumAIforAEMQuickDemo.mp4" target="_blank">
+<figure>
+<img src="../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg" alt="Composum AI for AEM Quick Demo" 
+width="500px"/><br/>
+<figcaption>
+Quick demonstration of Composum AI features
+</figcaption>
+</figure>
+</a>
 
 ## The content creation assistant
 

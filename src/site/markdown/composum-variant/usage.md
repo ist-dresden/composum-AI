@@ -26,9 +26,12 @@ the [project's Github repository](https://github.com/ist-dresden/composum-AI).
 
 ## A quick demo
 
-![Img1](../image/ai/video/QuickDemo-poster.jpg)
-
-[Quick Demo video](../image/ai/video/QuickDemo.mp4)
+<a href="../image/ai/video/QuickDemo.mp4" target="_blank">
+<figure>
+<img src="../image/ai/video/QuickDemo-poster.jpg" alt="Quick Demo video" width="500px"/><br/>
+<figcaption>Quick Demo video</figcaption>
+</figure>
+</a>
 
 ## How to access the Composum AI
 

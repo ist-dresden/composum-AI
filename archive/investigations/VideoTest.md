@@ -37,3 +37,28 @@
 https://github.com/ist-dresden/composum-AI/assets/999184/18595f2a-e0b5-49f3-bc4c-65d6a8bc93f6
 
 https://github.com/ist-dresden/composum-AI/assets/999184/18595f2a-e0b5-49f3-bc4c-65d6a8bc93f6
+
+## With link
+
+<a href="../image/ai/video/ComposumAIforAEMQuickDemo.mp4" target="_blank">
+![Img1](../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg)
+</a>
+
+## With link 2
+
+<a href="../image/ai/video/ComposumAIforAEMQuickDemo.mp4" target="_blank">
+<img src="../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg">
+</a>
+
+## Figure:
+
+HTML Figure with picture and link to video:
+
+<a href="../image/ai/video/ComposumAIforAEMQuickDemo.mp4" target="_blank">
+    <figure>
+        <img src="../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg">
+        <figcaption>
+            Quick demonstration of Composum AI features
+        </figcaption>
+    </figure>
+</a>
