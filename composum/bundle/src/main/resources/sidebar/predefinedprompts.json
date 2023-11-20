@@ -1,5 +1,5 @@
 {
-  "Summary": "Please provide a brief summary of the main points and themes in the text.",
+  "Summary": "Please provide a brief summary of the main points and themes in the text. Only use the information provided in the text; DO NOT use any information you know about the world.",
   "Question": "Please answer the following question based on the given text:\n",
   "Simplification Suggestions": "Identify parts of the text that could be simplified or made easier to understand. Name those parts and make suggestions for alternative wording.",
   "Content Flow": "Analyze the flow of the content. Does it progress logically? Is there a clear introduction, body, and conclusion?",
