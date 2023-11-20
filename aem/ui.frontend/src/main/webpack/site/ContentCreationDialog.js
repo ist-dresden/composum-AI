@@ -16,6 +16,8 @@ const historyMap = {};
 
 class ContentCreationDialog {
 
+
+    debug = true;
     /**
      * Creates a new ContentCreationDialog.
      *
@@ -146,13 +148,14 @@ class ContentCreationDialog {
     }
 
     onStopClicked(event) {
+        if (this.debug) console.log("onStopClicked", arguments);
         this.createServlet.abortRunningCalls();
         this.setLoading(false);
         this.history.maybeSaveToHistory();
     }
 
     onPredefinedPromptsChanged(event) {
-        console.log("onPredefinedPromptsChanged", arguments);
+        if (this.debug) console.log("onPredefinedPromptsChanged", arguments);
         const predefinedPrompt = this.$predefinedPromptsSelector.val();
         if (predefinedPrompt !== '-') {
             // this.history.maybeSaveToHistory(); // debatable: doesn't make sense if user just skips through the list.
@@ -162,7 +165,7 @@ class ContentCreationDialog {
     }
 
     onPromptChanged() {
-        // console.log("onPromptChanged", arguments); // on every keypress
+        if (this.debug) console.log("onPromptChanged", arguments); // on every keypress
         let prompt = this.$prompt.val();
         if (this.$predefinedPromptsSelector.val() !== prompt) {
             this.$predefinedPromptsSelector.val('-');
@@ -175,7 +178,7 @@ class ContentCreationDialog {
     }
 
     onContentSelectorChanged(event) {
-        console.log("onContentSelectorChanged", arguments);
+        if (this.debug) console.log("onContentSelectorChanged", arguments);
         const key = this.$contentSelector.val();
         switch (key) {
             case 'lastoutput':
@@ -264,7 +267,7 @@ class ContentCreationDialog {
     }
 
     onGenerateButtonClicked(event) {
-        console.log("onGenerateButtonClicked", arguments);
+        if (this.debug) console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
         const data = {
             prompt: this.$prompt.val(),
@@ -273,7 +276,7 @@ class ContentCreationDialog {
             richText: this.isRichtext,
             configBasePath: this.pagePath(this.componentPath)
         };
-        console.log("createContent", data);
+        if (this.debug) console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
         this.$dialog.find('.composum-ai-content-suggestion')[0].scrollIntoView();
@@ -286,7 +289,7 @@ class ContentCreationDialog {
 
     doneCallback(text, event) {
         this.streamingCallback(text);
-        console.log("ContentCreationDialog doneCallback", arguments);
+        if (this.debug) console.log("ContentCreationDialog doneCallback", arguments);
         const finishreason = event && event.data && event.data.result && event.data.result.finishreason;
         if (finishreason === 'LENGTH') {
             this.showError('The generated content stopped because of the length restriction.');
@@ -332,7 +335,7 @@ class ContentCreationDialog {
 
     /** Dialog submit: overwrite calling richtext editor / textarea in dialog */
     onSubmit(event) {
-        console.log("ContentCreationDialog onSubmit", arguments);
+        if (this.debug) console.log("ContentCreationDialog onSubmit", arguments);
         try {
             const response = this.getResponse();
             this.closeDialog(event);
@@ -348,7 +351,7 @@ class ContentCreationDialog {
     /** Dialog cancel: just closes dialog. */
     onCancel(event) {
         try {
-            console.log("ContentCreationDialog onCancel", arguments);
+            if (this.debug) console.log("ContentCreationDialog onCancel", arguments);
             this.closeDialog(event);
         } catch (e) { // better than crashing the whole page
             console.error("Error in onCancel", e);
@@ -356,7 +359,7 @@ class ContentCreationDialog {
     }
 
     closeDialog(event) {
-        console.log("ContentCreationDialog closeDialog", arguments);
+        if (this.debug) console.log("ContentCreationDialog closeDialog", arguments);
         this.history.maybeSaveToHistory();
         if (this.stackeddialog) {
             // unfortunately otherwise the dialog closes the other dialog which we have been called from, too.

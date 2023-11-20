@@ -25,6 +25,7 @@ try {
         const SERVICE_CREATE = 'create';
         const SERVICE_SIDEPANEL = 'sidepanel';
         const aiconfig = new AIConfig();
+        var debug = true;
 
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
@@ -32,6 +33,7 @@ try {
          * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
          */
         function loadSidebarPanelDialog() {
+            if (true) console.log("loadSidebarPanelDialog", arguments);
             try {
                 aiconfig.ifEnabled(SERVICE_SIDEPANEL, undefined, () => {
                     const dialogId = 'composumAI-sidebar-panel';
@@ -49,7 +51,7 @@ try {
 
                             // throw away HTML head and so forth:
                             const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
-                            console.log("found dialog", dialog);
+                            if (debug) console.log("found dialog", dialog);
                             // the first tab and panel are the actual dialog content:
                             const tab = dialog.find('coral-tabview coral-tab').first();
                             const panel = dialog.find('coral-tabview coral-panel').first();
@@ -77,6 +79,7 @@ try {
          */
 
         function showCreateDialog(parameters) {
+            if (debug) console.log("showCreateDialog", parameters);
             const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
             $.ajax({
@@ -84,6 +87,7 @@ try {
                 type: "GET",
                 dataType: "html",
                 success: function (data) {
+                    if (debug) console.log("showCreateDialog ajax", data);
                     // reload the dialog since otherwise we get an internal error in Coral on second show.
                     $(dialogId).remove();
                     // throw away HTML head and so forth:
@@ -113,13 +117,13 @@ try {
          * @param {HTMLElement} element - The DOM element to search for textareas.
          */
         function insertCreateButtonsForTextareas(element) {
-            console.log("insertCreateButton", arguments);
+            if (debug) console.log("insertCreateButton", arguments);
             if ($(element).find('.composum-ai-dialog').length > 0) {
                 return; // don't insert buttons into our own dialog
             }
             $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
                 function (index, textarea) {
-                    console.log("insertCreateButton textarea", textarea);
+                    if (debug) console.log("insertCreateButton textarea", textarea);
                     const resourceType = $(textarea).closest('coral-dialog-content').find('input[name="./sling:resourceType"]').val();
                     if (!resourceType) {
                         // debugger;
@@ -132,7 +136,7 @@ try {
                         gearsEdit.insertAfter(textarea);
                         textarea.setAttribute('data-comp-ai-iconsadded', 'true');
                         gearsEdit.click(function (event) {
-                            console.log("createButton click", arguments);
+                            if (debug) console.log("createButton click", arguments);
                             const formPath = $(textarea).closest('form').attr('action');
                             var property = $(textarea).attr('name');
                             property = property && property.startsWith('./') && property.substring(2);
@@ -162,10 +166,11 @@ try {
          * @param {Event} event - The event triggering the preparation.
          */
         function prepareDialog(event) {
-            console.log("prepareDialog", event.type, event.target);
+            if (debug) console.log("prepareDialog", event.type, event.target);
             try {
                 aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                     Coral.commons.ready(event.target, function () {
+                        if (debug) console.log("prepareDialog ready", event.type, event.target);
                         insertCreateButtonsForTextareas(event.target);
                     });
                 });
@@ -183,7 +188,7 @@ try {
          * @param {Event} event - The event indicating the activation of the RTE.
          */
         function initRteHooks(event) {
-            console.log("waitForReadyAndInsert", event.type, event.target);
+            if (debug) console.log("waitForReadyAndInsert", event.type, event.target);
             try {
                 aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                     Coral.commons.ready(event.target, function () {
@@ -214,6 +219,7 @@ try {
 
         /** editing-start event is received for an richtext editor - we have to register the button. */
         function onRteEditingStart(event) {
+            if (debug) console.log("onRteEditingStart", arguments);
             let $target = $(event.target);
             if ($target.closest('.composum-ai-dialog').length > 0) {
                 return; // don't insert buttons into our own dialog
@@ -229,7 +235,7 @@ try {
             if (!rteinstance) {
                 debugger; // FIXME
             }
-            console.log("onRteEditingStart", event.type, event.target, editable);
+            if (debug) console.log("onRteEditingStart rte found", event.type, event.target, editable);
 
             if (editable) {
                 componentPath = editable.path;
@@ -252,7 +258,7 @@ try {
         }
 
         function insertCreateButtons(target, editable, componentPath, resourceType, propertyName, rteinstance) {
-            // console.log("insertCreateButtons", arguments);
+            if (debug) console.log("insertCreateButtons", arguments);
             let buttongroups = channel.find('#InlineEditingUI .rte-ui > div > coral-buttongroup, coral-dialog[fullscreen] .rte-ui > div > coral-buttongroup');
             const $target = $(target);
             if ($target.hasClass('cq-RichText-editable')) { // maximized editor
@@ -274,10 +280,11 @@ try {
 
         /** Registers the content creation dialog in the richtext editor toolbar */
         function registerContentDialogInToolbar(buttongroup, target, editable, componentPath, resourceType, propertyName, rteinstance) {
+            if (debug) console.log("registerContentDialogInToolbar", arguments);
             const $button = $(rtebuttonHTML);
             $(buttongroup).append($button);
             $button.click(function (clickevent) {
-                console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
+                if (debug) console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
 
                 propertyName = propertyName || $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
                 propertyName = propertyName && propertyName.startsWith('./') && propertyName.substring(2);
@@ -310,6 +317,7 @@ try {
          * editable.dom[0].contains(element).
          * This logic prevents a container being found instead of the contained editable. */
         function determineEditableFromElement(element) {
+            if (debug) console.log("determineEditableFromElement", arguments);
             var bestEditable = undefined;
             for (var i = 0; i < Granite.author.editables.length; i++) {
                 var editable = Granite.author.editables[i];
@@ -331,3 +339,5 @@ try {
 } catch (e) {
     console.log('BUG: registerdialogs.js initialization error', e);
 }
+
+console.log("registerdialogs.js loaded");

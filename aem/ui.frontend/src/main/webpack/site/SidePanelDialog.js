@@ -9,6 +9,9 @@ import {HelpPage} from './HelpPage.js';
 const historyMap = {};
 
 class SidePanelDialog {
+
+    debug = true;
+
     constructor(dialog) {
         console.log("SidePanelDialog constructor ", arguments, this);
         this.$dialog = $(dialog);
@@ -59,7 +62,7 @@ class SidePanelDialog {
     }
 
     onStopClicked(event) {
-        console.log("onStopClicked", arguments);
+        if (this.debug) console.log("onStopClicked", arguments);
         if (event) {
             event.preventDefault();
         }
@@ -88,7 +91,7 @@ class SidePanelDialog {
     }
 
     setDialogStatus(status) {
-        // console.log("SidePanelDialog setDialogStatus", status);
+        if (this.debug) console.log("SidePanelDialog setDialogStatus", status);
         this.$predefinedPromptsSelector.val(status.predefinedPrompts || 'page');
         this.$contentSelector.val(status.contentSelector);
         if (status.promptCount) {
@@ -111,7 +114,7 @@ class SidePanelDialog {
      * either by deleting some or by copying some from the templates. If n < 0 we remove that many, but keep at least one. */
     ensurePromptCount(n) {
         const currentCount = this.$promptContainer.find('.composum-ai-prompt').length;
-        // console.log("ensurePromptCount", n, currentCount);
+        if (this.debug) console.log("ensurePromptCount", n, currentCount);
         n = n < 0 ? Math.max(currentCount + n, 1) : n === 0 ? 1 : n;
         if (currentCount < n) {
             for (let i = currentCount; i < n; i++) {
@@ -144,7 +147,7 @@ class SidePanelDialog {
     }
 
     onPredefinedPromptsChanged(event) {
-        console.log("onPredefinedPromptsChanged", arguments);
+        if (this.debug) console.log("onPredefinedPromptsChanged", arguments);
         const prompt = this.$predefinedPromptsSelector.val();
         if (prompt !== '-') {
             this.ensurePromptCount(1);
@@ -154,13 +157,14 @@ class SidePanelDialog {
     }
 
     onPromptAreaChanged(event) {
-        // console.log("onPromptAreaChanged", arguments); // on each key press
+        if (this.debug) console.log("onPromptAreaChanged", arguments); // on each key press
         this.$predefinedPromptsSelector.val('-');
         this.setAutomaticGenerateButtonState();
     }
 
     // TODO: possibly use resize on typing https://stackoverflow.com/questions/454202/creating-a-textarea-with-auto-resize/77155208
     expandOnFocus(event) {
+        if (this.debug) console.log("expandOnFocus", arguments);
         var that = event.target;
         that.rows = 5;
         while (that.scrollHeight > that.clientHeight) {
@@ -172,6 +176,7 @@ class SidePanelDialog {
 
     /** Shrink the text area to it's actual size so that it just captures the text it has. */
     shrinkOnBlur(event) {
+        if (this.debug) console.log("shrinkOnBlur", arguments);
         var that = event.target;
         $(that).val($(that).val().trim());
         setTimeout(function () {
@@ -214,7 +219,7 @@ class SidePanelDialog {
     }
 
     onGenerateButtonClicked(event) {
-        console.log("onGenerateButtonClicked", arguments);
+        if (this.debug) console.log("onGenerateButtonClicked", arguments);
         event.preventDefault();
         this.shrinkOnBlur(event);
         this.showError(undefined);
@@ -251,19 +256,20 @@ class SidePanelDialog {
             sourcePath: this.getSelectedPath(),
             configBasePath: this.getContentPath()
         };
-        console.log("createContent", data);
+        if (this.debug) console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
     }
 
     streamingCallback(text) {
-        // console.log("SidePanelDialog streamingCallback", arguments);
+        if (this.debug) console.log("SidePanelDialog streamingCallback", arguments);
         // set the text of the last div.composum-ai-response to the data
         const lastResponse = this.$promptContainer.find('.composum-ai-response:last');
         lastResponse.text(text);
     }
 
     doneCallback(text, event) {
+        if (this.debug) console.log("SidePanelDialog doneCallback", arguments);
         this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').length + 1);
         this.$promptContainer.find('.composum-ai-prompt:last').focus();
         console.log("SidePanelDialog doneCallback", arguments);
@@ -281,7 +287,7 @@ class SidePanelDialog {
     }
 
     errorCallback(data) {
-        console.log("SidePanelDialog errorCallback", arguments);
+        console.error("SidePanelDialog errorCallback", arguments);
         this.showError(data);
         this.setLoading(false);
     }

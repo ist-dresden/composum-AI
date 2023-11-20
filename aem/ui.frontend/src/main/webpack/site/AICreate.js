@@ -3,6 +3,9 @@
 const AICREATE_SERVLET = '/bin/cpm/ai/create';
 
 class AICreate {
+
+    debug = true;
+
     constructor(streamingCallback, doneCallback, errorCallback) {
         this.streamingCallback = streamingCallback;
         this.doneCallback = doneCallback;
@@ -11,6 +14,7 @@ class AICreate {
 
     /** Aborts old calls and triggers a new call. */
     createContent(data) {
+        if (this.debug) console.log("AICreate createContent", arguments);
         this.abortRunningCalls();
         // ajax call to AICreateServlet
         this.runningxhr = $.ajax({
@@ -24,6 +28,7 @@ class AICreate {
     }
 
     abortRunningCalls() {
+        if (this.debug) console.log("AICreate abortRunningCalls", arguments);
         if (this.runningxhr) {
             this.runningxhr.abort();
             this.runningxhr = undefined;
@@ -35,7 +40,7 @@ class AICreate {
     }
 
     ajaxSuccess(data, status, jqXHR) {
-        console.log("AICreate ajaxSuccess", arguments);
+        if (this.debug) console.log("AICreate ajaxSuccess", arguments);
         this.runningxhr = undefined;
         // the servlet returns a 202 with a Location-redirect to the actual content
         if (jqXHR.status === 202) {
@@ -53,12 +58,13 @@ class AICreate {
     }
 
     ajaxError(jqXHR, status, error) {
-        console.log("AICreate ajaxError", arguments);
+        if (this.debug) console.log("AICreate ajaxError", arguments);
         this.runningxhr = undefined;
         this.errorCallback(error);
     }
 
     startEventStream(location) {
+        if (this.debug) console.log("AICreate startEventStream", arguments);
         this.abortRunningCalls();
         this.streamingResult = "";
         this.eventSource = new EventSource(location);
@@ -69,30 +75,31 @@ class AICreate {
     }
 
     onStreamingMessage(eventSource, event) {
-        console.log("AICreate onStreamingMessage", arguments);
+        if (this.debug) console.log("AICreate onStreamingMessage", arguments);
         this.streamingResult += JSON.parse(event.data);
         this.streamingCallback(this.streamingResult);
     }
 
     onStreamingFinished(event) {
-        console.log("AICreate onStreamingFinished", arguments);
+        if (this.debug) console.log("AICreate onStreamingFinished", arguments);
         this.doneCallback(this.streamingResult, JSON.parse(event.data));
         this.abortRunningCalls();
     }
 
     onStreamingError(eventSource, event) {
-        console.log("AICreate onStreamingError", arguments);
+        if (this.debug) console.log("AICreate onStreamingError", arguments);
         this.errorCallback(event.data);
         this.abortRunningCalls();
     }
 
     onStreamingException(event) {
-        console.log("AICreate onStreamingException", arguments);
+        if (this.debug) console.log("AICreate onStreamingException", arguments);
         this.errorCallback(event);
         this.abortRunningCalls();
     }
 
     dispose() {
+        if (this.debug) console.log("AICreate dispose", arguments);
         this.abortRunningCalls();
     }
 
