@@ -92,8 +92,8 @@ class SidePanelDialog {
 
     setDialogStatus(status) {
         if (this.debug) console.log("SidePanelDialog setDialogStatus", status);
-        this.$predefinedPromptsSelector.val(status.predefinedPrompts || 'page');
-        this.$contentSelector.val(status.contentSelector);
+        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
+        this.$contentSelector.val(status.contentSelector || 'page');
         if (status.promptCount) {
             this.ensurePromptCount(status.promptCount);
             this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
