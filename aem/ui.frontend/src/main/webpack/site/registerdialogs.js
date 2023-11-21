@@ -28,6 +28,8 @@ try {
         var debug = true;
 
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
+        // for AEM 6.5.7 we, strangely, don't get the cq-sidepanel-loaded event. Try something else.
+        channel.on('cq-layer-activated', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
         /**
          * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.

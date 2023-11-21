@@ -5,6 +5,7 @@ const AICREATE_SERVLET = '/bin/cpm/ai/create';
 class AICreate {
 
     debug = true;
+    verbose = false;
 
     constructor(streamingCallback, doneCallback, errorCallback) {
         this.streamingCallback = streamingCallback;
@@ -16,14 +17,38 @@ class AICreate {
     createContent(data) {
         if (this.debug) console.log("AICreate createContent", arguments);
         this.abortRunningCalls();
-        // ajax call to AICreateServlet
-        this.runningxhr = $.ajax({
-            url: Granite.HTTP.externalize(AICREATE_SERVLET),
-            type: "POST",
-            cache: false,
-            data: data,
-            success: this.ajaxSuccess.bind(this),
-            error: this.ajaxError.bind(this)
+
+        this.runningxhr = new AbortController();
+        const {signal} = this.runningxhr;
+
+        // fetch call to AICreateServlet
+        Granite.csrf.refreshToken().then(token => {
+            fetch(Granite.HTTP.externalize(AICREATE_SERVLET), {
+                method: "POST",
+                cache: "no-cache",
+                signal,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', 'CSRF-Token': token},
+                body: new URLSearchParams(data)
+            })
+                .then(response => {
+                    if (this.debug) console.log("AICreate received response", response);
+                    if (response.status === 200) {
+                        this.runningxhr = undefined;
+                        return response.json();
+                    } else {
+                        throw new Error("Unexpected response code " + response.status);
+                    }
+                })
+                .then(data => {
+                    if (this.debug) console.log("AICreate received data", data);
+                    const streamid = data.streamid;
+                    if (streamid) {
+                        this.startEventStream(streamid);
+                    } else {
+                        throw new Error("Bug: No streamid response " + JSON.stringify(data));
+                    }
+                })
+                .catch(error => this.processError(error));
         });
     }
 
@@ -39,35 +64,18 @@ class AICreate {
         }
     }
 
-    ajaxSuccess(data, status, jqXHR) {
-        if (this.debug) console.log("AICreate ajaxSuccess", arguments);
-        this.runningxhr = undefined;
-        // the servlet returns a 202 with a Location-redirect to the actual content
-        if (jqXHR.status === 202) {
-            const location = jqXHR.getResponseHeader('Location');
-            if (location) {
-                this.startEventStream(location);
-            } else {
-                console.error("Bug: No Location header in 202 response", arguments);
-                this.errorCallback("Bug: No Location header in 202 response");
-            }
-        } else {
-            console.error("Bug: Unexpected response code. ", arguments);
-            this.errorCallback("Bug: Unexpected response code " + jqXHR.status);
-        }
-    }
-
-    ajaxError(jqXHR, status, error) {
+    processError(error) {
         if (this.debug) console.log("AICreate ajaxError", arguments);
+        debugger;
         this.runningxhr = undefined;
         this.errorCallback(error);
     }
 
-    startEventStream(location) {
+    startEventStream(streamid) {
         if (this.debug) console.log("AICreate startEventStream", arguments);
         this.abortRunningCalls();
         this.streamingResult = "";
-        this.eventSource = new EventSource(location);
+        this.eventSource = new EventSource(Granite.HTTP.externalize(AICREATE_SERVLET) + "?streamid=" + streamid);
         this.eventSource.onmessage = (event) => this.onStreamingMessage(this.eventSource, event);
         this.eventSource.onerror = (event) => this.onStreamingError(this.eventSource, event);
         this.eventSource.addEventListener('finished', (event) => this.onStreamingFinished(event));
@@ -75,7 +83,7 @@ class AICreate {
     }
 
     onStreamingMessage(eventSource, event) {
-        if (this.debug) console.log("AICreate onStreamingMessage", arguments);
+        if (this.verbose) console.log("AICreate onStreamingMessage", arguments);
         this.streamingResult += JSON.parse(event.data);
         this.streamingCallback(this.streamingResult);
     }
