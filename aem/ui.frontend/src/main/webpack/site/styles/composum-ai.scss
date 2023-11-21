@@ -2,7 +2,7 @@
 //== we make that horribly specific to override the default coral style there
 
 .coral-Form--vertical .coral-Form-fieldwrapper .coral-Form-fieldinfo.composum-ai-iconshiftleft {
-    right: 18px;
+    right: 22px;
 }
 
 #composumAI-sidebar-panel .composum-ai-response {
@@ -11,13 +11,15 @@
 
 .composum-ai-dialog .composum-ai-prompt-columns {
 
+    display: flex; // AEM 6.5.7
+
     .coral-FixedColumn-column {
         width: auto;
         flex: 1;
     }
 
     .coral-Form-fieldset .coral-Form-fieldset-legend {
-        margin-top: 0;
+        margin-top: 0; // FIXME has to be switched off for AEM 6.5.7
     }
 
     .coral-Form-fieldset {

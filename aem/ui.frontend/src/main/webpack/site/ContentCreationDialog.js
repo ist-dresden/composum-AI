@@ -73,6 +73,9 @@ class ContentCreationDialog {
         this.$dialog.find('form').addClass('_coral-Dialog--fullscreenTakeover');
         this.$dialog.find('coral-dialog-footer').children().appendTo(this.$dialog.find('coral-dialog-header div.cq-dialog-actions'));
         this.$dialog.find('.composum-ai-prompt-columns .u-coral-padding').removeClass('u-coral-padding');
+        // AEM 6.5.7
+        $('coral-dialog#composumAI-create-dialog').removeAttr('moveable').attr('fullscreen', 'fullscreen')
+            .addClass('coral3-Dialog--fullscreen');
     }
 
     removeFormAction() {

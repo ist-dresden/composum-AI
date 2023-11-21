@@ -108,11 +108,10 @@ try {
         }
 
         const fieldlabeliconHTML =
-            '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
-            '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-            '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-            '  </svg>\n' +
-            '</coral-icon>';
+            '<coral-icon ' +
+            '   class="coral-Form-fieldinfo coral3-Icon coral3-Icon--gearsEdit coral3-Icon--sizeS composum-ai-create-dialog-action" ' +
+            '   title="AI Content Creation" icon="gearsEdit" alt="description" size="S" autoarialabel="on" role="img" ' +
+            '   aria-label="AI Content Creation"></coral-icon>';
 
         /**
          * Inserts the AI content creation buttons for text areas in the provided element.
