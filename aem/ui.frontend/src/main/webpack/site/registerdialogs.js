@@ -291,6 +291,8 @@ try {
                 clickevent.stopPropagation();
                 const oldContent = rteinstance.getContent();
                 rteinstance.suspend();
+                const backdropOpen = $('.cq-dialog-backdrop').hasClass('is-open');
+
                 showCreateDialog({
                     componentPath,
                     property: propertyName,
@@ -304,7 +306,9 @@ try {
                         rteinstance.reactivate();
                         rteinstance.setContent(oldContent);
                         rteinstance.focus();
-                        $('.cq-dialog-backdrop').removeClass('is-open').hide();
+                        if (!backdropOpen) { // only hide if we weren't called from a dialog but an inline editor:
+                            $('.cq-dialog-backdrop').removeClass('is-open').hide();
+                        }
                     }
                 });
             });
