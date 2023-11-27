@@ -18,6 +18,7 @@ class ContentCreationDialog {
 
 
     debug = true;
+
     /**
      * Creates a new ContentCreationDialog.
      *
@@ -62,6 +63,7 @@ class ContentCreationDialog {
         this.showError();
         this.setLoading(false);
         this.fullscreen();
+        this.alignPromptAndSourceColumn();
         this.onPromptChanged();
         setTimeout(() => {
             this.setSourceContent(oldContent);
@@ -73,9 +75,29 @@ class ContentCreationDialog {
         this.$dialog.find('form').addClass('_coral-Dialog--fullscreenTakeover');
         this.$dialog.find('coral-dialog-footer').children().appendTo(this.$dialog.find('coral-dialog-header div.cq-dialog-actions'));
         this.$dialog.find('.composum-ai-prompt-columns .u-coral-padding').removeClass('u-coral-padding');
-        // AEM 6.5.7
+        // for AEM 6.5.7
         $('coral-dialog#composumAI-create-dialog').removeAttr('moveable').attr('fullscreen', 'fullscreen')
             .addClass('coral3-Dialog--fullscreen');
+    }
+
+    /* enlarge '.composum-ai-source-richtext [data-cq-richtext-editable=true]' so that div.composum-ai-source-column
+     * and div.composum-ai-prompt-column have the same height
+     * That's annoying to do with css, so we rather calculate and set the height here. */
+    alignPromptAndSourceColumn() {
+        const $editable = this.$dialog.find('.composum-ai-source-richtext [data-cq-richtext-editable=true]');
+        const $sourceColumn = this.$dialog.find('.composum-ai-source-column section');
+        const $promptColumn = this.$dialog.find('.composum-ai-prompt-column section');
+        setTimeout(() => {
+            const promptColumnScreenHeight = $promptColumn[0].clientHeight;
+            $editable.css('height', '100px');
+            const sourceColumnScreenHeight = $sourceColumn[0].clientHeight;
+            const heightDiff = promptColumnScreenHeight - sourceColumnScreenHeight;
+            if (heightDiff > 0) {
+                $editable.css('height', (heightDiff + 100) + 'px');
+            } else { // shouldn't happen - we rather leave it as it is.
+                $editable.css('height', '');
+            }
+        }, 100); // make sure it's already visible
     }
 
     removeFormAction() {
@@ -373,7 +395,11 @@ class ContentCreationDialog {
         }
         // else: let the dialog close itself.
         if (typeof this.onFinishCallback == 'function') {
-            this.onFinishCallback();
+            try {
+                this.onFinishCallback();
+            } catch (e) {
+                console.error("Error in onFinishCallback", e);
+            }
         }
     }
 

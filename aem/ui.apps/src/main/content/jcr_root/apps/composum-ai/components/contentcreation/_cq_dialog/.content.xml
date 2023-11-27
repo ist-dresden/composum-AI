@@ -20,6 +20,7 @@
                 <items jcr:primaryType="nt:unstructured">
                     <container
                             jcr:primaryType="nt:unstructured"
+                            granite:class="composum-ai-prompt-column"
                             sling:resourceType="granite/ui/components/coral/foundation/container">
                         <items jcr:primaryType="nt:unstructured">
                             <promptFieldset
@@ -52,6 +53,7 @@
                     </container>
                     <container2
                             jcr:primaryType="nt:unstructured"
+                            granite:class="composum-ai-source-column"
                             sling:resourceType="granite/ui/components/coral/foundation/container">
                         <items jcr:primaryType="nt:unstructured">
                             <sourceFieldset

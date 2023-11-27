@@ -303,12 +303,12 @@ try {
                     isRichtext: true,
                     stackeddialog: true,
                     onFinishCallback: function () {
-                        rteinstance.reactivate();
-                        rteinstance.setContent(oldContent);
-                        rteinstance.focus();
                         if (!backdropOpen) { // only hide if we weren't called from a dialog but an inline editor:
                             $('.cq-dialog-backdrop').removeClass('is-open').hide();
                         }
+                        rteinstance.reactivate();
+                        rteinstance.setContent(oldContent);
+                        rteinstance.focus();
                     }
                 });
             });

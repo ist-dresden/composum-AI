@@ -19,7 +19,7 @@
     }
 
     .coral-Form-fieldset .coral-Form-fieldset-legend {
-        margin-top: 0; // FIXME has to be switched off for AEM 6.5.7
+        margin-top: 0.5rem;
     }
 
     .coral-Form-fieldset {
@@ -28,9 +28,8 @@
 
 }
 
-.cq-Dialog:not([fullscreen]) .composum-ai-dialog .composum-ai-prompt-columns {
+.cq-Dialog .composum-ai-dialog .composum-ai-prompt-columns {
     .cq-RichText-editable {
-        height: 11.5rem;
+        height: 9.3rem; // AEM 6.5.7 appropriate default. AEMaaCS - 11.5rem ; we rather align via javascript
     }
-
 }
