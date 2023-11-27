@@ -206,16 +206,12 @@ try {
             }
         }
 
-        const rtebuttonHTML = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
+        const rtebuttonHTML = '<button is="coral-button" variant="quiet" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action coral3-Button--quiet" type="button"\n' +
             '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
             '    <coral-icon size="S"\n' +
-            '                class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
+            '                class="_coral-Icon--sizeS _coral-Icon coral3-Icon--gearsEdit" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
             '                aria-label="AI Content Creation">\n' +
-            '        <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-            '            <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-            '        </svg>\n' +
             '    </coral-icon>\n' +
-            '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
             '</button>\n';
 
         /** editing-start event is received for an richtext editor - we have to register the button. */
