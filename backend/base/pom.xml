@@ -50,6 +50,18 @@
             <version>5.2.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5-h2</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
         <!-- OSGi, Felix -->
         <dependency>
             <groupId>org.osgi</groupId>
