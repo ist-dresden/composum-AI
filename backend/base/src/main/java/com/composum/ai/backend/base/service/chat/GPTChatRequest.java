@@ -1,6 +1,7 @@
 package com.composum.ai.backend.base.service.chat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -140,7 +141,7 @@ public class GPTChatRequest {
                         }
                         messages.add(0, new GPTChatMessage(GPTMessageRole.SYSTEM, newSystemMessage));
                     } else {
-                        addMessages(List.of(message));
+                        addMessages(Arrays.asList(message));
                     }
                 }
             }

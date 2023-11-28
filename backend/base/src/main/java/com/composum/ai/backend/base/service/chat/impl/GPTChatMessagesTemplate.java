@@ -54,10 +54,11 @@ public class GPTChatMessagesTemplate {
         try (InputStream instream = stream; // to always close it
              InputStreamReader in = new InputStreamReader(instream, StandardCharsets.UTF_8);
              BufferedReader buf = new BufferedReader(in)) {
-            Iterator<String> lineiterator = buf.lines()
-                    .dropWhile((line) -> line.startsWith("#"))
-                    .iterator();
-            List<List<String>> blocks = getMessageLineBlocks(lineiterator);
+            List<String> lines = buf.lines().collect(Collectors.toList());
+            while (!lines.isEmpty() && lines.get(0).startsWith("#")) {
+                lines.remove(0);
+            }
+            List<List<String>> blocks = getMessageLineBlocks(lines.iterator());
             processBlocks(blocks);
         } catch (IOException | RuntimeException e) {
             throw new GPTException("Internal error (1) reading chat template " + name, e);
@@ -132,15 +133,19 @@ public class GPTChatMessagesTemplate {
         for (GPTChatMessage message : messages) {
             String content = message.getContent();
             if (content.contains(PLACEHOLDER_MARKER)) {
-                content = PLACEHOLDER_PATTERN.matcher(content).replaceAll((match) -> {
-                    String name = match.group(1);
+                StringBuffer sb = new StringBuffer();
+                Matcher matcher = PLACEHOLDER_PATTERN.matcher(content);
+                while (matcher.find()) {
+                    String name = matcher.group(1);
                     String value = placeholderValues.get(name);
                     if (value == null) {
                         LOG.error("Problem with template usage: missing placeholder value for placeholder {} in template {}", name, templateName, new Exception("Stacktrace, not thrown"));
                         throw new GPTException("Missing placeholder value for " + name);
                     }
-                    return Matcher.quoteReplacement(value);
-                });
+                    matcher.appendReplacement(sb, Matcher.quoteReplacement(value));
+                }
+                matcher.appendTail(sb);
+                content = sb.toString();
             }
             result.add(new GPTChatMessage(message.getRole(), content));
         }

@@ -1,7 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +20,7 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements translation.
@@ -81,7 +81,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             }
             addition = "Output HTML; start the translation with " + firstTag;
         }
-        List<GPTChatMessage> messages = template.getMessages(Map.of("sourcelanguage", sourceLanguage, "sourcephrase", text, "targetlanguage", targetLanguage, "addition", addition));
+        List<GPTChatMessage> messages = template.getMessages(ImmutableMap.of("sourcelanguage", sourceLanguage, "sourcephrase", text, "targetlanguage", targetLanguage, "addition", addition));
         request.addMessages(messages);
         // set request.setMaxTokens to about 2 times the number of words in the text to translate
         // since that seems a generous limit for the translation, but give a leeway for error messages.

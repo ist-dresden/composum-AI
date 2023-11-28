@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements generating keywords.
@@ -57,19 +60,20 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Nonnull
     @Override
     public List<String> generateKeywords(@Nullable String text, @Nullable GPTConfiguration configuration) {
-        if (text == null || text.isBlank()) {
-            return List.of();
+        if (text == null || text.trim().isEmpty()) {
+            return Collections.emptyList();
         }
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_MAKEKEYWORDS);
         GPTChatRequest request = new GPTChatRequest(configuration);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
-        List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText));
+        List<GPTChatMessage> messages = template.getMessages(
+                ImmutableMap.of(PLACEHOLDER_TEXT, shortenedText));
         request.addMessages(messages);
         request.setMaxTokens(50); // pretty arbitrary limit for now, needs testing.
         String response = chatCompletionService.getSingleChatCompletion(request);
-        List<String> lines = List.of(response.trim().split("\\s*\n\\s*"));
+        List<String> lines = Arrays.asList(response.trim().split("\\s*\n\\s*"));
         lines = lines.stream()
-                .filter(l -> !l.isBlank())
+                .filter(l -> !l.trim().isEmpty())
                 .filter(l -> l.length() < 40) // that should drop weird things and comments
                 .map(String::trim)
                 .map(l -> l.startsWith("- ") ? l.substring(2) : l)
@@ -80,7 +84,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Nonnull
     @Override
     public String generateDescription(@Nullable String text, int maxwords, @Nullable GPTConfiguration configuration) {
-        if (text == null || text.isBlank()) {
+        if (text == null || text.trim().isEmpty()) {
             return "";
         }
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_MAKEDESCRIPTION);
@@ -103,7 +107,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Nonnull
     @Override
     public String executePrompt(@Nullable String prompt, @Nullable GPTChatRequest additionalParameters) {
-        if (prompt == null || prompt.isBlank()) {
+        if (prompt == null || prompt.trim().isEmpty()) {
             return "";
         }
         GPTChatRequest request = makeExecutePromptRequest(prompt, additionalParameters);
@@ -126,7 +130,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Nonnull
     @Override
     public String executePromptOnText(@Nullable String prompt, @Nullable String text, @Nullable GPTChatRequest additionalParameters) {
-        if (prompt == null || prompt.isBlank()) {
+        if (prompt == null || prompt.trim().isEmpty()) {
             return "";
         }
         GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, additionalParameters);
@@ -143,7 +147,8 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         // TODO use intelligent algorithm to determine this limit, but that's pretty hard here.
         // also, the user should be alerted about that.
-        List<GPTChatMessage> messages = template.getMessages(Map.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
+        List<GPTChatMessage> messages = template.getMessages(
+                ImmutableMap.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
         GPTChatRequest request = new GPTChatRequest();
         request.addMessages(messages);
         request.mergeIn(additionalParameters);

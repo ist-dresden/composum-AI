@@ -1,10 +1,12 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,6 +19,8 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * A quick HTML markdown converter that handles the tags [a, strong, code, em, p, br, u, ul, li, ol] used in rich text editor.
@@ -33,13 +37,15 @@ public class HtmlToMarkdownConverter {
 
     private static Set<String> missingTags = new ConcurrentSkipListSet<>();
 
-    private static final Map<String, String> HEADER_TAGS = Map.of("h1", "# ", "h2", "## ", "h3",
-            "### ", "h4", "#### ", "h5", "##### ", "h6", "###### ");
+    private static final Map<String, String> HEADER_TAGS =
+            ImmutableMap.<String, String>builder()
+                    .put("h1", "# ").put("h2", "## ").put("h3", "### ").put("h4", "#### ")
+                    .put("h5", "##### ").put("h6", "###### ").build();
 
     /**
      * Important table attributes we need to keep.
      */
-    private static final List<String> TABLE_ATTRIBUTES = List.of("border", "colspan", "rowspan",
+    private static final List<String> TABLE_ATTRIBUTES = Arrays.asList("border", "colspan", "rowspan",
             "align", "valign", "scope", "cellpadding", "cellspacing", "width", "height", "bgcolor");
 
     // continued indentation. Two spaces since four would be code block
@@ -78,7 +84,7 @@ public class HtmlToMarkdownConverter {
      */
     protected void insertText(String text) {
         if (text != null) {
-            String splitText = text.lines()
+            String splitText = Stream.of(text.split("\n"))
                     .collect(Collectors.joining(continuedIndentation + "\n"));
             if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '\n') {
                 // only happens if we have mixed text and block level elements within a block level element
@@ -305,7 +311,7 @@ public class HtmlToMarkdownConverter {
                 sb.append("<").append(tagName);
                 for (String attr : TABLE_ATTRIBUTES) {
                     String value = element.attr(attr);
-                    if (!value.isBlank()) {
+                    if (!value.trim().isEmpty()) {
                         sb.append(" ").append(attr).append("=\"").append(value).append("\"");
                     }
                 }
