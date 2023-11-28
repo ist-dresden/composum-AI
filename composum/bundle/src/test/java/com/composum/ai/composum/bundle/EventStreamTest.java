@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.Flow;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.xss.XSSFilter;

@@ -1,7 +1,5 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
-import java.util.concurrent.Flow;
-
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
@@ -14,7 +12,6 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner implements GPTCompletionCallback {
 
     StringBuilder buffer = new StringBuilder();
-    private Flow.Subscription subscription;
     private boolean isFinished;
 
     public static void main(String[] args) throws Exception {

@@ -1,7 +1,5 @@
 package com.composum.ai.backend.base.service.chat;
 
-import java.util.concurrent.Flow;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -27,8 +25,6 @@ public interface GPTChatCompletionService {
     /**
      * Give some messages and receive the streaming response via callback, to reduce waiting time.
      * It possibly waits if a rate limit is reached, but otherwise returns immediately after scheduling an asynchronous call.
-     * The asynchronous call can be aborted by calling {@link Flow.Subscription#cancel()} on the subscription that is
-     * presented to {@link GPTCompletionCallback#onSubscribe(Flow.Subscription)} once the call is established.
      */
     void streamingChatCompletion(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException;
 

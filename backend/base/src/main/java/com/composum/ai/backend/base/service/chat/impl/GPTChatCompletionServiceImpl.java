@@ -168,7 +168,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
         RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
         this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
-        this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().isBlank() ? config.defaultModel().trim() : DEFAULT_MODEL;
+        this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
@@ -239,29 +239,29 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         String apiKey = null;
         if (config != null) {
             apiKey = config.openAiApiKey();
-            if (apiKey != null && !apiKey.isBlank() && !apiKey.startsWith("$[secret")) {
+            if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("$[secret")) {
                 LOG.info("Using OpenAI API key from configuration.");
                 return apiKey.trim();
             }
-            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().isBlank()) {
+            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().trim().isEmpty()) {
                 try {
-                    apiKey = Files.readString(Paths.get(config.openAiApiKeyFile()));
+                    apiKey = new String(Files.readAllBytes(Paths.get(config.openAiApiKeyFile())));
                 } catch (IOException e) {
                     throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
                 }
-                if (apiKey != null && !apiKey.isBlank()) {
+                if (apiKey != null && !apiKey.trim().isEmpty()) {
                     LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
                     return apiKey.trim();
                 }
             }
         }
         apiKey = System.getenv(OPENAI_API_KEY);
-        if (apiKey != null && !apiKey.isBlank()) {
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
             LOG.info("Using OpenAI API key from environment variable {}.");
             return apiKey.trim();
         }
         apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
-        if (apiKey != null && !apiKey.isBlank()) {
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
             LOG.info("Using OpenAI API key from system property {}.");
             return apiKey.trim();
         }
@@ -309,7 +309,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     private SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
-        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().isBlank() ? gptConfiguration.getApiKey() : this.apiKey;
+        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
         SimpleHttpRequest request = new SimpleHttpRequest("POST", CHAT_COMPLETION_URL);
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
         request.addHeader("Authorization", "Bearer " + actualApiKey);
@@ -371,7 +371,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 callback.onError(gptException);
                 throw gptException;
             }
-        } else if (!line.isBlank()) {
+        } else if (!line.trim().isEmpty()) {
             LOG.error("Bug: Got unexpected line from GPT, expecting streaming data: {}", line);
             GPTException gptException = new GPTException("Unexpected line from GPT: " + line);
             callback.onError(gptException);
@@ -524,8 +524,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Override
     public boolean isEnabled(GPTConfiguration gptConfig) {
         return isEnabled() && (
-                apiKey != null && !apiKey.isBlank() ||
-                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().isBlank()
+                apiKey != null && !apiKey.trim().isEmpty() ||
+                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().trim().isEmpty()
         );
     }
 
@@ -590,7 +590,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Override
     @Nonnull
     public String htmlToMarkdown(String html) {
-        if (html == null || html.isBlank()) {
+        if (html == null || html.trim().isEmpty()) {
             return "";
         }
         return new HtmlToMarkdownConverter().convert(html).trim();
