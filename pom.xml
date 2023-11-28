@@ -56,6 +56,12 @@
         <package.group>com/composum/ai</package.group>
         <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
         <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
+
+        <!-- for AEM 6.5.x backwards compatibility until the bronze age -->
+        <java.source>1.8</java.source>
+        <java.target>1.8</java.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
