@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -351,10 +352,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     }
 
     protected void captureHtmlTags(String value) {
-
-        PATTERN_HTML_TAG.matcher(value).results()
-                .map(matchResult -> matchResult.group(1))
-                .forEach(htmltags::add);
+        Matcher m = PATTERN_HTML_TAG.matcher(value);
+        while (m.find()) {
+            htmltags.add(m.group(1));
+        }
         // -> found: [ext, a, sly, strong, code, em, language, type, p, br, div, path, u, ul, attributes, li, ol]
     }
 

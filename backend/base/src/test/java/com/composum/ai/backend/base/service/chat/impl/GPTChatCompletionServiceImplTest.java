@@ -2,8 +2,6 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.http.HttpResponse;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -43,9 +41,7 @@ public class GPTChatCompletionServiceImplTest {
     public void testRecalculateDelayWhenBodyContainsTryAgainIn() {
         String body = "The request could not be completed. Please try again in 27s. bla bla bla";
         long delay = 1000L;
-        HttpResponse<String> response = Mockito.mock(HttpResponse.class);
-        Mockito.when(response.body()).thenReturn(body);
-        long actualDelay = service.recalculateDelay(response.body(), delay);
+        long actualDelay = service.recalculateDelay(body, delay);
         assertEquals(27000L, actualDelay);
     }
 
@@ -53,9 +49,7 @@ public class GPTChatCompletionServiceImplTest {
     public void testRecalculateDelayWhenBodyDoesNotContainTryAgainIn() {
         String body = "The response is successful.";
         long delay = 1000L;
-        HttpResponse<String> response = Mockito.mock(HttpResponse.class);
-        Mockito.when(response.body()).thenReturn(body);
-        long actualDelay = service.recalculateDelay(response.body(), delay);
+        long actualDelay = service.recalculateDelay(body, delay);
         assertEquals(2000L, actualDelay);
     }
 
