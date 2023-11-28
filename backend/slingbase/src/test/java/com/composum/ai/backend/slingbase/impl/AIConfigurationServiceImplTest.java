@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class AIConfigurationServiceImplTest {
     private UserManager userManager = mock(UserManager.class);
 
     private AIConfigurationServiceImpl service = new AIConfigurationServiceImpl() {{
-        this.plugins = List.of(slingCaConfigPlugin, osgiAIConfigurationPlugin);
+        this.plugins = Arrays.asList(slingCaConfigPlugin, osgiAIConfigurationPlugin);
         this.chatCompletionService = AIConfigurationServiceImplTest.this.chatCompletionService;
     }};
 

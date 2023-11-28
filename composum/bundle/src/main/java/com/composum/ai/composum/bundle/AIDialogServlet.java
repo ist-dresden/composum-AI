@@ -21,7 +21,6 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.pages.commons.util.RequestUtil;
 import com.composum.sling.core.ResourceHandle;
 import com.composum.sling.core.servlet.AbstractServiceServlet;
 import com.composum.sling.core.servlet.ServletOperation;
@@ -89,7 +88,7 @@ public class AIDialogServlet extends AbstractServiceServlet {
                 final RequestDispatcherOptions options = new RequestDispatcherOptions();
                 options.setForceResourceType(dialogResourceType);
 
-                final String selectors = RequestUtil.getSelectorString(request, null, 1);
+                final String selectors = request.getRequestPathInfo().getSelectorString();
                 options.setReplaceSelectors(StringUtils.isNotBlank(selectors) ? selectors : null);
 
                 final RequestDispatcher dispatcher = request.getRequestDispatcher(resource, options);

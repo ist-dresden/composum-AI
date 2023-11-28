@@ -68,7 +68,7 @@ public class ApproximateMarkdownServiceImplTest {
 
     @Test
     public void testApproximateMarkdownForSuccess() {
-        Resource component = createMockResource("res", Map.of("text", "This is a test string.", "title", "This is a test heading"));
+        Resource component = createMockResource("res", ImmutableMap.of("text", "This is a test string.", "title", "This is a test heading"));
         service.approximateMarkdown(component, printWriter, request, response);
         assertEquals("## This is a test heading\n" +
                 "This is a test string.\n" +
