@@ -41,21 +41,8 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     }
 
     @Override
-    public void onComplete() {
-        System.out.println("Completed");
-        GPTCompletionCallback.super.onComplete();
-        isFinished = true;
-    }
-
-    @Override
     public void setLoggingId(String loggingId) {
         System.out.println("Logging ID: " + loggingId);
-    }
-
-    @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        System.out.println("Subscribed");
-        this.subscription = subscription;
     }
 
     @Override

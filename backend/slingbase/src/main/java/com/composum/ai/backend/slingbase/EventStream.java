@@ -127,13 +127,6 @@ public class EventStream implements GPTCompletionCallback {
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        LOG.debug("EventStream.onSubscribe for {}", id);
-        this.subscription = subscription;
-        subscription.request(10000);
-    }
-
-    @Override
     public void onNext(String data) {
         LOG.trace("EventStream.onNext for {} : {}", id, data);
         slowdown.accept(data);
