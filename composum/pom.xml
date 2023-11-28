@@ -1,44 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.composum.ai</groupId>
-		<artifactId>composum-ai-integration</artifactId>
-		<version>0.5.4-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.composum.ai</groupId>
+        <artifactId>composum-ai-integration</artifactId>
+        <version>0.5.4-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>composum-ai-integration-composum</artifactId>
-	<packaging>pom</packaging>
+    <artifactId>composum-ai-integration-composum</artifactId>
+    <packaging>pom</packaging>
 
-	<name>Composum AI::Frontend</name>
-	<description>
-		Reactor for Composum AI Integration Frontend modules.
-	</description>
-	<url>${siteurl}</url>
+    <name>Composum AI::Frontend</name>
+    <description>
+        Reactor for Composum AI Integration Frontend modules.
+    </description>
+    <url>${siteurl}</url>
 
-	<properties>
-		<composum.nodes.version>4.2.1</composum.nodes.version>
-		<composum.platform.version>1.7.0</composum.platform.version>
-		<composum.pages.version>1.5.1</composum.pages.version>
-	</properties>
+    <properties>
+        <composum.nodes.version>4.2.1</composum.nodes.version>
+        <composum.platform.version>1.7.0</composum.platform.version>
+        <composum.pages.version>1.5.1</composum.pages.version>
 
-	<modules>
-		<module>bundle</module>
-		<module>package</module>
-	</modules>
+        <!-- Override AEM 6.5.x backwards compatibility settings from above -->
+        <java.source>11</java.source>
+        <java.target>11</java.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
 
-	<profiles>
-		<profile>
-			<!-- heroic attempt to stop the content-package-maven-plugin from deploying config -->
-			<id>config</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>config</module>
-			</modules>
-		</profile>
-	</profiles>
+    <modules>
+        <module>bundle</module>
+        <module>package</module>
+    </modules>
+
+    <profiles>
+        <profile>
+            <!-- heroic attempt to stop the content-package-maven-plugin from deploying config -->
+            <id>config</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>config</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
