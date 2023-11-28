@@ -1,6 +1,8 @@
 package com.composum.ai.backend.slingbase.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -80,11 +82,11 @@ public class GPTPermissionInfo {
      */
     public static class GPTPermissionInfoItem {
 
-        private List<String> services = List.of();
+        private List<String> services = Collections.emptyList();
 
-        private List<String> allowedComponents = List.of();
+        private List<String> allowedComponents = Collections.emptyList();
 
-        private List<String> deniedComponents = List.of();
+        private List<String> deniedComponents = Collections.emptyList();
 
         /**
          * The name of the service this applies to - one of the SERVICE_ constants.
@@ -146,13 +148,13 @@ public class GPTPermissionInfo {
                 return null;
             }
             GPTPermissionInfoItem result = new GPTPermissionInfoItem();
-            result.setService(List.of(config.services()));
+            result.setService(Arrays.asList(config.services()));
             result.setAllowedComponents(
                     config.allowedComponents() != null ?
-                            List.of(config.allowedComponents()) : List.of());
+                            Arrays.asList(config.allowedComponents()) : Collections.emptyList());
             result.setDeniedComponents(
                     config.deniedComponents() != null ?
-                            List.of(config.deniedComponents()) : List.of());
+                            Arrays.asList(config.deniedComponents()) : Collections.emptyList());
             return result;
         }
 
@@ -171,7 +173,7 @@ public class GPTPermissionInfo {
             return null;
         }
         GPTPermissionInfo result = new GPTPermissionInfo();
-        result.setServicePermissions(List.of(GPTPermissionInfoItem.from(configuration)));
+        result.setServicePermissions(Arrays.asList(GPTPermissionInfoItem.from(configuration)));
         return result;
     }
 

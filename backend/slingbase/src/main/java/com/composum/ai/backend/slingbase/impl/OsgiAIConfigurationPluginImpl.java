@@ -1,5 +1,6 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
                     .map(OsgiAIConfigurationPluginFactory::getConfig)
                     .collect(Collectors.toList());
         }
-        return List.of(fallbackConfig);
+        return Arrays.asList(fallbackConfig);
     }
 
     /**

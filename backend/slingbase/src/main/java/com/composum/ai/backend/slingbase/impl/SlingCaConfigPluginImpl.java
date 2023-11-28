@@ -1,5 +1,6 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +53,7 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
         Collection<GPTPermissionConfiguration> configs = confBuilder.asCollection(GPTPermissionConfiguration.class);
         LOG.debug("found configs: {}", configs);
-        return configs.isEmpty() ? null : List.copyOf(configs);
+        return configs.isEmpty() ? null : new ArrayList<>(configs);
     }
 
     @Nullable

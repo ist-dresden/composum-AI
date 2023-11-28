@@ -32,7 +32,7 @@ public abstract class AbstractGPTRunner {
         });
         // read key from file ~/.openaiapi
         Path filePath = Paths.get(System.getProperty("user.home"), ".openaiapi");
-        String apiKey = Files.readString(filePath);
+        String apiKey = new String(Files.readAllBytes(filePath));
 
         chatCompletionService.activate(new GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig() {
             @Override
