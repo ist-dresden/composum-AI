@@ -78,6 +78,7 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
     private static Resource determineResource(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) {
         Resource resource = request.getResource();
         if (StringUtils.isNotBlank(contentPath)) {
+            contentPath = contentPath.replace("_jcr_content", "jcr:content");
             resource = request.getResourceResolver().getResource(contentPath);
         }
         if (resource == null) {

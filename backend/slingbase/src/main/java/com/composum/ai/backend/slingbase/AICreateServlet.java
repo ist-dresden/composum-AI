@@ -229,8 +229,9 @@ public class AICreateServlet extends SlingAllMethodsServlet {
      *     That might lead to cutoff, as this is a hard limit and ChatGPT doesn't know about that during generation.
      *     So it's advisable to specify the desired text length in the prompt, too.</li>
      * </ul>
-     * A successful response will return an HTTP 202 with a 'Location' header that is an URL to this servlet,
-     * with the streamid as parameter, which will deliver the result as event stream.
+     * A successful response will return an HTTP 200 with a JSON map with a {@value #PARAMETER_STREAMID} with an streamid
+     * to access the response stream, which can be used with {@link #doGet(SlingHttpServletRequest, SlingHttpServletResponse)}
+     * to deliver the result as event stream.
      * Otherwise, it'll normally be an HTTP 400 with an error message.
      */
     @Override
@@ -290,8 +291,10 @@ public class AICreateServlet extends SlingAllMethodsServlet {
             contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
         }
 
-        response.setStatus(HttpServletResponse.SC_ACCEPTED);
-        response.addHeader("Location", request.getRequestURI() + "?" + PARAMETER_STREAMID + "=" + id);
+        response.setStatus(HttpServletResponse.SC_OK);
+        // on 202 with Location header Chrome freezes in $.ajax for  AEM 6.5.7 8-{} . So we have to do it differently.
+        response.setContentType("application/json");
+        gson.toJson(Map.of(PARAMETER_STREAMID, id), response.getWriter());
         LOG.info("Returning stream id {}", id);
     }
 

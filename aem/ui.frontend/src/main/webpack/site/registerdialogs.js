@@ -28,6 +28,8 @@ try {
         var debug = true;
 
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
+        // for AEM 6.5.7 we, strangely, don't get the cq-sidepanel-loaded event. Try something else.
+        channel.on('cq-layer-activated', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
         /**
          * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
@@ -106,11 +108,10 @@ try {
         }
 
         const fieldlabeliconHTML =
-            '<coral-icon class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS composum-ai-create-dialog-action" title="AI Content Creation" icon="gearsEdit" role="img" size="S">\n' +
-            '  <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-            '    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-            '  </svg>\n' +
-            '</coral-icon>';
+            '<coral-icon ' +
+            '   class="coral-Form-fieldinfo coral3-Icon coral3-Icon--gearsEdit coral3-Icon--sizeS composum-ai-create-dialog-action" ' +
+            '   title="AI Content Creation" icon="gearsEdit" alt="description" size="S" autoarialabel="on" role="img" ' +
+            '   aria-label="AI Content Creation"></coral-icon>';
 
         /**
          * Inserts the AI content creation buttons for text areas in the provided element.
@@ -205,16 +206,12 @@ try {
             }
         }
 
-        const rtebuttonHTML = '<button is="coral-button" variant="quietaction" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action" type="button"\n' +
+        const rtebuttonHTML = '<button is="coral-button" variant="quiet" class="rte-toolbar-item _coral-ActionButton composum-ai-create-dialog-action coral3-Button--quiet" type="button"\n' +
             '        title="AI Content Creation" icon="gearsEdit" size="S">\n' +
             '    <coral-icon size="S"\n' +
-            '                class="_coral-Icon--sizeS _coral-Icon" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
+            '                class="_coral-Icon--sizeS _coral-Icon coral3-Icon--gearsEdit" role="img" icon="gearsEdit" alt="AI Content Creation"\n' +
             '                aria-label="AI Content Creation">\n' +
-            '        <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">\n' +
-            '            <use xlink:href="#spectrum-icon-18-GearsEdit"></use>\n' +
-            '        </svg>\n' +
             '    </coral-icon>\n' +
-            '    <coral-button-label class="_coral-ActionButton-label"></coral-button-label>\n' +
             '</button>\n';
 
         /** editing-start event is received for an richtext editor - we have to register the button. */
@@ -294,6 +291,8 @@ try {
                 clickevent.stopPropagation();
                 const oldContent = rteinstance.getContent();
                 rteinstance.suspend();
+                const backdropOpen = $('.cq-dialog-backdrop').hasClass('is-open');
+
                 showCreateDialog({
                     componentPath,
                     property: propertyName,
@@ -304,10 +303,12 @@ try {
                     isRichtext: true,
                     stackeddialog: true,
                     onFinishCallback: function () {
+                        if (!backdropOpen) { // only hide if we weren't called from a dialog but an inline editor:
+                            $('.cq-dialog-backdrop').removeClass('is-open').hide();
+                        }
                         rteinstance.reactivate();
                         rteinstance.setContent(oldContent);
                         rteinstance.focus();
-                        $('.cq-dialog-backdrop').removeClass('is-open').hide();
                     }
                 });
             });
