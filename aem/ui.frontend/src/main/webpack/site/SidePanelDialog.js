@@ -21,6 +21,7 @@ class SidePanelDialog {
         this.setLoading(false);
         findSingleElement(this.$dialog, '.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+        this.setDialogStatus({});
 
         const historyPath = this.getContentPath();
         if (!historyMap[historyPath]) {
