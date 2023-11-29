@@ -149,7 +149,7 @@ class SidePanelDialog {
 
     onPredefinedPromptsChanged(event) {
         if (this.debug) console.log("onPredefinedPromptsChanged", arguments);
-        const prompt = this.$predefinedPromptsSelector.val();
+        const prompt = coralSelectValue(this.$predefinedPromptsSelector);
         if (prompt !== '-') {
             this.ensurePromptCount(1);
             this.$promptContainer.find('.composum-ai-prompt').val(prompt);
@@ -159,7 +159,7 @@ class SidePanelDialog {
 
     onPromptAreaChanged(event) {
         if (this.debug) console.log("onPromptAreaChanged", arguments); // on each key press
-        this.$predefinedPromptsSelector.val('-');
+        coralSelectValue(this.$predefinedPromptsSelector, '-');
         this.setAutomaticGenerateButtonState();
     }
 
@@ -167,8 +167,12 @@ class SidePanelDialog {
     expandOnFocus(event) {
         if (this.debug) console.log("expandOnFocus", arguments);
         var that = event.target;
+        if (!$(that).is('textarea')) {
+            console.error("BUG! expandOnFocus called on non-textarea", that);
+            return;
+        }
         that.rows = 5;
-        while (that.scrollHeight > that.clientHeight) {
+        while (that.rows <= 20 && that.scrollHeight > that.clientHeight) {
             that.rows++;
         }
         that.rows += 5;
@@ -177,19 +181,23 @@ class SidePanelDialog {
 
     /** Shrink the text area to it's actual size so that it just captures the text it has. */
     shrinkOnBlur(event) {
-        if (this.debug) console.log("shrinkOnBlur", arguments);
+        if (this.debug) console.log("shrinkOnBlur", event);
         var that = event.target;
+        if (!$(that).is('textarea')) {
+            console.error("BUG! shrinkOnBlur called on non-textarea", that);
+            return;
+        }
         $(that).val($(that).val().trim());
         setTimeout(function () {
             that.rows = 1;
-            while (that.scrollHeight > that.clientHeight) {
+            while (that.rows <= 20 && that.scrollHeight > that.clientHeight) {
                 that.rows++;
             }
         }, 100);
     }
 
     getSelectedPath() {
-        const key = this.$contentSelector.val();
+        const key = coralSelectValue(this.$contentSelector);
         var contentPath = this.getContentPath();
         var path;
         switch (key) {
@@ -222,9 +230,9 @@ class SidePanelDialog {
     onGenerateButtonClicked(event) {
         if (this.debug) console.log("onGenerateButtonClicked", arguments);
         event.preventDefault();
-        this.shrinkOnBlur(event);
         this.showError(undefined);
         this.removeLastEmptyPrompts();
+        this.shrinkOnBlur({target: this.$promptContainer.find('.composum-ai-prompt:last')[0]});
         this.removePromptsAfterEventSource(event);
         this.$promptContainer.find('.composum-ai-response:last').text('');
         this.$promptContainer.find('.composum-ai-response:last')[0].scrollIntoView({
