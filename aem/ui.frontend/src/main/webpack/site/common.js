@@ -33,8 +33,7 @@ function contentFragmentPath() {
 }
 
 /** To make sure the dialogs have the right elements, we log an error and call the debugger if a mandatory element in a dialog is not found (Bug!) */
-function findSingleElement($dialog, selector)
-{
+function findSingleElement($dialog, selector) {
     const $el = $dialog.find(selector);
     if ($el.length !== 1) {
         console.error('BUG! Dialog missing element for selector', $dialog.get(), selector, $el, $el.length);
@@ -43,4 +42,29 @@ function findSingleElement($dialog, selector)
     return $el;
 }
 
-export {errorText, contentFragmentPath, findSingleElement};
+/**
+ * Function to get and set the values of a single select coral-select.
+ * There is a gaping functionality hole in AEM 6.5.7 about that.
+ * @param $select the jQuery object for the coral-select (has to match exactly one element)
+ * @param value the value to set, or undefined to get the current value
+ */
+// see https://www.danklco.com/posts/2017/12/coralui3-set-select-value.html
+function coralSelectValue($select, value) {
+    if (value === undefined) {
+        return $select[0].values[0];
+    } else {
+        const select = $select[0];
+        if (!select.items) {
+            console.error('BUG! coral-select has no items', $select.get());
+            debugger;
+        } else {
+            select.items.getAll().forEach(function (item, idx) {
+                if (item.value === value) {
+                    item.selected = true;
+                }
+            });
+        }
+    }
+}
+
+export {errorText, contentFragmentPath, findSingleElement, coralSelectValue};

@@ -1,7 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {contentFragmentPath, errorText, findSingleElement} from './common.js';
+import {contentFragmentPath, errorText, findSingleElement, coralSelectValue} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
@@ -21,20 +21,18 @@ class SidePanelDialog {
         this.setLoading(false);
         findSingleElement(this.$dialog, '.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
-        this.setDialogStatus({});
 
         const historyPath = this.getContentPath();
         if (!historyMap[historyPath]) {
             historyMap[historyPath] = [];
         }
         this.history = new DialogHistory(this.$dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
-        this.history.restoreFromLastOfHistory();
+        setTimeout(() => this.history.restoreFromLastOfHistory(), 50); // coral-selects are not ready yet
     }
 
     assignElements() {
         this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefinedprompts');
         this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-contentselector');
-        this.$contentSelector.val('page');
         this.$promptContainer = findSingleElement(this.$dialog, '.composum-ai-promptcontainer');
         this.$promptTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-prompt');
         this.$responseTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-response');
@@ -79,8 +77,8 @@ class SidePanelDialog {
 
     getDialogStatus() {
         return {
-            predefinedPrompts: this.$predefinedPromptsSelector.val(),
-            contentSelector: this.$contentSelector.val(),
+            predefinedPrompts: coralSelectValue(this.$predefinedPromptsSelector),
+            contentSelector: coralSelectValue(this.$contentSelector),
             promptCount: this.$promptContainer.find('.composum-ai-prompt').length,
             prompts: this.$promptContainer.find('.composum-ai-prompt').map(function () {
                 return $(this).val();
@@ -93,8 +91,8 @@ class SidePanelDialog {
 
     setDialogStatus(status) {
         if (this.debug) console.log("SidePanelDialog setDialogStatus", status);
-        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
-        this.$contentSelector.val(status.contentSelector || 'page');
+        coralSelectValue(this.$predefinedPromptsSelector, status.predefinedPrompts);
+        coralSelectValue(this.$contentSelector, status.contentSelector || 'page');
         if (status.promptCount) {
             this.ensurePromptCount(status.promptCount);
             this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
@@ -262,9 +260,12 @@ class SidePanelDialog {
         const data = {
             prompt: this.$promptContainer.find('.composum-ai-prompt:first').val(),
             chat: JSON.stringify(chatHistory),
-            sourcePath: this.getSelectedPath(),
             configBasePath: this.getContentPath()
         };
+        const sourcePath = this.getSelectedPath();
+        if (sourcePath) {
+            data.sourcePath = sourcePath;
+        }
         if (this.debug) console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
