@@ -150,7 +150,9 @@ class SidePanelDialog {
         const prompt = coralSelectValue(this.$predefinedPromptsSelector);
         if (prompt !== '-') {
             this.ensurePromptCount(1);
-            this.$promptContainer.find('.composum-ai-prompt').val(prompt);
+            const promptArea = this.$promptContainer.find('.composum-ai-prompt');
+            promptArea.val(prompt);
+            this.expandOnFocus({target: promptArea[0]});
             this.setAutomaticGenerateButtonState();
         }
     }
