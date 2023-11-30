@@ -353,7 +353,8 @@ class ContentCreationDialog {
         } else {
             console.error("ContentCreationDialog showError", arguments);
             findSingleElement(this.$dialog, '.composum-ai-alert').text(errorText(error));
-            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-error-columns')
+                .removeClass('hidden').show()[0].scrollIntoView();
             debugger;
         }
     }

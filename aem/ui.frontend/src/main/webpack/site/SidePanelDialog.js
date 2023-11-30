@@ -26,6 +26,7 @@ class SidePanelDialog {
         if (!historyMap[historyPath]) {
             historyMap[historyPath] = [];
         }
+        if (this.debug) console.log("SidePanelDialog historyPath", historyPath);
         this.history = new DialogHistory(this.$dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
         setTimeout(() => this.history.restoreFromLastOfHistory(), 50); // coral-selects are not ready yet
     }
@@ -330,8 +331,10 @@ class SidePanelDialog {
             findSingleElement(this.$dialog, '.composum-ai-error-columns').hide();
         } else {
             console.error("SidePanelDialog showError", arguments);
-            findSingleElement(this.$dialog, '.composum-ai-alert coral-alert-content').text(errorText(error));
-            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-alert coral-alert-content')
+                .text(errorText(error));
+            findSingleElement(this.$dialog, '.composum-ai-error-columns')
+                .removeClass('hidden').show()[0].scrollIntoView();
             debugger;
         }
     }
