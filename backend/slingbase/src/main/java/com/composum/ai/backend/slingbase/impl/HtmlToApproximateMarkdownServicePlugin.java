@@ -161,7 +161,15 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         try (PrintWriter printWriter = new PrintWriter(writer)) {
             SlingHttpServletResponse wrappedResponse = new CapturingResponse(response, printWriter, resource.getPath());
             NonModifyingRequestWrapper wrappedRequest = new NonModifyingRequestWrapper(request, resource.getPath());
-            request.getRequestDispatcher(resource.getPath() + ".html").include(wrappedRequest, wrappedResponse);
+            Object oldWcmAttribute = request.getAttribute("com.day.cq.wcm.api.WCMMode");
+            try { // for AEM we have to avoid that edit mode introduces artifacts.
+                request.removeAttribute("com.day.cq.wcm.api.WCMMode");
+                request.getRequestDispatcher(resource.getPath() + ".html").include(wrappedRequest, wrappedResponse);
+            } finally {
+                if (oldWcmAttribute != null) {
+                    request.setAttribute("com.day.cq.wcm.api.WCMMode", oldWcmAttribute);
+                }
+            }
             if (wrappedRequest.hadInvalidOperation) { // if that exception has been swallowed
                 throw new UnsupportedOperationCalled();
             }
