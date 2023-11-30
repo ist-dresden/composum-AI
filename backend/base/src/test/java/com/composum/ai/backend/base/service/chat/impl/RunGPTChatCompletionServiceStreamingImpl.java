@@ -39,6 +39,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     @Override
     public void onFinish(GPTFinishReason finishReason) {
         isFinished = true;
+        System.out.println();
         System.out.println("Finished: " + finishReason);
     }
 
@@ -55,7 +56,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
 
     @Override
     public void onError(Throwable throwable) {
-        isFinished = true;
         throwable.printStackTrace(System.err);
+        isFinished = true;
     }
 }

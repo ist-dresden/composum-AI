@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -417,15 +418,29 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         CompletableFuture<Void> callFuture = triggerCallAsync(id, httpRequest, callback);
         callFuture.thenAccept(finished::complete)
                 .exceptionally(e -> {
-                    if (e instanceof RetryableException) {
-                        LOG.debug("Call {} to GPT failed, retry", id, e);
+                    RetryableException retryable = extractRetryableException(e);
+                    if (retryable != null) {
                         long newDelay = recalculateDelay(readoutResponse(e.getMessage()), defaultDelay);
+                        LOG.debug("Call {} to GPT failed, retry after {} ms because of {}", id, newDelay, e.toString());
                         performCallAsync(finished, id, httpRequest, callback, tryNumber + 1, newDelay);
                     } else {
                         finished.completeExceptionally(e);
                     }
                     return null;
                 });
+    }
+
+    protected static RetryableException extractRetryableException(Throwable e) {
+        RetryableException retryable = null;
+        if (e instanceof RetryableException) {
+            retryable = (RetryableException) e;
+        } else if (e instanceof CompletionException) {
+            CompletionException completionException = (CompletionException) e;
+            if (completionException.getCause() instanceof RetryableException) {
+                retryable = (RetryableException) completionException.getCause();
+            }
+        }
+        return retryable;
     }
 
     /**
@@ -699,8 +714,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         @Override
         public void failed(Exception cause) {
             LOG.error("Response {} from GPT failed", id, cause);
-            callback.onError(cause);
             result.completeExceptionally(cause);
+            if (!(cause instanceof RetryableException)) {
+                callback.onError(cause);
+            }
         }
 
         @Override
