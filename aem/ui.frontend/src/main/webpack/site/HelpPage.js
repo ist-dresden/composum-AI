@@ -19,7 +19,7 @@ class HelpPage {
                     innerHTML: Granite.I18n.get('Help')
                 },
                 content: {
-                    innerHTML: '<div class="helpcontent"></div>'
+                    innerHTML: '<div class="composum-ai-help helpcontent"></div>'
                 },
                 footer: {
                     innerHTML: '<button is="coral-button" variant="primary" coral-close size="M">' + Granite.I18n.get('Ok') + '</button>'
