@@ -66,11 +66,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/com.theokanning.openai-gpt3-java/api -->
             <dependency>
                 <groupId>com.theokanning.openai-gpt3-java</groupId>
                 <artifactId>api</artifactId>
-                <version>0.12.0</version>
-                <scope>provided</scope>
+                <version>0.18.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,12 +1,19 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
+import org.apache.sling.commons.threads.ThreadPoolManager;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.osgi.framework.BundleContext;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Tests for some methods of {@link GPTChatCompletionService}.
@@ -14,6 +21,16 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 public class GPTChatCompletionServiceImplTest {
 
     protected GPTChatCompletionServiceImpl service = new GPTChatCompletionServiceImpl();
+    private GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig config =
+            mock(GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class);
+    private BundleContext bundleContext = mock(BundleContext.class);
+
+    @Before
+    public void setUp() {
+        service.threadPoolManager = mock(ThreadPoolManager.class);
+        Mockito.when(config.openAiApiKey()).thenReturn("sk-abcdefg");
+        service.activate(config, bundleContext);
+    }
 
     @Test
     public void testShortenShortText() {
@@ -110,6 +127,36 @@ public class GPTChatCompletionServiceImplTest {
         String expected = "";
         String result = service.htmlToMarkdown(html);
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void testHandleStreamingEventEmptyLine() {
+        GPTCompletionCallback callback = mock(GPTCompletionCallback.class);
+        service.handleStreamingEvent(callback, 123, "");
+        Mockito.verifyNoInteractions(callback);
+    }
+
+    @Test
+    public void testHandleStreamingEventOK() throws JsonProcessingException {
+        GPTCompletionCallback callback = mock(GPTCompletionCallback.class);
+        String dataline = "data: {\"id\":\"chatcmpl-8QX6YCK6YipFgOW7MFJJQiKoemC4W\"," +
+                "\"object\":\"chat.completion.chunk\",\"created\":1701334474," +
+                "\"model\":\"gpt-3.5-turbo-0613\"," +
+                "\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hi\"},\"finish_reason\":null}]}";
+        service.handleStreamingEvent(callback, 123, dataline);
+        Mockito.verify(callback).onNext("Hi");
+    }
+
+    @Test
+    public void testHandleStreamingEventAdditionalFields() throws JsonProcessingException {
+        GPTCompletionCallback callback = mock(GPTCompletionCallback.class);
+        String dataline = "data: {\"id\":\"chatcmpl-8QX6YCK6YipFgOW7MFJJQiKoemC4W\"," +
+                "\"object\":\"chat.completion.chunk\",\"created\":1701334474," +
+                "\"model\":\"gpt-3.5-turbo-0613\"," +
+                "\"somethingunknown\":28," +
+                "\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hi\"},\"finish_reason\":null}]}";
+        service.handleStreamingEvent(callback, 123, dataline);
+        Mockito.verify(callback).onNext("Hi");
     }
 
 }
