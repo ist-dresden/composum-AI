@@ -58,7 +58,7 @@ import com.google.common.cache.CacheBuilder;
  */
 @Designate(ocd = HtmlToApproximateMarkdownServicePlugin.Config.class)
 @Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
-        property = Constants.SERVICE_RANKING + ":Integer=1000"
+        property = Constants.SERVICE_RANKING + ":Integer=10000"
 )
 public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
@@ -92,7 +92,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         }
 
         if (allowedResourceTypePattern != null && allowedResourceTypePattern.matcher(resourceType).matches()) {
-            if (deniedResourceTypePattern == null || deniedResourceTypePattern.matcher(resourceType).matches()) {
+            if (deniedResourceTypePattern != null && deniedResourceTypePattern.matcher(resourceType).matches()) {
                 LOG.debug("Resourcetype {} denied", resourceType);
                 return PluginResult.NOT_HANDLED;
             }
@@ -144,8 +144,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         if (ResourceUtil.getParent(resource.getPath(), 2) == null) {
             return true;
         }
-        if (resource.getName().equals("jcr:content") || resource.getParent().getName().equals("jcr:content")
-                || resource.getParent().getParent().getName().equals("jcr:content")) {
+        if (resource.getName().equals("jcr:content") || resource.getParent().getName().equals("jcr:content")) {
             return true;
         }
         return false;

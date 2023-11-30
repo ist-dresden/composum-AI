@@ -11,6 +11,7 @@ const historyMap = {};
 class SidePanelDialog {
 
     debug = true;
+    verbose = false;
 
     constructor(dialog) {
         console.log("SidePanelDialog constructor ", arguments, this);
@@ -159,7 +160,7 @@ class SidePanelDialog {
     }
 
     onPromptAreaChanged(event) {
-        if (this.debug) console.log("onPromptAreaChanged", arguments); // on each key press
+        if (this.verbose) console.log("onPromptAreaChanged", arguments); // on each key press
         coralSelectValue(this.$predefinedPromptsSelector, '-');
         this.setAutomaticGenerateButtonState();
     }
