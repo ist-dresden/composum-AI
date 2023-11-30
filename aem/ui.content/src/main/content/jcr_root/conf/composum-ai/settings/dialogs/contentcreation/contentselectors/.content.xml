@@ -17,6 +17,6 @@
         text="No additional content"
            value="empty"></empty>
     <hand jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
-        text="Hand-edited source content"
+          text="Manually entered source content"
           value="-"></hand>
 </jcr:root>

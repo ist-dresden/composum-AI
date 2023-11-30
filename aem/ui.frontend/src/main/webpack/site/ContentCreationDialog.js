@@ -222,6 +222,7 @@ class ContentCreationDialog {
                 this.setSourceContent('');
                 break;
             case '-':
+                this.setSourceContent(''); // waiting for input
                 break;
             default:
                 this.showError('Unknown content selector value ' + key);

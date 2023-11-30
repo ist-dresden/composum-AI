@@ -218,6 +218,7 @@
                         this.setSourceContent('');
                         break;
                     case '-':
+                        this.setSourceContent('');
                         break;
                     default:
                         this.showError('Unknown content selector value ' + key);
