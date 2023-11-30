@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
@@ -18,6 +20,8 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
         RunGPTChatCompletionServiceStreamingImpl instance = new RunGPTChatCompletionServiceStreamingImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
+        System.out.println("Done.");
     }
 
     private void run() throws InterruptedException {
@@ -34,6 +38,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
 
     @Override
     public void onFinish(GPTFinishReason finishReason) {
+        isFinished = true;
         System.out.println("Finished: " + finishReason);
     }
 
@@ -45,7 +50,7 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     @Override
     public void onNext(String item) {
         buffer.append(item);
-        System.out.println(item);
+        System.out.print(item);
     }
 
     @Override

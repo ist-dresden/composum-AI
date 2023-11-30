@@ -14,6 +14,7 @@ public class RunGPTCreateDescriptionImpl extends AbstractGPTRunner {
         RunGPTCreateDescriptionImpl instance = new RunGPTCreateDescriptionImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
     }
 
     private void run() {

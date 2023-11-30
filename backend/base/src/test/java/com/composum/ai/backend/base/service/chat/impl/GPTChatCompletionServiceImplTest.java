@@ -27,7 +27,6 @@ public class GPTChatCompletionServiceImplTest {
 
     @Before
     public void setUp() {
-        service.threadPoolManager = mock(ThreadPoolManager.class);
         Mockito.when(config.openAiApiKey()).thenReturn("sk-abcdefg");
         service.activate(config, bundleContext);
     }

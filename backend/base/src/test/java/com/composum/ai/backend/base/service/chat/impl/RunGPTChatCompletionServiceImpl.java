@@ -13,6 +13,7 @@ public class RunGPTChatCompletionServiceImpl extends AbstractGPTRunner {
         RunGPTChatCompletionServiceImpl instance = new RunGPTChatCompletionServiceImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
     }
 
     private void run() {

@@ -16,6 +16,7 @@ public class RunGPTExecutePromptOnTextImpl extends AbstractGPTRunner {
         RunGPTExecutePromptOnTextImpl instance = new RunGPTExecutePromptOnTextImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
     }
 
     private void run() throws InterruptedException {

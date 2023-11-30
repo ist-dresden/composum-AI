@@ -16,6 +16,7 @@ public class RunGPTCreateContentImpl extends AbstractGPTRunner {
         RunGPTCreateContentImpl instance = new RunGPTCreateContentImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
     }
 
     private void run() throws InterruptedException {
