@@ -1,7 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {contentFragmentPath, errorText, findSingleElement} from './common.js';
+import {contentFragmentPath, errorText, findSingleElement, coralSelectValue} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
@@ -11,6 +11,7 @@ const historyMap = {};
 class SidePanelDialog {
 
     debug = true;
+    verbose = false;
 
     constructor(dialog) {
         console.log("SidePanelDialog constructor ", arguments, this);
@@ -26,14 +27,14 @@ class SidePanelDialog {
         if (!historyMap[historyPath]) {
             historyMap[historyPath] = [];
         }
+        if (this.debug) console.log("SidePanelDialog historyPath", historyPath);
         this.history = new DialogHistory(this.$dialog, this.getDialogStatus.bind(this), this.setDialogStatus.bind(this), historyMap[historyPath]);
-        this.history.restoreFromLastOfHistory();
+        setTimeout(() => this.history.restoreFromLastOfHistory(), 50); // coral-selects are not ready yet
     }
 
     assignElements() {
         this.$predefinedPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-predefinedprompts');
         this.$contentSelector = findSingleElement(this.$dialog, '.composum-ai-contentselector');
-        this.$contentSelector.val('page');
         this.$promptContainer = findSingleElement(this.$dialog, '.composum-ai-promptcontainer');
         this.$promptTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-prompt');
         this.$responseTemplate = findSingleElement(this.$dialog, '.composum-ai-templates .composum-ai-response');
@@ -78,8 +79,8 @@ class SidePanelDialog {
 
     getDialogStatus() {
         return {
-            predefinedPrompts: this.$predefinedPromptsSelector.val(),
-            contentSelector: this.$contentSelector.val(),
+            predefinedPrompts: coralSelectValue(this.$predefinedPromptsSelector),
+            contentSelector: coralSelectValue(this.$contentSelector),
             promptCount: this.$promptContainer.find('.composum-ai-prompt').length,
             prompts: this.$promptContainer.find('.composum-ai-prompt').map(function () {
                 return $(this).val();
@@ -92,8 +93,8 @@ class SidePanelDialog {
 
     setDialogStatus(status) {
         if (this.debug) console.log("SidePanelDialog setDialogStatus", status);
-        this.$predefinedPromptsSelector.val(status.predefinedPrompts);
-        this.$contentSelector.val(status.contentSelector || 'page');
+        coralSelectValue(this.$predefinedPromptsSelector, status.predefinedPrompts);
+        coralSelectValue(this.$contentSelector, status.contentSelector || 'page');
         if (status.promptCount) {
             this.ensurePromptCount(status.promptCount);
             this.$promptContainer.find('.composum-ai-prompt').each(function (index, element) {
@@ -148,17 +149,19 @@ class SidePanelDialog {
 
     onPredefinedPromptsChanged(event) {
         if (this.debug) console.log("onPredefinedPromptsChanged", arguments);
-        const prompt = this.$predefinedPromptsSelector.val();
+        const prompt = coralSelectValue(this.$predefinedPromptsSelector);
         if (prompt !== '-') {
             this.ensurePromptCount(1);
-            this.$promptContainer.find('.composum-ai-prompt').val(prompt);
+            const promptArea = this.$promptContainer.find('.composum-ai-prompt');
+            promptArea.val(prompt);
+            this.expandOnFocus({target: promptArea[0]});
             this.setAutomaticGenerateButtonState();
         }
     }
 
     onPromptAreaChanged(event) {
-        if (this.debug) console.log("onPromptAreaChanged", arguments); // on each key press
-        this.$predefinedPromptsSelector.val('-');
+        if (this.verbose) console.log("onPromptAreaChanged", arguments); // on each key press
+        coralSelectValue(this.$predefinedPromptsSelector, '-');
         this.setAutomaticGenerateButtonState();
     }
 
@@ -166,8 +169,12 @@ class SidePanelDialog {
     expandOnFocus(event) {
         if (this.debug) console.log("expandOnFocus", arguments);
         var that = event.target;
+        if (!$(that).is('textarea')) {
+            console.error("BUG! expandOnFocus called on non-textarea", that);
+            return;
+        }
         that.rows = 5;
-        while (that.scrollHeight > that.clientHeight) {
+        while (that.rows <= 20 && that.scrollHeight > that.clientHeight) {
             that.rows++;
         }
         that.rows += 5;
@@ -176,19 +183,23 @@ class SidePanelDialog {
 
     /** Shrink the text area to it's actual size so that it just captures the text it has. */
     shrinkOnBlur(event) {
-        if (this.debug) console.log("shrinkOnBlur", arguments);
+        if (this.debug) console.log("shrinkOnBlur", event);
         var that = event.target;
+        if (!$(that).is('textarea')) {
+            console.error("BUG! shrinkOnBlur called on non-textarea", that);
+            return;
+        }
         $(that).val($(that).val().trim());
         setTimeout(function () {
             that.rows = 1;
-            while (that.scrollHeight > that.clientHeight) {
+            while (that.rows <= 20 && that.scrollHeight > that.clientHeight) {
                 that.rows++;
             }
         }, 100);
     }
 
     getSelectedPath() {
-        const key = this.$contentSelector.val();
+        const key = coralSelectValue(this.$contentSelector);
         var contentPath = this.getContentPath();
         var path;
         switch (key) {
@@ -221,9 +232,9 @@ class SidePanelDialog {
     onGenerateButtonClicked(event) {
         if (this.debug) console.log("onGenerateButtonClicked", arguments);
         event.preventDefault();
-        this.shrinkOnBlur(event);
         this.showError(undefined);
         this.removeLastEmptyPrompts();
+        this.shrinkOnBlur({target: this.$promptContainer.find('.composum-ai-prompt:last')[0]});
         this.removePromptsAfterEventSource(event);
         this.$promptContainer.find('.composum-ai-response:last').text('');
         this.$promptContainer.find('.composum-ai-response:last')[0].scrollIntoView({
@@ -253,9 +264,12 @@ class SidePanelDialog {
         const data = {
             prompt: this.$promptContainer.find('.composum-ai-prompt:first').val(),
             chat: JSON.stringify(chatHistory),
-            sourcePath: this.getSelectedPath(),
             configBasePath: this.getContentPath()
         };
+        const sourcePath = this.getSelectedPath();
+        if (sourcePath) {
+            data.sourcePath = sourcePath;
+        }
         if (this.debug) console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
@@ -318,8 +332,10 @@ class SidePanelDialog {
             findSingleElement(this.$dialog, '.composum-ai-error-columns').hide();
         } else {
             console.error("SidePanelDialog showError", arguments);
-            findSingleElement(this.$dialog, '.composum-ai-alert coral-alert-content').text(errorText(error));
-            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-alert coral-alert-content')
+                .text(errorText(error));
+            findSingleElement(this.$dialog, '.composum-ai-error-columns')
+                .removeClass('hidden').show()[0].scrollIntoView();
             debugger;
         }
     }

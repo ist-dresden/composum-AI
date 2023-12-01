@@ -1,23 +1,22 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Flow;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,8 +26,23 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.sling.commons.threads.ThreadPool;
-import org.apache.sling.commons.threads.ThreadPoolManager;
+import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
+import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
+import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
+import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
+import org.apache.hc.core5.io.CloseMode;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
+import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
@@ -37,7 +51,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -55,6 +68,7 @@ import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
@@ -63,7 +77,6 @@ import com.knuddels.jtokkit.api.EncodingType;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionChunk;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
 
 /**
@@ -98,11 +111,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
 
     public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
-
     /**
-     * Threadpool for accessing ChatGPT
+     * The maximum number of retries.
      */
-    public static final String COMPOSUM_AI_CHAT_GPT = "Composum-AI-ChatGPT";
+    public static final int MAXTRIES = 5;
 
     /**
      * The OpenAI Key for accessing ChatGPT; system default if not given in request.
@@ -110,7 +122,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private String apiKey;
     private String defaultModel;
 
-    private HttpClient httpClient;
+    private CloseableHttpAsyncClient httpAsyncClient;
 
     private ObjectMapper mapper;
 
@@ -138,15 +150,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     private BundleContext bundleContext;
 
     private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
-    private long requestTimeout;
-    private long connectionTimeout;
+    private int requestTimeout;
+    private int connectionTimeout;
     private Double temperature;
 
-    @Reference
-    protected ThreadPoolManager threadPoolManager;
-
-    protected ThreadPool executor;
     protected boolean disabled;
+
+    protected ScheduledExecutorService scheduledExecutorService;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
@@ -155,7 +165,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
         RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
         this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
-        this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().isBlank() ? config.defaultModel().trim() : DEFAULT_MODEL;
+        this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
@@ -172,15 +182,35 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.info("ChatGPT is disabled.");
         }
         if (isEnabled()) {
-            this.executor = threadPoolManager.get(COMPOSUM_AI_CHAT_GPT);
-            this.httpClient = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(connectionTimeout))
-                    .executor(executor)
+            PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
+                    .setDefaultConnectionConfig(ConnectionConfig.custom()
+                            .setSocketTimeout(this.requestTimeout, TimeUnit.SECONDS)
+                            .setConnectTimeout(this.connectionTimeout, TimeUnit.SECONDS)
+                            .build()
+                    )
+                    .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.STRICT)
                     .build();
+            this.httpAsyncClient = HttpAsyncClients.custom()
+                    .setIOReactorConfig(IOReactorConfig.custom()
+                            .setSoTimeout(this.requestTimeout, TimeUnit.SECONDS)
+                            .setIoThreadCount(10)
+                            .build())
+                    .setConnectionManager(connectionManager)
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setResponseTimeout(this.requestTimeout, TimeUnit.SECONDS).build())
+                    .build();
+            this.httpAsyncClient.start();
             mapper = new ObjectMapper();
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread thread = Executors.defaultThreadFactory().newThread(r);
+                thread.setDaemon(true);
+                return thread;
+            });
         } else {
-            this.httpClient = null;
+            this.httpAsyncClient = null;
         }
         this.bundleContext = bundleContext;
         templates.clear(); // bundleContext changed, after all.
@@ -190,48 +220,51 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Deactivate
     public void deactivate() {
         LOG.info("Deactivating GPTChatCompletionService");
-        if (executor != null) {
-            threadPoolManager.release(executor);
-            executor = null;
+        if (this.httpAsyncClient != null) {
+            this.httpAsyncClient.close(CloseMode.IMMEDIATE);
+            this.httpAsyncClient = null;
         }
         this.apiKey = null;
         this.defaultModel = null;
         this.limiter = null;
         this.gptLimiter = null;
-        this.httpClient = null;
         this.mapper = null;
         this.bundleContext = null;
         this.templates.clear();
         this.temperature = null;
+        if (scheduledExecutorService != null) {
+            scheduledExecutorService.shutdownNow();
+            scheduledExecutorService = null;
+        }
     }
 
     private static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
         String apiKey = null;
         if (config != null) {
             apiKey = config.openAiApiKey();
-            if (apiKey != null && !apiKey.isBlank() && !apiKey.startsWith("$[secret")) {
+            if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("$[secret")) {
                 LOG.info("Using OpenAI API key from configuration.");
                 return apiKey.trim();
             }
-            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().isBlank()) {
+            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().trim().isEmpty()) {
                 try {
-                    apiKey = Files.readString(Paths.get(config.openAiApiKeyFile()));
+                    apiKey = new String(Files.readAllBytes(Paths.get(config.openAiApiKeyFile())));
                 } catch (IOException e) {
                     throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
                 }
-                if (apiKey != null && !apiKey.isBlank()) {
+                if (apiKey != null && !apiKey.trim().isEmpty()) {
                     LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
                     return apiKey.trim();
                 }
             }
         }
         apiKey = System.getenv(OPENAI_API_KEY);
-        if (apiKey != null && !apiKey.isBlank()) {
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
             LOG.info("Using OpenAI API key from environment variable {}.");
             return apiKey.trim();
         }
         apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
-        if (apiKey != null && !apiKey.isBlank()) {
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
             LOG.info("Using OpenAI API key from system property {}.");
             return apiKey.trim();
         }
@@ -244,24 +277,24 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
-            String jsonRequest = createJsonRequest(request, false);
+            String jsonRequest = createJsonRequest(request);
             LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
 
-            HttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
-            HttpResponse<String> response = performCall(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-            ChatCompletionResult result = mapper.readValue(response.body(), ChatCompletionResult.class);
-            List<ChatCompletionChoice> choices = result.getChoices();
-            if (choices.isEmpty()) {
-                LOG.error("Got empty response {} from GPT: {}", id, response.body());
-                throw new GPTException("Got empty response from GPT: " + response.body());
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
+            GPTCompletionCallback.GPTCompletionCollector callback = new GPTCompletionCallback.GPTCompletionCollector();
+            CompletableFuture<Void> finished = new CompletableFuture<>();
+            performCallAsync(finished, id, httpRequest, callback, 0, 2000);
+            finished.get(this.requestTimeout, TimeUnit.SECONDS);
+            if (callback.getFinishReason() != GPTFinishReason.STOP) {
+                LOG.warn("Response {} from GPT finished with reason {}", id, callback.getFinishReason());
             }
-            ChatCompletionChoice choice = choices.get(0);
-            if (result.getUsage() != null || choice.getFinishReason() != null) {
-                LOG.debug("Response {} usage {} , finish reason {}", id, result.getUsage(), choice.getFinishReason());
+            if (callback.getError() != null) {
+                if (callback.getError() instanceof GPTException) {
+                    throw (GPTException) callback.getError();
+                }
+                throw new GPTException("Error while calling GPT", callback.getError());
             }
-            LOG.trace("Response {} from GPT: {}", id, choice.getMessage());
-            return choice.getMessage().getContent();
+            return callback.getResult();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.error("Interrupted during call {} to GPT", id, e);
@@ -271,18 +304,21 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 LOG.error("Error while call {} to GPT", id, e);
             }
             throw new GPTException("Error while calling GPT", e);
+        } catch (ExecutionException e) {
+            LOG.error("Error while call {} to GPT", id, e);
+            throw new GPTException("Error while calling GPT", e.getCause());
+        } catch (TimeoutException e) {
+            LOG.error("" + e, e);
+            throw new GPTException("Timeout while calling GPT", e);
         }
     }
 
-    private HttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
-        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().isBlank() ? gptConfiguration.getApiKey() : this.apiKey;
-        return HttpRequest.newBuilder()
-                .uri(URI.create(CHAT_COMPLETION_URL))
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + actualApiKey)
-                .timeout(Duration.ofSeconds(requestTimeout))
-                .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
-                .build();
+    private SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
+        SimpleHttpRequest request = new SimpleHttpRequest("POST", CHAT_COMPLETION_URL);
+        request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
+        request.addHeader("Authorization", "Bearer " + actualApiKey);
+        return request;
     }
 
     @Override
@@ -291,91 +327,18 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
-            String jsonRequest = createJsonRequest(request, true);
+            String jsonRequest = createJsonRequest(request);
             callback.setRequest(jsonRequest);
 
             LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
 
-            HttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
-
-            performCallAsync(httpRequest, new ResponseLineSubscriber(callback, id), 0, 2000);
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
+            performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
             Thread.currentThread().interrupt();
             LOG.error("Error while call {} to GPT", id, e);
             throw new GPTException("Error while calling GPT", e);
-        }
-    }
-
-    protected class ResponseLineSubscriber implements Flow.Subscriber<String> {
-        private final GPTCompletionCallback callback;
-        private final long id;
-        private volatile Flow.Subscription subscription;
-
-        private volatile boolean cancelled = false;
-
-        public ResponseLineSubscriber(GPTCompletionCallback callback, long id) {
-            this.callback = callback;
-            this.id = id;
-            callback.setLoggingId("" + id);
-        }
-
-        @Override
-        public void onSubscribe(Flow.Subscription subscription) {
-            this.subscription = subscription;
-            callback.onSubscribe(
-                    new Flow.Subscription() {
-                        @Override
-                        public void request(long n) {
-                            subscription.request(n);
-                        }
-
-                        @Override
-                        public void cancel() {
-                            cancelled = true;
-                            subscription.cancel();
-                        }
-                    }
-            );
-            subscription.request(1000);
-        }
-
-        @Override
-        public void onNext(String item) {
-            LOG.trace("Received line from ChatGPT for {} from GPT: {}", id, item);
-            if (!cancelled) {
-                try {
-                    handleStreamingEvent(callback, id, item);
-                } catch (RuntimeException e) {
-                    LOG.error("Error while handling streaming event {} from GPT", id, e);
-                    try {
-                        callback.onError(e);
-                    } finally {
-                        subscription.cancel();
-                        onError(e);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            LOG.error("Error while streaming call {} to GPT", id, throwable);
-            try {
-                callback.onError(throwable);
-            } finally {
-                if (null != subscription) {
-                    subscription.cancel();
-                }
-            }
-        }
-
-        @Override
-        public void onComplete() {
-            if (!cancelled) {
-                LOG.debug("Response {} from GPT finished", id);
-                callback.onComplete();
-            }
         }
     }
 
@@ -389,7 +352,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     protected void handleStreamingEvent(GPTCompletionCallback callback, long id, String line) {
         if (line.startsWith("data:")) {
-            line = line.substring(5);
+            line = line.substring(MAXTRIES);
             try {
                 if (" [DONE]".equals(line)) {
                     LOG.debug("Response {} from GPT received DONE", id);
@@ -413,7 +376,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 callback.onError(gptException);
                 throw gptException;
             }
-        } else if (!line.isBlank()) {
+        } else if (!line.trim().isEmpty()) {
             LOG.error("Bug: Got unexpected line from GPT, expecting streaming data: {}", line);
             GPTException gptException = new GPTException("Unexpected line from GPT: " + line);
             callback.onError(gptException);
@@ -436,98 +399,60 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     /**
-     * Executes a call with retries. It returns a response only if it was HTTP 200, otherwise it's retried or given up.
+     * Executes a call with retries. The response is written to callback; when it's finished the future is set - either normally or exceptionally if there was an error.
      *
-     * @return the response if it was HTTP 200
-     * @throws GPTException         if given up or if there was a non-retryable statuscode
-     * @throws IOException          if there was an io error
-     * @throws InterruptedException if the thread was interrupted
+     * @param finished    the future to set when the call is finished
+     * @param id          the id of the call, for logging
+     * @param httpRequest the request to send
+     * @param callback    the callback to write the response to
+     * @param tryNumber   the number of the try - if it's {@value #MAXTRIES} , we give up.
      */
-    // that should be the same as performCallAsync(...,200,0).join(), but I'll replace that when I trust the mechanics there.
-    protected <T> HttpResponse<T> performCall(HttpRequest httpRequest, HttpResponse.BodyHandler<T> bodyHandler) throws IOException, InterruptedException {
-        HttpResponse<T> response = null;
-        long delay = 2000;
-        long trynumber = 1;
-
-        while (trynumber < 5) {
-            try {
-                response = httpClient.send(httpRequest, bodyHandler);
-
-                if (response.statusCode() == 200) return response;
-                if (response.statusCode() != 429) {
-                    String responsebody = readoutResponse(response);
-                    LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), responsebody);
-                    throw new GPTException("Got error response from GPT: " + response.statusCode() + " " + responsebody);
-                }
-            } catch (IOException e) {
-                LOG.error("Error while calling GPT", e);
-                // do retry.
-            }
-
-            trynumber = trynumber + 1;
-            String responsebody = readoutResponse(response);
-            delay = recalculateDelay(responsebody, delay);
-            // that normally shouldn't happen except in tests because of rate limiting, so we log a warning
-            LOG.warn("Got error response from GPT, waiting {} ms: {}", delay, responsebody != null ? responsebody : "(no response)");
-            Thread.sleep(delay);
+    protected void performCallAsync(CompletableFuture<Void> finished, long id, SimpleHttpRequest httpRequest,
+                                    GPTCompletionCallback callback, int tryNumber, long defaultDelay) {
+        if (tryNumber >= MAXTRIES) {
+            LOG.error("Got too many 429 / error responses from GPT, giving up.");
+            GPTException gptException = new GPTException("Got too many 429 / error responses from GPT");
+            callback.onError(gptException);
+            finished.completeExceptionally(gptException);
         }
+        CompletableFuture<Void> callFuture = triggerCallAsync(id, httpRequest, callback);
+        callFuture.thenAccept(finished::complete)
+                .exceptionally(e -> {
+                    RetryableException retryable = extractRetryableException(e);
+                    if (retryable != null) {
+                        long newDelay = recalculateDelay(readoutResponse(e.getMessage()), defaultDelay);
+                        LOG.debug("Call {} to GPT failed, retry after {} ms because of {}", id, newDelay, e.toString());
+                        performCallAsync(finished, id, httpRequest, callback, tryNumber + 1, newDelay);
+                    } else {
+                        finished.completeExceptionally(e);
+                    }
+                    return null;
+                });
+    }
 
-        String responsebody = response != null ? readoutResponse(response.body()) : "(no response)";
-        LOG.error("Got too many 429 / error responses from GPT, giving up. {}", responsebody);
-        throw new GPTException("Got too many 429 / error responses from GPT: " + responsebody);
+    protected static RetryableException extractRetryableException(Throwable e) {
+        RetryableException retryable = null;
+        if (e instanceof RetryableException) {
+            retryable = (RetryableException) e;
+        } else if (e instanceof CompletionException) {
+            CompletionException completionException = (CompletionException) e;
+            if (completionException.getCause() instanceof RetryableException) {
+                retryable = (RetryableException) completionException.getCause();
+            }
+        }
+        return retryable;
     }
 
     /**
-     * Executes a call with retries. It returns a response only if it was HTTP 200, otherwise it's retried or given up.
-     *
-     * @return the response if it was HTTP 200
-     * @throws GPTException if given up or if there was a non-retryable statuscode
+     * Puts the call into the pipeline; the returned future will be set normally or exceptionally when it's done.
      */
-    protected CompletableFuture<HttpResponse<Void>> performCallAsync(HttpRequest httpRequest, Flow.Subscriber<String> lineSubscriber, int tryNumber, long defaultDelay) {
-        if (tryNumber >= 5) {
-            LOG.error("Got too many 429 / error responses from GPT, giving up.");
-            GPTException gptException = new GPTException("Got too many 429 / error responses from GPT");
-            lineSubscriber.onError(gptException);
-            throw gptException;
-        }
+    protected CompletableFuture<Void> triggerCallAsync(long id, SimpleHttpRequest httpRequest, GPTCompletionCallback callback) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
 
-        StringBuilder errorResponseBody = new StringBuilder();
-
-        HttpResponse.BodyHandler<Void> bodyHandler = (responseInfo) -> {
-            if (responseInfo.statusCode() == 200) {
-                return HttpResponse.BodyHandlers.fromLineSubscriber(lineSubscriber).apply(responseInfo);
-            } else {
-                return HttpResponse.BodySubscribers.ofByteArrayConsumer(
-                        (bytesOpt) -> bytesOpt.ifPresent(bytes ->
-                                errorResponseBody.append(new String(bytes, UTF_8))
-                        )
-                );
-            }
-        };
-
-        return httpClient.sendAsync(httpRequest, bodyHandler)
-                .thenCompose(response -> {
-                    if (response.statusCode() == 200) return CompletableFuture.completedFuture(response);
-                    if (response.statusCode() != 429) {
-                        LOG.error("Got unknown response from GPT: {} {}", response.statusCode(), errorResponseBody);
-                        GPTException gptException = new GPTException("Got error response from GPT: " + response.statusCode() + " " + errorResponseBody);
-                        lineSubscriber.onError(gptException);
-                        throw gptException;
-                    }
-
-                    long delay = recalculateDelay(errorResponseBody.toString(), defaultDelay);
-                    LOG.warn("Got error response from GPT, waiting {} ms: {}", delay, errorResponseBody != null ? errorResponseBody : "(no response)");
-
-                    return CompletableFuture.completedFuture(null)
-                            .thenComposeAsync(v -> performCallAsync(httpRequest, lineSubscriber, tryNumber + 1, delay * 2),
-                                    CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS));
-                })
-                .exceptionally(e -> {
-                    lineSubscriber.onError(e);
-                    LOG.error("Error while calling GPT", e);
-                    GPTException gptException = new GPTException("Error while calling GPT", e);
-                    throw gptException;
-                });
+        AsyncResponseConsumer<Void> responseConsumer = new StreamDecodingResponseConsumer(callback, result, id);
+        httpAsyncClient.execute(SimpleRequestProducer.create(httpRequest), responseConsumer,
+                new EnsureResultFutureCallback(result));
+        return result;
     }
 
     String readoutResponse(Object response) {
@@ -560,7 +485,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         return delay * 2;
     }
 
-    protected String createJsonRequest(GPTChatRequest request, boolean streaming) throws JsonProcessingException {
+    protected String createJsonRequest(GPTChatRequest request) throws JsonProcessingException {
         List<ChatMessage> messages = new ArrayList<>();
         for (GPTChatMessage message : request.getMessages()) {
             String role = message.getRole().toString();
@@ -579,7 +504,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 .messages(messages)
                 .temperature(temperature)
                 .maxTokens(request.getMaxTokens())
-                .stream(streaming ? Boolean.TRUE : null)
+                .stream(Boolean.TRUE)
                 .build();
         String jsonRequest = mapper.writeValueAsString(externalRequest);
         return jsonRequest;
@@ -599,8 +524,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Override
     public boolean isEnabled(GPTConfiguration gptConfig) {
         return isEnabled() && (
-                apiKey != null && !apiKey.isBlank() ||
-                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().isBlank()
+                apiKey != null && !apiKey.trim().isEmpty() ||
+                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().trim().isEmpty()
         );
     }
 
@@ -665,7 +590,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     @Override
     @Nonnull
     public String htmlToMarkdown(String html) {
-        if (html == null || html.isBlank()) {
+        if (html == null || html.trim().isEmpty()) {
             return "";
         }
         return new HtmlToMarkdownConverter().convert(html).trim();
@@ -698,4 +623,146 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         int requestTimeout();
     }
 
+    /**
+     * Thrown when we get a 429 rate limiting response.
+     */
+    protected static class RetryableException extends RuntimeException {
+        public RetryableException(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
+    protected class StreamDecodingResponseConsumer extends AbstractCharResponseConsumer<Void> {
+
+        private final GPTCompletionCallback callback;
+        private final CompletableFuture<Void> result;
+        private final StringBuilder resultBuilder = new StringBuilder();
+        private final long id;
+
+        /**
+         * If set, we collect the data for the error message, of false we process it as stream.
+         */
+        private Integer errorStatusCode;
+
+        /**
+         * The result of the webservice call is written to callback; result is set when either it completed or aborted.
+         */
+        public StreamDecodingResponseConsumer(GPTCompletionCallback callback, CompletableFuture<Void> result, long id) {
+            this.callback = callback;
+            this.result = result;
+            this.id = id;
+        }
+
+        @Override
+        protected void start(HttpResponse response, ContentType contentType) throws HttpException, IOException {
+            if (response.getCode() != 200) {
+                errorStatusCode = response.getCode();
+                LOG.warn("Response {} from GPT is not 200, but {}", id, response.getCode());
+            } else {
+                LOG.debug("Response {} from GPT is 200", id);
+            }
+        }
+
+        @Override
+        protected void data(CharBuffer src, boolean endOfStream) throws IOException {
+            LOG.trace("Response {} from GPT data part received {}", id, src);
+            resultBuilder.append(src);
+            if (errorStatusCode != null) {
+                LOG.trace("Response {} from GPT error part received {}", id, src);
+                return;
+            }
+            try {
+                // while the resultBuilder contains a "\n" feed the line to handleStreamingEvent
+                while (true) {
+                    int pos = resultBuilder.indexOf("\n");
+                    if (pos < 0) {
+                        break;
+                    }
+                    String line = resultBuilder.substring(0, pos);
+                    resultBuilder.delete(0, pos + 1);
+                    handleStreamingEvent(callback, id, line);
+                }
+                if (endOfStream && resultBuilder.length() > 0) {
+                    handleStreamingEvent(callback, id, resultBuilder.toString());
+                }
+            } catch (RuntimeException e) {
+                LOG.error("Response {} from GPT data part received {} and failed", id, src, e);
+                errorStatusCode = 700;
+            }
+        }
+
+        @Override
+        protected Void buildResult() throws IOException {
+            LOG.trace("Response {} buildResult", id);
+            // always called on request end.
+            if (errorStatusCode != null) {
+                if (errorStatusCode == 429) {
+                    LOG.warn("Response {} from GPT is 429, retrying", id);
+                    RetryableException retryableException = new RetryableException(resultBuilder.toString());
+                    result.completeExceptionally(retryableException);
+                    throw retryableException;
+                }
+                GPTException gptException = new GPTException("Error response from GPT: " + resultBuilder);
+                callback.onError(gptException);
+                result.completeExceptionally(gptException);
+                throw gptException;
+            }
+            result.complete(null);
+            return null;
+        }
+
+        @Override
+        public void failed(Exception cause) {
+            LOG.error("Response {} from GPT failed", id, cause);
+            result.completeExceptionally(cause);
+            if (!(cause instanceof RetryableException)) {
+                callback.onError(cause);
+            }
+        }
+
+        @Override
+        protected int capacityIncrement() {
+            return 10000;
+        }
+
+        @Override
+        public void releaseResources() {
+            // nothing to do
+        }
+
+    }
+
+    /**
+     * Makes doubly sure that result is somehow set after the call.
+     */
+    protected static class EnsureResultFutureCallback implements FutureCallback<Void> {
+
+        @Nonnull
+        private final CompletableFuture<Void> result;
+
+        public EnsureResultFutureCallback(@Nonnull CompletableFuture<Void> result) {
+            this.result = result;
+        }
+
+        @Override
+        public void completed(Void result) {
+            if (!this.result.isDone()) {
+                this.result.complete(result);
+            }
+        }
+
+        @Override
+        public void failed(Exception ex) {
+            if (!this.result.isDone()) {
+                this.result.completeExceptionally(ex);
+            }
+        }
+
+        @Override
+        public void cancelled() {
+            if (!this.result.isDone()) {
+                this.result.completeExceptionally(new CancellationException());
+            }
+        }
+    }
 }

@@ -19,6 +19,10 @@ class DialogHistory {
      * @param historyList a list of history entries from a previous session on the same page/component/field. Will be modified with new entries.
      */
     constructor(dialog, getDialogStatus, setDialogStatus, historyList) {
+        if (!dialog || !getDialogStatus || !setDialogStatus || !historyList) { // fail early
+            console.error('BUG! DialogHistory missing parameter', dialog, getDialogStatus, setDialogStatus, historyList);
+            throw new Error('BUG! DialogHistory missing parameter ' + dialog + ' ' + getDialogStatus + ' ' + setDialogStatus + ' ' + historyList);
+        }
         this.dialog = dialog;
         this.getDialogStatus = getDialogStatus;
         this.setDialogStatus = setDialogStatus;
@@ -73,6 +77,8 @@ class DialogHistory {
         if (this.historyIndex >= 0) {
             this.setDialogStatus(this.historyList[this.historyIndex]);
             this.updateButtons();
+        } else {
+            this.setDialogStatus({});
         }
     }
 

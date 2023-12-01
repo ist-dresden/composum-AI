@@ -1,6 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -26,9 +27,9 @@ public class JtokkitEncodingTest {
         // make a list of strings that correspond to the tokens
         List<String> decoded = new ArrayList<>();
         for (int i = 0; i < encoded.size(); i++) {
-            decoded.add(enc.decode(List.of(encoded.get(i))));
+            decoded.add(enc.decode(Arrays.asList(encoded.get(i))));
         }
-        Assert.assertEquals(List.of("hal", "lo"), decoded);
+        Assert.assertEquals(Arrays.asList("hal", "lo"), decoded);
     }
 
 }

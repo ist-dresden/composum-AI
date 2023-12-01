@@ -4,5 +4,5 @@
   "page": "Current page text",
   "lastoutput": "Current suggestion shown in this dialog (for iterative improvement)",
   "empty": "No text is added to your prompt",
-  "-": "Hand-edited source content"
+  "-": "Manually entered source content"
 }

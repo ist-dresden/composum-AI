@@ -39,6 +39,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -253,7 +254,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
         Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
 
-        int maxtokens = maxTokensParam != null ? maxTokensParam : 1000; // some arbitrary default
+        int maxtokens = maxTokensParam != null ? maxTokensParam : 2000; // some arbitrary default
         if (isNotBlank(textLength)) {
             Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
             if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
@@ -294,7 +295,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         // on 202 with Location header Chrome freezes in $.ajax for  AEM 6.5.7 8-{} . So we have to do it differently.
         response.setContentType("application/json");
-        gson.toJson(Map.of(PARAMETER_STREAMID, id), response.getWriter());
+        gson.toJson(ImmutableMap.of(PARAMETER_STREAMID, id), response.getWriter());
         LOG.info("Returning stream id {}", id);
     }
 

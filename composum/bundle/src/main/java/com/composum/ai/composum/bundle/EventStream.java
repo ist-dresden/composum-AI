@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -34,8 +33,6 @@ public class EventStream implements GPTCompletionCallback {
     public static final String QUEUEEND = ":queueend";
 
     private String id;
-
-    private volatile Flow.Subscription subscription;
 
     /**
      * concurrent queue with strings as lines to write, already in SSE format.
@@ -80,7 +77,6 @@ public class EventStream implements GPTCompletionCallback {
                 writer.flush();
             } catch (RuntimeException e) {
                 LOG.error("Error writing to {} : {}", id, e.toString());
-                subscription.cancel();
                 throw e;
             }
         }
@@ -126,13 +122,6 @@ public class EventStream implements GPTCompletionCallback {
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        LOG.debug("EventStream.onSubscribe for {}", id);
-        this.subscription = subscription;
-        subscription.request(10000);
-    }
-
-    @Override
     public void onNext(String data) {
         LOG.trace("EventStream.onNext for {} : {}", id, data);
         slowdown.accept(data);
@@ -149,9 +138,6 @@ public class EventStream implements GPTCompletionCallback {
     @Override
     public void onError(Throwable throwable) {
         LOG.error("EventStream.onError for {} : {}", id, throwable.toString(), throwable);
-        if (subscription != null) {
-            subscription.cancel();
-        }
         Status status = new Status(null, null, LOG);
         status.error("Internal error: " + throwable.toString(), throwable);
         queue.add("");

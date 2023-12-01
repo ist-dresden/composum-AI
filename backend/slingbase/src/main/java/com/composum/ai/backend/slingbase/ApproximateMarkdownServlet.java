@@ -60,7 +60,8 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
             response.setContentType("text/html");
             StringBuilderWriter writer = new StringBuilderWriter();
             approximateMarkdownService.approximateMarkdown(resource, new PrintWriter(writer), request, response);
-            // TODO: integrate that into the ApproximateMarkdownService as we convert to markdown and then back th HTML for richtext, but no time ATM.
+            // We could possibly integrate that into the ApproximateMarkdownService as we convert to markdown and then back th HTML for richtext
+            // OTOH that would return annoying HTML with <div> etc., so this might be the better way.
             response.getWriter().write(chatService.markdownToHtml(writer.toString()));
         } else {
             response.setContentType("text/plain");

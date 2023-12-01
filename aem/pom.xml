@@ -88,6 +88,12 @@
         <release.repository.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</release.repository.url>
         <release.autoReleaseAfterClose>false</release.autoReleaseAfterClose>
         <release.keyname>info@composum.com</release.keyname>
+
+        <!-- for AEM 6.5.x backwards compatibility until the bronze age -->
+        <java.source>1.8</java.source>
+        <java.target>1.8</java.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <build>
         <plugins>
@@ -381,7 +387,7 @@ Bundle-DocURL:
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse
                             m2e settings only. It has no influence on the Maven build itself. -->
@@ -524,13 +530,6 @@ Bundle-DocURL:
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>3.0.0</version>
-                </plugin>
-
-                <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.1.0</version>
                 </plugin>
 
                 <!-- https://mvnrepository.com/artifact/org.sonatype.plugins/nexus-staging-maven-plugin -->

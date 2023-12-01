@@ -2,11 +2,11 @@ package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
 public class EventStream implements GPTCompletionCallback {
@@ -30,8 +31,6 @@ public class EventStream implements GPTCompletionCallback {
     public static final String QUEUEEND = ":queueend";
 
     private String id;
-
-    private volatile Flow.Subscription subscription;
 
     /**
      * concurrent queue with strings as lines to write, already in SSE format.
@@ -76,7 +75,6 @@ public class EventStream implements GPTCompletionCallback {
                 writer.flush();
             } catch (RuntimeException e) {
                 LOG.error("Error writing to {} : {}", id, e.toString());
-                subscription.cancel();
                 throw e;
             }
         }
@@ -91,9 +89,9 @@ public class EventStream implements GPTCompletionCallback {
         LOG.debug("EventStream.onFinish for {} : {}", id, finishReason);
         slowdown.flush();
         this.finishReason = finishReason;
-        Map<String, Object> status = Map.of("success", true,
-                "data", Map.of(
-                        "result", Map.of("finishreason", finishReason.name())));
+        Map<String, Object> status = ImmutableMap.of("success", true,
+                "data", ImmutableMap.of(
+                        "result", ImmutableMap.of("finishreason", finishReason.name())));
         queue.add("");
         queue.add("event: finished");
         queue.add("data: " + gson.toJson(status));
@@ -127,13 +125,6 @@ public class EventStream implements GPTCompletionCallback {
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        LOG.debug("EventStream.onSubscribe for {}", id);
-        this.subscription = subscription;
-        subscription.request(10000);
-    }
-
-    @Override
     public void onNext(String data) {
         LOG.trace("EventStream.onNext for {} : {}", id, data);
         slowdown.accept(data);
@@ -154,13 +145,10 @@ public class EventStream implements GPTCompletionCallback {
     @Override
     public void onError(Throwable throwable) {
         LOG.error("EventStream.onError for {} : {}", id, throwable.toString(), throwable);
-        if (subscription != null) {
-            subscription.cancel();
-        }
         String errorDescription = throwable.toString();
-        Map<String, Object> status = Map.of("success", false,
+        Map<String, Object> status = ImmutableMap.of("success", false,
                 "title", "Internal error",
-                "messages", List.of(Map.of("level", "error", "text", errorDescription)));
+                "messages", Arrays.asList(ImmutableMap.of("level", "error", "text", errorDescription)));
         queue.add("");
         queue.add("event: exception"); // do not use 'error' as event name as that is received when the connection is closed.
         queue.add("data: " + gson.toJson(status));

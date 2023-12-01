@@ -283,7 +283,8 @@ try {
             $button.click(function (clickevent) {
                 if (debug) console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
 
-                propertyName = propertyName || $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+                const rteproperty = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+                propertyName = rteproperty || propertyName;
                 propertyName = propertyName && propertyName.startsWith('./') && propertyName.substring(2);
                 propertyName = propertyName || 'text'; // normal case for a rte - when it's an inline rte in the content it's really hard to find out.
 

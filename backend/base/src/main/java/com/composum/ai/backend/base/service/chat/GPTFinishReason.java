@@ -26,7 +26,7 @@ public enum GPTFinishReason {
 
     @Nullable
     public static GPTFinishReason fromChatGPT(@Nullable String chatGptRepresentation) {
-        if (chatGptRepresentation == null || chatGptRepresentation.isBlank()) {
+        if (chatGptRepresentation == null || chatGptRepresentation.trim().isEmpty()) {
             return null;
         }
         switch (chatGptRepresentation) {

@@ -1,6 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
-import java.util.concurrent.Flow;
+import java.util.concurrent.TimeUnit;
 
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
@@ -14,13 +14,14 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner implements GPTCompletionCallback {
 
     StringBuilder buffer = new StringBuilder();
-    private Flow.Subscription subscription;
     private boolean isFinished;
 
     public static void main(String[] args) throws Exception {
         RunGPTChatCompletionServiceStreamingImpl instance = new RunGPTChatCompletionServiceStreamingImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
+        System.out.println("Done.");
     }
 
     private void run() throws InterruptedException {
@@ -37,14 +38,9 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
 
     @Override
     public void onFinish(GPTFinishReason finishReason) {
-        System.out.println("Finished: " + finishReason);
-    }
-
-    @Override
-    public void onComplete() {
-        System.out.println("Completed");
-        GPTCompletionCallback.super.onComplete();
         isFinished = true;
+        System.out.println();
+        System.out.println("Finished: " + finishReason);
     }
 
     @Override
@@ -53,20 +49,14 @@ public class RunGPTChatCompletionServiceStreamingImpl extends AbstractGPTRunner 
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        System.out.println("Subscribed");
-        this.subscription = subscription;
-    }
-
-    @Override
     public void onNext(String item) {
         buffer.append(item);
-        System.out.println(item);
+        System.out.print(item);
     }
 
     @Override
     public void onError(Throwable throwable) {
-        isFinished = true;
         throwable.printStackTrace(System.err);
+        isFinished = true;
     }
 }

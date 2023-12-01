@@ -10,7 +10,8 @@
              value="As the author, summarize the text by capturing its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Identify the purpose and goal of the text, pinpoint key points of all topical sections. Write clear and simply, ensuring accuracy and completeness. Only use the information provided in the text; DO NOT use any information you know about the world."></summary>
     <question jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
               text="Question"
-              value="Please answer the following question based on the given text:
+              value="Please answer the following question based on the given text. After answering in your own words print a new paragraph with quotations of the exact phrase(s) or sentence(s) in the text that answer the question. The question is:
+
 "></question>
     <simplification_suggestions jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
                                 text="Simplification Suggestions"

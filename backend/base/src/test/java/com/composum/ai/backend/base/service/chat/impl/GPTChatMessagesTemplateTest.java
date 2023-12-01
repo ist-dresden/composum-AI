@@ -14,6 +14,7 @@ import org.slf4j.impl.SimpleLogger;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
+import com.google.common.collect.ImmutableMap;
 
 public class GPTChatMessagesTemplateTest {
 
@@ -36,7 +37,7 @@ public class GPTChatMessagesTemplateTest {
     @Test
     public void getMessages() {
         GPTChatMessagesTemplate template = new GPTChatMessagesTemplate(GPTChatMessagesTemplate.class.getClassLoader(), TEMPLATE);
-        List<GPTChatMessage> result = template.getMessages(Map.of("this", "thisvalue", "that", "that value"));
+        List<GPTChatMessage> result = template.getMessages(ImmutableMap.of("this", "thisvalue", "that", "that value"));
         assertEquals("Actual result: " + result, 5, result.size());
         // just compare the tostring values of the messages with the expected values
         assertEquals("GPTChatMessage{role=system, text='system message content'}", result.get(0).toString());

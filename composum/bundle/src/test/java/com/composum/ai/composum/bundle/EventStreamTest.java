@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.Flow;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.xss.XSSFilter;
@@ -34,9 +33,6 @@ public class EventStreamTest {
     private PrintWriter writer;
 
     @Mock
-    private Flow.Subscription subscription;
-
-    @Mock
     private XSSFilter xssFilter;
 
     private final StringBuilder buf = new StringBuilder();
@@ -60,12 +56,10 @@ public class EventStreamTest {
     public void testGoodFlow() throws InterruptedException {
         EventStream eventStream = new EventStream();
         eventStream.setId("testId");
-        eventStream.onSubscribe(subscription);
         eventStream.onNext("testItem1 ");
         eventStream.onNext("testItem2 ");
         eventStream.onNext("testItem3.");
         eventStream.onFinish(GPTFinishReason.STOP);
-        eventStream.onComplete();
         eventStream.writeTo(writer);
         String expected = "data: \"testItem1 testItem2 testItem3.\"\n" +
                 "\n" +
@@ -83,12 +77,9 @@ public class EventStreamTest {
         EventStream eventStream = new EventStream();
         eventStream.setId("testId");
 
-        eventStream.onSubscribe(subscription);
-
         Throwable throwable = new Throwable("testError");
         eventStream.onError(throwable);
 
-        verify(subscription).cancel();
         ec.checkThat(eventStream.queue.toString(), eventStream.queue.contains("event: exception"), is(true));
         eventStream.writeTo(writer);
         ec.checkThat(buf.toString().replaceAll("\\d{13}", "<timestamp>")

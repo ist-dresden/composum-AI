@@ -1,7 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {errorText, findSingleElement} from './common.js';
+import {errorText, findSingleElement, coralSelectValue} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
@@ -222,6 +222,7 @@ class ContentCreationDialog {
                 this.setSourceContent('');
                 break;
             case '-':
+                this.setSourceContent(''); // waiting for input
                 break;
             default:
                 this.showError('Unknown content selector value ' + key);
@@ -353,7 +354,8 @@ class ContentCreationDialog {
         } else {
             console.error("ContentCreationDialog showError", arguments);
             findSingleElement(this.$dialog, '.composum-ai-alert').text(errorText(error));
-            findSingleElement(this.$dialog, '.composum-ai-error-columns').show();
+            findSingleElement(this.$dialog, '.composum-ai-error-columns')
+                .removeClass('hidden').show()[0].scrollIntoView();
             debugger;
         }
     }

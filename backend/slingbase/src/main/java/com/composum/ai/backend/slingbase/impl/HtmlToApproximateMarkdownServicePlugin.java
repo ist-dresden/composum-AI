@@ -58,7 +58,7 @@ import com.google.common.cache.CacheBuilder;
  */
 @Designate(ocd = HtmlToApproximateMarkdownServicePlugin.Config.class)
 @Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
-        property = Constants.SERVICE_RANKING + ":Integer=1000"
+        property = Constants.SERVICE_RANKING + ":Integer=10000"
 )
 public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdownServicePlugin {
 
@@ -92,7 +92,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         }
 
         if (allowedResourceTypePattern != null && allowedResourceTypePattern.matcher(resourceType).matches()) {
-            if (deniedResourceTypePattern == null || deniedResourceTypePattern.matcher(resourceType).matches()) {
+            if (deniedResourceTypePattern != null && deniedResourceTypePattern.matcher(resourceType).matches()) {
                 LOG.debug("Resourcetype {} denied", resourceType);
                 return PluginResult.NOT_HANDLED;
             }
@@ -144,8 +144,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         if (ResourceUtil.getParent(resource.getPath(), 2) == null) {
             return true;
         }
-        if (resource.getName().equals("jcr:content") || resource.getParent().getName().equals("jcr:content")
-                || resource.getParent().getParent().getName().equals("jcr:content")) {
+        if (resource.getName().equals("jcr:content") || resource.getParent().getName().equals("jcr:content")) {
             return true;
         }
         return false;
@@ -162,7 +161,15 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         try (PrintWriter printWriter = new PrintWriter(writer)) {
             SlingHttpServletResponse wrappedResponse = new CapturingResponse(response, printWriter, resource.getPath());
             NonModifyingRequestWrapper wrappedRequest = new NonModifyingRequestWrapper(request, resource.getPath());
-            request.getRequestDispatcher(resource.getPath() + ".html").include(wrappedRequest, wrappedResponse);
+            Object oldWcmAttribute = request.getAttribute("com.day.cq.wcm.api.WCMMode");
+            try { // for AEM we have to avoid that edit mode introduces artifacts.
+                request.removeAttribute("com.day.cq.wcm.api.WCMMode");
+                request.getRequestDispatcher(resource.getPath() + ".html").include(wrappedRequest, wrappedResponse);
+            } finally {
+                if (oldWcmAttribute != null) {
+                    request.setAttribute("com.day.cq.wcm.api.WCMMode", oldWcmAttribute);
+                }
+            }
             if (wrappedRequest.hadInvalidOperation) { // if that exception has been swallowed
                 throw new UnsupportedOperationCalled();
             }

@@ -15,6 +15,7 @@ public class RunGPTCreateKeywordsImpl extends AbstractGPTRunner {
         RunGPTCreateKeywordsImpl instance = new RunGPTCreateKeywordsImpl();
         instance.setup();
         instance.run();
+        instance.teardown();
     }
 
     private void run() {

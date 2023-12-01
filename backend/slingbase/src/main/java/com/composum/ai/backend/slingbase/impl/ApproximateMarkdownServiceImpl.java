@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,6 +42,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Implementation for {@link ApproximateMarkdownService}.
@@ -49,7 +51,7 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.Plugin
 @Designate(ocd = ApproximateMarkdownServiceImpl.Config.class)
 public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownService {
 
-    public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = Map.of(
+    public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = ImmutableMap.of(
             "jcr:title", "## ",
             "title", "## ",
             "subtitle", "### ",
@@ -350,9 +352,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     }
 
     protected void captureHtmlTags(String value) {
-        PATTERN_HTML_TAG.matcher(value).results()
-                .map(matchResult -> matchResult.group(1))
-                .forEach(htmltags::add);
+        Matcher m = PATTERN_HTML_TAG.matcher(value);
+        while (m.find()) {
+            htmltags.add(m.group(1));
+        }
         // -> found: [ext, a, sly, strong, code, em, language, type, p, br, div, path, u, ul, attributes, li, ol]
     }
 

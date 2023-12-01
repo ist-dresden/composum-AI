@@ -1,11 +1,9 @@
 package com.composum.ai.backend.base.service.chat;
 
-import java.util.concurrent.Flow;
-
 /**
  * For a streaming mode this is given as parameter for the method call and receives the streamed data; the method returns only when the response is complete.
  */
-public interface GPTCompletionCallback extends Flow.Subscriber<String> {
+public interface GPTCompletionCallback {
 
     /**
      * This is called when the response is complete to specify the reason (e.g. {@link GPTFinishReason#STOP}
@@ -13,10 +11,15 @@ public interface GPTCompletionCallback extends Flow.Subscriber<String> {
      */
     void onFinish(GPTFinishReason finishReason);
 
-    @Override
-    default void onComplete() {
-        // empty because we have onFinish.
-    }
+    /**
+     * Called when a couple of characters come in.
+     */
+    void onNext(String chars);
+
+    /**
+     * Called when an error occurs.
+     */
+    void onError(Throwable throwable);
 
     /**
      * For debugging: this sets the internal ID that is used for logging purposes. Not a good ID give to the world, though.
@@ -28,4 +31,46 @@ public interface GPTCompletionCallback extends Flow.Subscriber<String> {
      */
     default void setRequest(String json) {
     }
+
+    /**
+     * A simple collector that just takes note of things.
+     */
+    public static class GPTCompletionCollector implements GPTCompletionCallback {
+
+        private StringBuilder buffer = new StringBuilder();
+        private Throwable throwable;
+        private GPTFinishReason finishReason;
+
+        @Override
+        public void onFinish(GPTFinishReason finishReason) {
+            this.finishReason = finishReason;
+        }
+
+        @Override
+        public void onNext(String chars) {
+            buffer.append(chars);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+        }
+
+        @Override
+        public void setLoggingId(String loggingId) {
+        }
+
+        public GPTFinishReason getFinishReason() {
+            return finishReason;
+        }
+
+        public String getResult() {
+            return buffer.toString();
+        }
+
+        public Throwable getError() {
+            return throwable;
+        }
+    }
+
 }

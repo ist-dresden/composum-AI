@@ -1,7 +1,5 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
-import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.COMPOSUM_AI_CHAT_GPT;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.file.Files;
@@ -16,23 +14,11 @@ public abstract class AbstractGPTRunner {
 
     protected GPTChatCompletionServiceImpl chatCompletionService;
 
-    protected ThreadPoolManager mockThreadPoolManager = Mockito.mock(ThreadPoolManager.class);
-
-    protected DefaultThreadPool defaultThreadPool;
-
     protected void setup() throws IOException {
-        chatCompletionService = new GPTChatCompletionServiceImpl() {{
-            this.threadPoolManager = mockThreadPoolManager;
-        }};
-        Mockito.when(mockThreadPoolManager.get(COMPOSUM_AI_CHAT_GPT)).thenAnswer(invocation -> {
-            if (defaultThreadPool == null) {
-                defaultThreadPool = new DefaultThreadPool(COMPOSUM_AI_CHAT_GPT, null);
-            }
-            return defaultThreadPool;
-        });
+        chatCompletionService = new GPTChatCompletionServiceImpl();
         // read key from file ~/.openaiapi
         Path filePath = Paths.get(System.getProperty("user.home"), ".openaiapi");
-        String apiKey = Files.readString(filePath);
+        String apiKey = new String(Files.readAllBytes(filePath));
 
         chatCompletionService.activate(new GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig() {
             @Override
@@ -77,10 +63,8 @@ public abstract class AbstractGPTRunner {
         }, null);
     }
 
-    protected void shutdown() {
-        if (defaultThreadPool != null) {
-            defaultThreadPool.shutdown();
-        }
+    protected void teardown() {
+        chatCompletionService.deactivate();
     }
 
 }
