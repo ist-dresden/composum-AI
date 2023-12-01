@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>com.composum.ai.aem</groupId>
 		<artifactId>composum-ai</artifactId>
-		<version>0.5.4-SNAPSHOT</version>
+		<version>0.6.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>composum-ai.core</artifactId>
