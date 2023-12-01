@@ -24,11 +24,6 @@ We should prepare a plugin mechanism to be extensible.
 
 ## Out of scope (ignored ideas not planned in this feature)
 
-- we will not implement component specific restrictions, as that is difficult to check in the browser and likely much
-  dependent on the system (Composum vs. AEM, AEM 6.5 vs. AEMaaCS)
-- We might later want to add an OpenAI API Key configuration here, but it's not yet clear how that would fit in, as
-  well as rate limiting configuration. So we ignore that in the current implementation.
-
 ## Implementation decisions
 
 - If the AI is rolled out for various sites, we need to have additive configurations. Thus restrictions have to be "
