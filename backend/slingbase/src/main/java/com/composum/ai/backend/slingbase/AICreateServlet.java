@@ -254,7 +254,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
         Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
 
-        int maxtokens = maxTokensParam != null ? maxTokensParam : 2000; // some arbitrary default
+        int maxtokens = maxTokensParam != null ? maxTokensParam : 1000; // some arbitrary default
         if (isNotBlank(textLength)) {
             Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
             if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
