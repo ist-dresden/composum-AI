@@ -1,7 +1,7 @@
-# Composum AI for Adobe AEM as a Cloud Service
+# Composum AI for Adobe AEM 6.5 and AEMaaCS
 
-The AEM variant of the [Composum AI](../index.md) currently provides two assistant dialogs with different focus
-and capabilities:
+The AEM variant of the [Composum AI](../index.md) supports both AEM 6.5.x and AEM as a Cloud Service. It currently
+provides two assistant dialogs with different focus and capabilities:
 
 - the Content Creation Assistant geared to text content generation for direct use in the editor, and
 - the Side Panel AI that is geared for analysing and discussing the content of the page or components with the AI, and
