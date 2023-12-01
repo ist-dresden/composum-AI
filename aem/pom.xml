@@ -14,19 +14,18 @@
  |  See the License for the specific language governing permissions and
  |  limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.composum.meta.ist</groupId>
         <artifactId>parent-root</artifactId>
         <version>1.7.1</version>
-        <relativePath/>
+        <relativePath />
     </parent>
     <groupId>com.composum.ai.aem</groupId>
     <artifactId>composum-ai</artifactId>
     <packaging>pom</packaging>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
     <name>Composum AI::AEM</name>
     <description>Composum AI AEM variant</description>
     <url>${siteurl}</url>
@@ -34,7 +33,7 @@
         <connection>scm:git:${giturl}</connection>
         <developerConnection>scm:git:${giturl}</developerConnection>
         <url>${giturl}</url>
-        <tag>HEAD</tag>
+        <tag>composum-ai-integration-0.6.0</tag>
     </scm>
     <distributionManagement>
         <site>
@@ -408,7 +407,7 @@ Bundle-DocURL:
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -428,7 +427,7 @@ Bundle-DocURL:
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -449,7 +448,7 @@ Bundle-DocURL:
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
