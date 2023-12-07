@@ -29,7 +29,7 @@ try {
 
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
         // for AEM 6.5.7 we, strangely, don't get the cq-sidepanel-loaded event. Try something else.
-        channel.on('cq-layer-activated', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
+        channel.on('cq-layer-activated cui-contentloaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
 
         /**
          * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
@@ -181,7 +181,7 @@ try {
             }
         }
 
-        channel.on('cq-layer-activated foundation-contentloaded', initRteHooks);
+        channel.on('cq-layer-activated foundation-contentloaded cui-contentloaded', initRteHooks);
 
 
         /**
@@ -189,17 +189,13 @@ try {
          * @param {Event} event - The event indicating the activation of the RTE.
          */
         function initRteHooks(event) {
-            if (debug) console.log("waitForReadyAndInsert", event.type, event.target);
+            if (debug) console.log("initRteHooks", event.type, event.target);
             try {
-                aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
-                    Coral.commons.ready(event.target, function () {
-                        channel.off('editing-start', onRteEditingStart)
-                            .on('editing-start', onRteEditingStart);
-                        Granite?.author?.ContentFrame?.getDocument()
-                            ?.off('editing-start', onRteEditingStart)
-                            ?.on('editing-start', onRteEditingStart);
-                    });
-                });
+                channel.off('editing-start', onRteEditingStart)
+                    .on('editing-start', onRteEditingStart);
+                Granite?.author?.ContentFrame?.getDocument()
+                    ?.off('editing-start', onRteEditingStart)
+                    ?.on('editing-start', onRteEditingStart);
             } catch (e) {
                 console.error("error initializing RTE hooks", event, e);
                 debugger;
@@ -216,42 +212,44 @@ try {
 
         /** editing-start event is received for an richtext editor - we have to register the button. */
         function onRteEditingStart(event) {
-            if (debug) console.log("onRteEditingStart", arguments);
-            let $target = $(event.target);
-            if ($target.closest('.composum-ai-dialog').length > 0) {
-                return; // don't insert buttons into our own dialog
-            }
-            let editable = Granite?.author?.selection?.getCurrentActive() ||
-                determineEditableFromElement(event.target); // when in content frame
-            // we have to determine the componentPath and resourceType right now to see whether the button is enabled.
-            // the rteinstance and the property name can also be determined later if we don't get them right now
-            let componentPath = undefined;
-            let resourceType = undefined;
-            let propertyName = undefined;
-            let rteinstance = $target.data('rteinstance') || $target.data('richText');
-            if (!rteinstance) {
-                debugger; // FIXME
-            }
-            if (debug) console.log("onRteEditingStart rte found", event.type, event.target, editable);
+            aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
+                if (debug) console.log("onRteEditingStart", arguments);
+                let $target = $(event.target);
+                if ($target.closest('.composum-ai-dialog').length > 0) {
+                    return; // don't insert buttons into our own dialog
+                }
+                let editable = Granite?.author?.selection?.getCurrentActive() ||
+                    determineEditableFromElement(event.target); // when in content frame
+                // we have to determine the componentPath and resourceType right now to see whether the button is enabled.
+                // the rteinstance and the property name can also be determined later if we don't get them right now
+                let componentPath = undefined;
+                let resourceType = undefined;
+                let propertyName = undefined;
+                let rteinstance = $target.data('rteinstance') || $target.data('richText');
+                if (!rteinstance) {
+                    debugger; // FIXME
+                }
+                if (debug) console.log("onRteEditingStart rte found", event.type, event.target, editable);
 
-            if (editable) {
-                componentPath = editable.path;
-                resourceType = editable.type;
-            } else if ($target.closest('form.content-fragment-editor')[0]) {
-                let editorDiv = $target.closest('div#Editor');
-                componentPath = editorDiv.data('path');
-                // no resourcetype available on content fragments
-            } else if ($target.closest('form.cq-dialog')[0]) {
-                let dialogForm = $target.closest('form.cq-dialog');
-                componentPath = dialogForm.attr('action');
-                resourceType = dialogForm.find('input[name="./sling:resourceType"]').val();
-                propertyName = $target.closest('div.richtext-container')
-                    .find('input[type="hidden"][data-cq-richtext-input]').attr('name');
-            }
+                if (editable) {
+                    componentPath = editable.path;
+                    resourceType = editable.type;
+                } else if ($target.closest('form.content-fragment-editor')[0]) {
+                    let editorDiv = $target.closest('div#Editor');
+                    componentPath = editorDiv.data('path');
+                    // no resourcetype available on content fragments
+                } else if ($target.closest('form.cq-dialog')[0]) {
+                    let dialogForm = $target.closest('form.cq-dialog');
+                    componentPath = dialogForm.attr('action');
+                    resourceType = dialogForm.find('input[name="./sling:resourceType"]').val();
+                    propertyName = $target.closest('div.richtext-container')
+                        .find('input[type="hidden"][data-cq-richtext-input]').attr('name');
+                }
 
-            aiconfig.ifEnabled(SERVICE_CREATE, resourceType,
-                () => insertCreateButtons(event.target, editable, componentPath, resourceType, propertyName, rteinstance)
-            );
+                aiconfig.ifEnabled(SERVICE_CREATE, resourceType,
+                    () => insertCreateButtons(event.target, editable, componentPath, resourceType, propertyName, rteinstance)
+                );
+            });
         }
 
         function insertCreateButtons(target, editable, componentPath, resourceType, propertyName, rteinstance) {
