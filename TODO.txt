@@ -27,3 +27,7 @@ sling:resourceType .*/image
 Print as 'attribute: value\n'
 
 ignore: align, fileReference, target, style, element
+
+## Check out Adobe Sensei GenAI
+
+https://business.adobe.com/summit/2023/sessions/opening-keynote-gs1.html at 1:20:00 or something

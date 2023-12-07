@@ -22,6 +22,7 @@ Testpages:
   html/content/experience-fragments/wknd/us/en/adventures/adventures-2021/master.html)
 - (not functional
   yet): [Content fragment](http://localhost:4502/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html/content/dam/wknd/en/adventures/ski-touring-mont-blanc/ski-touring-mont-blanc)
+  http://localhost:4502/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html/content/dam/core-components-examples/library/sample-assets/component-structured-content-fragment
 
 Test:
 
