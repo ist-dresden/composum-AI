@@ -77,7 +77,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-group ai-url-container" style="display: none;"
+                                    <div class="form-group composum-ai-url-container" style="display: none;"
                                          title="${cpn:i18n(slingRequest,'Enter an URL from which to grab the source text.')}">
                                         <label for="contentSelector">
                                             <cpn:text
@@ -85,7 +85,7 @@
                                         </label>
 
                                         <input name="title" data-label="Subtitle"
-                                               class="form-control ai-url-field"
+                                               class="form-control composum-ai-url-field"
                                                maxlength="256" type="text" value="" placeholder="">
                                     </div>
 

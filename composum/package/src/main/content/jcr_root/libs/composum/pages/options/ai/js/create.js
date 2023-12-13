@@ -66,8 +66,8 @@
                 this.$response = this.$el.find('.ai-response-field');
                 this.$sourceContent = this.$el.find('.ai-source-field');
 
-                this.$urlContainer = this.$el.find('.ai-url-container');
-                this.$urlField = this.$el.find('.ai-url-field');
+                this.$urlContainer = this.$el.find('.composum-ai-url-container');
+                this.$urlField = this.$el.find('.composum-ai-url-field');
 
                 this.setSourceContent(this.widget.getValue());
 
@@ -84,6 +84,12 @@
                 this.$contentSelect.change(this.contentSelectChanged.bind(this));
                 this.$sourceContent.change(this.sourceChanged.bind(this));
                 this.$urlField.change(this.urlChanged.bind(this));
+                this.$urlField.keydown((event) => {
+                    if (event.which === 13 && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                        event.preventDefault();
+                        this.urlChanged(event);
+                    }
+                });
 
                 this.$el.find('.replace-button').click(this.replaceButtonClicked.bind(this));
                 this.$el.find('.append-button').click(this.appendButtonClicked.bind(this));
@@ -146,7 +152,8 @@
                     'textLength': this.$textLength.val(),
                     'prompt': this.$prompt.val(),
                     'result': this.getResponse(),
-                    'source': this.getSourceContent()
+                    'source': this.getSourceContent(),
+                    'url': this.$urlField.val()
                 };
             },
 
@@ -173,6 +180,7 @@
                 this.setResponse(map['result']);
                 this.setSourceContent(map['source']);
                 this.adjustButtonStates();
+                this.$urlField.val(map['url']);
             },
 
             /** Button 'Reset' was clicked. */
@@ -223,6 +231,7 @@
                         this.setSourceContent('');
                         break;
                     case 'url':
+                        this.showError();
                         this.$urlContainer.show();
                     case '-':
                         this.setSourceContent('');
@@ -270,9 +279,24 @@
             },
 
             urlChanged(event) {
+                event.preventDefault();
                 const url = this.$urlField.val();
-                // XXX cannot retrieve content directly because of CORS limitiations - we need to do that
-                // via the server.
+                if (url) {
+                    this.showError();
+                    $.ajax({
+                        url: ai.const.url.create.approximated +
+                            (this.isRichText ? '.html' : '.md') + '?fromurl=' + url,
+                        type: "GET",
+                        dataType: "text",
+                        success: (data) => {
+                            this.setSourceContent(data);
+                        },
+                        error: (xhr, status, error) => {
+                            console.error("error loading approximate markdown for ", url, xhr, status, error);
+                            this.showError(status + " " + error);
+                        }
+                    });
+                }
             },
 
             resetHistoryButtonClicked: function (event) {
