@@ -66,6 +66,9 @@
                 this.$response = this.$el.find('.ai-response-field');
                 this.$sourceContent = this.$el.find('.ai-source-field');
 
+                this.$urlContainer = this.$el.find('.ai-url-container');
+                this.$urlField = this.$el.find('.ai-url-field');
+
                 this.setSourceContent(this.widget.getValue());
 
                 this.$el.find('.back-button').click(this.backButtonClicked.bind(this));
@@ -80,6 +83,7 @@
 
                 this.$contentSelect.change(this.contentSelectChanged.bind(this));
                 this.$sourceContent.change(this.sourceChanged.bind(this));
+                this.$urlField.change(this.urlChanged.bind(this));
 
                 this.$el.find('.replace-button').click(this.replaceButtonClicked.bind(this));
                 this.$el.find('.append-button').click(this.appendButtonClicked.bind(this));
@@ -201,6 +205,7 @@
                 event.preventDefault();
                 let contentSelect = this.$contentSelect.val();
                 const key = this.$contentSelect.val();
+                this.$urlContainer.hide();
                 switch (key) {
                     case 'lastoutput':
                         this.setSourceContent(this.getResponse());
@@ -217,6 +222,8 @@
                     case 'empty':
                         this.setSourceContent('');
                         break;
+                    case 'url':
+                        this.$urlContainer.show();
                     case '-':
                         this.setSourceContent('');
                         break;
@@ -260,6 +267,12 @@
                         this.showError(status + " " + error);
                     }
                 });
+            },
+
+            urlChanged(event) {
+                const url = this.$urlField.val();
+                // XXX cannot retrieve content directly because of CORS limitiations - we need to do that
+                // via the server.
             },
 
             resetHistoryButtonClicked: function (event) {
