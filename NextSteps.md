@@ -1,23 +1,13 @@
 # Next steps in the implementation
 
-- AEM announcement and installation and usage description
-- Update Pages content creation dialog with separate content field like AEM
-- Check where it should appear and where not - extend tag.
-    - Autor, key Felder
-- API key in site configuration? Tenant configuration?
-- (Explain: why isn't it there in edit styles)
-  
 - ??? Konfiguration f. Seiten?
 - ??? Input prompt nicht ersetzen? Predefined
-- Bug: for new component the history key is wrong in the create dialog
 
 ## Small bugs
 
-- Stacked Modals: scroll des untersten?
-- Bug, please report: no widget found for /content/ist/composum/home/pages/setup/jcr:
+- ??? Stacked Modals: scroll des untersten?
+- ??? Bug, please report: no widget found for /content/ist/composum/home/pages/setup/jcr:
   content/main/row/column-0/section/codeblock/code
-- Reset history button for create dialog
-- Reset in create dialog should clear response, too
 
 ## In evaluation
 
@@ -43,6 +33,8 @@
 - (Extend content creation assistent with selection as input. (Not possible on page, but there.) -> could also
   replace the selection / insert created text at point. Alternative: explicit input. Isn't really necessary, since
   user can just incorporate that into the prompt, or put it into the content suggestion field and iterate over that.)
+- Check where it should appear in Pages and where not - extend tag.
+  - Autor, key Felder
 
 # Archive
 
@@ -81,3 +73,6 @@
 - DONE Somehow implement streaming to make result more responsive.
 - DONE: Update AEM dialog with history
 - DONE: AEM 6.5 version
+- DONE: API key in site configuration? Tenant configuration?
+- DONE: AEM announcement and installation and usage description
+- DONE: Update Pages content creation dialog with separate content field like AEM

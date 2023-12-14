@@ -1,13 +1,19 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -39,10 +45,15 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
         })
 // curl -u admin:admin http://localhost:9090/bin/cpm/ai/approximated.md/content/ist/composum/home/platform/_jcr_content
 // http://localhost:4502/bin/cpm/ai/approximated.md/content/wknd/us/en/magazine/_jcr_content
+// http://localhost:9090/bin/cpm/ai/approximated.md?fromurl=https://www.composum.com/home.html
 public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServlet.class);
 
+    /**
+     * If this is given with an URL instead of a suffix, we retrieve the HTML from the given source.
+     */
+    public static final String PARAM_URL = "fromurl";
 
     @Reference
     ApproximateMarkdownService approximateMarkdownService;
@@ -54,7 +65,14 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         RequestPathInfo info = request.getRequestPathInfo();
         String path = info.getSuffix();
+        String url = request.getParameter(PARAM_URL);
         boolean richtext = "html".equalsIgnoreCase(info.getExtension()) || "htm".equalsIgnoreCase(info.getExtension());
+
+        if (StringUtils.isBlank(path) && StringUtils.isNotBlank(url)) {
+            getUrl(url, richtext, request, response);
+            return;
+        }
+
         Resource resource = request.getResourceResolver().getResource(path);
         if (richtext) {
             response.setContentType("text/html");
@@ -67,6 +85,53 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
             response.setContentType("text/plain");
             approximateMarkdownService.approximateMarkdown(resource, response.getWriter(), request, response);
         }
+    }
+
+    protected void getUrl(String urlString, boolean richtext, @Nonnull SlingHttpServletRequest request,
+                          @Nonnull SlingHttpServletResponse response) throws IOException {
+        InputStream in = null;
+        try {
+            if (!StringUtils.startsWith(urlString, "http")) {
+                urlString = "https://" + urlString;
+            }
+            URL url = new URL(urlString);
+            URLConnection conn = url.openConnection();
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(3000);
+            in = conn.getInputStream();
+
+            if (conn.getContentType().contains("text/html")) {
+                String result = IOUtils.toString(in, response.getCharacterEncoding());
+                String markdown = chatService.htmlToMarkdown(result);
+                if (richtext) {
+                    // convert it back and forth since that massively simplifies the HTML
+                    response.getWriter().println(chatService.markdownToHtml(markdown));
+                } else {
+                    response.getWriter().println(markdown);
+                }
+            } else if (conn.getContentType().contains("text/plain")) {
+                String result = IOUtils.toString(in, response.getCharacterEncoding());
+                response.getWriter().println(result);
+                // no idea what to do if richtext is wanted. Quote it somehow?
+            } else {
+                response.setContentType("text/plain");
+                String msg = request.getResourceBundle(request.getLocale()).getString("Unknown content type: ");
+                response.getWriter().println(msg + conn.getContentType());
+            }
+        } catch (MalformedURLException e) {
+            response.setContentType("text/plain");
+            String msg = request.getResourceBundle(request.getLocale()).getString("Invalid URL: ");
+            response.getWriter().println(msg + urlString);
+        } catch (IOException e) {
+            response.setContentType("text/plain");
+            String msg = request.getResourceBundle(request.getLocale()).getString("Problem reading URL: ");
+            response.getWriter().println(msg + e.toString());
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+
     }
 
 }

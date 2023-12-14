@@ -13,6 +13,9 @@
     <lastoutput jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
         text="Current suggestion shown in this dialog (for iterative improvement)"
         value="lastoutput"></lastoutput>
+    <url jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+         text="Text content of an external URL"
+         value="url"></url>
     <empty jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
         text="No additional content"
            value="empty"></empty>
