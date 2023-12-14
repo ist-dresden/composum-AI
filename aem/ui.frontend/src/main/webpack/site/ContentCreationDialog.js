@@ -118,6 +118,8 @@ class ContentCreationDialog {
             : findSingleElement(this.$dialog, '.composum-ai-response-plaintext');
         this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
         this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
+        this.$urlField = findSingleElement(this.$dialog, '.composum-ai-url-field');
+        this.$urlContainer = this.$urlField.parent();
     }
 
     getDialogStatus() {
@@ -153,6 +155,13 @@ class ContentCreationDialog {
         this.$prompt.on('change input', this.onPromptChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContent.on('change', this.onSourceContentChanged.bind(this));
+        this.$urlField.on('change', this.onUrlChanged.bind(this));
+        this.$urlField.on('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                event.preventDefault();
+                this.onUrlChanged(event);
+            }
+        });
         this.$generateButton.on('click', this.onGenerateButtonClicked.bind(this));
         findSingleElement(this.$dialog, '.composum-ai-stop-button').on('click', this.onStopClicked.bind(this));
         findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', this.resetForm.bind(this));
@@ -205,6 +214,7 @@ class ContentCreationDialog {
     onContentSelectorChanged(event) {
         if (this.debug) console.log("onContentSelectorChanged", arguments);
         const key = this.$contentSelector.val();
+        this.showUrl(false);
         switch (key) {
             case 'lastoutput':
                 this.setSourceContent(this.getResponse());
@@ -218,6 +228,10 @@ class ContentCreationDialog {
             case 'page':
                 this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContent(value));
                 break;
+            case 'url':
+                this.showError();
+                this.showUrl(true);
+                break;
             case 'empty':
                 this.setSourceContent('');
                 break;
@@ -226,6 +240,39 @@ class ContentCreationDialog {
                 break;
             default:
                 this.showError('Unknown content selector value ' + key);
+        }
+    }
+
+    showUrl(urlvisible) {
+        if (urlvisible) {
+            this.$urlContainer.show();
+        } else {
+            this.$urlContainer.hide();
+        }
+        this.alignPromptAndSourceColumn();
+    }
+
+    onUrlChanged(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const url = $(event.target).val();
+        if (url) {
+            console.log('fetching url ', url);
+            $.ajax({
+                url: Granite.HTTP.externalize(APPROXIMATED_MARKDOWN_SERVLET
+                    + (this.isRichtext ? '.html' : '.md')
+                    + '?fromurl=' + url
+                ),
+                type: "GET",
+                dataType: "text",
+                success: (data) => {
+                    this.setSourceContent(data);
+                },
+                error: (xhr, status, error) => {
+                    console.error("error loading approximate markdown for ", url, xhr, status, error);
+                    this.showError(errorText(status + " " + error));
+                }
+            });
         }
     }
 
