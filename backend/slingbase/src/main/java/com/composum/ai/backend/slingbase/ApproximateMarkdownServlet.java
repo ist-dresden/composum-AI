@@ -67,10 +67,12 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         String path = info.getSuffix();
         String url = request.getParameter(PARAM_URL);
         boolean richtext = "html".equalsIgnoreCase(info.getExtension()) || "htm".equalsIgnoreCase(info.getExtension());
+
         if (StringUtils.isBlank(path) && StringUtils.isNotBlank(url)) {
-            getUrl(url, richtext, response);
+            getUrl(url, richtext, request, response);
             return;
         }
+
         Resource resource = request.getResourceResolver().getResource(path);
         if (richtext) {
             response.setContentType("text/html");
@@ -85,7 +87,8 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    protected void getUrl(String urlString, boolean richtext, SlingHttpServletResponse response) throws IOException {
+    protected void getUrl(String urlString, boolean richtext, @Nonnull SlingHttpServletRequest request,
+                          @Nonnull SlingHttpServletResponse response) throws IOException {
         InputStream in = null;
         try {
             if (!StringUtils.startsWith(urlString, "http")) {
@@ -112,14 +115,17 @@ public class ApproximateMarkdownServlet extends SlingSafeMethodsServlet {
                 // no idea what to do if richtext is wanted. Quote it somehow?
             } else {
                 response.setContentType("text/plain");
-                response.getWriter().println("Unknown content type: " + conn.getContentType());
+                String msg = request.getResourceBundle(request.getLocale()).getString("Unknown content type: ");
+                response.getWriter().println(msg + conn.getContentType());
             }
         } catch (MalformedURLException e) {
             response.setContentType("text/plain");
-            response.getWriter().println("Invalid URL: " + urlString);
+            String msg = request.getResourceBundle(request.getLocale()).getString("Invalid URL: ");
+            response.getWriter().println(msg + urlString);
         } catch (IOException e) {
             response.setContentType("text/plain");
-            response.getWriter().println("Problem reading URL: " + e.toString());
+            String msg = request.getResourceBundle(request.getLocale()).getString("Problem reading URL: ");
+            response.getWriter().println(msg + e.toString());
         } finally {
             if (in != null) {
                 in.close();
