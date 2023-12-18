@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -325,6 +326,18 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @Override
     public List<Link> getComponentLinks(@NotNull Resource resource) {
         List<Link> resourceLinks = new ArrayList<>();
+        if (resource == null) {
+            return resourceLinks;
+        }
+        if (resource.getValueMap().isEmpty()) { // attribute resource, use parent
+            collectLinks(resource.getParent(), resourceLinks);
+        } else {
+            collectLinks(resource, resourceLinks);
+        }
+        return resourceLinks;
+    }
+
+    protected void collectLinks(Resource resource, List<Link> resourceLinks) {
         resource.getValueMap().entrySet().stream()
                 .filter(entry -> entry.getValue() instanceof String)
                 .filter(entry -> ((String) entry.getValue()).startsWith("/content/"))
@@ -332,12 +345,18 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                     String path = (String) entry.getValue();
                     Resource targetResource = resource.getResourceResolver().getResource(path);
                     if (targetResource != null) {
+                        if (targetResource.getChild(JcrConstants.JCR_CONTENT) != null) {
+                            targetResource = targetResource.getChild(JcrConstants.JCR_CONTENT);
+                        }
                         String title = targetResource.getValueMap().get("jcr:title", String.class);
                         if (title == null) {
                             title = targetResource.getValueMap().get("title", String.class);
                         }
                         if (title == null) {
                             title = targetResource.getName();
+                            if (JcrConstants.JCR_CONTENT.equals(title)) {
+                                title = targetResource.getParent().getName();
+                            }
                         }
                         resourceLinks.add(new Link(path, title));
                     }
@@ -345,7 +364,6 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         resource.getChildren().forEach(child -> {
             resourceLinks.addAll(getComponentLinks(child));
         });
-        return resourceLinks;
     }
 
     // debugging code; remove after it works.

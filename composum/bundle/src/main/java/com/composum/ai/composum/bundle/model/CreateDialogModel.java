@@ -1,12 +1,17 @@
 package com.composum.ai.composum.bundle.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -14,12 +19,27 @@ public class CreateDialogModel extends AbstractModel {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreateDialogModel.class);
 
+    protected transient ApproximateMarkdownService approximateMarkdownService;
+
     public Map<String, String> getPredefinedPrompts() {
         return readJsonFile("create/predefinedprompts.json");
     }
 
     public Map<String, String> getContentSelectors() {
-        return readJsonFile("create/contentselectors.json");
+        Map<String, String> results = new LinkedHashMap<>();
+        results.putAll(readJsonFile("create/contentselectors.json"));
+        List<ApproximateMarkdownService.Link> componentLinks = getApproximateMarkdownService().getComponentLinks(getResource());
+        for (ApproximateMarkdownService.Link link : componentLinks) {
+            results.put(link.getPath(), link.getTitle() + " (" + link.getPath() + ")");
+        }
+        return results;
+    }
+
+    protected ApproximateMarkdownService getApproximateMarkdownService() {
+        if (approximateMarkdownService == null) {
+            approximateMarkdownService = requireNonNull(context.getService(ApproximateMarkdownService.class));
+        }
+        return approximateMarkdownService;
     }
 
     public Map<String, String> getTextLengths() {

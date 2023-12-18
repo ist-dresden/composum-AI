@@ -153,7 +153,8 @@ public class ApproximateMarkdownServiceImplTest {
         // set up resources for the links, one with a title, one with a jcr:title
         context.create().resource("/content/parent/path/res1",
                 ImmutableMap.of("jcr:title", "res1"));
-        context.create().resource("/content/parent/path/child1",
+        context.create().resource("/content/parent/path/child1");
+        context.create().resource("/content/parent/path/child1/jcr:content",
                 ImmutableMap.of("title", "child1"));
 
         // Execute Method

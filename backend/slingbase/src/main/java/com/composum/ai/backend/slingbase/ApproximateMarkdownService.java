@@ -54,7 +54,7 @@ public interface ApproximateMarkdownService {
      * @return a list of links, or an empty list if there are none.
      */
     @Nonnull
-    List<Link> getComponentLinks(@Nonnull Resource resource);
+    List<Link> getComponentLinks(@Nullable Resource resource);
 
     /**
      * A link from a component.

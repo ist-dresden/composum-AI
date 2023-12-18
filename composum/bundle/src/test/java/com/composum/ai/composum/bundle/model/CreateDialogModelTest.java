@@ -6,10 +6,18 @@ import static org.junit.Assert.assertTrue;
 import java.util.Map;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 
 public class CreateDialogModelTest {
 
-    private CreateDialogModel model = new CreateDialogModel();
+    private ApproximateMarkdownService approximateMarkdownServiceMock =
+            Mockito.mock(ApproximateMarkdownService.class);
+
+    private CreateDialogModel model = new CreateDialogModel() {{
+        this.approximateMarkdownService = approximateMarkdownServiceMock;
+    }};
 
     @Test
     public void testGetPredefinedPrompts() {
