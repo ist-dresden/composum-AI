@@ -337,7 +337,13 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         return resourceLinks;
     }
 
-    protected void collectLinks(Resource resource, List<Link> resourceLinks) {
+    /**
+     * Collects links from a resource and its children. The link title will be the jcr:title or title attribute.
+     *
+     * @param resource      the resource to collect links from
+     * @param resourceLinks the list to store the collected links
+     */
+    protected void collectLinks(@NotNull Resource resource, List<Link> resourceLinks) {
         resource.getValueMap().entrySet().stream()
                 .filter(entry -> entry.getValue() instanceof String)
                 .filter(entry -> ((String) entry.getValue()).startsWith("/content/"))

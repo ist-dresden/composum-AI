@@ -237,7 +237,12 @@
                         this.setSourceContent('');
                         break;
                     default:
-                        this.showError('Unknown content selector value ' + key);
+                        if (key.startsWith('/content/')) {
+                            this.retrieveValue(key, (value) => this.setSourceContent(value));
+                        } else {
+                            debugger;
+                            this.showError('Unknown content selector value ' + key);
+                        }
                 }
             },
 
