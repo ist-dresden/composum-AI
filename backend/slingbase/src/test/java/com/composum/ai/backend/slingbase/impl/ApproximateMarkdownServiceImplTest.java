@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -26,6 +27,7 @@ import org.junit.rules.ErrorCollector;
 import org.mockito.Mockito;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -139,6 +141,30 @@ public class ApproximateMarkdownServiceImplTest {
         Map<String, Object> props = new HashMap<>(attributes);
         props.put("sling:resourceType", resourceType);
         return context.create().resource("/content/parent/path/res", props);
+    }
+
+    @Test
+    public void testGetComponentLinks() {
+        // Setup Mock Resources
+        Resource rootResource = context.create().resource("/content/parent/path/res",
+                ImmutableMap.of("link1", "/content/parent/path/res1"));
+        context.create().resource("/content/parent/path/res/child",
+                ImmutableMap.of("link2", "/content/parent/path/child1"));
+        // set up resources for the links, one with a title, one with a jcr:title
+        context.create().resource("/content/parent/path/res1",
+                ImmutableMap.of("jcr:title", "res1"));
+        context.create().resource("/content/parent/path/child1",
+                ImmutableMap.of("title", "child1"));
+
+        // Execute Method
+        List<ApproximateMarkdownService.Link> links = service.getComponentLinks(rootResource);
+
+        // Assertions
+        ec.checkThat(links.size(), is(2)); // Check if two links are returned
+        ec.checkThat(links.get(0).getPath(), is("/content/parent/path/res1")); // Check first link path
+        ec.checkThat(links.get(0).getTitle(), is("res1")); // Check first link title
+        ec.checkThat(links.get(1).getPath(), is("/content/parent/path/child1")); // Check second link path
+        ec.checkThat(links.get(1).getTitle(), is("child1")); // Check second link title
     }
 
 }

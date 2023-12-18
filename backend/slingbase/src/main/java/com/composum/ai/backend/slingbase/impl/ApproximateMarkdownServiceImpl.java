@@ -8,6 +8,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -314,6 +316,37 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     }
 
+    /**
+     * {@inheritDoc}
+     * We traverse the attributes of resource and all children and collect everything that starts with /content .
+     * The link title will be the jcr:title or title attribute.
+     */
+    @NotNull
+    @Override
+    public List<Link> getComponentLinks(@NotNull Resource resource) {
+        List<Link> resourceLinks = new ArrayList<>();
+        resource.getValueMap().entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof String)
+                .filter(entry -> ((String) entry.getValue()).startsWith("/content/"))
+                .forEach(entry -> {
+                    String path = (String) entry.getValue();
+                    Resource targetResource = resource.getResourceResolver().getResource(path);
+                    if (targetResource != null) {
+                        String title = targetResource.getValueMap().get("jcr:title", String.class);
+                        if (title == null) {
+                            title = targetResource.getValueMap().get("title", String.class);
+                        }
+                        if (title == null) {
+                            title = targetResource.getName();
+                        }
+                        resourceLinks.add(new Link(path, title));
+                    }
+                });
+        resource.getChildren().forEach(child -> {
+            resourceLinks.addAll(getComponentLinks(child));
+        });
+        return resourceLinks;
+    }
 
     // debugging code; remove after it works.
 

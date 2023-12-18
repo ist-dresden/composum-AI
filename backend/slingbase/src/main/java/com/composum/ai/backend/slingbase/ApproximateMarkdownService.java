@@ -1,6 +1,7 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,4 +46,37 @@ public interface ApproximateMarkdownService {
      */
     @Nonnull
     String getMarkdown(@Nullable String value);
+
+    /**
+     * Determines whether there are links saved in the component that could be used as a proposal for the user to be used as source for the AI via markdown generation etc.
+     *
+     * @param resource the resource to check
+     * @return a list of links, or an empty list if there are none.
+     */
+    @Nonnull
+    List<Link> getComponentLinks(@Nonnull Resource resource);
+
+    /**
+     * A link from a component.
+     *
+     * @see #getComponentLinks(Resource)
+     */
+    class Link {
+        private final String path;
+        private final String title;
+
+        public Link(String path, String title) {
+            this.path = path;
+            this.title = title;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+    }
+
 }
