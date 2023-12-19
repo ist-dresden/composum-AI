@@ -8,6 +8,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -36,6 +37,9 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
             @NotNull Resource resource, @NotNull PrintWriter out,
             @Nonnull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (handleImage(resource, out)) {
+            return PluginResult.HANDLED_ALL;
+        }
         boolean wasHandledAsPage = pageHandling(resource, out, service);
         boolean wasHandledAsTable = !wasHandledAsPage && tableHandling(resource, out, service);
         handleContentReference(resource, out, service, request, response);
@@ -114,5 +118,22 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
         }
     }
 
+    /**
+     * Handle resource that is a jcr:content of type nt:resource with a jcr:mimeType starting with image/
+     * as a markdown image reference to that path.
+     *
+     * @return whether it was an image for which we have written a markdown reference
+     */
+    protected boolean handleImage(Resource resource, PrintWriter out) {
+        if (JcrConstants.JCR_CONTENT.equals(resource.getName()) && resource.isResourceType("nt:resource")) {
+            String mimeType = resource.getValueMap().get("jcr:mimeType", String.class);
+            if (StringUtils.startsWith(mimeType, "image/")) {
+                String name = StringUtils.defaultString(resource.getValueMap().get("jcr:title", String.class), resource.getName());
+                out.println("![" + name + "](" + resource.getParent().getPath() + ")");
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

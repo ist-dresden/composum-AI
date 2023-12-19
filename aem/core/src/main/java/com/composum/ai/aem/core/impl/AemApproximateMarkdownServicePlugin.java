@@ -57,6 +57,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             @Nonnull Resource resource, @Nonnull PrintWriter out,
             @Nonnull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (renderDamAssets(resource, out)) {
+            return PluginResult.HANDLED_ALL;
+        }
         if (resourceRendersAsComponentMatching(resource, FULLY_IGNORED_TYPES)) {
             return PluginResult.HANDLED_ALL;
         }
@@ -303,6 +306,25 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             }
         }
         return list;
+    }
+
+    /**
+     * If the resource is a dam:Asset or a dam:AssetContent jcr:content then we return an image link
+     */
+    protected boolean renderDamAssets(Resource resource, PrintWriter out) {
+        Resource assetNode = resource;
+        if (resource.isResourceType("dam:AssetContent")) {
+            assetNode = resource.getParent();
+        }
+        if (assetNode.isResourceType("dam:Asset")) {
+            String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
+            if (StringUtils.startsWith(mimeType, "image/")) {
+                String name = StringUtils.defaultString(assetNode.getValueMap().get("jcr:content/jcr:title", String.class), assetNode.getName());
+                out.println("![" + name + "](" + assetNode.getPath());
+                return true;
+            }
+        }
+        return false;
     }
 
 }
