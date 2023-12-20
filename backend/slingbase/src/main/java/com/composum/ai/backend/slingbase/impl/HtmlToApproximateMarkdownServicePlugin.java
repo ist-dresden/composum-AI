@@ -126,6 +126,12 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         return PluginResult.NOT_HANDLED;
     }
 
+    @Nullable
+    @Override
+    public String getImageUrl(@Nullable Resource imageResource) {
+        return null;
+    }
+
     protected boolean isBecauseOfUnsupportedOperation(Throwable e) {
         if (e instanceof UnsupportedOperationCalled) {
             return true;

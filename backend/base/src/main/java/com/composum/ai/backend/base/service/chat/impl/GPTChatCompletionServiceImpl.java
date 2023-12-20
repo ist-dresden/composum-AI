@@ -490,6 +490,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         for (GPTChatMessage message : request.getMessages()) {
             String role = message.getRole().toString();
             messages.add(new ChatMessage(role, message.getContent()));
+            OUCH - NO SUPPORT OF IMAGES YET!
         }
         while (!messages.isEmpty() && StringUtil.isBlank(messages.get(messages.size() - 1).getContent())) {
             LOG.debug("Removing empty last message."); // suspicious - likely misusage of the API

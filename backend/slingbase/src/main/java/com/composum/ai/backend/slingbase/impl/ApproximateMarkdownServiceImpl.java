@@ -372,6 +372,20 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         });
     }
 
+    @Override
+    public String getImageUrl(Resource imageResource) {
+        if (imageResource == null) {
+            return null;
+        }
+        for (ApproximateMarkdownServicePlugin plugin : plugins) {
+            String imageUrl = plugin.getImageUrl(imageResource);
+            if (imageUrl != null) {
+                return imageUrl;
+            }
+        }
+        return null;
+    }
+
     // debugging code; remove after it works.
 
     protected Pattern PATTERN_HTML_TAG = Pattern.compile("<\\s*(ext|a|sly|strong|code|em|language|type|p|br|div|path|u|ul|attributes|li|ol|h[1-6]|b|i)(\\s+[^>]*)?>", Pattern.CASE_INSENSITIVE);

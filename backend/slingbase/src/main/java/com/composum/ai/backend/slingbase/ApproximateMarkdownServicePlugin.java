@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -38,6 +39,13 @@ public interface ApproximateMarkdownServicePlugin {
     PluginResult maybeHandle(@Nonnull Resource resource, @Nonnull PrintWriter out,
                              @Nonnull ApproximateMarkdownService service,
                              @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response);
+
+    /**
+     * Retrieves the imageURL in a way useable for ChatGPT - usually data:image/jpeg;base64,{base64_image}
+     * If the plugin cannot handle this resource, it should return null.
+     */
+    @Nullable
+    String getImageUrl(@Nullable Resource imageResource);
 
     /**
      * Returns true when the sling:resourceType or one of the sling:resourceSuperType of the sling:resourceType match the pattern.

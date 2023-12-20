@@ -257,6 +257,7 @@
                 if (!imagepath) {
                     this.$sourceContent.show();
                     this.$sourceImage.hide();
+                    this.$sourceImage.data('imagepath', undefined);
                     if (this.isRichText) {
                         core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
                     } else {
@@ -269,6 +270,7 @@
                     this.$sourceContent.hide();
                     this.$sourceImage.show();
                     this.$sourceImage.css('background-image', 'url(' + imagepath + ')');
+                    this.$sourceImage.data('imagepath', imagepath);
                 }
             },
 
@@ -375,11 +377,13 @@
                 let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
                 let source = this.getSourceContent();
+                let imagepath = this.$sourceImage.data('imagepath');
 
                 let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
                         textLength: textLength,
-                        inputText: source,
+                        inputText: imagepath ? undefined : source,
+                        inputImagePath: imagepath,
                         streaming: this.streaming,
                         richText: this.isRichText,
                         prompt: prompt

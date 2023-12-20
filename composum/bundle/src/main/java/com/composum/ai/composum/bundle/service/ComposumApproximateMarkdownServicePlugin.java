@@ -1,6 +1,9 @@
 package com.composum.ai.composum.bundle.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -13,6 +16,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -141,4 +145,31 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
         return false;
     }
 
+    /**
+     * Retrieves the imageURL in a way useable for ChatGPT - usually data:image/jpeg;base64,{base64_image}
+     */
+    @Nullable
+    @Override
+    public String getImageUrl(@Nullable Resource imageResource) {
+        Resource imageContentResource = imageResource;
+        if (imageContentResource != null && imageContentResource.isResourceType("nt:file")) {
+            imageContentResource = imageContentResource.getChild(JcrConstants.JCR_CONTENT);
+        }
+        if (imageContentResource != null && imageContentResource.isResourceType("nt:resource")) {
+            String mimeType = imageContentResource.getValueMap().get("jcr:mimeType", String.class);
+            if (StringUtils.startsWith(mimeType, "image/")) {
+                try (InputStream is = imageContentResource.adaptTo(InputStream.class)) {
+                    if (is == null) {
+                        LOG.warn("Unable to get InputStream from image resource {}", imageContentResource.getPath());
+                        return null;
+                    }
+                    byte[] data = is.readAllBytes();
+                    return "data:" + mimeType + ";base64," + new String(Base64.getEncoder().encode(data));
+                } catch (IOException e) {
+                    LOG.warn("Unable to get InputStream from image resource {}", imageContentResource.getPath(), e);
+                }
+            }
+        }
+        return null;
+    }
 }

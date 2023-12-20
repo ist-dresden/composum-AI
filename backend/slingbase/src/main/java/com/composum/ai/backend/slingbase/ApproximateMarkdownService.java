@@ -62,6 +62,12 @@ public interface ApproximateMarkdownService {
     List<Link> getComponentLinks(@Nullable Resource resource);
 
     /**
+     * Retrieves the imageURL in a way useable for ChatGPT - usually data:image/jpeg;base64,{base64_image}
+     */
+    @Nullable
+    String getImageUrl(@Nullable Resource imageResource);
+
+    /**
      * A link from a component.
      *
      * @see #getComponentLinks(Resource)

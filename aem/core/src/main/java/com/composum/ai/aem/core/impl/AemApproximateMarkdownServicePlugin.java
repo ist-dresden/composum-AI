@@ -4,8 +4,11 @@ import static com.day.cq.commons.jcr.JcrConstants.JCR_CONTENT;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_DESCRIPTION;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_TITLE;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -330,6 +334,35 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             }
         }
         return false;
+    }
+
+    /**
+     * Retrieves the imageURL in a way useable for ChatGPT - usually data:image/jpeg;base64,{base64_image}
+     */
+    @Nullable
+    @Override
+    public String getImageUrl(@Nullable Resource imageResource) {
+        Resource assetNode = imageResource;
+        if (imageResource.isResourceType("dam:AssetContent")) {
+            assetNode = imageResource.getParent();
+        }
+        if (assetNode.isResourceType("dam:Asset")) {
+            String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
+            Resource originalRendition = assetNode.getChild("/renditions/original/jcr:content");
+            if (StringUtils.startsWith(mimeType, "image/") && originalRendition != null) {
+                try (InputStream is = originalRendition.adaptTo(InputStream.class)) {
+                    if (is == null) {
+                        LOG.warn("Unable to get InputStream from image resource {}", assetNode.getPath());
+                        return null;
+                    }
+                    byte[] data = IOUtils.toByteArray(is);
+                    return "data:" + mimeType + ";base64," + new String(Base64.getEncoder().encode(data));
+                } catch (IOException e) {
+                    LOG.warn("Unable to get InputStream from image resource {}", assetNode.getPath(), e);
+                }
+            }
+        }
+        return null;
     }
 
 }
