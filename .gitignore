@@ -33,3 +33,4 @@ target
 .cgptdevbench/llmsearch.db
 .linklint
 .lycheecache
+build.log

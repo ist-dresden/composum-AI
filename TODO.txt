@@ -38,4 +38,7 @@ https://github.com/TheoKanning/openai-java/issues/397
 Alternative: https://github.com/namankhurpia/Easy-open-ai
 https://mvnrepository.com/artifact/io.github.namankhurpia/easyopenai -> many dependencies :-(
 
-!!!!! RESCALE IMAGES !!!!!
+##
+
+DTB Chat Completion Gen
+https://chat.openai.com/share/c095d1db-4e72-4abe-8794-c1fe9e01fbf7
