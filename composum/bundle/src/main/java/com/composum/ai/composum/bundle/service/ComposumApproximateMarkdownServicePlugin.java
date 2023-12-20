@@ -37,7 +37,7 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
             @NotNull Resource resource, @NotNull PrintWriter out,
             @Nonnull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
-        if (handleImage(resource, out)) {
+        if (handleImage(resource, out, response)) {
             return PluginResult.HANDLED_ALL;
         }
         boolean wasHandledAsPage = pageHandling(resource, out, service);
@@ -124,12 +124,17 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
      *
      * @return whether it was an image for which we have written a markdown reference
      */
-    protected boolean handleImage(Resource resource, PrintWriter out) {
+    protected boolean handleImage(Resource resource, PrintWriter out, SlingHttpServletResponse response) {
         if (JcrConstants.JCR_CONTENT.equals(resource.getName()) && resource.isResourceType("nt:resource")) {
             String mimeType = resource.getValueMap().get("jcr:mimeType", String.class);
             if (StringUtils.startsWith(mimeType, "image/")) {
                 String name = StringUtils.defaultString(resource.getValueMap().get("jcr:title", String.class), resource.getName());
                 out.println("![" + name + "](" + resource.getParent().getPath() + ")");
+                try {
+                    response.addHeader(ApproximateMarkdownService.HEADER_IMAGEPATH, resource.getParent().getPath());
+                } catch (RuntimeException e) {
+                    LOG.warn("Unable to set header " + ApproximateMarkdownService.HEADER_IMAGEPATH + " to " + resource.getParent().getPath(), e);
+                }
                 return true;
             }
         }

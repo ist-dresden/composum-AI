@@ -65,6 +65,7 @@
                 this.$spinner = this.$el.find('.loading-indicator');
                 this.$response = this.$el.find('.ai-response-field');
                 this.$sourceContent = this.$el.find('.ai-source-field');
+                this.$sourceImage = this.$el.find('.ai-source-image');
 
                 this.$urlContainer = this.$el.find('.composum-ai-url-container');
                 this.$urlField = this.$el.find('.composum-ai-url-field');
@@ -222,10 +223,10 @@
                         this.setSourceContent(this.widget.getValue());
                         break;
                     case 'component':
-                        this.retrieveValue(this.componentPath, (value) => this.setSourceContent(value));
+                        this.retrieveValue(this.componentPath, this.setSourceContent.bind(this));
                         break;
                     case 'page':
-                        this.retrieveValue(this.pagePath, (value) => this.setSourceContent(value));
+                        this.retrieveValue(this.pagePath, this.setSourceContent.bind(this));
                         break;
                     case 'empty':
                         this.setSourceContent('');
@@ -238,7 +239,7 @@
                         break;
                     default:
                         if (key.startsWith('/content/')) {
-                            this.retrieveValue(key, (value) => this.setSourceContent(value));
+                            this.retrieveValue(key, this.setSourceContent.bind(this));
                         } else {
                             debugger;
                             this.showError('Unknown content selector value ' + key);
@@ -251,11 +252,23 @@
                 this.$contentSelect.val('-');
             },
 
-            setSourceContent(value) {
-                if (this.isRichText) {
-                    core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
+            /** Puts the value into the source field. If imagepath is set, we instead make the image visible instead of the source textarea / rte */
+            setSourceContent(value, imagepath) {
+                if (!imagepath) {
+                    this.$sourceContent.show();
+                    this.$sourceImage.hide();
+                    if (this.isRichText) {
+                        core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
+                    } else {
+                        this.$sourceContent.val(value || '');
+                    }
                 } else {
-                    this.$sourceContent.val(value || '');
+                    // set the imageAlternative to the same size as the textAlternative
+                    this.$sourceImage.css('width', this.$sourceContent.css('width'));
+                    this.$sourceImage.css('height', this.$sourceContent.css('height'));
+                    this.$sourceContent.hide();
+                    this.$sourceImage.show();
+                    this.$sourceImage.css('background-image', 'url(' + imagepath + ')');
                 }
             },
 
@@ -273,8 +286,8 @@
                         (this.isRichText ? '.html' : '.md') + core.encodePath(path),
                     type: "GET",
                     dataType: "text",
-                    success: (data) => {
-                        callback(data);
+                    success: (data, status, xhr) => {
+                        callback(data, xhr.getResponseHeader('imagepath'));
                     },
                     error: (xhr, status, error) => {
                         console.error("error loading approximate markdown", xhr, status, error);

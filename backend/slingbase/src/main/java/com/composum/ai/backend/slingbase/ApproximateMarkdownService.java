@@ -16,6 +16,11 @@ import org.apache.sling.api.resource.Resource;
 public interface ApproximateMarkdownService {
 
     /**
+     * An additional header for the response that tells that the path is actually an image and gives its path.
+     */
+    String HEADER_IMAGEPATH = "imagepath";
+
+    /**
      * Generates a text formatted with markdown that heuristically represents the text content of a page or resource, mainly for use with the AI.
      * That is rather heuristically - it cannot faithfully represent the page, but will probably be enough to generate summaries, keywords and so forth.
      *

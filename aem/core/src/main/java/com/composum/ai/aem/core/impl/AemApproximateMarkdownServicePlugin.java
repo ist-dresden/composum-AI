@@ -57,7 +57,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             @Nonnull Resource resource, @Nonnull PrintWriter out,
             @Nonnull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
-        if (renderDamAssets(resource, out)) {
+        if (renderDamAssets(resource, out, response)) {
             return PluginResult.HANDLED_ALL;
         }
         if (resourceRendersAsComponentMatching(resource, FULLY_IGNORED_TYPES)) {
@@ -311,7 +311,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     /**
      * If the resource is a dam:Asset or a dam:AssetContent jcr:content then we return an image link
      */
-    protected boolean renderDamAssets(Resource resource, PrintWriter out) {
+    protected boolean renderDamAssets(Resource resource, PrintWriter out, SlingHttpServletResponse response) {
         Resource assetNode = resource;
         if (resource.isResourceType("dam:AssetContent")) {
             assetNode = resource.getParent();
@@ -321,6 +321,11 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             if (StringUtils.startsWith(mimeType, "image/")) {
                 String name = StringUtils.defaultString(assetNode.getValueMap().get("jcr:content/jcr:title", String.class), assetNode.getName());
                 out.println("![" + name + "](" + assetNode.getPath());
+                try {
+                    response.addHeader(ApproximateMarkdownService.HEADER_IMAGEPATH, resource.getParent().getPath());
+                } catch (RuntimeException e) {
+                    LOG.warn("Unable to set header " + ApproximateMarkdownService.HEADER_IMAGEPATH + " to " + resource.getParent().getPath(), e);
+                }
                 return true;
             }
         }
