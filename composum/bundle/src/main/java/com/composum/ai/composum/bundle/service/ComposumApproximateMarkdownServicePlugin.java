@@ -1,5 +1,8 @@
 package com.composum.ai.composum.bundle.service;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -9,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -164,6 +168,7 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
                         return null;
                     }
                     byte[] data = is.readAllBytes();
+                    data = resizeToMaxSize(data, mimeType, 512);
                     return "data:" + mimeType + ";base64," + new String(Base64.getEncoder().encode(data));
                 } catch (IOException e) {
                     LOG.warn("Unable to get InputStream from image resource {}", imageContentResource.getPath(), e);
@@ -172,4 +177,27 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
         }
         return null;
     }
+
+    /**
+     * We resize the image to a maximum width and height of maxSize, keeping the aspect ratio. If it's smaller, it's
+     * returned as is. It could be of types image/jpeg, image/png or image/gif .
+     */
+    protected byte[] resizeToMaxSize(@Nonnull byte[] imageData, String mimeType, int maxSize) throws IOException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+        BufferedImage originalImage = ImageIO.read(inputStream);
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+        if (width <= maxSize && height <= maxSize) {
+            return imageData;
+        }
+        double factor = maxSize * 1.0 / (Math.max(width, height) + 1);
+        int newWidth = (int) (width * factor);
+        int newHeight = (int) (height * factor);
+        BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, originalImage.getType());
+        resizedImage.createGraphics().drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(resizedImage, mimeType.substring("image/".length()), outputStream);
+        return outputStream.toByteArray();
+    }
+
 }

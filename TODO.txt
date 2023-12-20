@@ -31,3 +31,11 @@ ignore: align, fileReference, target, style, element
 ## Check out Adobe Sensei GenAI
 
 https://business.adobe.com/summit/2023/sessions/opening-keynote-gs1.html at 1:20:00 or something
+
+## Images
+
+https://github.com/TheoKanning/openai-java/issues/397
+Alternative: https://github.com/namankhurpia/Easy-open-ai
+https://mvnrepository.com/artifact/io.github.namankhurpia/easyopenai -> many dependencies :-(
+
+!!!!! RESCALE IMAGES !!!!!
