@@ -56,8 +56,8 @@ public class GPTChatMessage {
     public String toString() {
         return "GPTChatMessage{" +
                 "role=" + role +
-                ", text='" + content + '\'' +
-                ", imageUrl='" + (imageUrl != null ? "..." : "null") + '\'' +
+                (content != null ? ", text='" + content + '\'' : "") +
+                (imageUrl != null ? ", imageUrl='" + imageUrl + '\'' : "") +
                 '}';
     }
 

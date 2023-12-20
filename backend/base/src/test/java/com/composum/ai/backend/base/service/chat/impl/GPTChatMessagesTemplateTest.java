@@ -40,10 +40,10 @@ public class GPTChatMessagesTemplateTest {
         List<GPTChatMessage> result = template.getMessages(ImmutableMap.of("this", "thisvalue", "that", "that value"));
         assertEquals("Actual result: " + result, 5, result.size());
         // just compare the tostring values of the messages with the expected values
-        assertEquals("GPTChatMessage{role=system, text='system message content', imageUrl='null'}", result.get(0).toString());
-        assertEquals("GPTChatMessage{role=user, text='user message template', imageUrl='null'}", result.get(1).toString());
-        assertEquals("GPTChatMessage{role=assistant, text='assistant message template', imageUrl='null'}", result.get(2).toString());
-        assertEquals("GPTChatMessage{role=user, text='data with placeholder thisvalue or that value', imageUrl='null'}", result.get(3).toString());
+        assertEquals("GPTChatMessage{role=system, text='system message content'}", result.get(0).toString());
+        assertEquals("GPTChatMessage{role=user, text='user message template'}", result.get(1).toString());
+        assertEquals("GPTChatMessage{role=assistant, text='assistant message template'}", result.get(2).toString());
+        assertEquals("GPTChatMessage{role=user, text='data with placeholder thisvalue or that value'}", result.get(3).toString());
     }
 
 
