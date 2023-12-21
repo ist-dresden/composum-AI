@@ -452,6 +452,7 @@
                 if (error) {
                     this.$alert.text(error);
                     this.$alert.show();
+                    this.$alert[0].scrollIntoView();
                 } else {
                     this.$alert.hide();
                 }
