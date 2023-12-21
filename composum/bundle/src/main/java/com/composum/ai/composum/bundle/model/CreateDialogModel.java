@@ -2,8 +2,9 @@ package com.composum.ai.composum.bundle.model;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.pages.commons.model.AbstractModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 public class CreateDialogModel extends AbstractModel {
 
@@ -46,12 +50,13 @@ public class CreateDialogModel extends AbstractModel {
         return readJsonFile("create/textlengths.json");
     }
 
+    private static final Gson gson = new GsonBuilder().create();
+
     static Map<String, String> readJsonFile(String filePath) {
         try {
-            final ObjectMapper mapper = new ObjectMapper();
             InputStream inputStream = CreateDialogModel.class.getClassLoader().getResourceAsStream(filePath);
-            return mapper.readValue(inputStream, Map.class);
-        } catch (IOException e) {
+            return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Map.class);
+        } catch (JsonSyntaxException | JsonIOException e) {
             LOG.error("Cannot read {}", filePath, e);
             return null;
         }

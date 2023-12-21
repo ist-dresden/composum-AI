@@ -1,6 +1,8 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
 import java.util.List;
+
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.google.gson.annotations.SerializedName;
 
 public class ChatCompletionRequest {
@@ -15,7 +17,10 @@ public class ChatCompletionRequest {
     private int maxTokens;
 
     @SerializedName("stream")
-    private boolean stream;
+    private Boolean stream;
+
+    @SerializedName("temperature")
+    private Double temperature;
 
     // Getters and setters
     public String getModel() {
@@ -42,12 +47,20 @@ public class ChatCompletionRequest {
         this.maxTokens = maxTokens;
     }
 
-    public boolean isStream() {
+    public Boolean isStream() {
         return stream;
     }
 
-    public void setStream(boolean stream) {
+    public void setStream(Boolean stream) {
         this.stream = stream;
+    }
+
+    public Double getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(Double temperature) {
+        this.temperature = temperature;
     }
 
     public enum Role {
@@ -56,13 +69,19 @@ public class ChatCompletionRequest {
         @SerializedName("assistant")
         ASSISTANT,
         @SerializedName("system")
-        SYSTEM
-    }
+        SYSTEM;
 
-    public enum Type {
-        @SerializedName("text")
-        TEXT,
-        @SerializedName("image_url")
-        IMAGE_URL
+        public static Role make(GPTMessageRole role) {
+            switch (role) {
+                case USER:
+                    return USER;
+                case SYSTEM:
+                    return SYSTEM;
+                case ASSISTANT:
+                    return ASSISTANT;
+                default:
+                    throw new IllegalArgumentException("Unknown role " + role);
+            }
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
 import java.util.List;
+
+import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.google.gson.annotations.SerializedName;
 
 public class ChatCompletionResponse {
@@ -89,6 +91,22 @@ public class ChatCompletionResponse {
         @SerializedName("length")
         LENGTH,
         @SerializedName("content_filter")
-        CONTENT_FILTER
+        CONTENT_FILTER;
+
+        public static GPTFinishReason toGPTFinishReason(FinishReason finishReason) {
+            if (finishReason == null) {
+                return null;
+            }
+            switch (finishReason) {
+                case STOP:
+                    return GPTFinishReason.STOP;
+                case LENGTH:
+                    return GPTFinishReason.LENGTH;
+                case CONTENT_FILTER:
+                    return GPTFinishReason.CONTENT_FILTER;
+                default:
+                    throw new IllegalArgumentException("Unknown finish reason: " + finishReason);
+            }
+        }
     }
 }

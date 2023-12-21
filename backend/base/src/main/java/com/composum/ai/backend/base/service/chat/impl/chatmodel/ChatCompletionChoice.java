@@ -8,7 +8,10 @@ public class ChatCompletionChoice {
     private int index;
 
     @SerializedName("message")
-    private ChatCompletionMessage message;
+    private ChatCompletionChoiceMessage message;
+
+    @SerializedName("delta")
+    private ChatCompletionChoiceMessage delta;
 
     @SerializedName("finish_reason")
     private ChatCompletionResponse.FinishReason finishReason;
@@ -22,12 +25,23 @@ public class ChatCompletionChoice {
         this.index = index;
     }
 
-    public ChatCompletionMessage getMessage() {
+    public ChatCompletionChoiceMessage getMessage() {
         return message;
     }
 
-    public void setMessage(ChatCompletionMessage message) {
+    public void setMessage(ChatCompletionChoiceMessage message) {
         this.message = message;
+    }
+
+    /**
+     * Alternative to {@link #getMessage()} if it's a response chunk.
+     */
+    public ChatCompletionChoiceMessage getDelta() {
+        return delta;
+    }
+
+    public void setDelta(ChatCompletionChoiceMessage delta) {
+        this.delta = delta;
     }
 
     public ChatCompletionResponse.FinishReason getFinishReason() {

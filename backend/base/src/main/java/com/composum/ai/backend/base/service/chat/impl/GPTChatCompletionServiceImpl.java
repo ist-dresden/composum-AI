@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -65,19 +66,17 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
-import com.composum.ai.backend.base.service.chat.GPTMessageRole;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
-import com.theokanning.openai.completion.chat.ChatCompletionChoice;
-import com.theokanning.openai.completion.chat.ChatCompletionChunk;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatMessage;
 
 /**
  * Implements the actual access to the ChatGPT chat API.
@@ -124,7 +123,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     private CloseableHttpAsyncClient httpAsyncClient;
 
-    private ObjectMapper mapper;
+    private static final Gson gson = new GsonBuilder().create();
 
     private final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
@@ -200,9 +199,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                             .setResponseTimeout(this.requestTimeout, TimeUnit.SECONDS).build())
                     .build();
             this.httpAsyncClient.start();
-            mapper = new ObjectMapper();
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread thread = Executors.defaultThreadFactory().newThread(r);
@@ -228,7 +224,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.defaultModel = null;
         this.limiter = null;
         this.gptLimiter = null;
-        this.mapper = null;
         this.bundleContext = null;
         this.templates.clear();
         this.temperature = null;
@@ -358,19 +353,19 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     LOG.debug("Response {} from GPT received DONE", id);
                     return;
                 }
-                ChatCompletionChunk chunk = mapper.readerFor(ChatCompletionChunk.class).readValue(line);
+                ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
                 ChatCompletionChoice choice = chunk.getChoices().get(0);
-                String content = choice.getMessage().getContent();
+                String content = choice.getDelta().getContent();
                 if (content != null && !content.isEmpty()) {
                     LOG.trace("Response {} from GPT: {}", id, content);
                     callback.onNext(content);
                 }
-                GPTFinishReason finishReason = GPTFinishReason.fromChatGPT(choice.getFinishReason());
+                GPTFinishReason finishReason = ChatCompletionResponse.FinishReason.toGPTFinishReason(choice.getFinishReason());
                 if (finishReason != null) {
                     LOG.debug("Response {} from GPT finished with reason {}", id, finishReason);
                     callback.onFinish(finishReason);
                 }
-            } catch (RuntimeException | IOException e) {
+            } catch (RuntimeException e) {
                 LOG.error("Id {} Cannot deserialize {}", id, line, e);
                 GPTException gptException = new GPTException("Cannot deserialize " + line, e);
                 callback.onError(gptException);
@@ -486,28 +481,28 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     protected String createJsonRequest(GPTChatRequest request) throws JsonProcessingException {
-        List<ChatMessage> messages = new ArrayList<>();
+        List<ChatCompletionMessage> messages = new ArrayList<>();
         for (GPTChatMessage message : request.getMessages()) {
-            String role = message.getRole().toString();
-            messages.add(new ChatMessage(role, message.getContent()));
-            // FIXME(hps,20.12.23) XXX OUCH - NO SUPPORT OF IMAGES YET!
+            messages.add(ChatCompletionMessage.make(message));
         }
-        while (!messages.isEmpty() && StringUtil.isBlank(messages.get(messages.size() - 1).getContent())) {
-            LOG.debug("Removing empty last message."); // suspicious - likely misusage of the API
-            messages.remove(messages.size() - 1);
+        for (Iterator<ChatCompletionMessage> messageIterator = messages.iterator(); messageIterator.hasNext(); ) {
+            ChatCompletionMessage message = messageIterator.next();
+            if (message.isEmpty(null)) {
+                LOG.debug("Removing empty message {}", message); // suspicious - likely misusage of the API
+                messageIterator.remove();
+            }
         }
-        if (!messages.isEmpty() && messages.get(messages.size() - 1).getRole() == GPTMessageRole.ASSISTANT.toString()) {
+        if (!messages.isEmpty() && messages.get(messages.size() - 1).getRole() == ChatCompletionRequest.Role.ASSISTANT) {
             LOG.debug("Removing last message because it's an assistant message and that'd be confusing for GPT.");
             messages.remove(messages.size() - 1);
         }
-        ChatCompletionRequest externalRequest = ChatCompletionRequest.builder()
-                .model(defaultModel)
-                .messages(messages)
-                .temperature(temperature)
-                .maxTokens(request.getMaxTokens())
-                .stream(Boolean.TRUE)
-                .build();
-        String jsonRequest = mapper.writeValueAsString(externalRequest);
+        ChatCompletionRequest externalRequest = new ChatCompletionRequest();
+        externalRequest.setModel(defaultModel);
+        externalRequest.setMessages(messages);
+        externalRequest.setTemperature(temperature);
+        externalRequest.setMaxTokens(request.getMaxTokens());
+        externalRequest.setStream(Boolean.TRUE);
+        String jsonRequest = gson.toJson(externalRequest);
         return jsonRequest;
     }
 
@@ -703,7 +698,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     result.completeExceptionally(retryableException);
                     throw retryableException;
                 }
-                GPTException gptException = new GPTException("Error response from GPT: " + resultBuilder);
+                GPTException gptException = new GPTException("Error response from GPT (status " + errorStatusCode
+                        + ") : " + resultBuilder);
                 callback.onError(gptException);
                 result.completeExceptionally(gptException);
                 throw gptException;
