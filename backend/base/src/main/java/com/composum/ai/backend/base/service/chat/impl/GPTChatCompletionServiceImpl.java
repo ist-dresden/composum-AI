@@ -68,6 +68,7 @@ import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -120,6 +121,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     private String apiKey;
     private String defaultModel;
+    private String imageModel;
 
     private CloseableHttpAsyncClient httpAsyncClient;
 
@@ -165,6 +167,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
         this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
         this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
+        this.imageModel = config != null && config.imageModel() != null && !config.imageModel().trim().isEmpty() ? config.imageModel().trim() : null;
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
@@ -222,6 +225,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
         this.apiKey = null;
         this.defaultModel = null;
+        this.imageModel = null;
         this.limiter = null;
         this.gptLimiter = null;
         this.bundleContext = null;
@@ -325,7 +329,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             String jsonRequest = createJsonRequest(request);
             callback.setRequest(jsonRequest);
 
-            LOG.debug("Sending streaming request {} to GPT: {}", id, jsonRequest);
+            if (LOG.isDebugEnabled()) {
+                // replace data:image/jpeg;base64,{base64_image} with data:image/jpeg;base64, ...
+                String shortenedRequest = jsonRequest.replaceAll("data:image/[^;]+;base64,[^\\}]+\\}", "data:image/jpeg;base64,{base64_image}");
+                LOG.debug("Sending streaming request {} to GPT: {}", id, shortenedRequest);
+            }
 
             SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
@@ -496,8 +504,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             LOG.debug("Removing last message because it's an assistant message and that'd be confusing for GPT.");
             messages.remove(messages.size() - 1);
         }
+        boolean hasImage = messages.stream().flatMap(m -> m.getContent().stream())
+                .anyMatch(m -> m.getType() == ChatCompletionMessagePart.Type.IMAGE_URL);
+        if (hasImage && imageModel == null) {
+            LOG.error("No image model configured - defaultModel {} imageModel {}", defaultModel, imageModel);
+            throw new IllegalArgumentException("Cannot use image as input, no image model configured.");
+        }
         ChatCompletionRequest externalRequest = new ChatCompletionRequest();
-        externalRequest.setModel(defaultModel);
+        externalRequest.setModel(hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(temperature);
         externalRequest.setMaxTokens(request.getMaxTokens());
@@ -608,6 +622,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
         String defaultModel();
+
+        @AttributeDefinition(name = "Optional, a model that is used if an image is given as input. If not given, that is rejected.")
+        String imageModel();
 
         @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")
         String temperature();

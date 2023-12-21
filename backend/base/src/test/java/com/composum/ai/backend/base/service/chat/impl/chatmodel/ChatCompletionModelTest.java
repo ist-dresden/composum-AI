@@ -25,7 +25,7 @@ public class ChatCompletionModelTest {
                         "    {\"role\": \"assistant\", \"content\": \"Hello!\"},\n" +
                         "    {\"role\": \"user\", \"content\": [\n" +
                         "      {\"type\": \"text\", \"text\": \"What?s in this image?\"},\n" +
-                        "      {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg\"}}\n" +
+                        "      {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg\", \"detail\":\"low\"}}\n" +
                         "    ]}\n" +
                         "  ],\n" +
                         "  \"max_tokens\": 300,\n" +

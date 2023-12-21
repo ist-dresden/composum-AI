@@ -14,7 +14,7 @@ public class ChatCompletionRequest {
     private List<ChatCompletionMessage> messages;
 
     @SerializedName("max_tokens")
-    private int maxTokens;
+    private Integer maxTokens;
 
     @SerializedName("stream")
     private Boolean stream;
@@ -39,11 +39,11 @@ public class ChatCompletionRequest {
         this.messages = messages;
     }
 
-    public int getMaxTokens() {
+    public Integer getMaxTokens() {
         return maxTokens;
     }
 
-    public void setMaxTokens(int maxTokens) {
+    public void setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
     }
 

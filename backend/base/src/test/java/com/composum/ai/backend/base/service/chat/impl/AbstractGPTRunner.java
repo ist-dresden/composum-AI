@@ -47,6 +47,11 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public String imageModel() {
+                return "gpt-4-vision-preview";
+            }
+
+            @Override
             public String temperature() {
                 return null;
             }

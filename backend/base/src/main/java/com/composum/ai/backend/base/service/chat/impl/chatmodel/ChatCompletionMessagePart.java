@@ -100,6 +100,9 @@ public class ChatCompletionMessagePart {
         @SerializedName("url")
         private String url;
 
+        @SerializedName("detail")
+        private ImageDetail detail = ImageDetail.LOW;
+
         // Getters and setters
 
         public String getUrl() {
@@ -110,7 +113,23 @@ public class ChatCompletionMessagePart {
             this.url = url;
         }
 
+        public ImageDetail getDetail() {
+            return detail;
+        }
+
+        public void setDetail(ImageDetail detail) {
+            this.detail = detail;
+        }
+
     }
+
+    public enum ImageDetail {
+        @SerializedName("low")
+        LOW,
+        @SerializedName("high")
+        HIGH
+    }
+
 
     public static class ChatCompletionMessagePartListDeSerializer implements JsonDeserializer<List<ChatCompletionMessagePart>>,
             JsonSerializer<List<ChatCompletionMessagePart>> {
