@@ -69,8 +69,8 @@
                                                      granite:class="composum-ai-content-selector">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
-                                                path="/conf/composum-ai/settings/dialogs/contentcreation/contentselectors"/>
+                                                sling:resourceType="composum-ai/servlets/contentcreationselectors"
+                                                additionalAttribute="17"/>
                                     </contentSelector>
                                     <url
                                             jcr:primaryType="nt:unstructured"
