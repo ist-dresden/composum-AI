@@ -352,7 +352,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         }
         if (assetNode.isResourceType("dam:Asset")) {
             String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
-            Resource originalRendition = assetNode.getChild("/renditions/original/jcr:content");
+            Resource originalRendition = assetNode.getChild("jcr:content/renditions/original/jcr:content");
             if (StringUtils.startsWith(mimeType, "image/") && originalRendition != null) {
                 try (InputStream is = originalRendition.adaptTo(InputStream.class)) {
                     if (is == null) {

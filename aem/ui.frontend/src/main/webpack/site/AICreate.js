@@ -36,7 +36,9 @@ class AICreate {
                         this.runningxhr = undefined;
                         return response.json();
                     } else {
-                        throw new Error("Unexpected response code " + response.status);
+                        return response.text().then(errMsg => {
+                            throw new Error("Unexpected response code " + response.status + " : " + errMsg);
+                        });
                     }
                 })
                 .then(data => {
@@ -48,7 +50,7 @@ class AICreate {
                         throw new Error("Bug: No streamid response " + JSON.stringify(data));
                     }
                 })
-                .catch(error => this.processError(error));
+                .catch(this.processError.bind(this));
         });
     }
 
@@ -68,7 +70,8 @@ class AICreate {
         if (this.debug) console.log("AICreate ajaxError", arguments);
         debugger;
         this.runningxhr = undefined;
-        this.errorCallback(error);
+        const shortedError = error.toString().substring(0, 400);
+        this.errorCallback(shortedError);
     }
 
     startEventStream(streamid) {

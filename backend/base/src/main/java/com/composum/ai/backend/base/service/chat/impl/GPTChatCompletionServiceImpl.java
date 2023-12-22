@@ -107,6 +107,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
     public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
+    public static final String DEFAULT_IMAGE_MODEL = "gpt-4-vision-preview";
+
     private static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
     private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
 
@@ -623,7 +625,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
         String defaultModel();
 
-        @AttributeDefinition(name = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, that is rejected.")
+        @AttributeDefinition(name = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, that is rejected.",
+                defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel();
 
         @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")

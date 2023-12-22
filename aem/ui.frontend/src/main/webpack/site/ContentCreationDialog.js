@@ -304,6 +304,7 @@ class ContentCreationDialog {
         } else {
             const $heightReference = $sourceContainer.find('.coral-Form-field');
             const height = $heightReference.height();
+            this.$urlContainer.hide();
             $sourceContainer.addClass('hidden');
             $imageContainer.removeClass('hidden');
             // const $image = $imageContainer.find('.composum-ai-source-image');
@@ -373,7 +374,7 @@ class ContentCreationDialog {
         let imagepath = $image.data('imagepath');
         const data = {
             prompt: this.$prompt.val(),
-            source: imagepath ? undefined : this.getSourceContent(),
+            source: imagepath ? '' : this.getSourceContent(),
             inputImagePath: imagepath,
             textLength: this.$textLengthSelector.val(),
             richText: this.isRichtext,
