@@ -1,5 +1,7 @@
 # List of minor Todos
 
+Image description from URL?
+
 AEM for content fragments?
 URL as base text , inner links
 Append button for AEM
