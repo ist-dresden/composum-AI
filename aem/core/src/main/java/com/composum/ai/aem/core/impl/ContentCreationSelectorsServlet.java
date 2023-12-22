@@ -23,14 +23,16 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.adobe.granite.ui.components.ds.ValueMapResource;
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.google.gson.Gson;
 
 /**
- * Servlet that reads the content selectors from a JSON file, adds some things and returns that JSON.
+ * Servlet that reads the content selectors from a JSON file, adds links in the content and provides that to the dialog.
  */
 @Component(service = Servlet.class,
         property = {
@@ -46,14 +48,46 @@ public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
      */
     public static final String PATH_CONTENTSELECTORS = "/conf/composum-ai/settings/dialogs/contentcreation/contentselectors.json";
 
+    @Reference
+    private ApproximateMarkdownService approximateMarkdownService;
+
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
+        Map<String, String> contentSelectors = readPredefinedContentSelectors(request);
+        String path = request.getParameter("path");
+        Resource resource = request.getResourceResolver().getResource(path);
+        if (resource != null) {
+            addContentPaths(resource, contentSelectors);
+        }
+        DataSource dataSource = transformToDatasource(request, contentSelectors);
+        request.setAttribute(DataSource.class.getName(), dataSource);
+    }
+
+    /**
+     * We look for content paths in the component and it's parent. That seems more appropriate than the component itself
+     * in AEM - often interesting links are contained one level up, e.g. for text fields in teasers.
+     */
+    protected void addContentPaths(Resource resource, Map<String, String> contentSelectors) {
+        if (resource.getPath().contains("/jcr:content/")) {
+            resource = resource.getParent();
+        }
+        List<ApproximateMarkdownService.Link> componentLinks = approximateMarkdownService.getComponentLinks(resource);
+        for (ApproximateMarkdownService.Link link : componentLinks) {
+            contentSelectors.put(link.getPath(), link.getTitle() + " (" + link.getPath() + ")");
+        }
+    }
+
+    protected Map<String, String> readPredefinedContentSelectors(SlingHttpServletRequest request) throws IOException {
         Resource resource = request.getResourceResolver().getResource(PATH_CONTENTSELECTORS);
         Map<String, String> contentSelectors;
         try (InputStream in = resource.adaptTo(InputStream.class);
              Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
             contentSelectors = gson.fromJson(reader, Map.class);
         }
+        return contentSelectors;
+    }
+
+    protected static DataSource transformToDatasource(SlingHttpServletRequest request, Map<String, String> contentSelectors) {
         List<Resource> resourceList = contentSelectors.entrySet().stream()
                 .map(entry -> {
                     Map<String, Object> values = new HashMap<>();
@@ -64,6 +98,7 @@ public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
                 })
                 .collect(Collectors.toList());
         DataSource dataSource = new SimpleDataSource(resourceList.iterator());
-        request.setAttribute(DataSource.class.getName(), dataSource);
+        return dataSource;
     }
+
 }

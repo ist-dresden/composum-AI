@@ -241,8 +241,8 @@
                         if (key.startsWith('/content/')) {
                             this.retrieveValue(key, this.setSourceContent.bind(this));
                         } else {
-                            debugger;
                             this.showError('Unknown content selector value ' + key);
+                            debugger;
                         }
                 }
             },

@@ -1,7 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {errorText, findSingleElement, coralSelectValue} from './common.js';
+import {errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
@@ -223,10 +223,10 @@ class ContentCreationDialog {
                 this.setSourceContent(this.oldContent);
                 break;
             case 'component':
-                this.retrieveValue(this.componentPath, (value) => this.setSourceContent(value));
+                this.retrieveValue(this.componentPath, this.setSourceContent.bind(this));
                 break;
             case 'page':
-                this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContent(value));
+                this.retrieveValue(this.pagePath(this.componentPath), this.setSourceContent.bind(this));
                 break;
             case 'url':
                 this.showError();
@@ -239,7 +239,12 @@ class ContentCreationDialog {
                 this.setSourceContent(''); // waiting for input
                 break;
             default:
-                this.showError('Unknown content selector value ' + key);
+                if (key.startsWith('/content/')) {
+                    this.retrieveValue(key, this.setSourceContent.bind(this));
+                } else {
+                    this.showError('Unknown content selector value ' + key);
+                    debugger;
+                }
         }
     }
 
