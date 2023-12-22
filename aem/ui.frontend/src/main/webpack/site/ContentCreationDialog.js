@@ -289,9 +289,30 @@ class ContentCreationDialog {
         return rte;
     }
 
-    setSourceContent(value) {
-        const thevalue = value || '';
-        this.isRichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
+    /** Puts the value into the source field. If imagepath is set, we instead make the image visible instead of the source textarea / rte */
+    setSourceContent(value, imagepath) {
+        console.log("setSourceContent", arguments);
+        const $sourceContainer = this.$dialog.find('.composum-ai-source-container');
+        const $imageContainer = this.$dialog.find('.composum-ai-source-image-container');
+        const $image = $imageContainer.find('.composum-ai-source-image');
+        $sourceContainer.removeClass('hidden');
+        $imageContainer.addClass('hidden');
+        if (!imagepath) {
+            const thevalue = value || '';
+            this.isRichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
+            $imageContainer.find('.composum-ai-source-image').data('imagepath', undefined);
+        } else {
+            const $heightReference = $sourceContainer.find('.coral-Form-field');
+            const height = $heightReference.height();
+            $sourceContainer.addClass('hidden');
+            $imageContainer.removeClass('hidden');
+            // const $image = $imageContainer.find('.composum-ai-source-image');
+            // $image[0].outerHtml = '<div class="coral-Form-field composum-ai-source-image></div>';
+            // $image = $imageContainer.find('.composum-ai-source-image');
+            $image.css('background-image', 'url(' + imagepath + ')');
+            $image.data('imagepath', imagepath);
+            $image.css('height', height + 'px');
+        }
     }
 
     getSourceContent() {
@@ -320,8 +341,8 @@ class ContentCreationDialog {
             ),
             type: "GET",
             dataType: "text",
-            success: (data) => {
-                callback(data);
+            success: (data, status, xhr) => {
+                callback(data, xhr.getResponseHeader('imagepath'));
             },
             error: (xhr, status, error) => {
                 console.error("error loading approximate markdown", xhr, status, error);
@@ -347,9 +368,13 @@ class ContentCreationDialog {
     onGenerateButtonClicked(event) {
         if (this.debug) console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
+        const $imageContainer = this.$dialog.find('.composum-ai-source-image-container');
+        const $image = $imageContainer.find('.composum-ai-source-image');
+        let imagepath = $image.data('imagepath');
         const data = {
             prompt: this.$prompt.val(),
-            source: this.getSourceContent(),
+            source: imagepath ? undefined : this.getSourceContent(),
+            inputImagePath: imagepath,
             textLength: this.$textLengthSelector.val(),
             richText: this.isRichtext,
             configBasePath: this.pagePath(this.componentPath)
