@@ -1,24 +1,26 @@
 package com.composum.ai.backend.slingbase;
 
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -38,6 +40,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -98,6 +101,11 @@ public class AICreateServlet extends SlingAllMethodsServlet {
      * as e.g. in "1000|Several paragraphs of text".
      */
     public static final String PARAMETER_TEXTLENGTH = "textLength";
+
+    /**
+     * Parameter to transmit a path to an image instead of a text.
+     */
+    public static final String PARAMETER_INPUT_IMAGE_PATH = "inputImagePath";
 
     /**
      * Session contains a map at this key that maps the streamids to the streaming handle.
@@ -243,11 +251,14 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
         String sourceText = request.getParameter(PARAMETER_SOURCE);
         String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
+        String inputImagePath = request.getParameter(PARAMETER_INPUT_IMAGE_PATH);
         GPTConfiguration config = configurationService.getGPTConfiguration(request, configBasePath);
         String chat = request.getParameter(PARAMETER_CHAT);
-        if (isNoneBlank(sourcePath, sourceText)) {
-            LOG.warn("Cannot use both sourcePath and sourceText");
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Cannot use both sourcePath and sourceText.");
+        if (Stream.of(sourcePath, sourceText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
+            LOG.warn("More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
+                    " given, only one of them is allowed");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
+                    " given, only one of them is allowed");
             return;
         }
         boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
@@ -281,6 +292,18 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 return;
             } else {
                 sourceText = markdownService.approximateMarkdown(resource, request, response);
+            }
+        }
+
+        if (isNotBlank(inputImagePath)) {
+            Resource resource = request.getResourceResolver().getResource(inputImagePath);
+            String imageUrl = markdownService.getImageUrl(resource);
+            if (imageUrl == null) {
+                LOG.warn("No image found at {}", inputImagePath);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No image found at " + inputImagePath);
+                return;
+            } else {
+                additionalParameters.addMessages(Collections.singletonList(new GPTChatMessage(GPTMessageRole.USER, null, imageUrl)));
             }
         }
 

@@ -92,7 +92,7 @@ public class AIServlet extends AbstractServiceServlet {
     public static final String PARAMETER_TEXT = "text";
 
     /**
-     * Parameter to transmit a path to an image.
+     * Parameter to transmit a path to an image instead of a text.
      */
     public static final String PARAMETER_INPUT_IMAGE_PATH = "inputImagePath";
 
