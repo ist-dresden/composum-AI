@@ -623,11 +623,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         String openAiApiKeyFile();
 
         @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
-        String defaultModel();
+        String defaultModel() default DEFAULT_MODEL;
 
         @AttributeDefinition(name = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, that is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
-        String imageModel();
+        String imageModel() default DEFAULT_IMAGE_MODEL;
 
         @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")
         String temperature();

@@ -252,6 +252,9 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         String sourceText = request.getParameter(PARAMETER_SOURCE);
         String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
         String inputImagePath = request.getParameter(PARAMETER_INPUT_IMAGE_PATH);
+        if ("undefined".equals(inputImagePath) || "null".equals(inputImagePath) || StringUtils.isBlank(inputImagePath)) {
+            inputImagePath = null;
+        }
         GPTConfiguration config = configurationService.getGPTConfiguration(request, configBasePath);
         String chat = request.getParameter(PARAMETER_CHAT);
         if (Stream.of(sourcePath, sourceText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
