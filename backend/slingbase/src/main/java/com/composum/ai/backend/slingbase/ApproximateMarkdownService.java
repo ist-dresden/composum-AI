@@ -2,6 +2,7 @@ package com.composum.ai.backend.slingbase;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,7 +54,9 @@ public interface ApproximateMarkdownService {
     String getMarkdown(@Nullable String value);
 
     /**
-     * Determines whether there are links saved in the component that could be used as a proposal for the user to be used as source for the AI via markdown generation etc.
+     * Returns a number of links that are saved in the component or siblings of the component that could be used as
+     * a proposal for the user to be used as source for the AI via markdown generation etc.
+     * This heuristically collects a number of links that might be interesting.
      *
      * @param resource the resource to check
      * @return a list of links, or an empty list if there are none.
@@ -87,6 +90,27 @@ public interface ApproximateMarkdownService {
 
         public String getTitle() {
             return title;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) return true;
+            if (!(object instanceof Link)) return false;
+            Link link = (Link) object;
+            return Objects.equals(getPath(), link.getPath()) && Objects.equals(getTitle(), link.getTitle());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getPath(), getTitle());
+        }
+
+        @Override
+        public String toString() {
+            return "Link{" +
+                    "path='" + path + '\'' +
+                    ", title='" + title + '\'' +
+                    '}';
         }
     }
 

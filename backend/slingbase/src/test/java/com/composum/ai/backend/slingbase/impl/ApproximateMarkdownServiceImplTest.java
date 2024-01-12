@@ -146,9 +146,9 @@ public class ApproximateMarkdownServiceImplTest {
     @Test
     public void testGetComponentLinks() {
         // Setup Mock Resources
-        Resource rootResource = context.create().resource("/content/parent/path/res",
+        Resource rootResource = context.create().resource("/content/parent/path/jcr:content/res",
                 ImmutableMap.of("link1", "/content/parent/path/res1"));
-        context.create().resource("/content/parent/path/res/child",
+        context.create().resource("/content/parent/path/jcr:content/res/child",
                 ImmutableMap.of("link2", "/content/parent/path/child1"));
         // set up resources for the links, one with a title, one with a jcr:title
         context.create().resource("/content/parent/path/res1",

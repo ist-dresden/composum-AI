@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -319,7 +320,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     /**
      * {@inheritDoc}
-     * We traverse the attributes of resource and all children and collect everything that starts with /content .
+     * We traverse the attributes of resource and all children and collect everything that starts with /content.
+     * If there are less than 5 links, we continue with the parent resource until jcr:content is reached.
      * The link title will be the jcr:title or title attribute.
      */
     @NotNull
@@ -329,10 +331,21 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (resource == null) {
             return resourceLinks;
         }
+        Resource searchResource = resource;
         if (resource.getValueMap().isEmpty()) { // attribute resource, use parent
-            collectLinks(resource.getParent(), resourceLinks);
-        } else {
-            collectLinks(resource, resourceLinks);
+            searchResource = resource.getParent();
+        }
+        while (searchResource != null && resourceLinks.size() < 5 && searchResource.getPath().contains("/jcr:content/")) {
+            List<Link> resourceLinkCandidates = new ArrayList<>();
+            collectLinks(searchResource, resourceLinkCandidates);
+            Iterator<Link> iterator = resourceLinkCandidates.iterator();
+            while (resourceLinks.size() < 5 && iterator.hasNext()) {
+                Link link = iterator.next();
+                if (!resourceLinks.contains(link)) {
+                    resourceLinks.add(link);
+                }
+            }
+            searchResource = searchResource.getParent();
         }
         return resourceLinks;
     }
@@ -364,11 +377,14 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                                 title = targetResource.getParent().getName();
                             }
                         }
-                        resourceLinks.add(new Link(path, title));
+                        Link link = new Link(path, title);
+                        if (!resourceLinks.contains(link)) {
+                            resourceLinks.add(link);
+                        }
                     }
                 });
         resource.getChildren().forEach(child -> {
-            resourceLinks.addAll(getComponentLinks(child));
+            collectLinks(child, resourceLinks);
         });
     }
 
