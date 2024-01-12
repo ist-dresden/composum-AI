@@ -229,7 +229,9 @@ class ContentCreationDialog {
                 this.retrieveValue(this.pagePath(this.componentPath), this.setSourceContent.bind(this));
                 break;
             case 'url':
-                this.showError();
+                this.showError(false);
+                this.$urlField.val('');
+                this.onUrlChanged();
                 this.showUrl(true);
                 break;
             case 'empty':
@@ -258,15 +260,17 @@ class ContentCreationDialog {
     }
 
     onUrlChanged(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const url = $(event.target).val();
-        if (url) {
+        if (event && event.preventDefault && event.stopPropagation) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const url = this.$urlField.val();
+        if (url && url.trim().length > 0) {
             console.log('fetching url ', url);
             $.ajax({
                 url: Granite.HTTP.externalize(APPROXIMATED_MARKDOWN_SERVLET
                     + (this.isRichtext ? '.html' : '.md')
-                    + '?fromurl=' + url
+                    + '?fromurl=' + url.trim()
                 ),
                 type: "GET",
                 dataType: "text",
