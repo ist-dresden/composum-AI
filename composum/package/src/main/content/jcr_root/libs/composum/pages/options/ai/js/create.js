@@ -65,6 +65,7 @@
                 this.$spinner = this.$el.find('.loading-indicator');
                 this.$response = this.$el.find('.ai-response-field');
                 this.$sourceContent = this.$el.find('.ai-source-field');
+                this.$sourceImage = this.$el.find('.ai-source-image');
 
                 this.$urlContainer = this.$el.find('.composum-ai-url-container');
                 this.$urlField = this.$el.find('.composum-ai-url-field');
@@ -146,15 +147,17 @@
 
             /** Creates a map that saves the content of all fields of this dialog. */
             makeSaveStateMap: function () {
-                return {
+                const map = {
                     'predefinedPrompts': this.$predefinedPrompts.val(),
                     'contentSelect': this.$contentSelect.val(),
                     'textLength': this.$textLength.val(),
                     'prompt': this.$prompt.val(),
                     'result': this.getResponse(),
                     'source': this.getSourceContent(),
+                    'imagepath': this.$sourceImage.data('imagepath'),
                     'url': this.$urlField.val()
                 };
+                return map;
             },
 
             saveState: function () {
@@ -178,9 +181,10 @@
                 this.$textLength.val(map['textLength']);
                 this.$prompt.val(map['prompt']);
                 this.setResponse(map['result']);
-                this.setSourceContent(map['source']);
+                this.setSourceContent(map['source'], map['imagepath']);
                 this.adjustButtonStates();
                 this.$urlField.val(map['url']);
+                this.contentSelectChanged();
             },
 
             /** Button 'Reset' was clicked. */
@@ -210,10 +214,11 @@
 
             contentSelectChanged: function (event) {
                 console.log("contentSelectChanged", arguments);
-                event.preventDefault();
+                event && event.preventDefault();
                 let contentSelect = this.$contentSelect.val();
                 const key = this.$contentSelect.val();
                 this.$urlContainer.hide();
+                this.$sourceImage.removeData('imagepath');
                 switch (key) {
                     case 'lastoutput':
                         this.setSourceContent(this.getResponse());
@@ -222,22 +227,29 @@
                         this.setSourceContent(this.widget.getValue());
                         break;
                     case 'component':
-                        this.retrieveValue(this.componentPath, (value) => this.setSourceContent(value));
+                        this.retrieveValue(this.componentPath, this.setSourceContent.bind(this));
                         break;
                     case 'page':
-                        this.retrieveValue(this.pagePath, (value) => this.setSourceContent(value));
+                        this.retrieveValue(this.pagePath, this.setSourceContent.bind(this));
                         break;
                     case 'empty':
                         this.setSourceContent('');
                         break;
                     case 'url':
                         this.showError();
+                        this.setSourceContent('');
+                        this.urlChanged();
                         this.$urlContainer.show();
                     case '-':
                         this.setSourceContent('');
                         break;
                     default:
-                        this.showError('Unknown content selector value ' + key);
+                        if (key.startsWith('/content/')) {
+                            this.retrieveValue(key, this.setSourceContent.bind(this));
+                        } else {
+                            this.showError('Unknown content selector value ' + key);
+                            debugger;
+                        }
                 }
             },
 
@@ -246,11 +258,25 @@
                 this.$contentSelect.val('-');
             },
 
-            setSourceContent(value) {
-                if (this.isRichText) {
-                    core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
+            /** Puts the value into the source field. If imagepath is set, we instead make the image visible instead of the source textarea / rte */
+            setSourceContent(value, imagepath) {
+                if (!imagepath) {
+                    this.$sourceContent.show();
+                    this.$sourceImage.hide();
+                    this.$sourceImage.removeData('imagepath');
+                    if (this.isRichText) {
+                        core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
+                    } else {
+                        this.$sourceContent.val(value || '');
+                    }
                 } else {
-                    this.$sourceContent.val(value || '');
+                    // set the imageAlternative to the same size as the textAlternative
+                    this.$sourceImage.css('width', this.$sourceContent.css('width'));
+                    this.$sourceImage.css('height', this.$sourceContent.css('height'));
+                    this.$sourceContent.hide();
+                    this.$sourceImage.show();
+                    this.$sourceImage.css('background-image', 'url(' + imagepath + ')');
+                    this.$sourceImage.data('imagepath', imagepath);
                 }
             },
 
@@ -268,8 +294,8 @@
                         (this.isRichText ? '.html' : '.md') + core.encodePath(path),
                     type: "GET",
                     dataType: "text",
-                    success: (data) => {
-                        callback(data);
+                    success: (data, status, xhr) => {
+                        callback(data, xhr.getResponseHeader('imagepath'));
                     },
                     error: (xhr, status, error) => {
                         console.error("error loading approximate markdown", xhr, status, error);
@@ -279,7 +305,7 @@
             },
 
             urlChanged(event) {
-                event.preventDefault();
+                if (event) event.preventDefault();
                 const url = this.$urlField.val();
                 if (url) {
                     this.showError();
@@ -290,6 +316,7 @@
                         dataType: "text",
                         success: (data) => {
                             this.setSourceContent(data);
+                            this.$contentSelect.val('url');
                         },
                         error: (xhr, status, error) => {
                             console.error("error loading approximate markdown for ", url, xhr, status, error);
@@ -357,11 +384,13 @@
                 let textLength = this.$textLength.val();
                 let prompt = this.$prompt.val();
                 let source = this.getSourceContent();
+                let imagepath = this.$sourceImage.data('imagepath');
 
                 let url = ai.const.url.general.authoring + ".create.json";
                 core.ajaxPost(url, {
                         textLength: textLength,
-                        inputText: source,
+                        inputText: imagepath ? undefined : source,
+                        inputImagePath: imagepath,
                         streaming: this.streaming,
                         richText: this.isRichText,
                         prompt: prompt
@@ -430,6 +459,7 @@
                 if (error) {
                     this.$alert.text(error);
                     this.$alert.show();
+                    this.$alert[0].scrollIntoView();
                 } else {
                     this.$alert.hide();
                 }

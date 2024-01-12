@@ -69,8 +69,8 @@
                                                      granite:class="composum-ai-content-selector">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
-                                                path="/conf/composum-ai/settings/dialogs/contentcreation/contentselectors"/>
+                                                sling:resourceType="composum-ai/servlets/contentcreationselectors"
+                                                additionalAttribute="17"/>
                                     </contentSelector>
                                     <url
                                             jcr:primaryType="nt:unstructured"
@@ -84,7 +84,8 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             fieldDescription="The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed."
                                             fieldLabel="Source Content ('Data' for the instructions)" rows="10"
-                                            name="./sourcePlaintext" granite:class="composum-ai-source-plaintext">
+                                            name="./sourcePlaintext"
+                                            granite:class="composum-ai-source-plaintext composum-ai-source-container">
                                         <granite:rendercondition
                                                 jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
@@ -93,7 +94,7 @@
                                     </sourcePlaintext>
                                     <container
                                             jcr:primaryType="nt:unstructured"
-                                            granite:class="composum-ai-source-richtext"
+                                            granite:class="composum-ai-source-richtext composum-ai-source-container"
                                             sling:resourceType="granite/ui/components/coral/foundation/container">
                                         <items jcr:primaryType="nt:unstructured">
                                             <sourceRichtext
@@ -226,6 +227,21 @@
                                             </sourceRichtext>
                                         </items>
                                     </container>
+                                    <image-container
+                                            jcr:primaryType="nt:unstructured"
+                                            granite:class="composum-ai-source-image-container hidden"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <imagediv
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                    fieldDescription="An image that will be used to inform the AI."
+                                                    fieldLabel="Source Content ('Data' for the instructions)" rows="10"
+                                                    name="./sourceImage"
+                                                    granite:class="composum-ai-source-image">
+                                            </imagediv>
+                                        </items>
+                                    </image-container>
                                 </items>
                             </sourceFieldset>
                         </items>
@@ -241,6 +257,7 @@
                     <generateActionbar
                             jcr:primaryType="nt:unstructured"
                             margin="{Boolean}false"
+                            granite:class="composum-ai-actionbar"
                             sling:resourceType="granite/ui/components/coral/foundation/actionbar">
                         <primary
                                 jcr:primaryType="nt:unstructured">

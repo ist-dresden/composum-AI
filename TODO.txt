@@ -1,5 +1,7 @@
 # List of minor Todos
 
+Image description from URL?
+
 AEM for content fragments?
 URL as base text , inner links
 Append button for AEM
@@ -31,3 +33,14 @@ ignore: align, fileReference, target, style, element
 ## Check out Adobe Sensei GenAI
 
 https://business.adobe.com/summit/2023/sessions/opening-keynote-gs1.html at 1:20:00 or something
+
+## Images
+
+https://github.com/TheoKanning/openai-java/issues/397
+Alternative: https://github.com/namankhurpia/Easy-open-ai
+https://mvnrepository.com/artifact/io.github.namankhurpia/easyopenai -> many dependencies :-(
+
+##
+
+DTB Chat Completion Gen
+https://chat.openai.com/share/c095d1db-4e72-4abe-8794-c1fe9e01fbf7

@@ -3,9 +3,10 @@ package com.composum.ai.backend.base.service.chat;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * A chat message in a dialog with ChatGPT.
+ * A chat message in a dialog with ChatGPT. Currently limited to at most a text message and an image.
  *
  * @see "https://platform.openai.com/docs/guides/chat"
  */
@@ -13,10 +14,18 @@ public class GPTChatMessage {
 
     private final GPTMessageRole role;
     private final String content;
+    private final String imageUrl;
 
     public GPTChatMessage(@Nonnull GPTMessageRole role, @Nonnull String content) {
         this.role = role;
         this.content = content;
+        this.imageUrl = null;
+    }
+
+    public GPTChatMessage(@Nonnull GPTMessageRole role, @Nullable String content, @Nullable String imageUrl) {
+        this.role = role;
+        this.content = content;
+        this.imageUrl = imageUrl;
     }
 
     /**
@@ -34,13 +43,21 @@ public class GPTChatMessage {
     }
 
     /**
+     * The URL with the content of the image to be analyzed.
+     */
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    /**
      * String representation only for debugging.
      */
     @Override
     public String toString() {
         return "GPTChatMessage{" +
                 "role=" + role +
-                ", text='" + content + '\'' +
+                (content != null ? ", text='" + content + '\'' : "") +
+                (imageUrl != null ? ", imageUrl='" + imageUrl + '\'' : "") +
                 '}';
     }
 
@@ -49,12 +66,13 @@ public class GPTChatMessage {
         if (this == o) return true;
         if (!(o instanceof GPTChatMessage)) return false;
         GPTChatMessage that = (GPTChatMessage) o;
-        return getRole() == that.getRole() && Objects.equals(getContent(), that.getContent());
+        return getRole() == that.getRole() && Objects.equals(getContent(), that.getContent()) &&
+                Objects.equals(getImageUrl(), that.getImageUrl());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRole() != null ? getRole().toString() : "", getContent());
+        return Objects.hash(getRole() != null ? getRole().toString() : "", getContent(), getImageUrl());
     }
 
 }

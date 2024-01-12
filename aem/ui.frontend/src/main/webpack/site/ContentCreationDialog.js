@@ -1,7 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {errorText, findSingleElement, coralSelectValue} from './common.js';
+import {errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
@@ -120,12 +120,15 @@ class ContentCreationDialog {
         this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
         this.$urlField = findSingleElement(this.$dialog, '.composum-ai-url-field');
         this.$urlContainer = this.$urlField.parent();
+        this.$imageContainer = findSingleElement(this.$dialog, '.composum-ai-source-image-container');
+        this.$image = findSingleElement(this.$imageContainer, '.composum-ai-source-image');
     }
 
     getDialogStatus() {
         return {
             prompt: this.$prompt.val(),
             source: this.getSourceContent(),
+            imagepath: this.$image.data('imagepath'),
             textLength: this.$textLengthSelector.val(),
             contentSelector: this.$contentSelector.val(),
             predefinedPrompts: this.$predefinedPromptsSelector.val(),
@@ -138,8 +141,8 @@ class ContentCreationDialog {
         this.$contentSelector.val(status.contentSelector);
         this.$textLengthSelector.val(status.textLength);
         this.$prompt.val(status.prompt);
-        if (status.source) {
-            this.setSourceContent(status.source);
+        if (status.source || status.imagepath) {
+            this.setSourceContent(status.source, status.imagepath);
         } else {
             this.setSourceContent(this.oldContent);
         }
@@ -215,6 +218,7 @@ class ContentCreationDialog {
         if (this.debug) console.log("onContentSelectorChanged", arguments);
         const key = this.$contentSelector.val();
         this.showUrl(false);
+        this.$image.removeData('imagepath');
         switch (key) {
             case 'lastoutput':
                 this.setSourceContent(this.getResponse());
@@ -223,13 +227,15 @@ class ContentCreationDialog {
                 this.setSourceContent(this.oldContent);
                 break;
             case 'component':
-                this.retrieveValue(this.componentPath, (value) => this.setSourceContent(value));
+                this.retrieveValue(this.componentPath, this.setSourceContent.bind(this));
                 break;
             case 'page':
-                this.retrieveValue(this.pagePath(this.componentPath), (value) => this.setSourceContent(value));
+                this.retrieveValue(this.pagePath(this.componentPath), this.setSourceContent.bind(this));
                 break;
             case 'url':
-                this.showError();
+                this.showError(false);
+                this.$urlField.val('');
+                this.onUrlChanged();
                 this.showUrl(true);
                 break;
             case 'empty':
@@ -239,7 +245,12 @@ class ContentCreationDialog {
                 this.setSourceContent(''); // waiting for input
                 break;
             default:
-                this.showError('Unknown content selector value ' + key);
+                if (key.startsWith('/content/')) {
+                    this.retrieveValue(key, this.setSourceContent.bind(this));
+                } else {
+                    this.showError('Unknown content selector value ' + key);
+                    debugger;
+                }
         }
     }
 
@@ -253,15 +264,17 @@ class ContentCreationDialog {
     }
 
     onUrlChanged(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const url = $(event.target).val();
-        if (url) {
+        if (event && event.preventDefault && event.stopPropagation) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const url = this.$urlField.val();
+        if (url && url.trim().length > 0) {
             console.log('fetching url ', url);
             $.ajax({
                 url: Granite.HTTP.externalize(APPROXIMATED_MARKDOWN_SERVLET
                     + (this.isRichtext ? '.html' : '.md')
-                    + '?fromurl=' + url
+                    + '?fromurl=' + url.trim()
                 ),
                 type: "GET",
                 dataType: "text",
@@ -284,9 +297,29 @@ class ContentCreationDialog {
         return rte;
     }
 
-    setSourceContent(value) {
-        const thevalue = value || '';
-        this.isRichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
+    /** Puts the value into the source field. If imagepath is set, we instead make the image visible instead of the source textarea / rte */
+    setSourceContent(value, imagepath) {
+        console.log("setSourceContent", arguments);
+        const $sourceContainer = this.$dialog.find('.composum-ai-source-container');
+        $sourceContainer.removeClass('hidden');
+        this.$imageContainer.addClass('hidden');
+        if (!imagepath) {
+            const thevalue = value || '';
+            this.isRichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
+            this.$image.removeData('imagepath');
+        } else {
+            const $heightReference = $sourceContainer.find('.coral-Form-field');
+            const height = $heightReference.height();
+            this.$urlContainer.hide();
+            $sourceContainer.addClass('hidden');
+            this.$imageContainer.removeClass('hidden');
+            // const $image = $imageContainer.find('.composum-ai-source-image');
+            // this.$image[0].outerHtml = '<div class="coral-Form-field composum-ai-source-image></div>';
+            // this.$image = $imageContainer.find('.composum-ai-source-image');
+            this.$image.css('background-image', 'url(' + imagepath + ')');
+            this.$image.data('imagepath', imagepath);
+            this.$image.css('height', height + 'px');
+        }
     }
 
     getSourceContent() {
@@ -315,8 +348,8 @@ class ContentCreationDialog {
             ),
             type: "GET",
             dataType: "text",
-            success: (data) => {
-                callback(data);
+            success: (data, status, xhr) => {
+                callback(data, xhr.getResponseHeader('imagepath'));
             },
             error: (xhr, status, error) => {
                 console.error("error loading approximate markdown", xhr, status, error);
@@ -342,9 +375,11 @@ class ContentCreationDialog {
     onGenerateButtonClicked(event) {
         if (this.debug) console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
+        let imagepath = this.$image.data('imagepath');
         const data = {
             prompt: this.$prompt.val(),
-            source: this.getSourceContent(),
+            source: imagepath ? '' : this.getSourceContent(),
+            inputImagePath: imagepath,
             textLength: this.$textLengthSelector.val(),
             richText: this.isRichtext,
             configBasePath: this.pagePath(this.componentPath)
@@ -352,7 +387,8 @@ class ContentCreationDialog {
         if (this.debug) console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
-        this.$dialog.find('.composum-ai-content-suggestion')[0].scrollIntoView();
+        findSingleElement(this.$dialog, '.composum-ai-actionbar')[0].scrollIntoView();
+        // this also makes content suggestion and loading indicator visible.
     }
 
     streamingCallback(text) {
@@ -403,6 +439,7 @@ class ContentCreationDialog {
             findSingleElement(this.$dialog, '.composum-ai-alert').text(errorText(error));
             findSingleElement(this.$dialog, '.composum-ai-error-columns')
                 .removeClass('hidden').show()[0].scrollIntoView();
+            this.$stopButton
             debugger;
         }
     }

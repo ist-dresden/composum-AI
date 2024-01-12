@@ -1,0 +1,9 @@
+{
+  "widget": "The text field you were editing",
+  "component": "The component you were editing, including subcomponents",
+  "page": "Current page text",
+  "lastoutput": "Current suggestion shown in this dialog (for iterative improvement)",
+  "url": "Text content of an external URL",
+  "empty": "No additional content",
+  "-": "Manually entered source content"
+}

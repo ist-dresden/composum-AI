@@ -22,11 +22,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.theokanning.openai-gpt3-java</groupId>
-            <artifactId>api</artifactId>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.knuddels/jtokkit -->
         <dependency>
             <groupId>com.knuddels</groupId>
@@ -98,7 +93,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.15.4</version>
+            <version>1.17.2</version>
         </dependency>
 
         <!-- Logging -->
@@ -159,7 +154,6 @@
                             com.composum.ai.backend.base.*
                         </Export-Package>
                         <Embed-Dependency>
-                            api*;groupId=com.theokanning.openai-gpt3-java,
                             jtokkit*;groupId=com.knuddels,
                             jsoup*,
                             org.eclipse.mylyn.wikitext*,

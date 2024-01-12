@@ -1,17 +1,26 @@
 package com.composum.ai.composum.bundle.service;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -36,6 +45,9 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
             @NotNull Resource resource, @NotNull PrintWriter out,
             @Nonnull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (handleImage(resource, out, response)) {
+            return PluginResult.HANDLED_ALL;
+        }
         boolean wasHandledAsPage = pageHandling(resource, out, service);
         boolean wasHandledAsTable = !wasHandledAsPage && tableHandling(resource, out, service);
         handleContentReference(resource, out, service, request, response);
@@ -114,5 +126,78 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
         }
     }
 
+    /**
+     * Handle resource that is a jcr:content of type nt:resource with a jcr:mimeType starting with image/
+     * as a markdown image reference to that path.
+     *
+     * @return whether it was an image for which we have written a markdown reference
+     */
+    protected boolean handleImage(Resource resource, PrintWriter out, SlingHttpServletResponse response) {
+        if (JcrConstants.JCR_CONTENT.equals(resource.getName()) && resource.isResourceType("nt:resource")) {
+            String mimeType = resource.getValueMap().get("jcr:mimeType", String.class);
+            if (StringUtils.startsWith(mimeType, "image/")) {
+                String name = StringUtils.defaultString(resource.getValueMap().get("jcr:title", String.class), resource.getName());
+                out.println("![" + name + "](" + resource.getParent().getPath() + ")");
+                try {
+                    response.addHeader(ApproximateMarkdownService.HEADER_IMAGEPATH, resource.getParent().getPath());
+                } catch (RuntimeException e) {
+                    LOG.warn("Unable to set header " + ApproximateMarkdownService.HEADER_IMAGEPATH + " to " + resource.getParent().getPath(), e);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Retrieves the imageURL in a way useable for ChatGPT - usually data:image/jpeg;base64,{base64_image}
+     */
+    @Nullable
+    @Override
+    public String getImageUrl(@Nullable Resource imageResource) {
+        Resource imageContentResource = imageResource;
+        if (imageContentResource != null && imageContentResource.isResourceType("nt:file")) {
+            imageContentResource = imageContentResource.getChild(JcrConstants.JCR_CONTENT);
+        }
+        if (imageContentResource != null && imageContentResource.isResourceType("nt:resource")) {
+            String mimeType = imageContentResource.getValueMap().get("jcr:mimeType", String.class);
+            if (StringUtils.startsWith(mimeType, "image/")) {
+                try (InputStream is = imageContentResource.adaptTo(InputStream.class)) {
+                    if (is == null) {
+                        LOG.warn("Unable to get InputStream from image resource {}", imageContentResource.getPath());
+                        return null;
+                    }
+                    byte[] data = is.readAllBytes();
+                    data = resizeToMaxSize(data, mimeType, 512);
+                    return "data:" + mimeType + ";base64," + new String(Base64.getEncoder().encode(data));
+                } catch (IOException e) {
+                    LOG.warn("Unable to get InputStream from image resource {}", imageContentResource.getPath(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * We resize the image to a maximum width and height of maxSize, keeping the aspect ratio. If it's smaller, it's
+     * returned as is. It could be of types image/jpeg, image/png or image/gif .
+     */
+    protected byte[] resizeToMaxSize(@Nonnull byte[] imageData, String mimeType, int maxSize) throws IOException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+        BufferedImage originalImage = ImageIO.read(inputStream);
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+        if (width <= maxSize && height <= maxSize) {
+            return imageData;
+        }
+        double factor = maxSize * 1.0 / (Math.max(width, height) + 1);
+        int newWidth = (int) (width * factor);
+        int newHeight = (int) (height * factor);
+        BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, originalImage.getType());
+        resizedImage.createGraphics().drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(resizedImage, mimeType.substring("image/".length()), outputStream);
+        return outputStream.toByteArray();
+    }
 
 }

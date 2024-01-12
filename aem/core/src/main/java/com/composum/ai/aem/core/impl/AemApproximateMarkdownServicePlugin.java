@@ -4,8 +4,14 @@ import static com.day.cq.commons.jcr.JcrConstants.JCR_CONTENT;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_DESCRIPTION;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_TITLE;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +20,9 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -57,6 +65,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             @Nonnull Resource resource, @Nonnull PrintWriter out,
             @Nonnull ApproximateMarkdownService service,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (renderDamAssets(resource, out, response)) {
+            return PluginResult.HANDLED_ALL;
+        }
         if (resourceRendersAsComponentMatching(resource, FULLY_IGNORED_TYPES)) {
             return PluginResult.HANDLED_ALL;
         }
@@ -303,6 +314,82 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             }
         }
         return list;
+    }
+
+    /**
+     * If the resource is a dam:Asset or a dam:AssetContent jcr:content then we return an image link
+     */
+    protected boolean renderDamAssets(Resource resource, PrintWriter out, SlingHttpServletResponse response) {
+        Resource assetNode = resource;
+        if (resource.isResourceType("dam:AssetContent")) {
+            assetNode = resource.getParent();
+        }
+        if (assetNode.isResourceType("dam:Asset")) {
+            String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
+            if (StringUtils.startsWith(mimeType, "image/")) {
+                String name = StringUtils.defaultString(assetNode.getValueMap().get("jcr:content/jcr:title", String.class), assetNode.getName());
+                out.println("![" + name + "](" + assetNode.getPath());
+                try {
+                    response.addHeader(ApproximateMarkdownService.HEADER_IMAGEPATH, resource.getParent().getPath());
+                } catch (RuntimeException e) {
+                    LOG.warn("Unable to set header " + ApproximateMarkdownService.HEADER_IMAGEPATH + " to " + resource.getParent().getPath(), e);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Retrieves the imageURL in a way useable for ChatGPT - usually data:image/jpeg;base64,{base64_image}
+     */
+    @Nullable
+    @Override
+    public String getImageUrl(@Nullable Resource imageResource) {
+        Resource assetNode = imageResource;
+        if (imageResource.isResourceType("dam:AssetContent")) {
+            assetNode = imageResource.getParent();
+        }
+        if (assetNode.isResourceType("dam:Asset")) {
+            String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
+            Resource originalRendition = assetNode.getChild("jcr:content/renditions/original/jcr:content");
+            if (StringUtils.startsWith(mimeType, "image/") && originalRendition != null) {
+                try (InputStream is = originalRendition.adaptTo(InputStream.class)) {
+                    if (is == null) {
+                        LOG.warn("Unable to get InputStream from image resource {}", assetNode.getPath());
+                        return null;
+                    }
+                    byte[] data = IOUtils.toByteArray(is);
+                    data = resizeToMaxSize(data, mimeType, 512);
+                    return "data:" + mimeType + ";base64," + new String(Base64.getEncoder().encode(data));
+                } catch (IOException e) {
+                    LOG.warn("Unable to get InputStream from image resource {}", assetNode.getPath(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * We resize the image to a maximum width and height of maxSize, keeping the aspect ratio. If it's smaller, it's
+     * returned as is. It could be of types image/jpeg, image/png or image/gif .
+     */
+    protected byte[] resizeToMaxSize(@Nonnull byte[] imageData, String mimeType, int maxSize) throws IOException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+        BufferedImage originalImage = ImageIO.read(inputStream);
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+        if (width <= maxSize && height <= maxSize) {
+            return imageData;
+        }
+        double factor = maxSize * 1.0 / (Math.max(width, height) + 1);
+        int newWidth = (int) (width * factor);
+        int newHeight = (int) (height * factor);
+        BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, originalImage.getType());
+        resizedImage.createGraphics().drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(resizedImage, mimeType.substring("image/".length()), outputStream);
+        return outputStream.toByteArray();
     }
 
 }

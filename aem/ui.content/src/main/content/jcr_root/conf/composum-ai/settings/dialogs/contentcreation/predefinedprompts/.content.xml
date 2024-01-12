@@ -70,4 +70,7 @@ Do also fix orthographical and grammar errors."></improve>
                       value="Convert the following text from Markdown to HTML:
 
 "></markdown_to_html>
+    <describeImage jcr:primaryType="nt:unstructured" sling:resourceType="nt:unstructured"
+                   text="Describe Image"
+                   value="Please describe the following image in a way that a blind person can understand it."></describeImage>
 </jcr:root>

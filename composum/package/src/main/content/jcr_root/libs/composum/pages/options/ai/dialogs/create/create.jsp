@@ -89,7 +89,7 @@
                                                maxlength="256" type="text" value="" placeholder="">
                                     </div>
 
-                                    <div class="form-group"
+                                    <div class="form-group ai-source-container"
                                          title="${cpn:i18n(slingRequest,'The base text that is modified according to the prompt. Will be overwritten when the Content Selector is changed.')}">
                                         <label for="promptTextarea">
                                             <cpn:text i18n="true">Source Text</cpn:text>
@@ -104,11 +104,13 @@
                                                 </cpp:widgetForm>
                                             </c:when>
                                             <c:otherwise>
-                                                <textarea id="sourcePlaintext" name="sourcePlaintext"
-                                                          class="form-control ai-source-field"
-                                                          rows="10"></textarea>
+                                            <textarea id="sourcePlaintext" name="sourcePlaintext"
+                                                      class="form-control ai-source-field"
+                                                      rows="10"></textarea>
                                             </c:otherwise>
                                         </c:choose>
+                                        <div class="ai-source-image" style="display: none;">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

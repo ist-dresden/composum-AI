@@ -401,6 +401,7 @@
                     console.error("Error generating text: ", data);
                     this.$alert.html("Error generating text: " + JSON.stringify(data));
                     this.$alert.show();
+                    this.$alert[0].scrollIntoView();
                     this.setLoading(false);
                 }
             },
@@ -429,6 +430,7 @@
                 console.error("Error generating text: ", arguments);
                 this.$alert.html("Error generating text: " + JSON.stringify(arguments));
                 this.$alert.show();
+                this.$alert[0].scrollIntoView();
             },
 
             startStreaming: function (streamid) {
@@ -458,6 +460,7 @@
                 this.setLoading(false);
                 this.$alert.text('Connection failed.');
                 this.$alert.show();
+                this.$alert[0].scrollIntoView();
             },
 
             onStreamingFinished: function (event) {
@@ -491,6 +494,7 @@
                 this.abortRunningCalls();
                 this.$alert.text(event.data);
                 this.$alert.show();
+                this.$alert[0].scrollIntoView();
             }
 
         });

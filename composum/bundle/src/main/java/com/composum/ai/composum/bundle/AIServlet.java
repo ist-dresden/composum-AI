@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,6 +28,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -47,6 +50,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
@@ -86,6 +90,11 @@ public class AIServlet extends AbstractServiceServlet {
      * Parameter to transmit a text on which ChatGPT is to operate - not as instructions but as data.
      */
     public static final String PARAMETER_TEXT = "text";
+
+    /**
+     * Parameter to transmit a path to an image instead of a text.
+     */
+    public static final String PARAMETER_INPUT_IMAGE_PATH = "inputImagePath";
 
     /**
      * Parameter to transmit a prompt on which ChatGPT is to operate - that is, the instructions.
@@ -512,9 +521,12 @@ public class AIServlet extends AbstractServiceServlet {
             String textLength = request.getParameter("textLength");
             String inputPath = request.getParameter("inputPath");
             String inputText = request.getParameter("inputText");
+            String inputImagePath = request.getParameter(PARAMETER_INPUT_IMAGE_PATH);
             String chat = request.getParameter(PARAMETER_CHAT);
-            if (isNoneBlank(inputPath, inputText)) {
-                status.error("Both inputPath and inputText given, only one of them is allowed");
+            if (Stream.of(inputPath, inputText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
+                status.error("More than one of inputPath and inputText and " + PARAMETER_INPUT_IMAGE_PATH +
+                        " given, only one of them is allowed");
+                return;
             }
             boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
 
@@ -543,6 +555,16 @@ public class AIServlet extends AbstractServiceServlet {
                         status.error("No resource found at " + inputPath);
                     } else {
                         inputText = markdownService.approximateMarkdown(resource, request, response);
+                    }
+                }
+                if (isNotBlank(inputImagePath)) {
+                    Resource resource = request.getResourceResolver().getResource(inputImagePath);
+                    String imageUrl = markdownService.getImageUrl(resource);
+                    if (imageUrl == null) {
+                        status.error("No image found at " + inputImagePath);
+                        return;
+                    } else {
+                        additionalParameters.addMessages(List.of(new GPTChatMessage(GPTMessageRole.USER, null, imageUrl)));
                     }
                 }
                 if (status.isValid()) {

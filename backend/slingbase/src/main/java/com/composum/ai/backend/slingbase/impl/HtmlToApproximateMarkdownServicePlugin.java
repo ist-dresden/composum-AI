@@ -100,6 +100,10 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
 
             try {
                 String html = renderedAsHTML(resource, request, response);
+                if (StringUtils.isBlank(html)) {
+                    LOG.debug("No HTML generated for {} with resource type {}", resource.getPath(), resource.getResourceType());
+                    return PluginResult.NOT_HANDLED;
+                }
                 String markdown = service.getMarkdown(html);
                 if (StringUtils.isBlank(markdown)) {
                     LOG.debug("No markdown generated for {} with resource type {}", resource.getPath(), resource.getResourceType());
@@ -120,6 +124,12 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             }
         }
         return PluginResult.NOT_HANDLED;
+    }
+
+    @Nullable
+    @Override
+    public String getImageUrl(@Nullable Resource imageResource) {
+        return null;
     }
 
     protected boolean isBecauseOfUnsupportedOperation(Throwable e) {
@@ -173,6 +183,9 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             if (wrappedRequest.hadInvalidOperation) { // if that exception has been swallowed
                 throw new UnsupportedOperationCalled();
             }
+        }
+        if (writer.toString().contains("Resource dumped by HtmlRenderer")) {
+            return null;
         }
         return writer.toString();
     }

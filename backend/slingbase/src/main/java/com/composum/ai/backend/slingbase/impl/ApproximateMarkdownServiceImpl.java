@@ -8,7 +8,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,10 +23,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -314,6 +318,89 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     }
 
+    /**
+     * {@inheritDoc}
+     * We traverse the attributes of resource and all children and collect everything that starts with /content.
+     * If there are less than 5 links, we continue with the parent resource until jcr:content is reached.
+     * The link title will be the jcr:title or title attribute.
+     */
+    @NotNull
+    @Override
+    public List<Link> getComponentLinks(@NotNull Resource resource) {
+        List<Link> resourceLinks = new ArrayList<>();
+        if (resource == null) {
+            return resourceLinks;
+        }
+        Resource searchResource = resource;
+        if (resource.getValueMap().isEmpty()) { // attribute resource, use parent
+            searchResource = resource.getParent();
+        }
+        while (searchResource != null && resourceLinks.size() < 5 && searchResource.getPath().contains("/jcr:content/")) {
+            List<Link> resourceLinkCandidates = new ArrayList<>();
+            collectLinks(searchResource, resourceLinkCandidates);
+            Iterator<Link> iterator = resourceLinkCandidates.iterator();
+            while (resourceLinks.size() < 5 && iterator.hasNext()) {
+                Link link = iterator.next();
+                if (!resourceLinks.contains(link)) {
+                    resourceLinks.add(link);
+                }
+            }
+            searchResource = searchResource.getParent();
+        }
+        return resourceLinks;
+    }
+
+    /**
+     * Collects links from a resource and its children. The link title will be the jcr:title or title attribute.
+     *
+     * @param resource      the resource to collect links from
+     * @param resourceLinks the list to store the collected links
+     */
+    protected void collectLinks(@NotNull Resource resource, List<Link> resourceLinks) {
+        resource.getValueMap().entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof String)
+                .filter(entry -> ((String) entry.getValue()).startsWith("/content/"))
+                .forEach(entry -> {
+                    String path = (String) entry.getValue();
+                    Resource targetResource = resource.getResourceResolver().getResource(path);
+                    if (targetResource != null) {
+                        if (targetResource.getChild(JcrConstants.JCR_CONTENT) != null) {
+                            targetResource = targetResource.getChild(JcrConstants.JCR_CONTENT);
+                        }
+                        String title = targetResource.getValueMap().get("jcr:title", String.class);
+                        if (title == null) {
+                            title = targetResource.getValueMap().get("title", String.class);
+                        }
+                        if (title == null) {
+                            title = targetResource.getName();
+                            if (JcrConstants.JCR_CONTENT.equals(title)) {
+                                title = targetResource.getParent().getName();
+                            }
+                        }
+                        Link link = new Link(path, title);
+                        if (!resourceLinks.contains(link)) {
+                            resourceLinks.add(link);
+                        }
+                    }
+                });
+        resource.getChildren().forEach(child -> {
+            collectLinks(child, resourceLinks);
+        });
+    }
+
+    @Override
+    public String getImageUrl(Resource imageResource) {
+        if (imageResource == null) {
+            return null;
+        }
+        for (ApproximateMarkdownServicePlugin plugin : plugins) {
+            String imageUrl = plugin.getImageUrl(imageResource);
+            if (imageUrl != null) {
+                return imageUrl;
+            }
+        }
+        return null;
+    }
 
     // debugging code; remove after it works.
 
