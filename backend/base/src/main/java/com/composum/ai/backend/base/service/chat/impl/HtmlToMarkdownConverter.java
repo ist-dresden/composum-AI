@@ -13,10 +13,14 @@ import javax.annotation.Nullable;
 
 import org.jsoup.Jsoup;
 import org.jsoup.internal.StringUtil;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.XmlDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +78,10 @@ public class HtmlToMarkdownConverter {
         } else if (node instanceof Element) {
             Element element = (Element) node;
             convertElement(element);
+        } else if (node instanceof Comment || node instanceof DocumentType || node instanceof XmlDeclaration) {
+            // no text content
+        } else if (node instanceof DataNode) {
+            // not quite sure what to do with this, but this is very likely not text content.
         } else {
             throw new UnsupportedOperationException("Unknown node type " + node.getClass());
         }
