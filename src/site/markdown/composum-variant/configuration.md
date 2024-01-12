@@ -44,6 +44,7 @@ For the OSGI configuration there are the following configurations:
 | temperature       | Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0            |               |
 | connectionTimeout | Connection timeout in seconds                                                                                              | 20            |
 | requestTimeout    | Request timeout in seconds                                                                                                 | 60            |
+| imageModel        | Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, that is rejected.   |               |
 
 If Sling Context Aware Configuration contains an entry for `com.composum.ai.backend.slingbase.model.OpenAIConfig`,
 then the OpenAI API Key is taken from the configuration `openAiApiKey` of that `Composum AI OpenAI Configuration` of
