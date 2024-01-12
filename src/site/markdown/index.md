@@ -27,7 +27,8 @@ there is quite number of commercial systems like
 [Aleph's Luminous](https://www.aleph-alpha.com/luminous) (Germany) in development, to name only a few.
 All of there provide APIs that allow
 them to be used very flexibly in a lot of ways that are useful for supporting a CMS - for translation, content
-creation, review, summarizing, chat, you name it.
+creation, review, summarizing, chat, you name it. Optionally it is possible to use the vision capabilities
+on images as well, e.g. to generate alt texts for images.
 
 Composum AI provides AI services for [Composum Pages](https://www.composum.com/home.html) and
 [Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html). Both
