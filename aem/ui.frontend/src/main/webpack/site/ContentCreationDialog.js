@@ -120,12 +120,15 @@ class ContentCreationDialog {
         this.$stopButton = findSingleElement(this.$dialog, '.composum-ai-stop-button');
         this.$urlField = findSingleElement(this.$dialog, '.composum-ai-url-field');
         this.$urlContainer = this.$urlField.parent();
+        this.$imageContainer = findSingleElement(this.$dialog, '.composum-ai-source-image-container');
+        this.$image = findSingleElement(this.$imageContainer, '.composum-ai-source-image');
     }
 
     getDialogStatus() {
         return {
             prompt: this.$prompt.val(),
             source: this.getSourceContent(),
+            imagepath: this.$image.data('imagepath'),
             textLength: this.$textLengthSelector.val(),
             contentSelector: this.$contentSelector.val(),
             predefinedPrompts: this.$predefinedPromptsSelector.val(),
@@ -138,8 +141,8 @@ class ContentCreationDialog {
         this.$contentSelector.val(status.contentSelector);
         this.$textLengthSelector.val(status.textLength);
         this.$prompt.val(status.prompt);
-        if (status.source) {
-            this.setSourceContent(status.source);
+        if (status.source || status.imagepath) {
+            this.setSourceContent(status.source, status.imagepath);
         } else {
             this.setSourceContent(this.oldContent);
         }
@@ -215,6 +218,7 @@ class ContentCreationDialog {
         if (this.debug) console.log("onContentSelectorChanged", arguments);
         const key = this.$contentSelector.val();
         this.showUrl(false);
+        this.$image.removeData('imagepath');
         switch (key) {
             case 'lastoutput':
                 this.setSourceContent(this.getResponse());
@@ -297,26 +301,24 @@ class ContentCreationDialog {
     setSourceContent(value, imagepath) {
         console.log("setSourceContent", arguments);
         const $sourceContainer = this.$dialog.find('.composum-ai-source-container');
-        const $imageContainer = this.$dialog.find('.composum-ai-source-image-container');
-        const $image = $imageContainer.find('.composum-ai-source-image');
         $sourceContainer.removeClass('hidden');
-        $imageContainer.addClass('hidden');
+        this.$imageContainer.addClass('hidden');
         if (!imagepath) {
             const thevalue = value || '';
             this.isRichtext ? this.$sourceContent.setContent(thevalue) : this.$sourceContent.val(thevalue);
-            $imageContainer.find('.composum-ai-source-image').data('imagepath', undefined);
+            this.$image.removeData('imagepath');
         } else {
             const $heightReference = $sourceContainer.find('.coral-Form-field');
             const height = $heightReference.height();
             this.$urlContainer.hide();
             $sourceContainer.addClass('hidden');
-            $imageContainer.removeClass('hidden');
+            this.$imageContainer.removeClass('hidden');
             // const $image = $imageContainer.find('.composum-ai-source-image');
-            // $image[0].outerHtml = '<div class="coral-Form-field composum-ai-source-image></div>';
-            // $image = $imageContainer.find('.composum-ai-source-image');
-            $image.css('background-image', 'url(' + imagepath + ')');
-            $image.data('imagepath', imagepath);
-            $image.css('height', height + 'px');
+            // this.$image[0].outerHtml = '<div class="coral-Form-field composum-ai-source-image></div>';
+            // this.$image = $imageContainer.find('.composum-ai-source-image');
+            this.$image.css('background-image', 'url(' + imagepath + ')');
+            this.$image.data('imagepath', imagepath);
+            this.$image.css('height', height + 'px');
         }
     }
 
@@ -373,9 +375,7 @@ class ContentCreationDialog {
     onGenerateButtonClicked(event) {
         if (this.debug) console.log("onGenerateButtonClicked", arguments);
         this.showError(undefined);
-        const $imageContainer = this.$dialog.find('.composum-ai-source-image-container');
-        const $image = $imageContainer.find('.composum-ai-source-image');
-        let imagepath = $image.data('imagepath');
+        let imagepath = this.$image.data('imagepath');
         const data = {
             prompt: this.$prompt.val(),
             source: imagepath ? '' : this.getSourceContent(),

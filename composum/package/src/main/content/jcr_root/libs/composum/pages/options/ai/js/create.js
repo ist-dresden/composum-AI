@@ -147,15 +147,17 @@
 
             /** Creates a map that saves the content of all fields of this dialog. */
             makeSaveStateMap: function () {
-                return {
+                const map = {
                     'predefinedPrompts': this.$predefinedPrompts.val(),
                     'contentSelect': this.$contentSelect.val(),
                     'textLength': this.$textLength.val(),
                     'prompt': this.$prompt.val(),
                     'result': this.getResponse(),
                     'source': this.getSourceContent(),
+                    'imagepath': this.$sourceImage.data('imagepath'),
                     'url': this.$urlField.val()
                 };
+                return map;
             },
 
             saveState: function () {
@@ -179,9 +181,10 @@
                 this.$textLength.val(map['textLength']);
                 this.$prompt.val(map['prompt']);
                 this.setResponse(map['result']);
-                this.setSourceContent(map['source']);
+                this.setSourceContent(map['source'], map['imagepath']);
                 this.adjustButtonStates();
                 this.$urlField.val(map['url']);
+                this.contentSelectChanged();
             },
 
             /** Button 'Reset' was clicked. */
@@ -211,10 +214,11 @@
 
             contentSelectChanged: function (event) {
                 console.log("contentSelectChanged", arguments);
-                event.preventDefault();
+                event && event.preventDefault();
                 let contentSelect = this.$contentSelect.val();
                 const key = this.$contentSelect.val();
                 this.$urlContainer.hide();
+                this.$sourceImage.removeData('imagepath');
                 switch (key) {
                     case 'lastoutput':
                         this.setSourceContent(this.getResponse());
@@ -233,6 +237,8 @@
                         break;
                     case 'url':
                         this.showError();
+                        this.setSourceContent('');
+                        this.urlChanged();
                         this.$urlContainer.show();
                     case '-':
                         this.setSourceContent('');
@@ -257,7 +263,7 @@
                 if (!imagepath) {
                     this.$sourceContent.show();
                     this.$sourceImage.hide();
-                    this.$sourceImage.data('imagepath', undefined);
+                    this.$sourceImage.removeData('imagepath');
                     if (this.isRichText) {
                         core.widgetOf(this.$sourceContent.find('textarea')).setValue(value || '');
                     } else {
@@ -299,7 +305,7 @@
             },
 
             urlChanged(event) {
-                event.preventDefault();
+                if (event) event.preventDefault();
                 const url = this.$urlField.val();
                 if (url) {
                     this.showError();
@@ -310,6 +316,7 @@
                         dataType: "text",
                         success: (data) => {
                             this.setSourceContent(data);
+                            this.$contentSelect.val('url');
                         },
                         error: (xhr, status, error) => {
                             console.error("error loading approximate markdown for ", url, xhr, status, error);
