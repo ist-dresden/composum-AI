@@ -383,7 +383,8 @@ class ContentCreationDialog {
         if (this.debug) console.log("createContent", data);
         this.setLoading(true);
         this.createServlet.createContent(data);
-        this.$dialog.find('.composum-ai-content-suggestion')[0].scrollIntoView();
+        findSingleElement(this.$dialog, '.composum-ai-actionbar')[0].scrollIntoView();
+        // this also makes content suggestion and loading indicator visible.
     }
 
     streamingCallback(text) {
@@ -434,6 +435,7 @@ class ContentCreationDialog {
             findSingleElement(this.$dialog, '.composum-ai-alert').text(errorText(error));
             findSingleElement(this.$dialog, '.composum-ai-error-columns')
                 .removeClass('hidden').show()[0].scrollIntoView();
+            this.$stopButton
             debugger;
         }
     }

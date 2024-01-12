@@ -257,6 +257,7 @@
                     <generateActionbar
                             jcr:primaryType="nt:unstructured"
                             margin="{Boolean}false"
+                            granite:class="composum-ai-actionbar"
                             sling:resourceType="granite/ui/components/coral/foundation/actionbar">
                         <primary
                                 jcr:primaryType="nt:unstructured">
