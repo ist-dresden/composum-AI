@@ -83,6 +83,13 @@ Selecting one of these options replaces the 'Source' text area with the chosen t
 - **Hand edited content:** You can provide your own text as a base for the AI to work with.
 - **No Text Added:** If you like to generate text by just giving the AI some instructions that do not refer to any
   current text content, this is your choice.
+- **External URL:** An URL field is provided, where you can enter the URL of a web page. The text content of the URL
+  will be retrieved into the 'Source' text area.
+- If the component itself or sibling components contain paths into the JCR - e.g. links to other pages or references to
+  parts of other pages - then up to 5 of these paths are listed as additional options. Selecting one of these options
+  replaces the 'Source' text area with the chosen text.
+- If some of those references are images, these will be offered as well. The images can serve as input for the AI (
+  currently the beta version of ChatGPT vision preview) e.g. to generate a description for the image.
 
 ### Predefined prompts
 
@@ -102,6 +109,7 @@ text. Some examples are:
 - **Improve:** The AI improves the text into a businesslike informative style, fixing orthographical and grammar errors.
 - **SEO Description:** The AI creates a description for a web page with the given text, usable for search engine
   optimization (SEO).
+- **Describe Image:** somewhat experimental: the AI describes a selected image.
 
 ### Tips and Tricks for using the Content Creation Assistant
 
