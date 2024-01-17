@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.Reference;
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.adobe.granite.ui.components.ds.ValueMapResource;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.google.gson.Gson;
 
@@ -51,6 +52,9 @@ public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
     @Reference
     private ApproximateMarkdownService approximateMarkdownService;
 
+    @Reference
+    private GPTChatCompletionService chatCompletionService;
+
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         Map<String, String> contentSelectors = readPredefinedContentSelectors(request);
@@ -73,7 +77,9 @@ public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
         }
         List<ApproximateMarkdownService.Link> componentLinks = approximateMarkdownService.getComponentLinks(resource);
         for (ApproximateMarkdownService.Link link : componentLinks) {
-            contentSelectors.put(link.getPath(), link.getTitle() + " (" + link.getPath() + ")");
+            if (!link.isNeedsVision() || chatCompletionService.isVisionEnabled()) {
+                contentSelectors.put(link.getPath(), link.getTitle() + " (" + link.getPath() + ")");
+            }
         }
     }
 

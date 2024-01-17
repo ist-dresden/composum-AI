@@ -78,10 +78,12 @@ public interface ApproximateMarkdownService {
     class Link {
         private final String path;
         private final String title;
+        private final boolean needsVision;
 
-        public Link(String path, String title) {
+        public Link(String path, String title, boolean needsVision) {
             this.path = path;
             this.title = title;
+            this.needsVision = needsVision;
         }
 
         public String getPath() {
@@ -92,17 +94,22 @@ public interface ApproximateMarkdownService {
             return title;
         }
 
+        public boolean isNeedsVision() {
+            return needsVision;
+        }
+
         @Override
         public boolean equals(Object object) {
             if (this == object) return true;
             if (!(object instanceof Link)) return false;
             Link link = (Link) object;
-            return Objects.equals(getPath(), link.getPath()) && Objects.equals(getTitle(), link.getTitle());
+            return Objects.equals(getPath(), link.getPath()) && Objects.equals(getTitle(), link.getTitle())
+                    && needsVision == link.needsVision;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getPath(), getTitle());
+            return Objects.hash(getPath(), getTitle(), needsVision);
         }
 
         @Override
@@ -110,6 +117,7 @@ public interface ApproximateMarkdownService {
             return "Link{" +
                     "path='" + path + '\'' +
                     ", title='" + title + '\'' +
+                    ", needsVision=" + needsVision +
                     '}';
         }
     }

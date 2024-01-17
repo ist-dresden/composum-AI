@@ -541,6 +541,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         );
     }
 
+    @Override
+    public boolean isVisionEnabled() {
+        return imageModel != null && !imageModel.trim().isEmpty();
+    }
+
     @Nonnull
     @Override
     public GPTChatMessagesTemplate getTemplate(@Nonnull String templateName) throws GPTException {

@@ -12,6 +12,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.pages.commons.model.AbstractModel;
 import com.google.gson.Gson;
@@ -25,6 +26,8 @@ public class CreateDialogModel extends AbstractModel {
 
     protected transient ApproximateMarkdownService approximateMarkdownService;
 
+    protected transient GPTChatCompletionService chatCompletionService;
+
     public Map<String, String> getPredefinedPrompts() {
         return readJsonFile("create/predefinedprompts.json");
     }
@@ -34,7 +37,9 @@ public class CreateDialogModel extends AbstractModel {
         results.putAll(readJsonFile("create/contentselectors.json"));
         List<ApproximateMarkdownService.Link> componentLinks = getApproximateMarkdownService().getComponentLinks(getResource());
         for (ApproximateMarkdownService.Link link : componentLinks) {
-            results.put(link.getPath(), link.getTitle() + " (" + link.getPath() + ")");
+            if (!link.isNeedsVision() || getChatCompletionService().isVisionEnabled()) {
+                results.put(link.getPath(), link.getTitle() + " (" + link.getPath() + ")");
+            }
         }
         return results;
     }
@@ -44,6 +49,13 @@ public class CreateDialogModel extends AbstractModel {
             approximateMarkdownService = requireNonNull(context.getService(ApproximateMarkdownService.class));
         }
         return approximateMarkdownService;
+    }
+
+    protected GPTChatCompletionService getChatCompletionService() {
+        if (chatCompletionService == null) {
+            chatCompletionService = requireNonNull(context.getService(GPTChatCompletionService.class));
+        }
+        return chatCompletionService;
     }
 
     public Map<String, String> getTextLengths() {

@@ -76,4 +76,9 @@ public interface GPTChatCompletionService {
      * (That is currently whether there is an api key either globally or in the gptConfig).
      */
     boolean isEnabled(GPTConfiguration gptConfig);
+
+    /**
+     * Returns true if vision is enabled.
+     */
+    boolean isVisionEnabled();
 }

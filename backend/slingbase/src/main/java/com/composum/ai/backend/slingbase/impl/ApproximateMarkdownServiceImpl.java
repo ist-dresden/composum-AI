@@ -73,6 +73,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
      */
     protected final static Pattern IGNORED_NODE_NAMES = Pattern.compile("i18n|renditions|rep:.*|dam:.*|cq:.*");
 
+    protected final static Pattern IMAGE_PATTERN = Pattern.compile("\\.(png|jpg|jpeg|gif|svg)(/|$)", Pattern.CASE_INSENSITIVE);
+
+    protected final static Pattern VIDEO_PATTERN = Pattern.compile("\\.(mp4|mov)(/|$)", Pattern.CASE_INSENSITIVE);
+
     /**
      * A list of attributes that are output (in that ordering) without any label, each on a line for itself.
      */
@@ -377,15 +381,28 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
                                 title = targetResource.getParent().getName();
                             }
                         }
-                        Link link = new Link(path, title);
-                        if (!resourceLinks.contains(link)) {
-                            resourceLinks.add(link);
+                        boolean needsVision = isNeedsVision(targetResource);
+                        if (!VIDEO_PATTERN.matcher(targetResource.getPath()).find()) {
+                            Link link = new Link(path, title, needsVision);
+                            if (!resourceLinks.contains(link)) {
+                                resourceLinks.add(link);
+                            }
                         }
                     }
                 });
         resource.getChildren().forEach(child -> {
             collectLinks(child, resourceLinks);
         });
+    }
+
+    private static boolean isNeedsVision(Resource targetResource) {
+        if (IMAGE_PATTERN.matcher(targetResource.getPath()).find()) {
+            return true;
+        }
+        if (targetResource.getValueMap().get("jcr:content/jcr:mimeType", String.class) != null) {
+            return true;
+        }
+        return false;
     }
 
     @Override

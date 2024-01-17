@@ -372,7 +372,7 @@
             generateButtonClicked: function (event) {
                 event.preventDefault();
                 this.setLoading(true);
-                this.$response[0].scrollIntoView();
+                this.$el.find('.stop-button')[0].scrollIntoView();
 
                 const that = this;
 
