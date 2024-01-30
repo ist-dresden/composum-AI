@@ -17,7 +17,27 @@ putting the power of AI supported content creation at your fingertips.
 
 Click for a 2.5min demonstration video of
 [Composum AI for Composum Pages](image/ai/video/QuickDemo.mp4) or
-[Composum AI for Adobe Experience Manager (AEM)](image/ai/video/ComposumAIforAEMQuickDemo.mp4).
+[Composum AI for Adobe Experience Manager (AEM)](image/ai/video/ComposumAIforAEMQuickDemo.mp4), or watch these on
+Youtube:
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 2em;">
+  <div style="flex: 0 0; margin-bottom: 2em; text-align: center;">
+    <iframe src="https://www.youtube.com/embed/ubBhv2PUSEs?si=lSdKlwIDPkE" 
+          title="Living Slideshow for the Composum AI for the Composum Pages CMS" 
+          frameborder="0" width="560" height="315" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen="allowfullscreen"></iframe>
+    <p>Living Slideshow for the Composum AI for the Composum Pages CMS</p>
+  </div>
+
+  <div style="flex: 0 0; margin-bottom: 2em; text-align: center;">
+    <iframe src="https://www.youtube.com/embed/ubBhv2PUSEs?si=96gv-F4zX_o" 
+        title="Living Slideshow for the Composum AI for Adobe AEM" frameborder="0" width="560" height="315" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen="allowfullscreen"></iframe>
+    <p>Living Slideshow for the Composum AI for Adobe AEM</p>
+  </div>
+</div>
 
 ## Basic idea
 

@@ -8,7 +8,9 @@ CMDLINE="lychee --cache -f detailed --base target/staging/parent-2/parent-2-publ
   --exclude 'https://cloud.composum.com/' \
   --exclude 'https://chat.openai.com/' \
   --exclude 'http://localhost:8080/system/console/configMgr' \
+  target/staging/parent-2/parent-2-public/composum-platform/composum-ai-integration/*.html \
   target/staging/parent-2/parent-2-public/composum-platform/composum-ai-integration/*/*.html"
+
 
 mvn clean install javadoc:aggregate site site:stage
 

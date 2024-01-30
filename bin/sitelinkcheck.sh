@@ -18,4 +18,4 @@ lychee --cache -f detailed --base /composum-AI/ \
   --exclude 'https://cloud.composum.com/' \
   --exclude 'https://chat.openai.com/' \
   --exclude 'http://localhost:8080/system/console/configMgr' \
-  target/site/*/*.html
+  target/site/*.html target/site/*/*.html
