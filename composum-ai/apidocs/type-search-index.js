@@ -1,1 +1,1 @@
-typeSearchIndex = [{"p":"com.composum.ai.aem.core.impl","l":"AemApproximateMarkdownServicePlugin"},{"l":"All Classes","url":"allclasses-index.html"}]
+typeSearchIndex = [{"p":"com.composum.ai.aem.core.impl","l":"AemApproximateMarkdownServicePlugin"},{"l":"All Classes","url":"allclasses-index.html"},{"p":"com.composum.ai.aem.core.impl","l":"ContentCreationSelectorsServlet"}]

@@ -1,8 +1,9 @@
 com.composum.ai.backend.base.impl
-com.composum.ai.backend.base
+com.composum.ai.backend.base.service
 com.composum.ai.backend.base.service.chat
 com.composum.ai.backend.base.service.chat.impl
-com.composum.ai.backend.base.service
-com.composum.ai.backend.slingbase.impl
+com.composum.ai.backend.base.service.chat.impl.chatmodel
+com.composum.ai.backend.base
 com.composum.ai.backend.slingbase
+com.composum.ai.backend.slingbase.impl
 com.composum.ai.backend.slingbase.model
