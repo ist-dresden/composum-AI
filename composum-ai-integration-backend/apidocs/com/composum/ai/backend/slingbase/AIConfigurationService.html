@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":6,"i1":6};
+var data = {"i0":6,"i1":6,"i2":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -169,6 +169,14 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Reads the GPTConfiguration from sling context aware configurations.</div>
 </td>
 </tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code><a href="model/GPTPromptLibrary.html" title="annotation in com.composum.ai.backend.slingbase.model">GPTPromptLibrary</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getGPTPromptLibraryPaths(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">getGPTPromptLibraryPaths</a></span>&#8203;(org.apache.sling.api.SlingHttpServletRequest&nbsp;request,
+                        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;contentPath)</code></th>
+<td class="colLast">
+<div class="block">Reads the GPTPromptLibrary from sling context aware configurations, falling back to OSGI configurations, falling back to default values.</div>
+</td>
+</tr>
 </table>
 </li>
 </ul>
@@ -214,7 +222,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <a id="getGPTConfiguration(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getGPTConfiguration</h4>
 <pre class="methodSignature"><a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation" class="externalLink">@Nullable</a>
@@ -224,6 +232,28 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
                                      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;contentPath)
                               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalArgumentException</a></pre>
 <div class="block">Reads the GPTConfiguration from sling context aware configurations.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the request</dd>
+<dd><code>contentPath</code> - if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalArgumentException</a></code> - if none of the paths is a /content/ path.</dd>
+</dl>
+</li>
+</ul>
+<a id="getGPTPromptLibraryPaths(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getGPTPromptLibraryPaths</h4>
+<pre class="methodSignature"><a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation" class="externalLink">@Nullable</a>
+<a href="model/GPTPromptLibrary.html" title="annotation in com.composum.ai.backend.slingbase.model">GPTPromptLibrary</a>&nbsp;getGPTPromptLibraryPaths&#8203;(<a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nonnull.html?is-external=true" title="class or interface in javax.annotation" class="externalLink">@Nonnull</a>
+                                          org.apache.sling.api.SlingHttpServletRequest&nbsp;request,
+                                          <a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation" class="externalLink">@Nullable</a>
+                                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;contentPath)
+                                   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalArgumentException</a></pre>
+<div class="block">Reads the GPTPromptLibrary from sling context aware configurations, falling back to OSGI configurations, falling back to default values.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>request</code> - the request</dd>

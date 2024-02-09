@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -266,6 +266,14 @@ implements <a href="../AIConfigurationService.html" title="interface in com.comp
 </td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code><a href="../model/GPTPromptLibrary.html" title="annotation in com.composum.ai.backend.slingbase.model">GPTPromptLibrary</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getGPTPromptLibraryPaths(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">getGPTPromptLibraryPaths</a></span>&#8203;(@NotNull org.apache.sling.api.SlingHttpServletRequest&nbsp;request,
+                        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;contentPath)</code></th>
+<td class="colLast">
+<div class="block">Reads the GPTPromptLibrary from sling context aware configurations, falling back to OSGI configurations, falling back to default values.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>protected boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#pageAllowed(org.apache.sling.api.SlingHttpServletRequest,java.lang.String,com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration)">pageAllowed</a></span>&#8203;(org.apache.sling.api.SlingHttpServletRequest&nbsp;request,
            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;contentPath,
@@ -399,7 +407,7 @@ public&nbsp;<a href="../model/GPTPermissionInfo.html" title="class in com.compos
 <a id="getGPTConfiguration(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getGPTConfiguration</h4>
 <pre class="methodSignature">public&nbsp;com.composum.ai.backend.base.service.chat.GPTConfiguration&nbsp;getGPTConfiguration&#8203;(@NotNull
@@ -412,6 +420,31 @@ public&nbsp;<a href="../model/GPTPermissionInfo.html" title="class in com.compos
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../AIConfigurationService.html#getGPTConfiguration(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">getGPTConfiguration</a></code>&nbsp;in interface&nbsp;<code><a href="../AIConfigurationService.html" title="interface in com.composum.ai.backend.slingbase">AIConfigurationService</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>request</code> - the request</dd>
+<dd><code>contentPath</code> - if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalArgumentException</a></code> - if none of the paths is a /content/ path.</dd>
+</dl>
+</li>
+</ul>
+<a id="getGPTPromptLibraryPaths(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getGPTPromptLibraryPaths</h4>
+<pre class="methodSignature"><a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation" class="externalLink">@Nullable</a>
+public&nbsp;<a href="../model/GPTPromptLibrary.html" title="annotation in com.composum.ai.backend.slingbase.model">GPTPromptLibrary</a>&nbsp;getGPTPromptLibraryPaths&#8203;(@NotNull
+                                                 @NotNull org.apache.sling.api.SlingHttpServletRequest&nbsp;request,
+                                                 <a href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation" class="externalLink">@Nullable</a>
+                                                 <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;contentPath)
+                                          throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalArgumentException</a></pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../AIConfigurationService.html#getGPTPromptLibraryPaths(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">AIConfigurationService</a></code></span></div>
+<div class="block">Reads the GPTPromptLibrary from sling context aware configurations, falling back to OSGI configurations, falling back to default values.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../AIConfigurationService.html#getGPTPromptLibraryPaths(org.apache.sling.api.SlingHttpServletRequest,java.lang.String)">getGPTPromptLibraryPaths</a></code>&nbsp;in interface&nbsp;<code><a href="../AIConfigurationService.html" title="interface in com.composum.ai.backend.slingbase">AIConfigurationService</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>request</code> - the request</dd>
 <dd><code>contentPath</code> - if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/</dd>
