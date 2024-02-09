@@ -3,7 +3,7 @@
   <img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_gray_6d6d6d.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1"></img>
 </a>
 
-# Composum AI - AI-powered content creation integrated in your CMS
+# Composum AI - AI-powered content creation integrated into Adobe Experience Manager / Composum Pages
 
 > Fast and flexible, \
 > Composum empowers you, \
@@ -22,20 +22,20 @@ Youtube:
 
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 2em;">
   <div style="flex: 0 0; margin-bottom: 2em; text-align: center;">
-    <iframe src="https://www.youtube.com/embed/ubBhv2PUSEs?si=lSdKlwIDPkE" 
+    <iframe src="https://www.youtube.com/embed/96gv-F4zX_o?si=eOXepyR2uP-tPjXp" 
+        title="Living Slideshow for the Composum AI for Adobe AEM" frameborder="0" width="560" height="315" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen="allowfullscreen"></iframe>
+    <p>Living Slideshow for the Composum AI for Adobe AEM</p>
+  </div>
+
+  <div style="flex: 0 0; margin-bottom: 2em; text-align: center;">
+    <iframe src="https://www.youtube.com/embed/lSdKlwIDPkE?si=IRPONQn1zBk_0CZ0" 
           title="Living Slideshow for the Composum AI for the Composum Pages CMS" 
           frameborder="0" width="560" height="315" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen="allowfullscreen"></iframe>
     <p>Living Slideshow for the Composum AI for the Composum Pages CMS</p>
-  </div>
-
-  <div style="flex: 0 0; margin-bottom: 2em; text-align: center;">
-    <iframe src="https://www.youtube.com/embed/ubBhv2PUSEs?si=96gv-F4zX_o" 
-        title="Living Slideshow for the Composum AI for Adobe AEM" frameborder="0" width="560" height="315" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        allowfullscreen="allowfullscreen"></iframe>
-    <p>Living Slideshow for the Composum AI for Adobe AEM</p>
   </div>
 </div>
 

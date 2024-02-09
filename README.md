@@ -1,4 +1,4 @@
-# Composum AI - AI-powered content creation integrated in your CMS
+# Composum AI - AI-powered content creation integrated in Adobe Experience Manager and Composum Pages
 
 > Fast and flexible,<br>
 > Composum empowers you,<br>
@@ -7,8 +7,11 @@
 
 We provide several content creation assistants that are tightly integrated into
 [Composum Pages](https://www.composum.com/) or
-[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
+[Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html) (AEM)
 putting the power of AI supported content creation at your fingertips.
+For a quick overview - here are two 2.5min demonstrations, one for AEM and one for Composum Pages:
+
+[Click for a 2.5min demonstration video for Adobe AEM](https://github.com/ist-dresden/composum-AI/assets/999184/70b7e6a1-41f2-4dbf-8e5d-7db6bf17233d)
 
 [Click for a 2.5min demonstration video of Composum AI for Composum Pages](https://github.com/ist-dresden/composum-AI/assets/999184/18595f2a-e0b5-49f3-bc4c-65d6a8bc93f6)
 
@@ -40,8 +43,6 @@ we currently use it as backend. If there is demand, we intend to provide alterna
 as they become commercially available,
 especially as those might be preferred by European customers because of stricter privacy and
 data security rules. It's likely that in time there will also be LLM that can be run on premise.
-
-[Click for a 2.5min demonstration video for Adobe AEM](https://github.com/ist-dresden/composum-AI/assets/999184/70b7e6a1-41f2-4dbf-8e5d-7db6bf17233d)
 
 ## Functionality
 
