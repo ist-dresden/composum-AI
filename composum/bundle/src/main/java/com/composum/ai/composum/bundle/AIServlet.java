@@ -618,7 +618,7 @@ public class AIServlet extends AbstractServiceServlet {
     public class StreamResponseOperation implements ServletOperation {
 
         @Override
-        public void doIt(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response, @org.jetbrains.annotations.Nullable ResourceHandle resource)
+        public void doIt(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response, @Nullable ResourceHandle resource)
                 throws IOException {
             Status status = new Status(request, response, LOG);
             String streamId = status.getRequiredParameter(RESULTKEY_STREAMID, null, "No stream id given");

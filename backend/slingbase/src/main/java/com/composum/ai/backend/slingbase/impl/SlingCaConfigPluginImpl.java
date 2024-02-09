@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.caconfig.ConfigurationBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 import com.composum.ai.backend.slingbase.model.OpenAIConfig;
 
 /**
@@ -73,6 +75,21 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         }
         LOG.debug("found key: {}", result);
         return result;
+    }
+
+    @Nullable
+    @Override
+    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+        if (!enabled || contentPath == null) {
+            return null;
+        }
+        LOG.debug("getGPTPromptLibraryPaths({}, {})", request.getResource().getPath(), contentPath);
+        Resource resource = determineResource(request, contentPath);
+
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
+        GPTPromptLibrary config = confBuilder.as(GPTPromptLibrary.class);
+        LOG.debug("found config: {}", config);
+        return config;
     }
 
     @Nonnull

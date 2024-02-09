@@ -10,6 +10,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 public interface AIConfigurationPlugin {
 
@@ -37,5 +38,15 @@ public interface AIConfigurationPlugin {
      */
     @Nullable
     GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
+
+    /**
+     * Reads the GPTPromptLibrary from sling context aware configurations or OSGI configurations, falling back to default values.
+     *
+     * @param request     the request
+     * @param contentPath if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/
+     * @throws IllegalArgumentException if none of the paths is a /content/ path.
+     */
+    @Nullable
+    GPTPromptLibrary getGPTPromptLibraryPaths(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
 
 }

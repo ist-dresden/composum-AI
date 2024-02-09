@@ -26,6 +26,7 @@ import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 /**
  * Collects the configurations from {@link AIConfigurationPlugin}s and aggregates them.
@@ -162,6 +163,23 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
                 if (configuration != null) {
                     LOG.info("Plugin {} returned configuration {}", plugin.getClass(), configuration);
                     return configuration;
+                }
+            } catch (Exception e) {
+                LOG.error("Error in AIConfigurationPlugin with {}", plugin.getClass(), e);
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+        for (AIConfigurationPlugin plugin : plugins) {
+            try {
+                GPTPromptLibrary promptLibrary = plugin.getGPTPromptLibraryPaths(request, contentPath);
+                if (promptLibrary != null) {
+                    LOG.info("Plugin {} returned prompt library {}", plugin.getClass(), promptLibrary);
+                    return promptLibrary;
                 }
             } catch (Exception e) {
                 LOG.error("Error in AIConfigurationPlugin with {}", plugin.getClass(), e);

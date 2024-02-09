@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 /**
  * This implementation sources its configurations from the OSGI environment, specifically from instances of {@link GPTPermissionConfiguration}.
@@ -76,6 +78,12 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
     @Nullable
     @Override
     public GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
         return null;
     }
 
