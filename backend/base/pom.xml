@@ -18,7 +18,7 @@
     <url>${siteurl}</url>
 
     <properties>
-        <wikitext.version>3.0.48.202308291007</wikitext.version>
+        <wikitext.version>3.0.42</wikitext.version>
     </properties>
 
     <dependencies>
