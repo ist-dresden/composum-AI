@@ -2,9 +2,6 @@ package com.composum.ai.backend.slingbase.impl;
 
 import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.matchesAny;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +31,6 @@ import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
 /**
  * Collects the configurations from {@link AIConfigurationPlugin}s and aggregates them.
@@ -78,8 +72,6 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
-
-    protected final Gson gson = new Gson();
 
     /**
      * Union of the plugin's results.
@@ -234,29 +226,13 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
         };
     }
 
-    /**
-     * {@inheritDoc}
-     * This method tries to parse the mapPath as JSON.
-     */
     @Nullable
     @Override
-    public Map<String, String> getGPTConfigurationMap(@NotNull SlingHttpServletRequest request, @Nullable String mapPath) throws IllegalArgumentException {
-        if (mapPath == null || !mapPath.contains(".json")) {
-            return null;
-        }
-        Resource resource = request.getResourceResolver().getResource(mapPath);
-        if (resource == null) {
-            return null;
-        }
-        try (InputStream stream = resource.adaptTo(InputStream.class)) {
-            if (stream == null) {
-                return null;
-            }
-            return gson.fromJson(new InputStreamReader(stream), Map.class);
-        } catch (IOException | JsonSyntaxException | JsonIOException e) {
-            LOG.error("Error reading map from {}", mapPath, e);
-            return null;
-        }
+    public Map<String, String> getGPTConfigurationMap(@NotNull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String languageCode) {
+        return plugins.stream()
+                .map(plugin -> plugin.getGPTConfigurationMap(request, mapPath, languageCode))
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
     }
 
 }

@@ -53,6 +53,6 @@ public interface AIConfigurationService {
      * Decodes the map from the given mapPath, as determined from the appropriate method of {@link #getGPTPromptLibraryPaths(SlingHttpServletRequest, String)}.
      */
     @Nullable
-    Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath) throws IllegalArgumentException;
+    Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String languageCode) throws IllegalArgumentException;
 
 }

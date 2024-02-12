@@ -65,7 +65,7 @@ public interface AIConfigurationPlugin {
     }
 
     @Nullable
-    default Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath) {
+    default Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String languageKey) {
         return null;
     }
 

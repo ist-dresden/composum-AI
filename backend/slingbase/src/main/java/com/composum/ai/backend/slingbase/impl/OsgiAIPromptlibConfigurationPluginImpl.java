@@ -1,8 +1,14 @@
 package com.composum.ai.backend.slingbase.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -15,6 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * This implementation sources the global GPTPromptLibrary configuration from the OSGI environment.
@@ -31,6 +40,8 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
     private static final Logger LOG = LoggerFactory.getLogger(OsgiAIPromptlibConfigurationPluginImpl.class);
 
     private GPTPromptLibrary config;
+
+    protected final Gson gson = new Gson();
 
     @Activate
     @Modified
@@ -51,4 +62,28 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
         return config;
     }
 
+    /**
+     * {@inheritDoc}
+     * This method tries to parse the mapPath as JSON.
+     */
+    @Nullable
+    @Override
+    public Map<String, String> getGPTConfigurationMap(@NotNull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String languageKey) {
+        if (mapPath == null || !mapPath.contains(".json")) {
+            return null;
+        }
+        Resource resource = request.getResourceResolver().getResource(mapPath);
+        if (resource == null) {
+            return null;
+        }
+        try (InputStream stream = resource.adaptTo(InputStream.class)) {
+            if (stream == null) {
+                return null;
+            }
+            return gson.fromJson(new InputStreamReader(stream), Map.class);
+        } catch (IOException | JsonSyntaxException | JsonIOException e) {
+            LOG.error("Error reading map from {}", mapPath, e);
+            return null;
+        }
+    }
 }

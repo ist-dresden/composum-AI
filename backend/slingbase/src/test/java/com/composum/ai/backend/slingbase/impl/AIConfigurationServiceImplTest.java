@@ -2,7 +2,6 @@ package com.composum.ai.backend.slingbase.impl;
 
 import static org.apache.sling.testing.mock.caconfig.ContextPlugins.CACONFIG;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -11,10 +10,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.Map;
 
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -114,17 +111,6 @@ public class AIConfigurationServiceImplTest {
         GPTConfiguration config = service.getGPTConfiguration(getRequest(), "/content/allowed/jcr:content/path");
         assertThat(config, notNullValue());
         assertThat(config.getApiKey(), is(key));
-    }
-
-    @Test
-    public void getGPTConfigurationMap() {
-        String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
-        context.load(true).binaryFile(new ByteArrayInputStream(json.getBytes()), "/content/allowed/jcr:content/path.json");
-        Map<String, String> result = service.getGPTConfigurationMap(getRequest(), "/content/allowed/jcr:content/path.json");
-        assertThat(result, not(nullValue()));
-        assertThat(result.size(), is(2));
-        assertThat(result.get("key1"), is("value1"));
-        assertThat(result.get("key2"), is("value2"));
     }
 
 }
