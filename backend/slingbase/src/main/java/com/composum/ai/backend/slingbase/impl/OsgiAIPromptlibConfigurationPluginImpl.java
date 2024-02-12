@@ -1,8 +1,5 @@
 package com.composum.ai.backend.slingbase.impl;
 
-import java.util.List;
-
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -16,9 +13,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
-import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 /**
@@ -54,24 +49,6 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
     @Override
     public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
         return config;
-    }
-
-    /**
-     * Not implemented here.
-     */
-    @Override
-    @Nullable
-    public List<GPTPermissionConfiguration> allowedServices(SlingHttpServletRequest request, String contentPath) {
-        return null;
-    }
-
-    /**
-     * Not implemented here.
-     */
-    @Nullable
-    @Override
-    public GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
-        return null;
     }
 
 }

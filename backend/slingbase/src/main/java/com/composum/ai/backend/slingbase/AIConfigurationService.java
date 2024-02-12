@@ -1,5 +1,7 @@
 package com.composum.ai.backend.slingbase;
 
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -38,7 +40,7 @@ public interface AIConfigurationService {
     GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
 
     /**
-     * Reads the GPTPromptLibrary from sling context aware configurations, falling back to OSGI configurations, falling back to default values.
+     * Reads the {@link GPTPromptLibrary} from sling context aware configurations, falling back to OSGI configurations, falling back to default values.
      *
      * @param request     the request
      * @param contentPath if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/
@@ -46,5 +48,11 @@ public interface AIConfigurationService {
      */
     @Nullable
     GPTPromptLibrary getGPTPromptLibraryPaths(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
+
+    /**
+     * Decodes the map from the given mapPath, as determined from the appropriate method of {@link #getGPTPromptLibraryPaths(SlingHttpServletRequest, String)}.
+     */
+    @Nullable
+    Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath) throws IllegalArgumentException;
 
 }

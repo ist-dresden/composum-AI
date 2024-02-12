@@ -1,6 +1,7 @@
 package com.composum.ai.backend.slingbase;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -8,8 +9,8 @@ import javax.annotation.Nullable;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 public interface AIConfigurationPlugin {
@@ -26,7 +27,9 @@ public interface AIConfigurationPlugin {
      * @see GPTPermissionInfo#SERVICE_TRANSLATE
      */
     @Nullable
-    List<GPTPermissionConfiguration> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath);
+    default List<GPTPermissionConfiguration> allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) {
+        return null;
+    }
 
     /**
      * Reads the GPTConfiguration from sling context aware configurations.
@@ -37,7 +40,9 @@ public interface AIConfigurationPlugin {
      * @throws IllegalArgumentException if none of the paths is a /content/ path.
      */
     @Nullable
-    GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
+    default GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+        return null;
+    }
 
     /**
      * Reads the GPTPromptLibrary from sling context aware configurations or OSGI configurations, falling back to default values.
@@ -47,6 +52,21 @@ public interface AIConfigurationPlugin {
      * @throws IllegalArgumentException if none of the paths is a /content/ path.
      */
     @Nullable
-    GPTPromptLibrary getGPTPromptLibraryPaths(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
+    default GPTPromptLibrary getGPTPromptLibraryPaths(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) {
+        return null;
+    }
+
+    /**
+     * Returns the default paths for {@link #getGPTPromptLibraryPaths(SlingHttpServletRequest, String)}.
+     */
+    @Nullable
+    default GPTPromptLibrary getGPTPromptLibraryPathsDefault() {
+        return null;
+    }
+
+    @Nullable
+    default Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath) {
+        return null;
+    }
 
 }

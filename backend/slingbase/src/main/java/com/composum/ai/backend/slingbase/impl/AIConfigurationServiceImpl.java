@@ -2,7 +2,14 @@ package com.composum.ai.backend.slingbase.impl;
 
 import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.matchesAny;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,6 +34,9 @@ import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Collects the configurations from {@link AIConfigurationPlugin}s and aggregates them.
@@ -68,6 +78,8 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
+
+    protected final Gson gson = new Gson();
 
     /**
      * Union of the plugin's results.
@@ -174,17 +186,77 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     @Nullable
     @Override
     public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
-        for (AIConfigurationPlugin plugin : plugins) {
-            try {
-                GPTPromptLibrary promptLibrary = plugin.getGPTPromptLibraryPaths(request, contentPath);
-                if (promptLibrary != null) {
-                    LOG.info("Plugin {} returned prompt library {}", plugin.getClass(), promptLibrary);
-                    return promptLibrary;
+        return new GPTPromptLibrary() {
+
+            @Override
+            public String contentCreationPromptsPath() {
+                Optional<String> result = plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPaths(request, contentPath))
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::contentCreationPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst();
+                if (result.isPresent()) {
+                    return result.get();
                 }
-            } catch (Exception e) {
-                LOG.error("Error in AIConfigurationPlugin with {}", plugin.getClass(), e);
+                return plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPathsDefault())
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::contentCreationPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst().orElse(null);
             }
-        }
-        return null;
+
+            @Override
+            public String sidePanelPromptsPath() {
+                Optional<String> result = plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPaths(request, contentPath))
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::sidePanelPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst();
+                if (result.isPresent()) {
+                    return result.get();
+                }
+                return plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPathsDefault())
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::sidePanelPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst().orElse(null);
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return GPTPromptLibrary.class;
+            }
+
+        };
     }
+
+    /**
+     * {@inheritDoc}
+     * This method tries to parse the mapPath as JSON.
+     */
+    @Nullable
+    @Override
+    public Map<String, String> getGPTConfigurationMap(@NotNull SlingHttpServletRequest request, @Nullable String mapPath) throws IllegalArgumentException {
+        if (mapPath == null || !mapPath.contains(".json")) {
+            return null;
+        }
+        Resource resource = request.getResourceResolver().getResource(mapPath);
+        if (resource == null) {
+            return null;
+        }
+        try (InputStream stream = resource.adaptTo(InputStream.class)) {
+            if (stream == null) {
+                return null;
+            }
+            return gson.fromJson(new InputStreamReader(stream), Map.class);
+        } catch (IOException | JsonSyntaxException | JsonIOException e) {
+            LOG.error("Error reading map from {}", mapPath, e);
+            return null;
+        }
+    }
+
 }

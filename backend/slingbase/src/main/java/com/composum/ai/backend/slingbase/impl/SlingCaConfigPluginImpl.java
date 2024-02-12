@@ -79,12 +79,15 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
 
     @Nullable
     @Override
-    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) {
         if (!enabled || contentPath == null) {
             return null;
         }
         LOG.debug("getGPTPromptLibraryPaths({}, {})", request.getResource().getPath(), contentPath);
         Resource resource = determineResource(request, contentPath);
+        if (resource == null) {
+            return null;
+        }
 
         ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
         GPTPromptLibrary config = confBuilder.as(GPTPromptLibrary.class);
@@ -92,7 +95,10 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         return config;
     }
 
-    @Nonnull
+    /**
+     * Determines the resource to use for the given request and content path.
+     */
+    @Nullable
     private static Resource determineResource(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) {
         Resource resource = request.getResource();
         if (StringUtils.isNotBlank(contentPath)) {
@@ -100,10 +106,12 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
             resource = request.getResourceResolver().getResource(contentPath);
         }
         if (resource == null) {
-            throw new IllegalArgumentException("No resource found for path " + contentPath);
+            LOG.warn("No resource found for path {}", contentPath);
+            return null;
         }
         if (!resource.getPath().startsWith("/content/")) {
-            throw new IllegalArgumentException("Path " + resource.getPath() + " is not a /content/ path");
+            LOG.warn("Path {} is not a /content/ path", resource.getPath());
+            return null;
         }
         return resource;
     }
