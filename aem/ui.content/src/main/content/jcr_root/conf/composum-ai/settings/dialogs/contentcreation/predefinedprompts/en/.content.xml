@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="wknd/components/page"
+            cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
+            jcr:language="en"
+            jcr:title="Default Content Creation Prompt Library, English"
+            hideInNav="true">
+        <root
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="wknd/components/container"
+                layout="responsiveGrid">
+            <container
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="wknd/components/container"
+                    layout="responsiveGrid">
+                <teaser_1
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Summarize"
+                        jcr:description="Please write an eloquent summary of the text. The summary should capture its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Make sure the summary meets the purpose and goal of the text and key points of all topical sections. Write clear and simply, ensuring accuracy and completeness. Only use the information provided in the text; DO NOT use any information you know about the world."
+                />
+                <teaser_2
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Introduction"
+                        jcr:description="Please write an eloquent introduction for the text, in the style the text is written, as it could be put in front of the text."
+                />
+                <teaser_3
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Conclusion"
+                        jcr:description="Please write an eloquent conclusion for the text, in the style the text is written, as it could be put after the text."
+                />
+                <teaser_4
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Expand"
+                        jcr:description="Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style."
+                />
+                <teaser_5
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Extend"
+                        jcr:description="Please extend the text with more details and elaboration while maintaining the current tone and style."
+                />
+                <teaser_6
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Abstract"
+                        jcr:description="Please write an abstract for the text that provides a concise overview of the key points and main themes of the text, as it could be put in front of the text."
+                />
+                <teaser_7
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Headline"
+                        jcr:description="Please write a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style."
+                />
+                <teaser_8
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="10 headline suggestions"
+                        jcr:description="Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style."
+                />
+                <teaser_9
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="10 headline + subheadline suggestions"
+                        jcr:description="Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style."
+                />
+                <teaser_10
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Question"
+                        jcr:description="Please answer the following question based on the given text:\n"
+                />
+                <teaser_11
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Improve"
+                        jcr:description="Print improved version of the text into a businesslike informative style.\nDo also fix orthographical and grammar errors."
+                />
+                <teaser_12
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="SEO Description"
+                        jcr:description="Please create a description for a web page with the following text, usable for search engine optimization (SEO)."
+                />
+                <teaser_13
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Teaser"
+                        jcr:description="Please write a brief, engaging teaser for the text, as it could be used for a link to the text. It should pique the reader's interest and encourage them to read the full content."
+                />
+                <teaser_14
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Rewrite for Different Audience"
+                        jcr:description="Please rewrite the text to suit a different audience: \n"
+                />
+                <teaser_15
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Bullet Point Summary"
+                        jcr:description="Please summarize the main points of the text as a list of bullet points, as it could be put in front of the text"
+                />
+                <teaser_16
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="BAB Framework Text"
+                        jcr:description="Please write a complete text using the Before-After-Bridge (BAB) framework. Start by describing the problem, then envision the improvements, and finally introduce the solution that makes this transformation possible."
+                />
+                <teaser_17
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="AIDA Framework Text"
+                        jcr:description="Please write a complete text using the AIDA framework. Start by capturing attention, then generate interest, induce desire, and finally, call for action."
+                />
+                <teaser_18
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Slogan"
+                        jcr:description="Based on the given text, please create a catchy and memorable slogan that captures its main theme. Output it as it could be put in front of the text."
+                />
+                <teaser_19
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="CTA"
+                        jcr:description="Based on the text, create a call to action that encourages the reader to take the next step, and clearly conveys the unique value proposition to the reader."
+                />
+                <teaser_20
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Markdown to HTML"
+                        jcr:description="Convert the following text from Markdown to HTML:\n\n"
+                />
+                <teaser_21
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Describe image"
+                        jcr:description="Please describe the following image in a way that a blind person can understand it."
+                />
+            </container>
+        </root>
+    </jcr:content>
+</jcr:root>
