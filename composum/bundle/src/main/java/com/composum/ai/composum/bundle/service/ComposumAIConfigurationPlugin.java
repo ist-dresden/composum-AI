@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
@@ -27,7 +28,9 @@ import com.composum.sling.core.util.SlingResourceUtil;
 /**
  * Implements Composum specific methods of AIConfigurationPlugin.
  */
-@Component
+@Component(
+        property = Constants.SERVICE_RANKING + ":Integer=5000"
+)
 public class ComposumAIConfigurationPlugin implements AIConfigurationPlugin {
 
     @Nullable
@@ -54,7 +57,7 @@ public class ComposumAIConfigurationPlugin implements AIConfigurationPlugin {
     @Nullable
     @Override
     public Map<String, String> getGPTConfigurationMap(@Nonnull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String ignored) {
-        if (StringUtils.isBlank(mapPath)) {
+        if (StringUtils.isBlank(mapPath) || mapPath.toLowerCase().contains(".json")) {
             return null;
         }
         BeanContext.Service context = new BeanContext.Service(request, null);

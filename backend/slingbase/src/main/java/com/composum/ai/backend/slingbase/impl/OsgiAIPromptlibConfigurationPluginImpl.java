@@ -69,7 +69,7 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
     @Nullable
     @Override
     public Map<String, String> getGPTConfigurationMap(@NotNull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String languageKey) {
-        if (mapPath == null || !mapPath.contains(".json")) {
+        if (mapPath == null || !mapPath.toLowerCase().contains(".json")) {
             return null;
         }
         Resource resource = request.getResourceResolver().getResource(mapPath);
