@@ -26,16 +26,16 @@ import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 /**
- * Datasource for the prompts of the content creation dialog.
+ * Datasource for the prompts of the sidebar AI dialog.
  */
 @Component(service = Servlet.class,
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum Pages Content Creation Selectors Servlet",
-                "sling.servlet.resourceTypes=composum-ai/servlets/contentcreationprompts",
+                "sling.servlet.resourceTypes=composum-ai/servlets/sidepanelaiprompts",
         })
-public class AemContentCreationPromptsServlet extends SlingSafeMethodsServlet {
+public class AemSidePanelPromptsServlet extends SlingSafeMethodsServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AemContentCreationPromptsServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AemSidePanelPromptsServlet.class);
 
     @Reference
     private AIConfigurationService aiConfigurationService;

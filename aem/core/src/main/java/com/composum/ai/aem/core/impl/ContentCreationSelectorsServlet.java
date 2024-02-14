@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl;
 
+import static com.composum.ai.aem.core.impl.SelectorUtils.transformToDatasource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,9 +14,11 @@ import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -32,7 +36,7 @@ import com.google.gson.Gson;
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Content Creation Selectors Servlet",
                 "sling.servlet.resourceTypes=composum-ai/servlets/contentcreationselectors",
         })
-public class ContentCreationSelectorsServlet extends AbstractSelectorsServlet {
+public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
 
     private final Gson gson = new Gson();
 
