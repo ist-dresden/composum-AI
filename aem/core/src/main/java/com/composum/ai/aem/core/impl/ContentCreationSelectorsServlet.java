@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl;
 
+import static com.composum.ai.aem.core.impl.SelectorUtils.PARAMETER_PATH;
 import static com.composum.ai.aem.core.impl.SelectorUtils.transformToDatasource;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         Map<String, String> contentSelectors = readPredefinedContentSelectors(request);
-        String path = request.getParameter("path");
+        String path = request.getParameter(PARAMETER_PATH);
         Resource resource = request.getResourceResolver().getResource(path);
         if (resource != null) {
             addContentPaths(resource, contentSelectors);

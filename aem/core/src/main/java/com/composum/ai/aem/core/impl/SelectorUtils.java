@@ -21,6 +21,8 @@ import com.adobe.granite.ui.components.ds.ValueMapResource;
  */
 class SelectorUtils {
 
+    public static final String PARAMETER_PATH = "path";
+
     /**
      * The keys of the map are the displayed texts, the values the value for the selects.
      */

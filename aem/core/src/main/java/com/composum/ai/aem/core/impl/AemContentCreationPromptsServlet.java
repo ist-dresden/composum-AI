@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl;
 
+import static com.composum.ai.aem.core.impl.SelectorUtils.PARAMETER_PATH;
 import static com.composum.ai.aem.core.impl.SelectorUtils.findLanguage;
 import static com.composum.ai.aem.core.impl.SelectorUtils.transformToDatasource;
 
@@ -42,7 +43,7 @@ public class AemContentCreationPromptsServlet extends SlingSafeMethodsServlet {
 
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
-        String pagePath = request.getRequestPathInfo().getSuffix();
+        String pagePath = request.getParameter(PARAMETER_PATH);
         Resource pageResource = request.getResourceResolver().getResource(pagePath);
         String language = findLanguage(pageResource);
 
