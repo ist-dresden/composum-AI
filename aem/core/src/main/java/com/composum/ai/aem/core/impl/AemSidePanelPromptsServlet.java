@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl;
 
 import static com.composum.ai.aem.core.impl.SelectorUtils.PARAMETER_PATH;
 import static com.composum.ai.aem.core.impl.SelectorUtils.findLanguage;
+import static com.composum.ai.aem.core.impl.SelectorUtils.replaceLanguagePlaceholder;
 import static com.composum.ai.aem.core.impl.SelectorUtils.transformToDatasource;
 
 import java.io.IOException;
@@ -56,6 +57,7 @@ public class AemSidePanelPromptsServlet extends SlingSafeMethodsServlet {
         } else {
             LOG.warn("No content creation prompts path found for page " + pagePath);
         }
+        prompts = replaceLanguagePlaceholder(prompts, language);
 
         DataSource dataSource = transformToDatasource(request, prompts);
         request.setAttribute(DataSource.class.getName(), dataSource);

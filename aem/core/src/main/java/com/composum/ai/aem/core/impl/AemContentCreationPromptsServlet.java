@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl;
 
 import static com.composum.ai.aem.core.impl.SelectorUtils.PARAMETER_PATH;
 import static com.composum.ai.aem.core.impl.SelectorUtils.findLanguage;
+import static com.composum.ai.aem.core.impl.SelectorUtils.replaceLanguagePlaceholder;
 import static com.composum.ai.aem.core.impl.SelectorUtils.transformToDatasource;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class AemContentCreationPromptsServlet extends SlingSafeMethodsServlet {
         Resource pageResource = request.getResourceResolver().getResource(pagePath);
         String language = findLanguage(pageResource);
 
-        Map<String, String> prompts = Collections.emptyMap();
+        Map<String, String> prompts = null;
 
         GPTPromptLibrary paths = aiConfigurationService.getGPTPromptLibraryPaths(request, pagePath);
         if (paths != null && paths.contentCreationPromptsPath() != null) {
@@ -56,6 +57,8 @@ public class AemContentCreationPromptsServlet extends SlingSafeMethodsServlet {
         } else {
             LOG.warn("No content creation prompts path found for page " + pagePath);
         }
+        prompts = prompts != null ? prompts : Collections.emptyMap();
+        prompts = replaceLanguagePlaceholder(prompts, language);
 
         DataSource dataSource = transformToDatasource(request, prompts);
         request.setAttribute(DataSource.class.getName(), dataSource);

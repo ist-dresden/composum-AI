@@ -64,6 +64,12 @@
                         sling:resourceType="wknd/components/teaser"
                         jcr:title="10 Vorschläge für Überschrift und Unterüberschrift"
                         jcr:description="Schreibe 10 Vorschläge für eine Überschrift und eine Unterüberschrift für den Text. Gib für jeden Vorschlag nur die rohe Überschrift und in der nächsten Zeile eine Unterüberschrift an. Bitte keine Erklärungen und kein Einfassen mit Anführungszeichen. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                <teaser_9a
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Übersetzung"
+                        jcr:description="Übersetze den gegebenen Text auf TARGETLANGUAGE. Du bist ein Experte für Übersetzungen und übersetzt Texte mit größter Genauigkeit, wobei der ursprüngliche Stil, Ton, die Stimmung und alle Formatierungselemente (Markdown, HTML-Tags, Sonderzeichen) so weit wie möglich erhalten bleiben."/>
+                />
                 <teaser_10
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/teaser"

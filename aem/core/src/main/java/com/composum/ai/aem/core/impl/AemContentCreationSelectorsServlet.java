@@ -15,7 +15,6 @@ import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -37,7 +36,7 @@ import com.google.gson.Gson;
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Content Creation Selectors Servlet",
                 "sling.servlet.resourceTypes=composum-ai/servlets/contentcreationselectors",
         })
-public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
+public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
 
     private final Gson gson = new Gson();
 

@@ -73,6 +73,12 @@
                         jcr:title="10 headline + subheadline suggestions"
                         jcr:description="Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style."
                 />
+                <teaser_9a
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Translate"
+                        jcr:description="Translate the given text to TARGETLANGUAGE. You are an expert translator to translate texts with utmost fidelity, preserving the original style, tone, sentiment, and all formatting elements (markdown, HTML tags, special characters) to the greatest extent possible."
+                />
                 <teaser_10
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/teaser"
