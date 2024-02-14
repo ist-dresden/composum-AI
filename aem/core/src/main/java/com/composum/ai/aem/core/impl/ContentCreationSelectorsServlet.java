@@ -5,10 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
@@ -17,17 +15,11 @@ import javax.servlet.ServletException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.granite.ui.components.ds.DataSource;
-import com.adobe.granite.ui.components.ds.SimpleDataSource;
-import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.google.gson.Gson;
@@ -37,10 +29,10 @@ import com.google.gson.Gson;
  */
 @Component(service = Servlet.class,
         property = {
-                Constants.SERVICE_DESCRIPTION + "=Composum Pages Content Creation Selectors Servlet",
+                Constants.SERVICE_DESCRIPTION + "=Composum AI Content Creation Selectors Servlet",
                 "sling.servlet.resourceTypes=composum-ai/servlets/contentcreationselectors",
         })
-public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
+public class ContentCreationSelectorsServlet extends AbstractSelectorsServlet {
 
     private final Gson gson = new Gson();
 
@@ -91,20 +83,6 @@ public class ContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
             contentSelectors = gson.fromJson(reader, Map.class);
         }
         return contentSelectors;
-    }
-
-    protected static DataSource transformToDatasource(SlingHttpServletRequest request, Map<String, String> contentSelectors) {
-        List<Resource> resourceList = contentSelectors.entrySet().stream()
-                .map(entry -> {
-                    Map<String, Object> values = new HashMap<>();
-                    values.put("value", entry.getKey());
-                    values.put("text", entry.getValue());
-                    ValueMap valueMap = new ValueMapDecorator(values);
-                    return new ValueMapResource(request.getResourceResolver(), new ResourceMetadata(), "nt:unstructured", valueMap);
-                })
-                .collect(Collectors.toList());
-        DataSource dataSource = new SimpleDataSource(resourceList.iterator());
-        return dataSource;
     }
 
 }
