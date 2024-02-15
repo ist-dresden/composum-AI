@@ -64,6 +64,9 @@ class SelectorUtils {
         String language = null;
         while (pageResource != null && language == null) {
             language = pageResource.getValueMap().get(JcrConstants.JCR_LANGUAGE, String.class);
+            if (language == null) {
+                language = pageResource.getValueMap().get(JcrConstants.JCR_CONTENT + "/" + JcrConstants.JCR_LANGUAGE, String.class);
+            }
             pageResource = pageResource.getParent();
         }
         return language;
