@@ -24,12 +24,14 @@ public class RunGPTMultiTranslationServiceImpl extends AbstractGPTRunner {
     private void run() {
         // checkTranslation(Arrays.asList());
         // checkTranslation(Arrays.asList("Hi!", "Good morning"));
-        // checkTranslation(Arrays.asList("Hi!", "Good morning", "How are you?", "More", "Let's translate as translate can."));
-        List<String> veryLongArray = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            veryLongArray.add("This is a very long text intended to hit the token limit and lead to a complaint by ChatGPT and see what happens then.");
+        checkTranslation(Arrays.asList("Hi!", "Good morning", "How are you?", "More", "Let's translate as translate can."));
+        if (0 == 0) {
+            List<String> veryLongArray = new ArrayList<>();
+            for (int i = 0; i < 30; i++) {
+                veryLongArray.add("This is a very long text intended to hit the token limit and lead to a complaint by ChatGPT and see what happens then.");
+            }
+            checkTranslation(veryLongArray);
         }
-        checkTranslation(veryLongArray);
     }
 
     private List<String> checkTranslation(List<String> totranslate) {

@@ -85,8 +85,6 @@ import com.knuddels.jtokkit.api.EncodingType;
  * @see "https://platform.openai.com/docs/api-reference/chat/create"
  * @see "https://platform.openai.com/docs/guides/chat"
  */
-// TODO(hps,06.04.23) check error handling
-// TODO(hps,06.04.23) more configurability
 @Component(service = GPTChatCompletionService.class)
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
@@ -302,15 +300,25 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             throw new GPTException("Interrupted during call to GPT", e);
         } catch (IOException e) {
             if (!e.toString().contains("Stream") || !e.toString().contains("cancelled")) {
-                LOG.error("Error while call {} to GPT", id, e);
+                LOG.error("IO error while call {} to GPT", id, e);
             }
             throw new GPTException("Error while calling GPT", e);
         } catch (ExecutionException e) {
-            LOG.error("Error while call {} to GPT", id, e);
-            throw new GPTException("Error while calling GPT", e.getCause());
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            if (cause instanceof GPTException.GPTContextLengthExceededException) {
+                LOG.info("Context length exceeded while call {} to GPT", id);
+            } else {
+                LOG.error("Execution error while call {} to GPT", id, e);
+            }
+            if (cause instanceof GPTException || cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            throw new GPTException("Execution Error while calling GPT", e);
         } catch (TimeoutException e) {
             LOG.error("" + e, e);
             throw new GPTException("Timeout while calling GPT", e);
+        } catch (RuntimeException e) {
+            throw e;
         }
     }
 
@@ -723,8 +731,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     result.completeExceptionally(retryableException);
                     throw retryableException;
                 }
-                GPTException gptException = new GPTException("Error response from GPT (status " + errorStatusCode
-                        + ") : " + resultBuilder);
+                GPTException gptException = buildException(errorStatusCode, resultBuilder.toString());
                 callback.onError(gptException);
                 result.completeExceptionally(gptException);
                 throw gptException;
@@ -735,7 +742,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @Override
         public void failed(Exception cause) {
-            LOG.error("Response {} from GPT failed", id, cause);
+            LOG.info("Response {} from GPT failed: {}", id, cause.toString());
             result.completeExceptionally(cause);
             if (!(cause instanceof RetryableException)) {
                 callback.onError(cause);
@@ -752,6 +759,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             // nothing to do
         }
 
+    }
+
+    protected static GPTException buildException(Integer errorStatusCode, String result) {
+        if (Integer.valueOf(400).equals(errorStatusCode) && result != null
+                && result.contains("invalid_request_error") && result.contains("context_length_exceeded")) {
+            return new GPTException.GPTContextLengthExceededException(result);
+        }
+        return new GPTException("Error response from GPT (status " + errorStatusCode
+                + ") : " + result);
     }
 
     /**

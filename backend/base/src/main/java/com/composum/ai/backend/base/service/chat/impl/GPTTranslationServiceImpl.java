@@ -3,6 +3,7 @@ package com.composum.ai.backend.base.service.chat.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,6 +94,39 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Nonnull
     @Override
     public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration) throws GPTException {
+        return fragmentedTranslationDivideAndConquer(texts, targetLanguage, configuration, new AtomicInteger(5));
+    }
+
+    /**
+     * We try to translate the whole lot of texts. If that leads to an exception because we are out of tokens or the response was garbled, we split it into two and translate these individually. If even one text is too long, we are lost and give up.
+     */
+    protected List<String> fragmentedTranslationDivideAndConquer(@Nonnull List<String> texts, @Nonnull String targetLanguage,
+                                                                 @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries) throws GPTException {
+        if (permittedRetries.get() <= 0) {
+            LOG.error("Too many retries for fragmented translation to {} of {}", targetLanguage, texts);
+            throw new GPTException("Too many retries for fragmented translation");
+        }
+        try {
+            return fragmentedTranslation(texts, targetLanguage, configuration, permittedRetries);
+        } catch (GPTException.GPTRetryableResponseErrorException e) {
+            // is hopefully rare - otherwise we likely have to rethink this.
+            LOG.info("Splitting translation because of retryable error: {}", e.toString());
+            // that did cost something, so retry permits are decremented. We split anyway, since that might make things easier for the GPT service.
+            permittedRetries.decrementAndGet();
+        } catch (GPTException.GPTContextLengthExceededException e) {
+            // everything is fine - that doesn't cost anything. Just split
+        }
+        int half = texts.size() / 2;
+        List<String> firstHalf = texts.subList(0, half);
+        List<String> secondHalf = texts.subList(half, texts.size());
+        List<String> result = new ArrayList<>();
+        result.addAll(fragmentedTranslationDivideAndConquer(firstHalf, targetLanguage, configuration, permittedRetries));
+        result.addAll(fragmentedTranslationDivideAndConquer(secondHalf, targetLanguage, configuration, permittedRetries));
+        return result;
+    }
+
+    protected List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage,
+                                                 @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries) throws GPTException {
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();
         }
@@ -137,14 +171,14 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             if (idnum >= ids.size() || !ids.get(idnum).equals(id)) {
                 LOG.debug("Original text:\n{}", joinedtexts);
                 LOG.debug("Mismatch in response:\n{}", response);
-                throw new GPTException("Mismatch in translation fragments: " + id + " vs. " + ids.get(idnum));
+                throw new GPTException.GPTRetryableResponseErrorException("Mismatch in translation fragments: " + id + " vs. " + ids.get(idnum));
             }
             idnum++;
         }
         if (result.size() != texts.size()) {
             LOG.debug("Original text:\n{}", joinedtexts);
             LOG.debug("Mismatch in response:\n{}", response);
-            throw new GPTException("Mismatch in number of translation fragments: " + result.size() + " vs. " + texts.size());
+            throw new GPTException.GPTRetryableResponseErrorException("Mismatch in number of translation fragments: " + result.size() + " vs. " + texts.size());
         }
         return result;
     }
