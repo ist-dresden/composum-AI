@@ -117,7 +117,11 @@ public class AemAIConfigurationPlugin implements AIConfigurationPlugin {
                 langResource = resource.getChild(languageKey + "/" + JcrConstants.JCR_CONTENT);
                 break;
             }
-            languageKey = StringUtils.substringBeforeLast(languageKey, "_");
+            if (languageKey.contains("_")) {
+                languageKey = StringUtils.substringBeforeLast(languageKey, "_");
+            } else {
+                break;
+            }
         }
         if (langResource == null && resource.getChild("en/" + JcrConstants.JCR_CONTENT) != null) {
             langResource = resource.getChild("en/" + JcrConstants.JCR_CONTENT);
