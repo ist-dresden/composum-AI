@@ -38,23 +38,23 @@ editor.
 
 ### REST interface for the UI
 
-The REST interface needs the following operations. (URL prefix is /apps/composum-ai/autotranslate/list)
+The REST interface needs the following operations. (URL prefix is /apps/composum-ai/components/autotranslate/list)
 
-- List of translation processes (GET /apps/composum-ai/autotranslate/list.html)
+- List of translation processes (GET /apps/composum-ai/components/autotranslate/list.html)
     - Returns: list of links to the translation run including basic metadata (status), sorted by recency
     - HTML: form for start translation + table with 2 columns translation run status (RUNNING, DONE) incl. title with
       metadata + link
-- Start translation process (POST /apps/composum-ai/autotranslate/list.create.html)
+- Start translation process (POST /apps/composum-ai/components/autotranslate/list.create.html)
     - Parameters: path of the page to translate, recursive flag. (The language would be determined from the path.)
     - Returns: link to a translation run (including an id)
     - HTML: redirect to info about translation run
-- Information about a translation run (/apps/composum-ai/autotranslate/run.html/{id})
+- Information about a translation run (/apps/composum-ai/components/autotranslate/run.html/{id})
     - Status (Started, Running, Finished, Cancelled), Start / Stop time, User
     - List of pages already translated
     - List of pending pages
     - HTML: table with status; cancel button (form), table with pages : 2 columns, DONE/PENDING, path with link to
       editor
-- Cancel translation process (POST /apps/composum-ai/autotranslate/run.cancel.html/{id})
+- Cancel translation process (POST /apps/composum-ai/components/autotranslate/run.cancel.html/{id})
     - (POST) to the translation run with suffix /cancel
     - HTML: redirect to list of translation processes
 
@@ -63,16 +63,16 @@ for a start. The responses can contain HTML displayable in the browser, and even
 
 ### Necessary files
 
-We implement the REST interface with HTL (e.g. /apps/composum-ai/autotranslate/list/list.html for the list request)
+We implement the REST interface with HTL (e.g. /apps/composum-ai/components/autotranslate/list/list.html for the list request)
 and a Sling Model
-`com.composum.ai.aem.core.impl.autotranslate.AutoTranslateModel`
+`com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel`
 
 We need the following files: to implement all the requests:
 
-- /apps/composum-ai/autotranslate/list/list.html for the list GET
-- /apps/composum-ai/autotranslate/list/create.POST.html for the create POST.
-- /apps/composum-ai/autotranslate/run/run.html for the run GET
-- /apps/composum-ai/autotranslate/run/cancel.POST.html for the cancel POST
+- /apps/composum-ai/components/autotranslate/list/list.html for the list GET
+- /apps/composum-ai/components/autotranslate/list/create.POST.html for the create POST.
+- /apps/composum-ai/components/autotranslate/run/run.html for the run GET
+- /apps/composum-ai/components/autotranslate/run/cancel.POST.html for the cancel POST
 
 ## Some technical details
 

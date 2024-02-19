@@ -1,0 +1,29 @@
+<sly data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
+     data-sly-set.model="${runmodel.model}">
+    <div class="container mt-4">
+        <h2>Translation Run Details</h2>
+        <p><strong>Status:</strong> ${model.status}</p>
+        <p><strong>Start / Stop Time:</strong> ${model.startTime} / ${model.stopTime}</p>
+        <p><strong>User:</strong> ${model.user}</p>
+        <div class="mt-3">
+            <h3>Translated Pages</h3>
+            <table class="table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Status</th>
+                        <th>Page</th>
+                    </tr>
+                </thead>
+                <tbody data-sly-list="${model.translatedPages}">
+                    <tr>
+                        <td>${item.status}</td>
+                        <td><a href="/editor.html/${item.pagePath}.html">${item.pagePath}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <form action="/apps/composum-ai/components/autotranslate/run.cancel.html/${model.id}" method="GET" class="mt-3">
+            <button type="submit" class="btn btn-warning">Cancel Translation Process</button>
+        </form>
+    </div>
+</sly>
