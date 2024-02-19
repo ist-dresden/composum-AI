@@ -29,6 +29,9 @@ translated from (either verbatim or in form of a hash, to see when a re-translat
 and the text it was originally translated to (so that we can check whether it was manually fixed afterwards, possibly
 also as a hash).
 
+We save property values : the property value before the translation is saved with prefix `ai_original_` and the
+property name, and the property value after the translation is saved with prefix `ai_translated_ and the property name.
+
 ## UI
 
 The translation process would be a long running process in the server, translating page by page. Thus, it needs to
@@ -63,7 +66,8 @@ for a start. The responses can contain HTML displayable in the browser, and even
 
 ### Necessary files
 
-We implement the REST interface with HTL (e.g. /apps/composum-ai/components/autotranslate/list/list.html for the list request)
+We implement the REST interface with HTL (e.g. /apps/composum-ai/components/autotranslate/list/list.html for the list
+request)
 and a Sling Model
 `com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel`
 

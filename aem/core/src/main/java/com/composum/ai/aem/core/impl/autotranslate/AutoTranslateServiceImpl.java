@@ -17,10 +17,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A service that provides automatic translation of AEM pages.
@@ -32,11 +33,16 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 // REQUIRE since this is currently only a POC
 public class AutoTranslateServiceImpl implements AutoTranslateService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateServiceImpl.class);
+
     @Reference
     private ThreadPoolManager threadPoolManager;
 
     @Reference
     private AutoTranslateStateService stateService;
+
+    @Reference
+    private AutoPageTranslateService pageTranslateService;
 
     private ThreadPool threadPool;
 
@@ -44,7 +50,10 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     @Override
     public List<TranslationRun> getTranslationRuns() {
-        return Collections.unmodifiableList(stateService.getTranslationRuns());
+        List<TranslationRun> runs = new ArrayList<>();
+        runs.addAll(stateService.getTranslationRuns());
+        Collections.reverse(runs);
+        return runs;
     }
 
     @Activate
@@ -87,7 +96,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
 
         TranslationRunImpl run = stateService.getTranslationRuns().stream()
-                .filter(r -> r.rootPath.equals(path)).findAny().orElse(null);
+                .filter(r -> r.rootPath.equals(path) && r.stopTime == null).findAny().orElse(null);
         if (run != null) {
             throw new IllegalArgumentException("Translation run for " + path + " is already running");
         }
@@ -137,11 +146,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     public class TranslationRunImpl extends TranslationRun {
         public Future<?> future;
-        List<TranslationPage> translatedPages;
+        List<TranslationPageImpl> translatedPages;
 
         @Override
         public List<TranslationPage> getTranslatedPages() {
-            return translatedPages;
+            return Collections.unmodifiableList(translatedPages);
         }
 
         public void cancel() {
@@ -154,9 +163,14 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public void execute() {
             status = "running";
             startTime = new Date().toString();
-            for (TranslationPage page : translatedPages) {
+            for (TranslationPageImpl page : translatedPages) {
                 page.status = "running";
-                // do the translation
+                try {
+                    pageTranslateService.translateLiveCopy(page.resource);
+                } catch (Exception e) {
+                    page.status = "error";
+                    LOG.error("Error translating " + page.pagePath, e);
+                }
                 page.status = "done";
             }
             status = "done";
@@ -165,11 +179,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     public static class TranslationPageImpl extends TranslationPage {
-        Resource page;
+        Resource resource;
 
-        public TranslationPageImpl(Resource page) {
-            this.page = page;
-            pagePath = page.getParent().getPath(); // remove jcr:content
+        public TranslationPageImpl(Resource resource) {
+            this.resource = resource;
+            pagePath = resource.getParent().getPath(); // remove jcr:content
         }
     }
 
