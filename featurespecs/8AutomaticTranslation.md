@@ -134,6 +134,8 @@ Unclear: what exactly is the problem with the AEM translation process?
 ## Links
 
 https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
+https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html?lang=en - 
+  Workflow when updating a language copy
 
 ## Additional ideas
 
@@ -225,3 +227,12 @@ contant fragment translation only these folders have to be copied.
 
 - implement rollback for testing
 - check for content fragments and assets
+
+## More details
+
+### Differential translation
+
+When a text was translated and then manually corrected, and the original text was changed again, we want to include
+the manual correction in the new translation. An example how this can be done is the following; load the JSON into
+https://chatgpttools.stoerr.net/chatgpttools/multiplemessagechat.html for viewing.
+[{"role":"system","content":"You are tasked as an expert translator to translate texts with utmost fidelity, preserving the original style, tone, sentiment, and all formatting elements (markdown, HTML tags, special characters) to the greatest extent possible.\nIMPORTANT: Only provide the translated text, maintaining all original formatting and non-translatable elements. Avoid any extraneous comments or actions not directly related to the translation."},{"role":"user","content":"Print the original text you have to translate exactly without any comments."},{"role":"assistant","content":"Meet our extraordinary travel guides. When you travel with a certified WKND guide you gain access to attractions and perspectives not found on the pages of a guide book."},{"role":"user","content":"Print this original text translated into German."},{"role":"assistant","content":"Lernen Sie unsere außergewöhnlichen Reiseführer kennen. Wenn Sie mit einem zertifizierten WKND-Reiseleiter unterwegs sind, erhalten Sie Zugang zu Attraktionen und Perspektiven, die nicht auf den Seiten eines Reiseführers zu finden sind."},{"role":"user","content":"Print this original text as it was manually adapted."},{"role":"assistant","content":"Lernen Sie unsere außergewöhnlichen Reiseleiter kennen. Wenn Sie mit einem zertifizierten WKND-Reiseleiter unterwegs sind, erhalten Sie Zugang zu Attraktionen und Perspektiven, die nicht auf den Seiten eines Reiseführers zu finden sind."},{"role":"user","content":"Print the new text that is to be translated."},{"role":"assistant","content":"Meet our extraordinary travel guides. When you travel with a certified WKND guide you gain access to attractions and perspectives not found on the pages of a guide book. Choose the perfect guide for yourself!"},{"role":"user","content":"Translate the new text. Take care to include the manual adaptions for the original text."},{"role":"assistant","content":"Lernen Sie unsere außergewöhnlichen Reiseleiter kennen. Wenn Sie mit einem zertifizierten WKND-Reiseleiter unterwegs sind, erhalten Sie Zugang zu Attraktionen und Perspektiven, die nicht auf den Seiten eines Reiseführers zu finden sind. Wählen Sie den perfekten Reiseleiter für sich!"}]
