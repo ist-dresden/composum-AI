@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
 /**
@@ -92,6 +93,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             valueMap.put(AI_PREFIX + propertyName + AI_TRANSLATED_SUFFIX, translatedValue);
             valueMap.put(propertyName, translatedValue);
             valueMap.put(AI_TRANSLATED_MARKER, Boolean.TRUE);
+
+            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resourceToTranslate, false);
+            if (!relationship.getStatus().isCancelled() && !relationship.getStatus().isCancelledForChildren()) {
+                // experimentally, AEM cancels the relationship with "deep" in the UI when there are no child nodes.
+                boolean deep = !resource.getChildren().iterator().hasNext();
+                liveRelationshipManager.cancelRelationship(resource.getResourceResolver(), relationship,
+                        deep, false);
+            }
         }
         resource.getResourceResolver().commit();
     }
