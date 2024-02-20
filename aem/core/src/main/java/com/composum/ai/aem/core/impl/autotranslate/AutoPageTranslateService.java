@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -10,6 +11,6 @@ import com.day.cq.wcm.api.WCMException;
  */
 public interface AutoPageTranslateService {
 
-    void translateLiveCopy(Resource resource) throws WCMException, PersistenceException;
+    void translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException;
 
 }

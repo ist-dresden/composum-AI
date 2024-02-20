@@ -6,6 +6,8 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+
 public interface AutoTranslateService {
 
     /**
@@ -16,7 +18,7 @@ public interface AutoTranslateService {
     /**
      * Starts a new translation run.
      */
-    TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive) throws LoginException, PersistenceException;
+    TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive, GPTConfiguration configuration) throws LoginException, PersistenceException;
 
     public abstract class TranslationRun {
         public String id;
@@ -27,6 +29,7 @@ public interface AutoTranslateService {
         public String rootPath;
 
         public abstract List<TranslationPage> getTranslatedPages();
+
         public abstract void cancel();
     }
 

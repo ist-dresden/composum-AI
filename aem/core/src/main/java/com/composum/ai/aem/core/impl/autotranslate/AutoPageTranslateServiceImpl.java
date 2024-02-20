@@ -15,6 +15,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.SelectorUtils;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
@@ -69,7 +71,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public void translateLiveCopy(Resource resource) throws WCMException, PersistenceException {
+    public void translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException {
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         collectPropertiesToTranslate(resource, propertiesToTranslate);
         LOG.info("Set of property names to translate in {} : {}", resource.getPath(),
@@ -79,8 +81,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         List<String> valuesToTranslate = propertiesToTranslate.stream()
                 .map(p -> p.resource.getValueMap().get(p.propertyName, String.class))
                 .collect(Collectors.toList());
-        // for testing something random but trackable.
-        List<String> translatedValues = valuesToTranslate.stream().map(this::reverseString).collect(Collectors.toList());
+        String language = SelectorUtils.getLanguageName(SelectorUtils.findLanguage(resource));
+        List<String> translatedValues =
+                valuesToTranslate.stream().map(this::reverseString).collect(Collectors.toList()); // for testing
+        // translationService.fragmentedTranslation(valuesToTranslate, language, configuration);
         for (int i = 0; i < propertiesToTranslate.size(); i++) {
             PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
             String originalValue = valuesToTranslate.get(i);

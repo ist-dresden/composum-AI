@@ -25,7 +25,7 @@ import com.adobe.granite.ui.components.ds.ValueMapResource;
 /**
  * Some utility methods for this.
  */
-class SelectorUtils {
+public class SelectorUtils {
 
     /**
      * Parameter defining the path to the resource we work on.
@@ -60,7 +60,7 @@ class SelectorUtils {
     /**
      * Determines the langage this resource is in by searching for a ancestor resource with jcr:language set.
      */
-    static String findLanguage(Resource pageResource) {
+    public static String findLanguage(Resource pageResource) {
         String language = null;
         while (pageResource != null && language == null) {
             language = pageResource.getValueMap().get(JcrConstants.JCR_LANGUAGE, String.class);
@@ -89,7 +89,7 @@ class SelectorUtils {
 
     /* Determine the actual language name of the page - language is the language code, not the name.
      * the name of the language needs to be the human-readable name of the language in the language itself. */
-    static String getLanguageName(String language) {
+    public static String getLanguageName(String language) {
         language = StringUtils.replaceChars(language, "_", "-");
         Locale locale = Locale.forLanguageTag(language);
         String languageName = locale.getDisplayLanguage(locale);

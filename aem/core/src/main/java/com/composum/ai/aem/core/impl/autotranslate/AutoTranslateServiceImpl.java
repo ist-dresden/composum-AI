@@ -25,6 +25,9 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
+
 /**
  * A service that provides automatic translation of AEM pages.
  * <p>
@@ -45,6 +48,9 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     @Reference
     private AutoPageTranslateService pageTranslateService;
+
+    @Reference
+    private AIConfigurationService configurationService;
 
     private ThreadPool threadPool;
 
@@ -82,7 +88,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     @Override
-    public TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive) throws LoginException, PersistenceException {
+    public TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive, GPTConfiguration configuration) throws LoginException, PersistenceException {
         if (disabled) {
             throw new IllegalStateException("AutoTranslateService is disabled");
         }
@@ -127,6 +133,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         run.future = getThreadPool().submit(run::execute);
         run.status = "scheduled";
         run.user = resourceResolver.getUserID();
+        run.configuration = configuration;
         processResolver.commit();
         return run;
     }
@@ -149,6 +156,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     public class TranslationRunImpl extends TranslationRun {
         public Future<?> future;
         List<TranslationPageImpl> translatedPages;
+        GPTConfiguration configuration;
 
         @Override
         public List<TranslationPage> getTranslatedPages() {
@@ -169,7 +177,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             for (TranslationPageImpl page : translatedPages) {
                 page.status = "running";
                 try {
-                    pageTranslateService.translateLiveCopy(page.resource);
+                    pageTranslateService.translateLiveCopy(page.resource, configuration);
                     page.status = "done";
                 } catch (Exception e) {
                     page.status = "error";

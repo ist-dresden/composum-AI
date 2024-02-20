@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
@@ -16,7 +17,9 @@ public class AutoTranslateRunModel {
     private SlingHttpServletRequest request;
 
     public AutoTranslateService.TranslationRun getModel() {
-        String id = StringUtils.removeStart(request.getRequestPathInfo().getSuffix(), "/");
+        RequestPathInfo requestPathInfo = request.getRequestPathInfo();
+        String suffix = requestPathInfo.getSuffix();
+        String id = StringUtils.removeStart(suffix, "/");
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("id suffix is required");
         }
