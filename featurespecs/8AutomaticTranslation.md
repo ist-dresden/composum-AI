@@ -107,6 +107,12 @@ one experience fragment can have several languages.
 
 Composum would work quite differently, but that will be an afterthought after a POC for AEM.
 
+Unclear: what exactly is the problem with the AEM translation process?
+
+## Links
+
+https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
+
 ## Development
 
 ### Background information about live copies

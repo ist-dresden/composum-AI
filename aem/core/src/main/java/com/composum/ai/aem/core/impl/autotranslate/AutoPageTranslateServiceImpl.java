@@ -37,6 +37,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private static final Logger LOG = LoggerFactory.getLogger(AutoPageTranslateServiceImpl.class);
 
     /**
+     * Boolean property that marks a resource as automatically translated by this process.
+     */
+    public static final String AI_TRANSLATED_MARKER = "ai_translated";
+
+    /**
      * Prefix for property names of saved values.
      */
     public static final String AI_PREFIX = "ai_";
@@ -64,8 +69,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     @Override
     public void translateLiveCopy(Resource resource) throws WCMException, PersistenceException {
-        resource.getResourceResolver().refresh();
-        resource.getResourceResolver().commit();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         collectPropertiesToTranslate(resource, propertiesToTranslate);
         LOG.info("Set of property names to translate in {} : {}", resource.getPath(),
@@ -88,6 +91,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             valueMap.put(AI_PREFIX + propertyName + AI_ORIGINAL_SUFFIX, originalValue);
             valueMap.put(AI_PREFIX + propertyName + AI_TRANSLATED_SUFFIX, translatedValue);
             valueMap.put(propertyName, translatedValue);
+            valueMap.put(AI_TRANSLATED_MARKER, Boolean.TRUE);
         }
         resource.getResourceResolver().commit();
     }

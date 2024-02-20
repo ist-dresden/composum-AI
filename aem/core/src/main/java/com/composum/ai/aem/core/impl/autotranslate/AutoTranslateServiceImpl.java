@@ -18,6 +18,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * This is a proof-of-concept implementation, only available if explicitly enabled in the OSGi configuration.
  */
 @Designate(ocd = AutoTranslateServiceImpl.Config.class)
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, scope = ServiceScope.SINGLETON)
 // REQUIRE since this is currently only a POC
 public class AutoTranslateServiceImpl implements AutoTranslateService {
 
@@ -68,12 +69,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     @Deactivate
     public void deactivate() {
         disabled = true;
-        try {
-            stateService.getTranslationRuns().forEach(TranslationRunImpl::cancel);
-        } finally {
-            if (threadPool != null) {
-                threadPoolManager.release(threadPool);
-            }
+        if (threadPool != null) {
+            threadPoolManager.release(threadPool);
         }
     }
 
