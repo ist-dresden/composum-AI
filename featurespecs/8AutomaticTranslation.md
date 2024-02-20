@@ -128,4 +128,5 @@ https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
 Resources that are in a live relationship get a `jcr:mixinTypes="[cq:LiveRelationship]"`.
 Cancelled relationship: `jcr:mixinTypes="[cq:LiveRelationship,cq:LiveSyncCancelled]"` ,
 `cq:isCancelledForChildren="{Boolean}true"` . The editor seems to use cq:isCancelledForChildren=true only when the
-resource has no child resources.
+resource has no child resources. For the jcr:content node only property inheritance is cancelled - cancelling the
+resource inheritance seems to put the editor into trouble.

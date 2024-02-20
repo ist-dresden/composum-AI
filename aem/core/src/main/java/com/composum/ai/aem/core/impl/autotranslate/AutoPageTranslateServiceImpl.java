@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -93,13 +94,18 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             Resource resourceToTranslate = propertyToTranslate.resource;
             LOG.info("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
             ModifiableValueMap valueMap = resourceToTranslate.adaptTo(ModifiableValueMap.class);
-            valueMap.put(AI_PREFIX + propertyName + AI_ORIGINAL_SUFFIX, originalValue);
-            valueMap.put(AI_PREFIX + propertyName + AI_TRANSLATED_SUFFIX, translatedValue);
+            valueMap.put(encodePropertyName(propertyName, AI_ORIGINAL_SUFFIX), originalValue);
+            valueMap.put(encodePropertyName(propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
             valueMap.put(propertyName, translatedValue);
             valueMap.put(AI_TRANSLATED_MARKER, Boolean.TRUE);
 
             LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resourceToTranslate, false);
-            if (!relationship.getStatus().isCancelled() && !relationship.getStatus().isCancelledForChildren()) {
+            if (resourceToTranslate.getName().equals(JcrConstants.JCR_CONTENT)) {
+                // here we have to cancel the properties individually.
+                // cancelling the relationship for the whole resource seems to lead to trouble with the editor.
+                liveRelationshipManager.cancelPropertyRelationship(
+                        resource.getResourceResolver(), relationship, new String[]{propertyToTranslate.propertyName}, false);
+            } else if (!relationship.getStatus().isCancelled() && !relationship.getStatus().isCancelledForChildren()) {
                 // experimentally, AEM cancels the relationship with "deep" in the UI when there are no child nodes.
                 boolean deep = !resource.getChildren().iterator().hasNext();
                 liveRelationshipManager.cancelRelationship(resource.getResourceResolver(), relationship,
@@ -116,7 +122,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         ValueMap valueMap = resource.getValueMap();
         for (String propertyName : valueMap.keySet()) {
             if (isTranslatableProperty(propertyName, valueMap.get(propertyName))) {
-                if (!valueMap.containsKey(AI_PREFIX + propertyName + AI_ORIGINAL_SUFFIX)) {
+                if (!valueMap.containsKey(encodePropertyName(propertyName, AI_ORIGINAL_SUFFIX))) {
                     PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
                     propertyToTranslate.resource = resource;
                     propertyToTranslate.propertyName = propertyName;
@@ -128,6 +134,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             collectPropertiesToTranslate(child, propertiesToTranslate);
         }
         return propertiesToTranslate;
+    }
+
+    protected String encodePropertyName(String propertyName, String suffix) {
+        return AI_PREFIX + propertyName.replace(":", "_") + suffix;
     }
 
     protected final Pattern PATTERH_HAS_WHITESPACE = Pattern.compile("\\s.*\\s");
