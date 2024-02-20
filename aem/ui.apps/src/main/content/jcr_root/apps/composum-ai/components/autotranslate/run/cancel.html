@@ -1,6 +1,11 @@
-<sly data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
-     data-sly-use.cancelled="${runmodel.cancel}">
+<p data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
+     data-sly-set.model="${runmodel.model}"
+     data-sly-set.cancelled="${runmodel.cancel}">
     <div class="alert alert-warning" role="alert">
         Translation process cancelled successfully. ${cancelled}
     </div>
-</sly>
+</p>
+<p>
+Back to <a href="/apps/composum-ai/components/autotranslate/run.${model.id}.html">Run for ${model.rootPath}</a>,
+back to <a href="/apps/composum-ai/components/autotranslate/list.html">translation start page</a>.
+</p>

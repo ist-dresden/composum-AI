@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.threads.ThreadPool;
@@ -84,7 +85,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     @Override
-    public TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive) throws LoginException {
+    public TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive) throws LoginException, PersistenceException {
         if (disabled) {
             throw new IllegalStateException("AutoTranslateService is disabled");
         }
@@ -102,6 +103,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
 
         ResourceResolver processResolver = resourceResolver.clone(null);
+        processResolver.refresh();
+        processResolver.commit();
         Resource root = processResolver.getResource(path);
         if (root == null) {
             throw new IllegalArgumentException("No such resource: " + path);
@@ -126,6 +129,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         stateService.getTranslationRuns().add(run);
         run.future = getThreadPool().submit(run::execute);
         run.status = "scheduled";
+        run.user = resourceResolver.getUserID();
+        processResolver.commit();
         return run;
     }
 
@@ -162,18 +167,20 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
         public void execute() {
             status = "running";
+            boolean hasErrors = false;
             startTime = new Date().toString();
             for (TranslationPageImpl page : translatedPages) {
                 page.status = "running";
                 try {
                     pageTranslateService.translateLiveCopy(page.resource);
+                    page.status = "done";
                 } catch (Exception e) {
                     page.status = "error";
+                    hasErrors = true;
                     LOG.error("Error translating " + page.pagePath, e);
                 }
-                page.status = "done";
             }
-            status = "done";
+            status = hasErrors ? "doneWithErrors" : "done";
             stopTime = new Date().toString();
         }
     }

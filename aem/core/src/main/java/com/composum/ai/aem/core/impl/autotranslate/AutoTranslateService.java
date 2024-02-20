@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import java.util.List;
 
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 
 public interface AutoTranslateService {
@@ -15,7 +16,7 @@ public interface AutoTranslateService {
     /**
      * Starts a new translation run.
      */
-    TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive) throws LoginException;
+    TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive) throws LoginException, PersistenceException;
 
     public abstract class TranslationRun {
         public String id;

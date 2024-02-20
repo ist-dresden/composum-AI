@@ -9,21 +9,24 @@
             <h3>Translated Pages</h3>
             <table class="table">
                 <thead class="thead-light">
-                    <tr>
-                        <th>Status</th>
-                        <th>Page</th>
-                    </tr>
+                <tr>
+                    <th>Status</th>
+                    <th>Page</th>
+                </tr>
                 </thead>
                 <tbody data-sly-list="${model.translatedPages}">
-                    <tr>
-                        <td>${item.status}</td>
-                        <td><a href="/editor.html/${item.pagePath}.html">${item.pagePath}</a></td>
-                    </tr>
+                <tr>
+                    <td>${item.status}</td>
+                    <td><a href="/editor.html/${item.pagePath}.html">${item.pagePath}</a></td>
+                </tr>
                 </tbody>
             </table>
         </div>
         <form action="/apps/composum-ai/components/autotranslate/run.cancel.html/${model.id}" method="GET" class="mt-3">
             <button type="submit" class="btn btn-warning">Cancel Translation Process</button>
         </form>
+        <p>
+            Back to <a href="/apps/composum-ai/components/autotranslate/list.html">translation start page</a>.
+        </p>
     </div>
 </sly>

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
@@ -21,7 +22,7 @@ public class AutoTranslateListModel {
         return autoTranslateService.getTranslationRuns();
     }
 
-    public AutoTranslateService.TranslationRun createRun() throws LoginException {
+    public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
         String path = request.getParameter("path");
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("path parameter is required");

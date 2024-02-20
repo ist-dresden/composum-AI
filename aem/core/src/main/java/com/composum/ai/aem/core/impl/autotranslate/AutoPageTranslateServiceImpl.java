@@ -3,10 +3,11 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.jcr.RangeIterator;
-
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Component;
@@ -16,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.day.cq.wcm.api.WCMException;
-import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
 /**
@@ -26,8 +26,9 @@ import com.day.cq.wcm.msm.api.LiveRelationshipManager;
  * that is, contain multiple whitespace sequences. Since that's bound to fail sometimes, we later need a rule configuration
  * mechanism in the OSGI configuration that defines positive / negative exceptions, but that's not in scope for now.
  * </p> <p>
- * We save property values : the property value before the translation is saved with prefix `ai_original_` and the
- * property name, and the property value after the translation is saved with prefix `ai_translated_ and the property name.
+ * We save property values : the property value before the translation is saved with prefix `ai_` and suffix `_original`
+ * for the property name, and the property value after the translation is saved with prefix `ai_` and
+ * suffix `_translated` for the property name.
  * </p>
  */
 @Component
@@ -36,14 +37,21 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private static final Logger LOG = LoggerFactory.getLogger(AutoPageTranslateServiceImpl.class);
 
     /**
-     * Prefix for the property name of a property that saves the original value of the property, to track when it has to be re-translated.
+     * Prefix for property names of saved values.
      */
-    public static final String AI_ORIGINAL_PREFIX = "ai_original_";
+    public static final String AI_PREFIX = "ai_";
 
     /**
-     * Prefix for the property name of a property that saves the translated value of the property, to track whether it has been manually changed after automatic translation.
+     * Suffix for the property name of a property that saves the original value of the property, to track when it
+     * has to be re-translated.
      */
-    public static final String AI_TRANSLATED_PREFIX = "ai_translated_";
+    public static final String AI_ORIGINAL_SUFFIX = "_original";
+
+    /**
+     * Suffix for the property name of a property that saves the translated value of the property, to track whether
+     * it has been manually changed after automatic translation.
+     */
+    public static final String AI_TRANSLATED_SUFFIX = "_translated";
 
     public static final List<String> CERTAINLY_TRANSLATABLE_PROPERTIES =
             Arrays.asList("jcr:title", "jcr:description", "text", "title");
@@ -55,18 +63,33 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public void translateLiveCopy(Resource resource) throws WCMException {
-        List<LiveRelationship> relationships = new ArrayList<>();
-        for (RangeIterator it = liveRelationshipManager.getLiveRelationships(resource, null, null); it.hasNext(); ) {
-            relationships.add((LiveRelationship) it.next());
-        }
-
+    public void translateLiveCopy(Resource resource) throws WCMException, PersistenceException {
+        resource.getResourceResolver().refresh();
+        resource.getResourceResolver().commit();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         collectPropertiesToTranslate(resource, propertiesToTranslate);
         LOG.info("Set of property names to translate in {} : {}", resource.getPath(),
                 propertiesToTranslate.stream()
                         .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
-        LOG.warn("Translating {} properties", propertiesToTranslate.size());
+        LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
+        List<String> valuesToTranslate = propertiesToTranslate.stream()
+                .map(p -> p.resource.getValueMap().get(p.propertyName, String.class))
+                .collect(Collectors.toList());
+        // for testing something random but trackable.
+        List<String> translatedValues = valuesToTranslate.stream().map(this::reverseString).collect(Collectors.toList());
+        for (int i = 0; i < propertiesToTranslate.size(); i++) {
+            PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
+            String originalValue = valuesToTranslate.get(i);
+            String translatedValue = translatedValues.get(i);
+            String propertyName = propertyToTranslate.propertyName;
+            Resource resourceToTranslate = propertyToTranslate.resource;
+            LOG.info("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
+            ModifiableValueMap valueMap = resourceToTranslate.adaptTo(ModifiableValueMap.class);
+            valueMap.put(AI_PREFIX + propertyName + AI_ORIGINAL_SUFFIX, originalValue);
+            valueMap.put(AI_PREFIX + propertyName + AI_TRANSLATED_SUFFIX, translatedValue);
+            valueMap.put(propertyName, translatedValue);
+        }
+        resource.getResourceResolver().commit();
     }
 
     /**
@@ -76,7 +99,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         ValueMap valueMap = resource.getValueMap();
         for (String propertyName : valueMap.keySet()) {
             if (isTranslatableProperty(propertyName, valueMap.get(propertyName))) {
-                if (!valueMap.containsKey(AI_ORIGINAL_PREFIX + propertyName)) {
+                if (!valueMap.containsKey(AI_PREFIX + propertyName + AI_ORIGINAL_SUFFIX)) {
                     PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
                     propertyToTranslate.resource = resource;
                     propertyToTranslate.propertyName = propertyName;
@@ -90,14 +113,25 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return propertiesToTranslate;
     }
 
+    protected final Pattern PATTERH_HAS_WHITESPACE = Pattern.compile("\\s.*\\s");
+
+    /**
+     * As additional heuristic - the text should have at least one word with >= 4 letters.
+     * That will break down very different languages, I know, but this is a POC. :-)
+     */
+    protected final Pattern PATTERN_HAS_WORD = Pattern.compile("\\w{4}");
+
     protected boolean isTranslatableProperty(String name, Object value) {
         if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name)) {
             return true;
         }
         if (value instanceof String) {
             String stringValue = (String) value;
-            return stringValue.contains("  ") && // heuristic for a start.
-                    !name.startsWith(AI_ORIGINAL_PREFIX) && !name.startsWith(AI_TRANSLATED_PREFIX);
+            return !(name.startsWith(AI_PREFIX) && name.endsWith(AI_TRANSLATED_SUFFIX)) &&
+                    !(name.startsWith(AI_PREFIX) && name.endsWith(AI_ORIGINAL_SUFFIX)) &&
+                    // heuristic for a start:
+                    PATTERH_HAS_WHITESPACE.matcher(stringValue).find() &&
+                    PATTERN_HAS_WORD.matcher(stringValue).find();
         }
         return false;
     }
@@ -110,6 +144,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         public String toString() {
             return resource.getPath() + "/" + propertyName;
         }
+    }
+
+    // FIXME(hps,20.02.24) remove this - testing only.
+    private String reverseString(String value) {
+        return new StringBuilder(value).reverse().toString();
     }
 
 }

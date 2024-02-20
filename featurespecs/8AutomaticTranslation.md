@@ -106,3 +106,20 @@ path, and we'd need to update the path in the translated page. Perhaps there is 
 one experience fragment can have several languages.
 
 Composum would work quite differently, but that will be an afterthought after a POC for AEM.
+
+## Development
+
+### Background information about live copies
+
+/content//cq:LiveSyncConfig shows the live copies - subnode of jcr:content, e.g.:
+
+    <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+              jcr:primaryType="cq:LiveCopy"
+              cq:isDeep="{Boolean}true"
+              cq:master="/content/wknd/language-masters/en">
+    </jcr:root>
+
+Resources that are in a live relationship get a `jcr:mixinTypes="[cq:LiveRelationship]"`.
+Cancelled relationship: `jcr:mixinTypes="[cq:LiveRelationship,cq:LiveSyncCancelled]"` ,
+`cq:isCancelledForChildren="{Boolean}true"` . The editor seems to use cq:isCancelledForChildren=true only when the
+resource has no child resources.

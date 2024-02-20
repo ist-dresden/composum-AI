@@ -1,8 +1,12 @@
-<sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel" data-sly-set.id="${model.createRun.id}">
+<sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel"
+     data-sly-set.id="${model.createRun.id}">
     <div class="alert alert-success" role="alert">
         Translation process started successfully.
         <a href="/apps/composum-ai/components/autotranslate/run.html/${id}" class="alert-link">
             View translation run ${id}
         </a>.
     </div>
+    <p>
+        Back to <a href="/apps/composum-ai/components/autotranslate/list.html">translation start page</a>.
+    </p>
 </sly>
