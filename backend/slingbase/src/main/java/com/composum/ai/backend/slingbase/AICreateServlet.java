@@ -179,7 +179,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
      * In case of errors, there will be an 'exception' event into the stream with data JSON like this: {"success":false,"title":"Internal error","messages":[{"level":"error","text":"something happened"}]}
      */
     @Override
-    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws IOException {
+    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws IOException, ServletException {
         String streamId = request.getParameter(PARAMETER_STREAMID);
         LOG.info("Retrieving stream {}", streamId);
         EventStream stream = retrieveStream(streamId, request);
@@ -194,9 +194,12 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 if (stream.getWholeResponse() != null) {
                     LOG.debug("Whole response for {} : {}", streamId, stream.getWholeResponse());
                 }
-            } catch (IOException | InterruptedException e) {
-                LOG.warn("Error writing to stream " + streamId, e);
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted writing to stream " + streamId, e);
                 Thread.currentThread().interrupt();
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Interrupted during writing stream " + e);
+            } catch (IOException e) {
+                LOG.warn("Error writing to stream " + streamId, e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error writing stream " + e);
             }
         }

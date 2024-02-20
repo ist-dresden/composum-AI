@@ -349,7 +349,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
-            Thread.currentThread().interrupt();
             LOG.error("Error while call {} to GPT", id, e);
             throw new GPTException("Error while calling GPT", e);
         }

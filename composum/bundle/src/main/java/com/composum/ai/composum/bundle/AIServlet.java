@@ -619,7 +619,7 @@ public class AIServlet extends AbstractServiceServlet {
 
         @Override
         public void doIt(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response, @Nullable ResourceHandle resource)
-                throws IOException {
+                throws IOException, ServletException {
             Status status = new Status(request, response, LOG);
             String streamId = status.getRequiredParameter(RESULTKEY_STREAMID, null, "No stream id given");
             if (status.isValid()) {
@@ -636,9 +636,11 @@ public class AIServlet extends AbstractServiceServlet {
                         if (stream.getWholeResponse() != null) {
                             LOG.debug("Whole response for {} : {}", streamId, stream.getWholeResponse());
                         }
-                    } catch (IOException | InterruptedException e) {
-                        status.error("Error writing to stream: " + e, e);
+                    } catch (InterruptedException e) {
+                        status.error("Thread interrupted when writing to stream: " + e, e);
                         Thread.currentThread().interrupt();
+                    } catch (IOException e) {
+                        status.error("Error writing to stream: " + e, e);
                     }
                 }
             }
