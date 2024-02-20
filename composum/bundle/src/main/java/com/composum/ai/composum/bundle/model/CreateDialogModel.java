@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 import com.composum.pages.commons.model.AbstractModel;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,8 +30,17 @@ public class CreateDialogModel extends AbstractModel {
 
     protected transient GPTChatCompletionService chatCompletionService;
 
+    protected transient AIConfigurationService aiConfigurationService;
+
     public Map<String, String> getPredefinedPrompts() {
-        return readJsonFile("create/predefinedprompts.json");
+        GPTPromptLibrary paths = getAIConfigurationService().getGPTPromptLibraryPaths(getContext().getRequest(), getResource().getPath());
+        if (paths != null) {
+            String path = paths.contentCreationPromptsPath();
+            Map<String, String> map = getAIConfigurationService().getGPTConfigurationMap(getContext().getRequest(), path, null);
+            return map;
+        }
+        LOG.error("No paths for predefined prompts found for {}", getPath());
+        return null;
     }
 
     public Map<String, String> getContentSelectors() {
@@ -56,6 +67,13 @@ public class CreateDialogModel extends AbstractModel {
             chatCompletionService = requireNonNull(context.getService(GPTChatCompletionService.class));
         }
         return chatCompletionService;
+    }
+
+    protected AIConfigurationService getAIConfigurationService() {
+        if (aiConfigurationService == null) {
+            aiConfigurationService = requireNonNull(context.getService(AIConfigurationService.class));
+        }
+        return aiConfigurationService;
     }
 
     public Map<String, String> getTextLengths() {

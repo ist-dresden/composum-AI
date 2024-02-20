@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -233,8 +233,8 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         if (StringUtils.isNotBlank(title)) {
             out.println("## " + title);
         }
-        Map<String, String> elementLabels = new HashMap<>();
-        Map<String, Integer> listOrder = new HashMap<>();
+        Map<String, String> elementLabels = new LinkedHashMap<>();
+        Map<String, Integer> listOrder = new LinkedHashMap<>();
         findElementLabels(dataNode, elementLabels, listOrder);
         if (referencedResource.getChild("jcr:content/data/" + variation) != null) {
             referencedResource = referencedResource.getChild("jcr:content/data/" + variation);

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -20,7 +19,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 
@@ -68,15 +66,6 @@ public class OsgiAIConfigurationPluginImpl implements AIConfigurationPlugin {
                     .collect(Collectors.toList());
         }
         return Arrays.asList(fallbackConfig);
-    }
-
-    /**
-     * Not implemented here.
-     */
-    @Nullable
-    @Override
-    public GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
-        return null;
     }
 
 }

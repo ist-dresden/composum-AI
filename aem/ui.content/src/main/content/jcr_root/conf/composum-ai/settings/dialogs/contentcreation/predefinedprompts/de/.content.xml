@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="wknd/components/page"
+            cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
+            jcr:language="de"
+            jcr:title="Standard-Bibliothek für Inhalteerstellung, Deutsch"
+            hideInNav="true">
+        <root
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="wknd/components/container"
+                layout="responsiveGrid">
+            <container
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="wknd/components/container"
+                    layout="responsiveGrid">
+                <teaser_1
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Fasse zusammen"
+                        jcr:description="Schreibe bitte eine prägnante Zusammenfassung des Textes. Die Zusammenfassung soll die Hauptideen im Stil des Textes einfangen, als könnte sie vor dem Text stehen. Sorge dafür, dass sie deutlich kürzer als das Original ist. Die Zusammenfassung soll dem Zweck und Ziel des Textes sowie den Schlüsselpunkten aller Themenbereiche gerecht werden. Schreibe klar und einfach, um Genauigkeit und Vollständigkeit zu gewährleisten. Nutze nur die im Text gegebenen Informationen; verwende keine Informationen, die du über die Welt weißt."/>
+                <teaser_2
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Einführung"
+                        jcr:description="Schreibe eine eloquente Einführung für den Text, im Stil des Textes, als könnte sie vor dem Text stehen."/>
+                <teaser_3
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Fazit"
+                        jcr:description="Schreibe ein eloquentes Fazit für den Text, im Stil des Textes, als könnte es nach dem Text stehen."/>
+                <teaser_4
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Erweitere"
+                        jcr:description="Nutze die bereitgestellten Notizen als Inspiration, um einen Text zu verfassen, der die Hauptideen und Themen darlegt. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                <teaser_5
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Ergänze"
+                        jcr:description="Bitte ergänze den Text um weitere Details und Ausführungen, während der aktuelle Ton und Stil beibehalten wird."/>
+                <teaser_6
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Abstrakt"
+                        jcr:description="Schreibe ein Abstrakt für den Text, das einen prägnanten Überblick über die Schlüsselpunkte und Hauptthemen des Textes bietet, als könnte es vor dem Text stehen."/>
+                <teaser_7
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Überschrift"
+                        jcr:description="Schreibe eine Überschrift für den Text. Gib nur die rohe Überschrift an, keine Erklärungen und keine Zitate. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                <teaser_8
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="10 Überschriftvorschläge"
+                        jcr:description="Schreibe 10 Vorschläge für eine Überschrift für den Text. Gib nur die rohe Überschrift an, keine Erklärungen und keine Zitate. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                <teaser_9
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="10 Vorschläge für Überschrift und Unterüberschrift"
+                        jcr:description="Schreibe 10 Vorschläge für eine Überschrift und eine Unterüberschrift für den Text. Gib für jeden Vorschlag nur die rohe Überschrift und in der nächsten Zeile eine Unterüberschrift an. Bitte keine Erklärungen und kein Einfassen mit Anführungszeichen. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                <teaser_9a
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Übersetzung"
+                        jcr:description="Übersetze den gegebenen Text auf TARGETLANGUAGE. Du bist ein Experte für Übersetzungen und übersetzt Texte mit größter Genauigkeit, wobei der ursprüngliche Stil, Ton, die Stimmung und alle Formatierungselemente (Markdown, HTML-Tags, Sonderzeichen) so weit wie möglich erhalten bleiben."/>
+                />
+                <teaser_10
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Frage"
+                        jcr:description="Bitte beantworte die folgende Frage auf Basis des gegebenen Textes:"/>
+                <teaser_11
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Verbessere"
+                        jcr:description="Drucke eine verbesserte Version des Textes in einem geschäftsmäßigen, informativen Stil. Korrigiere dabei auch Rechtschreib- und Grammatikfehler."/>
+                <teaser_12
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="SEO-Beschreibung"
+                        jcr:description="Erstelle bitte eine Beschreibung für eine Webseite mit dem folgenden Text, nutzbar für die Suchmaschinenoptimierung (SEO)."/>
+                <teaser_13
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Teaser"
+                        jcr:description="Schreibe einen kurzen, ansprechenden Teaser für den Text, wie er für einen Link zum Text verwendet werden könnte. Er soll das Interesse der Leser wecken und sie dazu ermutigen, den vollständigen Inhalt zu lesen."/>
+                <teaser_14
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Umschreiben für ein anderes Publikum"
+                        jcr:description="Bitte schreibe den Text um, damit er zu einem anderen Publikum passt:"/>
+                <teaser_15
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Stichpunkt-Zusammenfassung"
+                        jcr:description="Fasse die Hauptpunkte des Textes als Liste von Stichpunkten zusammen, wie sie vor dem Text stehen könnte"/>
+                <teaser_16
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="BAB-Rahmentext"
+                        jcr:description="Schreibe einen vollständigen Text unter Verwendung des Before-After-Bridge (BAB)-Frameworks. Beginne damit, das Problem zu beschreiben, stelle dann die Verbesserungen vor und führe schließlich die Lösung ein, die diese Transformation ermöglicht."/>
+                <teaser_17
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="AIDA-Rahmentext"
+                        jcr:description="Schreibe einen vollständigen Text unter Verwendung des AIDA-Frameworks. Beginne damit, Aufmerksamkeit zu erregen, dann Interesse zu wecken, Verlangen zu induzieren und schließlich zu einer Handlung aufzurufen."/>
+                <teaser_18
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Slogan"
+                        jcr:description="Erstelle auf Basis des gegebenen Textes einen einprägsamen und denkwürdigen Slogan, der das Hauptthema einfängt. Gib ihn so aus, als könnte er vor dem Text stehen."/>
+                <teaser_19
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="CTA"
+                        jcr:description="Erstelle auf Basis des Textes einen Call-to-Action, der den Leser dazu ermutigt, den nächsten Schritt zu tun, und deutlich den einzigartigen Wertvorschlag an den Leser vermittelt."/>
+                <teaser_20
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Markdown zu HTML"
+                        jcr:description="Konvertiere den folgenden Text von Markdown zu HTML:"/>
+                <teaser_21
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Beschreibe Bild"
+                        jcr:description="Bitte beschreibe das folgende Bild so, dass es eine blinde Person verstehen kann."/>
+            </container>
+        </root>
+    </jcr:content>
+</jcr:root>

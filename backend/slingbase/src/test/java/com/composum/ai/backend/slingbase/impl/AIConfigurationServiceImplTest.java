@@ -12,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.SlingHttpServletRequest;

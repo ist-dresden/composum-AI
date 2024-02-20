@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cpp="http://sling.composum.com/pages/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cpp:Page">
+    <!-- This page contains the prompts used normally for the content creation dialog. Every text is a prompt -
+    the title is shown in the drop down list, and it's text is the actual prompt. It should be translated
+     into all relevant languages. -->
+    <!--
+    {
+      "Summary": "Please write an eloquent summary of the text. The summary should capture its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Make sure the summary meets the purpose and goal of the text and key points of all topical sections. Write clear and simply, ensuring accuracy and completeness. Only use the information provided in the text; DO NOT use any information you know about the world.",
+      "Question": "Please answer the following question based on the given text. After answering in your own words print a new paragraph with quotations of the exact phrase(s) or sentence(s) in the text that answer the question. The question is:\n\n",
+      "Simplification Suggestions": "Identify parts of the text that could be simplified or made easier to understand. Name those parts and make suggestions for alternative wording.",
+      "Content Flow": "Analyze the flow of the content. Does it progress logically? Is there a clear introduction, body, and conclusion?",
+      "Review": "Check whether there is a good text flow, and whether there are contradictions or repetitions and redundancy in the text, inconsistent style or tone and stylistic problems. Check for long and complicated sentences that could be made simpler and more understandable. Give suggestions for improvement. Be picky.",
+      "10 headline suggestions": "Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.",
+      "10 headline + subheading suggestions": "Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style.",
+      "Sentiment Analysis": "Analyze the sentiment conveyed by the text. Is it positive, negative, or neutral? How strong is the sentiment?",
+      "AIDA Content Audit": "Review the provided text and suggest improvements following the AIDA model (Attention, Interest, Desire, and Action). Point out areas where attention-grabbing, interest building, desire amplification, or call-to-action might be lacking and provide suggestions to enhance each aspect.",
+      "BAB Content Audit": "Review the provided text and suggest improvements following the BAB Before-After-Bridge) model. Provide suggestions to enhance the 'Before' situation, 'After' vision, and 'Bridge' solution, making sure the reader can clearly see the transformation and the role our product/service plays in it.",
+      "CTA Evaluation": "Examine the current call-to-action (CTA) in the text. Does it compel the reader to take the desired action? Is it clear and persuasive? Are there ways to improve it? If there is no CTA, suggest one that fits the content and intended audience. Prioritize CTAs that are actionable, emotionally engaging, and concise.",
+      "CTA Suggestions": "Based on the main topic of the content, please suggest five distinct call-to-action (CTA) phrases that could motivate readers to engage further with the content or the brand. The CTAs should be clear, concise, and create a sense of urgency.",
+      "Content Gap Analysis": "Analyze the text to identify topics or subtopics that are not covered but could be relevant and valuable to the audience. Consider what questions the reader might still have after reading the text, and what additional information or perspectives could be included to make the text more comprehensive and informative.",
+      "Addressing Content Gaps": "Based on the identified content gaps, provide specific suggestions on how to fill these gaps. Include ideas for new sections, topics, or types of information that could be added to the text, as well as any changes to the text's organization or flow that could help integrate this new content.",
+      "Response simulation": "Simulate a positive, a negative and a neutral response of a reader about the provided text.",
+      "Tone Analysis": "Analyze the tone of the text. Is it formal, informal, friendly, confrontational, enthusiastic, neutral, etc?",
+      "Audience Suitability": "Given the following audience profile, evaluate whether the text is suitable, and suggest any needed improvements:\n",
+      "Relevance Evaluation": "Evaluate whether the content of the text is relevant to the following topic or purpose:\n",
+      "Fact Check": "Identify any factual claims in the text and indicate whether they are generally considered accurate, inaccurate, or uncertain.",
+      "Proofread": "Please check the text for any spelling, grammar, or punctuation errors, typos, incorrect  sentence structure and incorrect / inappropriate word usage, run-on sentences, incorrect subject-verb agreement, missing or repeated words. In each problem report, print a the part of the sentence where the problem occurs and how that part of the sentence would be improved. Sort the reported problems by severity.",
+      "Keyword Density": "Identify the most frequently used words or phrases in the text, excluding common function words."
+    }
+     -->
+    <jcr:content
+            jcr:primaryType="cpp:PageContent"
+            sling:resourceType="composum/pages/components/page"
+            jcr:description="Default prompt library for the Content Creation Dialog"
+            jcr:title="Content Creation Default Prompts"
+            category="prompt library"
+            pageLanguages="[en,de]"
+            subtitle=""
+            template="composum/pages/components/templates/page/test">
+        <main
+                jcr:primaryType="cpp:Container"
+                sling:resourceType="composum/pages/components/container/parsys">
+            <text_1
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    text="Please write an eloquent summary of the text. The summary should capture its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Make sure the summary meets the purpose and goal of the text and key points of all topical sections. Write clear and simply, ensuring accuracy and completeness. Only use the information provided in the text; DO NOT use any information you know about the world."
+                    title="Summarize">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            text="&lt;p>Bitte schreibe eine treffende Zusammenfassung des Textes. Die Zusammenfassung sollte die Hauptideen des Textes im Stil des Originals erfassen und vor dem Text stehen können. Stelle sicher, dass sie deutlich kürzer ist als der Originaltext ist. Stelle sicher, dass die Zusammenfassung den Zweck und das Ziel des Textes sowie die wichtigsten Punkte aller Abschnitte trifft. Schreibe klar und einfach, und achte dabei auf Genauigkeit und Vollständigkeit. Verwende ausschließlich die im Text angegebenen Informationen; verwende KEINE Informationen, die Sie ansonsten über die Welt wissen.&lt;/p>"
+                            title="Zusammenfassen"/>
+                </i18n>
+            </text_1>
+            <text_2
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Question"
+                    text="Please answer the following question based on the given text:&lt;br>">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Frage"
+                            text="Bitte beantworte die folgende Frage basierend auf dem gegebenen Text:&lt;br>"/>
+                </i18n>
+            </text_2>
+            <text_3
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Simplification Suggestions"
+                    text="Identify parts of the text that could be simplified or made easier to understand. Name those parts and make suggestions for alternative wording.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Vereinfachungsvorschläge"
+                            text="Identifiziere Teile des Textes, die vereinfacht oder verständlicher gemacht werden könnten. Nenne diese Teile und mache Vorschläge für alternative Formulierungen."/>
+                </i18n>
+            </text_3>
+            <text_4
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Content Flow"
+                    text="Analyze the flow of the content. Does it progress logically? Is there a clear introduction, body, and conclusion?">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Inhaltlicher Fluss"
+                            text="Analysiere den Fluss des Inhalts. Verläuft er logisch? Gibt es eine klare Einleitung, einen Hauptteil und einen Schluss?"/>
+                </i18n>
+            </text_4>
+            <text_5
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Review"
+                    text="Check whether there is a good text flow, and whether there are contradictions or repetitions and redundancy in the text, inconsistent style or tone and stylistic problems. Check for long and complicated sentences that could be made simpler and more understandable. Give suggestions for improvement. Be picky.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Überprüfung"
+                            text="Überprüfe, ob es einen guten Textfluss gibt und ob es Widersprüche, Wiederholungen und Redundanzen im Text, einen inkonsistenten Stil oder Ton und stilistische Probleme gibt. Überprüfe nach langen und komplizierten Sätzen, die einfacher und verständlicher gemacht werden könnten. Gib Verbesserungsvorschläge. Sei wählerisch."/>
+                </i18n>
+            </text_5>
+            <text_6
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="10 headline suggestions"
+                    text="Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="10 Überschriften-Vorschläge"
+                            text="Bitte schreibe 10 Vorschläge für eine Überschrift für den Text. Gib nur die reine Überschrift an, keine Erklärungen und keine Anführungszeichen. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                </i18n>
+            </text_6>
+            <text_7
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="10 headline + subheading suggestions"
+                    text="Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="10 Überschrift + Untertitel-Vorschläge"
+                            text="Bitte schreibe 10 Vorschläge für eine Überschrift und einen Untertitel für den Text. Gib für jeden Vorschlag nur die reine Überschrift und in der nächsten Zeile einen Untertitel an. Bitte keine Erklärungen und keine Anführungszeichen. Verwende einen geschäftsmäßigen, informativen Stil."/>
+                </i18n>
+            </text_7>
+            <text_8
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Sentiment Analysis"
+                    text="Analyze the sentiment conveyed by the text. Is it positive, negative, or neutral? How strong is the sentiment?">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Sentiment-Analyse"
+                            text="Analysiere das im Text vermittelte Gefühl. Ist es positiv, negativ oder neutral? Wie stark ist das Gefühl?"/>
+                </i18n>
+            </text_8>
+            <text_9
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="AIDA Content Audit"
+                    text="Review the provided text and suggest improvements following the AIDA model (Attention, Interest, Desire, and Action). Point out areas where attention-grabbing, interest building, desire amplification, or call-to-action might be lacking and provide suggestions to enhance each aspect.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="AIDA-Inhaltsprüfung"
+                            text="Überprüfe den bereitgestellten Text und schlage Verbesserungen nach dem AIDA-Modell (Attention, Interest, Desire und Action) vor. Weise auf Bereiche hin, in denen es an Aufmerksamkeit, Interesse, Verstärkung des Verlangens oder Handlungsaufforderung fehlen könnte, und gib Vorschläge zur Verbesserung jedes Aspekts."/>
+                </i18n>
+            </text_9>
+            <text_10
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="BAB Content Audit"
+                    text="Review the provided text and suggest improvements following the BAB (Before-After-Bridge) model. Provide suggestions to enhance the 'Before' situation, 'After' vision, and 'Bridge' solution, making sure the reader can clearly see the transformation and the role our product/service plays in it.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="BAB-Inhaltsprüfung"
+                            text="Überprüfe den bereitgestellten Text und schlage Verbesserungen nach dem BAB-Modell (Before-After-Bridge) vor. Gib Vorschläge zur Verbesserung der 'Before'-Situation, der 'After'-Vision und der 'Bridge'-Lösung, um sicherzustellen, dass der Leser die Transformation und die Rolle unseres Produkts/Services darin klar erkennen kann."/>
+                </i18n>
+            </text_10>
+            <text_11
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="CTA Evaluation"
+                    text="Examine the current call-to-action (CTA) in the text. Does it compel the reader to take the desired action? Is it clear and persuasive? Are there ways to improve it? If there is no CTA, suggest one that fits the content and intended audience. Prioritize CTAs that are actionable, emotionally engaging, and concise.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="CTA-Bewertung"
+                            text="Untersuche die aktuelle Handlungsaufforderung (CTA) im Text. Zwingt sie den Leser, die gewünschte Aktion auszuführen? Ist sie klar und überzeugend? Gibt es Möglichkeiten, sie zu verbessern? Wenn es keine CTA gibt, schlage eine vor, die zum Inhalt und zur Zielgruppe passt. Priorisiere CTAs, die handlungsfähig, emotional ansprechend und prägnant sind."/>
+                </i18n>
+            </text_11>
+            <text_12
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="CTA Suggestions"
+                    text="Based on the main topic of the content, please suggest five distinct call-to-action (CTA) phrases that could motivate readers to engage further with the content or the brand. The CTAs should be clear, concise, and create a sense of urgency.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="CTA-Vorschläge"
+                            text="Basierend auf dem Hauptthema des Inhalts schlage bitte fünf verschiedene Handlungsaufforderungen (CTA) vor, die die Leser dazu motivieren könnten, sich weiter mit dem Inhalt oder der Marke zu beschäftigen. Die CTAs sollten klar, prägnant und ein Gefühl der Dringlichkeit erzeugen."/>
+                </i18n>
+            </text_12>
+            <text_13
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Content Gap Analysis"
+                    text="Analyze the text to identify topics or subtopics that are not covered but could be relevant and valuable to the audience. Consider what questions the reader might still have after reading the text, and what additional information or perspectives could be included to make the text more comprehensive and informative.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Analyse von Inhaltlücken"
+                            text="Analysiere den Text, um Themen oder Unterpunkte zu identifizieren, die nicht abgedeckt sind, aber für das Publikum relevant und wertvoll sein könnten. Überlege, welche Fragen der Leser nach dem Lesen des Textes noch haben könnte, und welche zusätzlichen Informationen oder Perspektiven aufgenommen werden könnten, um den Text umfassender und informativer zu gestalten."/>
+                </i18n>
+            </text_13>
+            <text_14
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Addressing Content Gaps"
+                    text="Based on the identified content gaps, provide specific suggestions on how to fill these gaps. Include ideas for new sections, topics, or types of information that could be added to the text, as well as any changes to the text's organization or flow that could help integrate this new content.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Adressierung von Inhaltlücken"
+                            text="Basierend auf den identifizierten Inhaltlücken gib spezifische Vorschläge, wie diese Lücken gefüllt werden können. Schließe Ideen für neue Abschnitte, Themen oder Arten von Informationen ein, die dem Text hinzugefügt werden könnten, sowie Änderungen an der Organisation oder am Fluss des Textes, die dazu beitragen könnten, diesen neuen Inhalt zu integrieren."/>
+                </i18n>
+            </text_14>
+            <text_15
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Response simulation"
+                    text="Simulate a positive, a negative and a neutral response of a reader about the provided text.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Reaktionssimulation"
+                            text="Simuliere eine positive, eine negative und eine neutrale Reaktion eines Lesers auf den bereitgestellten Text."/>
+                </i18n>
+            </text_15>
+            <text_16
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Tone Analysis"
+                    text="Analyze the tone of the text. Is it formal, informal, friendly, confrontational, enthusiastic, neutral, etc?">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Tonanalyse"
+                            text="Analysiere den Ton des Textes. Ist er formell, informell, freundlich, konfrontativ, enthusiastisch, neutral, etc.?"/>
+                </i18n>
+            </text_16>
+            <text_17
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Audience Suitability"
+                    text="Given the following audience profile, evaluate whether the text is suitable, and suggest any needed improvements:&lt;br>">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Zielgruppen-Eignung"
+                            text="Bewerte anhand des folgenden Zielgruppenprofils, ob der Text geeignet ist, und schlage erforderliche Verbesserungen vor:&lt;br>"/>
+                </i18n>
+            </text_17>
+            <text_18
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Relevance Evaluation"
+                    text="Evaluate whether the content of the text is relevant to the following topic or purpose:&lt;br>">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Relevanzbewertung"
+                            text="Bewerte, ob der Inhalt des Textes relevant für das folgende Thema oder den Zweck ist:&lt;br>"/>
+                </i18n>
+            </text_18>
+            <text_19
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Fact Check"
+                    text="Identify any factual claims in the text and indicate whether they are generally considered accurate, inaccurate, or uncertain.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Faktencheck"
+                            text="Identifiziere alle sachlichen Behauptungen im Text und gib an, ob sie allgemein als korrekt, inkorrekt oder unsicher angesehen werden."/>
+                </i18n>
+            </text_19>
+            <text_20
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Proofread"
+                    text="Please check the text for any spelling, grammar, or punctuation errors, typos, incorrect  sentence structure and incorrect / inappropriate word usage, run-on sentences, incorrect subject-verb agreement, missing or repeated words. In each problem report, print a the part of the sentence where the problem occurs and how that part of the sentence would be improved. Sort the reported problems by severity.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Korrekturlesen"
+                            text="Bitte überprüfe den Text auf Rechtschreib-, Grammatik- oder Zeichensetzungsfehler, Tippfehler, inkorrekte Satzstruktur und inkorrekte / unangemessene Wortverwendung, Satzgefüge, inkorrekte Subjekt-Verb-Vereinbarung, fehlende oder wiederholte Wörter. Gib in jedem Problembericht den Teil des Satzes an, in dem das Problem auftritt, und wie dieser Teil des Satzes verbessert werden würde. Sortiere die gemeldeten Probleme nach Schwere."/>
+                </i18n>
+            </text_20>
+            <text_21
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Keyword Density"
+                    text="Identify the most frequently used words or phrases in the text, excluding common function words.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Schlüsselwortdichte"
+                            text="Identifiziere die am häufigsten verwendeten Schlüsselwörter oder Phrasen im Text, wobei gängige Funktionswörter ausgeschlossen sind."/>
+                </i18n>
+            </text_21>
+        </main>
+        <navigation
+                jcr:primaryType="nt:unstructured"
+                hideInNav="{Boolean}true"/>
+        <search
+                jcr:primaryType="nt:unstructured"
+                ignoreInSearch="{Boolean}true"/>
+        <style
+                jcr:primaryType="nt:unstructured"/>
+    </jcr:content>
+</jcr:root>

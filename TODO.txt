@@ -44,3 +44,14 @@ https://mvnrepository.com/artifact/io.github.namankhurpia/easyopenai -> many dep
 
 DTB Chat Completion Gen
 https://chat.openai.com/share/c095d1db-4e72-4abe-8794-c1fe9e01fbf7
+
+## Perhaps refactor the paths
+
+/libs/composum/pages/options/ai -> /apps/composum/ai ? That does fit the other pages extensions -> keep options/ai
+/apps/composum-ai -> /apps/composum/ai
+
+/apps/composum-ai-packages/content/install -> /apps/composum/ai/install
+/apps/composum-ai-packages/application/install -> /apps/composum/ai/install
+
+Reason was that I'd like to place the sidebar prompt json and the content creation prompt json at the same place, if need
+be at /apps / /libs , but that'd mean I'd have to create a new /apps/composum/ai/ just for that.

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.caconfig.ConfigurationBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 import com.composum.ai.backend.slingbase.model.OpenAIConfig;
 
 /**
@@ -75,7 +77,28 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         return result;
     }
 
-    @Nonnull
+    @Nullable
+    @Override
+    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) {
+        if (!enabled || contentPath == null) {
+            return null;
+        }
+        LOG.debug("getGPTPromptLibraryPaths({}, {})", request.getResource().getPath(), contentPath);
+        Resource resource = determineResource(request, contentPath);
+        if (resource == null) {
+            return null;
+        }
+
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
+        GPTPromptLibrary config = confBuilder.as(GPTPromptLibrary.class);
+        LOG.debug("found config: {}", config);
+        return config;
+    }
+
+    /**
+     * Determines the resource to use for the given request and content path.
+     */
+    @Nullable
     private static Resource determineResource(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath) {
         Resource resource = request.getResource();
         if (StringUtils.isNotBlank(contentPath)) {
@@ -83,10 +106,12 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
             resource = request.getResourceResolver().getResource(contentPath);
         }
         if (resource == null) {
-            throw new IllegalArgumentException("No resource found for path " + contentPath);
+            LOG.warn("No resource found for path {}", contentPath);
+            return null;
         }
         if (!resource.getPath().startsWith("/content/")) {
-            throw new IllegalArgumentException("Path " + resource.getPath() + " is not a /content/ path");
+            LOG.warn("Path {} is not a /content/ path", resource.getPath());
+            return null;
         }
         return resource;
     }

@@ -2,7 +2,11 @@ package com.composum.ai.backend.slingbase.impl;
 
 import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.matchesAny;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,6 +30,7 @@ import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
+import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 /**
  * Collects the configurations from {@link AIConfigurationPlugin}s and aggregates them.
@@ -169,4 +174,65 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
         }
         return null;
     }
+
+    @Nullable
+    @Override
+    public GPTPromptLibrary getGPTPromptLibraryPaths(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+        return new GPTPromptLibrary() {
+
+            @Override
+            public String contentCreationPromptsPath() {
+                Optional<String> result = plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPaths(request, contentPath))
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::contentCreationPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst();
+                if (result.isPresent()) {
+                    return result.get();
+                }
+                return plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPathsDefault())
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::contentCreationPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst().orElse(null);
+            }
+
+            @Override
+            public String sidePanelPromptsPath() {
+                Optional<String> result = plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPaths(request, contentPath))
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::sidePanelPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst();
+                if (result.isPresent()) {
+                    return result.get();
+                }
+                return plugins.stream()
+                        .map(plugin -> plugin.getGPTPromptLibraryPathsDefault())
+                        .filter(Objects::nonNull)
+                        .map(GPTPromptLibrary::sidePanelPromptsPath)
+                        .filter(Objects::nonNull)
+                        .findFirst().orElse(null);
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return GPTPromptLibrary.class;
+            }
+
+        };
+    }
+
+    @Nullable
+    @Override
+    public Map<String, String> getGPTConfigurationMap(@NotNull SlingHttpServletRequest request, @Nullable String mapPath, @Nullable String languageCode) {
+        return plugins.stream()
+                .map(plugin -> plugin.getGPTConfigurationMap(request, mapPath, languageCode))
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+    }
+
 }

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="wknd/components/page"
+            cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
+            jcr:language="en"
+            jcr:title="Default Side Panel Prompt Library, English"
+            hideInNav="true">
+        <root
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="wknd/components/container"
+                layout="responsiveGrid">
+            <container
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="wknd/components/container"
+                    layout="responsiveGrid">
+                <teaser_1
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Summarize"
+                        jcr:description="Please write an eloquent summary of the text. The summary should capture its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Make sure the summary meets the purpose and goal of the text and key points of all topical sections. Write clear and simply, ensuring accuracy and completeness. Only use the information provided in the text; DO NOT use any information you know about the world."
+                />
+                <teaser_2
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Question"
+                        jcr:description="Please answer the following question based on the given text:&lt;br>"
+                />
+                <teaser_3
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Simplify"
+                        jcr:description="Identify parts of the text that could be simplified or made easier to understand. Name those parts and make suggestions for alternative wording."
+                />
+                <teaser_4
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Content Flow"
+                        jcr:description="Analyze the flow of the content. Does it progress logically? Is there a clear introduction, body, and conclusion?"
+                />
+                <teaser_5
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Review"
+                        jcr:description="Check whether there is a good text flow, and whether there are contradictions or repetitions and redundancy in the text, inconsistent style or tone and stylistic problems. Check for long and complicated sentences that could be made simpler and more understandable. Give suggestions for improvement. Be picky."
+                />
+                <teaser_6
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="10 Headlines"
+                        jcr:description="Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style."
+                />
+                <teaser_7
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="10 Headlines + Subheadings"
+                        jcr:description="Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style."
+                />
+                <teaser_8
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Sentiment Analysis"
+                        jcr:description="Analyze the sentiment conveyed by the text. Is it positive, negative, or neutral? How strong is the sentiment?"
+                />
+                <teaser_9
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="AIDA Content Audit"
+                        jcr:description="Review the provided text and suggest improvements following the AIDA model (Attention, Interest, Desire, and Action). Point out areas where attention-grabbing, interest building, desire amplification, or call-to-action might be lacking and provide suggestions to enhance each aspect."
+                />
+                <teaser_10
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="BAB Content Audit"
+                        jcr:description="Review the provided text and suggest improvements following the BAB Before-After-Bridge) model. Provide suggestions to enhance the 'Before' situation, 'After' vision, and 'Bridge' solution, making sure the reader can clearly see the transformation and the role our product/service plays in it."
+                />
+                <teaser_11
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="CTA Evaluation"
+                        jcr:description="Examine the current call-to-action (CTA) in the text. Does it compel the reader to take the desired action? Is it clear and persuasive? Are there ways to improve it? If there is no CTA, suggest one that fits the content and intended audience. Prioritize CTAs that are actionable, emotionally engaging, and concise."
+                />
+                <teaser_12
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="CTA Suggestions"
+                        jcr:description="Based on the main topic of the content, please suggest five distinct call-to-action (CTA) phrases that could motivate readers to engage further with the content or the brand. The CTAs should be clear, concise, and create a sense of urgency."
+                />
+                <teaser_13
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Content Gap Analysis"
+                        jcr:description="Analyze the text to identify topics or subtopics that are not covered but could be relevant and valuable to the audience. Consider what questions the reader might still have after reading the text, and what additional information or perspectives could be included to make the text more comprehensive and informative."
+                />
+                <teaser_14
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Addressing Content Gaps"
+                        jcr:description="Based on the identified content gaps, provide specific suggestions on how to fill these gaps. Include ideas for new sections, topics, or types of information that could be added to the text, as well as any changes to the text's organization or flow that could help integrate this new content."
+                />
+                <teaser_15
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Response Simulation"
+                        jcr:description="Simulate a positive, a negative and a neutral response of a reader about the provided text."
+                />
+                <teaser_16
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Tone Analysis"
+                        jcr:description="Analyze the tone of the text. Is it formal, informal, friendly, confrontational, enthusiastic, neutral, etc?"
+                />
+                <teaser_17
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Audience Suitability"
+                        jcr:description="Given the following audience profile, evaluate whether the text is suitable, and suggest any needed improvements:"
+                />
+                <teaser_18
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Relevance Evaluation"
+                        jcr:description="Evaluate whether the content of the text is relevant to the following topic or purpose:"
+                />
+                <teaser_19
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Fact Check"
+                        jcr:description="Identify any factual claims in the text and indicate whether they are generally considered accurate, inaccurate, or uncertain."
+                />
+                <teaser_20
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Proofread"
+                        jcr:description="Please check the text for any spelling, grammar, or punctuation errors, typos, incorrect  sentence structure and incorrect / inappropriate word usage, run-on sentences, incorrect subject-verb agreement, missing or repeated words. In each problem report, print a the part of the sentence where the problem occurs and how that part of the sentence would be improved. Sort the reported problems by severity."
+                />
+                <teaser_21
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Keyword Density"
+                        jcr:description="Identify the most frequently used words or phrases in the text, excluding common function words."
+                />
+            </container>
+        </root>
+    </jcr:content>
+</jcr:root>

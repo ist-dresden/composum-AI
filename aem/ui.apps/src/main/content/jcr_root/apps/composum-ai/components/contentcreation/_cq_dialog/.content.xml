@@ -37,8 +37,7 @@
                                                        granite:class="composum-ai-predefined-prompts">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
-                                                path="/conf/composum-ai/settings/dialogs/contentcreation/predefinedprompts"/>
+                                                sling:resourceType="composum-ai/servlets/contentcreationprompts"/>
                                     </predefinedPrompts>
                                     <promptArea jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
@@ -69,8 +68,7 @@
                                                      granite:class="composum-ai-content-selector">
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="composum-ai/servlets/contentcreationselectors"
-                                                additionalAttribute="17"/>
+                                                sling:resourceType="composum-ai/servlets/contentcreationselectors"/>
                                     </contentSelector>
                                     <url
                                             jcr:primaryType="nt:unstructured"

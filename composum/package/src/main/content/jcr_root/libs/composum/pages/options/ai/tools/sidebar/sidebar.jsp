@@ -5,7 +5,7 @@
 <%@taglib prefix="cpp" uri="http://sling.composum.com/cppl/1.0" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <cpp:defineFrameObjects/>
-<% request.setAttribute(RA_STICKY_LOCALE, request.getLocale()); // use editors locale %>
+<% /* request.setAttribute(RA_STICKY_LOCALE, request.getLocale()); */ // use editors locale %>
 <cpp:element var="review" type="com.composum.ai.composum.bundle.model.SidebarDialogModel" mode="none"
              cssBase="composum-pages-options-ai-tools-sidebar" cssAdd="composum-pages-tools">
     <%--@elvariable id="review" type="com.composum.ai.composum.bundle.model.SidebarDialogModel"--%>
@@ -109,4 +109,4 @@
     </c:if>
 </cpp:element>
 
-<% request.removeAttribute(RA_STICKY_LOCALE); %>
+<% /* request.removeAttribute(RA_STICKY_LOCALE); */ %>

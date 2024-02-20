@@ -59,8 +59,7 @@
                                                 filterType="General"/>
                                         <datasource
                                                 jcr:primaryType="nt:unstructured"
-                                                sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
-                                                path="/conf/composum-ai/settings/dialogs/sidepanel-ai/predefinedprompts"/>
+                                                sling:resourceType="composum-ai/servlets/sidepanelaiprompts"/>
                                     </predefPrompt>
                                     <contentSelector
                                             jcr:primaryType="nt:unstructured"

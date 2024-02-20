@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cpp="http://sling.composum.com/pages/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="cpp:Page">
+    <!-- This page contains the prompts used normally for the content creation dialog. Every text is a prompt -
+    the title is shown in the drop down list, and it's text is the actual prompt. It should be translated
+     into all relevant languages. -->
+    <jcr:content
+            jcr:primaryType="cpp:PageContent"
+            sling:resourceType="composum/pages/components/page"
+            jcr:description="Default prompt library for the Content Creation Dialog"
+            jcr:title="Content Creation Default Prompts"
+            category="prompt library"
+            pageLanguages="[en,de]"
+            subtitle=""
+            template="composum/pages/components/templates/page/test">
+        <main
+                jcr:primaryType="cpp:Container"
+                sling:resourceType="composum/pages/components/container/parsys">
+            <text_1
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    text="Please write an eloquent summary of the text. The summary should capture its main ideas in the style the text is written, as it could be put in front of the text. Ensure it's much shorter than the original. Make sure the summary meets the purpose and goal of the text and key points of all topical sections. Write clear and simply, ensuring accuracy and completeness. Only use the information provided in the text; DO NOT use any information you know about the world."
+                    title="Summarize">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            text="&lt;p>Bitte schreibe eine treffende Zusammenfassung des Textes. Die Zusammenfassung sollte die Hauptideen des Textes im Stil des Originals erfassen und vor dem Text stehen können. Stelle sicher, dass sie deutlich kürzer ist als der Originaltext ist. Stelle sicher, dass die Zusammenfassung den Zweck und das Ziel des Textes sowie die wichtigsten Punkte aller Abschnitte trifft. Schreibe klar und einfach, und achte dabei auf Genauigkeit und Vollständigkeit. Verwende ausschließlich die im Text angegebenen Informationen; verwende KEINE Informationen, die Sie ansonsten über die Welt wissen.&lt;/p>"
+                            title="Zusammenfassen"/>
+                </i18n>
+            </text_1>
+            <text_2
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Introduction"
+                    text="Please write an eloquent introduction for the text, in the style the text is written, as it could be put in front of the text.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Einführung"
+                            text="Bitte schreibe eine wortgewandte Einleitung für den Text, in dem Stil, in dem der Text geschrieben ist, so wie sie dem Text vorangestellt werden könnte."/>
+                </i18n>
+            </text_2>
+            <text_3
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Conclusion"
+                    text="Please write an eloquent conclusion for the text, in the style the text is written, as it could be put after the text.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Schluss"
+                            text="Bitte schreibe einen wortgewandten Schluss für den Text, in dem Stil, in dem der Text geschrieben ist, so wie er dem Text nachgestellt werden könnte."/>
+                </i18n>
+            </text_3>
+            <text_4
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Expand"
+                    text="Using the provided notes as inspiration, write a text that expresses the main ideas and themes that are present. Use a businesslike informative style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Erweitern"
+                            text="Verwende die bereitgestellten Notizen als Inspiration, um einen Text zu schreiben, der die Hauptideen und Themen ausdrückt, die vorhanden sind. Verwende einen sachlichen, informativen Stil."/>
+                </i18n>
+            </text_4>
+            <text_5
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Extend"
+                    text="Please extend the text with more details and elaboration while maintaining the current tone and style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Erweitern"
+                            text="Bitte erweitere den Text um weitere Details und Ausführungen, während du den aktuellen Ton und Stil beibehältst."/>
+                </i18n>
+            </text_5>
+            <text_6
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Abstract"
+                    text="Please write an abstract for the text that provides a concise overview of the key points and main themes of the text, as it could be put in front of the text.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Abstract"
+                            text="Bitte schreibe ein Abstract für den Text, das einen prägnanten Überblick über die wichtigsten Punkte und Hauptthemen des Textes bietet, so wie es vor den Text gestellt werden könnte."/>
+                </i18n>
+            </text_6>
+            <text_7
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Headline"
+                    text="Please write a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Überschrift"
+                            text="Bitte schreibe eine Überschrift für den Text. Drucke nur die rohe Überschrift, keine Erklärungen und keine Anführungszeichen. Verwende einen sachlichen, informativen Stil."/>
+                </i18n>
+            </text_7>
+            <text_8
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="10 headline suggestions"
+                    text="Please write 10 suggestions for a headline for the text. Print just the raw headline, no explanations and no quotes. Use a businesslike informative style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="10 Überschriftvorschläge"
+                            text="Bitte schreibe 10 Vorschläge für eine Überschrift für den Text. Drucke nur die rohe Überschrift, keine Erklärungen und keine Anführungszeichen. Verwende einen sachlichen, informativen Stil."/>
+                </i18n>
+            </text_8>
+            <text_9
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="10 headline + subheadline suggestions"
+                    text="Please write 10 suggestions for a headline and a subheading for the text. For each suggestion print just the raw headline and in the next line a subheading. Please no explanations and no surrounding with quotes. Use a businesslike informative style.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="10 Überschrift- und Untertitelvorschläge"
+                            text="Bitte schreibe 10 Vorschläge für eine Überschrift und einen Untertitel für den Text. Drucke für jeden Vorschlag nur die rohe Überschrift und in der nächsten Zeile einen Untertitel. Bitte keine Erklärungen und keine Anführungszeichen. Verwende einen sachlichen, informativen Stil."/>
+                </i18n>
+            </text_9>
+            <text_10
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Question"
+                    text="Please answer the following question based on the given text:&lt;br>">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Frage"
+                            text="Bitte beantworte die folgende Frage basierend auf dem gegebenen Text:&lt;br>"/>
+                </i18n>
+            </text_10>
+            <text_11
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Improve"
+                    text="Print improved version of the text into a businesslike informative style.&lt;br>Do also fix orthographical and grammar errors.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Verbessern"
+                            text="Drucke eine verbesserte Version des Textes in einem sachlichen, informativen Stil.&lt;br>Behebe auch orthographische und grammatikalische Fehler."/>
+                </i18n>
+            </text_11>
+            <text_12
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="SEO Description"
+                    text="Please create a description for a web page with the following text, usable for search engine optimization (SEO).">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="SEO-Beschreibung"
+                            text="Bitte erstelle eine Beschreibung für eine Webseite mit dem folgenden Text, die für die Suchmaschinenoptimierung (SEO) verwendet werden kann."/>
+                </i18n>
+            </text_12>
+            <text_13
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Teaser"
+                    text="Please write a brief, engaging teaser for the text, as it could be used for a link to the text. It should pique the reader's interest and encourage them to read the full content.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Teaser"
+                            text="Bitte schreibe einen kurzen, ansprechenden Teaser für den Text, der für einen Link zum Text verwendet werden könnte. Er sollte das Interesse des Lesers wecken und ihn dazu ermutigen, den gesamten Inhalt zu lesen."/>
+                </i18n>
+            </text_13>
+            <text_14
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Rewrite for Different Audience"
+                    text="Please rewrite the text to suit a different audience: &lt;br>">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Für ein anderes Publikum umschreiben"
+                            text="Bitte schreibe den Text um, um einem anderen Publikum zu entsprechen: &lt;br>"/>
+                </i18n>
+            </text_14>
+            <text_15
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Bullet Point Summary"
+                    text="Please summarize the main points of the text as a list of bullet points, as it could be put in front of the text">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Stichpunktzusammenfassung"
+                            text="Bitte fasse die Hauptpunkte des Textes als Liste von Stichpunkten zusammen, so wie sie vor den Text gestellt werden könnte"/>
+                </i18n>
+            </text_15>
+            <text_16
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="BAB Framework Text"
+                    text="Please write a complete text using the Before-After-Bridge (BAB) framework. Start by describing the problem, then envision the improvements, and finally introduce the solution that makes this transformation possible.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="BAB-Rahmentext"
+                            text="Bitte schreibe einen vollständigen Text mit dem Before-After-Bridge (BAB)-Rahmen. Beginne mit der Beschreibung des Problems, stelle dir dann die Verbesserungen vor und stelle schließlich die Lösung vor, die diese Transformation möglich macht."/>
+                </i18n>
+            </text_16>
+            <text_17
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="AIDA Framework Text"
+                    text="Please write a complete text using the AIDA framework. Start by capturing attention, then generate interest, induce desire, and finally, call for action.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="AIDA-Rahmentext"
+                            text="Bitte schreibe einen vollständigen Text mit dem AIDA-Framework. Beginne mit Erregung der Aufmerksamkeit, erzeuge dann Interesse, erzeuge Verlangen und rufe schließlich zur Aktion auf."/>
+                </i18n>
+            </text_17>
+            <text_18
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Slogan"
+                    text="Based on the given text, please create a catchy and memorable slogan that captures its main theme. Output it as it could be put in front of the text.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Slogan"
+                            text="Basierend auf dem gegebenen Text, erstelle bitte einen eingängigen und einprägsamen Slogan, der das Hauptthema des Textes einfängt. Gib ihn aus, so wie er vor den Text gestellt werden könnte."/>
+                </i18n>
+            </text_18>
+            <text_19
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="CTA"
+                    text="Based on the text, create a call to action that encourages the reader to take the next step, and clearly conveys the unique value proposition to the reader.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="CTA"
+                            text="Basierend auf dem Text, erstelle einen Handlungsaufforderung, die den Leser dazu ermutigt, den nächsten Schritt zu unternehmen, und die dem Leser das einzigartige Wertversprechen klar vermittelt."/>
+                </i18n>
+            </text_19>
+            <text_20
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Markdown to HTML"
+                    text="Convert the following text from Markdown to HTML:&lt;br>&lt;br>">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Markdown zu HTML"
+                            text="Konvertiere den folgenden Text von Markdown zu HTML:&lt;br>&lt;br>"/>
+                </i18n>
+            </text_20>
+            <text_21
+                    jcr:primaryType="cpp:Element"
+                    sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
+                    title="Describe image"
+                    text="Please describe the following image in a way that a blind person can understand it.">
+                <i18n
+                        jcr:primaryType="nt:unstructured">
+                    <de
+                            jcr:primaryType="nt:unstructured"
+                            title="Bild beschreiben"
+                            text="Bitte beschreibe das folgende Bild so, dass es von einer blinden Person verstanden werden kann."/>
+                </i18n>
+            </text_21>
+        </main>
+        <navigation
+                jcr:primaryType="nt:unstructured"
+                hideInNav="{Boolean}true"/>
+        <search
+                jcr:primaryType="nt:unstructured"
+                ignoreInSearch="{Boolean}true"/>
+        <style
+                jcr:primaryType="nt:unstructured"/>
+    </jcr:content>
+</jcr:root>
