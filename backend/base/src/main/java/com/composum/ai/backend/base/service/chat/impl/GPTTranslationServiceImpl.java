@@ -324,10 +324,12 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     protected String getCachedResponse(String cacheKey) {
         if (cacheDir != null) {
             Path cacheResponse = cacheDir.resolve(cacheKey + ".response");
-            try {
-                return new String(Files.readAllBytes(cacheResponse), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                LOG.debug("Reading from " + cacheResponse, e);
+            if (Files.exists(cacheResponse)) {
+                try {
+                    return new String(Files.readAllBytes(cacheResponse), StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    LOG.warn("Reading from " + cacheResponse, e);
+                }
             }
         }
         return null;
