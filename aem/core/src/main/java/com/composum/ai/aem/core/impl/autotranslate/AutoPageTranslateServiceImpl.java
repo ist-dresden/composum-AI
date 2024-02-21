@@ -95,8 +95,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         String language = SelectorUtils.findLanguage(resource);
         String languageName = SelectorUtils.getLanguageName(language);
         List<String> translatedValues =
-                valuesToTranslate.stream().map(this::oddEvenCase).collect(Collectors.toList()); // for testing
-        // translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
+                translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
         for (int i = 0; i < propertiesToTranslate.size(); i++) {
             PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
             String originalValue = valuesToTranslate.get(i);
@@ -249,28 +248,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         public String toString() {
             return resource.getPath() + "/" + propertyName;
         }
-    }
-
-    // FIXME(hps,20.02.24) remove this - testing only.
-    /**
-     * Turns every odd numbered character in a word to lowercase and every even numbered character in a word
-     * to uppercase lIkE tHiS.
-     * This makes it obvious that we changed something, but doesn't break something even in HTML.
-     * Usable as a fake "translator" for testing that costs nothing and is instantaneous.
-     */
-    protected String oddEvenCase(String value) {
-        StringBuilder result = new StringBuilder();
-        boolean upper = true;
-        for (char c : value.toCharArray()) {
-            if (Character.isLetter(c)) {
-                result.append(upper ? Character.toUpperCase(c) : Character.toLowerCase(c));
-                upper = !upper;
-            } else {
-                upper = false;
-                result.append(c);
-            }
-        }
-        return result.toString();
     }
 
 }

@@ -4,6 +4,7 @@ import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServi
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_PATTERN;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.fakeTranslation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +73,13 @@ public class GPTTranslationServiceImplTest extends TestCase {
         List<String> texts = Arrays.asList("Hi!", "Good morning");
         List<String> resultTexts = GPTTranslationServiceImpl.separateResultTexts(result, texts, ids, result);
         assertEquals(Arrays.asList("Hallo!", "Guten Morgen"), resultTexts);
+    }
+
+    @Test
+    public void testFakeTranslation() {
+        assertEquals(null, fakeTranslation(null));
+        assertEquals("", fakeTranslation(""));
+        assertEquals("THiS iS a tEsT <code>aNd sOmE COdE</code>", fakeTranslation("This is a test <code>and some Code</code>"));
     }
 
 }

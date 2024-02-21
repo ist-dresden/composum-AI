@@ -6,12 +6,19 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +28,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 /**
  * Building on {@link GPTChatCompletionService} this implements translation.
  */
+@Designate(ocd = GPTTranslationServiceImpl.Config.class)
 @Component(service = GPTTranslationService.class)
 public class GPTTranslationServiceImpl implements GPTTranslationService {
 
@@ -42,12 +51,19 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Reference
     protected GPTChatCompletionService chatCompletionService;
 
+    protected Config config;
+
     /**
      * Translate the text from the target to destination language, either Java locale name or language name.
      */
     @Nonnull
     @Override
     public String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage, @Nullable GPTConfiguration configuration) {
+        ensureEnabled();
+        if (config.fakeTranslation()) {
+            return fakeTranslation(text);
+        }
+
         if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(targetLanguage)) {
             return "";
         }
@@ -61,8 +77,15 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
     @Override
     public void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration, @Nonnull GPTCompletionCallback callback) throws GPTException {
+        ensureEnabled();
+
         if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(sourceLanguage) || Strings.isNullOrEmpty(targetLanguage)) {
             throw new IllegalArgumentException("Empty text or languages");
+        }
+        if (config.fakeTranslation()) {
+            callback.onNext(fakeTranslation(text));
+            callback.onFinish(GPTFinishReason.STOP);
+            return;
         }
 
         GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
@@ -94,6 +117,11 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Nonnull
     @Override
     public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration) throws GPTException {
+        ensureEnabled();
+        if (config.fakeTranslation()) {
+            return texts.stream().map(GPTTranslationServiceImpl::fakeTranslation).collect(Collectors.toList());
+        }
+
         return fragmentedTranslationDivideAndConquer(texts, targetLanguage, configuration, new AtomicInteger(5));
     }
 
@@ -212,4 +240,74 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         return request;
     }
 
+    /**
+     * This turns the capitalization of every odd letter in each word on it's head. If we are in a HTML tag (that is,
+     * between a &lt; and a &gt; ) then nothing is changed to avoid destroying richtext.
+     * For quick and inexpensive testing e.g. of bulk translation mechanics.
+     * <p>Example: "This is a test <code>and some Code</code>" -> "THiS iS a tEsT <code>aNd sOmE COdE</code>"</p>
+     */
+    protected static String fakeTranslation(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        StringBuilder result = new StringBuilder();
+        boolean inTag = false;
+        boolean oddChar = true;
+        for (char c : text.toCharArray()) {
+            if (c == '<') {
+                inTag = true;
+            } else if (c == '>') {
+                inTag = false;
+            }
+            if (inTag) {
+                result.append(c);
+            } else {
+                if (Character.isLetter(c)) {
+                    if (oddChar) {
+                        result.append(c);
+                    } else {
+                        result.append(Character.isUpperCase(c) ? Character.toLowerCase(c) : Character.toUpperCase(c));
+                    }
+                    oddChar = !oddChar;
+                } else {
+                    result.append(c);
+                    oddChar = true;
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    @Activate
+    @Modified
+    protected void activate(Config config) {
+        this.config = config;
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        this.config = null;
+    }
+
+    protected void ensureEnabled() {
+        if (config == null || config.disabled()) {
+            throw new IllegalStateException("Translation service is currently disabled" +
+                    (config == null ? "" : " by configuration"));
+        }
+    }
+
+    @ObjectClassDefinition(name = "Composum AI Translation Service Configuration",
+            description = "Configuration for the Composum AI Translation Service")
+    public @interface Config {
+
+        @AttributeDefinition(name = "Disable the Autotranslate service", defaultValue = "true")
+        boolean disabled() default true;
+
+        @AttributeDefinition(name = "Fake translation", description = "For quick and inexpensive testing, " +
+                "when you just want to check that the translation does something for e.g. a bulk of texts, " +
+                "you can enable this. The translation then just turns the text iNtO tHiS cApItAlIsAtIoN." +
+                "Easy to spot, but probably doesn't destroy the content.", defaultValue = "false")
+        boolean fakeTranslation() default false;
+
+    }
 }
