@@ -44,6 +44,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     /**
      * Boolean property that marks a resource as automatically translated by this process.
+     * Find translated resources with /content//*[@ai_translated] .
      */
     public static final String AI_TRANSLATED_MARKER = "ai_translated";
 
@@ -189,6 +190,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * Inverse to {@link #cancelInheritance(Resource, Resource, PropertyToTranslate)}.
      */
     protected void reenableInheritance(Resource resource, String key, LiveRelationship relationship) throws WCMException {
+        if (relationship == null) {
+            LOG.warn("No live relationship for translated key {} path {}", key, resource.getPath());
+            return;
+        }
         try {
             if (resource.getName().equals(JcrConstants.JCR_CONTENT) || resource.getName().equals("metadata")) {
                 liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship, new String[]{key}, false);

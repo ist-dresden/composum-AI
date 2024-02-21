@@ -156,6 +156,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         return pages;
     }
 
+    @Override
+    public void rollback(Resource resource) throws WCMException {
+        pageTranslateService.rollback(resource);
+    }
+
     protected void doRollback(ResourceResolver resourceResolver, TranslationRunImpl translationRun) throws PersistenceException, WCMException {
         for (TranslationPageImpl page : translationRun.translatedPages) {
             Resource resource = resourceResolver.getResource(page.pagePath);

@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
@@ -22,6 +23,9 @@ public interface AutoTranslateService {
      * Starts a new translation run.
      */
     TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive, GPTConfiguration configuration) throws LoginException, PersistenceException;
+
+    /** Rolls the translation results at this resource back - mostly for debugging. */
+    void rollback(Resource resource) throws WCMException;
 
     public abstract class TranslationRun {
         public String id;
