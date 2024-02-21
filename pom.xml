@@ -53,7 +53,7 @@
 
     <properties>
         <package.group>com/composum/ai</package.group>
-        <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
+        <siteurl>https://ist-dresden.github.io/composum-AI/</siteurl>
         <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
 
         <!-- for AEM 6.5.x backwards compatibility until the bronze age -->

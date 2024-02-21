@@ -78,6 +78,40 @@ We need the following files: to implement all the requests:
 - /apps/composum-ai/components/autotranslate/run/run.html for the run GET
 - /apps/composum-ai/components/autotranslate/run/cancel.POST.html for the cancel POST
 
+## Experience Fragments
+
+usage e.g.
+/content/wknd/language-masters/lc/about-us -> 
+/content/experience-fragments/wknd/language-masters/en/contributors/stacey-roswells/master
+
+Has the same structure as normal content with language masters and so forth.
+We can make a live copy of the experience fragment folder and translate it, and then replace the items.
+? do we have to cut the inheritance?
+
+## Content Fragments
+
+usage e.g.
+/content/wknd/language-masters/lc/adventures/ski-touring-mont-blanc ->
+/content/dam/wknd/en/adventures/ski-touring-mont-blanc/ski-touring-mont-blanc
+
+?? How to update the text attribute?
+
+## Assets (images etc.)
+
+Unclear: they have titles etc, so they are language specific as well. Copy?
+
+## Language copies
+
+Pages have properties before translation:
+
+        cq:cloudserviceconfigs="[cloudconfigs/translation/translationcfg/default_translation,cloudconfigs/translation/msft-translation/msft_trial]"
+        cq:isTransCreated="{Boolean}true"
+        cq:lastTranslationUpdate="{Date}2024-02-21T10:00:56.150+01:00"
+        cq:translationJob="[/content/projects/portugese/portugese/jcr:content/dashboard/gadgets/translationjob]"
+        cq:translationProject="[/content/projects/portugese/portugese]"
+        cq:translationSourcePath="/content/wknd/language-masters/en"
+        cq:translationStatus="DRAFT"
+
 ## Some technical details
 
 An easy and pretty reliable way would be to translate each text in one request. It would likely improve results if the
@@ -89,12 +123,11 @@ needs testing since that needs precise separation of the texts and precise order
 An idea would be to separate the texts in the original message with separators like `===<<<### 573472 ###>>>===`
 containing random numbers, and instruct ChatGPT to include the separators in the translation.
 
-## Possible improvements
-
-Storing both the original text and the translated text verbatim in the component would allow for a "re-translate"
+Storing both the original text and the translated text verbatim in the component could allow later for a "re-translate"
 dialog that can provide ChatGPT with the previous original text, the text it was translated to, the text it was manually
-corrected to and the text of the new original text to be translated. That might massively improve the result. Possibly
-one could automatically extract instructions for the next translation process from the manual corrections.
+corrected to and the text of the new original text to be translated. That might massively improve the result. 
+And it can make automatical detection of what needs to be re-translated possible.
+Possibly one could automatically extract instructions for the next translation process from the manual corrections.
 
 We might give the user a way to provide general information about the translation and the site - perhaps extending the
 system message.
