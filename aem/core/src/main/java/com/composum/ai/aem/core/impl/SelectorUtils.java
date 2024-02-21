@@ -1,14 +1,18 @@
 package com.composum.ai.aem.core.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -37,6 +41,17 @@ public class SelectorUtils {
      */
     public static final String PLACEHOLDER_TARGETLANGUAGE = "TARGETLANGUAGE";
 
+    protected static final Pattern LOCALE_PATTERN = Pattern.compile("^[a-z]{2}([_-][a-zA-Z]{2,3})?$");
+
+    protected static Set<String> LOCALE_NAMES =
+            Stream.concat(Stream.of(Locale.getAvailableLocales())
+                                    .map(Locale::toString),
+                            Stream.of(Locale.getAvailableLocales())
+                                    .map(Locale::toLanguageTag))
+                    .filter(LOCALE_PATTERN.asPredicate())
+                    .map(t -> t.replace('-', '_').toLowerCase())
+                    .collect(Collectors.toSet());
+
     /**
      * The keys of the map are the displayed texts, the values the value for the selects.
      */
@@ -58,16 +73,27 @@ public class SelectorUtils {
     }
 
     /**
-     * Determines the langage this resource is in by searching for a ancestor resource with jcr:language set.
+     * Determines the language this resource is in by searching for an ancestor resource with jcr:language set,
+     * or for an ancestor that looks like a language code.
      */
     public static String findLanguage(Resource pageResource) {
         String language = null;
-        while (pageResource != null && language == null) {
-            language = pageResource.getValueMap().get(JcrConstants.JCR_LANGUAGE, String.class);
+        Resource candidate = pageResource;
+        while (candidate != null && language == null) {
+            language = candidate.getValueMap().get(JcrConstants.JCR_LANGUAGE, String.class);
             if (language == null) {
-                language = pageResource.getValueMap().get(JcrConstants.JCR_CONTENT + "/" + JcrConstants.JCR_LANGUAGE, String.class);
+                language = candidate.getValueMap().get(JcrConstants.JCR_CONTENT + "/" + JcrConstants.JCR_LANGUAGE, String.class);
             }
-            pageResource = pageResource.getParent();
+            candidate = candidate.getParent();
+        }
+        if (language == null) {
+            String[] pathElements = pageResource.getPath().split("/");
+            for (String element : pathElements) {
+                if (isLocaleName(element)) {
+                    language = element;
+                    break;
+                }
+            }
         }
         return language;
     }
@@ -95,4 +121,44 @@ public class SelectorUtils {
         String languageName = locale.getDisplayLanguage(locale);
         return languageName;
     }
+
+    public static boolean isLocaleName(String name) {
+        return name != null && LOCALE_NAMES.contains(name.replace('-', '_').toLowerCase());
+    }
+
+    /**
+     * We look in the resource path for a path element that {@link #isLocaleName(String)} and try to replace it
+     * by language as it is or language with a country suffix ([-_][a-zA-Z]{2}) removed. Resources that
+     * can be found like that are returned.
+     */
+    public static List<Resource> getLanguageSiblings(@Nullable Resource resource, @Nullable String language) {
+        if (resource == null || language == null) {
+            return Collections.emptyList();
+        }
+        List<Resource> result = new ArrayList<>();
+        String path = resource.getPath();
+        String[] pathElements = path.split("/");
+        Set<String> paths = new java.util.HashSet<>();
+        paths.add(path);
+        for (int i = 0; i < pathElements.length; i++) {
+            String element = pathElements[i];
+            if (isLocaleName(element)) {
+                pathElements[i] = language;
+                Resource candidate = resource.getResourceResolver().getResource(String.join("/", pathElements));
+                if (candidate != null && !paths.contains(candidate.getPath())) {
+                    result.add(candidate);
+                    paths.add(candidate.getPath());
+                }
+                pathElements[i] = language.split("[-_]", 2)[0];
+                candidate = resource.getResourceResolver().getResource(String.join("/", pathElements));
+                if (candidate != null && !paths.contains(candidate.getPath())) {
+                    result.add(candidate);
+                    paths.add(candidate.getPath());
+                }
+            }
+            pathElements[i] = element;
+        }
+        return result;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     public static final String AI_PREFIX = "ai_";
 
     /**
+     * Prefix for property names changed to language copies
+     */
+    public static final String LC_PREFIX = "lc_";
+
+    /**
      * Suffix for the property name of a property that saves the original value of the property, to track when it
      * has to be re-translated.
      */
@@ -62,8 +68,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      */
     public static final String AI_TRANSLATED_SUFFIX = "_translated";
 
+    /**
+     * List of properties that should always be translated.
+     */
     public static final List<String> CERTAINLY_TRANSLATABLE_PROPERTIES =
-            Arrays.asList("jcr:title", "jcr:description", "text", "title");
+            Arrays.asList("jcr:title", "jcr:description", "text", "title", "alt", "cq:panelTitle", "shortDescription",
+                    "actionText", "accessibilityLabel", "pretitle", "displayPopupTitle", "helpMessage");
 
     @Reference
     private GPTTranslationService translationService;
@@ -82,10 +92,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         List<String> valuesToTranslate = propertiesToTranslate.stream()
                 .map(p -> p.resource.getValueMap().get(p.propertyName, String.class))
                 .collect(Collectors.toList());
-        String language = SelectorUtils.getLanguageName(SelectorUtils.findLanguage(resource));
+        String language = SelectorUtils.findLanguage(resource);
+        String languageName = SelectorUtils.getLanguageName(language);
         List<String> translatedValues =
-                valuesToTranslate.stream().map(this::reverseString).collect(Collectors.toList()); // for testing
-        // translationService.fragmentedTranslation(valuesToTranslate, language, configuration);
+                valuesToTranslate.stream().map(this::oddEvenCase).collect(Collectors.toList()); // for testing
+        // translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
         for (int i = 0; i < propertiesToTranslate.size(); i++) {
             PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
             String originalValue = valuesToTranslate.get(i);
@@ -94,12 +105,58 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             Resource resourceToTranslate = propertyToTranslate.resource;
             LOG.info("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
             ModifiableValueMap valueMap = resourceToTranslate.adaptTo(ModifiableValueMap.class);
-            valueMap.put(encodePropertyName(propertyName, AI_ORIGINAL_SUFFIX), originalValue);
-            valueMap.put(encodePropertyName(propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
+            valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), originalValue);
+            valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
             valueMap.put(propertyName, translatedValue);
             valueMap.put(AI_TRANSLATED_MARKER, Boolean.TRUE);
 
+            cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
+        }
+        migratePathsToLanguageCopy(resource, language);
+        resource.getResourceResolver().commit();
+    }
+
+    /**
+     * Traverses the resource tree looking for paths pointing to /content/dam/ and /content/experience-fragments/ and
+     * changes them if there is an unique language copy in our language.
+     */
+    protected void migratePathsToLanguageCopy(Resource resource, String language) {
+        resource.getChildren().forEach(child -> migratePathsToLanguageCopy(child, language));
+        ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+        if (mvm != null) {
+            Map<String, Object> newEntries = new java.util.HashMap<>(); // avoid concurrency problems with the iterator
+            for (Map.Entry<String, Object> entry : mvm.entrySet()) {
+                if (entry.getValue() instanceof String) {
+                    String value = (String) entry.getValue();
+                    if (value.startsWith("/content/dam/") || value.startsWith("/content/experience-fragments/")) {
+                        Resource referencedResource = resource.getResourceResolver().getResource(value);
+                        List<Resource> languageSiblings = SelectorUtils.getLanguageSiblings(referencedResource, language);
+                        if (languageSiblings.size() == 1) {
+                            Resource languageCopy = languageSiblings.get(0);
+                            newEntries.put(entry.getKey(), languageCopy.getPath());
+                            String origKey = encodePropertyName(LC_PREFIX, entry.getKey(), AI_ORIGINAL_SUFFIX);
+                            if (mvm.get(origKey) == null) {
+                                newEntries.put(origKey, value);
+                            }
+                            newEntries.put(encodePropertyName(LC_PREFIX, entry.getKey(), AI_TRANSLATED_SUFFIX), languageCopy.getPath());
+                        } else if (languageSiblings.size() > 1) {
+                            LOG.warn("More than one language copy for {} in {} - {}", entry.getKey(), resource.getPath(),
+                                    languageSiblings.stream().map(Resource::getPath).collect(Collectors.toList()));
+                        }
+                    }
+                }
+            }
+            mvm.putAll(newEntries);
+        }
+    }
+
+    protected void cancelInheritance(Resource resource, Resource resourceToTranslate, PropertyToTranslate propertyToTranslate) throws WCMException {
+        try {
             LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resourceToTranslate, false);
+            if (relationship == null) {
+                // a bit doubtful, but this way everything is revertable.
+                throw new IllegalArgumentException("No live relationship for translated path " + resourceToTranslate.getPath());
+            }
             if (resourceToTranslate.getName().equals(JcrConstants.JCR_CONTENT)) {
                 // here we have to cancel the properties individually.
                 // cancelling the relationship for the whole resource seems to lead to trouble with the editor.
@@ -111,8 +168,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 liveRelationshipManager.cancelRelationship(resource.getResourceResolver(), relationship,
                         deep, false);
             }
+        } catch (WCMException | RuntimeException e) {
+            LOG.error("Error cancelling inheritance for {} property {}", resourceToTranslate.getPath(), propertyToTranslate.propertyName, e);
+            throw e;
         }
-        resource.getResourceResolver().commit();
     }
 
     /**
@@ -122,7 +181,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         ValueMap valueMap = resource.getValueMap();
         for (String propertyName : valueMap.keySet()) {
             if (isTranslatableProperty(propertyName, valueMap.get(propertyName))) {
-                if (!valueMap.containsKey(encodePropertyName(propertyName, AI_ORIGINAL_SUFFIX))) {
+                if (!valueMap.containsKey(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX))) {
                     PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
                     propertyToTranslate.resource = resource;
                     propertyToTranslate.propertyName = propertyName;
@@ -136,32 +195,51 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return propertiesToTranslate;
     }
 
-    protected String encodePropertyName(String propertyName, String suffix) {
-        return AI_PREFIX + propertyName.replace(":", "_") + suffix;
+    /**
+     * Searches for properties
+     */
+
+    protected String encodePropertyName(String prefix, String propertyName, String suffix) {
+        return prefix + propertyName.replace(":", "_") + suffix;
     }
 
-    protected final Pattern PATTERH_HAS_WHITESPACE = Pattern.compile("\\s.*\\s");
+    protected static final Pattern PATTERN_HAS_WHITESPACE = Pattern.compile("\\s");
 
     /**
      * As additional heuristic - the text should have at least one word with >= 4 letters.
      * That will break down very different languages, I know, but this is a POC. :-)
      */
-    protected final Pattern PATTERN_HAS_WORD = Pattern.compile("\\w{4}");
+    protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{Alpha}{4}");
 
-    protected boolean isTranslatableProperty(String name, Object value) {
+    /**
+     * Checks whether the property is one of jcr:title, jcr:description, title, alt, cq:panelTitle, shortDescription,
+     * actionText, accessibilityLabel, pretitle, displayPopupTitle, helpMessage , or alternatively don't have a colon
+     * in the name, have a String value, don't start with /{content,apps,libs,mnt}/ in the value and the value has
+     * a whitespace and at least one 4 letter sequence.
+     */
+    protected static boolean isTranslatableProperty(String name, Object value) {
         if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name)) {
             return true;
         }
+        if (name.contains(":")) {
+            return false;
+        }
         if (value instanceof String) {
             String stringValue = (String) value;
-            return !(name.startsWith(AI_PREFIX) && name.endsWith(AI_TRANSLATED_SUFFIX)) &&
-                    !(name.startsWith(AI_PREFIX) && name.endsWith(AI_ORIGINAL_SUFFIX)) &&
-                    // heuristic for a start:
-                    PATTERH_HAS_WHITESPACE.matcher(stringValue).find() &&
+            if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
+                    stringValue.startsWith("/libs/") || stringValue.startsWith("/mnt/")) {
+                return false; // looks like path
+            }
+            if ((name.startsWith(AI_PREFIX) || name.startsWith(LC_PREFIX)) &&
+                    (name.endsWith(AI_TRANSLATED_SUFFIX) || name.endsWith(AI_ORIGINAL_SUFFIX))) {
+                return false;
+            }
+            return PATTERN_HAS_WHITESPACE.matcher(stringValue).find() &&
                     PATTERN_HAS_WORD.matcher(stringValue).find();
         }
         return false;
     }
+
 
     protected class PropertyToTranslate {
         private Resource resource;
@@ -174,8 +252,25 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     }
 
     // FIXME(hps,20.02.24) remove this - testing only.
-    private String reverseString(String value) {
-        return new StringBuilder(value).reverse().toString();
+    /**
+     * Turns every odd numbered character in a word to lowercase and every even numbered character in a word
+     * to uppercase lIkE tHiS.
+     * This makes it obvious that we changed something, but doesn't break something even in HTML.
+     * Usable as a fake "translator" for testing that costs nothing and is instantaneous.
+     */
+    protected String oddEvenCase(String value) {
+        StringBuilder result = new StringBuilder();
+        boolean upper = true;
+        for (char c : value.toCharArray()) {
+            if (Character.isLetter(c)) {
+                result.append(upper ? Character.toUpperCase(c) : Character.toLowerCase(c));
+                upper = !upper;
+            } else {
+                upper = false;
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 
 }
