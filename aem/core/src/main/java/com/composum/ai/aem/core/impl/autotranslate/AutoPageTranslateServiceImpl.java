@@ -186,6 +186,58 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     }
 
     /**
+     * Inverse to {@link #cancelInheritance(Resource, Resource, PropertyToTranslate)}.
+     */
+    protected void reenableInheritance(Resource resource, String key, LiveRelationship relationship) throws WCMException {
+        try {
+            if (resource.getName().equals(JcrConstants.JCR_CONTENT) || resource.getName().equals("metadata")) {
+                liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship, new String[]{key}, false);
+            } else {
+                liveRelationshipManager.reenableRelationship(resource.getResourceResolver(), relationship, false);
+            }
+        } catch (IllegalStateException e) {
+            if (!e.toString().contains("is not cancelled")) {
+                LOG.error("Error reenabling inheritance for {} property {} : {}",
+                        resource.getPath(), key, e.toString());
+                throw e;
+            }
+            // else ignore - was already done for another property.
+        } catch (WCMException | RuntimeException e) {
+            LOG.error("Error reenabling inheritance for {} property {} : {}",
+                    resource.getPath(), key, e.toString());
+            throw e;
+        }
+    }
+
+    @Override
+    public void rollback(Resource resource) throws WCMException {
+        for (Resource child : resource.getChildren()) {
+            rollback(child);
+        }
+        ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        for (String key : mvm.keySet().stream().collect(Collectors.toList())) {
+            String originalKey = encodePropertyName(AI_PREFIX, key, AI_ORIGINAL_SUFFIX);
+            String translatedKey = encodePropertyName(AI_PREFIX, key, AI_TRANSLATED_SUFFIX);
+            String originalPathKey = encodePropertyName(LC_PREFIX, key, AI_ORIGINAL_SUFFIX);
+            String translatedPathKey = encodePropertyName(LC_PREFIX, key, AI_TRANSLATED_SUFFIX);
+            if (mvm.containsKey(originalKey)) {
+                mvm.put(key, mvm.get(originalKey));
+                mvm.remove(originalKey);
+                mvm.remove(translatedKey);
+                reenableInheritance(resource, key, relationship);
+            }
+            if (mvm.containsKey(originalPathKey)) {
+                mvm.put(key, mvm.get(originalPathKey));
+                mvm.remove(originalPathKey);
+                mvm.remove(translatedPathKey);
+                reenableInheritance(resource, key, relationship);
+            }
+        }
+        mvm.remove(AI_TRANSLATED_MARKER);
+    }
+
+    /**
      * Searches for properties we have to translate.
      */
     protected List<PropertyToTranslate> collectPropertiesToTranslate(Resource resource, List<PropertyToTranslate> propertiesToTranslate) {

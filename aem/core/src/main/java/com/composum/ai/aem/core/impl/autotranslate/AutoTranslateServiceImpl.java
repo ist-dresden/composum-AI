@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -27,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.day.cq.wcm.api.WCMException;
 
 /**
  * A service that provides automatic translation of AEM pages.
@@ -152,6 +156,15 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         return pages;
     }
 
+    protected void doRollback(ResourceResolver resourceResolver, TranslationRunImpl translationRun) throws PersistenceException, WCMException {
+        for (TranslationPageImpl page : translationRun.translatedPages) {
+            Resource resource = resourceResolver.getResource(page.pagePath);
+            if (resource != null) {
+                pageTranslateService.rollback(resource);
+            }
+            resourceResolver.commit();
+        }
+    }
 
     public class TranslationRunImpl extends TranslationRun {
         public Future<?> future;
@@ -170,6 +183,16 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             }
         }
 
+        @Override
+        public void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException {
+            try {
+                AutoTranslateServiceImpl.this.doRollback(resourceResolver, this);
+            } catch (PersistenceException | WCMException | RuntimeException e) {
+                messages.append("Error rolling back: " + e.toString() + "\n");
+                throw e;
+            }
+        }
+
         public void execute() {
             status = "running";
             boolean hasErrors = false;
@@ -181,6 +204,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     page.status = "done";
                 } catch (Exception e) {
                     page.status = "error";
+                    this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
                     hasErrors = true;
                     LOG.error("Error translating " + page.pagePath, e);
                 }

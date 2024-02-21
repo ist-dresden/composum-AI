@@ -3,9 +3,12 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
+
+import com.day.cq.wcm.api.WCMException;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class AutoTranslateRunModel {
@@ -33,6 +36,12 @@ public class AutoTranslateRunModel {
         AutoTranslateService.TranslationRun run = getModel();
         run.cancel();
         return "cancelled";
+    }
+
+    public String rollback() throws PersistenceException, WCMException {
+        AutoTranslateService.TranslationRun run = getModel();
+        run.rollback(AutoTranslateRunModel.this.request.getResourceResolver());
+        return "rolled back";
     }
 
 }

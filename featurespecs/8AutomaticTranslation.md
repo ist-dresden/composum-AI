@@ -210,7 +210,14 @@ contant fragment translation only these folders have to be copied.
 
 - http://localhost:4502/assets.html/content/dam/wknd# : create /content/dam/wknd/de and make live copies of
   /content/dam/wknd/en/adventures and /content/dam/wknd/en/magazine into that.
--  /content/experience-fragments/wknd/language-masters/en
+- http://localhost:4502/aem/experience-fragments.html/content/experience-fragments create
+  /content/experience-fragments/wknd/language-masters/de as live copy of
+  /content/experience-fragments/wknd/language-masters/en
+- http://localhost:4502/sites.html/content/wknd/language-masters create /content/wknd/language-masters/de as live copy
+  of /content/wknd/language-masters/en
+
+-> translate /content/dam/wknd/de , /content/experience-fragments/wknd/language-masters/de and
+/content/wknd/language-masters/de
 
 ## TODO:
 

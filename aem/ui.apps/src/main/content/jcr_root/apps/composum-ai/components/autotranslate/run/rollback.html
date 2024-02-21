@@ -1,0 +1,11 @@
+<p data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
+     data-sly-set.model="${runmodel.model}"
+     data-sly-set.rolledback="${runmodel.rollback}">
+    <div class="alert alert-warning" role="alert">
+        Translation is now ${rolledback}.
+    </div>
+</p>
+<p>
+Back to <a href="/apps/composum-ai/components/autotranslate/run.${model.id}.html">Run for ${model.rootPath}</a>,
+back to <a href="/apps/composum-ai/components/autotranslate/list.html">translation start page</a>.
+</p>

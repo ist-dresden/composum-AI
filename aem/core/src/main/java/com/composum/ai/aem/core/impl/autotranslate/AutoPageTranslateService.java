@@ -11,6 +11,14 @@ import com.day.cq.wcm.api.WCMException;
  */
 public interface AutoPageTranslateService {
 
+    /**
+     * Implements the actual translation for one page or asset.
+     */
     void translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException;
+
+    /**
+     * Rolls everything back in the resource - mostly for testing purposes.
+     */
+    void rollback(Resource resource) throws WCMException;
 
 }

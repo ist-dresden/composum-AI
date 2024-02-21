@@ -17,13 +17,19 @@
                 <tbody data-sly-list="${model.translatedPages}">
                 <tr>
                     <td>${item.status}</td>
-                    <td><a href="/editor.html/${item.pagePath}.html">${item.pagePath}</a></td>
+                    <td><a href="/editor.html${item.pagePath}.html">${item.pagePath}</a></td>
                 </tr>
                 </tbody>
+                <pre>
+                    ${model.messages.toString}
+                </pre>
             </table>
         </div>
         <form action="/apps/composum-ai/components/autotranslate/run.cancel.html/${model.id}" method="GET" class="mt-3">
             <button type="submit" class="btn btn-warning">Cancel Translation Process</button>
+        </form>
+        <form action="/apps/composum-ai/components/autotranslate/run.rollback.html/${model.id}" method="GET" class="mt-3">
+            <button type="submit" class="btn btn-warning">Rollback Translation Process</button>
         </form>
         <p>
             Back to <a href="/apps/composum-ai/components/autotranslate/list.html">translation start page</a>.
