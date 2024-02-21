@@ -1,8 +1,14 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,6 +59,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
     protected Config config;
 
+    protected Path cacheDir;
+
     /**
      * Translate the text from the target to destination language, either Java locale name or language name.
      */
@@ -69,9 +77,16 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         }
 
         GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
+        String cacheKey = cacheKey(request);
+        String cachedResponse = getCachedResponse(cacheKey);
+        if (cachedResponse != null) {
+            LOG.debug("Returning cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cachedResponse);
+            return cachedResponse;
+        }
         String response = chatCompletionService.getSingleChatCompletion(request);
         response = response.trim();
         LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
+        cacheResponse(cacheKey, request, response);
         return response;
     }
 
@@ -89,6 +104,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         }
 
         GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
+        // we don't do caching here since that'd be complicated and this is only for interactive use, not bulk use, anyway.
         chatCompletionService.streamingChatCompletion(request, callback);
     }
 
@@ -169,8 +185,10 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
     protected static String joinTexts(List<String> texts, List<String> ids) {
         StringBuilder joinedtexts = new StringBuilder();
+        int rndid = 382938675;
         for (String text : texts) {
-            String id = "" + Math.round(Math.abs(Math.random() * 1000000));
+            rndid = rndid * 92821 + Objects.hashCode(text); // deterministic pseudo random number for cachability
+            String id = "" + (Math.abs(rndid) % 1000000);
             joinedtexts.append(MULTITRANSLATION_SEPARATOR_START).append(id).append(MULTITRANSLATION_SEPARATOR_END);
             joinedtexts.append(text);
             ids.add(id);
@@ -278,10 +296,58 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         return result.toString();
     }
 
+
+    private String cacheKey(GPTChatRequest request) {
+        if (cacheDir == null) {
+            return null;
+        }
+        int hash = 17;
+        for (char c : request.toString().toCharArray()) {
+            hash = 92821 * hash + c;
+        }
+        return Integer.toHexString(Math.abs(hash));
+    }
+
+    protected void cacheResponse(String cacheKey, GPTChatRequest request, String response) {
+        if (cacheDir != null) {
+            Path cacheRequest = cacheDir.resolve(cacheKey + ".request");
+            Path cacheResponse = cacheDir.resolve(cacheKey + ".response");
+            try {
+                Files.write(cacheRequest, request.toString().getBytes(StandardCharsets.UTF_8));
+                Files.write(cacheResponse, response.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                LOG.error("Writing to this or response file " + cacheResponse, e);
+            }
+        }
+    }
+
+    protected String getCachedResponse(String cacheKey) {
+        if (cacheDir != null) {
+            Path cacheResponse = cacheDir.resolve(cacheKey + ".response");
+            try {
+                return new String(Files.readAllBytes(cacheResponse), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                LOG.debug("Reading from " + cacheResponse, e);
+            }
+        }
+        return null;
+    }
+
+
     @Activate
     @Modified
     protected void activate(Config config) {
         this.config = config;
+        File cacheDir = config.diskCache() != null && !config.diskCache().trim().isEmpty() ? new File(config.diskCache().trim()) : null;
+        this.cacheDir = null;
+        if (cacheDir != null) {
+            if (cacheDir.exists()) {
+                LOG.info("Using disk cache for translations at {}", cacheDir);
+                this.cacheDir = cacheDir.toPath();
+            } else {
+                LOG.error("Disk cache for translations does not exist: {}", cacheDir);
+            }
+        }
     }
 
     @Deactivate
@@ -309,5 +375,9 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 "Easy to spot, but probably doesn't destroy the content completely.", defaultValue = "false")
         boolean fakeTranslation() default false;
 
+        @AttributeDefinition(name = "Disk cache", description = "Path to a directory where to cache the translations. " +
+                "If empty, no caching is done. If the path is relative, it is relative to the current working directory. " +
+                "If the path is absolute, it is used as is.", defaultValue = "")
+        String diskCache();
     }
 }
