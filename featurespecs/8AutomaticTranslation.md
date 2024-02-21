@@ -37,7 +37,7 @@ property name, and the property value after the translation is saved with prefix
 ### Experience Fragments
 
 usage e.g.
-/content/wknd/language-masters/lc/about-us -> 
+/content/wknd/language-masters/lc/about-us ->
 /content/experience-fragments/wknd/language-masters/en/contributors/stacey-roswells/master
 
 Has the same structure as normal content with language masters and so forth.
@@ -79,7 +79,7 @@ Language copies seem to be recognized by path. (Renaming a copy means it is not 
 
 ### Approach to these assets
 
-We try to follow the way AEM does it - that is, we will use copies of the assets at the langage sister path. These 
+We try to follow the way AEM does it - that is, we will use copies of the assets at the langage sister path. These
 can be created as live copies or just copies and translated with the UI. During the page translation process we
 check all paths for having a translated language sister path and replace them with the translated paths.
 (Not quite sure whether it's right to cut inheritance or not.)
@@ -97,26 +97,26 @@ containing random numbers, and instruct ChatGPT to include the separators in the
 
 Storing both the original text and the translated text verbatim in the component could allow later for a "re-translate"
 dialog that can provide ChatGPT with the previous original text, the text it was translated to, the text it was manually
-corrected to and the text of the new original text to be translated. That might massively improve the result. 
+corrected to and the text of the new original text to be translated. That might massively improve the result.
 And it can make automatical detection of what needs to be re-translated possible.
 Possibly one could automatically extract instructions for the next translation process from the manual corrections.
-Thus, we store the original text to an attribute as ai_(attributename)_original and the automatic translation as well 
+Thus, we store the original text to an attribute as ai_(attributename)_original and the automatic translation as well
 in ai_(attributename)_translated.
 
 We might give the user a way to provide general information about the translation and the site - perhaps extending the
 system message.
 
-For automatically replacing paths with language copies we follow the same strategy: the original path is stored as 
+For automatically replacing paths with language copies we follow the same strategy: the original path is stored as
 lc_(attributename)_original and the translated path as lc_(attributename)_translated. Thus we can reinstate the path
 automatically if the user clicks on re-enable inheritance.
 
 ### Heuristics for translateable attribute recognition.
 
-To avoid having to configure the translation for all properties we use a heuristic to recognize translated 
+To avoid having to configure the translation for all properties we use a heuristic to recognize translated
 properties that is meant to have likely no false positives and few false negatives. Specifically, we check whether the
 property name is one of jcr:title, jcr:description, title, alt, cq:panelTitle, shortDescription, actionText,
 accessibilityLabel, pretitle, displayPopupTitle, helpMessage , or alternatively doesn't have a colon in the name, has a
-String value, doesn't start with /{content,apps,libs,mnt}/ in the value and the value has a whitespace and at least 
+String value, doesn't start with /{content,apps,libs,mnt}/ in the value and the value has a whitespace and at least
 one 4 letter sequence.
 
 ## Open points
@@ -135,7 +135,7 @@ https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
 
 ## Additional ideas
 
-Tool for creating translations of i18n dictionaries? 
+Tool for creating translations of i18n dictionaries?
 
 ## UI
 
@@ -200,3 +200,18 @@ Cancelled relationship: `jcr:mixinTypes="[cq:LiveRelationship,cq:LiveSyncCancell
 `cq:isCancelledForChildren="{Boolean}true"` . The editor seems to use cq:isCancelledForChildren=true only when the
 resource has no child resources. For the jcr:content node only property inheritance is cancelled - cancelling the
 resource inheritance seems to put the editor into trouble.
+
+### Testing on WKND Site
+
+Content fragments: there are some in /content/dam/wknd/*/adventures and /content/dam/wknd/*/magazine -> for testing
+contant fragment translation only these folders have to be copied.
+
+#### Setup of live copies for testing a full site translation
+
+- http://localhost:4502/assets.html/content/dam/wknd# : create /content/dam/wknd/de and make live copies of
+  /content/dam/wknd/en/adventures and /content/dam/wknd/en/magazine into that.
+
+## TODO:
+
+- implement rollback for testing
+- check for content fragments and assets

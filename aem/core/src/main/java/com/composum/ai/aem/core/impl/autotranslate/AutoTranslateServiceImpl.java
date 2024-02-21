@@ -144,7 +144,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
         // find all jcr:content nodes below root and return a list of these
         List<Resource> pages = new ArrayList<>();
-        if (root.isResourceType("cq:PageContent")) {
+        if (root.isResourceType("cq:PageContent") || root.isResourceType("dam:AssetContent")) {
             pages.add(root);
         } else {
             root.getChildren().forEach(child -> pages.addAll(collectPages(child)));

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -73,7 +74,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      */
     public static final List<String> CERTAINLY_TRANSLATABLE_PROPERTIES =
             Arrays.asList("jcr:title", "jcr:description", "text", "title", "alt", "cq:panelTitle", "shortDescription",
-                    "actionText", "accessibilityLabel", "pretitle", "displayPopupTitle", "helpMessage");
+                    "actionText", "accessibilityLabel", "pretitle", "displayPopupTitle", "helpMessage",
+                    "dc:title", "dc:description");
 
     @Reference
     private GPTTranslationService translationService;
@@ -100,6 +102,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
             String originalValue = valuesToTranslate.get(i);
             String translatedValue = translatedValues.get(i);
+            if (StringUtils.equals(StringUtils.trim(originalValue), StringUtils.trim(translatedValue))) {
+                LOG.info("Translation of {} in {} is the same as the original, not setting it.",
+                        propertyToTranslate.propertyName, propertyToTranslate.resource.getPath());
+                continue;
+            }
             String propertyName = propertyToTranslate.propertyName;
             Resource resourceToTranslate = propertyToTranslate.resource;
             LOG.info("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
@@ -125,6 +132,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         if (mvm != null) {
             Map<String, Object> newEntries = new java.util.HashMap<>(); // avoid concurrency problems with the iterator
             for (Map.Entry<String, Object> entry : mvm.entrySet()) {
+                if (entry.getKey().contains(":")) {
+                    continue; // don't touch system stuff - usually the relevant paths are in fileReference or similar.
+                }
                 if (entry.getValue() instanceof String) {
                     String value = (String) entry.getValue();
                     if (value.startsWith("/content/dam/") || value.startsWith("/content/experience-fragments/")) {
@@ -156,7 +166,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 // a bit doubtful, but this way everything is revertable.
                 throw new IllegalArgumentException("No live relationship for translated path " + resourceToTranslate.getPath());
             }
-            if (resourceToTranslate.getName().equals(JcrConstants.JCR_CONTENT)) {
+            if (resourceToTranslate.getName().equals(JcrConstants.JCR_CONTENT) ||
+                    resourceToTranslate.getName().equals("metadata")) { // metadata for assets
                 // here we have to cancel the properties individually.
                 // cancelling the relationship for the whole resource seems to lead to trouble with the editor.
                 liveRelationshipManager.cancelPropertyRelationship(
@@ -168,7 +179,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         deep, false);
             }
         } catch (WCMException | RuntimeException e) {
-            LOG.error("Error cancelling inheritance for {} property {}", resourceToTranslate.getPath(), propertyToTranslate.propertyName, e);
+            LOG.error("Error cancelling inheritance for {} property {} : {}",
+                    resourceToTranslate.getPath(), propertyToTranslate.propertyName, e.toString());
             throw e;
         }
     }

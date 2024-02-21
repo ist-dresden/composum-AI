@@ -301,12 +301,12 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     public @interface Config {
 
         @AttributeDefinition(name = "Disable the Autotranslate service", defaultValue = "true")
-        boolean disabled() default true;
+        boolean disabled() default false;
 
         @AttributeDefinition(name = "Fake translation", description = "For quick and inexpensive testing, " +
                 "when you just want to check that the translation does something for e.g. a bulk of texts, " +
-                "you can enable this. The translation then just turns the text iNtO tHiS cApItAlIsAtIoN." +
-                "Easy to spot, but probably doesn't destroy the content.", defaultValue = "false")
+                "you can enable this. The \"translation\" then just turns the text iNtO tHiS cApItAlIsAtIoN. " +
+                "Easy to spot, but probably doesn't destroy the content completely.", defaultValue = "false")
         boolean fakeTranslation() default false;
 
     }
