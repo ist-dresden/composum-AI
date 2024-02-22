@@ -92,8 +92,10 @@ which might or might not be a problem).
 
 If we put all text of the page into one request, that would automatically provide a context for the translation, but
 needs testing since that needs precise separation of the texts and precise ordering of the translations in the result.
-An idea would be to separate the texts in the original message with separators like `===<<<### 573472 ###>>>===`
-containing random numbers, and instruct ChatGPT to include the separators in the translation.
+An idea would be to separate the texts in the original message with separators like 
+`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%`
+containing random numbers, and instruct ChatGPT to include the separators in the translation. (The % sequences are 
+single token sequences in the ChatGPT tokenizer.)
 
 Storing both the original text and the translated text verbatim in the component could allow later for a "re-translate"
 dialog that can provide ChatGPT with the previous original text, the text it was translated to, the text it was manually

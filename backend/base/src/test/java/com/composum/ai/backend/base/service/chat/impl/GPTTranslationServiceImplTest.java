@@ -9,7 +9,6 @@ import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServi
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +23,11 @@ public class GPTTranslationServiceImplTest extends TestCase {
 
     private static final Logger LOG = LoggerFactory.getLogger(GPTTranslationServiceImpl.class);
 
+    @Test
+    public void testSeparatorConsistency() {
+        assertTrue(MULTITRANSLATION_SEPARATOR_PATTERN.matcher(MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END).matches());
+        assertTrue(MULTITRANSLATION_SEPARATOR_PATTERN.matcher(" \n  " + MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END + "  \n").matches());
+    }
 
     @Test
     public void testJoinAndSeparate() {
@@ -63,11 +67,11 @@ public class GPTTranslationServiceImplTest extends TestCase {
     public void testRealTranslation() {
         String result = "\n" +
                 "```\n" +
-                "===<<<### 397360 ###>>>===\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 397360 %%%%%%%%%%%%%%%%\n" +
                 "Hallo!\n" +
-                "===<<<### 319439 ###>>>===\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 319439 %%%%%%%%%%%%%%%%\n" +
                 "Guten Morgen\n" +
-                "===<<<### 424242 ###>>>===\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%\n" +
                 "```";
         List<String> ids = Arrays.asList("397360", "319439");
         List<String> texts = Arrays.asList("Hi!", "Good morning");

@@ -761,8 +761,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     protected static GPTException buildException(Integer errorStatusCode, String result) {
+        // this is annoyingly heuristic and seems to break once in a while.
         if (Integer.valueOf(400).equals(errorStatusCode) && result != null
-                && result.contains("invalid_request_error") && result.contains("context_length_exceeded")) {
+                && result.contains("invalid_request_error") &&
+                (result.contains("context_length_exceeded") || result.contains("max_tokens") ||
+                        result.contains("model supports at most") ||
+                        result.contains("maximum context length"))) {
             return new GPTException.GPTContextLengthExceededException(result);
         }
         return new GPTException("Error response from GPT (status " + errorStatusCode

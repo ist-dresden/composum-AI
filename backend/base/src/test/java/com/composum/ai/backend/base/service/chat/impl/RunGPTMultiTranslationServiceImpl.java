@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.mockito.Mockito;
+
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 
 /**
@@ -32,6 +34,7 @@ public class RunGPTMultiTranslationServiceImpl extends AbstractGPTRunner {
             }
             checkTranslation(veryLongArray);
         }
+        System.out.println("DONE");
     }
 
     private List<String> checkTranslation(List<String> totranslate) {
@@ -44,6 +47,7 @@ public class RunGPTMultiTranslationServiceImpl extends AbstractGPTRunner {
         super.setup();
         translationService = new GPTTranslationServiceImpl();
         translationService.chatCompletionService = chatCompletionService;
+        translationService.activate(Mockito.mock(GPTTranslationServiceImpl.Config.class));
     }
 
 }

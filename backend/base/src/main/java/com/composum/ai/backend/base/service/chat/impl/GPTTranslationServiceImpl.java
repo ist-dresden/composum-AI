@@ -109,24 +109,24 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     }
 
     /**
-     * Start of separator like `===<<<### 573472 ###>>>===` .
+     * Start of separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` .
      */
-    protected static final String MULTITRANSLATION_SEPARATOR_START = "\n===<<<### ";
+    protected static final String MULTITRANSLATION_SEPARATOR_START = "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ";
 
     /**
-     * End of separator like `573472 ###>>>===` .
+     * End of separator like `573472 %%%%%%%%%%%%%%%%` .
      */
-    protected static final String MULTITRANSLATION_SEPARATOR_END = " ###>>>===\n";
+    protected static final String MULTITRANSLATION_SEPARATOR_END = " %%%%%%%%%%%%%%%%\n";
 
     /**
-     * Regexp matching separator like `===<<<### 573472 ###>>>===` (group "id" matches the number)
+     * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` (group "id" matches the number)
      */
-    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("\\s*\n===<<<### (?<id>\\d+) ###>>>===\n\\s*");
+    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("\\s*\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%\n\\s*");
 
     protected static final String LASTID = "424242";
 
     /**
-     * We join all text fragments we have to translate into one big texts separated with separators like `===<<<### 573472 ###>>>===` and
+     * We join all text fragments we have to translate into one big texts separated with separators like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` and
      * then translate that. Then we split the result at the separators and return the fragments. Safety check is that the is from the
      * fragments have to match the ids in the result.
      */
@@ -146,10 +146,17 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      */
     protected List<String> fragmentedTranslationDivideAndConquer(@Nonnull List<String> texts, @Nonnull String targetLanguage,
                                                                  @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries) throws GPTException {
+        if (texts.isEmpty()) {
+            return Collections.emptyList();
+        } else if (texts.size() == 1) {
+            return Collections.singletonList(singleTranslation(texts.get(0), null, targetLanguage, configuration));
+        }
+
         if (permittedRetries.get() <= 0) {
             LOG.error("Too many retries for fragmented translation to {} of {}", targetLanguage, texts);
             throw new GPTException("Too many retries for fragmented translation");
         }
+
         try {
             return fragmentedTranslation(texts, targetLanguage, configuration, permittedRetries);
         } catch (GPTException.GPTRetryableResponseErrorException e) {
@@ -160,6 +167,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         } catch (GPTException.GPTContextLengthExceededException e) {
             // everything is fine - that doesn't cost anything. Just split
         }
+
         int half = texts.size() / 2;
         List<String> firstHalf = texts.subList(0, half);
         List<String> secondHalf = texts.subList(half, texts.size());
@@ -188,7 +196,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         int rndid = 382938675;
         for (String text : texts) {
             rndid = rndid * 92821 + Objects.hashCode(text); // deterministic pseudo random number for cachability
-            String id = "" + (Math.abs(rndid) % 1000000);
+            String id = ("" + (1000000 + Math.abs(rndid) % 1000000)).substring(1);
             joinedtexts.append(MULTITRANSLATION_SEPARATOR_START).append(id).append(MULTITRANSLATION_SEPARATOR_END);
             joinedtexts.append(text);
             ids.add(id);

@@ -2,6 +2,8 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import java.io.IOException;
 
+import org.mockito.Mockito;
+
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 
 /**
@@ -46,6 +48,8 @@ public class RunGPTTranslationServiceImpl extends AbstractGPTRunner {
         super.setup();
         translationService = new GPTTranslationServiceImpl();
         translationService.chatCompletionService = chatCompletionService;
+        GPTTranslationServiceImpl.Config config = Mockito.mock(GPTTranslationServiceImpl.Config.class);
+        translationService.activate(config);
     }
 
 }
