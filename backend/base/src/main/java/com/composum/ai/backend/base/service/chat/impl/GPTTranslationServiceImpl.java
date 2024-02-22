@@ -121,7 +121,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     /**
      * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` (group "id" matches the number)
      */
-    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("\\s*\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%\n\\s*");
+    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%\n");
 
     protected static final String LASTID = "424242";
 
@@ -216,7 +216,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             String id = m.group("id");
             int end = m.start();
             if (start > 0) { // remove text before first separator
-                String part = response.substring(start - 1, end - 1);
+                String part = response.substring(start - 1, end - 1).trim();
                 result.add(part);
             }
             start = m.end();

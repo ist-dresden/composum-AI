@@ -104,13 +104,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             String originalValue = valuesToTranslate.get(i);
             String translatedValue = translatedValues.get(i);
             if (StringUtils.equals(StringUtils.trim(originalValue), StringUtils.trim(translatedValue))) {
-                LOG.info("Translation of {} in {} is the same as the original, not setting it.",
+                LOG.trace("Translation of {} in {} is the same as the original, not setting it.",
                         propertyToTranslate.propertyName, propertyToTranslate.resource.getPath());
                 continue;
             }
             String propertyName = propertyToTranslate.propertyName;
             Resource resourceToTranslate = propertyToTranslate.resource;
-            LOG.info("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
+            LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
             ModifiableValueMap valueMap = resourceToTranslate.adaptTo(ModifiableValueMap.class);
             valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), originalValue);
             valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), translatedValue);

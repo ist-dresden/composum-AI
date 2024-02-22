@@ -57,6 +57,11 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public int maximumTokensPerRequest() {
+                return 0;
+            }
+
+            @Override
             public int requestTimeout() {
                 return 60;
             }

@@ -9,6 +9,7 @@ import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServi
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +27,6 @@ public class GPTTranslationServiceImplTest extends TestCase {
     @Test
     public void testSeparatorConsistency() {
         assertTrue(MULTITRANSLATION_SEPARATOR_PATTERN.matcher(MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END).matches());
-        assertTrue(MULTITRANSLATION_SEPARATOR_PATTERN.matcher(" \n  " + MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END + "  \n").matches());
     }
 
     @Test
@@ -38,6 +38,17 @@ public class GPTTranslationServiceImplTest extends TestCase {
         List<String> result = GPTTranslationServiceImpl.separateResultTexts(joinedTexts, texts, ids, joinedTexts);
 
         assertEquals(texts, result);
+    }
+
+    @Test
+    public void testJoinAndSeparateWithWhitespace() {
+        List<String> texts = Arrays.asList("", "text1", "", " \n \n ", "text3", "");
+        List<String> ids = new ArrayList<>();
+
+        String joinedTexts = GPTTranslationServiceImpl.joinTexts(texts, ids);
+        List<String> result = GPTTranslationServiceImpl.separateResultTexts(joinedTexts, texts, ids, joinedTexts);
+
+        assertEquals(texts.stream().map(String::trim).collect(Collectors.toList()), result);
     }
 
     @Test
