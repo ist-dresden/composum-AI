@@ -188,7 +188,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
 
         @Override
-        public void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException {
+        public synchronized void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException {
             try {
                 AutoTranslateServiceImpl.this.doRollback(resourceResolver, this);
             } catch (PersistenceException | WCMException | RuntimeException e) {
@@ -200,12 +200,23 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         /**
          * Translate the pages; close the resolver when done.
          */
-        public void execute(ResourceResolver resourceResolver) {
+        public synchronized void execute(ResourceResolver resourceResolver) {
             try {
                 status = "running";
                 boolean hasErrors = false;
                 startTime = new Date().toString();
+                boolean interrupted = false;
                 for (TranslationPageImpl page : translatedPages) {
+                    if (!interrupted && Thread.interrupted()) {
+                        Thread.currentThread().interrupt();
+                        interrupted = true;
+                    }
+                    if (interrupted) {
+                        status = "cancelled";
+                        page.status = "cancelled";
+                        continue;
+                    }
+
                     page.status = "running";
                     try {
                         Resource resource = resourceResolver.getResource(page.resourcePath);
