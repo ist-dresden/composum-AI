@@ -36,7 +36,7 @@ public class AutoTranslateListModel {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("path parameter is required");
         }
-        path = path.replaceAll("_jcr_content", "jcr:content");
+        path = path.replaceAll("_jcr_content", "jcr:content").trim();
         boolean recursive = request.getParameter("recursive") != null;
         GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
         return autoTranslateService.startTranslation(request.getResourceResolver(), path, recursive, configuration);
@@ -47,7 +47,7 @@ public class AutoTranslateListModel {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("path parameter is required");
         }
-        path = path.replaceAll("_jcr_content", "jcr:content");
+        path = path.replaceAll("_jcr_content", "jcr:content").trim();
         Resource resource = request.getResourceResolver().getResource(path);
         autoTranslateService.rollback(resource);
         request.getResourceResolver().commit();

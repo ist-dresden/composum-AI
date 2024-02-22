@@ -110,8 +110,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
 
         ResourceResolver processResolver = resourceResolver.clone(null);
-        processResolver.refresh();
-        processResolver.commit();
         Resource root = processResolver.getResource(path);
         if (root == null) {
             throw new IllegalArgumentException("No such resource: " + path);
@@ -138,7 +136,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         run.status = "scheduled";
         run.user = resourceResolver.getUserID();
         run.configuration = configuration;
-        processResolver.commit();
         return run;
     }
 

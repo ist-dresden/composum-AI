@@ -103,11 +103,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
             String originalValue = valuesToTranslate.get(i);
             String translatedValue = translatedValues.get(i);
-            if (StringUtils.equals(StringUtils.trim(originalValue), StringUtils.trim(translatedValue))) {
-                LOG.trace("Translation of {} in {} is the same as the original, not setting it.",
-                        propertyToTranslate.propertyName, propertyToTranslate.resource.getPath());
-                continue;
-            }
+//            if (StringUtils.equals(StringUtils.trim(originalValue), StringUtils.trim(translatedValue))) {
+//                LOG.trace("Translation of {} in {} is the same as the original, not setting it.",
+//                        propertyToTranslate.propertyName, propertyToTranslate.resource.getPath());
+//                continue; // not quite sure whether that's right - that could lead to multiple user alerts
+//            }
             String propertyName = propertyToTranslate.propertyName;
             Resource resourceToTranslate = propertyToTranslate.resource;
             LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);

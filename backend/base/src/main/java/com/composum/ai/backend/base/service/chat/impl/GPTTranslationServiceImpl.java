@@ -95,7 +95,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 }
                 response = chatCompletionService.getSingleChatCompletion(request);
                 response = response != null ? response.trim() : "";
-                LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
+                LOG.trace("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
                 cacheResponse(cacheKey, request, response);
             }
 
@@ -134,9 +134,10 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     protected static final String MULTITRANSLATION_SEPARATOR_END = " %%%%%%%%%%%%%%%%\n";
 
     /**
-     * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` (group "id" matches the number)
+     * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` (group "id" matches the number).
+     * The \n cannot be directly matched since at the start it's sometimes ```%%%%...
      */
-    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%\n");
+    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("(?<!%)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%(?!%)");
 
     protected static final String LASTID = "424242";
 
@@ -389,6 +390,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                     LOG.warn("Reading from " + cacheResponse, e);
                 }
             }
+        } else {
+            LOG.debug("No cached response for {}", cacheKey);
         }
         return null;
     }

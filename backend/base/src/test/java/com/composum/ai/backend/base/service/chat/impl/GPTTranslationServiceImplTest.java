@@ -29,7 +29,7 @@ public class GPTTranslationServiceImplTest extends TestCase {
 
     @Test
     public void testSeparatorConsistency() {
-        assertTrue(MULTITRANSLATION_SEPARATOR_PATTERN.matcher(MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END).matches());
+        assertTrue(MULTITRANSLATION_SEPARATOR_PATTERN.matcher(MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END).find());
     }
 
     @Test
@@ -80,13 +80,11 @@ public class GPTTranslationServiceImplTest extends TestCase {
     @Test
     public void testSimulateRealTranslation() {
         String result = "\n" +
-                "```\n" +
-                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 397360 %%%%%%%%%%%%%%%%\n" +
+                "```%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 397360 %%%%%%%%%%%%%%%%\n" +
                 "Hallo!\n" +
                 "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 319439 %%%%%%%%%%%%%%%%\n" +
                 "Guten Morgen\n" +
-                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%\n" +
-                "```";
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%```";
         List<String> ids = asList("397360", "319439");
         List<String> texts = asList("Hi!", "Good morning");
         List<String> resultTexts = GPTTranslationServiceImpl.separateResultTexts(result, texts, ids, result);
