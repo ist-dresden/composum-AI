@@ -86,6 +86,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     @Override
     public void translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException {
+        resource.getResourceResolver().refresh();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         collectPropertiesToTranslate(resource, propertiesToTranslate);
         LOG.info("Set of property names to translate in {} : {}", resource.getPath(),

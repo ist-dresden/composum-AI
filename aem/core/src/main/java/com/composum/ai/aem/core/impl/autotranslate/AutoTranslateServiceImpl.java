@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.commons.threads.ThreadPool;
 import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
@@ -103,9 +103,9 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             throw new IllegalArgumentException("Only pages below /content/ are supported: " + path);
         }
 
-        TranslationRunImpl run = stateService.getTranslationRuns().stream()
-                .filter(r -> r.rootPath.equals(path) && r.stopTime == null).findAny().orElse(null);
-        if (run != null) {
+        if (stateService.getTranslationRuns().stream()
+                .filter(r -> r.rootPath.equals(path) && r.stopTime == null)
+                .findAny().orElse(null) != null) {
             throw new IllegalArgumentException("Translation run for " + path + " is already running");
         }
 
@@ -127,12 +127,14 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             }
         }
 
-        run = new TranslationRunImpl();
+        TranslationRunImpl run = new TranslationRunImpl();
         run.id = "" + Math.abs(System.nanoTime());
         run.rootPath = path;
-        run.translatedPages = resources.stream().map(TranslationPageImpl::new).collect(Collectors.toList());
+        run.translatedPages = resources.stream()
+                .map(r -> new TranslationPageImpl(r.getPath()))
+                .collect(Collectors.toList());
         stateService.getTranslationRuns().add(run);
-        run.future = getThreadPool().submit(run::execute);
+        run.future = getThreadPool().submit(() -> run.execute(processResolver));
         run.status = "scheduled";
         run.user = resourceResolver.getUserID();
         run.configuration = configuration;
@@ -160,7 +162,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     protected void doRollback(ResourceResolver resourceResolver, TranslationRunImpl translationRun) throws PersistenceException, WCMException {
         for (TranslationPageImpl page : translationRun.translatedPages) {
-            Resource resource = resourceResolver.getResource(page.pagePath);
+            Resource resource = resourceResolver.getResource(page.resourcePath);
             if (resource != null) {
                 pageTranslateService.rollback(resource);
             }
@@ -195,33 +197,41 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             }
         }
 
-        public void execute() {
-            status = "running";
-            boolean hasErrors = false;
-            startTime = new Date().toString();
-            for (TranslationPageImpl page : translatedPages) {
-                page.status = "running";
-                try {
-                    pageTranslateService.translateLiveCopy(page.resource, configuration);
-                    page.status = "done";
-                } catch (Exception e) {
-                    page.status = "error";
-                    this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
-                    hasErrors = true;
-                    LOG.error("Error translating " + page.pagePath, e);
+        /**
+         * Translate the pages; close the resolver when done.
+         */
+        public void execute(ResourceResolver resourceResolver) {
+            try {
+                status = "running";
+                boolean hasErrors = false;
+                startTime = new Date().toString();
+                for (TranslationPageImpl page : translatedPages) {
+                    page.status = "running";
+                    try {
+                        Resource resource = resourceResolver.getResource(page.resourcePath);
+                        pageTranslateService.translateLiveCopy(resource, configuration);
+                        page.status = "done";
+                    } catch (Exception e) {
+                        page.status = "error";
+                        this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
+                        hasErrors = true;
+                        LOG.error("Error translating " + page.pagePath, e);
+                    }
                 }
+                status = hasErrors ? "doneWithErrors" : "done";
+                stopTime = new Date().toString();
+            } finally {
+                resourceResolver.close();
             }
-            status = hasErrors ? "doneWithErrors" : "done";
-            stopTime = new Date().toString();
         }
     }
 
     public static class TranslationPageImpl extends TranslationPage {
-        Resource resource;
+        String resourcePath;
 
-        public TranslationPageImpl(Resource resource) {
-            this.resource = resource;
-            pagePath = resource.getParent().getPath(); // remove jcr:content
+        public TranslationPageImpl(String resourcePath) {
+            this.resourcePath = resourcePath;
+            pagePath = ResourceUtil.getParent(resourcePath); // remove jcr:content
         }
     }
 
