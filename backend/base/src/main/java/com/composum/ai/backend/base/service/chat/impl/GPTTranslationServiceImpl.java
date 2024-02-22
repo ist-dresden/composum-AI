@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,30 +65,44 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     /**
      * Translate the text from the target to destination language, either Java locale name or language name.
      */
-    @Nonnull
+    @Nullable
     @Override
-    public String singleTranslation(@Nullable String text, @Nullable String sourceLanguage, @Nullable String targetLanguage, @Nullable GPTConfiguration configuration) {
+    public String singleTranslation(@Nullable String rawText, @Nullable String sourceLanguage, @Nullable String targetLanguage, @Nullable GPTConfiguration configuration) {
         ensureEnabled();
-        if (config.fakeTranslation()) {
-            return fakeTranslation(text);
+        if (rawText == null) {
+            return null;
         }
+        Matcher m = PATTERN_SEPARATE_WHITESPACE.matcher(rawText);
+        if (m.matches()) {
+            String before = m.group(1);
+            String text = m.group(2);
+            String after = m.group(3);
+            String response;
+            if (config.fakeTranslation()) {
+                response = fakeTranslation(text);
+            } else {
 
-        if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(targetLanguage)) {
-            return "";
-        }
+                if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(targetLanguage)) {
+                    return "";
+                }
 
-        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
-        String cacheKey = cacheKey(request);
-        String cachedResponse = getCachedResponse(cacheKey);
-        if (cachedResponse != null) {
-            LOG.debug("Returning cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cachedResponse);
-            return cachedResponse;
+                GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
+                String cacheKey = cacheKey(request);
+                String cachedResponse = getCachedResponse(cacheKey);
+                if (cachedResponse != null) {
+                    LOG.debug("Returning cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cachedResponse);
+                    return cachedResponse;
+                }
+                response = chatCompletionService.getSingleChatCompletion(request);
+                response = response != null ? response.trim() : "";
+                LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
+                cacheResponse(cacheKey, request, response);
+            }
+
+            return before + response + after;
+        } else {
+            throw new IllegalStateException("Bug - that shouldn't happen. Text: '" + rawText + "'");
         }
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        response = response.trim();
-        LOG.debug("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
-        cacheResponse(cacheKey, request, response);
-        return response;
     }
 
     @Override
@@ -125,6 +140,11 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
     protected static final String LASTID = "424242";
 
+    protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
+
+    /** Separate whitespace at the beginning and end from the non-whitespace text. */
+    protected static final Pattern PATTERN_SEPARATE_WHITESPACE = Pattern.compile("\\A(\\s*)(.*?)(\\s*)\\Z", Pattern.DOTALL);
+
     /**
      * We join all text fragments we have to translate into one big texts separated with separators like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` and
      * then translate that. Then we split the result at the separators and return the fragments. Safety check is that the is from the
@@ -134,11 +154,39 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Override
     public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration) throws GPTException {
         ensureEnabled();
-        if (config.fakeTranslation()) {
-            return texts.stream().map(GPTTranslationServiceImpl::fakeTranslation).collect(Collectors.toList());
+        if (texts == null || texts.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return fragmentedTranslationDivideAndConquer(texts, targetLanguage, configuration, new AtomicInteger(5));
+        List<String> realTexts = texts.stream()
+                .filter(s -> s != null && PATTERN_HAS_LETTER.matcher(s).find())
+                .map(s -> PATTERN_SEPARATE_WHITESPACE.matcher(s).replaceAll("$2"))
+                .collect(Collectors.toList());
+
+        List<String> translatedRealTexts;
+        if (config.fakeTranslation()) {
+            translatedRealTexts = realTexts.stream().map(GPTTranslationServiceImpl::fakeTranslation).collect(Collectors.toList());
+        } else {
+            translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(5));
+        }
+
+        Iterator<String> translatedRealTextsIterator = translatedRealTexts.iterator();
+        List<String> result = new ArrayList<>();
+        for (String text : texts) {
+            if (text == null || !PATTERN_HAS_LETTER.matcher(text).find()) {
+                result.add(text);
+            } else {
+                Matcher m = PATTERN_SEPARATE_WHITESPACE.matcher(text);
+                if (m.matches()) {
+                    String before = m.group(1);
+                    String after = m.group(3);
+                    result.add(before + translatedRealTextsIterator.next() + after);
+                } else {
+                    throw new IllegalStateException("Bug - that shouldn't happen. Text: '" + text + "'");
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -303,7 +351,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 }
             }
         }
-        return result.toString();
+        return result.toString().trim(); // trim to make it behave like the original.
     }
 
 

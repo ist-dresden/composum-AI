@@ -277,7 +277,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * As additional heuristic - the text should have at least one word with >= 4 letters.
      * That will break down very different languages, I know, but this is a POC. :-)
      */
-    protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{Alpha}{4}");
+    protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{L}{4}");
+
+    protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
 
     /**
      * Checks whether the property is one of jcr:title, jcr:description, title, alt, cq:panelTitle, shortDescription,
@@ -286,7 +288,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * a whitespace and at least one 4 letter sequence.
      */
     protected static boolean isTranslatableProperty(String name, Object value) {
-        if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name)) {
+        if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name) &&
+                value != null && (value instanceof String) &&
+                PATTERN_HAS_LETTER.matcher((String) value).find()) {
             return true;
         }
         if (name.contains(":")) {
