@@ -162,6 +162,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         } catch (GPTException.GPTRetryableResponseErrorException e) {
             // is hopefully rare - otherwise we likely have to rethink this.
             LOG.info("Splitting translation because of retryable error: {}", e.toString());
+            LOG.info("GPTRetryableResponseErrorException occurred for {} texts with length {}", texts.size(),
+                    texts.stream().collect(Collectors.summarizingInt(String::length)));
             // that did cost something, so retry permits are decremented. We split anyway, since that might make things easier for the GPT service.
             permittedRetries.decrementAndGet();
         } catch (GPTException.GPTContextLengthExceededException e) {

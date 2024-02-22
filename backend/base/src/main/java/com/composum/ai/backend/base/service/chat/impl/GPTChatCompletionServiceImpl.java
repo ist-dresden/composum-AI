@@ -159,6 +159,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected ScheduledExecutorService scheduledExecutorService;
 
+    protected Integer maximumTokensPerRequest;
+
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         LOG.info("Activating GPTChatCompletionService {}", config);
@@ -171,6 +173,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
+        this.maximumTokensPerRequest = config != null && config.maximumTokensPerRequest() > 0 ? config.maximumTokensPerRequest() : null;
         try {
             this.temperature = config != null && !StringUtil.isBlank(config.temperature()) ? Double.valueOf(config.temperature()) : null;
         } catch (NumberFormatException e) {
@@ -526,6 +529,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         externalRequest.setMaxTokens(request.getMaxTokens());
         externalRequest.setStream(Boolean.TRUE);
         String jsonRequest = gson.toJson(externalRequest);
+        checkTokenCount(jsonRequest);
         return jsonRequest;
     }
 
@@ -611,6 +615,18 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         return enc.countTokensOrdinary(text);
     }
 
+    protected void checkTokenCount(String jsonRequest) {
+        if (maximumTokensPerRequest != null && jsonRequest != null) {
+            if (jsonRequest.length() < maximumTokensPerRequest) {
+                return;
+            }
+            int tokens = countTokens(jsonRequest); // not exact but close enough for this purpose
+            if (tokens > maximumTokensPerRequest) {
+                throw new GPTException("Aborting request because configured maximumTokensPerRequest is exceeded: request has about " + tokens);
+            }
+        }
+    }
+
     @Override
     @Nonnull
     public String htmlToMarkdown(String html) {
@@ -643,6 +659,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")
         String temperature();
+
+        @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
+                "That's about a half of the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
+                defaultValue = "50000")
+        int maximumTokensPerRequest();
 
         @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "" + DEFAULTVALUE_CONNECTIONTIMEOUT)
         int connectionTimeout();
