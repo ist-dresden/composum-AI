@@ -220,8 +220,9 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     page.status = "running";
                     try {
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        pageTranslateService.translateLiveCopy(resource, configuration);
+                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, configuration);
                         page.status = "done";
+                        page.stats = stats;
                     } catch (Exception e) {
                         page.status = "error";
                         this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");

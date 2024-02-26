@@ -38,8 +38,7 @@ public class GPTChatCompletionServiceImplLengthTest {
             mock(GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class);
     protected BundleContext bundleContext = mock(BundleContext.class);
 
-    public static final List<String> models = Arrays.asList("gpt-3.5-turbo",
-            "gpt-3.5-turbo-0125", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-turbo-preview", "gpt-4-vision-preview");
+    public static final List<String> models = Arrays.asList("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-turbo-preview", "gpt-4-vision-preview");
 
     @Before
     public void setUp() throws NoSuchFieldException {

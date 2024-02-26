@@ -17,7 +17,13 @@
                 <tbody data-sly-list="${model.translatedPages}">
                 <tr>
                     <td>${item.status}</td>
-                    <td><a href="/editor.html${item.pagePath}.html">${item.pagePath}</a></td>
+                    <td>${item.stats.translatedProperties} / ${item.stats.translateableProperties} ,
+                        ${item.stats.relocatedPaths} / ${item.stats.paths}
+                    </td>
+                    <td>
+                        <a data-sly-unwrap="${item.stats.translatedProperties == 0 && item.stats.relocatedPaths == 0}"
+                           href="/editor.html${item.pagePath}.html">${item.pagePath}
+                        </a></td>
                 </tr>
                 </tbody>
                 <pre>
@@ -28,7 +34,8 @@
         <form action="/apps/composum-ai/components/autotranslate/run.cancel.html/${model.id}" method="GET" class="mt-3">
             <button type="submit" class="btn btn-warning">Cancel Translation Process</button>
         </form>
-        <form action="/apps/composum-ai/components/autotranslate/run.rollback.html/${model.id}" method="GET" class="mt-3">
+        <form action="/apps/composum-ai/components/autotranslate/run.rollback.html/${model.id}" method="GET"
+              class="mt-3">
             <button type="submit" class="btn btn-warning">Rollback Translation Process</button>
         </form>
         <p>

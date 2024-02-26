@@ -46,6 +46,7 @@ public interface AutoTranslateService {
     public abstract class TranslationPage {
         public String pagePath;
         public String status;
+        public AutoPageTranslateService.Stats stats;
     }
 
 }

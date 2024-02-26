@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -85,14 +84,17 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public void translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException {
+    public Stats translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException {
+        Stats stats = new Stats();
         resource.getResourceResolver().refresh();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
-        collectPropertiesToTranslate(resource, propertiesToTranslate);
+        collectPropertiesToTranslate(resource, propertiesToTranslate, stats);
+
         LOG.info("Set of property names to translate in {} : {}", resource.getPath(),
                 propertiesToTranslate.stream()
                         .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
         LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
+
         List<String> valuesToTranslate = propertiesToTranslate.stream()
                 .map(p -> p.resource.getValueMap().get(p.propertyName, String.class))
                 .collect(Collectors.toList());
@@ -100,6 +102,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         String languageName = SelectorUtils.getLanguageName(language);
         List<String> translatedValues =
                 translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
+                translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
+
         for (int i = 0; i < propertiesToTranslate.size(); i++) {
             PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
             String originalValue = valuesToTranslate.get(i);
@@ -117,41 +121,47 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
             valueMap.put(propertyName, translatedValue);
             valueMap.put(AI_TRANSLATED_MARKER, Boolean.TRUE);
+            stats.translatedProperties++;
 
             cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
         }
-        migratePathsToLanguageCopy(resource, language);
+
+        migratePathsToLanguageCopy(resource, language, stats);
         resource.getResourceResolver().commit();
+        return stats;
     }
 
     /**
      * Traverses the resource tree looking for paths pointing to /content/dam/ and /content/experience-fragments/ and
      * changes them if there is an unique language copy in our language.
      */
-    protected void migratePathsToLanguageCopy(Resource resource, String language) {
-        resource.getChildren().forEach(child -> migratePathsToLanguageCopy(child, language));
+    protected void migratePathsToLanguageCopy(Resource resource, String language, Stats stats) {
+        resource.getChildren().forEach(child -> migratePathsToLanguageCopy(child, language, stats));
         ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
         if (mvm != null) {
             Map<String, Object> newEntries = new java.util.HashMap<>(); // avoid concurrency problems with the iterator
             for (Map.Entry<String, Object> entry : mvm.entrySet()) {
-                if (entry.getKey().contains(":")) {
-                    continue; // don't touch system stuff - usually the relevant paths are in fileReference or similar.
+                String key = entry.getKey();
+                if (key.contains(":") || key.startsWith(AI_PREFIX) || key.startsWith(LC_PREFIX)) {
+                    continue; // don't touch system stuff with : - usually the relevant paths are in fileReference or similar.
                 }
                 if (entry.getValue() instanceof String) {
                     String value = (String) entry.getValue();
                     if (value.startsWith("/content/dam/") || value.startsWith("/content/experience-fragments/")) {
+                        stats.paths++;
                         Resource referencedResource = resource.getResourceResolver().getResource(value);
                         List<Resource> languageSiblings = SelectorUtils.getLanguageSiblings(referencedResource, language);
                         if (languageSiblings.size() == 1) {
+                            stats.relocatedPaths++;
                             Resource languageCopy = languageSiblings.get(0);
-                            newEntries.put(entry.getKey(), languageCopy.getPath());
-                            String origKey = encodePropertyName(LC_PREFIX, entry.getKey(), AI_ORIGINAL_SUFFIX);
+                            newEntries.put(key, languageCopy.getPath());
+                            String origKey = encodePropertyName(LC_PREFIX, key, AI_ORIGINAL_SUFFIX);
                             if (mvm.get(origKey) == null) {
                                 newEntries.put(origKey, value);
                             }
-                            newEntries.put(encodePropertyName(LC_PREFIX, entry.getKey(), AI_TRANSLATED_SUFFIX), languageCopy.getPath());
+                            newEntries.put(encodePropertyName(LC_PREFIX, key, AI_TRANSLATED_SUFFIX), languageCopy.getPath());
                         } else if (languageSiblings.size() > 1) {
-                            LOG.warn("More than one language copy for {} in {} - {}", entry.getKey(), resource.getPath(),
+                            LOG.warn("More than one language copy for {} in {} - {}", key, resource.getPath(),
                                     languageSiblings.stream().map(Resource::getPath).collect(Collectors.toList()));
                         }
                     }
@@ -246,10 +256,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Searches for properties we have to translate.
      */
-    protected List<PropertyToTranslate> collectPropertiesToTranslate(Resource resource, List<PropertyToTranslate> propertiesToTranslate) {
+    protected void collectPropertiesToTranslate(Resource resource, List<PropertyToTranslate> propertiesToTranslate, Stats stats) {
         ValueMap valueMap = resource.getValueMap();
         for (String propertyName : valueMap.keySet()) {
             if (isTranslatableProperty(propertyName, valueMap.get(propertyName))) {
+                stats.translateableProperties++;
                 if (!valueMap.containsKey(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX))) {
                     PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
                     propertyToTranslate.resource = resource;
@@ -259,9 +270,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
         }
         for (Resource child : resource.getChildren()) {
-            collectPropertiesToTranslate(child, propertiesToTranslate);
+            collectPropertiesToTranslate(child, propertiesToTranslate, stats);
         }
-        return propertiesToTranslate;
     }
 
     /**

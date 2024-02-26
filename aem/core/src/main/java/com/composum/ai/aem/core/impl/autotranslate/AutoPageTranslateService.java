@@ -14,11 +14,28 @@ public interface AutoPageTranslateService {
     /**
      * Implements the actual translation for one page or asset.
      */
-    void translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException;
+    Stats translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException;
 
     /**
      * Rolls everything back in the resource - mostly for testing purposes.
      */
     void rollback(Resource resource) throws WCMException;
+
+    public static class Stats {
+        public int translateableProperties;
+        public int translatedProperties;
+        public int paths;
+        public int relocatedPaths;
+
+        @Override
+        public String toString() {
+            return "Stats{" +
+                    "translateableProperties=" + translateableProperties +
+                    ", translatedProperties=" + translatedProperties +
+                    ", paths=" + paths +
+                    ", relocatedPaths=" + relocatedPaths +
+                    '}';
+        }
+    }
 
 }
