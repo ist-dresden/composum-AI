@@ -12,4 +12,7 @@ public @interface OpenAIConfig {
     @Property(label = "OpenAI API Key", description = "OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
     String openAiApiKey();
 
+    @Property(label = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/.")
+    String openAiOrganizationId();
+
 }

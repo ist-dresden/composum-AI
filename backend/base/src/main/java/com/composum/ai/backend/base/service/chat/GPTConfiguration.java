@@ -1,6 +1,6 @@
 package com.composum.ai.backend.base.service.chat;
 
-import static com.google.common.base.Objects.*;
+import static com.google.common.base.Objects.toStringHelper;
 
 import java.util.Objects;
 
@@ -29,11 +29,14 @@ public class GPTConfiguration {
 
     private final String apiKey;
 
+    private final String organizationId;
+
     private final AnswerType answerType;
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable AnswerType answerType) {
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
         this.apiKey = apiKey;
         this.answerType = answerType;
+        this.organizationId = organizationId;
     }
 
     /**
@@ -41,6 +44,13 @@ public class GPTConfiguration {
      */
     public String getApiKey() {
         return apiKey;
+    }
+
+    /**
+     * The organization id to use with ChatGPT. If this is not set, we will try to fall back to global configurations.
+     */
+    public String getOrganizationId() {
+        return organizationId;
     }
 
     /**
@@ -67,11 +77,15 @@ public class GPTConfiguration {
         if (this.apiKey != null && other.apiKey != null && !this.apiKey.equals(other.apiKey)) {
             throw new IllegalArgumentException("Cannot merge conflicting API keys: " + this.apiKey + " vs. " + other.apiKey);
         }
+        String organizationId = this.organizationId != null ? this.organizationId : other.organizationId;
+        if (this.organizationId != null && other.organizationId != null && !this.organizationId.equals(other.organizationId)) {
+            throw new IllegalArgumentException("Cannot merge conflicting organization ids: " + this.organizationId + " vs. " + other.organizationId);
+        }
         AnswerType answerType = this.answerType != null ? this.answerType : other.answerType;
         if (this.answerType != null && other.answerType != null && !this.answerType.equals(other.answerType)) {
             throw new IllegalArgumentException("Cannot merge conflicting answer types: " + this.answerType + " vs. " + other.answerType);
         }
-        return new GPTConfiguration(apiKey, answerType);
+        return new GPTConfiguration(apiKey, organizationId, answerType);
     }
 
     /**
@@ -87,7 +101,7 @@ public class GPTConfiguration {
      */
     @Nonnull
     public static GPTConfiguration ofRichText(boolean richText) {
-        return new GPTConfiguration(null, richText ? AnswerType.HTML : AnswerType.MARKDOWN);
+        return new GPTConfiguration(null, null, richText ? AnswerType.HTML : AnswerType.MARKDOWN);
     }
 
     @Override
@@ -102,8 +116,8 @@ public class GPTConfiguration {
         return helper.toString();
     }
 
-    public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, AnswerType.MARKDOWN);
-    public static final GPTConfiguration HTML = new GPTConfiguration(null, AnswerType.HTML);
+    public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, null, AnswerType.MARKDOWN);
+    public static final GPTConfiguration HTML = new GPTConfiguration(null, null, AnswerType.HTML);
 
     @Override
     public boolean equals(Object o) {

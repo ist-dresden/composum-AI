@@ -37,6 +37,11 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public String openAiOrganizationId() {
+                return null;
+            }
+
+            @Override
             public String openAiApiKeyFile() {
                 return null;
             }

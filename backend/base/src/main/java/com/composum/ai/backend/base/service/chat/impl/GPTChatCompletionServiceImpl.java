@@ -89,7 +89,7 @@ import com.knuddels.jtokkit.api.EncodingType;
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
     protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
@@ -107,8 +107,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4-vision-preview";
 
-    private static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
-    private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
+    protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
+    protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
 
     public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
     /**
@@ -119,15 +119,16 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     /**
      * The OpenAI Key for accessing ChatGPT; system default if not given in request.
      */
-    private String apiKey;
-    private String defaultModel;
-    private String imageModel;
+    protected String apiKey;
+    protected String organizationId;
+    protected String defaultModel;
+    protected String imageModel;
 
-    private CloseableHttpAsyncClient httpAsyncClient;
+    protected CloseableHttpAsyncClient httpAsyncClient;
 
-    private static final Gson gson = new GsonBuilder().create();
+    protected static final Gson gson = new GsonBuilder().create();
 
-    private final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
+    protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
     /**
      * Limiter that maps the financial reasons to limit.
@@ -148,12 +149,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     protected Encoding enc = registry.getEncoding(EncodingType.CL100K_BASE);
 
-    private BundleContext bundleContext;
+    protected BundleContext bundleContext;
 
-    private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
-    private int requestTimeout;
-    private int connectionTimeout;
-    private Double temperature;
+    protected final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
+    protected int requestTimeout;
+    protected int connectionTimeout;
+    protected Double temperature;
 
     protected boolean disabled;
 
@@ -183,6 +184,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.disabled = config != null && config.disabled();
         if (!disabled) {
             this.apiKey = retrieveOpenAIKey(config);
+            this.organizationId = config.openAiOrganizationId();
         } else {
             LOG.info("ChatGPT is disabled.");
         }
@@ -240,7 +242,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    private static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
+    protected static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
         String apiKey = null;
         if (config != null) {
             apiKey = config.openAiApiKey();
@@ -325,11 +327,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    private SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
         String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
+        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
         SimpleHttpRequest request = new SimpleHttpRequest("POST", CHAT_COMPLETION_URL);
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
         request.addHeader("Authorization", "Bearer " + actualApiKey);
+        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
+            request.addHeader("OpenAI-Organization", actualOrganizationId);
+        }
         return request;
     }
 
@@ -646,6 +652,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
         String openAiApiKey();
 
+        @AttributeDefinition(name = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/.")
+        String openAiOrganizationId();
+
         // alternatively, a key file
         @AttributeDefinition(name = "OpenAI API Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
         String openAiApiKeyFile();
@@ -683,15 +692,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected class StreamDecodingResponseConsumer extends AbstractCharResponseConsumer<Void> {
 
-        private final GPTCompletionCallback callback;
-        private final CompletableFuture<Void> result;
-        private final StringBuilder resultBuilder = new StringBuilder();
-        private final long id;
+        protected final GPTCompletionCallback callback;
+        protected final CompletableFuture<Void> result;
+        protected final StringBuilder resultBuilder = new StringBuilder();
+        protected final long id;
 
         /**
          * If set, we collect the data for the error message, of false we process it as stream.
          */
-        private Integer errorStatusCode;
+        protected Integer errorStatusCode;
 
         /**
          * The result of the webservice call is written to callback; result is set when either it completed or aborted.
@@ -800,7 +809,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected static class EnsureResultFutureCallback implements FutureCallback<Void> {
 
         @Nonnull
-        private final CompletableFuture<Void> result;
+        protected final CompletableFuture<Void> result;
 
         public EnsureResultFutureCallback(@Nonnull CompletableFuture<Void> result) {
             this.result = result;
