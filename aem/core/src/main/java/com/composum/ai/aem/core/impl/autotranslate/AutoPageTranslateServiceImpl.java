@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -92,14 +95,16 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public Stats translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException {
+    public Stats translateLiveCopy(@Nonnull Resource resource, @Nullable GPTConfiguration configuration,
+                                   @Nonnull AutoTranslateService.TranslationParameters translationParameters)
+            throws WCMException, PersistenceException {
         Stats stats = new Stats();
         resource.getResourceResolver().refresh();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = false;
-        collectPropertiesToTranslate(resource, propertiesToTranslate, stats);
+        collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters);
 
-        LOG.info("Set of property names to translate in {} : {}", resource.getPath(),
+        LOG.debug("Set of property names to translate in {} : {}", resource.getPath(),
                 propertiesToTranslate.stream()
                         .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
         LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
@@ -283,7 +288,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Searches for properties we have to translate.
      */
-    protected void collectPropertiesToTranslate(Resource resource, List<PropertyToTranslate> propertiesToTranslate, Stats stats) {
+    protected void collectPropertiesToTranslate(Resource resource, List<PropertyToTranslate> propertiesToTranslate, Stats stats, AutoTranslateService.TranslationParameters translationParameters) {
         ValueMap valueMap = resource.getValueMap();
         for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
             if (isTranslatableProperty(entry.getKey(), entry.getValue())) {
@@ -296,7 +301,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 }
             }
         }
-        resource.getChildren().forEach(child -> collectPropertiesToTranslate(child, propertiesToTranslate, stats));
+        resource.getChildren().forEach(child -> collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters));
     }
 
     /**

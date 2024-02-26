@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -22,12 +23,29 @@ public interface AutoTranslateService {
     /**
      * Starts a new translation run.
      */
-    TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive, GPTConfiguration configuration) throws LoginException, PersistenceException;
+    TranslationRun startTranslation(
+            @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
+            @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)
+            throws LoginException, PersistenceException;
 
-    /** Rolls the translation results at this resource back - mostly for debugging. */
+    /**
+     * Rolls the translation results at this resource back - mostly for debugging.
+     */
     void rollback(Resource resource) throws WCMException;
 
-    public abstract class TranslationRun {
+    public static class TranslationParameters {
+        /**
+         * Translate subpages as well.
+         */
+        public boolean recursive;
+
+        /**
+         * Also re-translate properties where the original was changed.
+         */
+        public boolean changed;
+    }
+
+    public static abstract class TranslationRun {
         public String id;
         public String status;
         public String startTime;
@@ -43,7 +61,7 @@ public interface AutoTranslateService {
         public abstract void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException;
     }
 
-    public abstract class TranslationPage {
+    public static abstract class TranslationPage {
         public String pagePath;
         public String status;
         public AutoPageTranslateService.Stats stats;

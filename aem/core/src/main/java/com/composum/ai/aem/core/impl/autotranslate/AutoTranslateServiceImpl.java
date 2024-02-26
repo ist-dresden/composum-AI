@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -92,7 +93,10 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     @Override
-    public TranslationRun startTranslation(ResourceResolver resourceResolver, String path, boolean recursive, GPTConfiguration configuration) throws LoginException, PersistenceException {
+    public TranslationRun startTranslation(
+            @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
+            @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)
+            throws LoginException, PersistenceException {
         if (disabled) {
             throw new IllegalStateException("AutoTranslateService is disabled");
         }
@@ -115,7 +119,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             throw new IllegalArgumentException("No such resource: " + path);
         }
         List<Resource> resources;
-        if (recursive) {
+        if (translationParameters.recursive) {
             resources = collectPages(root);
         } else {
             if (root.isResourceType("cq:Page")) {
@@ -130,6 +134,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         TranslationRunImpl run = new TranslationRunImpl();
         run.id = "" + Math.abs(System.nanoTime());
         run.rootPath = path;
+        run.translationParameters = translationParameters;
         run.translatedPages = resources.stream()
                 .map(r -> new TranslationPageImpl(r.getPath()))
                 .collect(Collectors.toList());
@@ -174,6 +179,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public Future<?> future;
         List<TranslationPageImpl> translatedPages;
         GPTConfiguration configuration;
+        TranslationParameters translationParameters;
 
         @Override
         public List<TranslationPage> getTranslatedPages() {
@@ -220,7 +226,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     page.status = "running";
                     try {
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, configuration);
+                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, configuration, translationParameters);
                         page.status = "done";
                         page.stats = stats;
                     } catch (Exception e) {

@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 
@@ -14,7 +17,10 @@ public interface AutoPageTranslateService {
     /**
      * Implements the actual translation for one page or asset.
      */
-    Stats translateLiveCopy(Resource resource, GPTConfiguration configuration) throws WCMException, PersistenceException;
+    Stats translateLiveCopy(
+            @Nonnull Resource resource, @Nullable GPTConfiguration configuration,
+            @Nonnull AutoTranslateService.TranslationParameters translationParameters)
+            throws WCMException, PersistenceException;
 
     /**
      * Rolls everything back in the resource - mostly for testing purposes.

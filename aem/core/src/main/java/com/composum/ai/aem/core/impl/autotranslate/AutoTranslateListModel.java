@@ -38,8 +38,12 @@ public class AutoTranslateListModel {
         }
         path = path.replaceAll("_jcr_content", "jcr:content").trim();
         boolean recursive = request.getParameter("recursive") != null;
+        boolean changed = request.getParameter("changed") != null;
         GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
-        return autoTranslateService.startTranslation(request.getResourceResolver(), path, recursive, configuration);
+        AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
+        parms.recursive = recursive;
+        parms.changed = changed;
+        return autoTranslateService.startTranslation(request.getResourceResolver(), path, parms, configuration);
     }
 
     public String rollback() throws WCMException, PersistenceException {
