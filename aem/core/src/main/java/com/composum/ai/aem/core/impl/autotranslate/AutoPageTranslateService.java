@@ -29,8 +29,23 @@ public interface AutoPageTranslateService {
 
     public static class Stats {
         public int translateableProperties;
+
         public int translatedProperties;
+
+        /**
+         * Were already translated, but translation source had changed.
+         */
+        public int retranslatedProperties;
+
+        /**
+         * Properties that have manually been modified after translation, but were now changed to automatic translation
+         * because of a change in the source. -> manual care is needed.
+         * Also count as {@link #retranslatedProperties}.
+         */
+        public int modifiedButRetranslatedProperties;
+
         public int paths;
+
         public int relocatedPaths;
 
         @Override
@@ -38,6 +53,8 @@ public interface AutoPageTranslateService {
             return "Stats{" +
                     "translateableProperties=" + translateableProperties +
                     ", translatedProperties=" + translatedProperties +
+                    ", retranslatedProperties=" + retranslatedProperties +
+                    ", modifiedButRetranslatedProperties=" + modifiedButRetranslatedProperties +
                     ", paths=" + paths +
                     ", relocatedPaths=" + relocatedPaths +
                     '}';

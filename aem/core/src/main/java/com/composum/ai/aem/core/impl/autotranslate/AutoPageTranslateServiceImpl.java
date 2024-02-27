@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -110,7 +111,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
 
         List<String> valuesToTranslate = propertiesToTranslate.stream()
-                .map(p -> p.resource.getValueMap().get(p.propertyName, String.class))
+                .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))
                 .collect(Collectors.toList());
         String language = SelectorUtils.findLanguage(resource);
         String languageName = SelectorUtils.getLanguageName(language);
@@ -128,8 +129,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 //                continue; // not quite sure whether that's right - that could lead to multiple user alerts
 //            }
             String propertyName = propertyToTranslate.propertyName;
-            Resource resourceToTranslate = propertyToTranslate.resource;
-            LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.resource.getPath(), translatedValue);
+            Resource resourceToTranslate = propertyToTranslate.targetResource;
+            LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.targetResource.getPath(), translatedValue);
             ModifiableValueMap valueMap = requireNonNull(resourceToTranslate.adaptTo(ModifiableValueMap.class));
             valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), originalValue);
             valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
@@ -288,20 +289,39 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Searches for properties we have to translate.
      */
-    protected void collectPropertiesToTranslate(Resource resource, List<PropertyToTranslate> propertiesToTranslate, Stats stats, AutoTranslateService.TranslationParameters translationParameters) {
-        ValueMap valueMap = resource.getValueMap();
-        for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+    protected void collectPropertiesToTranslate(
+            @Nonnull Resource resource, @Nonnull List<PropertyToTranslate> propertiesToTranslate, @Nonnull Stats stats,
+            @Nonnull AutoTranslateService.TranslationParameters translationParameters) throws WCMException {
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        String sourcePath = relationship.getSourcePath();
+        Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
+        // TODO check variants wrt. rollout
+        ValueMap sourceValueMap = sourceResource.getValueMap();
+        ValueMap targetValueMap = resource.getValueMap();
+        for (Map.Entry<String, Object> entry : sourceValueMap.entrySet()) {
             if (isTranslatableProperty(entry.getKey(), entry.getValue())) {
                 stats.translateableProperties++;
-                if (!valueMap.containsKey(encodePropertyName(AI_PREFIX, entry.getKey(), AI_ORIGINAL_SUFFIX))) {
+                String originallyTranslatedValue = targetValueMap.get(encodePropertyName(AI_PREFIX, entry.getKey(), AI_ORIGINAL_SUFFIX), String.class);
+                boolean alreadyTranslated = originallyTranslatedValue != null;
+                boolean addProperty = !alreadyTranslated;
+                if (alreadyTranslated && translationParameters.translateWhenChanged) {
+                    addProperty = !StringUtils.equals(originallyTranslatedValue, sourceValueMap.get(entry.getKey(), String.class));
+                    if (addProperty) {
+                        LOG.debug("Re-translating because of change: {} in {}", entry.getKey(), resource.getPath());
+                    }
+                }
+                if (addProperty) {
                     PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
-                    propertyToTranslate.resource = resource;
+                    propertyToTranslate.sourceResource = sourceResource;
+                    propertyToTranslate.targetResource = resource;
                     propertyToTranslate.propertyName = entry.getKey();
                     propertiesToTranslate.add(propertyToTranslate);
                 }
             }
         }
-        resource.getChildren().forEach(child -> collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters));
+        for (Resource child : resource.getChildren()) {
+            collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters);
+        }
     }
 
     /**
@@ -361,12 +381,29 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
 
     protected static class PropertyToTranslate {
-        private Resource resource;
+        /**
+         * The resource where we take the translation source from. Can be the {@link #targetResource} but
+         * also the source of a live copy.
+         */
+        private Resource sourceResource;
+        /**
+         * The resource where we write the translation.
+         */
+        private Resource targetResource;
         private String propertyName;
 
         @Override
         public String toString() {
-            return resource.getPath() + "/" + propertyName;
+            StringBuilder sb = new StringBuilder();
+            sb.append(targetResource != null ? targetResource.getPath() : "null");
+            sb.append("/");
+            sb.append(propertyName);
+            if (sourceResource != null && targetResource != null && !sourceResource.getPath().equals(targetResource.getPath())) {
+                sb.append(" (from ");
+                sb.append(sourceResource.getPath());
+                sb.append(")");
+            }
+            return sb.toString();
         }
     }
 

@@ -26,24 +26,29 @@ public class AutoTranslateListModel {
     @Self
     private SlingHttpServletRequest request;
 
+    private AutoTranslateService.TranslationRun run;
+
 
     public List<AutoTranslateService.TranslationRun> getTranslationRuns() {
         return autoTranslateService.getTranslationRuns();
     }
 
     public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
-        String path = request.getParameter("path");
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("path parameter is required");
+        if (run == null) {
+            String path = request.getParameter("path");
+            if (path == null || path.isEmpty()) {
+                throw new IllegalArgumentException("path parameter is required");
+            }
+            path = path.replaceAll("_jcr_content", "jcr:content").trim();
+            boolean recursive = request.getParameter("recursive") != null;
+            boolean changed = request.getParameter("translateWhenChanged") != null;
+            GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
+            AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
+            parms.recursive = recursive;
+            parms.translateWhenChanged = changed;
+            run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms, configuration);
         }
-        path = path.replaceAll("_jcr_content", "jcr:content").trim();
-        boolean recursive = request.getParameter("recursive") != null;
-        boolean changed = request.getParameter("changed") != null;
-        GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
-        AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
-        parms.recursive = recursive;
-        parms.changed = changed;
-        return autoTranslateService.startTranslation(request.getResourceResolver(), path, parms, configuration);
+        return run;
     }
 
     public String rollback() throws WCMException, PersistenceException {
@@ -55,7 +60,7 @@ public class AutoTranslateListModel {
         Resource resource = request.getResourceResolver().getResource(path);
         autoTranslateService.rollback(resource);
         request.getResourceResolver().commit();
-        return "rolled back";
+        return "rolled back for " + path;
     }
 
 }

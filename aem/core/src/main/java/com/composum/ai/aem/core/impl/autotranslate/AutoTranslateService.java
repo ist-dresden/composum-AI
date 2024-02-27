@@ -42,7 +42,7 @@ public interface AutoTranslateService {
         /**
          * Also re-translate properties where the original was changed.
          */
-        public boolean changed;
+        public boolean translateWhenChanged;
     }
 
     public static abstract class TranslationRun {
