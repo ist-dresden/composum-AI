@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +33,15 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.day.crx.JcrConstants;
 
 
@@ -59,6 +66,9 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     protected static final Pattern EXPERIENCEFRAGMENT_TYPES = Pattern.compile("core/wcm/components/experiencefragment/v./experiencefragment");
 
     protected static final Pattern CONTENTFRAGMENT_TYPES = Pattern.compile("core/wcm/components/contentfragment/v./contentfragment");
+
+    @Reference
+    private LiveRelationshipManager liveRelationshipManager;
 
     @Override
     public @Nonnull PluginResult maybeHandle(
@@ -225,7 +235,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         return false;
     }
 
-    private void renderReferencedContentFragment(
+    protected void renderReferencedContentFragment(
             Resource resource, PrintWriter out, ApproximateMarkdownService service,
             Resource referencedResource, String variation, String reference, String[] elementNames) {
         Resource dataNode = referencedResource.getChild("jcr:content/data");
@@ -392,4 +402,29 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
         return outputStream.toByteArray();
     }
 
+    @Nonnull
+    @Override
+    public Collection<ApproximateMarkdownService.Link> getMasterLinks(Resource resource) {
+        if (resource == null) {
+            return Collections.emptyList();
+        }
+        try {
+            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, false);
+            if (liveRelationship != null) {
+                String masterPath = liveRelationship.getSourcePath();
+                Resource master = masterPath != null ? resource.getResourceResolver().getResource(masterPath) : null;
+                if (master != null) {
+                    ApproximateMarkdownService.Link componentLink =
+                            new ApproximateMarkdownService.Link(master.getPath(), "Text in livecopy blueprint", false);
+                    String pagePath = masterPath.substring(0, masterPath.lastIndexOf("/jcr:content") + 12);
+                    ApproximateMarkdownService.Link pageLink =
+                            new ApproximateMarkdownService.Link(pagePath, "Blueprint Page", false);
+                    return Arrays.asList(componentLink, pageLink);
+                }
+            }
+        } catch (WCMException e) {
+            LOG.error("Cannot get live relationships of " + resource.getPath(), e);
+        }
+        return Collections.emptyList();
+    }
 }

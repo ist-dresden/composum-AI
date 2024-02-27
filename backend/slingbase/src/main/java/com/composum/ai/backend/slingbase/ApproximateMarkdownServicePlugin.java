@@ -1,6 +1,8 @@
 package com.composum.ai.backend.slingbase;
 
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -65,6 +67,14 @@ public interface ApproximateMarkdownServicePlugin {
             component = component.getResourceResolver().getResource(supertype);
         }
         return false;
+    }
+
+    /**
+     * If applicable: this returns links to the master from which the current page was created - e.g. an AEM live copy.
+     */
+    @Nonnull
+    default Collection<? extends ApproximateMarkdownService.Link> getMasterLinks(Resource resource) {
+        return Collections.emptyList();
     }
 
 }

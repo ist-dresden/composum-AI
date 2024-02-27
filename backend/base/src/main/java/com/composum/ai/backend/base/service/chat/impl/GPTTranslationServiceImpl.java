@@ -294,14 +294,14 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
-        String addition = "";
+        String addition = configuration.getAdditionalInstructions() != null ? "\n\n" + configuration.getAdditionalInstructions() : "";
         if (configuration != null && configuration.isHtml()) {
             Matcher m = HTML_TAG_AT_START.matcher(text);
             String firstTag = "<p>";
             if (m.find()) {
                 firstTag = m.group(1);
             }
-            addition = "Output HTML; start the translation with " + firstTag;
+            addition += (addition.isEmpty() ? "" : "\n\n") + "Output HTML; start the translation with " + firstTag;
         }
         List<GPTChatMessage> messages = template.getMessages(
                 ImmutableMap.of("sourcelanguage", sourceLanguage != null ? sourceLanguage : "guess it from the text",

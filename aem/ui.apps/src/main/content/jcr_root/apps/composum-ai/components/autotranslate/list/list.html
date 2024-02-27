@@ -16,8 +16,14 @@
                     <label class="form-check-label" for="translateWhenChanged">Re-translate changed values</label>
                 </div>
             </div>
+            <!-- a text area with additional system instructions. -->
+            <div class="form-group">
+                <label for="additionalInstructions">Optionally, additional instructions:</label> <br/>
+                <textarea class="form-control" id="additionalInstructions" name="additionalInstructions" rows="3" cols="80"></textarea>
+            </div>
             <button type="submit" class="btn btn-primary">Start Translation Process</button>
         </form>
+        <hr>
         <table class="table mt-3">
             <thead class="thead-dark">
                 <tr>
@@ -35,7 +41,7 @@
         <hr>
         <form action="/apps/composum-ai/components/autotranslate/list.rollback.html" method="GET">
             <div class="form-group">
-                <label for="path">Rollback Path:</label>
+                <label for="path">Rollback for path:</label>
                 <input type="text" class="form-control" id="path" name="path" required size="80">
             </div>
             <button type="submit" class="btn btn-primary">Rollback Translation Results</button>

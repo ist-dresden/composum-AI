@@ -43,6 +43,10 @@ public interface AutoTranslateService {
          * Also re-translate properties where the original was changed.
          */
         public boolean translateWhenChanged;
+        /**
+         * Optionally, additional instructions to add to the system prompt.
+         */
+        public String additionalInstructions;
     }
 
     public static abstract class TranslationRun {

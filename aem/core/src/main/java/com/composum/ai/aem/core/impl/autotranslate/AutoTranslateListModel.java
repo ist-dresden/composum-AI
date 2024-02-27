@@ -42,10 +42,12 @@ public class AutoTranslateListModel {
             path = path.replaceAll("_jcr_content", "jcr:content").trim();
             boolean recursive = request.getParameter("recursive") != null;
             boolean changed = request.getParameter("translateWhenChanged") != null;
+            String additionalInstructions = request.getParameter("additionalInstructions");
             GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             parms.recursive = recursive;
             parms.translateWhenChanged = changed;
+            parms.additionalInstructions = additionalInstructions;
             run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms, configuration);
         }
         return run;

@@ -33,10 +33,17 @@ public class GPTConfiguration {
 
     private final AnswerType answerType;
 
+    private final String additionalInstructions;
+
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
+        this(apiKey, organizationId, answerType, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
+        this.additionalInstructions = additionalInstructions;
     }
 
     /**
@@ -58,6 +65,13 @@ public class GPTConfiguration {
      */
     public AnswerType getAnswerType() {
         return answerType;
+    }
+
+    /**
+     * Optionally, additional instructions to add to the system prompt.
+     */
+    public String getAdditionalInstructions() {
+        return additionalInstructions;
     }
 
     public boolean isHtml() {
@@ -85,7 +99,9 @@ public class GPTConfiguration {
         if (this.answerType != null && other.answerType != null && !this.answerType.equals(other.answerType)) {
             throw new IllegalArgumentException("Cannot merge conflicting answer types: " + this.answerType + " vs. " + other.answerType);
         }
-        return new GPTConfiguration(apiKey, organizationId, answerType);
+        String additionalInstructions = this.additionalInstructions == null ? other.additionalInstructions :
+                other.additionalInstructions == null ? this.additionalInstructions : this.additionalInstructions + "\n\n" + other.additionalInstructions;
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions);
     }
 
     /**
