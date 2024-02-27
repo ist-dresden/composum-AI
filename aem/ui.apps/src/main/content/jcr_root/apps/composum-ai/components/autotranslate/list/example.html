@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Translation Processes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+    <sly data-sly-call="${clientLib.all @ categories='coralui3'}"></sly>
+    <sly data-sly-call="${clientLib.all @ categories='granite.ui.foundation.content'}"></sly>
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
+        <div class="foundation-layout-panel-body">
+            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
+                <div class="cq-dialog-content-page">
+                    <form id="cq-sites-properties-form"
+                          class="coral-Form coral-Form--vertical foundation-form">
+                        <div class="coral-FixedColumn">
+                            <div class="coral-FixedColumn-column">
+                                <section class="coral-Form-fieldset"><h2
+                                            id="label_f3ba4f45-96f3-4315-89cc-cd1ebab6be5e"
+                                            class="coral-Form-fieldset-legend">Title and Tags</h2>
+                                    <div class="foundation-field-editable"><span
+                                                class="foundation-field-readonly coral-Form-fieldwrapper"><label
+                                                    class="coral-Form-fieldlabel">Title</label><span
+                                                    class="coral-Form-field foundation-layout-util-breakword">About Us</span></span>
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_f3ba4f45-96f3-4315-89cc-cd1ebab6be5e"
+                                                   class="coral-Form-fieldlabel">Title *</label><input
+                                                    class="coral-Form-field _coral-Textfield"
+                                                    data-cq-msm-lockable="jcr:title" type="text"
+                                                    name="./jcr:title"
+                                                    labelledby="label_f3ba4f45-96f3-4315-89cc-cd1ebab6be5e description_c4321ee0-0b09-49cf-86f1-be70196988d9"
+                                                    value="About Us" aria-required="true"
+                                                    data-foundation-validation="" data-validation=""
+                                                    is="coral-textfield" id="coral-id-3"
+                                                    aria-labelledby="label_f3ba4f45-96f3-4315-89cc-cd1ebab6be5e description_c4321ee0-0b09-49cf-86f1-be70196988d9"
+                                                    variant="default">
+                                            <coral-icon
+                                                    class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS"
+                                                    icon="infoCircle" tabindex="0"
+                                                    aria-describedby="description_c4321ee0-0b09-49cf-86f1-be70196988d9"
+                                                    alt="description" role="img"
+                                                    aria-label="description" size="S">
+                                                <svg focusable="false" aria-hidden="true"
+                                                     class="_coral-Icon--svg _coral-Icon">
+                                                    <use xlink:href="#spectrum-icon-18-Info"></use>
+                                                </svg>
+                                            </coral-icon>
+                                            <coral-tooltip target="_prev" placement="left"
+                                                           id="description_c4321ee0-0b09-49cf-86f1-be70196988d9"
+                                                           x-placement="left"
+                                                           class="_coral-Overlay _coral-Tooltip _coral-Tooltip--default _coral-Tooltip--left"
+                                                           role="tooltip" tabindex="-1"
+                                                           variant="default"
+                                                           style="position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(475px, 6px, 0px);">
+                                                <span class=" _coral-Tooltip-tip" handle="tip"></span>
+                                                <coral-tooltip-content class="_coral-Tooltip-label">
+                                                    Defines the page meta title for SEO, as well as a
+                                                    title displayable in the page content (unless an
+                                                    overriding 'Page Title' is defined).
+                                                </coral-tooltip-content>
+                                            </coral-tooltip>
+                                        </div>
+                                    </div>
+                                    <input class="msm-config-endpoint" type="hidden"
+                                           value="/content/wknd/language-masters/en/about-us">
+                                    <div class="coral-Form-fieldwrapper"><label
+                                                id="label_cb79051b-b182-4c47-983f-19f274e61af7"
+                                                class="coral-Form-fieldlabel"
+                                                for="coral-id-5">Tags</label>
+                                        <foundation-autocomplete class="coral-Form-field cq-ui-tagfield"
+                                                                 data-cq-msm-lockable="cq:tags"
+                                                                 name="./cq:tags" multiple=""
+                                                                 pickersrc="/mnt/overlay/cq/gui/content/coral/common/form/tagfield/picker.html?root=%2fcontent%2fcq%3atags&amp;selectionCount=multiple"
+                                                                 labelledby="label_cb79051b-b182-4c47-983f-19f274e61af7 description_cb79051b-b182-4c47-983f-19f274e61af7"
+                                                                 valuedisplaymode="block"
+                                                                 data-foundation-validation=""
+                                                                 data-cq-ui-tagfield-create-action="/mnt/overlay/wcm/foundation/components/basicpage/v1/basicpage/tabs/basic/items/column/items/title/items/tags">
+                                            <div class="foundation-autocomplete-inputgroupwrapper">
+                                                <div class="coral-InputGroup" role="presentation"><input
+                                                            is="coral-textfield"
+                                                            class="coral-InputGroup-input _coral-Textfield"
+                                                            autocomplete="off" placeholder=""
+                                                            id="coral-id-5"
+                                                            aria-labelledby="label_cb79051b-b182-4c47-983f-19f274e61af7 description_cb79051b-b182-4c47-983f-19f274e61af7"
+                                                            role="combobox" aria-expanded="false"
+                                                            variant="default"
+                                                            labelledby="label_cb79051b-b182-4c47-983f-19f274e61af7 description_cb79051b-b182-4c47-983f-19f274e61af7"><span
+                                                            class="coral-InputGroup-button"><button
+                                                                is="coral-button"
+                                                                title="Open Selection Dialog"
+                                                                type="button"
+                                                                aria-label="Open Selection Dialog"
+                                                                variant="default"
+                                                                class="_coral-Button _coral-Button--primary"
+                                                                size="M"><coral-icon size="S"
+                                                                                     class="_coral-Icon--sizeS _coral-Icon"
+                                                                                     role="img"
+                                                                                     icon="FolderOpenOutline"
+                                                                                     aria-hidden="true">
+      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon">
+        <use xlink:href="#spectrum-icon-18-FolderOpenOutline"></use>
+      </svg>
+    </coral-icon><coral-button-label class="_coral-Button-label"></coral-button-label></button></span></div>
+                                            </div>
+                                            <coral-overlay foundation-autocomplete-suggestion=""
+                                                           class="foundation-picker-buttonlist _coral-Overlay"
+                                                           data-foundation-picker-buttonlist-src="/mnt/overlay/cq/gui/content/coral/common/form/tagfield/suggestion{.offset,limit}.html?root=%2fcontent%2fcq%3atags{&amp;query}"
+                                                           style="display: none; visibility: visible;"></coral-overlay>
+                                            <coral-taglist foundation-autocomplete-value=""
+                                                           name="./cq:tags" class="_coral-Tags"
+                                                           role="grid" aria-live="off"
+                                                           aria-atomic="false"
+                                                           aria-relevant="additions">
+                                                <coral-tag multiline=""
+                                                           value="wknd:customer-journey/engage" color=""
+                                                           size="M" role="row" tabindex="0" closable=""
+                                                           class="_coral-Tags-item _coral-Tags-item--deletable _coral-Tags-item--multiline"
+                                                           aria-labelledby="coral-id-6">
+                                                    <coral-tag-label role="rowheader" id="coral-id-6"
+                                                                     class="_coral-Tags-itemLabel">WKND
+                                                        : Customer Journey / Engage
+                                                    </coral-tag-label>
+                                                    <input type="hidden" handle="input" name="./cq:tags"
+                                                           value="wknd:customer-journey/engage"><span
+                                                            handle="buttonCell" role="gridcell">
+  <button is="coral-button" tracking="off" handle="button" type="button" variant="_custom"
+          class=" _coral-ClearButton _coral-ClearButton--small _coral-Tags-item-removeButton" title="Remove"
+          tabindex="0" coral-close="" size="M" aria-label="Remove: WKND : Customer Journey / Engage">
+      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon _coral-UIIcon-CrossSmall">
+        <use xlink:href="#spectrum-css-icon-CrossSmall"></use>
+      </svg>
+    <coral-button-label handle="buttonLabel"></coral-button-label></button>
+</span></coral-tag>
+                                                <coral-tag multiline=""
+                                                           value="wknd:customer-journey/support"
+                                                           color="" size="M" role="row" tabindex="-1"
+                                                           closable=""
+                                                           class="_coral-Tags-item _coral-Tags-item--deletable _coral-Tags-item--multiline"
+                                                           aria-labelledby="coral-id-7">
+                                                    <coral-tag-label role="rowheader" id="coral-id-7"
+                                                                     class="_coral-Tags-itemLabel">WKND
+                                                        : Customer Journey / Support
+                                                    </coral-tag-label>
+                                                    <input type="hidden" handle="input" name="./cq:tags"
+                                                           value="wknd:customer-journey/support"><span
+                                                            handle="buttonCell" role="gridcell">
+  <button is="coral-button" tracking="off" handle="button" type="button" variant="_custom"
+          class=" _coral-ClearButton _coral-ClearButton--small _coral-Tags-item-removeButton" title="Remove"
+          tabindex="0" coral-close="" size="M" aria-label="Remove: WKND : Customer Journey / Support">
+      <svg focusable="false" aria-hidden="true" class="_coral-Icon--svg _coral-Icon _coral-UIIcon-CrossSmall">
+        <use xlink:href="#spectrum-css-icon-CrossSmall"></use>
+      </svg>
+    <coral-button-label handle="buttonLabel"></coral-button-label></button>
+</span></coral-tag>
+                                            </coral-taglist>
+                                            <input class="foundation-field-related" type="hidden"
+                                                   name="./cq:tags@TypeHint" value="String[]"><input
+                                                    class="foundation-field-related" type="hidden"
+                                                    name="./cq:tags@Delete">
+                                            <script src="/libs/cq/gui/components/coral/common/form/tagfield/clientlibs/tagfield.lc-a6e69373fd6c23d6212b4176f03f527e-lc.js"></script>
+                                        </foundation-autocomplete>
+                                        <coral-icon
+                                                class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS"
+                                                icon="infoCircle" tabindex="0"
+                                                aria-describedby="description_cb79051b-b182-4c47-983f-19f274e61af7"
+                                                alt="description" role="img" aria-label="description"
+                                                size="S">
+                                            <svg focusable="false" aria-hidden="true"
+                                                 class="_coral-Icon--svg _coral-Icon">
+                                                <use xlink:href="#spectrum-icon-18-Info"></use>
+                                            </svg>
+                                        </coral-icon>
+                                        <coral-tooltip target="_prev" placement="left"
+                                                       id="description_cb79051b-b182-4c47-983f-19f274e61af7"
+                                                       x-placement="left"
+                                                       style="position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(475px, 6px, 0px);"
+                                                       class="_coral-Overlay _coral-Tooltip _coral-Tooltip--default _coral-Tooltip--left"
+                                                       role="tooltip" tabindex="-1" variant="default">
+                                            <span class=" _coral-Tooltip-tip" handle="tip"></span>
+                                            <coral-tooltip-content class="_coral-Tooltip-label">Defines
+                                                the page meta tags for SEO.
+                                            </coral-tooltip-content>
+                                        </coral-tooltip>
+                                    </div>
+                                    <div class="foundation-field-editable">
+                                        <div class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                                            <coral-checkbox data-cq-msm-lockable="hideInNav"
+                                                            data-allowbulkedit="true" name="./hideInNav"
+                                                            value="true" data-foundation-validation=""
+                                                            data-validation=""
+                                                            class="coral-Form-field _coral-Checkbox">
+                                                <input type="checkbox" handle="input"
+                                                       class=" _coral-Checkbox-input" id="coral-id-18"
+                                                       name="./hideInNav" value="true"><span
+                                                        class=" _coral-Checkbox-box" handle="checkbox">
+      <svg focusable="false" aria-hidden="true"
+           class="_coral-Icon--svg _coral-Icon _coral-Checkbox-checkmark _coral-UIIcon-CheckmarkSmall">
+        <use xlink:href="#spectrum-css-icon-CheckmarkSmall"></use>
+      </svg>
+      <svg focusable="false" aria-hidden="true"
+           class="_coral-Icon--svg _coral-Icon _coral-Checkbox-partialCheckmark _coral-UIIcon-DashSmall">
+        <use xlink:href="#spectrum-css-icon-DashSmall"></use>
+      </svg>
+</span><label class=" _coral-Checkbox-label" handle="labelWrapper" for="coral-id-18">
+                                                                    <span class=" u-coral-screenReaderOnly"
+                                                                          handle="screenReaderOnly"
+                                                                          hidden="">Select</span>
+                                                    <coral-checkbox-label>Hide in Navigation
+                                                    </coral-checkbox-label>
+                                                </label></coral-checkbox>
+                                            <input class="foundation-field-related" type="hidden"
+                                                   name="./hideInNav@Delete"></div>
+                                    </div>
+                                    <input type="hidden" name="_charset_" value="utf-8">
+                                </section>
+                                <section class="coral-Form-fieldset"><h2
+                                            id="label_a3121987-1c39-4df0-a35e-6ebd7617d589"
+                                            class="coral-Form-fieldset-legend">Branding</h2>
+                                    <div class="coral-Form-fieldwrapper">
+                                        <section class="cq-siteadmin-admin-properties-basic-brandSlug">
+                                            <label class="coral-Form-fieldlabel">Brand Slug</label>
+                                            <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                                <coral-checkbox name="./brandSlug_override" value="true"
+                                                                class="_coral-Checkbox"><input
+                                                            type="checkbox" handle="input"
+                                                            class=" _coral-Checkbox-input"
+                                                            id="coral-id-19" name="./brandSlug_override"
+                                                            value="true"><span
+                                                            class=" _coral-Checkbox-box"
+                                                            handle="checkbox">
+      <svg focusable="false" aria-hidden="true"
+           class="_coral-Icon--svg _coral-Icon _coral-Checkbox-checkmark _coral-UIIcon-CheckmarkSmall">
+        <use xlink:href="#spectrum-css-icon-CheckmarkSmall"></use>
+      </svg>
+      <svg focusable="false" aria-hidden="true"
+           class="_coral-Icon--svg _coral-Icon _coral-Checkbox-partialCheckmark _coral-UIIcon-DashSmall">
+        <use xlink:href="#spectrum-css-icon-DashSmall"></use>
+      </svg>
+</span><label class=" _coral-Checkbox-label" handle="labelWrapper" for="coral-id-19">
+                                                                        <span class=" u-coral-screenReaderOnly"
+                                                                              handle="screenReaderOnly"
+                                                                              hidden="">Select</span>
+                                                        <coral-checkbox-label>
+                                                            Override:
+                                                        </coral-checkbox-label>
+                                                    </label></coral-checkbox>
+                                                <input type="hidden" name="./brandSlug_override@Delete"
+                                                       value="">
+                                                <input is="coral-textfield" placeholder="Override Value"
+                                                       name="./brandSlug" disabled=""
+                                                       class="_coral-Textfield" variant="default">
+                                            </div>
+                                        </section>
+                                    </div>
+                                </section>
+                                <section class="coral-Form-fieldset"><h2
+                                            id="label_19626153-3dd8-4864-899f-c67bab0b74b4"
+                                            class="coral-Form-fieldset-legend">HTML ID</h2>
+                                    <div class="coral-Form-fieldwrapper"><label
+                                                id="label_19626153-3dd8-4864-899f-c67bab0b74b4"
+                                                class="coral-Form-fieldlabel">ID</label><input
+                                                class="coral-Form-field _coral-Textfield" type="text"
+                                                name="./id"
+                                                labelledby="label_19626153-3dd8-4864-899f-c67bab0b74b4 description_2ae2603c-fe3c-4f4d-88f2-0b97aa3825e5"
+                                                data-foundation-validation="html-unique-id-validator"
+                                                data-validation="html-unique-id-validator"
+                                                is="coral-textfield" id="coral-id-20"
+                                                aria-labelledby="label_19626153-3dd8-4864-899f-c67bab0b74b4 description_2ae2603c-fe3c-4f4d-88f2-0b97aa3825e5"
+                                                variant="default">
+                                        <coral-icon
+                                                class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS"
+                                                icon="infoCircle" tabindex="0"
+                                                aria-describedby="description_2ae2603c-fe3c-4f4d-88f2-0b97aa3825e5"
+                                                alt="description" role="img" aria-label="description"
+                                                size="S">
+                                            <svg focusable="false" aria-hidden="true"
+                                                 class="_coral-Icon--svg _coral-Icon">
+                                                <use xlink:href="#spectrum-icon-18-Info"></use>
+                                            </svg>
+                                        </coral-icon>
+                                        <coral-tooltip target="_prev" placement="left"
+                                                       id="description_2ae2603c-fe3c-4f4d-88f2-0b97aa3825e5"
+                                                       x-placement="left"
+                                                       style="position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(475px, 6px, 0px);"
+                                                       class="_coral-Overlay _coral-Tooltip _coral-Tooltip--default _coral-Tooltip--left"
+                                                       role="tooltip" tabindex="-1" variant="default">
+                                            <span class=" _coral-Tooltip-tip" handle="tip"></span>
+                                            <coral-tooltip-content class="_coral-Tooltip-label">HTML ID
+                                                attribute to apply to the component.
+                                            </coral-tooltip-content>
+                                        </coral-tooltip>
+                                    </div>
+                                </section>
+                                <section class="coral-Form-fieldset"><h2
+                                            id="label_aba1ece2-67e4-413f-a7f3-3cbd21e8f4ac"
+                                            class="coral-Form-fieldset-legend">More Titles and
+                                        Description</h2>
+                                    <div class="foundation-field-editable">
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_aba1ece2-67e4-413f-a7f3-3cbd21e8f4ac"
+                                                   class="coral-Form-fieldlabel">Page
+                                                Title</label><input
+                                                    class="coral-Form-field _coral-Textfield"
+                                                    data-cq-msm-lockable="pageTitle"
+                                                    data-allowbulkedit="true" type="text"
+                                                    name="./pageTitle"
+                                                    labelledby="label_aba1ece2-67e4-413f-a7f3-3cbd21e8f4ac description_0079458e-1f4a-401c-b90b-d3191a9e90ef"
+                                                    data-foundation-validation="" data-validation=""
+                                                    is="coral-textfield" id="coral-id-22"
+                                                    aria-labelledby="label_aba1ece2-67e4-413f-a7f3-3cbd21e8f4ac description_0079458e-1f4a-401c-b90b-d3191a9e90ef"
+                                                    variant="default">
+                                            <coral-icon
+                                                    class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS"
+                                                    icon="infoCircle" tabindex="0"
+                                                    aria-describedby="description_0079458e-1f4a-401c-b90b-d3191a9e90ef"
+                                                    alt="description" role="img"
+                                                    aria-label="description" size="S">
+                                                <svg focusable="false" aria-hidden="true"
+                                                     class="_coral-Icon--svg _coral-Icon">
+                                                    <use xlink:href="#spectrum-icon-18-Info"></use>
+                                                </svg>
+                                            </coral-icon>
+                                            <coral-tooltip target="_prev" placement="left"
+                                                           id="description_0079458e-1f4a-401c-b90b-d3191a9e90ef"
+                                                           x-placement="left"
+                                                           style="position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(475px, 6px, 0px);"
+                                                           class="_coral-Overlay _coral-Tooltip _coral-Tooltip--default _coral-Tooltip--left"
+                                                           role="tooltip" tabindex="-1"
+                                                           variant="default">
+                                                <span class=" _coral-Tooltip-tip" handle="tip"></span>
+                                                <coral-tooltip-content class="_coral-Tooltip-label">
+                                                    Defines a page title that is displayable in the page
+                                                    content, instead of the 'Title'.
+                                                </coral-tooltip-content>
+                                            </coral-tooltip>
+                                        </div>
+                                    </div>
+                                    <div class="foundation-field-editable">
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_6b74622c-14cb-4802-bc61-41b0e80da678"
+                                                   class="coral-Form-fieldlabel" for="coral-id-24">Navigation
+                                                Title</label><input
+                                                    class="coral-Form-field _coral-Textfield"
+                                                    data-cq-msm-lockable="navTitle"
+                                                    data-allowbulkedit="true" type="text"
+                                                    name="./navTitle"
+                                                    labelledby="label_6b74622c-14cb-4802-bc61-41b0e80da678 description_6b74622c-14cb-4802-bc61-41b0e80da678"
+                                                    data-foundation-validation="" data-validation=""
+                                                    is="coral-textfield" id="coral-id-24"
+                                                    aria-labelledby="label_6b74622c-14cb-4802-bc61-41b0e80da678 description_6b74622c-14cb-4802-bc61-41b0e80da678"
+                                                    variant="default">
+                                            <coral-icon
+                                                    class="coral-Form-fieldinfo _coral-Icon _coral-Icon--sizeS"
+                                                    icon="infoCircle" tabindex="0"
+                                                    aria-describedby="description_6b74622c-14cb-4802-bc61-41b0e80da678"
+                                                    alt="description" role="img"
+                                                    aria-label="description" size="S">
+                                                <svg focusable="false" aria-hidden="true"
+                                                     class="_coral-Icon--svg _coral-Icon">
+                                                    <use xlink:href="#spectrum-icon-18-Info"></use>
+                                                </svg>
+                                            </coral-icon>
+                                            <coral-tooltip target="_prev" placement="left"
+                                                           id="description_6b74622c-14cb-4802-bc61-41b0e80da678"
+                                                           x-placement="left"
+                                                           style="position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(475px, 6px, 0px);"
+                                                           class="_coral-Overlay _coral-Tooltip _coral-Tooltip--default _coral-Tooltip--left"
+                                                           role="tooltip" tabindex="-1"
+                                                           variant="default">
+                                                <span class=" _coral-Tooltip-tip" handle="tip"></span>
+                                                <coral-tooltip-content class="_coral-Tooltip-label">
+                                                    Defines a navigation title that is displayed in site
+                                                    navigation menus, instead of the 'Page Title' or
+                                                    'Title'.
+                                                </coral-tooltip-content>
+                                            </coral-tooltip>
+                                        </div>
+                                    </div>
+                                    <div class="foundation-field-editable">
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_eccfaae3-5d2b-4afd-8d5e-92083aa8148f"
+                                                   class="coral-Form-fieldlabel"
+                                                   for="coral-id-26">Subtitle</label><input
+                                                    class="coral-Form-field _coral-Textfield"
+                                                    data-cq-msm-lockable="subtitle"
+                                                    data-allowbulkedit="true" type="text"
+                                                    name="./subtitle"
+                                                    labelledby="label_eccfaae3-5d2b-4afd-8d5e-92083aa8148f"
+                                                    data-foundation-validation="" data-validation=""
+                                                    is="coral-textfield" id="coral-id-26"
+                                                    aria-labelledby="label_eccfaae3-5d2b-4afd-8d5e-92083aa8148f"
+                                                    variant="default"></div>
+                                    </div>
+                                    <div class="foundation-field-editable"><span
+                                                class="foundation-field-readonly coral-Form-fieldwrapper"><label
+                                                    class="coral-Form-fieldlabel">Description</label><span
+                                                    class="coral-Form-field foundation-layout-util-breakword">WKND is a collective of outdoors, music, crafts, adventure sports, and travel enthusiasts that want to share our experiences, connections, and expertise with the world. </span></span>
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_3d997219-8a76-4b2c-bee1-7976fe5ca6f6"
+                                                   class="coral-Form-fieldlabel"
+                                                   for="coral-id-27">Description</label><textarea
+                                                    class="coral-Form-field foundation-layout-util-resizable-none _coral-Textfield _coral-Textfield--multiline"
+                                                    data-cq-msm-lockable="jcr:description"
+                                                    data-allowbulkedit="true" name="./jcr:description"
+                                                    rows="5"
+                                                    labelledby="label_3d997219-8a76-4b2c-bee1-7976fe5ca6f6"
+                                                    data-foundation-validation="" data-validation=""
+                                                    is="coral-textarea" id="coral-id-27"
+                                                    aria-labelledby="label_3d997219-8a76-4b2c-bee1-7976fe5ca6f6"
+                                                    variant="default" data-comp-ai-iconsadded="true">WKND is a collective of outdoors, music, crafts, adventure sports, and travel enthusiasts that want to share our experiences, connections, and expertise with the world. </textarea>
+                                            <coral-icon
+                                                    class="coral-Form-fieldinfo coral3-Icon coral3-Icon--gearsEdit coral3-Icon--sizeS composum-ai-create-dialog-action _coral-Icon--sizeS _coral-Icon"
+                                                    title="AI Content Creation" icon="gearsEdit"
+                                                    alt="description" size="S" autoarialabel="on"
+                                                    role="img" aria-label="description">
+                                                <svg focusable="false" aria-hidden="true"
+                                                     class="_coral-Icon--svg _coral-Icon">
+                                                    <use xlink:href="#spectrum-icon-18-GearsEdit"></use>
+                                                </svg>
+                                            </coral-icon>
+                                        </div>
+                                    </div>
+                                </section>
+                                <section class="coral-Form-fieldset"><h2
+                                            id="label_331ccfac-c60e-4f3b-9453-f03a021d5475"
+                                            class="coral-Form-fieldset-legend">On/Off Time</h2>
+                                    <div class="foundation-field-editable">
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_331ccfac-c60e-4f3b-9453-f03a021d5475"
+                                                   class="coral-Form-fieldlabel">On Time</label>
+                                            <coral-datepicker class="coral-Form-field _coral-InputGroup"
+                                                              data-cq-msm-lockable="onTime"
+                                                              data-allowbulkedit="true" type="datetime"
+                                                              name="./onTime" min="today"
+                                                              displayformat="MMMM DD, YYYY hh:mm a"
+                                                              valueformat="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
+                                                              headerformat="MMMM YYYY"
+                                                              labelledby="label_331ccfac-c60e-4f3b-9453-f03a021d5475"
+                                                              data-foundation-validation=""
+                                                              data-validation=""
+                                                              aria-labelledby="label_331ccfac-c60e-4f3b-9453-f03a021d5475"
+                                                              role="group"><input type="hidden"
+                                                                                  handle="hiddenInput"
+                                                                                  name="./onTime"
+                                                                                  value=""><input
+                                                        is="coral-textfield" tracking="off" type="text"
+                                                        handle="input"
+                                                        class="_coral-InputGroup-field _coral-Textfield"
+                                                        role="combobox" id="coral-id-40"
+                                                        aria-labelledby="label_331ccfac-c60e-4f3b-9453-f03a021d5475"
+                                                        aria-autocomplete="none" aria-haspopup="dialog"
+                                                        aria-expanded="false"
+                                                        aria-controls="coral-id-28" variant="default">
+                                                <button is="coral-button" tracking="off"
+                                                        variant="_custom"
+                                                        class=" _coral-InputGroup-button _coral-FieldButton"
+                                                        type="button" handle="toggle"
+                                                        aria-haspopup="dialog" aria-label="Calendar"
+                                                        title="Calendar" aria-expanded="false"
+                                                        aria-controls="coral-id-28" size="M">
+                                                    <coral-icon icon="calendar" role="img" iconsize="S"
+                                                                class="u-coral-noMargin _coral-Icon _coral-Icon--sizeS"
+                                                                handle="icon" size="S"
+                                                                aria-hidden="true">
+                                                        <svg focusable="false" aria-hidden="true"
+                                                             class="_coral-Icon--svg _coral-Icon">
+                                                            <use xlink:href="#spectrum-icon-18-Calendar"></use>
+                                                        </svg>
+                                                    </coral-icon>
+                                                    <coral-button-label></coral-button-label>
+                                                </button>
+                                                <coral-popover tracking="off" smart=""
+                                                               class="_coral-Datepicker-overlay _coral-Overlay _coral-Popover"
+                                                               handle="overlay" id="coral-id-28"
+                                                               breadthoffset="50%r - 50%p"
+                                                               placement="bottom"
+                                                               style="max-height: 75vh; position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(491px, -5px, 0px);"
+                                                               aria-labelledby="label_331ccfac-c60e-4f3b-9453-f03a021d5475"
+                                                               x-placement="top" role="dialog"
+                                                               aria-live="assertive" variant="default"
+                                                               closable="off" tabindex="0">
+                                                    <div handle="topTabCapture" coral-tabcapture="top"
+                                                         tabindex="0" role="presentation"></div>
+                                                    <div class=" _coral-Dialog-header"
+                                                         handle="headerWrapper" role="presentation"
+                                                         hidden="">
+                                                        <coral-popover-header
+                                                                class="_coral-Dialog-title"></coral-popover-header>
+                                                    </div>
+                                                    <button is="coral-button" tracking="off"
+                                                            handle="closeButton"
+                                                            class="_coral-Dialog-closeButton _coral-ClearButton"
+                                                            type="button" variant="_custom" icon="close"
+                                                            title="Close" tabindex="-1" coral-close=""
+                                                            size="M" style="display: none;">
+                                                        <coral-icon size="S"
+                                                                    class="_coral-Icon--sizeS _coral-Icon"
+                                                                    role="img" icon="close">
+                                                            <svg focusable="false" aria-hidden="true"
+                                                                 class="_coral-Icon--svg _coral-Icon">
+                                                                <use xlink:href="#spectrum-icon-18-Close"></use>
+                                                            </svg>
+                                                        </coral-icon>
+                                                        <coral-button-label></coral-button-label>
+                                                    </button>
+                                                    <div class=" _coral-Popover-tip" handle="tip"
+                                                         hidden=""></div>
+                                                    <coral-popover-content
+                                                            class="_coral-Dialog-content"></coral-popover-content>
+                                                    <coral-popover-footer class="_coral-Dialog-footer"
+                                                                          hidden=""></coral-popover-footer>
+                                                    <div handle="intermediateTabCapture"
+                                                         coral-tabcapture="intermediate" tabindex="0"
+                                                         role="presentation"></div>
+                                                    <div handle="bottomTabCapture"
+                                                         coral-tabcapture="bottom" tabindex="0"
+                                                         role="presentation"></div>
+                                                </coral-popover>
+                                            </coral-datepicker>
+                                            <input class="foundation-field-related" type="hidden"
+                                                   value="Date" name="./onTime@TypeHint">
+                                            <p class="granite-datepicker-timezone granite-coral-Form-fieldlongdesc"
+                                               data-granite-datepicker-timezone-server="60"
+                                               hidden="hidden">
+                                                <coral-icon icon="alert" size="XS" role="img"
+                                                            class="_coral-Icon--sizeXS _coral-Icon">
+                                                    <svg focusable="false" aria-hidden="true"
+                                                         class="_coral-Icon--svg _coral-Icon">
+                                                        <use xlink:href="#spectrum-icon-24-Alert"></use>
+                                                    </svg>
+                                                </coral-icon>
+                                                Your timezone (UTC<span
+                                                        class="granite-datepicker-timezone-client"></span>)
+                                                will be used instead of the server setting (UTC+0100)
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="foundation-field-editable">
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_937f6817-a109-48ef-8466-d3e0cd176971"
+                                                   class="coral-Form-fieldlabel" for="coral-id-137">Off
+                                                Time</label>
+                                            <coral-datepicker class="coral-Form-field _coral-InputGroup"
+                                                              data-cq-msm-lockable="offTime"
+                                                              data-allowbulkedit="true" type="datetime"
+                                                              name="./offTime" min="today"
+                                                              displayformat="MMMM DD, YYYY hh:mm a"
+                                                              valueformat="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
+                                                              headerformat="MMMM YYYY"
+                                                              labelledby="label_937f6817-a109-48ef-8466-d3e0cd176971"
+                                                              data-foundation-validation=""
+                                                              data-validation=""
+                                                              aria-labelledby="label_937f6817-a109-48ef-8466-d3e0cd176971"
+                                                              role="group"><input type="hidden"
+                                                                                  handle="hiddenInput"
+                                                                                  name="./offTime"
+                                                                                  value=""><input
+                                                        is="coral-textfield" tracking="off" type="text"
+                                                        handle="input"
+                                                        class="_coral-InputGroup-field _coral-Textfield"
+                                                        role="combobox" id="coral-id-137"
+                                                        aria-labelledby="label_937f6817-a109-48ef-8466-d3e0cd176971"
+                                                        aria-autocomplete="none" aria-haspopup="dialog"
+                                                        aria-expanded="false"
+                                                        aria-controls="coral-id-125" variant="default">
+                                                <button is="coral-button" tracking="off"
+                                                        variant="_custom"
+                                                        class=" _coral-InputGroup-button _coral-FieldButton"
+                                                        type="button" handle="toggle"
+                                                        aria-haspopup="dialog" aria-label="Calendar"
+                                                        title="Calendar" aria-expanded="false"
+                                                        aria-controls="coral-id-125" size="M">
+                                                    <coral-icon icon="calendar" role="img" iconsize="S"
+                                                                class="u-coral-noMargin _coral-Icon _coral-Icon--sizeS"
+                                                                handle="icon" size="S"
+                                                                aria-hidden="true">
+                                                        <svg focusable="false" aria-hidden="true"
+                                                             class="_coral-Icon--svg _coral-Icon">
+                                                            <use xlink:href="#spectrum-icon-18-Calendar"></use>
+                                                        </svg>
+                                                    </coral-icon>
+                                                    <coral-button-label></coral-button-label>
+                                                </button>
+                                                <coral-popover tracking="off" smart=""
+                                                               class="_coral-Datepicker-overlay _coral-Overlay _coral-Popover"
+                                                               handle="overlay" id="coral-id-125"
+                                                               breadthoffset="50%r - 50%p"
+                                                               placement="bottom"
+                                                               style="max-height: 75vh; position: absolute; display: none; visibility: visible; will-change: transform; top: 0px; left: 0px; transform: translate3d(491px, -5px, 0px);"
+                                                               aria-labelledby="label_937f6817-a109-48ef-8466-d3e0cd176971"
+                                                               x-placement="top" role="dialog"
+                                                               aria-live="assertive" variant="default"
+                                                               closable="off" tabindex="0">
+                                                    <div handle="topTabCapture" coral-tabcapture="top"
+                                                         tabindex="0" role="presentation"></div>
+                                                    <div class=" _coral-Dialog-header"
+                                                         handle="headerWrapper" role="presentation"
+                                                         hidden="">
+                                                        <coral-popover-header
+                                                                class="_coral-Dialog-title"></coral-popover-header>
+                                                    </div>
+                                                    <button is="coral-button" tracking="off"
+                                                            handle="closeButton"
+                                                            class="_coral-Dialog-closeButton _coral-ClearButton"
+                                                            type="button" variant="_custom" icon="close"
+                                                            title="Close" tabindex="-1" coral-close=""
+                                                            size="M" style="display: none;">
+                                                        <coral-icon size="S"
+                                                                    class="_coral-Icon--sizeS _coral-Icon"
+                                                                    role="img" icon="close">
+                                                            <svg focusable="false" aria-hidden="true"
+                                                                 class="_coral-Icon--svg _coral-Icon">
+                                                                <use xlink:href="#spectrum-icon-18-Close"></use>
+                                                            </svg>
+                                                        </coral-icon>
+                                                        <coral-button-label></coral-button-label>
+                                                    </button>
+                                                    <div class=" _coral-Popover-tip" handle="tip"
+                                                         hidden=""></div>
+                                                    <coral-popover-content
+                                                            class="_coral-Dialog-content"></coral-popover-content>
+                                                    <coral-popover-footer class="_coral-Dialog-footer"
+                                                                          hidden=""></coral-popover-footer>
+                                                    <div handle="intermediateTabCapture"
+                                                         coral-tabcapture="intermediate" tabindex="0"
+                                                         role="presentation"></div>
+                                                    <div handle="bottomTabCapture"
+                                                         coral-tabcapture="bottom" tabindex="0"
+                                                         role="presentation"></div>
+                                                </coral-popover>
+                                            </coral-datepicker>
+                                            <input class="foundation-field-related" type="hidden"
+                                                   value="Date" name="./offTime@TypeHint">
+                                            <p class="granite-datepicker-timezone granite-coral-Form-fieldlongdesc"
+                                               data-granite-datepicker-timezone-server="60"
+                                               hidden="hidden">
+                                                <coral-icon icon="alert" size="XS" role="img"
+                                                            class="_coral-Icon--sizeXS _coral-Icon">
+                                                    <svg focusable="false" aria-hidden="true"
+                                                         class="_coral-Icon--svg _coral-Icon">
+                                                        <use xlink:href="#spectrum-icon-24-Alert"></use>
+                                                    </svg>
+                                                </coral-icon>
+                                                Your timezone (UTC<span
+                                                        class="granite-datepicker-timezone-client"></span>)
+                                                will be used instead of the server setting (UTC+0100)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+                                <section class="coral-Form-fieldset"><h2
+                                            id="label_1157ed1c-e8d4-4a8b-96d9-f6102fb49fa9"
+                                            class="coral-Form-fieldset-legend">Vanity URL</h2>
+                                    <div class="foundation-field-editable">
+                                        <div class="coral-Form-fieldwrapper foundation-field-edit">
+                                            <label id="label_1157ed1c-e8d4-4a8b-96d9-f6102fb49fa9"
+                                                   class="coral-Form-fieldlabel">Vanity URL</label>
+                                            <coral-multifield
+                                                    class="coral-Form-field _coral-Multifield coral-Well"
+                                                    data-cq-msm-lockable="sling:vanityPath"
+                                                    aria-labelledby="label_1157ed1c-e8d4-4a8b-96d9-f6102fb49fa9"
+                                                    data-foundation-validation="" data-validation=""
+                                                    min="0"
+                                                    data-granite-coral-multifield-name="./sling:vanityPath"
+                                                    id="coral-id-222">
+                                                <button type="button" is="coral-button"
+                                                        coral-multifield-add="" aria-label="Add"
+                                                        variant="default"
+                                                        class="_coral-Button _coral-Button--primary"
+                                                        size="M">
+                                                    <coral-button-label class="_coral-Button-label">
+                                                        Add
+                                                    </coral-button-label>
+                                                </button>
+                                                <input class="foundation-field-related" type="hidden"
+                                                       name="./sling:vanityPath@Delete">
+                                                <template coral-multifield-template=""><input
+                                                            type="text" name="./sling:vanityPath"
+                                                            value="" aria-required="true"
+                                                            data-foundation-validation=""
+                                                            data-validation="" is="coral-textfield">
+                                                </template>
+                                            </coral-multifield>
+                                        </div>
+                                    </div>
+                                    <div class="foundation-field-editable">
+                                        <div class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                                            <coral-checkbox data-cq-msm-lockable="./sling:redirect"
+                                                            name="./sling:redirect" value="true"
+                                                            data-foundation-validation=""
+                                                            data-validation=""
+                                                            class="coral-Form-field _coral-Checkbox">
+                                                <input type="checkbox" handle="input"
+                                                       class=" _coral-Checkbox-input" id="coral-id-223"
+                                                       name="./sling:redirect" value="true"><span
+                                                        class=" _coral-Checkbox-box" handle="checkbox">
+      <svg focusable="false" aria-hidden="true"
+           class="_coral-Icon--svg _coral-Icon _coral-Checkbox-checkmark _coral-UIIcon-CheckmarkSmall">
+        <use xlink:href="#spectrum-css-icon-CheckmarkSmall"></use>
+      </svg>
+      <svg focusable="false" aria-hidden="true"
+           class="_coral-Icon--svg _coral-Icon _coral-Checkbox-partialCheckmark _coral-UIIcon-DashSmall">
+        <use xlink:href="#spectrum-css-icon-DashSmall"></use>
+      </svg>
+</span><label class=" _coral-Checkbox-label" handle="labelWrapper" for="coral-id-223">
+                                                                    <span class=" u-coral-screenReaderOnly"
+                                                                          handle="screenReaderOnly"
+                                                                          hidden="">Select</span>
+                                                    <coral-checkbox-label>Redirect Vanity URL
+                                                    </coral-checkbox-label>
+                                                </label></coral-checkbox>
+                                            <input class="foundation-field-related" type="hidden"
+                                                   name="./sling:redirect@Delete"></div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
