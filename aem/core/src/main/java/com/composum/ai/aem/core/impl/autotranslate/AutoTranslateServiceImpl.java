@@ -212,6 +212,12 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 boolean hasErrors = false;
                 startTime = new Date().toString();
                 boolean interrupted = false;
+                GPTConfiguration mergedConfiguration = configuration;
+                if (translationParameters.additionalInstructions != null ||
+                        !translationParameters.additionalInstructions.trim().isEmpty()) {
+                    mergedConfiguration = new GPTConfiguration(null, null, null,
+                            translationParameters.additionalInstructions).merge(configuration);
+                }
                 for (TranslationPageImpl page : translatedPages) {
                     if (!interrupted && Thread.interrupted()) {
                         Thread.currentThread().interrupt();
@@ -226,7 +232,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     page.status = "running";
                     try {
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, configuration, translationParameters);
+                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
+                                mergedConfiguration, translationParameters);
                         page.status = "done";
                         page.stats = stats;
                     } catch (Exception e) {

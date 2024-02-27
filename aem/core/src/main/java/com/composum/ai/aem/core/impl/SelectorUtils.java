@@ -77,6 +77,9 @@ public class SelectorUtils {
      * or for an ancestor that looks like a language code.
      */
     public static String findLanguage(Resource pageResource) {
+        if (pageResource == null) {
+            return null;
+        }
         String language = null;
         Resource candidate = pageResource;
         while (candidate != null && language == null) {

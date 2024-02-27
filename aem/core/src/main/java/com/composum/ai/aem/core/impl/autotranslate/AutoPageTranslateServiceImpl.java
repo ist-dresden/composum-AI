@@ -295,29 +295,34 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
         String sourcePath = relationship.getSourcePath();
         Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
-        // TODO check variants wrt. rollout
-        ValueMap sourceValueMap = sourceResource.getValueMap();
-        ValueMap targetValueMap = resource.getValueMap();
-        for (Map.Entry<String, Object> entry : sourceValueMap.entrySet()) {
-            if (isTranslatableProperty(entry.getKey(), entry.getValue())) {
-                stats.translateableProperties++;
-                String originallyTranslatedValue = targetValueMap.get(encodePropertyName(AI_PREFIX, entry.getKey(), AI_ORIGINAL_SUFFIX), String.class);
-                boolean alreadyTranslated = originallyTranslatedValue != null;
-                boolean addProperty = !alreadyTranslated;
-                if (alreadyTranslated && translationParameters.translateWhenChanged) {
-                    addProperty = !StringUtils.equals(originallyTranslatedValue, sourceValueMap.get(entry.getKey(), String.class));
+        if (sourceResource != null) {
+            ValueMap sourceValueMap = sourceResource.getValueMap();
+            ValueMap targetValueMap = resource.getValueMap();
+            for (Map.Entry<String, Object> entry : sourceValueMap.entrySet()) {
+                if (isTranslatableProperty(entry.getKey(), entry.getValue())) {
+                    stats.translateableProperties++;
+                    String originallyTranslatedValue = targetValueMap.get(encodePropertyName(AI_PREFIX, entry.getKey(), AI_ORIGINAL_SUFFIX), String.class);
+                    boolean alreadyTranslated = originallyTranslatedValue != null;
+                    boolean addProperty = !alreadyTranslated;
+                    if (alreadyTranslated && translationParameters.translateWhenChanged) {
+                        addProperty = !StringUtils.equals(originallyTranslatedValue, sourceValueMap.get(entry.getKey(), String.class));
+                        if (addProperty) {
+                            LOG.debug("Re-translating because of change: {} in {}", entry.getKey(), resource.getPath());
+                        }
+                    }
                     if (addProperty) {
-                        LOG.debug("Re-translating because of change: {} in {}", entry.getKey(), resource.getPath());
+                        PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
+                        propertyToTranslate.sourceResource = sourceResource;
+                        propertyToTranslate.targetResource = resource;
+                        propertyToTranslate.propertyName = entry.getKey();
+                        propertiesToTranslate.add(propertyToTranslate);
                     }
                 }
-                if (addProperty) {
-                    PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
-                    propertyToTranslate.sourceResource = sourceResource;
-                    propertyToTranslate.targetResource = resource;
-                    propertyToTranslate.propertyName = entry.getKey();
-                    propertiesToTranslate.add(propertyToTranslate);
-                }
             }
+        } else {
+            LOG.info("No source resource found - translation not touching {}", resource.getPath());
+            // that can happen for new resources in the live copy. Unfortunately it's not really clear if we should
+            // try to translate that or not - we'll probably learn about that in practice.
         }
         for (Resource child : resource.getChildren()) {
             collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters);
