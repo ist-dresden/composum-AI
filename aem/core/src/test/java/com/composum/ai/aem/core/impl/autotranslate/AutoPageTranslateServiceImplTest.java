@@ -2,12 +2,49 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 
 import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.isTranslatableProperty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.when;
 
+import java.util.Date;
+import java.util.List;
+
+import org.apache.sling.api.resource.Resource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
+
+import io.wcm.testing.mock.aem.junit5.AemContext;
 
 public class AutoPageTranslateServiceImplTest {
+
+    @Mock
+    protected LiveRelationshipManager liveRelationshipManager;
+
+    @InjectMocks
+    protected AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl();
+
+    protected AutoCloseable mocks;
+
+    @BeforeEach
+    public void setUp() {
+        mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    public void close() throws Exception {
+        mocks.close();
+    }
 
     @Test
     public void testIsTranslatableProperty() {
@@ -65,6 +102,48 @@ public class AutoPageTranslateServiceImplTest {
         // Test with string value with multiple whitespace sequences and multiple 4 letter sequences
         assertTrue(isTranslatableProperty("propertyName", "abcd  efgh  ijkl"));
 
+        // that's likely a boolean property
+        assertFalse(isTranslatableProperty("displayPopupTitle", "true"));
+        assertFalse(isTranslatableProperty("displayPopupTitle", "false"));
+
+        // dates are not translateable
+        assertFalse(isTranslatableProperty("propertyName", "2022-01-01"));
+        assertFalse(isTranslatableProperty("propertyName", "2022-01-01T00:00:00.000Z"));
+        assertFalse(isTranslatableProperty("propertyName", new Date().toString()));
+
+        // rather do not translate anything that looks like a boolean, even if it's a whitelisted property
+        assertFalse(isTranslatableProperty("shortDescription", "true"));
+        assertFalse(isTranslatableProperty("jcr:title", "false"));
+    }
+
+    // problems on /content/wknd/language-masters/es/adventures/beervana-portland/jcr:content : displayPopupTitle true appears in list
+    @Test
+    public void testCollectPropertiesToTranslate() throws WCMException {
+        AemContext context = new AemContext();
+        Resource orig = context.create().resource("/content/en/jcr:content", "something", "This is to be translated", "displayPopupTitle", "true");
+        Resource origsub = context.create().resource("/content/en/jcr:content/foo", "jcr:title", "This is also to be translated");
+        Resource copy = context.create().resource("/content/de/jcr:content", "something", "This is to be translated", "displayPopupTitle", "true");
+        Resource copysub = context.create().resource("/content/de/jcr:content/foo", "jcr:title", "This is also to be translated");
+
+
+        when(liveRelationshipManager.getLiveRelationship(Mockito.any(), anyBoolean())).then(invocation -> {
+            Resource resource = invocation.getArgument(0);
+            LiveRelationship liveRelationship = Mockito.mock(LiveRelationship.class);
+            when(liveRelationship.getSourcePath()).thenReturn(resource.getPath().replace("/de/", "/en/"));
+            return liveRelationship;
+        });
+
+        List<AutoPageTranslateServiceImpl.PropertyToTranslate> props = new java.util.ArrayList<>();
+        AutoPageTranslateServiceImpl.Stats stats = new AutoPageTranslateServiceImpl.Stats();
+        AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
+        service.collectPropertiesToTranslate(copy, props, stats, parms);
+        assertEquals(2, props.size());
+        assertEquals("something", props.get(0).propertyName);
+        assertEquals("/content/de/jcr:content", props.get(0).targetResource.getPath());
+        assertEquals("/content/en/jcr:content", props.get(0).sourceResource.getPath());
+        assertEquals("jcr:title", props.get(1).propertyName);
+        assertEquals("/content/de/jcr:content/foo", props.get(1).targetResource.getPath());
+        assertEquals("/content/en/jcr:content/foo", props.get(1).sourceResource.getPath());
     }
 
 }

@@ -46,7 +46,7 @@ import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 @Component
 public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AutoPageTranslateServiceImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(AutoPageTranslateServiceImpl.class);
 
     /**
      * Saves the date when a resource was automatically translated.
@@ -86,14 +86,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      */
     public static final List<String> CERTAINLY_TRANSLATABLE_PROPERTIES =
             Arrays.asList("jcr:title", "jcr:description", "text", "title", "alt", "cq:panelTitle", "shortDescription",
-                    "actionText", "accessibilityLabel", "pretitle", "displayPopupTitle", "helpMessage",
+                    "actionText", "accessibilityLabel", "pretitle", "helpMessage",
                     "dc:title", "dc:description");
 
     @Reference
-    private GPTTranslationService translationService;
+    protected GPTTranslationService translationService;
 
     @Reference
-    private LiveRelationshipManager liveRelationshipManager;
+    protected LiveRelationshipManager liveRelationshipManager;
 
     @Override
     public Stats translateLiveCopy(@Nonnull Resource resource, @Nullable GPTConfiguration configuration,
@@ -354,20 +354,23 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * a whitespace and at least one 4 letter sequence.
      */
     protected static boolean isTranslatableProperty(String name, Object value) {
-        if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name) &&
-                (value instanceof String) &&
-                PATTERN_HAS_LETTER.matcher((String) value).find()) {
-            return true;
-        }
-        if (name.contains(":")) {
-            return false;
-        }
         if (value instanceof String) {
             String stringValue = (String) value;
             if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
-                    stringValue.startsWith("/libs/") || stringValue.startsWith("/mnt/")) {
-                return false; // looks like path
+                    stringValue.startsWith("/libs/") || stringValue.startsWith("/mnt/") ||
+                    stringValue.equals("true") || stringValue.equals("false")) {
+                return false; // looks like path or boolean
             }
+
+            if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name) &&
+                    PATTERN_HAS_LETTER.matcher(stringValue).find()
+            ) {
+                return true;
+            }
+            if (name.contains(":")) {
+                return false;
+            }
+
             if (isAiTranslateProperty(name)) {
                 return false;
             }
@@ -390,19 +393,18 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
          * The resource where we take the translation source from. Can be the {@link #targetResource} but
          * also the source of a live copy.
          */
-        private Resource sourceResource;
+        protected Resource sourceResource;
         /**
          * The resource where we write the translation.
          */
-        private Resource targetResource;
-        private String propertyName;
+        protected Resource targetResource;
+        protected String propertyName;
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
+            sb.append(propertyName).append(" in ");
             sb.append(targetResource != null ? targetResource.getPath() : "null");
-            sb.append("/");
-            sb.append(propertyName);
             if (sourceResource != null && targetResource != null && !sourceResource.getPath().equals(targetResource.getPath())) {
                 sb.append(" (from ");
                 sb.append(sourceResource.getPath());
