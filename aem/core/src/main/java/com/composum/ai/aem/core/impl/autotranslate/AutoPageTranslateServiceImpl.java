@@ -119,6 +119,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))
                     .collect(Collectors.toList());
             String language = SelectorUtils.findLanguage(resource);
+            if (language == null) {
+                throw new IllegalArgumentException("No language found for " + resource.getPath());
+            }
             String languageName = SelectorUtils.getLanguageName(language);
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
