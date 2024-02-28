@@ -17,7 +17,7 @@
                 <tbody data-sly-list="${model.translatedPages}">
                 <tr>
                     <td>${item.status}</td>
-                    <td>${item.stats.translatedProperties} / ${item.stats.translateableProperties} ,
+                    <td>${item.stats.translatedProperties} | ${item.stats.modifiedButRetranslatedProperties} | ${item.stats.retranslatedProperties} / ${item.stats.translateableProperties} ,
                         ${item.stats.relocatedPaths} / ${item.stats.paths}
                     </td>
                     <td>

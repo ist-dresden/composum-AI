@@ -48,6 +48,10 @@ public interface AutoPageTranslateService {
 
         public int relocatedPaths;
 
+        public boolean hasChanges() {
+            return translatedProperties + retranslatedProperties + modifiedButRetranslatedProperties + relocatedPaths > 0;
+        }
+
         @Override
         public String toString() {
             return "Stats{" +

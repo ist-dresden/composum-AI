@@ -237,8 +237,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         Resource resource = resourceResolver.getResource(page.resourcePath);
                         AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
                                 mergedConfiguration, translationParameters);
-                        page.status = "done";
                         page.stats = stats;
+                        page.status = stats.hasChanges() ? "done" : "unchanged";
                     } catch (Exception e) {
                         page.status = "error";
                         this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
