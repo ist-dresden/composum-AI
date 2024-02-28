@@ -657,52 +657,57 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
-        @AttributeDefinition(name = "Disable the GPT Chat Completion Service", description = "Disable the GPT Chat Completion Service", defaultValue = "false")
+        @AttributeDefinition(name = "Disable", description = "Disable the GPT Chat Completion Service", required = false)
         boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
 
-        @AttributeDefinition(name = "Optional, URL of the chat completion service, if not OpenAI's default")
+        @AttributeDefinition(name = "URL of the chat completion service",
+                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
         String chatCompletionUrl();
 
-        @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
+        @AttributeDefinition(name = "OpenAI API key", description = "OpenAI API key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .", required = false)
         String openAiApiKey();
 
-        @AttributeDefinition(name = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/.")
+        @AttributeDefinition(name = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization .", required = false)
         String openAiOrganizationId();
 
         // alternatively, a key file
-        @AttributeDefinition(name = "OpenAI API Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
+        @AttributeDefinition(name = "OpenAI API key file", required = false,
+                description = "Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
         String openAiApiKeyFile();
 
-        @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
+        @AttributeDefinition(name = "Default model", required = false,
+                description = "Default model to use for the chat completion. The default if not set is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
         String defaultModel() default DEFAULT_MODEL;
 
-        @AttributeDefinition(name = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, that is rejected.",
+        @AttributeDefinition(name = "Vision model", required = false,
+                description = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, image recognition is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel() default DEFAULT_IMAGE_MODEL;
 
-        @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")
+        @AttributeDefinition(name = "Temperature", required = false,
+                description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0", defaultValue = "")
         String temperature();
 
         @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
                 "That's about a half of the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
-                defaultValue = "50000")
+                defaultValue = "50000", required = false)
         int maximumTokensPerRequest();
 
-        @AttributeDefinition(name = "Connection timeout in seconds", description = "Default " + DEFAULTVALUE_CONNECTIONTIMEOUT)
+        @AttributeDefinition(name = "Connection timeout in seconds", description = "Default " + DEFAULTVALUE_CONNECTIONTIMEOUT, required = false)
         int connectionTimeout() default DEFAULTVALUE_CONNECTIONTIMEOUT;
 
-        @AttributeDefinition(name = "Request timeout in seconds", description = "Default " + DEFAULTVALUE_REQUESTTIMEOUT)
+        @AttributeDefinition(name = "Request timeout in seconds", description = "Default " + DEFAULTVALUE_REQUESTTIMEOUT, required = false)
         int requestTimeout() default DEFAULTVALUE_REQUESTTIMEOUT;
 
-        @AttributeDefinition(name = "Maximum requests per minute",
+        @AttributeDefinition(name = "Maximum requests per minute", required = false,
                 description = "Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_MINUTE)
         int requestsPerMinute();
 
-        @AttributeDefinition(name = "Maximum requests per hour",
+        @AttributeDefinition(name = "Maximum requests per hour", required = false,
                 description = "Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_HOUR)
         int requestsPerHour();
 
-        @AttributeDefinition(name = "Maximum requests per day",
+        @AttributeDefinition(name = "Maximum requests per day", required = false,
                 description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
         int requestsPerDay();
     }
