@@ -89,6 +89,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     "actionText", "accessibilityLabel", "pretitle", "helpMessage",
                     "dc:title", "dc:description");
 
+    protected static final Pattern PATTERN_IGNORED_SUBNODE_NAMES =
+            Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*");
+
     @Reference
     protected GPTTranslationService translationService;
 
@@ -293,6 +296,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             @Nonnull Resource resource, @Nonnull List<PropertyToTranslate> propertiesToTranslate, @Nonnull Stats stats,
             @Nonnull AutoTranslateService.TranslationParameters translationParameters) throws WCMException {
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        if (relationship == null) {
+            LOG.warn("No live relationship for {}", resource.getPath());
+            return;
+        }
         String sourcePath = relationship.getSourcePath();
         Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
         if (sourceResource != null) {
@@ -325,7 +332,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             // try to translate that or not - we'll probably learn about that in practice.
         }
         for (Resource child : resource.getChildren()) {
-            collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters);
+            if (!PATTERN_IGNORED_SUBNODE_NAMES.matcher(child.getName()).matches()) {
+                collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters);
+            }
         }
     }
 
