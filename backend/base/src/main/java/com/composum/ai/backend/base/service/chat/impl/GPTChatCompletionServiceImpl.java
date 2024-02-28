@@ -110,6 +110,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
     protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 120;
 
+    protected static final int DEFAULTVALUE_REQUESTS_PER_MINUTE = 100;
+    protected static final int DEFAULTVALUE_REQUESTS_PER_HOUR = 1000;
+    protected static final int DEFAULTVALUE_REQUESTS_PER_DAY = 3000;
+
     public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
     /**
      * The maximum number of retries.
@@ -167,9 +171,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         LOG.info("Activating GPTChatCompletionService {}", config);
         // since it costs a bit of money and there are remote limits, we do limit it somewhat, especially for the case of errors.
-        RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
-        RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
-        this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
+        int limitPerDay = config != null && config.requestsPerDay() > 0 ? config.requestsPerDay() : DEFAULTVALUE_REQUESTS_PER_DAY;
+        RateLimiter dayLimiter = new RateLimiter(null, limitPerDay, 1, TimeUnit.DAYS);
+        int limitPerHour = config != null && config.requestsPerHour() > 0 ? config.requestsPerHour() : DEFAULTVALUE_REQUESTS_PER_HOUR;
+        RateLimiter hourLimiter = new RateLimiter(dayLimiter, limitPerHour, 1, TimeUnit.HOURS);
+        int limitPerMinute = config != null && config.requestsPerMinute() > 0 ? config.requestsPerMinute() : DEFAULTVALUE_REQUESTS_PER_MINUTE;
+        this.limiter = new RateLimiter(hourLimiter, limitPerMinute, 1, TimeUnit.MINUTES);
         this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.imageModel = config != null && config.imageModel() != null && !config.imageModel().trim().isEmpty() ? config.imageModel().trim() : null;
         this.apiKey = null;
@@ -681,11 +688,23 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 defaultValue = "50000")
         int maximumTokensPerRequest();
 
-        @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "" + DEFAULTVALUE_CONNECTIONTIMEOUT)
-        int connectionTimeout();
+        @AttributeDefinition(name = "Connection timeout in seconds", description = "Default " + DEFAULTVALUE_CONNECTIONTIMEOUT)
+        int connectionTimeout() default DEFAULTVALUE_CONNECTIONTIMEOUT;
 
-        @AttributeDefinition(name = "Request timeout in seconds", defaultValue = "" + DEFAULTVALUE_REQUESTTIMEOUT)
-        int requestTimeout();
+        @AttributeDefinition(name = "Request timeout in seconds", description = "Default " + DEFAULTVALUE_REQUESTTIMEOUT)
+        int requestTimeout() default DEFAULTVALUE_REQUESTTIMEOUT;
+
+        @AttributeDefinition(name = "Maximum requests per minute",
+                description = "Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_MINUTE)
+        int requestsPerMinute();
+
+        @AttributeDefinition(name = "Maximum requests per hour",
+                description = "Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_HOUR)
+        int requestsPerHour();
+
+        @AttributeDefinition(name = "Maximum requests per day",
+                description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
+        int requestsPerDay();
     }
 
     /**

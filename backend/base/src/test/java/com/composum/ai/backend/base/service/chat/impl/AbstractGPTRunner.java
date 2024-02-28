@@ -79,6 +79,21 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public int requestsPerMinute() {
+                return 20;
+            }
+
+            @Override
+            public int requestsPerHour() {
+                return 60;
+            }
+
+            @Override
+            public int requestsPerDay() {
+                return 120;
+            }
+
+            @Override
             public int connectionTimeout() {
                 return 20;
             }
