@@ -64,12 +64,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     private boolean disabled;
 
-    /**
-     * We do not translate in parallel since that can lead to concurrent modifications.
-     */
-    private final Lock lock = new ReentrantLock();
-    private volatile Thread runningThread;
-
     @Override
     public List<TranslationRun> getTranslationRuns() {
         List<TranslationRun> runs = new ArrayList<>();
@@ -217,9 +211,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
          */
         public void execute(ResourceResolver resourceResolver) {
             try {
-                status = "waitingForLock";
-                lock.tryLock(60, TimeUnit.MINUTES);
-                runningThread = Thread.currentThread();
                 status = "running";
                 boolean hasErrors = false;
                 startTime = new Date().toString();
@@ -257,15 +248,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 }
                 status = hasErrors ? "doneWithErrors" : "done";
                 stopTime = new Date().toString();
-            } catch (InterruptedException e) {
-                status = "lockingFailed";
-                LOG.info("Locking failed for 60 minutes for translation run because of parallel running thread " + id);
-                if (runningThread != null) { // probably something is wrong, abort that.
-                    runningThread.interrupt();
-                }
             } finally {
-                runningThread = null;
-                lock.unlock();
                 resourceResolver.close();
             }
         }
