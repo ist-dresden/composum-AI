@@ -90,7 +90,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     "dc:title", "dc:description");
 
     protected static final Pattern PATTERN_IGNORED_SUBNODE_NAMES =
-            Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*");
+            Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*|sling:members");
 
     @Reference
     protected GPTTranslationService translationService;
@@ -102,57 +102,61 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     public Stats translateLiveCopy(@Nonnull Resource resource, @Nullable GPTConfiguration configuration,
                                    @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException {
-        LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
-        Stats stats = new Stats();
-        resource.getResourceResolver().refresh();
-        List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
-        boolean changed = false;
-        collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters);
+        try {
+            LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
+            Stats stats = new Stats();
+            resource.getResourceResolver().revert();
+            List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
+            boolean changed = false;
+            collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters);
 
-        LOG.debug("Set of property names to translate in {} : {}", resource.getPath(),
-                propertiesToTranslate.stream()
-                        .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
-        LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
+            LOG.debug("Set of property names to translate in {} : {}", resource.getPath(),
+                    propertiesToTranslate.stream()
+                            .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
+            LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
 
-        List<String> valuesToTranslate = propertiesToTranslate.stream()
-                .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))
-                .collect(Collectors.toList());
-        String language = SelectorUtils.findLanguage(resource);
-        String languageName = SelectorUtils.getLanguageName(language);
-        List<String> translatedValues =
-                translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
-        translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
+            List<String> valuesToTranslate = propertiesToTranslate.stream()
+                    .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))
+                    .collect(Collectors.toList());
+            String language = SelectorUtils.findLanguage(resource);
+            String languageName = SelectorUtils.getLanguageName(language);
+            List<String> translatedValues =
+                    translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
+            translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
 
-        for (int i = 0; i < propertiesToTranslate.size(); i++) {
-            PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
-            String originalValue = valuesToTranslate.get(i);
-            String translatedValue = translatedValues.get(i);
+            for (int i = 0; i < propertiesToTranslate.size(); i++) {
+                PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
+                String originalValue = valuesToTranslate.get(i);
+                String translatedValue = translatedValues.get(i);
 //            if (StringUtils.equals(StringUtils.trim(originalValue), StringUtils.trim(translatedValue))) {
 //                LOG.trace("Translation of {} in {} is the same as the original, not setting it.",
 //                        propertyToTranslate.propertyName, propertyToTranslate.resource.getPath());
 //                continue; // not quite sure whether that's right - that could lead to multiple user alerts
 //            }
-            String propertyName = propertyToTranslate.propertyName;
-            Resource resourceToTranslate = propertyToTranslate.targetResource;
-            LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.targetResource.getPath(), translatedValue);
-            ModifiableValueMap valueMap = requireNonNull(resourceToTranslate.adaptTo(ModifiableValueMap.class));
-            valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), originalValue);
-            valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
-            valueMap.put(propertyName, translatedValue);
-            markAsAiTranslated(resourceToTranslate);
-            stats.translatedProperties++;
-            changed = true;
+                String propertyName = propertyToTranslate.propertyName;
+                Resource resourceToTranslate = propertyToTranslate.targetResource;
+                LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.targetResource.getPath(), translatedValue);
+                ModifiableValueMap valueMap = requireNonNull(resourceToTranslate.adaptTo(ModifiableValueMap.class));
+                valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), originalValue);
+                valueMap.put(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), translatedValue);
+                valueMap.put(propertyName, translatedValue);
+                markAsAiTranslated(resourceToTranslate);
+                stats.translatedProperties++;
+                changed = true;
 
-            cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
-        }
+                cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
+            }
 
-        changed |= migratePathsToLanguageCopy(resource, language, stats);
-        if (changed) {
-            markAsAiTranslated(resource);
+            changed |= migratePathsToLanguageCopy(resource, language, stats);
+            if (changed) {
+                markAsAiTranslated(resource);
+            }
+            resource.getResourceResolver().commit();
+            LOG.debug("<<< translateLiveCopy: {}", resource.getPath());
+            return stats;
+        } finally {
+            resource.getResourceResolver().revert();
         }
-        resource.getResourceResolver().commit();
-        LOG.debug("<<< translateLiveCopy: {}", resource.getPath());
-        return stats;
     }
 
     protected static void markAsAiTranslated(Resource resource) {
