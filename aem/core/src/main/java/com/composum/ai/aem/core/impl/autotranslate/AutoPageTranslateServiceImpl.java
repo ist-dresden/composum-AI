@@ -102,6 +102,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     public Stats translateLiveCopy(@Nonnull Resource resource, @Nullable GPTConfiguration configuration,
                                    @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException {
+        LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
         Stats stats = new Stats();
         resource.getResourceResolver().refresh();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
@@ -150,6 +151,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             markAsAiTranslated(resource);
         }
         resource.getResourceResolver().commit();
+        LOG.debug("<<< translateLiveCopy: {}", resource.getPath());
         return stats;
     }
 
