@@ -5,8 +5,7 @@
     <title>Translation Processes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
-    <sly data-sly-call="${clientLib.all @ categories='coralui3'}"></sly>
-    <sly data-sly-call="${clientLib.all @ categories='granite.ui.foundation.content'}"></sly>
+    <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
 <div class="foundation-layout-panel">
@@ -19,7 +18,9 @@
                             <div class="coral-FixedColumn-column">
                                 <form class="coral-Form coral-Form--vertical foundation-form"
                                       action="/apps/composum-ai/components/autotranslate/list.create.html" method="GET">
-                                    <h2>Translation Processes</h2>
+                                    <section class="coral-Form-fieldset"><h2
+                                                id="label_f3ba4f45-96f3-4315-89cc-cd1ebab6be5e"
+                                                class="coral-Form-fieldset-legend">Translation Processes</h2>
                                     <div class="form-group">
                                         <label for="path">Path:</label>
                                         <input type="text" class="form-control" id="path" name="path" required
@@ -46,6 +47,7 @@
                                                   name="additionalInstructions" rows="3" cols="80"></textarea>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Start Translation Process</button>
+                                    </section>
                                 </form>
                                 <hr>
                                 <table class="table mt-3">
@@ -77,10 +79,48 @@
                             </div>
                         </div>
                     </sly>
+
+                    <div class="coral-Form coral-Form--vertical">
+                        <fieldset class="coral-Form-fieldset">
+                            <legend class="coral-Form-fieldset-legend">Translation Processes</legend>
+
+                            <div class="coral-Form-fieldwrapper">
+                                <label class="coral-Form-fieldlabel" for="pathCoral">Path:</label>
+                                <input type="text" class="coral-Form-field" id="pathCoral" name="path" required size="80" placeholder="Enter the path">
+                            </div>
+
+                            <div class="coral-Form-fieldwrapper">
+                                <label class="coral-Checkbox">
+                                    <input type="checkbox" class="coral-Checkbox-input" id="recursiveCoral" name="recursive" checked>
+                                    <span class="coral-Checkbox-checkmark"></span>
+                                    <span class="coral-Checkbox-label">Recursive</span>
+                                </label>
+                            </div>
+
+                            <div class="coral-Form-fieldwrapper">
+                                <label class="coral-Checkbox">
+                                    <input type="checkbox" class="coral-Checkbox-input" id="translateWhenChangedCoral" name="translateWhenChanged" checked>
+                                    <span class="coral-Checkbox-checkmark"></span>
+                                    Re-translate changed values
+                                </label>
+                            </div>
+
+                            <div class="coral-Form-fieldwrapper">
+                                <label class="coral-Form-fieldlabel" for="additionalInstructionsCoral">Optionally, additional instructions:</label>
+                                <textarea class="coral-Form-field" id="additionalInstructionsCoral" name="additionalInstructions" rows="3" cols="80" placeholder="Enter any additional instructions"></textarea>
+                            </div>
+
+                            <button type="submit" class="coral-Button coral-Button--primary">Start Translation Process</button>
+                        </fieldset>
+                    </div>
+
+                    <!-- The table and rollback form can also be converted to use Coral UI components for consistency. -->
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 </body>
 </html>
