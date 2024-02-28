@@ -7,8 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -162,6 +165,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         List<String> realTexts = texts.stream()
                 .filter(s -> s != null && PATTERN_HAS_LETTER.matcher(s).find())
                 .map(s -> PATTERN_SEPARATE_WHITESPACE.matcher(s).replaceAll("$2"))
+                .distinct()
                 .collect(Collectors.toList());
 
         List<String> translatedRealTexts;
@@ -171,17 +175,24 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(5));
         }
 
-        Iterator<String> translatedRealTextsIterator = translatedRealTexts.iterator();
+        Map<String, String> translatedRealTextsMap = new LinkedHashMap<>();
+        for (int i = 0; i < realTexts.size(); i++) {
+            translatedRealTextsMap.put(realTexts.get(i), translatedRealTexts.get(i));
+        }
+
         List<String> result = new ArrayList<>();
         for (String text : texts) {
-            if (text == null || !PATTERN_HAS_LETTER.matcher(text).find()) {
+            if (translatedRealTextsMap.containsKey(text)) {
+                result.add(translatedRealTextsMap.get(text));
+            } else if (text == null || !PATTERN_HAS_LETTER.matcher(text).find()) {
                 result.add(text);
             } else {
                 Matcher m = PATTERN_SEPARATE_WHITESPACE.matcher(text);
                 if (m.matches()) {
                     String before = m.group(1);
                     String after = m.group(3);
-                    result.add(before + translatedRealTextsIterator.next() + after);
+                    String realText = m.group(2);
+                    result.add(before + translatedRealTextsMap.get(realText) + after);
                 } else {
                     throw new IllegalStateException("Bug - that shouldn't happen. Text: '" + text + "'");
                 }

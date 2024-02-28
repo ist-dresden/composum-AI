@@ -12,7 +12,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 
 import junit.framework.TestCase;
 
@@ -113,6 +117,25 @@ public class GPTTranslationServiceImplTest extends TestCase {
         assertEquals("", service.singleTranslation("", null, "de",null));
         assertEquals("hAlLo", service.singleTranslation("hallo", null, "de",null));
         assertEquals("\nHU hO ", service.singleTranslation("\nHu ho ", null, "de",null));
+    }
+
+    @Test
+    public void testFragmentedTranslation() {
+        GPTTranslationServiceImpl service = new GPTTranslationServiceImpl() {
+            @Nullable
+            @Override
+            public String singleTranslation(@Nullable String rawText, @Nullable String sourceLanguage, @Nullable String targetLanguage, @Nullable GPTConfiguration configuration) {
+                assertFalse(rawText.contains("17"));
+                return rawText.toUpperCase(Locale.ROOT);
+            }
+        };
+        GPTTranslationServiceImpl.Config config = mock(GPTTranslationServiceImpl.Config.class);
+        service.activate(config);
+        assertTrue(service.fragmentedTranslation(null, null, null).isEmpty());
+        assertTrue(service.fragmentedTranslation(asList(), null, null).isEmpty());
+        assertEquals(Arrays.asList("", "\n", "HOLLA", ""), service.fragmentedTranslation(asList("", "\n", "holla", ""), null, null));
+        assertEquals(Arrays.asList("HOLLA", "\nMIAU HO HO "), service.fragmentedTranslation(asList("holla", "\nmiau ho Ho "), null, null));
+        assertEquals(Arrays.asList("17", "TRUE", "\nMIAU HO HO ", "TRUE", "17"), service.fragmentedTranslation(asList("17", "true", "\nmiau ho Ho ", "true", "17"), null, null));
     }
 
 }
