@@ -108,7 +108,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4-vision-preview";
 
     protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
-    protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
+    protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 120;
 
     public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
     /**
@@ -123,6 +123,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected String organizationId;
     protected String defaultModel;
     protected String imageModel;
+    protected String chatCompletionUrl = CHAT_COMPLETION_URL;
 
     protected CloseableHttpAsyncClient httpAsyncClient;
 
@@ -187,6 +188,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             this.organizationId = config.openAiOrganizationId();
         } else {
             LOG.info("ChatGPT is disabled.");
+        }
+        if (config.chatCompletionUrl() != null && !config.chatCompletionUrl().trim().isEmpty()) {
+            this.chatCompletionUrl = config.chatCompletionUrl().trim();
         }
         if (isEnabled()) {
             PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
@@ -330,7 +334,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
         String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
         String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
-        SimpleHttpRequest request = new SimpleHttpRequest("POST", CHAT_COMPLETION_URL);
+        SimpleHttpRequest request = new SimpleHttpRequest("POST", chatCompletionUrl);
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
         request.addHeader("Authorization", "Bearer " + actualApiKey);
         if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
@@ -648,6 +652,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @AttributeDefinition(name = "Disable the GPT Chat Completion Service", description = "Disable the GPT Chat Completion Service", defaultValue = "false")
         boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
+
+        @AttributeDefinition(name = "Optional, URL of the chat completion service, if not OpenAI's default")
+        String chatCompletionUrl();
 
         @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
         String openAiApiKey();

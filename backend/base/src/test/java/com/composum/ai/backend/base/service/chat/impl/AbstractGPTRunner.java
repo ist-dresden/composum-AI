@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.CHAT_COMPLETION_URL;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.file.Files;
@@ -29,6 +31,11 @@ public abstract class AbstractGPTRunner {
             @Override
             public boolean disabled() {
                 return false;
+            }
+
+            @Override
+            public String chatCompletionUrl() {
+                return CHAT_COMPLETION_URL;
             }
 
             @Override
