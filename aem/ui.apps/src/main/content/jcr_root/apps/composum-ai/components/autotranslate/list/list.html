@@ -18,35 +18,37 @@
                             <div class="coral-FixedColumn-column">
                                 <form class="coral-Form coral-Form--vertical foundation-form"
                                       action="/apps/composum-ai/components/autotranslate/list.create.html" method="GET">
+                                    <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
-                                                id="label_f3ba4f45-96f3-4315-89cc-cd1ebab6be5e"
-                                                class="coral-Form-fieldset-legend">Translation Processes</h2>
-                                    <div class="form-group">
-                                        <label for="path">Path:</label>
-                                        <input type="text" class="form-control" id="path" name="path" required
-                                               size="80">
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="recursive"
-                                                   name="recursive" checked="checked">
-                                            <label class="form-check-label" for="recursive">Recursive</label>
+                                                class="coral-Form-fieldset-legend">Translation Process</h2>
+                                        <div class="form-group">
+                                            <label for="path">Path:</label>
+                                            <input type="text" class="form-control" id="path" name="path" required
+                                                   size="80">
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="translateWhenChanged"
-                                                   name="translateWhenChanged" checked="checked">
-                                            <label class="form-check-label" for="translateWhenChanged">Re-translate
-                                                changed values</label>
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="recursive"
+                                                       name="recursive" checked="checked">
+                                                <label class="form-check-label" for="recursive">Recursive</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox"
+                                                       id="translateWhenChanged"
+                                                       name="translateWhenChanged" checked="checked">
+                                                <label class="form-check-label" for="translateWhenChanged">Re-translate
+                                                    changed values</label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <!-- a text area with additional system instructions. -->
-                                    <div class="form-group">
-                                        <label for="additionalInstructions">Optionally, additional instructions:</label>
-                                        <br/>
-                                        <textarea class="form-control" id="additionalInstructions"
-                                                  name="additionalInstructions" rows="3" cols="80"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Start Translation Process</button>
+                                        <!-- a text area with additional system instructions. -->
+                                        <div class="form-group">
+                                            <label for="additionalInstructions">Optionally, additional
+                                                instructions:</label>
+                                            <br/>
+                                            <textarea class="form-control" id="additionalInstructions"
+                                                      name="additionalInstructions" rows="3" cols="80"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Start Translation Process</button>
                                     </section>
                                 </form>
                                 <hr>
@@ -86,12 +88,14 @@
 
                             <div class="coral-Form-fieldwrapper">
                                 <label class="coral-Form-fieldlabel" for="pathCoral">Path:</label>
-                                <input type="text" class="coral-Form-field" id="pathCoral" name="path" required size="80" placeholder="Enter the path">
+                                <input type="text" class="coral-Form-field" id="pathCoral" name="path" required
+                                       size="80" placeholder="Enter the path">
                             </div>
 
                             <div class="coral-Form-fieldwrapper">
                                 <label class="coral-Checkbox">
-                                    <input type="checkbox" class="coral-Checkbox-input" id="recursiveCoral" name="recursive" checked>
+                                    <input type="checkbox" class="coral-Checkbox-input" id="recursiveCoral"
+                                           name="recursive" checked>
                                     <span class="coral-Checkbox-checkmark"></span>
                                     <span class="coral-Checkbox-label">Recursive</span>
                                 </label>
@@ -99,18 +103,23 @@
 
                             <div class="coral-Form-fieldwrapper">
                                 <label class="coral-Checkbox">
-                                    <input type="checkbox" class="coral-Checkbox-input" id="translateWhenChangedCoral" name="translateWhenChanged" checked>
+                                    <input type="checkbox" class="coral-Checkbox-input" id="translateWhenChangedCoral"
+                                           name="translateWhenChanged" checked>
                                     <span class="coral-Checkbox-checkmark"></span>
                                     Re-translate changed values
                                 </label>
                             </div>
 
                             <div class="coral-Form-fieldwrapper">
-                                <label class="coral-Form-fieldlabel" for="additionalInstructionsCoral">Optionally, additional instructions:</label>
-                                <textarea class="coral-Form-field" id="additionalInstructionsCoral" name="additionalInstructions" rows="3" cols="80" placeholder="Enter any additional instructions"></textarea>
+                                <label class="coral-Form-fieldlabel" for="additionalInstructionsCoral">Optionally,
+                                    additional instructions:</label>
+                                <textarea class="coral-Form-field" id="additionalInstructionsCoral"
+                                          name="additionalInstructions" rows="3" cols="80"
+                                          placeholder="Enter any additional instructions"></textarea>
                             </div>
 
-                            <button type="submit" class="coral-Button coral-Button--primary">Start Translation Process</button>
+                            <button type="submit" class="coral-Button coral-Button--primary">Start Translation Process
+                            </button>
                         </fieldset>
                     </div>
 
