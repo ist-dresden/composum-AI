@@ -1,11 +1,48 @@
-<p data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
-     data-sly-set.model="${runmodel.model}"
-     data-sly-set.cancelled="${runmodel.cancel}">
-    <div class="alert alert-warning" role="alert">
-        Translation process ${cancelled}.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancel translation process</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+    <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
+        <div class="foundation-layout-panel-body">
+            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
+                <div class="cq-dialog-content-page">
+                    <sly data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
+                         data-sly-set.model="${runmodel.model}"
+                         data-sly-set.cancelled="${runmodel.cancel}">
+                        <div class="coral-FixedColumn">
+                            <div class="coral-FixedColumn-column">
+                                <form class="coral-Form coral-Form--vertical foundation-form"
+                                      action="../list.html" method="GET">
+                                    <input type="hidden" name="_charset_" value="utf-8">
+                                    <section class="coral-Form-fieldset"><h2
+                                                class="coral-Form-fieldset-legend">Canceling translation process</h2>
+                                        <span class="foundation
+                                        -field-readonly coral-Form-fieldwrapper">
+                                            <span class="coral-Form-field foundation-layout-util-breakword">
+                                                The <a href="/apps/composum-ai/components/autotranslate/run.${model.id}.html">translation process for ${model.rootPath}</a>
+                                                was ${cancelled}.
+                                                </span>
+                                        </span>
+                                        <button type="submit" class="coral-Button coral-Button--primary">
+                                            Back to translation start page.
+                                        </button>
+                                    </section>
+                                </form>
+                            </div>
+                        </div>
+                    </sly>
+                </div>
+            </div>
+        </div>
     </div>
-</p>
-<p>
-Back to <a href="/apps/composum-ai/components/autotranslate/run.${model.id}.html">Run for ${model.rootPath}</a>,
-back to <a href="/apps/composum-ai/components/autotranslate/list.html">translation start page</a>.
-</p>
+</div>
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+</body>
+</html>

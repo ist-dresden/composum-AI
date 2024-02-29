@@ -41,7 +41,7 @@ public class AutoTranslateRunModel {
     public String rollback() throws PersistenceException, WCMException {
         AutoTranslateService.TranslationRun run = getModel();
         run.rollback(AutoTranslateRunModel.this.request.getResourceResolver());
-        return "rolled back for " + run.rootPath;
+        return "rolled back";
     }
 
 }

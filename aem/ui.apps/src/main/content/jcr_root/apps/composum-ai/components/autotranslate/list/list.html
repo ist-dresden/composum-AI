@@ -21,110 +21,97 @@
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
                                                 class="coral-Form-fieldset-legend">Translation Process</h2>
-                                        <div class="form-group">
-                                            <label for="path">Path:</label>
-                                            <input type="text" class="form-control" id="path" name="path" required
-                                                   size="80">
+                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <span class="coral-Form-field foundation-layout-util-breakword">
+                                                With this form a translation process can be started for a given path.
+                                                </span>
+                                        </span>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="path">Path *</label>
+                                            <input class="coral-Form-field _coral-Textfield" type="text" name="path"
+                                                   required="true" is="coral-textfield" id="path" value=""
+                                                   placeholder="Enter the path">
                                         </div>
-                                        <div class="form-group">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="recursive"
-                                                       name="recursive" checked="checked">
-                                                <label class="form-check-label" for="recursive">Recursive</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                       id="translateWhenChanged"
-                                                       name="translateWhenChanged" checked="checked">
-                                                <label class="form-check-label" for="translateWhenChanged">Re-translate
-                                                    changed values</label>
-                                            </div>
+                                        <!-- Recursive -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="recursive" checked="checked">
+                                                <label for="recursiveCoral">Recursive</label>
+                                            </coral-checkbox>
+                                        </div>
+                                        <!-- Re-translate changed values -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="translateWhenChanged" checked="checked">
+                                                <label for="translateWhenChangedCoral">Re-translate changed
+                                                    values</label>
+                                            </coral-checkbox>
                                         </div>
                                         <!-- a text area with additional system instructions. -->
-                                        <div class="form-group">
-                                            <label for="additionalInstructions">Optionally, additional
-                                                instructions:</label>
-                                            <br/>
-                                            <textarea class="form-control" id="additionalInstructions"
-                                                      name="additionalInstructions" rows="3" cols="80"></textarea>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="additionalInstructions">Optionally,
+                                                additional instructions:</label>
+                                            <textarea is="coral-textarea" class="coral-Form-field _coral-Textfield"
+                                                      placeholder="Enter any additional instructions describing intended style, tone, language variants, etc."
+                                                      name="additionalInstructions" value=""
+                                                      labelledby="label-vertical-textarea-1"></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Start Translation Process</button>
+                                        <button type="submit" class="coral-Button coral-Button--primary">Start
+                                            Translation
+                                            Process
+                                        </button>
                                     </section>
                                 </form>
                                 <hr>
-                                <table class="table mt-3">
-                                    <thead class="thead-dark">
-                                    <tr>
-                                        <th>Status</th>
-                                        <th>Translation root path</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody data-sly-list="${model.translationRuns}">
-                                    <tr>
-                                        <td>${item.status}</td>
-                                        <td>
-                                            <a href="/apps/composum-ai/components/autotranslate/run.html/${item.id}">${item.rootPath}</a>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                                <section class="coral-Form-fieldset"><h2
+                                            class="coral-Form-fieldset-legend">Triggered translations</h2>
+                                    <span class="foundation-layout-util-breakword">
+                                        This table lists all translation processes that are currently running or have been
+                                        completed, last run first. Refresh page to update stati.
+                                    </span>
+                                    <!-- Table with translation runs -->
+                                    <table is="coral-table" style="max-height:300px">
+                                        <thead is="coral-table-head" sticky>
+                                        <tr is="coral-table-row">
+                                            <th is="coral-table-headercell">Status</th>
+                                            <th is="coral-table-headercell">Translation root path</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody is="coral-table-body" data-sly-list="${model.translationRuns}">
+                                        <tr is="coral-table-row">
+                                            <td is="coral-table-cell">${item.status}</td>
+                                            <td is="coral-table-cell">
+                                                <a href="/apps/composum-ai/components/autotranslate/run.html/${item.id}">${item.rootPath}</a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </section>
                                 <hr>
-                                <form action="/apps/composum-ai/components/autotranslate/list.rollback.html"
+                                <form class="coral-Form coral-Form--vertical foundation-form"
+                                      action="/apps/composum-ai/components/autotranslate/list.rollback.html"
                                       method="GET">
-                                    <div class="form-group">
-                                        <label for="path">Rollback for path:</label>
-                                        <input type="text" class="form-control" id="path" name="path" required
-                                               size="80">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Rollback Translation Results</button>
+                                    <input type="hidden" name="_charset_" value="utf-8">
+                                    <section class="coral-Form-fieldset"><h2
+                                                class="coral-Form-fieldset-legend">Rollback Translation</h2>
+                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <span class="coral-Form-field foundation-layout-util-breakword">
+                                                For quick testing only - this will roll back the given page tree
+                                                to the state before the translation process.
+                                                </span>
+                                        </span>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="path">Path *</label>
+                                            <input class="coral-Form-field _coral-Textfield" type="text" name="path"
+                                                   required="true" is="coral-textfield" id="path" value=""
+                                                   placeholder="Enter the path to be rolled back">
+                                        </div>
+                                        <button type="submit" class="coral-Button coral-Button--primary">
+                                            Rollback Translation Results
+                                        </button>
+                                    </section>
                                 </form>
                             </div>
                         </div>
                     </sly>
-
-                    <div class="coral-Form coral-Form--vertical">
-                        <fieldset class="coral-Form-fieldset">
-                            <legend class="coral-Form-fieldset-legend">Translation Processes</legend>
-
-                            <div class="coral-Form-fieldwrapper">
-                                <label class="coral-Form-fieldlabel" for="pathCoral">Path:</label>
-                                <input type="text" class="coral-Form-field" id="pathCoral" name="path" required
-                                       size="80" placeholder="Enter the path">
-                            </div>
-
-                            <div class="coral-Form-fieldwrapper">
-                                <label class="coral-Checkbox">
-                                    <input type="checkbox" class="coral-Checkbox-input" id="recursiveCoral"
-                                           name="recursive" checked>
-                                    <span class="coral-Checkbox-checkmark"></span>
-                                    <span class="coral-Checkbox-label">Recursive</span>
-                                </label>
-                            </div>
-
-                            <div class="coral-Form-fieldwrapper">
-                                <label class="coral-Checkbox">
-                                    <input type="checkbox" class="coral-Checkbox-input" id="translateWhenChangedCoral"
-                                           name="translateWhenChanged" checked>
-                                    <span class="coral-Checkbox-checkmark"></span>
-                                    Re-translate changed values
-                                </label>
-                            </div>
-
-                            <div class="coral-Form-fieldwrapper">
-                                <label class="coral-Form-fieldlabel" for="additionalInstructionsCoral">Optionally,
-                                    additional instructions:</label>
-                                <textarea class="coral-Form-field" id="additionalInstructionsCoral"
-                                          name="additionalInstructions" rows="3" cols="80"
-                                          placeholder="Enter any additional instructions"></textarea>
-                            </div>
-
-                            <button type="submit" class="coral-Button coral-Button--primary">Start Translation Process
-                            </button>
-                        </fieldset>
-                    </div>
-
-                    <!-- The table and rollback form can also be converted to use Coral UI components for consistency. -->
-
                 </div>
             </div>
         </div>
