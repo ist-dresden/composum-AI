@@ -15,83 +15,85 @@
                 <div class="cq-dialog-content-page">
                     <sly data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
                          data-sly-set.model="${runmodel.model}">
-                        <div class="coral-FixedColumn">
-                            <div class="coral-FixedColumn-column">
-                                <section class="coral-Form-fieldset"><h2
-                                            class="coral-Form-fieldset-legend">Translation run details</h2>
-                                    <div class="coral-Form coral-Form--vertical foundation-form">
-                                        <input type="hidden" name="_charset_" value="utf-8">
-                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                        <section class="coral-Form-fieldset"><h2
+                                    class="coral-Form-fieldset-legend">Translation run details</h2>
+                            <div class="coral-Form coral-Form--vertical foundation-form">
+                                <input type="hidden" name="_charset_" value="utf-8">
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                                 <span class="coral-Form-field foundation-layout-util-breakword">
                                                     <strong>Status:</strong> ${model.status}
                                                 </span>
                                             </span>
-                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                                 <span class="coral-Form-field foundation-layout-util-breakword">
                                                     <strong>Start time:</strong> ${model.startTime}
                                                 </span>
                                             </span>
-                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                                 <span class="coral-Form-field foundation-layout-util-breakword">
                                                     <strong>Stop time:</strong> ${model.stopTime}
                                                 </span>
                                             </span>
-                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                                 <span class="coral-Form-field foundation-layout-util-breakword">
                                                     <strong>User:</strong> ${model.user}
                                                 </span>
                                             </span>
-                                        <div class="coral-Form-fieldwrapper">
-                                            <label class="coral-Form-fieldlabel" for="additionalInstructions">Translated
-                                                Pages</label>
-                                            <table is="coral-table">
-                                                <thead is="coral-table-head" sticky>
-                                                <tr is="coral-table-row">
-                                                    <th is="coral-table-headercell">Status</th>
-                                                    <th is="coral-table-headercell">Page</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody is="coral-table-body"
-                                                       data-sly-list="${model.translatedPages}">
-                                                <tr is="coral-table-row">
-                                                    <td is="coral-table-cell">${item.status}</td>
-                                                    <td is="coral-table-cell">
-                                                        <a data-sly-unwrap="${item.stats.translatedProperties == 0 && item.stats.relocatedPaths == 0}"
-                                                           target="_blank"
-                                                           href="/editor.html${item.pagePath}.html">${item.pagePath}
-                                                        </a></td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <p>
-                                        <a href="../run.cancel.html/${model.id}"
-                                           class="coral-Button coral-Button--warning">
-                                            Cancel Translation Process
-                                        </a>
-                                        </p>
-                                        <p>
-                                        <a href="../run.rollback.html/${model.id}"
-                                           class="coral-Button coral-Button--warning">
-                                            Rollback Translation Process
-                                        </a>
-                                        </p>
-                                        <p>
-                                        <a href="../list.html"
-                                           class="coral-Button coral-Button--primary">
-                                            Back to translation start page.
-                                        </a>
-                                        </p>
-                                        <div class="coral-Form-fieldwrapper" data-sly-test="${model.messages.toString}">
-                                            <label class="coral-Form-fieldlabel"
-                                                   for="additionalInstructions">Messages</label>
-                                            <p>${model.messages.toString}</p>
-                                        </div>
-                                    </div>
-
-                                </section>
+                                <div class="coral-Form-fieldwrapper">
+                                    <label class="coral-Form-fieldlabel" for="additionalInstructions">Translated
+                                        Pages</label>
+                                    <table is="coral-table">
+                                        <thead is="coral-table-head" sticky>
+                                        <tr is="coral-table-row">
+                                            <th is="coral-table-headercell">Status</th>
+                                            <th is="coral-table-headercell">Modified properties & paths</th>
+                                            <th is="coral-table-headercell">Page</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody is="coral-table-body"
+                                               data-sly-list="${model.translatedPages}">
+                                        <tr is="coral-table-row">
+                                            <td is="coral-table-cell">${item.status}</td>
+                                            <td is="coral-table-cell">
+                                                <sly data-sly-test="${item.stats.hasChanges}">
+                                                    ${item.stats.translatedProperties}
+                                                    | ${item.stats.modifiedButRetranslatedProperties}
+                                                    | ${item.stats.retranslatedProperties}
+                                                    / ${item.stats.translateableProperties} ,
+                                                    ${item.stats.relocatedPaths} / ${item.stats.paths}
+                                                </sly>
+                                            </td>
+                                            <td is="coral-table-cell">
+                                                <a data-sly-unwrap="${!item.stats.hasChanges}"
+                                                   target="_blank"
+                                                   href="/editor.html${item.pagePath}.html">${item.pagePath}
+                                                </a></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p>
+                                    <a href="../run.cancel.html/${model.id}"
+                                       class="coral-Button coral-Button--warning">
+                                        Cancel Translation Process
+                                    </a>
+                                    <a href="../run.rollback.html/${model.id}"
+                                       class="coral-Button coral-Button--warning">
+                                        Rollback Translation Process
+                                    </a>
+                                    <a href="../list.html"
+                                       class="coral-Button coral-Button--primary">
+                                        Back to translation start page.
+                                    </a>
+                                </p>
+                                <div class="coral-Form-fieldwrapper" data-sly-test="${model.messages.toString}">
+                                    <label class="coral-Form-fieldlabel"
+                                           for="additionalInstructions">Messages</label>
+                                    <p>${model.messages.toString @ context='html'}</p>
+                                </div>
                             </div>
-                        </div>
+
+                        </section>
                     </sly>
                 </div>
             </div>

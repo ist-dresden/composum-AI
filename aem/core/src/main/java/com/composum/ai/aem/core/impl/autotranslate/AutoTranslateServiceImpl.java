@@ -192,7 +192,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public void cancel() {
             if (future != null) {
                 future.cancel(true);
-                future = null;
+                status = "cancelling";
             }
         }
 
@@ -222,6 +222,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                             translationParameters.additionalInstructions).merge(configuration);
                 }
                 for (TranslationPageImpl page : translatedPages) {
+                    interrupted = interrupted || future == null || future.isCancelled();
                     if (!interrupted && Thread.interrupted()) {
                         Thread.currentThread().interrupt();
                         interrupted = true;
@@ -246,9 +247,10 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         LOG.error("Error translating " + page.pagePath, e);
                     }
                 }
-                status = hasErrors ? "doneWithErrors" : "done";
+                status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
                 stopTime = new Date().toString();
             } finally {
+                future = null;
                 resourceResolver.close();
             }
         }

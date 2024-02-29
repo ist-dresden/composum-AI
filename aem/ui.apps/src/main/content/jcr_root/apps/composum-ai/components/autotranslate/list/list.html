@@ -17,7 +17,7 @@
                         <div class="coral-FixedColumn">
                             <div class="coral-FixedColumn-column">
                                 <form class="coral-Form coral-Form--vertical foundation-form"
-                                      action="/apps/composum-ai/components/autotranslate/list.create.html" method="GET">
+                                      action="list.create.html" method="GET">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
                                                 class="coral-Form-fieldset-legend">Translation Process</h2>
@@ -79,7 +79,7 @@
                                         <tr is="coral-table-row">
                                             <td is="coral-table-cell">${item.status}</td>
                                             <td is="coral-table-cell">
-                                                <a href="/apps/composum-ai/components/autotranslate/run.html/${item.id}">${item.rootPath}</a>
+                                                <a href="run.html/${item.id}">${item.rootPath}</a>
                                             </td>
                                         </tr>
                                         </tbody>
@@ -87,7 +87,7 @@
                                 </section>
                                 <hr>
                                 <form class="coral-Form coral-Form--vertical foundation-form"
-                                      action="/apps/composum-ai/components/autotranslate/list.rollback.html"
+                                      action="list.rollback.html"
                                       method="GET">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
@@ -104,7 +104,7 @@
                                                    required="true" is="coral-textfield" id="path" value=""
                                                    placeholder="Enter the path to be rolled back">
                                         </div>
-                                        <button type="submit" class="coral-Button coral-Button--primary">
+                                        <button type="submit" class="coral-Button coral-Button--warning">
                                             Rollback Translation Results
                                         </button>
                                     </section>
