@@ -163,8 +163,14 @@ This corresponds to a live copy 'rollout' with integrated translation.
 
 ## Open points
 
-- Do languages with very different character systems (jp, es, ru, chinese, korean) work?
-- Not quite clear yet: what exactly is the problem with the AEM translation process?
+- How well do languages with very different character systems (ja, es, ru, chinese zh, korean ko) work? A 
+  translation is performed, looks nicely and when translated back with Deepl the texts make sense, but it'd be 
+  interesting how skilled the translation is. Also, that might need additional instructions for the translator to 
+  choose the right variant, tone etc. (Simplified chinese might be zh-CN , traditional zh-Hant). 
+- Currently the translator can be switched on or off, but there is no configuration for whom it is available and no 
+  configuration in what content areas it can be used.
+- If a manual correction was made and the translation is updated, anyway, the manual correction should be saved for 
+  later fixing.
 
 ## Links
 
@@ -244,8 +250,6 @@ https://chatgpttools.stoerr.net/chatgpttools/multiplemessagechat.html for viewin
 
 ## More ideas
 
-- We might give the user a way to provide general information about the translation and the site - perhaps extending the
-  system message.
 - Implement differential translation
 - Tool for creating translations of i18n dictionaries?
 - Composum would work quite differently, but that will be an afterthought after a POC for AEM.
