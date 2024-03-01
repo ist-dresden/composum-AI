@@ -20,25 +20,36 @@
                             <div class="coral-Form coral-Form--vertical foundation-form">
                                 <input type="hidden" name="_charset_" value="utf-8">
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
-                                                <span class="coral-Form-field foundation-layout-util-breakword">
-                                                    <strong>Status:</strong> ${model.status}
-                                                </span>
-                                            </span>
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>Status:</strong> ${model.status}
+                                    </span>
+                                </span>
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
-                                                <span class="coral-Form-field foundation-layout-util-breakword">
-                                                    <strong>Start time:</strong> ${model.startTime}
-                                                </span>
-                                            </span>
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>Start time:</strong> ${model.startTime}
+                                    </span>
+                                </span>
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
-                                                <span class="coral-Form-field foundation-layout-util-breakword">
-                                                    <strong>Stop time:</strong> ${model.stopTime}
-                                                </span>
-                                            </span>
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>Stop time:</strong> ${model.stopTime}
+                                    </span>
+                                </span>
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
-                                                <span class="coral-Form-field foundation-layout-util-breakword">
-                                                    <strong>User:</strong> ${model.user}
-                                                </span>
-                                            </span>
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>User:</strong> ${model.user}
+                                    </span>
+                                </span>
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                   <span class="coral-Form-field foundation-layout-util-breakword">
+                                       The "modified properties" statistics column shows for each page the count of newly translated properties,
+                                       properties that have been retranslated because the original was modified,
+                                       properties that have been retranslated while the translation was manually modified (that likely needs attention!)
+                                       versus the total count of properties that are translateable, and
+                                       the number of paths that were found and relocated to a copy with the appropriate language
+                                       versus the total number of paths found in the page.
+                                       For modified pages a link into the editor is provided.
+                                       </span>
+                               </span>
                                 <div class="coral-Form-fieldwrapper">
                                     <label class="coral-Form-fieldlabel" for="additionalInstructions">Translated
                                         Pages</label>
@@ -57,9 +68,11 @@
                                             <td is="coral-table-cell">
                                                 <sly data-sly-test="${item.stats.hasChanges}">
                                                     ${item.stats.translatedProperties}
-                                                    | ${item.stats.modifiedButRetranslatedProperties}
                                                     | ${item.stats.retranslatedProperties}
-                                                    / ${item.stats.translateableProperties} ,
+                                                    | ${item.stats.modifiedButRetranslatedProperties}
+                                                    /
+                                                    ${item.stats.translateableProperties} ,
+                                                    &nbsp;&nbsp;
                                                     ${item.stats.relocatedPaths} / ${item.stats.paths}
                                                 </sly>
                                             </td>
