@@ -20,8 +20,16 @@
                                       action="list.create.html" method="GET">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
-                                                class="coral-Form-fieldset-legend">Translation Process proof of concept</h2>
+                                                class="coral-Form-fieldset-legend">Translation Process proof of
+                                            concept</h2>
                                         <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <coral-alert variant="error" data-sly-test="${model.disabled}">
+                                                <coral-alert-header>NOT CONFIGURED</coral-alert-header>
+                                                <coral-alert-content>The translation service is currently not enabled in the
+                                                    OSGI configuration and thus unavailable - please consult the
+                                                    documentation for further information.
+                                                </coral-alert-content>
+                                            </coral-alert>
                                             <span class="coral-Form-field foundation-layout-util-breakword">
                                                 With this form an automatic translation of a page or page tree can be done.
                                                 It assumes the given path is a live copy of the original language
@@ -33,6 +41,8 @@
                                                 full documentation is
                                                 <a href="https://ist-dresden.github.io/composum-AI/aem-variant/automaticTranslationPoc.html">available
                                                     on the project page</a>.
+                                                Please be sure to understand this documentation - this is currently in
+                                                an experimental stage, though it might work for you nicely, anyway.
                                                 </span>
                                         </span>
                                         <div class="coral-Form-fieldwrapper">
@@ -44,14 +54,16 @@
                                         <!-- Recursive -->
                                         <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="recursive">
-                                                <label for="recursiveCoral">Recursive - also translate all subpages</label>
+                                                <label for="recursiveCoral">Recursive - also translate all
+                                                    subpages</label>
                                             </coral-checkbox>
                                         </div>
                                         <!-- Re-translate changed values -->
                                         <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="translateWhenChanged" checked="checked">
                                                 <label for="translateWhenChangedCoral">Re-translate values that have
-                                                been changed in the blueprint of the live copy after the last translation run
+                                                    been changed in the blueprint of the live copy after the last
+                                                    translation run
                                                 </label>
                                             </coral-checkbox>
                                         </div>

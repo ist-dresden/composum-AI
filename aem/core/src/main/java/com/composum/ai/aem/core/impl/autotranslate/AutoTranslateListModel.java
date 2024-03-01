@@ -17,10 +17,10 @@ import com.day.cq.wcm.api.WCMException;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class AutoTranslateListModel {
 
-    @OSGiService
+    @OSGiService(optional = true)
     private AutoTranslateService autoTranslateService;
 
-    @OSGiService
+    @OSGiService(optional = true)
     private AIConfigurationService configurationService;
 
     @Self
@@ -28,6 +28,9 @@ public class AutoTranslateListModel {
 
     private AutoTranslateService.TranslationRun run;
 
+    public boolean isDisabled() {
+        return autoTranslateService == null || !autoTranslateService.isEnabled() || configurationService == null;
+    }
 
     public List<AutoTranslateService.TranslationRun> getTranslationRuns() {
         return autoTranslateService.getTranslationRuns();

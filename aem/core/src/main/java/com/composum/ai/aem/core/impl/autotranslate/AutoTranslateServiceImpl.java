@@ -96,6 +96,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     @Override
+    public boolean isEnabled() {
+        return !disabled;
+    }
+
+    @Override
     public TranslationRun startTranslation(
             @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
             @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)

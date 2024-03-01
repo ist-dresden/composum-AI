@@ -33,7 +33,9 @@ public interface AutoTranslateService {
      */
     void rollback(Resource resource) throws WCMException;
 
-    public static class TranslationParameters {
+    boolean isEnabled();
+
+    static class TranslationParameters {
         /**
          * Translate subpages as well.
          */
@@ -49,7 +51,7 @@ public interface AutoTranslateService {
         public String additionalInstructions;
     }
 
-    public static abstract class TranslationRun {
+    static abstract class TranslationRun {
         public String id;
         public String status;
         public String startTime;
@@ -65,7 +67,7 @@ public interface AutoTranslateService {
         public abstract void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException;
     }
 
-    public static abstract class TranslationPage {
+    static abstract class TranslationPage {
         public String pagePath;
         public String status;
         public AutoPageTranslateService.Stats stats;
