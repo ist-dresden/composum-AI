@@ -85,13 +85,11 @@ import com.knuddels.jtokkit.api.EncodingType;
  * @see "https://platform.openai.com/docs/api-reference/chat/create"
  * @see "https://platform.openai.com/docs/guides/chat"
  */
-// TODO(hps,06.04.23) check error handling
-// TODO(hps,06.04.23) more configurability
 @Component(service = GPTChatCompletionService.class)
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
 public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
     protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
@@ -109,8 +107,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4-vision-preview";
 
-    private static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
-    private static final int DEFAULTVALUE_REQUESTTIMEOUT = 60;
+    protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
+    protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 120;
+
+    protected static final int DEFAULTVALUE_REQUESTS_PER_MINUTE = 100;
+    protected static final int DEFAULTVALUE_REQUESTS_PER_HOUR = 1000;
+    protected static final int DEFAULTVALUE_REQUESTS_PER_DAY = 3000;
 
     public static final String TRUNCATE_MARKER = " ... (truncated) ... ";
     /**
@@ -121,15 +123,17 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     /**
      * The OpenAI Key for accessing ChatGPT; system default if not given in request.
      */
-    private String apiKey;
-    private String defaultModel;
-    private String imageModel;
+    protected String apiKey;
+    protected String organizationId;
+    protected String defaultModel;
+    protected String imageModel;
+    protected String chatCompletionUrl = CHAT_COMPLETION_URL;
 
-    private CloseableHttpAsyncClient httpAsyncClient;
+    protected CloseableHttpAsyncClient httpAsyncClient;
 
-    private static final Gson gson = new GsonBuilder().create();
+    protected static final Gson gson = new GsonBuilder().create();
 
-    private final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
+    protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
     /**
      * Limiter that maps the financial reasons to limit.
@@ -150,29 +154,35 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     protected Encoding enc = registry.getEncoding(EncodingType.CL100K_BASE);
 
-    private BundleContext bundleContext;
+    protected BundleContext bundleContext;
 
-    private final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
-    private int requestTimeout;
-    private int connectionTimeout;
-    private Double temperature;
+    protected final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
+    protected int requestTimeout;
+    protected int connectionTimeout;
+    protected Double temperature;
 
     protected boolean disabled;
 
     protected ScheduledExecutorService scheduledExecutorService;
 
+    protected Integer maximumTokensPerRequest;
+
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         LOG.info("Activating GPTChatCompletionService {}", config);
         // since it costs a bit of money and there are remote limits, we do limit it somewhat, especially for the case of errors.
-        RateLimiter dayLimiter = new RateLimiter(null, 200, 1, TimeUnit.DAYS);
-        RateLimiter hourLimiter = new RateLimiter(dayLimiter, 100, 1, TimeUnit.HOURS);
-        this.limiter = new RateLimiter(hourLimiter, 20, 1, TimeUnit.MINUTES);
+        int limitPerDay = config != null && config.requestsPerDay() > 0 ? config.requestsPerDay() : DEFAULTVALUE_REQUESTS_PER_DAY;
+        RateLimiter dayLimiter = new RateLimiter(null, limitPerDay, 1, TimeUnit.DAYS);
+        int limitPerHour = config != null && config.requestsPerHour() > 0 ? config.requestsPerHour() : DEFAULTVALUE_REQUESTS_PER_HOUR;
+        RateLimiter hourLimiter = new RateLimiter(dayLimiter, limitPerHour, 1, TimeUnit.HOURS);
+        int limitPerMinute = config != null && config.requestsPerMinute() > 0 ? config.requestsPerMinute() : DEFAULTVALUE_REQUESTS_PER_MINUTE;
+        this.limiter = new RateLimiter(hourLimiter, limitPerMinute, 1, TimeUnit.MINUTES);
         this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.imageModel = config != null && config.imageModel() != null && !config.imageModel().trim().isEmpty() ? config.imageModel().trim() : null;
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
+        this.maximumTokensPerRequest = config != null && config.maximumTokensPerRequest() > 0 ? config.maximumTokensPerRequest() : null;
         try {
             this.temperature = config != null && !StringUtil.isBlank(config.temperature()) ? Double.valueOf(config.temperature()) : null;
         } catch (NumberFormatException e) {
@@ -182,8 +192,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.disabled = config != null && config.disabled();
         if (!disabled) {
             this.apiKey = retrieveOpenAIKey(config);
+            this.organizationId = config.openAiOrganizationId();
         } else {
             LOG.info("ChatGPT is disabled.");
+        }
+        if (config.chatCompletionUrl() != null && !config.chatCompletionUrl().trim().isEmpty()) {
+            this.chatCompletionUrl = config.chatCompletionUrl().trim();
         }
         if (isEnabled()) {
             PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
@@ -239,7 +253,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    private static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
+    protected static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
         String apiKey = null;
         if (config != null) {
             apiKey = config.openAiApiKey();
@@ -302,23 +316,37 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             throw new GPTException("Interrupted during call to GPT", e);
         } catch (IOException e) {
             if (!e.toString().contains("Stream") || !e.toString().contains("cancelled")) {
-                LOG.error("Error while call {} to GPT", id, e);
+                LOG.error("IO error while call {} to GPT", id, e);
             }
             throw new GPTException("Error while calling GPT", e);
         } catch (ExecutionException e) {
-            LOG.error("Error while call {} to GPT", id, e);
-            throw new GPTException("Error while calling GPT", e.getCause());
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            if (cause instanceof GPTException.GPTContextLengthExceededException) {
+                LOG.info("Context length exceeded while call {} to GPT", id);
+            } else {
+                LOG.error("Execution error while call {} to GPT", id, e);
+            }
+            if (cause instanceof GPTException || cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            throw new GPTException("Execution Error while calling GPT", e);
         } catch (TimeoutException e) {
             LOG.error("" + e, e);
             throw new GPTException("Timeout while calling GPT", e);
+        } catch (RuntimeException e) {
+            throw e;
         }
     }
 
-    private SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
         String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
-        SimpleHttpRequest request = new SimpleHttpRequest("POST", CHAT_COMPLETION_URL);
+        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
+        SimpleHttpRequest request = new SimpleHttpRequest("POST", chatCompletionUrl);
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
         request.addHeader("Authorization", "Bearer " + actualApiKey);
+        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
+            request.addHeader("OpenAI-Organization", actualOrganizationId);
+        }
         return request;
     }
 
@@ -341,7 +369,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
-            Thread.currentThread().interrupt();
             LOG.error("Error while call {} to GPT", id, e);
             throw new GPTException("Error while calling GPT", e);
         }
@@ -519,6 +546,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         externalRequest.setMaxTokens(request.getMaxTokens());
         externalRequest.setStream(Boolean.TRUE);
         String jsonRequest = gson.toJson(externalRequest);
+        checkTokenCount(jsonRequest);
         return jsonRequest;
     }
 
@@ -604,6 +632,18 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         return enc.countTokensOrdinary(text);
     }
 
+    protected void checkTokenCount(String jsonRequest) {
+        if (maximumTokensPerRequest != null && jsonRequest != null) {
+            if (jsonRequest.length() < maximumTokensPerRequest) {
+                return;
+            }
+            int tokens = countTokens(jsonRequest); // not exact but close enough for this purpose
+            if (tokens > maximumTokensPerRequest) {
+                throw new GPTException("Aborting request because configured maximumTokensPerRequest is exceeded: request has about " + tokens);
+            }
+        }
+    }
+
     @Override
     @Nonnull
     public String htmlToMarkdown(String html) {
@@ -617,31 +657,59 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
-        @AttributeDefinition(name = "Disable the GPT Chat Completion Service", description = "Disable the GPT Chat Completion Service", defaultValue = "false")
+        @AttributeDefinition(name = "Disable", description = "Disable the GPT Chat Completion Service", required = false)
         boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
 
-        @AttributeDefinition(name = "OpenAI API Key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
+        @AttributeDefinition(name = "URL of the chat completion service",
+                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
+        String chatCompletionUrl();
+
+        @AttributeDefinition(name = "OpenAI API key", description = "OpenAI API key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .", required = false)
         String openAiApiKey();
 
+        @AttributeDefinition(name = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization .", required = false)
+        String openAiOrganizationId();
+
         // alternatively, a key file
-        @AttributeDefinition(name = "OpenAI API Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
+        @AttributeDefinition(name = "OpenAI API key file", required = false,
+                description = "Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
         String openAiApiKeyFile();
 
-        @AttributeDefinition(name = "Default model to use for the chat completion. The default is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .", defaultValue = DEFAULT_MODEL)
+        @AttributeDefinition(name = "Default model", required = false,
+                description = "Default model to use for the chat completion. The default if not set is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
         String defaultModel() default DEFAULT_MODEL;
 
-        @AttributeDefinition(name = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, that is rejected.",
+        @AttributeDefinition(name = "Vision model", required = false,
+                description = "Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, image recognition is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel() default DEFAULT_IMAGE_MODEL;
 
-        @AttributeDefinition(name = "Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0", defaultValue = "")
+        @AttributeDefinition(name = "Temperature", required = false,
+                description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0", defaultValue = "")
         String temperature();
 
-        @AttributeDefinition(name = "Connection timeout in seconds", defaultValue = "" + DEFAULTVALUE_CONNECTIONTIMEOUT)
-        int connectionTimeout();
+        @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
+                "That's about a half of the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
+                defaultValue = "50000", required = false)
+        int maximumTokensPerRequest();
 
-        @AttributeDefinition(name = "Request timeout in seconds", defaultValue = "" + DEFAULTVALUE_REQUESTTIMEOUT)
-        int requestTimeout();
+        @AttributeDefinition(name = "Connection timeout in seconds", description = "Default " + DEFAULTVALUE_CONNECTIONTIMEOUT, required = false)
+        int connectionTimeout() default DEFAULTVALUE_CONNECTIONTIMEOUT;
+
+        @AttributeDefinition(name = "Request timeout in seconds", description = "Default " + DEFAULTVALUE_REQUESTTIMEOUT, required = false)
+        int requestTimeout() default DEFAULTVALUE_REQUESTTIMEOUT;
+
+        @AttributeDefinition(name = "Maximum requests per minute", required = false,
+                description = "Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_MINUTE)
+        int requestsPerMinute();
+
+        @AttributeDefinition(name = "Maximum requests per hour", required = false,
+                description = "Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_HOUR)
+        int requestsPerHour();
+
+        @AttributeDefinition(name = "Maximum requests per day", required = false,
+                description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
+        int requestsPerDay();
     }
 
     /**
@@ -655,15 +723,15 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected class StreamDecodingResponseConsumer extends AbstractCharResponseConsumer<Void> {
 
-        private final GPTCompletionCallback callback;
-        private final CompletableFuture<Void> result;
-        private final StringBuilder resultBuilder = new StringBuilder();
-        private final long id;
+        protected final GPTCompletionCallback callback;
+        protected final CompletableFuture<Void> result;
+        protected final StringBuilder resultBuilder = new StringBuilder();
+        protected final long id;
 
         /**
          * If set, we collect the data for the error message, of false we process it as stream.
          */
-        private Integer errorStatusCode;
+        protected Integer errorStatusCode;
 
         /**
          * The result of the webservice call is written to callback; result is set when either it completed or aborted.
@@ -723,8 +791,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     result.completeExceptionally(retryableException);
                     throw retryableException;
                 }
-                GPTException gptException = new GPTException("Error response from GPT (status " + errorStatusCode
-                        + ") : " + resultBuilder);
+                GPTException gptException = buildException(errorStatusCode, resultBuilder.toString());
                 callback.onError(gptException);
                 result.completeExceptionally(gptException);
                 throw gptException;
@@ -735,7 +802,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @Override
         public void failed(Exception cause) {
-            LOG.error("Response {} from GPT failed", id, cause);
+            LOG.info("Response {} from GPT failed: {}", id, cause.toString());
             result.completeExceptionally(cause);
             if (!(cause instanceof RetryableException)) {
                 callback.onError(cause);
@@ -754,13 +821,26 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     }
 
+    protected static GPTException buildException(Integer errorStatusCode, String result) {
+        // this is annoyingly heuristic and seems to break once in a while.
+        if (Integer.valueOf(400).equals(errorStatusCode) && result != null
+                && result.contains("invalid_request_error") &&
+                (result.contains("context_length_exceeded") || result.contains("max_tokens") ||
+                        result.contains("model supports at most") ||
+                        result.contains("maximum context length"))) {
+            return new GPTException.GPTContextLengthExceededException(result);
+        }
+        return new GPTException("Error response from GPT (status " + errorStatusCode
+                + ") : " + result);
+    }
+
     /**
      * Makes doubly sure that result is somehow set after the call.
      */
     protected static class EnsureResultFutureCallback implements FutureCallback<Void> {
 
         @Nonnull
-        private final CompletableFuture<Void> result;
+        protected final CompletableFuture<Void> result;
 
         public EnsureResultFutureCallback(@Nonnull CompletableFuture<Void> result) {
             this.result = result;

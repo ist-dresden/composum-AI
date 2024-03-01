@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Translation run details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+    <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
+        <div class="foundation-layout-panel-body">
+            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
+                <div class="cq-dialog-content-page">
+                    <sly data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
+                         data-sly-set.model="${runmodel.model}">
+                        <section class="coral-Form-fieldset"><h2
+                                    class="coral-Form-fieldset-legend">Translation run details</h2>
+                            <div class="coral-Form coral-Form--vertical foundation-form">
+                                <input type="hidden" name="_charset_" value="utf-8">
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>Status:</strong> ${model.status}
+                                    </span>
+                                </span>
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>Start time:</strong> ${model.startTime}
+                                    </span>
+                                </span>
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>Stop time:</strong> ${model.stopTime}
+                                    </span>
+                                </span>
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                    <span class="coral-Form-field foundation-layout-util-breakword">
+                                        <strong>User:</strong> ${model.user}
+                                    </span>
+                                </span>
+                                <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                   <span class="coral-Form-field foundation-layout-util-breakword">
+                                       The "modified properties" statistics column shows for each page the count of newly translated properties,
+                                       properties that have been retranslated because the original was modified,
+                                       properties that have been retranslated while the translation was manually modified (that likely needs attention!)
+                                       versus the total count of properties that are translateable, and
+                                       the number of paths that were found and relocated to a copy with the appropriate language
+                                       versus the total number of paths found in the page.
+                                       For modified pages a link into the editor is provided.
+                                       </span>
+                               </span>
+                                <div class="coral-Form-fieldwrapper">
+                                    <label class="coral-Form-fieldlabel" for="additionalInstructions">Translated
+                                        Pages</label>
+                                    <table is="coral-table">
+                                        <thead is="coral-table-head" sticky>
+                                        <tr is="coral-table-row">
+                                            <th is="coral-table-headercell">Status</th>
+                                            <th is="coral-table-headercell">Modified properties & paths</th>
+                                            <th is="coral-table-headercell">Page</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody is="coral-table-body"
+                                               data-sly-list="${model.translatedPages}">
+                                        <tr is="coral-table-row">
+                                            <td is="coral-table-cell">${item.status}</td>
+                                            <td is="coral-table-cell">
+                                                <sly data-sly-test="${item.stats.hasChanges}">
+                                                    ${item.stats.translatedProperties}
+                                                    | ${item.stats.retranslatedProperties}
+                                                    | ${item.stats.modifiedButRetranslatedProperties}
+                                                    /
+                                                    ${item.stats.translateableProperties} ,
+                                                    &nbsp;&nbsp;
+                                                    ${item.stats.relocatedPaths} / ${item.stats.paths}
+                                                </sly>
+                                            </td>
+                                            <td is="coral-table-cell">
+                                                <a data-sly-unwrap="${!item.stats.hasChanges}"
+                                                   target="_blank"
+                                                   href="/editor.html${item.pagePath}.html">${item.pagePath}
+                                                </a></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p>
+                                    <a href="../run.cancel.html/${model.id}"
+                                       class="coral-Button coral-Button--warning">
+                                        Cancel Translation Process
+                                    </a>
+                                    <a href="../run.rollback.html/${model.id}"
+                                       class="coral-Button coral-Button--warning">
+                                        Rollback Translation Process
+                                    </a>
+                                    <a href="../list.html"
+                                       class="coral-Button coral-Button--primary">
+                                        Back to translation start page.
+                                    </a>
+                                </p>
+                                <div class="coral-Form-fieldwrapper" data-sly-test="${model.messages.toString}">
+                                    <label class="coral-Form-fieldlabel"
+                                           for="additionalInstructions">Messages</label>
+                                    <p>${model.messages.toString @ context='html'}</p>
+                                </div>
+                            </div>
+
+                        </section>
+                    </sly>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+</body>
+</html>

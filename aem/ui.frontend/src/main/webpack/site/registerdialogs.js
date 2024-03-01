@@ -85,7 +85,9 @@ try {
             const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
             $.ajax({
-                url: CREATE_DIALOG_URL + "?richtext=" + parameters.isRichtext + '&path=' + encodeURIComponent(parameters.componentPath),
+                url: CREATE_DIALOG_URL + "?richtext=" + parameters.isRichtext +
+                    '&path=' + encodeURIComponent(parameters.componentPath) +
+                    '&property=' + encodeURIComponent(parameters.property),
                 type: "GET",
                 dataType: "html",
                 success: function (data) {

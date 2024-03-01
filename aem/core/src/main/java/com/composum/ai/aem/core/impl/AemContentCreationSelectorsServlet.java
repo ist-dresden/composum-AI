@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -55,6 +56,10 @@ public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet 
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         Map<String, String> contentSelectors = readPredefinedContentSelectors(request);
         String path = request.getParameter(PARAMETER_PATH);
+        String property = request.getParameter("property");
+        if (StringUtils.isNotBlank(property)) {
+            path = path + "/" + property;
+        }
         Resource resource = request.getResourceResolver().getResource(path);
         if (resource != null) {
             addContentPaths(resource, contentSelectors);
@@ -65,12 +70,9 @@ public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet 
 
     /**
      * We look for content paths in the component and it's parent. That seems more appropriate than the component itself
-     * in AEM - often interesting links are contained one level up, e.g. for text fields in teasers.
+     * in AEM - often interesting links are contained one or more levels up, e.g. for text fields in teasers.
      */
     protected void addContentPaths(Resource resource, Map<String, String> contentSelectors) {
-        if (resource.getPath().contains("/jcr:content/")) {
-            resource = resource.getParent();
-        }
         List<ApproximateMarkdownService.Link> componentLinks = approximateMarkdownService.getComponentLinks(resource);
         for (ApproximateMarkdownService.Link link : componentLinks) {
             if (!link.isNeedsVision() || chatCompletionService.isVisionEnabled()) {

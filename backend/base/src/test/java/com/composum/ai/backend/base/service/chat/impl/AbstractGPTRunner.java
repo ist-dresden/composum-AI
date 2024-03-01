@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.CHAT_COMPLETION_URL;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.file.Files;
@@ -32,8 +34,18 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public String chatCompletionUrl() {
+                return CHAT_COMPLETION_URL;
+            }
+
+            @Override
             public String openAiApiKey() {
                 return apiKey;
+            }
+
+            @Override
+            public String openAiOrganizationId() {
+                return null;
             }
 
             @Override
@@ -57,8 +69,28 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public int maximumTokensPerRequest() {
+                return 0;
+            }
+
+            @Override
             public int requestTimeout() {
                 return 60;
+            }
+
+            @Override
+            public int requestsPerMinute() {
+                return 20;
+            }
+
+            @Override
+            public int requestsPerHour() {
+                return 60;
+            }
+
+            @Override
+            public int requestsPerDay() {
+                return 120;
             }
 
             @Override

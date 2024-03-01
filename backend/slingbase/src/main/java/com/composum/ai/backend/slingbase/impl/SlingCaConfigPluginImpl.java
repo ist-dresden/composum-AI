@@ -71,7 +71,7 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         OpenAIConfig config = confBuilder.as(OpenAIConfig.class);
         GPTConfiguration result = null;
         if (StringUtils.isNotBlank(config.openAiApiKey())) {
-            result = new GPTConfiguration(config.openAiApiKey(), null);
+            result = new GPTConfiguration(config.openAiApiKey(), config.openAiOrganizationId(), null);
         }
         LOG.debug("found key: {}", result);
         return result;

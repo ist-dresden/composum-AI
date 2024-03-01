@@ -146,7 +146,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (resource == null || IGNORED_NODE_NAMES.matcher(resource.getName()).matches()) {
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
             // TODO(hps,26.05.23) this might lead to trouble if the user edits a non-default language first. Join with translations?
-            // Also it'd be not quite clear what language we should take.
+            // Also, it'd be not quite clear what language we should take. That's Composum only, though.
             return;
         }
         if (!ResourceUtil.normalize(resource.getPath()).startsWith("/content/")) {
@@ -158,24 +158,15 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         PluginResult pluginResult = executePlugins(resource, out, request, response);
         boolean printEmptyLine = false;
         if (pluginResult == NOT_HANDLED) {
-            for (String attributename : textAttributes) {
-                String value = resource.getValueMap().get(attributename, String.class);
-                if (isNotBlank(value)) {
-                    String prefix = ATTRIBUTE_TO_MARKDOWN_PREFIX.getOrDefault(attributename, "");
-                    String markdown;
-                    if ("text".equals(attributename) && resource.getValueMap().get("textIsRich") != null) {
-                        String textIsRich = resource.getValueMap().get("textIsRich", String.class);
-                        markdown = "true".equalsIgnoreCase(textIsRich) ?
-                                chatCompletionService.htmlToMarkdown(value).trim() : value;
-                    } else {
-                        markdown = getMarkdown(value);
-                    }
-                    out.println(prefix + markdown);
-                    printEmptyLine = true;
-                }
+            if (resource.getValueMap().isEmpty() && !resource.hasChildren()) { // attribute resource
+                String attributeName = resource.getName();
+                String markdown = attributeToMarkdown(resource.getParent(), attributeName,
+                        resource.getParent().getValueMap().get(attributeName, String.class));
+                out.println(markdown);
+                // no need for empty line since there are no children.
+            } else {
+                printEmptyLine = handleResource(resource, out, printEmptyLine);
             }
-            printEmptyLine = handleCodeblock(resource, out, printEmptyLine);
-            printEmptyLine = handleLabeledAttributes(resource, out, printEmptyLine);
         }
         if (printEmptyLine) {
             out.println();
@@ -184,6 +175,33 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             resource.getChildren().forEach(child -> approximateMarkdown(child, out, request, response));
         }
         logUnhandledAttributes(resource);
+    }
+
+    protected boolean handleResource(@NotNull Resource resource, @NotNull PrintWriter out, boolean printEmptyLine) {
+        for (String attributename : textAttributes) {
+            String value = resource.getValueMap().get(attributename, String.class);
+            if (isNotBlank(value)) {
+                String prefix = ATTRIBUTE_TO_MARKDOWN_PREFIX.getOrDefault(attributename, "");
+                String markdown = attributeToMarkdown(resource, attributename, value);
+                out.println(prefix + markdown);
+                printEmptyLine = true;
+            }
+        }
+        printEmptyLine = handleCodeblock(resource, out, printEmptyLine);
+        printEmptyLine = handleLabeledAttributes(resource, out, printEmptyLine);
+        return printEmptyLine;
+    }
+
+    protected String attributeToMarkdown(@NotNull Resource resource, String attributename, String value) {
+        String markdown;
+        if ("text".equals(attributename) && resource.getValueMap().get("textIsRich") != null) {
+            String textIsRich = resource.getValueMap().get("textIsRich", String.class);
+            markdown = "true".equalsIgnoreCase(textIsRich) ?
+                    chatCompletionService.htmlToMarkdown(value).trim() : value;
+        } else {
+            markdown = getMarkdown(value);
+        }
+        return markdown;
     }
 
     @Nonnull
@@ -335,6 +353,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (resource == null) {
             return resourceLinks;
         }
+
+        plugins.stream().forEach(plugin -> resourceLinks.addAll(plugin.getMasterLinks(resource)));
+
         Resource searchResource = resource;
         if (resource.getValueMap().isEmpty()) { // attribute resource, use parent
             searchResource = resource.getParent();
