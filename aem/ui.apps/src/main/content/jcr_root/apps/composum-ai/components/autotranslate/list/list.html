@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Translation Processes</title>
+    <title>Translation Process Proof of Concept</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
     <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
@@ -20,10 +20,19 @@
                                       action="list.create.html" method="GET">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
-                                                class="coral-Form-fieldset-legend">Translation Process</h2>
+                                                class="coral-Form-fieldset-legend">Translation Process proof of concept</h2>
                                         <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                             <span class="coral-Form-field foundation-layout-util-breakword">
-                                                With this form a translation process can be started for a given path.
+                                                With this form an automatic translation of a page or page tree can be done.
+                                                It assumes the given path is a live copy of the original language
+                                                (to be easily updateable from the blueprint)
+                                                and will translate all properties heuristically determined to be text
+                                                using ChatGPT,
+                                                as well as change found paths to a copy with the appropriate language.
+                                                Translation is disabled until enabled in OSGI configuration;
+                                                full documentation is
+                                                <a href="https://ist-dresden.github.io/composum-AI/aem-variant/automaticTranslationPoc.html">available
+                                                    on the project page</a>.
                                                 </span>
                                         </span>
                                         <div class="coral-Form-fieldwrapper">
@@ -35,14 +44,15 @@
                                         <!-- Recursive -->
                                         <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="recursive" checked="checked">
-                                                <label for="recursiveCoral">Recursive</label>
+                                                <label for="recursiveCoral">Recursive - also translate all subpages</label>
                                             </coral-checkbox>
                                         </div>
                                         <!-- Re-translate changed values -->
                                         <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="translateWhenChanged" checked="checked">
-                                                <label for="translateWhenChangedCoral">Re-translate changed
-                                                    values</label>
+                                                <label for="translateWhenChangedCoral">Re-translate values that have
+                                                been changed in the blueprint of the live copy after the last translation run
+                                                </label>
                                             </coral-checkbox>
                                         </div>
                                         <!-- a text area with additional system instructions. -->
