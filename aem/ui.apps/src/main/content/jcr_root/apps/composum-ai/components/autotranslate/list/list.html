@@ -60,13 +60,18 @@
                                         </div>
                                         <!-- Re-translate changed values -->
                                         <div class="coral-Form-fieldwrapper">
-                                            <coral-checkbox name="translateWhenChanged" checked="checked">
-                                                <label for="translateWhenChangedCoral">Re-translate values that have
+                                            <coral-checkbox name="translateWhenChanged" checked="checked" id="translateWhenChanged">
+                                                <label for="translateWhenChanged">Re-translate values that have
                                                     been changed in the blueprint of the live copy after the last
                                                     translation run
                                                 </label>
                                             </coral-checkbox>
                                         </div>
+                                        <!-- Break inheritance on translation -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="breakInheritance" id="breakInheritance">
+                                                <label for="breakInheritance">Break inheritance of component / property on translation</label>
+                                            </coral-checkbox>
                                         <!-- a text area with additional system instructions. -->
                                         <div class="coral-Form-fieldwrapper">
                                             <label class="coral-Form-fieldlabel" for="additionalInstructions">Optionally,

@@ -46,11 +46,13 @@ public class AutoTranslateListModel {
             boolean recursive = request.getParameter("recursive") != null;
             boolean changed = request.getParameter("translateWhenChanged") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
+            boolean breakInheritance = request.getParameter("breakInheritance") != null;
             GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             parms.recursive = recursive;
             parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
+            parms.breakInheritance = breakInheritance;
             run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms, configuration);
         }
         return run;

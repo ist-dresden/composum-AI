@@ -49,6 +49,11 @@ public interface AutoTranslateService {
          * Optionally, additional instructions to add to the system prompt.
          */
         public String additionalInstructions;
+
+        /**
+         * If true, we break the inheritance of the component / the property on translation.
+         */
+        public boolean breakInheritance;
     }
 
     static abstract class TranslationRun {

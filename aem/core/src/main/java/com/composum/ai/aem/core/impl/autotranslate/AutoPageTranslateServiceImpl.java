@@ -82,6 +82,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     public static final String AI_TRANSLATED_SUFFIX = "_translated";
 
     /**
+     * Suffix for a property name where a manual change is saved when a retranslation is done despite a manual modification.
+     * Will be overwritten if another retranslation is done.
+     */
+    public static final String AI_MANUAL_CHANGE_SUFFIX = "_manualChange";
+
+
+    /**
      * List of properties that should always be translated.
      */
     public static final List<String> CERTAINLY_TRANSLATABLE_PROPERTIES =
@@ -147,7 +154,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 stats.translatedProperties++;
                 changed = true;
 
-                cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
+                if (translationParameters.breakInheritance) {
+                    cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
+                }
             }
 
             changed |= migratePathsToLanguageCopy(resource, language, stats);
