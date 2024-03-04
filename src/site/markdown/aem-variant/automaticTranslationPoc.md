@@ -26,7 +26,8 @@ reasoning capabilities that can improve the quality of the translation:
   That can range from minor changes like influencing how formal to address the user to major modifications like
   simplifying the language for a younger audience.
 - While that's not currently implemented, we make preparations so that manual corrections of translations can be
-  preserved when a retranslation of a modified text in the original language is done.
+  preserved when a retranslation of a modified text in the original language is done (see ["Differential 
+  re-translation"](#difftranslation) below).
 
 Or course, the full power of the [Composum AI](usage.md) can then be used to further improve the translated texts.
 
@@ -99,6 +100,16 @@ automatic translation.
 
 ## Possible extensions
 
+<a id="difftranslation"></a>
 ### Differential re-translation
 
-TBD
+An interesting possibility where the reasoning capabilities of LLM could ease the translators work is the case where 
+an automatical translation was done and an editor made manual changes to that translation. If in such a case the 
+master language the text is changed and a simple automatical translation would be re-run, then the manual changes would be
+lost. When employing an LLM, it'd be possible to give it:
+1. the first version of the language master
+2. the text that was automatically translated to
+3. the text that was manually changed into
+4. the new version of the language master
+and ask the LLM to translate the new version and to replicate the manual changes between 2 and 3 into the new version.
+This could minimize the manual work for such cases.
