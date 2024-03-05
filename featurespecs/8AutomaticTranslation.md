@@ -14,9 +14,14 @@ afterwards and fix them.
 For AEM: instead of the language copies mechanism that is often used for site translation we employ the live copy
 mechanism, which might be simpler to use, which would also be a distinguishing feature of the Composum AI translation
 process. The translation would then be a live copy of the original page. The translation process would then go through
-all components of the translated tree, break the inheritance and replace the texts in the text properties. This would
+all components of the translated tree and replace the texts in the text properties. (We opt not to break the 
+inheritance). This would
 provide an initial translation; for updating the translation, the live copy mechanism could be used in conjunction with
 a translation by the content creation dialog, or the translation could be updated by the process.
+
+This process can be triggered separately, or with a special action performed on rollout - e.g. a new 
+[synchronization action](https://experienceleague.adobe.com/docs/experience-manager-65/content/sites/administering/introduction/msm-sync.html?lang=en#installed-synchronization-actions)
+that can be integrated into rollout actions and triggers the translation process.
 
 Translated would normally be properties that "obviously" contain text, like jcr:title, jcr:description, text, title
 etc. (Let's search the wcm core components documentation for that), and properties that heuristically "look like text",
@@ -61,11 +66,14 @@ usage e.g.
 /content/wknd/language-masters/lc/adventures/ski-touring-mont-blanc ->
 /content/dam/wknd/en/adventures/ski-touring-mont-blanc/ski-touring-mont-blanc
 
-??? How to update the text attribute?
+Currently heuristic recognition of text attributes. That will probably need a specific implementation observing the 
+models, possibly a translation of the actual models.
 
 ### Assets (images etc.)
 
-Unclear: they have titles etc, so they are language specific as well. Copy?
+They have titles etc, so they are language specific as well, but these are often not used. If content fragments are 
+used, a live copy of the assets for translating content fragments will copy image assets, too - that might be a 
+problem. 
 
 ### AEM Language copies as comparison
 
@@ -171,12 +179,33 @@ This corresponds to a live copy 'rollout' with integrated translation.
   configuration in what content areas it can be used.
 - If a manual correction was made and the translation is updated, anyway, the manual correction should be saved for 
   later fixing.
+- For content fragments likely the models have to be translated.
+- In general - how to deal with i18n of components? (Probably out of scope, but needs discussion.)
+- rewrite to use 
+  [Sling Jobs](https://medium.com/@jlanssie/translate-entires-websites-in-aem-automatically-with-openai-944875cbfa22) 
+  for the translation
+- If it's a synchronization action - how to check whether it's finished?
+- Custom tool: show only conditionally?
 
 ## Links
 
 https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
 https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html?lang=en -
 Workflow when updating a language copy
+
+https://medium.com/@vsr061/create-custom-aem-menu-tools-with-granite-ui-shell-53c56e435f8a - Custom AEM menu tools
+https://medium.com/@jlanssie/how-to-create-a-custom-tool-in-aem-78d14c1f66d5
+
+### Links for translation on rollout
+https://github.com/AdobeDocs/experience-manager-65.en/blob/main/help/sites-administering/msm-best-practices.md etc.
+https://www.linkedin.com/pulse/aem-msm-custom-rollout-action-nurbek-umirov/
+https://experienceleague.adobe.com/docs/experience-manager-65/content/sites/administering/introduction/msm-sync.html?lang=en
+
+### Links for workflows
+
+https://medium.com/@jlanssie/translate-entires-websites-in-aem-automatically-with-openai-944875cbfa22 workflow to 
+translate pages. Interesting points: translates text in the for of JSON.
+https://medium.com/@jlanssie/create-a-custom-workflow-model-in-aem-with-a-full-code-coverage-unit-test-4178b2263b81
 
 ## Development
 
