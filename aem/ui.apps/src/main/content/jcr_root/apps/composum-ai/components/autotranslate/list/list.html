@@ -60,7 +60,8 @@
                                         </div>
                                         <!-- Re-translate changed values -->
                                         <div class="coral-Form-fieldwrapper">
-                                            <coral-checkbox name="translateWhenChanged" checked="checked" id="translateWhenChanged">
+                                            <coral-checkbox name="translateWhenChanged" checked="checked"
+                                                            id="translateWhenChanged">
                                                 <label for="translateWhenChanged">Re-translate values that have
                                                     been changed in the blueprint of the live copy after the last
                                                     translation run
@@ -70,21 +71,23 @@
                                         <!-- Break inheritance on translation -->
                                         <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="breakInheritance" id="breakInheritance">
-                                                <label for="breakInheritance">Break inheritance of component / property on translation</label>
+                                                <label for="breakInheritance">Break inheritance of component / property
+                                                    on translation</label>
                                             </coral-checkbox>
-                                        <!-- a text area with additional system instructions. -->
-                                        <div class="coral-Form-fieldwrapper">
-                                            <label class="coral-Form-fieldlabel" for="additionalInstructions">Optionally,
-                                                additional instructions:</label>
-                                            <textarea is="coral-textarea" class="coral-Form-field _coral-Textfield"
-                                                      placeholder="Enter any additional instructions describing intended style, tone, language variants, etc."
-                                                      name="additionalInstructions" value=""
-                                                      labelledby="label-vertical-textarea-1"></textarea>
+                                            <!-- a text area with additional system instructions. -->
+                                            <div class="coral-Form-fieldwrapper">
+                                                <label class="coral-Form-fieldlabel" for="additionalInstructions">Optionally,
+                                                    additional instructions:</label>
+                                                <textarea is="coral-textarea" class="coral-Form-field _coral-Textfield"
+                                                          placeholder="Enter any additional instructions describing intended style, tone, language variants, etc."
+                                                          name="additionalInstructions" value=""
+                                                          labelledby="label-vertical-textarea-1"></textarea>
+                                            </div>
+                                            <button type="submit" class="coral-Button coral-Button--primary">Start
+                                                Translation
+                                                Process
+                                            </button>
                                         </div>
-                                        <button type="submit" class="coral-Button coral-Button--primary">Start
-                                            Translation
-                                            Process
-                                        </button>
                                     </section>
                                 </form>
                                 <hr>
