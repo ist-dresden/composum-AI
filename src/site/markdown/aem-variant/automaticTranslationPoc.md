@@ -23,7 +23,7 @@ reasoning capabilities that can improve the quality of the translation:
   and formatting. But:
 - Additional instructions can be given to influence the writing style, finetuning the translation
   to the desired audience, and even to give background information about the site and the translation, if needed.
-  That can range from minor changes like influencing how formal to address the user to major modifications like
+  That can range from minor changes like influencing how formal to address the reader to major modifications like
   simplifying the language for a younger audience.
 - While that's not currently implemented, we make preparations so that manual corrections of translations can be
   preserved when a retranslation of a modified text in the original language is done (see ["Differential 
