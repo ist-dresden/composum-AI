@@ -4,9 +4,12 @@ import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveActionFactory;
 import com.day.cq.wcm.msm.commons.BaseActionFactory;
@@ -26,6 +29,12 @@ public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTransl
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateLiveActionFactory.class);
 
+    @Reference
+    protected AutoPageTranslateService autoPageTranslateService;
+
+    @Reference
+    private AIConfigurationService configurationService;
+
     @Activate
     protected void activate(ComponentContext componentContext) {
         LOG.info("AutoTranslateLiveActionFactory.activate", componentContext.getProperties());
@@ -33,7 +42,7 @@ public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTransl
 
     @Override
     protected AutoTranslateLiveAction newActionInstance(ValueMap valueMap) throws WCMException {
-        return new AutoTranslateLiveActionImpl(valueMap, this);
+        return new AutoTranslateLiveActionImpl(valueMap, this, autoPageTranslateService, configurationService);
     }
 
     @Override

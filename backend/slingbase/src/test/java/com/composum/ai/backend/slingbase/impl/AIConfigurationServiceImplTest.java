@@ -108,7 +108,7 @@ public class AIConfigurationServiceImplTest {
         // set up sling configuration for the path with key
         context.create().resource("/conf/global/sling:configs/com.composum.ai.backend.slingbase.model.OpenAIConfig",
                 "openAiApiKey", key);
-        GPTConfiguration config = service.getGPTConfiguration(getRequest(), "/content/allowed/jcr:content/path");
+        GPTConfiguration config = service.getGPTConfiguration(getRequest().getResourceResolver(), "/content/allowed/jcr:content/path");
         assertThat(config, notNullValue());
         assertThat(config.getApiKey(), is(key));
     }

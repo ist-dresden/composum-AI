@@ -47,7 +47,7 @@ public class AutoTranslateListModel {
             boolean changed = request.getParameter("translateWhenChanged") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean breakInheritance = request.getParameter("breakInheritance") != null;
-            GPTConfiguration configuration = configurationService.getGPTConfiguration(request, path);
+            GPTConfiguration configuration = configurationService.getGPTConfiguration(request.getResourceResolver(), path);
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             parms.recursive = recursive;
             parms.translateWhenChanged = changed;

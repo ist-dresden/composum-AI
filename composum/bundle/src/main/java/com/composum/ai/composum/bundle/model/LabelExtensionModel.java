@@ -73,7 +73,7 @@ public class LabelExtensionModel extends AbstractModel {
             widget = context.getAttribute(EditWidgetTag.WIDGET_VAR, EditWidgetTag.class);
             chatCompletionService = context.getService(GPTChatCompletionService.class);
             aiConfigurationService = context.getService(AIConfigurationService.class);
-            GPTConfiguration gptConfig = aiConfigurationService != null ? aiConfigurationService.getGPTConfiguration(context.getRequest(), getPath()) : null;
+            GPTConfiguration gptConfig = aiConfigurationService != null ? aiConfigurationService.getGPTConfiguration(context.getResolver(), getPath()) : null;
             if (widget.getModel() instanceof Model && chatCompletionService != null && chatCompletionService.isEnabled(gptConfig)) {
                 model = (Model) widget.getModel();
                 valid = true;

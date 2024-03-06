@@ -54,6 +54,11 @@ public interface AutoTranslateService {
          * If true, we break the inheritance of the component / the property on translation.
          */
         public boolean breakInheritance;
+
+        /**
+         * If true the changes are saved ({@link ResourceResolver#commit()}) after each page.
+         */
+        public boolean autoSave = true;
     }
 
     static abstract class TranslationRun {

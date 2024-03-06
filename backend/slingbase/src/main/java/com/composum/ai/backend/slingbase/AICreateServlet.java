@@ -258,7 +258,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         if ("undefined".equals(inputImagePath) || "null".equals(inputImagePath) || StringUtils.isBlank(inputImagePath)) {
             inputImagePath = null;
         }
-        GPTConfiguration config = configurationService.getGPTConfiguration(request, configBasePath);
+        GPTConfiguration config = configurationService.getGPTConfiguration(request.getResourceResolver(), configBasePath);
         String chat = request.getParameter(PARAMETER_CHAT);
         if (Stream.of(sourcePath, sourceText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
             LOG.warn("More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
