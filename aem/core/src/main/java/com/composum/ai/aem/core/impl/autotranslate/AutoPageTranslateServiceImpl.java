@@ -185,8 +185,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         ModifiableValueMap valueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         valueMap.put(PROPERTY_AI_TRANSLATED_BY, true);
         valueMap.put(PROPERTY_AI_TRANSLATED_DATE, Calendar.getInstance());
-        liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
-                liveRelationship, new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE}, false);
+        if (liveRelationship != null) {
+            liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
+                    liveRelationship, new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE}, false);
+        }
     }
 
     /**
