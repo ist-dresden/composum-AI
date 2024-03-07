@@ -50,13 +50,19 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     @Override
     protected boolean handles(Resource source, Resource target, LiveRelationship relation, boolean isResetRollout)
             throws RepositoryException, WCMException {
-        LOG.debug("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
-        return target != null && JcrConstants.JCR_CONTENT.equals(target.getName());
+        boolean isContentNode = target != null && JcrConstants.JCR_CONTENT.equals(target.getName());
+        if (isContentNode) {
+            LOG.debug("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
+        } else {
+            LOG.trace("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
+        }
+        return isContentNode;
     }
 
     @Override
     protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave)
             throws RepositoryException, WCMException {
+        LOG.debug("doExecute({}, {}, {})", liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         GPTConfiguration config = configurationService.getGPTConfiguration(target.getResourceResolver(), target.getPath());
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
         parms.recursive = false;
@@ -68,9 +74,12 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
+            // that works only for the root page. For the rest we use this hack to determine whether the user is waiting or this is an asynchronous rollout.
+            duringLiveCopyCreation = duringLiveCopyCreation || (target.getResourceResolver().getAttribute("sling.authType") != null);
+            LOG.debug("duringLiveCopyCreation: {}", duringLiveCopyCreation);
             if (duringLiveCopyCreation) {
                 // do that afterward since we cannot access all live relationships from the manager
-                // and cancel properties since they aren't saved yet
+                // and cancel properties since they aren't saved yet, or the user is waiting for us.
                 autoTranslateService.startTranslation(target.getResourceResolver(), target.getPath(), parms, config);
             } else {
                 autoPageTranslateService.translateLiveCopy(target, config, parms);

@@ -141,7 +141,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     protected void markAsAiTranslated(Resource resource, LiveRelationship liveRelationship) throws WCMException {
         ModifiableValueMap valueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-        AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(null, valueMap, "dummy");
+        AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(null, valueMap, null);
         targetWrapper.setAiTranslatedBy(resource.getResourceResolver().getUserID());
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
         if (liveRelationship != null) {

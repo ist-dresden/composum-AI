@@ -158,14 +158,14 @@ class AITranslatePropertyWrapper {
     }
 
     public String[] allGeneralKeys() {
-        return new String[]{propertyName, PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE};
+        return new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE};
     }
 
     public String[] allKeys() {
         List<String> keys = new ArrayList<>();
-        Arrays.stream(allLcKeys()).map(keys::add);
-        Arrays.stream(allAiKeys()).map(keys::add);
-        Arrays.stream(allGeneralKeys()).map(keys::add);
+        keys.addAll(Arrays.asList(allLcKeys()));
+        keys.addAll(Arrays.asList(allAiKeys()));
+        keys.addAll(Arrays.asList(allGeneralKeys()));
         return keys.toArray(new String[0]);
     }
 
