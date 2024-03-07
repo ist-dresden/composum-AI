@@ -219,7 +219,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 startTime = new Date().toString();
                 boolean interrupted = false;
                 GPTConfiguration mergedConfiguration = configuration;
-                if (translationParameters.additionalInstructions != null ||
+                if (translationParameters.additionalInstructions != null &&
                         !translationParameters.additionalInstructions.trim().isEmpty()) {
                     mergedConfiguration = new GPTConfiguration(null, null, null,
                             translationParameters.additionalInstructions).merge(configuration);
@@ -259,11 +259,19 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     }
                 }
                 status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
-                stopTime = new Date().toString();
             } catch (InterruptedException e) {
-                LOG.error("" + e, e);
+                LOG.error("Interruption during " + this, e);
                 Thread.currentThread().interrupt();
+                status = "interrupted";
+            } catch (Exception e) {
+                LOG.error("Error during " + this, e);
+                status = "error";
+                messages.append("Error: " + e.toString() + "\n");
             } finally {
+                stopTime = new Date().toString();
+                if (status == null) {
+                    status = "finished";
+                }
                 future = null;
                 callResourceResolver.close();
             }

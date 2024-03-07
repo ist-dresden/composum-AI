@@ -75,6 +75,19 @@ public interface AutoTranslateService {
         public abstract void cancel();
 
         public abstract void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException;
+
+
+        @Override
+        public String toString() {
+            return "TranslationRun: id='" + id + '\'' +
+                    ", status='" + status + '\'' +
+                    ", startTime='" + startTime + '\'' +
+                    ", stopTime='" + stopTime + '\'' +
+                    ", user='" + user + '\'' +
+                    ", rootPath='" + rootPath + '\'' +
+                    ", messages=" + messages;
+        }
+
     }
 
     static abstract class TranslationPage {

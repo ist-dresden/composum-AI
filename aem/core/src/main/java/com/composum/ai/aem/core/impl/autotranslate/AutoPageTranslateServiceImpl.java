@@ -339,7 +339,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         stats.modifiedButRetranslatedProperties++;
                     }
 
-                    stats.translatedProperties++;
                     if (targetWrapper.hasSavedTranslation()) {
                         stats.retranslatedProperties++;
                     }

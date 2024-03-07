@@ -72,8 +72,10 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             } else {
                 autoPageTranslateService.translateLiveCopy(target, config, parms);
             }
-        } catch (PersistenceException | LoginException e) {
-            throw new WCMException("Error translating " + source.getPath(), e);
+//        } catch (PersistenceException | LoginException e) {
+//            throw new WCMException("Error translating " + source.getPath(), e);
+        } catch (Exception e) { // rather log exception for now since a demo is coming...
+            LOG.error("Error translating " + source.getPath(), e);
         }
     }
 
