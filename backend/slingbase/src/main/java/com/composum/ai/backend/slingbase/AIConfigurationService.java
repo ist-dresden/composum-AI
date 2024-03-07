@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.ResourceResolver;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
@@ -32,12 +33,12 @@ public interface AIConfigurationService {
     /**
      * Reads the GPTConfiguration from sling context aware configurations.
      *
-     * @param request     the request
+     * @param resourceResolver the resource resolver
      * @param contentPath if that's given we read the configuration for this path, otherwise we take the requests path, as long as it starts with /content/
      * @throws IllegalArgumentException if none of the paths is a /content/ path.
      */
     @Nullable
-    GPTConfiguration getGPTConfiguration(@Nonnull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException;
+    GPTConfiguration getGPTConfiguration(@Nonnull ResourceResolver resourceResolver, @Nullable String contentPath) throws IllegalArgumentException;
 
     /**
      * Reads the {@link GPTPromptLibrary} from sling context aware configurations, falling back to OSGI configurations, falling back to default values.

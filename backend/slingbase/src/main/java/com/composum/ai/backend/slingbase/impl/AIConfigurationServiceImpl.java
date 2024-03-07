@@ -15,6 +15,7 @@ import javax.jcr.RepositoryException;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
@@ -79,7 +80,7 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     @Override
     @Nullable
     public GPTPermissionInfo allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
-        GPTConfiguration gptConfiguration = getGPTConfiguration(request, contentPath);
+        GPTConfiguration gptConfiguration = getGPTConfiguration(request.getResourceResolver(), contentPath);
         GPTPermissionInfo result = null;
         if (chatCompletionService.isEnabled(gptConfiguration)) {
             for (AIConfigurationPlugin plugin : plugins) {
@@ -160,10 +161,10 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
 
 
     @Override
-    public GPTConfiguration getGPTConfiguration(@NotNull SlingHttpServletRequest request, @Nullable String contentPath) throws IllegalArgumentException {
+    public GPTConfiguration getGPTConfiguration(@NotNull ResourceResolver resourceResolver, @Nullable String contentPath) throws IllegalArgumentException {
         for (AIConfigurationPlugin plugin : plugins) {
             try {
-                GPTConfiguration configuration = plugin.getGPTConfiguration(request, contentPath);
+                GPTConfiguration configuration = plugin.getGPTConfiguration(resourceResolver, contentPath);
                 if (configuration != null) {
                     LOG.info("Plugin {} returned configuration {}", plugin.getClass(), configuration);
                     return configuration;

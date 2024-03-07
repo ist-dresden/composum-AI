@@ -37,6 +37,7 @@
                         <!-- /apps root -->
                         <filter><root>/apps</root></filter>
                         <filter><root>/apps/composum-ai</root></filter>
+                        <filter><root>/apps/msm/composum-ai</root></filter>
 
                         <!-- Common overlay roots -->
                         <filter><root>/apps/sling</root></filter>
@@ -49,7 +50,7 @@
                         <filter><root>/apps/settings</root></filter>
 
                         <!-- DAM folder root, will be created via repoinit -->
-                        <filter><root>/content/dam/composum-ai</root></filter>
+                        <!-- <filter><root>/content/dam/composum-ai</root></filter> -->
 
                     </filters>
                 </configuration>

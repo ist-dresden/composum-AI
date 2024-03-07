@@ -77,7 +77,7 @@
         <!-- https://mvnrepository.com/artifact/com.adobe.aem/aemanalyser-maven-plugin -->
         <aemanalyser.version>1.5.8</aemanalyser.version>
         <aem.sdk.api>2023.7.12874.20230726T072051Z-230702</aem.sdk.api>
-        <aem.uber.jar.version>6.5.7</aem.uber.jar.version> <!-- 6.5.8 is last one with sources -->
+        <aem.uber.jar.version>6.5.7</aem.uber.jar.version>
         <osgi.version>6.0.0</osgi.version>
 
         <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>

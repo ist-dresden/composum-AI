@@ -66,10 +66,10 @@ public class AutoPageTranslateServiceImplTest {
         assertFalse(isTranslatableProperty("propertyName", "/mnt/someValue"));
 
         // Test with property name starting with AI_PREFIX or LC_PREFIX and ending with AI_TRANSLATED_SUFFIX or AI_ORIGINAL_SUFFIX
-        assertFalse(isTranslatableProperty(AutoPageTranslateServiceImpl.AI_PREFIX + "propertyName" + AutoPageTranslateServiceImpl.AI_TRANSLATED_SUFFIX, "Some value"));
-        assertFalse(isTranslatableProperty(AutoPageTranslateServiceImpl.AI_PREFIX + "propertyName" + AutoPageTranslateServiceImpl.AI_ORIGINAL_SUFFIX, "Some value"));
-        assertFalse(isTranslatableProperty(AutoPageTranslateServiceImpl.LC_PREFIX + "propertyName" + AutoPageTranslateServiceImpl.AI_TRANSLATED_SUFFIX, "Some value"));
-        assertFalse(isTranslatableProperty(AutoPageTranslateServiceImpl.LC_PREFIX + "propertyName" + AutoPageTranslateServiceImpl.AI_ORIGINAL_SUFFIX, "Some value"));
+        assertFalse(isTranslatableProperty(AITranslatePropertyWrapper.AI_PREFIX + "propertyName" + AITranslatePropertyWrapper.AI_TRANSLATED_SUFFIX, "Some value"));
+        assertFalse(isTranslatableProperty(AITranslatePropertyWrapper.AI_PREFIX + "propertyName" + AITranslatePropertyWrapper.AI_ORIGINAL_SUFFIX, "Some value"));
+        assertFalse(isTranslatableProperty(AITranslatePropertyWrapper.LC_PREFIX + "propertyName" + AITranslatePropertyWrapper.AI_TRANSLATED_SUFFIX, "Some value"));
+        assertFalse(isTranslatableProperty(AITranslatePropertyWrapper.LC_PREFIX + "propertyName" + AITranslatePropertyWrapper.AI_ORIGINAL_SUFFIX, "Some value"));
 
         // Test with string value without whitespace and 4 letter sequence
         assertFalse(isTranslatableProperty("propertyName", "abc"));

@@ -288,7 +288,7 @@ public class AIServlet extends AbstractServiceServlet {
         public final void doIt(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response, @Nullable ResourceHandle resource) throws RepositoryException, IOException, ServletException {
             Status status = new Status(request, response, LOG);
             String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
-            GPTConfiguration config = configurationService.getGPTConfiguration(request, configBasePath);
+            GPTConfiguration config = configurationService.getGPTConfiguration(request.getResourceResolver(), configBasePath);
 
             try {
                 performOperation(status, request, response, config);

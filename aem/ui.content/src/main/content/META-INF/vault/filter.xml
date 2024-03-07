@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/conf/composum-ai"/>
+    <!-- These are not actually used but present in earlier versions than 0.8.0 - remove the content. -->
     <filter root="/content/composum-ai"/>
     <filter root="/content/dam/composum-ai"/>
     <filter root="/content/experience-fragments/composum-ai"/>

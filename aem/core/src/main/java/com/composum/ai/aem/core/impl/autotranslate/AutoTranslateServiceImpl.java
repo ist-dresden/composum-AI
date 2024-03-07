@@ -5,9 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -214,14 +211,15 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         /**
          * Translate the pages; close the resolver when done.
          */
-        public void execute(ResourceResolver resourceResolver) {
+        public void execute(ResourceResolver callResourceResolver) {
             try {
+                Thread.sleep(2000); // delay a little since that is used during creating a livecopy, and that should be finished.
                 status = "running";
                 boolean hasErrors = false;
                 startTime = new Date().toString();
                 boolean interrupted = false;
                 GPTConfiguration mergedConfiguration = configuration;
-                if (translationParameters.additionalInstructions != null ||
+                if (translationParameters.additionalInstructions != null &&
                         !translationParameters.additionalInstructions.trim().isEmpty()) {
                     mergedConfiguration = new GPTConfiguration(null, null, null,
                             translationParameters.additionalInstructions).merge(configuration);
@@ -239,7 +237,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     }
 
                     page.status = "running";
+                    ResourceResolver resourceResolver = null;
                     try {
+                        resourceResolver = callResourceResolver.clone(null);
+                        resourceResolver.revert();
+                        resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
                         AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
                                 mergedConfiguration, translationParameters);
@@ -250,13 +252,28 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
                         hasErrors = true;
                         LOG.error("Error translating " + page.pagePath, e);
+                    } finally {
+                        if (resourceResolver != null) {
+                            resourceResolver.close();
+                        }
                     }
                 }
                 status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
-                stopTime = new Date().toString();
+            } catch (InterruptedException e) {
+                LOG.error("Interruption during " + this, e);
+                Thread.currentThread().interrupt();
+                status = "interrupted";
+            } catch (Exception e) {
+                LOG.error("Error during " + this, e);
+                status = "error";
+                messages.append("Error: " + e.toString() + "\n");
             } finally {
+                stopTime = new Date().toString();
+                if (status == null) {
+                    status = "finished";
+                }
                 future = null;
-                resourceResolver.close();
+                callResourceResolver.close();
             }
         }
     }

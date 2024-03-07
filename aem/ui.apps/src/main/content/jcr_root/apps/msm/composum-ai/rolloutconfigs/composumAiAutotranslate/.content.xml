@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="cq:RolloutConfig"
+          cq:trigger="rollout"
+          jcr:description="Triggers the Composum AI automatic translation proof of concept action"
+          jcr:title="Composum AI Autotranslate POC">
+    <composumAiAutoTranslate
+            jcr:primaryType="cq:LiveSyncAction"/>
+</jcr:root>
