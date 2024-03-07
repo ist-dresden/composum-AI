@@ -1,18 +1,18 @@
 package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 
+import java.util.Objects;
+
 import javax.jcr.RepositoryException;
 
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateServiceImpl;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -50,6 +50,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     @Override
     protected boolean handles(Resource source, Resource target, LiveRelationship relation, boolean isResetRollout)
             throws RepositoryException, WCMException {
+        LOG.debug("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
         return target != null && JcrConstants.JCR_CONTENT.equals(target.getName());
     }
 
@@ -61,8 +62,10 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         parms.recursive = false;
         parms.autoSave = autoSave;
         parms.breakInheritance = false;
-        // parms.additionalInstructions
-        // parms.translateWhenChanged
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(target.adaptTo(ConfigurationBuilder.class));
+        AutoTranslateLiveActionConfig autoTranslateLiveActionConfig = confBuilder.as(AutoTranslateLiveActionConfig.class);
+        parms.additionalInstructions = autoTranslateLiveActionConfig.additionalInstructions();
+        // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
             if (duringLiveCopyCreation) {

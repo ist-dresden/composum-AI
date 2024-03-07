@@ -45,7 +45,8 @@
                             <bnd><![CDATA[
 Export-Package: com.composum.ai.aem.core.impl.autotranslate
 Import-Package: javax.annotation;version=0.0.0,*
-                                ]]></bnd>
+Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotranslate.rollout.AutoTranslateLiveActionConfig
+]]></bnd>
                         </configuration>
                     </execution>
                 </executions>
