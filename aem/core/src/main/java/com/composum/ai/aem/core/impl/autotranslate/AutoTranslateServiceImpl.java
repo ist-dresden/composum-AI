@@ -211,8 +211,9 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         /**
          * Translate the pages; close the resolver when done.
          */
-        public void execute(ResourceResolver resourceResolver) {
+        public void execute(ResourceResolver callResourceResolver) {
             try {
+                Thread.sleep(2000); // delay a little since that is used during creating a livecopy, and that should be finished.
                 status = "running";
                 boolean hasErrors = false;
                 startTime = new Date().toString();
@@ -236,7 +237,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     }
 
                     page.status = "running";
+                    ResourceResolver resourceResolver = null;
                     try {
+                        resourceResolver = callResourceResolver.clone(null);
+                        resourceResolver.revert();
+                        resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
                         AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
                                 mergedConfiguration, translationParameters);
@@ -247,13 +252,20 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
                         hasErrors = true;
                         LOG.error("Error translating " + page.pagePath, e);
+                    } finally {
+                        if (resourceResolver != null) {
+                            resourceResolver.close();
+                        }
                     }
                 }
                 status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
                 stopTime = new Date().toString();
+            } catch (InterruptedException e) {
+                LOG.error("" + e, e);
+                Thread.currentThread().interrupt();
             } finally {
                 future = null;
-                resourceResolver.close();
+                callResourceResolver.close();
             }
         }
     }
