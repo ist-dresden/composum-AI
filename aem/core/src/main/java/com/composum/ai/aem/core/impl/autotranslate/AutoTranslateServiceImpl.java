@@ -144,10 +144,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 .map(r -> new TranslationPageImpl(r.getPath()))
                 .collect(Collectors.toList());
         stateService.getTranslationRuns().add(run);
-        run.future = getThreadPool().submit(() -> run.execute(processResolver));
+        run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
         run.status = "scheduled";
         run.user = resourceResolver.getUserID();
         run.configuration = configuration;
+        run.future = getThreadPool().submit(() -> run.execute(processResolver));
         return run;
     }
 
@@ -182,6 +183,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     public class TranslationRunImpl extends TranslationRun {
         public Future<?> future;
+        public long waituntil;
         List<TranslationPageImpl> translatedPages;
         GPTConfiguration configuration;
         TranslationParameters translationParameters;
@@ -213,8 +215,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
          */
         public void execute(ResourceResolver callResourceResolver) {
             try {
-                Thread.sleep(2000); // delay a little since that is used during creating a livecopy, and that should be finished.
                 status = "running";
+                if (System.currentTimeMillis() < waituntil) {
+                    // delay a little since that is used during creating a livecopy, and that should be finished.
+                    Thread.sleep(waituntil - System.currentTimeMillis());
+                }
                 boolean hasErrors = false;
                 startTime = new Date().toString();
                 boolean interrupted = false;
@@ -250,8 +255,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     } catch (Exception e) {
                         page.status = "error";
                         this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
-                        hasErrors = true;
                         LOG.error("Error translating " + page.pagePath, e);
+                        hasErrors = true;
                     } finally {
                         if (resourceResolver != null) {
                             resourceResolver.close();
