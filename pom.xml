@@ -10,7 +10,7 @@
 
     <groupId>com.composum.ai</groupId>
     <artifactId>composum-ai-integration</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Composum AI</name>
@@ -23,7 +23,7 @@
         <connection>scm:git:${giturl}</connection>
         <developerConnection>scm:git:${giturl}</developerConnection>
         <url>${giturl}</url>
-        <tag>composum-ai-integration-0.8.1</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>
