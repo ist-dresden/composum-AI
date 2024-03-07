@@ -123,7 +123,7 @@ configuration. This is an additional configuration - to get the pages copied we 
 configuration, and then the translation rollout configuration to get the pages transparently translated.
 
 Rollout of a component or re-enabling the inheritance of the component resets that component completely, which would
-remove the properties we save our translation information in. To avoid that we break inheritance for these 
+remove the properties we save our translation information in. To avoid that we break inheritance for these
 properties selectively.
 
 ### Open points for the rollout configuration
@@ -164,6 +164,40 @@ massively improve the result if an editor has corrected the translation afterwar
 For automatically replacing paths with language copies we follow the same strategy: the original path is stored as
 `lc_(attributeName)_original` and the translated path as `lc_(attributeName)_translated`. Thus we can reinstate the path
 automatically if the user clicks on re-enable inheritance.
+
+### Analysis of saving the original and translated texts
+
+There are the following states for a property:
+
+1. no translation done
+2. original saved as blueprint and saved translation is as the text.
+3. inheritance broken, text changed: saved original is as blueprint and saved translation is the old translation.
+    - if the inheritance is re-enabled, the old translation is reinstated -> 2.
+4. inheritance intact, original changed but not rolled out, saved original and saved
+   automatic translation are out of date
+    - rollout: saved original and saved automatic translation and text are discarded and updated. -> 2.
+5. original changed but not rolled out, inhertance broken. saved original and saved automatic
+   translation are out of date, manual changes.
+    - if the inheritance is re-enabled: synchronize component would normally get the value from blueprint. Right way:
+      differential-translate the blueprint, but takes time. Bad way: roll back to the old translation. -> 2. (We might
+      save the manual changes, though)
+    - rollout: normally no changes -> also do it this way. (Unclear: start manual process with differential 
+      translation?) -> still at 4.
+
+An invariant is that if inheritance is not broken, the saved translation is equal to the text. This is only broken 
+temporarily during a rollout when inheritance is not broken, the text ist reset to the 
+blueprint's state, which has to be fixed during the execution of the translation - either by putting the result of 
+the previous manual translation into the text, or by re-translating the text if the blueprint has changed.
+
+Open point: it's not clear to me when to apply the differential retranslation, nor where the manual translation 
+result should come from.
+- During rollout probably nothing should change if inheritance is broken; if not it could be applied but what would 
+  be the approved manual translation?
+- If the inheritance is re-enabled, the user expects a reset, so the old manual translation is probably not the 
+  approved translation.
+Two thinkable ways:
+- Manual process (possibly supported by a workflow)
+- Automatically during rollout when inheritance is cancelled - that must be switchable, though.
 
 ### Heuristics for translateable attribute recognition.
 

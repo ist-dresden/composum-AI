@@ -5,9 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;

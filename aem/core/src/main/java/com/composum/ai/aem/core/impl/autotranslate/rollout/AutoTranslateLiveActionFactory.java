@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveActionFactory;
@@ -33,7 +34,10 @@ public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTransl
     protected AutoPageTranslateService autoPageTranslateService;
 
     @Reference
-    private AIConfigurationService configurationService;
+    protected AIConfigurationService configurationService;
+
+    @Reference
+    protected AutoTranslateService autoTranslateService;
 
     @Activate
     protected void activate(ComponentContext componentContext) {
@@ -42,7 +46,7 @@ public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTransl
 
     @Override
     protected AutoTranslateLiveAction newActionInstance(ValueMap valueMap) throws WCMException {
-        return new AutoTranslateLiveActionImpl(valueMap, this, autoPageTranslateService, configurationService);
+        return new AutoTranslateLiveActionImpl(valueMap, this, autoPageTranslateService, configurationService, autoTranslateService);
     }
 
     @Override

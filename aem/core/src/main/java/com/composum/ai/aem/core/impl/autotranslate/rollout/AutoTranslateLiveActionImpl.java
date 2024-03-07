@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 import javax.jcr.RepositoryException;
 
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateServiceImpl;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -30,11 +32,14 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
 
     protected final AIConfigurationService configurationService;
 
+    protected final AutoTranslateService autoTranslateService;
+
     protected AutoTranslateLiveActionImpl(ValueMap config, BaseActionFactory<? extends LiveAction> liveActionFactory,
-                                          AutoPageTranslateService autoPageTranslateService, AIConfigurationService configurationService) {
+                                          AutoPageTranslateService autoPageTranslateService, AIConfigurationService configurationService, AutoTranslateService autoTranslateService) {
         super(config, liveActionFactory);
         this.autoPageTranslateService = autoPageTranslateService;
         this.configurationService = configurationService;
+        this.autoTranslateService = autoTranslateService;
     }
 
     @Override
@@ -59,8 +64,15 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         // parms.additionalInstructions
         // parms.translateWhenChanged
         try {
-            autoPageTranslateService.translateLiveCopy(target, config, parms);
-        } catch (PersistenceException e) {
+            boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
+            if (duringLiveCopyCreation) {
+                // do that afterward since we cannot access all live relationships from the manager
+                // and cancel properties since they aren't saved yet
+                autoTranslateService.startTranslation(target.getResourceResolver(), target.getPath(), parms, config);
+            } else {
+                autoPageTranslateService.translateLiveCopy(target, config, parms);
+            }
+        } catch (PersistenceException | LoginException e) {
             throw new WCMException("Error translating " + source.getPath(), e);
         }
     }
