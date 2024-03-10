@@ -7,8 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -305,7 +303,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
-        String addition = configuration.getAdditionalInstructions() != null ? "\n\n" + configuration.getAdditionalInstructions() : "";
+        String addition = configuration != null && configuration.getAdditionalInstructions() != null ? "\n\n" + configuration.getAdditionalInstructions() : "";
         if (configuration != null && configuration.isHtml()) {
             Matcher m = HTML_TAG_AT_START.matcher(text);
             String firstTag = "<p>";
