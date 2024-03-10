@@ -80,12 +80,6 @@
 							<type>zip</type>
 							<target>/apps/composum-ai-packages/content/install</target>
 						</embedded>
-						<embedded>
-							<groupId>com.composum.ai.aem</groupId>
-							<artifactId>composum-ai.ui.config</artifactId>
-							<type>zip</type>
-							<target>/apps/composum-ai-packages/application/install</target>
-						</embedded>
 					</embeddeds>
 				</configuration>
 			</plugin>
