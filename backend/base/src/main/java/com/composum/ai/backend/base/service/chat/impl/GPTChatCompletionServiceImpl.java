@@ -166,6 +166,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected ScheduledExecutorService scheduledExecutorService;
 
     protected Integer maximumTokensPerRequest;
+    protected Integer maximumTokensPerResponse;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
@@ -183,6 +184,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
         this.maximumTokensPerRequest = config != null && config.maximumTokensPerRequest() > 0 ? config.maximumTokensPerRequest() : null;
+        this.maximumTokensPerResponse = config != null && config.maximumTokensPerResponse() > 0 ? config.maximumTokensPerResponse() : null;
         try {
             this.temperature = config != null && !StringUtil.isBlank(config.temperature()) ? Double.valueOf(config.temperature()) : null;
         } catch (NumberFormatException e) {
@@ -543,7 +545,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         externalRequest.setModel(hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(temperature);
-        externalRequest.setMaxTokens(request.getMaxTokens());
+       Integer maxTokens = request.getMaxTokens();
+        if (maxTokens != null && maxTokens > 0) {
+            if (maximumTokensPerResponse != null && maximumTokensPerResponse > 0 && maxTokens > maximumTokensPerResponse) {
+                LOG.debug("Reducing maxTokens from {} to {} because of configured maximumTokensPerResponse", maxTokens, maximumTokensPerResponse);
+                maxTokens = maximumTokensPerResponse;
+            }
+            externalRequest.setMaxTokens(maxTokens);
+        }
         externalRequest.setStream(Boolean.TRUE);
         String jsonRequest = gson.toJson(externalRequest);
         checkTokenCount(jsonRequest);
@@ -692,6 +701,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 "That's about a half of the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
                 defaultValue = "50000", required = false)
         int maximumTokensPerRequest();
+
+        @AttributeDefinition(name = "Maximum output tokens per request", description = "Maximum number of tokens to return in the response. Must not exceed the capabilities of the model - as of 10/03/24 this is 4096 for most OpenAI models - which is the default, so no need to set that.", required = false)
+        int maximumTokensPerResponse() default 4096;
 
         @AttributeDefinition(name = "Connection timeout in seconds", description = "Default " + DEFAULTVALUE_CONNECTIONTIMEOUT, required = false)
         int connectionTimeout() default DEFAULTVALUE_CONNECTIONTIMEOUT;
