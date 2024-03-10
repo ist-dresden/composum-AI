@@ -5,11 +5,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -21,6 +23,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -69,11 +72,23 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         return runs;
     }
 
+    protected AutoTranslateServiceImpl.Config config;
+
+    protected List<Pattern> deniedResourceTypes = new ArrayList<>();
+
     @Activate
-    public void activate(Config config) {
+    @Modified
+    protected void activate(AutoTranslateServiceImpl.Config config) {
+        this.config = config;
+        deniedResourceTypes.clear();
         disabled = config.disabled();
         if (!config.disabled()) {
             threadPool = threadPoolManager.get(getClass().getName());
+            for (final String rule : config.deniedResourceTypes()) {
+                if (StringUtils.isNotBlank(rule)) {
+                    deniedResourceTypes.add(Pattern.compile(rule));
+                }
+            }
         }
     }
 
@@ -83,6 +98,20 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         if (threadPool != null) {
             threadPoolManager.release(threadPool);
         }
+    }
+
+    @Override
+    public boolean isTranslatableResource(@Nonnull final Resource resource) {
+        if (disabled) {
+            return false;
+        }
+        final String resourceType = resource.getResourceType();
+        for (final Pattern pattern : deniedResourceTypes) {
+            if (pattern.matcher(resourceType).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected ThreadPool getThreadPool() {
@@ -300,6 +329,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         @AttributeDefinition(name = "Disable the Autotranslate service", defaultValue = "true")
         boolean disabled() default true;
 
+        @AttributeDefinition(name = "Denied Resource Types")
+        String[] deniedResourceTypes() default {};
     }
-
 }

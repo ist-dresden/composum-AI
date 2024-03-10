@@ -5,7 +5,9 @@ import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServi
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -30,6 +32,8 @@ public class AutoPageTranslateServiceImplTest {
 
     @Mock
     protected LiveRelationshipManager liveRelationshipManager;
+    @Mock
+    protected AutoTranslateService autoTranslateService;
 
     @InjectMocks
     protected AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl();
@@ -39,6 +43,7 @@ public class AutoPageTranslateServiceImplTest {
     @BeforeEach
     public void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
+        when(autoTranslateService.isTranslatableResource(any(Resource.class))).thenReturn(true);
     }
 
     @AfterEach
@@ -128,7 +133,7 @@ public class AutoPageTranslateServiceImplTest {
 
         when(liveRelationshipManager.getLiveRelationship(Mockito.any(), anyBoolean())).then(invocation -> {
             Resource resource = invocation.getArgument(0);
-            LiveRelationship liveRelationship = Mockito.mock(LiveRelationship.class);
+            LiveRelationship liveRelationship = mock(LiveRelationship.class);
             when(liveRelationship.getSourcePath()).thenReturn(resource.getPath().replace("/de/", "/en/"));
             return liveRelationship;
         });
