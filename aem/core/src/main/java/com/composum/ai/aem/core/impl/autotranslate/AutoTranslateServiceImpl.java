@@ -80,15 +80,15 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     @Modified
     protected void activate(AutoTranslateServiceImpl.Config config) {
         this.config = config;
-        deniedResourceTypes.clear();
         disabled = config.disabled();
-        if (!config.disabled()) {
-            threadPool = threadPoolManager.get(getClass().getName());
-            for (final String rule : config.deniedResourceTypes()) {
-                if (StringUtils.isNotBlank(rule)) {
-                    deniedResourceTypes.add(Pattern.compile(rule));
-                }
+        deniedResourceTypes.clear();
+        for (final String rule : config.deniedResourceTypes()) {
+            if (StringUtils.isNotBlank(rule)) {
+                deniedResourceTypes.add(Pattern.compile(rule));
             }
+        }
+        if (isEnabled()) {
+            threadPool = threadPoolManager.get(getClass().getName());
         }
     }
 
@@ -101,8 +101,13 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     @Override
+    public boolean isEnabled() {
+        return !disabled;
+    }
+
+    @Override
     public boolean isTranslatableResource(@Nonnull final Resource resource) {
-        if (disabled) {
+        if (!isEnabled()) {
             return false;
         }
         final String resourceType = resource.getResourceType();
@@ -119,11 +124,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             threadPool = threadPoolManager.get(getClass().getName());
         }
         return threadPool;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return !disabled;
     }
 
     @Override

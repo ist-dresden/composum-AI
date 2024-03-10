@@ -12,13 +12,10 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  */
 @Component
-@Designate(ocd = AutoPageTranslateServiceImpl.Config.class)
 public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
-
-    @ObjectClassDefinition(name = "Composum AI Page Translation Service",
-            description = "Configuration for the Composum AI Page Translation Service")
-    public @interface Config {
-    }
 
     protected static final Logger LOG = LoggerFactory.getLogger(AutoPageTranslateServiceImpl.class);
 
@@ -75,8 +66,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     @Reference
     protected GPTTranslationService translationService;
 
-    @Reference
-    protected AutoTranslateService translateService;
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+    protected volatile AutoTranslateService translateService;
 
     @Reference
     protected LiveRelationshipManager liveRelationshipManager;
@@ -315,7 +306,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         String sourcePath = relationship.getSourcePath();
         Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
-        if (sourceResource != null && translateService.isTranslatableResource(sourceResource)) {
+        if (sourceResource != null && translateService != null
+                && translateService.isTranslatableResource(sourceResource)) {
             ValueMap sourceValueMap = sourceResource.getValueMap();
             ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
             for (Map.Entry<String, Object> entry : sourceValueMap.entrySet()) {

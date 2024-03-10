@@ -41,7 +41,7 @@ public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTransl
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-        LOG.info("AutoTranslateLiveActionFactory.activate", componentContext.getProperties());
+        LOG.info("AutoTranslateLiveActionFactory.activate ({})", componentContext.getProperties());
     }
 
     @Override
