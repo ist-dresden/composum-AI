@@ -24,8 +24,8 @@ class AICreate {
         // fetch call to AICreateServlet
         Granite.csrf.refreshToken().then(token => {
             const url = Granite.HTTP.externalize(AICREATE_SERVLET);
-            if (!url.contains("/bin/cpm/ai")) { // safety check
-                throw new Error("Invalid path: " + url);
+            if (!url.toString().includes('/bin/cpm/ai')) { // safety check since it's a POST request
+                throw new Error('Invalid path: ' + url);
             }
             fetch(url, {
                 method: "POST",
