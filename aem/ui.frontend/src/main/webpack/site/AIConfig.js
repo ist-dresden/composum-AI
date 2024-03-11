@@ -56,30 +56,33 @@ function checkAllowed(data, service, resourceType) {
     return result;
 }
 
-function getContentURL() {
-    let contentURL = Granite?.author?.ContentFrame?.contentURL;
-    // if contentURL is not set, we check whether there is an item= parameter in the document.location.search
-    if (!contentURL) {
-        const search = window.location.search;
-        const itemParam = search?.match(/item=([^&]*)/);
-        if (itemParam) {
-            contentURL = itemParam[1];
-        }
-    } else if (contentURL.startsWith("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html")) {
-        // weird case in content fragment editor where that URL is just wrong. Remove that prefix.
-        contentURL = contentURL.replace("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html", "");
-    }
-    return contentURL;
-}
-
 class AIConfig {
+
+    getContentURL() {
+        let contentURL = Granite?.author?.ContentFrame?.contentURL;
+        // if contentURL is not set, we check whether there is an item= parameter in the document.location.search
+        if (!contentURL) {
+            const search = window.location.search;
+            const itemParam = search?.match(/item=([^&]*)/);
+            if (itemParam) {
+                contentURL = itemParam[1];
+            }
+        } else if (contentURL.startsWith("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html")) {
+            // weird case in content fragment editor where that URL is just wrong. Remove that prefix.
+            contentURL = contentURL.replace("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html", "");
+        }
+        if (contentURL.endsWith(".html")) {
+            contentURL = contentURL.substring(0, contentURL.length - 5);
+        }
+        return contentURL;
+    }
 
     /** Checks whether the named service is actually enabled for the current user, editor type and content URL. */
     ifEnabled(service, resourceType, callbackIfEnabled) {
         // console.log("AIConfig ifEnabled", arguments);
         try {
             const editorUrl = window.location.pathname;
-            let contentURL = getContentURL();
+            let contentURL = this.getContentURL();
             const cachekey = editorUrl + "|||" + contentURL;
             const result = enabledServicesCache.get(cachekey);
             if (result) {

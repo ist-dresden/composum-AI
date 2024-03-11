@@ -37,13 +37,14 @@ try {
         function loadSidebarPanelDialog() {
             if (true) console.log("loadSidebarPanelDialog", arguments);
             try {
+                const url = SIDEPANEL_DIALOG_URL + "?path=" + encodeURIComponent(aiconfig.getContentURL());
                 aiconfig.ifEnabled(SERVICE_SIDEPANEL, undefined, () => {
                     const dialogId = 'composumAI-sidebar-panel';
                     if ($('#' + dialogId).length > 0 || $('#SidePanel coral-tabview').length === 0) {
                         return;
                     }
                     $.ajax({
-                        url: SIDEPANEL_DIALOG_URL,
+                        url: url,
                         type: "GET",
                         dataType: "html",
                         success: function (data) {
