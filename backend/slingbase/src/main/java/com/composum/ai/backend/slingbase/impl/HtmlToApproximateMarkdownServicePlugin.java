@@ -373,6 +373,12 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             throw new UnsupportedOperationCalled();
         }
 
+        /** We render with GET, obviously. */
+        @Override
+        public String getMethod() {
+            return "GET";
+        }
+
         // Methods we think are too dangerous to use since they might modify the request, so we mostly throw an exception.
         // Possibly we'll have to rethink this.
         @Nullable
