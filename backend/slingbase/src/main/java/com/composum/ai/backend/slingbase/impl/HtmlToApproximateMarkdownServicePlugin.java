@@ -282,12 +282,18 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
 
         @Override
         public void setStatus(int sc) {
-            throw logAndThrow("Not implemented: CapturingResponse.setStatus");
+            if (sc != 200) {
+                throw logAndThrow("Status other than 200 not supported: CapturingResponse.setStatus " + sc);
+            }
+            // just ignore OK, that's fine
         }
 
         @Override
         public void setStatus(int sc, String sm) {
-            throw logAndThrow("Not implemented: CapturingResponse.setStatus");
+            if (sc != 200) {
+                throw logAndThrow("Not implemented: CapturingResponse.setStatus " + sc + " : " + sm);
+            }
+            // just ignore 200, that's fine
         }
 
         @Override
