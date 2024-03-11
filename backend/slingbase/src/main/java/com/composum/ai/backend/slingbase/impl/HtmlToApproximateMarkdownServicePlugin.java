@@ -384,18 +384,21 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
         @Nullable
         @Override
         public RequestDispatcher getRequestDispatcher(@NotNull String path, RequestDispatcherOptions options) {
+            // This actually happens on some components, but we rather don't want to support it to avoid side effects.
             throw logAndThrow("Not implemented: NonModifyingRequestWrapper.getRequestDispatcher");
         }
 
         @Nullable
         @Override
         public RequestDispatcher getRequestDispatcher(@NotNull Resource resource, RequestDispatcherOptions options) {
+            // This actually happens on some components, but we rather don't want to support it to avoid side effects.
             throw logAndThrow("Not implemented: NonModifyingRequestWrapper.getRequestDispatcher");
         }
 
         @Nullable
         @Override
         public RequestDispatcher getRequestDispatcher(@NotNull Resource resource) {
+            // This actually happens on some components, but we rather don't want to support it to avoid side effects.
             throw logAndThrow("Not implemented: NonModifyingRequestWrapper.getRequestDispatcher");
         }
 

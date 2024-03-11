@@ -45,8 +45,16 @@ public class AemSidePanelPromptsServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         String pagePath = request.getParameter(PARAMETER_PATH);
-        Resource pageResource = request.getResourceResolver().getResource(pagePath);
-        String language = findLanguage(pageResource);
+        if (pagePath == null) {
+            pagePath = request.getRequestPathInfo().getSuffix();
+        }
+        String language = null;
+        if (pagePath != null) {
+            Resource pageResource = request.getResourceResolver().getResource(pagePath);
+            language = findLanguage(pageResource);
+        } else {
+            LOG.warn("BUG: No page path found for side panel prompts for ", request.getRequestURI());
+        }
 
         Map<String, String> prompts = Collections.emptyMap();
 
