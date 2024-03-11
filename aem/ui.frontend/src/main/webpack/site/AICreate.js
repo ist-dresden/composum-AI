@@ -23,7 +23,11 @@ class AICreate {
 
         // fetch call to AICreateServlet
         Granite.csrf.refreshToken().then(token => {
-            fetch(Granite.HTTP.externalize(AICREATE_SERVLET), {
+            const url = Granite.HTTP.externalize(AICREATE_SERVLET);
+            if (!url.contains("/bin/cpm/ai")) { // safety check
+                throw new Error("Invalid path: " + url);
+            }
+            fetch(url, {
                 method: "POST",
                 cache: "no-cache",
                 signal,
