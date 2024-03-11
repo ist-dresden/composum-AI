@@ -1,44 +1,50 @@
-# Wichtige Ideen
+# Important ideas to convey in talk
 
 ## LLM interface: sehr einfach aber extrem flexibel
 
-Request:
-  - Systemmessage: was es grundsätzlich machen soll
-  - Daten:
-    - evtl. Hintergrundinformationen
-    - zu bearbeitender Text
-  - Prompt: Instruktionen was zu tun ist
+Request in general:
 
-Beispiel Übersetzung:
-  - Systemmessage: "Sein ein Übersetzungsexperte"
-  - Daten: "Georg Fischer ist stolz auf seine lange Erfolgsgeschichte."
-  - Prompt: "Übersetze den Satz ins Englische."
--> "Georg Fischer is proud of its long history of success."
+- System message: what it fundamentally should do
+- Data:
+    - possible background information
+    - text to be processed
+- Prompt: instructions on what to do exactly
 
-Beispiel Textgenerierung:
-  - Systemmessage: "Sei ein professioneller Redaktionsassistent."
-  - Daten: "Mit Spezialized Solutions ...."
-  - Prompt: "Erstelle 10 sehr unterschiedliche Vorschläge für eine Überschrift."
--> "Mit Spezialized Solutions zum Erfolg: 10 Gründe, warum Sie uns vertrauen können."
-   "Optimieren Sie Ihre Projekte mit Spezialized Solutions" ...
+Example for Translation:
 
-Viele Möglichkeiten für konkrete Aufgaben:
-- Übersetzung
-- Textgenerierung - Vorschläge für: Zusammenfassung, Vorschläge für Textfragmente: Umformulierung, CTA, Slogans, 
-  Teaser, Bildbeschreibungen, SEO, Transformation, ...
-- Textanalyse: gap analysis, suggestions for restructuring, ...
-- Suche: Auswahl der passendsten Suchresultate, evtl. direkte Beantwortung von natürlichsprachlichen Anfragen
+- System message: "You are translation expert"
+- Data: "Georg Fischer is proud of its long history of success."
+- Prompt: "Translate the sentence into English." -> "Georg Fischer is proud of its long history of success."
 
-"Eine KI ist auch nur ein Mensch" - Ausführung von konkret beschriebenen Teilaufgaben
+Example for Text Generation:
+
+- System message: "You are a professional editorial assistant."
+- Data: "With Specialized Solutions ...."
+- Prompt: "Create 10 very different suggestions for a headline."
+- -> "Succeed with Specialized Solutions: 10 reasons why you can trust us.", "Optimize your projects with Specialized
+  Solutions" ...
+
+Many possibilities for specific tasks:
+
+- Translation
+- Text generation - Suggestions for: summary, suggestions for text fragments: rephrasing, CTA, slogans, teasers, image
+  descriptions, SEO, transformation, ...
+- Text analysis: gap analysis, evaluation, suggestions for restructuring, ...
+- Search: selection of the most suitable search results, possibly direct answers to natural language queries
+
+"AIs are just humans too" - Execution of manually described subtasks.
+(Mental model of a human assistant with huge general knowledge but no knowledge about the given task is better
+model than computer program. "Natürlichsprachliche Programmierung")
 
 ## Composum AI
 
 Various assistants to support these processes:
-- Content Creation Assistant kurze Vorführung Grundidee, evtl. CTA suggestions, headline suggestions, 
-  - ? content transformation
+
+- Content Creation Assistant kurze Vorführung Grundidee, evtl. als Beispiel CTA suggestions, headline suggestions,
+  generate Teaser
 - Sidebar AI
 
-- Übersetzung Vorführung
+- Demo of automatic translation POC
 
 ## Advantages of using LLM for translation
 
@@ -52,3 +58,7 @@ Various assistants to support these processes:
 - full implementation automatic translation
 - exploration + adaption of the existing possibilities of Composum AI for content creation
 - support in finding ideas for LLM support for editor workflows
+
+Kennst Du die Rephrasierungsvorschläge / Wortvorschläge in https://www.deepl.com/write ? Das wäre auch ein 
+super-cooles Tool das man für Redakteure replizieren könnte. (Allerdings muss man da in den Richtexteditor eingreifen.
+:-( )
