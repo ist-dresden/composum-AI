@@ -34,6 +34,8 @@ public class AutoPageTranslateServiceImplTest {
     protected LiveRelationshipManager liveRelationshipManager;
     @Mock
     protected AutoTranslateService autoTranslateService;
+    @Mock
+    protected AutoTranslateConfigService autoTranslateConfigService;
 
     @InjectMocks
     protected AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl();
@@ -43,7 +45,7 @@ public class AutoPageTranslateServiceImplTest {
     @BeforeEach
     public void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
-        when(autoTranslateService.isTranslatableResource(any(Resource.class))).thenReturn(true);
+        when(autoTranslateConfigService.isTranslatableResource(any(Resource.class))).thenReturn(true);
     }
 
     @AfterEach

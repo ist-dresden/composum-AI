@@ -15,8 +15,6 @@ import com.day.cq.wcm.api.WCMException;
 
 public interface AutoTranslateService {
 
-    boolean isTranslatableResource(@Nonnull Resource resource);
-
     /**
      * Retrieves all currently running translation processes.
      */

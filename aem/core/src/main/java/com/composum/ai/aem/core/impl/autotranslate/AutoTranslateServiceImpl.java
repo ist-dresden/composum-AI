@@ -5,13 +5,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -21,19 +19,13 @@ import org.apache.sling.commons.threads.ThreadPool;
 import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ServiceScope;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -41,9 +33,7 @@ import com.day.cq.wcm.api.WCMException;
  * <p>
  * This is a proof-of-concept implementation, only available if explicitly enabled in the OSGi configuration.
  */
-@Designate(ocd = AutoTranslateServiceImpl.Config.class)
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, scope = ServiceScope.SINGLETON)
-// REQUIRE since this is currently only a POC
+@Component
 public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateServiceImpl.class);
@@ -58,11 +48,9 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     private AutoPageTranslateService pageTranslateService;
 
     @Reference
-    private AIConfigurationService configurationService;
+    protected AutoTranslateConfigService autoTranslateConfigService;
 
     private ThreadPool threadPool;
-
-    private boolean disabled;
 
     @Override
     public List<TranslationRun> getTranslationRuns() {
@@ -72,29 +60,16 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         return runs;
     }
 
-    protected AutoTranslateServiceImpl.Config config;
-
-    protected List<Pattern> deniedResourceTypes = new ArrayList<>();
-
     @Activate
     @Modified
-    protected void activate(AutoTranslateServiceImpl.Config config) {
-        this.config = config;
-        disabled = config.disabled();
-        deniedResourceTypes.clear();
-        for (final String rule : config.deniedResourceTypes()) {
-            if (StringUtils.isNotBlank(rule)) {
-                deniedResourceTypes.add(Pattern.compile(rule));
-            }
-        }
-        if (isEnabled()) {
+    protected void activate() {
+        if (isEnabled() && threadPool == null) {
             threadPool = threadPoolManager.get(getClass().getName());
         }
     }
 
     @Deactivate
     public void deactivate() {
-        disabled = true;
         if (threadPool != null) {
             threadPoolManager.release(threadPool);
         }
@@ -102,21 +77,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     @Override
     public boolean isEnabled() {
-        return !disabled;
-    }
-
-    @Override
-    public boolean isTranslatableResource(@Nonnull final Resource resource) {
-        if (!isEnabled()) {
-            return false;
-        }
-        final String resourceType = resource.getResourceType();
-        for (final Pattern pattern : deniedResourceTypes) {
-            if (pattern.matcher(resourceType).matches()) {
-                return false;
-            }
-        }
-        return true;
+        return autoTranslateConfigService.isEnabled();
     }
 
     protected ThreadPool getThreadPool() {
@@ -131,7 +92,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
             @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)
             throws LoginException, PersistenceException {
-        if (disabled) {
+        if (!isEnabled()) {
             throw new IllegalStateException("AutoTranslateService is disabled");
         }
         if (path == null || path.isEmpty()) {
@@ -321,15 +282,4 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
     }
 
-    @ObjectClassDefinition(name = "Composum AI Autotranslate Configuration",
-            description = "Automatic translation of AEM pages at /apps/composum-ai/components/autotranslate/list/list.html ." +
-                    "Proof of concept quality - might work, but use at your own peril. :-)")
-    public @interface Config {
-
-        @AttributeDefinition(name = "Disable the Autotranslate service", defaultValue = "true")
-        boolean disabled() default true;
-
-        @AttributeDefinition(name = "Denied Resource Types")
-        String[] deniedResourceTypes() default {};
-    }
 }

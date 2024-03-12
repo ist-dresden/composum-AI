@@ -23,13 +23,17 @@ public class AutoTranslateListModel {
     @OSGiService(optional = true)
     private AIConfigurationService configurationService;
 
+    @OSGiService(optional = true)
+    private AutoTranslateConfigService autoTranslateConfigService;
+
     @Self
     private SlingHttpServletRequest request;
 
     private AutoTranslateService.TranslationRun run;
 
     public boolean isDisabled() {
-        return autoTranslateService == null || !autoTranslateService.isEnabled() || configurationService == null;
+        return autoTranslateService == null || !autoTranslateService.isEnabled() || configurationService == null
+                || autoTranslateConfigService == null || !autoTranslateConfigService.isPocUiEnabled();
     }
 
     public List<AutoTranslateService.TranslationRun> getTranslationRuns() {

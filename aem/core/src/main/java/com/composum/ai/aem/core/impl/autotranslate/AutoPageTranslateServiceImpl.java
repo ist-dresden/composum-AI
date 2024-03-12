@@ -1,26 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
-import com.composum.ai.aem.core.impl.SelectorUtils;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.base.service.chat.GPTTranslationService;
-import com.day.cq.wcm.api.WCMException;
-import com.day.cq.wcm.msm.api.LiveRelationship;
-import com.day.cq.wcm.msm.api.LiveRelationshipManager;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -32,8 +14,27 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.composum.ai.aem.core.impl.SelectorUtils;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
 /**
  * <p>
@@ -65,6 +66,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     @Reference
     protected GPTTranslationService translationService;
+
+    @Reference
+    protected AutoTranslateConfigService autoTranslateConfigService;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL)
     protected volatile AutoTranslateService translateService;
@@ -307,7 +311,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         String sourcePath = relationship.getSourcePath();
         Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
         if (sourceResource != null && translateService != null
-                && translateService.isTranslatableResource(sourceResource)) {
+                && autoTranslateConfigService.isTranslatableResource(sourceResource)) {
             ValueMap sourceValueMap = sourceResource.getValueMap();
             ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
             for (Map.Entry<String, Object> entry : sourceValueMap.entrySet()) {

@@ -2,6 +2,7 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,6 +33,7 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
  */
 public class GPTChatCompletionServiceImplLengthTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImplLengthTest.class);
     private final Logger LOG_IMPL = (SimpleLogger) LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
     protected GPTChatCompletionServiceImpl service = new GPTChatCompletionServiceImpl();
@@ -43,14 +46,23 @@ public class GPTChatCompletionServiceImplLengthTest {
     @Before
     public void setUp() throws NoSuchFieldException {
         String key = System.getenv("OPENAI_API_KEY");
-        Assume.assumeNotNull(key); // locally that's often set and is required for the test.
-        Mockito.when(config.openAiApiKey()).thenReturn(key);
+        assumeNotNull(key); // locally that's often set and is required for the test.
+        when(config.openAiApiKey()).thenReturn(key);
+        when(config.connectionTimeout()).thenReturn(2);
+        when(config.requestTimeout()).thenReturn(5);
         service.activate(config, bundleContext);
     }
 
+    @After
+    public void tearDown() {
+        service.deactivate();
+    }
+
     @Test
+    @Ignore("Takes some time and might fail if OpenAI has trouble.")
     public void testRequireTooManyTokens() {
         for (String model : models) {
+            LOG.error("Testing model " + model);
             when(config.defaultModel()).thenReturn(model);
             service.activate(config, bundleContext);
             try {
@@ -62,6 +74,8 @@ public class GPTChatCompletionServiceImplLengthTest {
                         "\nFIX THIS! If that doesn't trigger the error, this costs money!");
             } catch (GPTException.GPTContextLengthExceededException e) {
                 System.out.println("Received expected exception for model " + model + " : " + e.toString());
+            } finally {
+                service.deactivate();
             }
 
         }

@@ -435,10 +435,10 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     }
 
     @ObjectClassDefinition(name = "Composum AI Translation Service Configuration",
-            description = "Configuration for the Composum AI Translation Service")
+            description = "Configuration for the basic Composum AI Translation Service")
     public @interface Config {
 
-        @AttributeDefinition(name = "Disable the Autotranslate service", defaultValue = "false")
+        @AttributeDefinition(name = "Disable the translation service", defaultValue = "false")
         boolean disabled() default false;
 
         @AttributeDefinition(name = "Fake translation", description = "For quick and inexpensive testing, " +
