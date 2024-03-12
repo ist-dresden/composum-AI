@@ -135,11 +135,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         run.translatedPages = resources.stream()
                 .map(r -> new TranslationPageImpl(r.getPath()))
                 .collect(Collectors.toList());
-        stateService.getTranslationRuns().add(run);
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
         run.status = "scheduled";
         run.user = resourceResolver.getUserID();
         run.configuration = configuration;
+        stateService.getTranslationRuns().add(run);
         run.future = getThreadPool().submit(() -> run.execute(processResolver));
         return run;
     }

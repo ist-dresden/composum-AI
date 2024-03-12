@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -17,13 +18,13 @@ import com.day.cq.wcm.api.WCMException;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class AutoTranslateListModel {
 
-    @OSGiService(optional = true)
+    @OSGiService
     private AutoTranslateService autoTranslateService;
 
-    @OSGiService(optional = true)
+    @OSGiService
     private AIConfigurationService configurationService;
 
-    @OSGiService(optional = true)
+    @OSGiService
     private AutoTranslateConfigService autoTranslateConfigService;
 
     @Self
@@ -37,7 +38,7 @@ public class AutoTranslateListModel {
     }
 
     public List<AutoTranslateService.TranslationRun> getTranslationRuns() {
-        return autoTranslateService.getTranslationRuns();
+        return autoTranslateService != null ? autoTranslateService.getTranslationRuns() : Collections.emptyList();
     }
 
     public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
