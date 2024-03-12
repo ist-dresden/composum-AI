@@ -307,7 +307,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             ValueMap sourceValueMap = sourceResource.getValueMap();
             ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
             for (String key : autoTranslateConfigService.translateableAttributes(sourceResource)) {
-                String value = sourceValueMap.get(key, String.class);
+                if (AITranslatePropertyWrapper.isAiTranslateProperty(key)) {
+                    continue;
+                }
                 stats.translateableProperties++;
                 AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
                 boolean isCancelled = relationship.getStatus() != null && (

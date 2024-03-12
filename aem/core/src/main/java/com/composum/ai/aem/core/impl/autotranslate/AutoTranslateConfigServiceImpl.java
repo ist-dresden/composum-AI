@@ -49,19 +49,26 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
     protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
 
     protected List<Pattern> deniedResourceTypes = new ArrayList<>();
+    protected List<Pattern> allowedAttributeRegexes = new ArrayList<>();
+    protected List<Pattern> deniedAttributesRegexes = new ArrayList<>();
 
-    private AutoTranslateConfig config;
+    protected AutoTranslateConfig config;
 
     @Activate
     @Modified
     public void activate(AutoTranslateConfig config) {
         this.config = config;
-        deniedResourceTypes.clear();
-        for (final String rule : config.deniedResourceTypes()) {
-            if (StringUtils.isNotBlank(rule)) {
-                deniedResourceTypes.add(Pattern.compile(rule));
-            }
-        }
+        deniedResourceTypes = stringArrayToRegexes(config.deniedResourceTypes());
+        allowedAttributeRegexes = stringArrayToRegexes(config.allowedAttributeRegexes());
+        deniedAttributesRegexes = stringArrayToRegexes(config.deniedAttributesRegexes());
+    }
+
+    private static List<Pattern> stringArrayToRegexes(String[] array) {
+        return array == null ? Collections.emptyList() :
+                Arrays.stream(array)
+                        .filter(StringUtils::isNotBlank)
+                        .map(s -> Pattern.compile(s))
+                        .collect(Collectors.toList());
     }
 
     @Deactivate
@@ -95,14 +102,35 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
 
     @Override
     public List<String> translateableAttributes(@Nullable Resource resource) {
-        if (resource == null) {
+        if (resource == null || !isTranslatableResource(resource)) {
             return Collections.emptyList();
         }
         ValueMap valueMap = resource.getValueMap();
-        return valueMap.entrySet().stream()
-                .filter(entry -> isTranslatableProperty(entry.getKey(), entry.getValue()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+
+        String slingResourceType = null;
+        String attributeAdditionalPath = "";
+        Resource searchResource = resource;
+        while (searchResource != null && slingResourceType == null) {
+            slingResourceType = searchResource.getValueMap().get("sling:resourceType", String.class);
+            if (slingResourceType == null) {
+                attributeAdditionalPath = searchResource.getName() + "/" + attributeAdditionalPath;
+            }
+            searchResource = searchResource.getParent();
+        }
+
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+            String attributeDescription = slingResourceType + "%" + attributeAdditionalPath + entry.getKey();
+            boolean allowed = allowedAttributeRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
+            if (!allowed) {
+                boolean denied = deniedAttributesRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
+                if (denied || !isHeuristicallyTranslatableProperty(entry.getKey(), entry.getValue())) {
+                    continue;
+                }
+            }
+            result.add(entry.getKey());
+        }
+        return result;
     }
 
     /**
@@ -111,7 +139,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
      * in the name, have a String value, don't start with /{content,apps,libs,mnt}/ in the value and the value has
      * a whitespace and at least one 4 letter sequence.
      */
-    protected static boolean isTranslatableProperty(String name, Object value) {
+    protected static boolean isHeuristicallyTranslatableProperty(String name, Object value) {
         if (value instanceof String) {
             String stringValue = (String) value;
             if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
