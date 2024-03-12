@@ -30,6 +30,8 @@ import com.day.cq.wcm.api.WCMException;
 
 /**
  * A service that provides automatic translation of AEM pages.
+ * The actual work is done in {@link AutoPageTranslateServiceImpl};
+ * this is for managing the translation queue and the thread pool.
  * <p>
  * This is a proof-of-concept implementation, only available if explicitly enabled in the OSGi configuration.
  */

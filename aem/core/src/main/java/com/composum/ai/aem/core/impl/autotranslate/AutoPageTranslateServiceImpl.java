@@ -53,14 +53,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     protected static final Logger LOG = LoggerFactory.getLogger(AutoPageTranslateServiceImpl.class);
 
-    /**
-     * List of properties that should always be translated.
-     */
-    public static final List<String> CERTAINLY_TRANSLATABLE_PROPERTIES =
-            Arrays.asList("jcr:title", "jcr:description", "text", "title", "alt", "cq:panelTitle", "shortDescription",
-                    "actionText", "accessibilityLabel", "pretitle", "helpMessage",
-                    "dc:title", "dc:description");
-
     protected static final Pattern PATTERN_IGNORED_SUBNODE_NAMES =
             Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*|sling:members");
 
@@ -314,50 +306,49 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 && autoTranslateConfigService.isTranslatableResource(sourceResource)) {
             ValueMap sourceValueMap = sourceResource.getValueMap();
             ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-            for (Map.Entry<String, Object> entry : sourceValueMap.entrySet()) {
-                if (isTranslatableProperty(entry.getKey(), entry.getValue())) {
-                    stats.translateableProperties++;
-                    AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, entry.getKey());
-                    boolean isCancelled = relationship.getStatus() != null && (
-                            relationship.getStatus().isCancelled() ||
-                                    relationship.getStatus().getCanceledProperties().contains(entry.getKey())
-                    );
+            for (String key : autoTranslateConfigService.translateableAttributes(sourceResource)) {
+                String value = sourceValueMap.get(key, String.class);
+                stats.translateableProperties++;
+                AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
+                boolean isCancelled = relationship.getStatus() != null && (
+                        relationship.getStatus().isCancelled() ||
+                                relationship.getStatus().getCanceledProperties().contains(key)
+                );
 
-                    // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
-                    // or if we have a current translation.
+                // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
+                // or if we have a current translation.
 
-                    if (isCancelled && !translationParameters.translateWhenChanged) {
-                        continue; // don't touch cancelled properties
-                    }
-
-                    if (targetWrapper.isOriginalAsWhenLastTranslating()) {
-                        // shortcut: we have a recent translation already
-                        targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
-                        changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
-                        continue;
-                    }
-
-                    if (isCancelled && targetWrapper.hasSavedTranslation()
-                            && !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getCurrentValue())
-                            && !StringUtils.equals(targetWrapper.getOriginal(), targetWrapper.getCurrentValue())) {
-                        // = translateWhenChanged override; save manual change. We also exclude the phase during rollout
-                        // where the property is reset to the original value and we have to restore the translation.
-                        LOG.info("Re-translating {} in {} despite manual change", entry.getKey(), resource.getPath());
-                        targetWrapper.saveManualChange();
-                        stats.modifiedButRetranslatedProperties++;
-                    }
-
-                    if (targetWrapper.hasSavedTranslation()) {
-                        stats.retranslatedProperties++;
-                    }
-
-                    LOG.debug("Re-translating {} in {}", entry.getKey(), resource.getPath());
-                    PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
-                    propertyToTranslate.sourceResource = sourceResource;
-                    propertyToTranslate.targetResource = resource;
-                    propertyToTranslate.propertyName = entry.getKey();
-                    propertiesToTranslate.add(propertyToTranslate);
+                if (isCancelled && !translationParameters.translateWhenChanged) {
+                    continue; // don't touch cancelled properties
                 }
+
+                if (targetWrapper.isOriginalAsWhenLastTranslating()) {
+                    // shortcut: we have a recent translation already
+                    targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
+                    changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
+                    continue;
+                }
+
+                if (isCancelled && targetWrapper.hasSavedTranslation()
+                        && !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getCurrentValue())
+                        && !StringUtils.equals(targetWrapper.getOriginal(), targetWrapper.getCurrentValue())) {
+                    // = translateWhenChanged override; save manual change. We also exclude the phase during rollout
+                    // where the property is reset to the original value and we have to restore the translation.
+                    LOG.info("Re-translating {} in {} despite manual change", key, resource.getPath());
+                    targetWrapper.saveManualChange();
+                    stats.modifiedButRetranslatedProperties++;
+                }
+
+                if (targetWrapper.hasSavedTranslation()) {
+                    stats.retranslatedProperties++;
+                }
+
+                LOG.debug("Re-translating {} in {}", key, resource.getPath());
+                PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
+                propertyToTranslate.sourceResource = sourceResource;
+                propertyToTranslate.targetResource = resource;
+                propertyToTranslate.propertyName = key;
+                propertiesToTranslate.add(propertyToTranslate);
             }
         } else {
             LOG.info("No source resource found - translation not touching {}", resource.getPath());
@@ -379,49 +370,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     protected static String encodePropertyName(String prefix, String propertyName, String suffix) {
         return prefix + propertyName.replace(":", "_") + suffix;
-    }
-
-    protected static final Pattern PATTERN_HAS_WHITESPACE = Pattern.compile("\\s");
-
-    /**
-     * As additional heuristic - the text should have at least one word with >= 4 letters.
-     * That will break down very different languages, I know, but this is a POC. :-)
-     */
-    protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{L}{4}");
-
-    protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
-
-    /**
-     * Checks whether the property is one of jcr:title, jcr:description, title, alt, cq:panelTitle, shortDescription,
-     * actionText, accessibilityLabel, pretitle, displayPopupTitle, helpMessage , or alternatively don't have a colon
-     * in the name, have a String value, don't start with /{content,apps,libs,mnt}/ in the value and the value has
-     * a whitespace and at least one 4 letter sequence.
-     */
-    protected static boolean isTranslatableProperty(String name, Object value) {
-        if (value instanceof String) {
-            String stringValue = (String) value;
-            if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
-                    stringValue.startsWith("/libs/") || stringValue.startsWith("/mnt/") ||
-                    stringValue.equals("true") || stringValue.equals("false")) {
-                return false; // looks like path or boolean
-            }
-
-            if (CERTAINLY_TRANSLATABLE_PROPERTIES.contains(name) &&
-                    PATTERN_HAS_LETTER.matcher(stringValue).find()
-            ) {
-                return true;
-            }
-            if (name.contains(":")) {
-                return false;
-            }
-
-            if (AITranslatePropertyWrapper.isAiTranslateProperty(name)) {
-                return false;
-            }
-            return PATTERN_HAS_WHITESPACE.matcher(stringValue).find() &&
-                    PATTERN_HAS_WORD.matcher(stringValue).find();
-        }
-        return false;
     }
 
     protected static class PropertyToTranslate {
