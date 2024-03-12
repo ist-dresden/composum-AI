@@ -1,7 +1,0 @@
-{
-    "scripts": [
-        "create path (sling:OrderedFolder) /content/dam/composum-ai",
-        "create path (nt:unstructured) /content/dam/composum-ai/jcr:content",
-        "set properties on /content/dam/composum-ai/jcr:content\n  set cq:conf{String} to /conf/composum-ai\n  set jcr:title{String} to \"Composum AI\"\nend"
-    ]
-}
