@@ -21,6 +21,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
@@ -30,6 +32,8 @@ import com.adobe.granite.ui.components.ds.ValueMapResource;
  * Some utility methods for this.
  */
 public class SelectorUtils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SelectorUtils.class);
 
     /**
      * Parameter defining the path to the resource we work on.
@@ -97,6 +101,8 @@ public class SelectorUtils {
                     break;
                 }
             }
+        } else {
+            LOG.trace("Language {} because of {}", language, candidate != null ? candidate.getPath() : "null");
         }
         return language;
     }
