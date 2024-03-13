@@ -2,9 +2,13 @@ package com.composum.ai.backend.slingbase.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -26,6 +30,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.request.RequestDispatcherOptions;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
@@ -373,6 +379,26 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             throw new UnsupportedOperationCalled();
         }
 
+        @Override
+        public RequestParameter getRequestParameter(String name) {
+            return null;
+        }
+
+        @Override
+        public RequestParameterMap getRequestParameterMap() {
+            return new EmptyRequestParameterMap();
+        }
+
+        @Override
+        public List<RequestParameter> getRequestParameterList() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public RequestParameter[] getRequestParameters(String name) {
+            return new RequestParameter[0];
+        }
+
         /** We render with GET, obviously. */
         @Override
         public String getMethod() {
@@ -503,5 +529,25 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
      */
     protected static class UnsupportedOperationCalled extends RuntimeException {
         // empty
+    }
+
+    protected static class EmptyRequestParameterMap extends AbstractMap<String, RequestParameter[]> implements RequestParameterMap {
+
+        @Override
+        public Set<Entry<String, RequestParameter[]>> entrySet() {
+            return Collections.emptySet();
+        }
+
+        @Nullable
+        @Override
+        public RequestParameter[] getValues(@NotNull String name) {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public RequestParameter getValue(String name) {
+            return null;
+        }
     }
 }
