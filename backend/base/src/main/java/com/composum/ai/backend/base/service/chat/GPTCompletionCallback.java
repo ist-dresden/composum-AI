@@ -1,5 +1,8 @@
 package com.composum.ai.backend.base.service.chat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * For a streaming mode this is given as parameter for the method call and receives the streamed data; the method returns only when the response is complete.
  */
@@ -37,12 +40,15 @@ public interface GPTCompletionCallback {
      */
     public static class GPTCompletionCollector implements GPTCompletionCallback {
 
+        private static final Logger LOG = LoggerFactory.getLogger(GPTCompletionCollector.class);
+
         private StringBuilder buffer = new StringBuilder();
         private Throwable throwable;
         private GPTFinishReason finishReason;
 
         @Override
         public void onFinish(GPTFinishReason finishReason) {
+            LOG.debug("Finished with reason {} :\n{}", finishReason, buffer);
             this.finishReason = finishReason;
         }
 
@@ -53,6 +59,7 @@ public interface GPTCompletionCallback {
 
         @Override
         public void onError(Throwable throwable) {
+            LOG.debug("Error: ", throwable);
             this.throwable = throwable;
         }
 

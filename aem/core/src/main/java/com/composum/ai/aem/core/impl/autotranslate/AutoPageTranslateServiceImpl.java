@@ -92,7 +92,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         String languageName = SelectorUtils.getLanguageName(language);
         List<String> translatedValues =
                 translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
-        translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
 
         Map<String, LiveRelationship> relationships = new HashMap<>();
 

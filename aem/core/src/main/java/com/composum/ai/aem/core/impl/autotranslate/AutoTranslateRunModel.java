@@ -16,8 +16,19 @@ public class AutoTranslateRunModel {
     @OSGiService
     private AutoTranslateService autoTranslateService;
 
+    @OSGiService
+    private AutoTranslateConfigService autoTranslateConfigService;
+
     @Self
     private SlingHttpServletRequest request;
+
+
+    public void checkDisabled() {
+        if (autoTranslateService == null || !autoTranslateService.isEnabled()
+                || autoTranslateConfigService == null || !autoTranslateConfigService.isPocUiEnabled()) {
+            throw new IllegalStateException("AutoTranslateService is not available");
+        }
+    }
 
     public AutoTranslateService.TranslationRun getModel() {
         RequestPathInfo requestPathInfo = request.getRequestPathInfo();

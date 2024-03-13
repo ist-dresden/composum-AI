@@ -42,6 +42,9 @@ public class AutoTranslateListModel {
     }
 
     public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
+        if (isDisabled()) {
+            throw new IllegalStateException("AutoTranslateService is not available");
+        }
         if (run == null) {
             String path = request.getParameter("path");
             if (path == null || path.isEmpty()) {
@@ -64,6 +67,9 @@ public class AutoTranslateListModel {
     }
 
     public String rollback() throws WCMException, PersistenceException {
+        if (isDisabled()) {
+            throw new IllegalStateException("AutoTranslateService is not available");
+        }
         String path = request.getParameter("path");
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("path parameter is required");
