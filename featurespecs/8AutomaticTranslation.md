@@ -249,6 +249,11 @@ Workflow when updating a language copy
 https://medium.com/@vsr061/create-custom-aem-menu-tools-with-granite-ui-shell-53c56e435f8a - Custom AEM menu tools
 https://medium.com/@jlanssie/how-to-create-a-custom-tool-in-aem-78d14c1f66d5
 
+Configuration of translation rules in AEM:
+https://experienceleague.adobe.com/docs/experience-manager-65/content/headless/translation/translation-rules.html
+https://developer.adobe.com/experience-manager/reference-materials/cloud-service/javadoc/com/adobe/granite/translation/api/TranslationService.html
+https://github.com/Adobe-Marketing-Cloud/aem-translation-framework-bootstrap-connector
+
 ### Links for translation on rollout
 
 https://github.com/AdobeDocs/experience-manager-65.en/blob/main/help/sites-administering/msm-best-practices.md etc.
