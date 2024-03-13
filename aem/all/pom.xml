@@ -80,6 +80,8 @@
 							<type>zip</type>
 							<target>/apps/composum-ai-packages/content/install</target>
 						</embedded>
+						<!-- Deliberately not including the <artifactId>composum-ai.ui.config</artifactId> since that
+							 could conflict with the users configurations -->
 					</embeddeds>
 				</configuration>
 			</plugin>
@@ -194,12 +196,6 @@
 		<dependency>
 			<groupId>com.composum.ai.aem</groupId>
 			<artifactId>composum-ai.ui.content</artifactId>
-			<version>${project.version}</version>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>com.composum.ai.aem</groupId>
-			<artifactId>composum-ai.ui.config</artifactId>
 			<version>${project.version}</version>
 			<type>zip</type>
 		</dependency>

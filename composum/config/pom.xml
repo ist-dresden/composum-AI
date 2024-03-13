@@ -13,7 +13,7 @@
 
     <name>Composum AI::Composum::Config</name>
     <description>
-        Configuration for Composum specific package for Composum AI.
+        Example configurations for Composum specific package for Composum AI.
     </description>
     <url>${siteurl}</url>
 
@@ -104,6 +104,7 @@
         </profile>
         <profile>
             <id>installPackage</id>
+            <!-- Not automatically deployed since that might conflict with the users settings.
             <activation>
                 <property>
                     <name>deploy.package</name>
@@ -127,6 +128,7 @@
                     </plugin>
                 </plugins>
             </build>
+            -->
         </profile>
         <profile>
             <id>installTestContent</id>

@@ -33,7 +33,7 @@
     <artifactId>composum-ai.ui.config</artifactId>
     <packaging>content-package</packaging>
     <name>Composum AI::AEM::UI config</name>
-    <description>UI config package for Composum AI</description>
+    <description>UI example config package for Composum AI</description>
     <url>${siteurl}</url>
 
     <!-- ====================================================================== -->
