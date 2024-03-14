@@ -5,11 +5,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -17,8 +19,13 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 
 /**
  * Serves the configurations for the automatic translation service.
@@ -28,6 +35,8 @@ import org.osgi.service.metatype.annotations.Designate;
         configurationPid = "com.composum.ai.aem.core.impl.autotranslate.AutoTranslateServiceImpl")
 @Designate(ocd = AutoTranslateConfig.class)
 public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateConfigServiceImpl.class);
 
     /**
      * List of properties that should always be translated.
@@ -48,11 +57,27 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
 
     protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
 
+    /**
+     * Matches a HTML tag or endtag or HTML comment.
+     */
+    public static final Pattern HTML_TAG_OR_COMMENT_PATTERN =
+            Pattern.compile("<\\w+(\\s+[a-zA-Z0-9_-]*+(=\"[^\"]*\"|=\\S+)?)*/?>|</[a-zA-Z0-9_-]*+>|<!--\\s.*?\\s-->");
+
+    /**
+     * Somewhat arbitrary treshold: if a single property is more than that number of tokens we don't try
+     * to translate it. That'll likely fail and block the translation, and there is very likely something
+     * that shouldn't be translated, anyway, like a large HTML fragment.
+     */
+    protected static final int HUGE_TRESHOLD = 3000;
+
     protected List<Pattern> deniedResourceTypes = new ArrayList<>();
     protected List<Pattern> allowedAttributeRegexes = new ArrayList<>();
     protected List<Pattern> deniedAttributesRegexes = new ArrayList<>();
 
     protected AutoTranslateConfig config;
+
+    @Reference
+    protected GPTChatCompletionService gptChatCompletionService;
 
     @Activate
     @Modified
@@ -124,7 +149,8 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
             boolean allowed = allowedAttributeRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
             if (!allowed) {
                 boolean denied = deniedAttributesRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
-                if (denied || !isHeuristicallyTranslatableProperty(entry.getKey(), entry.getValue())) {
+                if (denied || !isHeuristicallyTranslatableProperty(entry.getKey(), entry.getValue())
+                        || isHuge(entry.getKey(), entry.getValue())) {
                     continue;
                 }
             }
@@ -137,9 +163,9 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
      * Checks whether the property is one of jcr:title, jcr:description, title, alt, cq:panelTitle, shortDescription,
      * actionText, accessibilityLabel, pretitle, displayPopupTitle, helpMessage , or alternatively don't have a colon
      * in the name, have a String value, don't start with /{content,apps,libs,mnt}/ in the value and the value has
-     * a whitespace and at least one 4 letter sequence.
+     * a whitespace and at least one 4 letter sequence. We also exclude something that is {@link #isHtmlButNotRichtext(String, Object)}.
      */
-    protected static boolean isHeuristicallyTranslatableProperty(String name, Object value) {
+    public static boolean isHeuristicallyTranslatableProperty(String name, Object value) {
         if (value instanceof String) {
             String stringValue = (String) value;
             if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
@@ -161,10 +187,75 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
                 return false;
             }
             return PATTERN_HAS_WHITESPACE.matcher(stringValue).find() &&
-                    PATTERN_HAS_WORD.matcher(stringValue).find();
+                    PATTERN_HAS_WORD.matcher(stringValue).find() &&
+                    !isHtmlButNotRichtext(name, value);
         }
         return false;
     }
 
+    /**
+     * Heuristic check whether this is actually HTML that shouldn't be translated.
+     * Richtext is acceptable for translating, but HTML with lots of attributes not.
+     * We recognize text that has a very significant amount of text in HTML tags / comments and try to
+     * err on the save side - it should be "very obviously" HTMl, which often has
+     * many attributes in it's HTML tags.
+     */
+    public static boolean isHtmlButNotRichtext(String name, Object value) {
+        if (value == null || !(value instanceof String) || ((String) value).length() < 50) {
+            return false;
+        }
+        String text = (String) value;
+        if (!text.contains("<") && !text.contains("&lt;") ||
+                !text.contains(">") && !text.contains("&gt;") || !text.contains("/")) {
+            return false;
+        }
+        text = StringEscapeUtils.unescapeHtml(text);
+        int textLength = text.length();
+        int tagcount = 0;
+        int textInTags = 0;
+        int startTagCount = 0;
+        int endTagCount = 0;
+        // count characters within nontrivial HTML tags / HTML comments
+        Matcher matcher = HTML_TAG_OR_COMMENT_PATTERN.matcher(text);
+        while (matcher.find()) {
+            tagcount++;
+            int length = matcher.end() - matcher.start();
+            if (length > 10) {
+                textInTags += length;
+            }
+            String matchedText = matcher.group();
+            if (matchedText.startsWith("</")) {
+                endTagCount++;
+            } else if (!matchedText.startsWith("<!--")) {
+                startTagCount++;
+            }
+        }
+        LOG.debug("Tagcount: {}, textInTags percentage: {}", tagcount, (100L * textInTags) / textLength);
+        boolean isHtml = tagcount > 10 && textInTags > textLength / 3 && startTagCount > 5 && endTagCount > 5;
+        if (isHtml) {
+            LOG.warn("Attribute {} contained a large HTML fragment and should probably be excluded from translation.", name);
+        }
+        return isHtml;
+    }
+
+    /**
+     * This recognizes huge values that we shouldn't even attempt to translate since that would very likely
+     * fail and block translation of the rest of the properties.
+     * (Note: it is not impossible to translate such a thing but that would need a special implementation which
+     * we will do if there is a real use case.)
+     */
+    public boolean isHuge(String name, Object value) {
+        if (value instanceof String) {
+            String stringValue = (String) value;
+            if (stringValue.length() > HUGE_TRESHOLD) {
+                int tokens = this.gptChatCompletionService.countTokens(stringValue);
+                if (tokens > HUGE_TRESHOLD) {
+                    LOG.warn("Property has huge content and therefore is not translated - perhaps exclude by configuration? {} with {} tokens", name, tokens);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 }
