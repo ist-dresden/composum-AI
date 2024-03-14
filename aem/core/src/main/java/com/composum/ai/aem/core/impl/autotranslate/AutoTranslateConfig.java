@@ -37,4 +37,9 @@ public @interface AutoTranslateConfig {
                     "heuristics / standard attributes. Same syntax as allowed attributes.")
     String[] deniedAttributesRegexes() default {};
 
+    @AttributeDefinition(name = "Ignore Assets except Content Fragments",
+            description = "If true, assets are ignored for translation, except for content fragments. " +
+                    "(Otherwise the translator would translate metadata of images and videos.)")
+    boolean ignoreAssetsExceptContentFragments() default true;
+
 }

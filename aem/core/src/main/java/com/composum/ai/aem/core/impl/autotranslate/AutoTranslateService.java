@@ -1,10 +1,14 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.startsWith;
+
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -91,9 +95,23 @@ public interface AutoTranslateService {
     }
 
     static abstract class TranslationPage {
+        private final static Pattern IMAGE_VIDEO_PATTERN =
+                Pattern.compile("\\.(png|jpg|jpeg|gif|svg|mp3|mov|mp4)(/|$)", Pattern.CASE_INSENSITIVE);
+
         public String pagePath;
         public String status;
         public AutoPageTranslateService.Stats stats;
+
+        public String editorUrl() {
+            if (startsWith(pagePath,  "/content/dam")) {
+                if (IMAGE_VIDEO_PATTERN.matcher(pagePath).find()) {
+                    return "/assetdetails.html" + pagePath;
+                }
+                return "/editor.html" + pagePath;
+            } else {
+                return "/editor.html" + pagePath + ".html";
+            }
+        }
     }
 
 }

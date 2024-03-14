@@ -117,6 +117,11 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
             return false;
         }
         final String resourceType = resource.getResourceType();
+        if (resourceType.equals("dam:AssetContent") && config.ignoreAssetsExceptContentFragments()
+                && !Boolean.TRUE.equals(resource.getValueMap().get("contentFragment", Boolean.class))){
+            LOG.debug("Ignoring asset that is not content fragment: ", resource.getPath());
+            return false;
+        }
         for (final Pattern pattern : deniedResourceTypes) {
             if (pattern.matcher(resourceType).matches()) {
                 return false;

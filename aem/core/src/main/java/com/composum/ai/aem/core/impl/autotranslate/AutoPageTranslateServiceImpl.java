@@ -25,7 +25,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,9 +60,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     @Reference
     protected AutoTranslateConfigService autoTranslateConfigService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
-    protected volatile AutoTranslateService translateService;
 
     @Reference
     protected LiveRelationshipManager liveRelationshipManager;
@@ -301,60 +297,61 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         String sourcePath = relationship.getSourcePath();
         Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
-        if (sourceResource != null && translateService != null
-                && autoTranslateConfigService.isTranslatableResource(sourceResource)) {
-            ValueMap sourceValueMap = sourceResource.getValueMap();
-            ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-            for (String key : autoTranslateConfigService.translateableAttributes(sourceResource)) {
-                if (AITranslatePropertyWrapper.isAiTranslateProperty(key)) {
-                    continue;
-                }
-                stats.translateableProperties++;
-                AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
-                boolean isCancelled = relationship.getStatus() != null && (
-                        relationship.getStatus().isCancelled() ||
-                                relationship.getStatus().getCanceledProperties().contains(key)
-                );
-
-                // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
-                // or if we have a current translation.
-
-                if (isCancelled && !translationParameters.translateWhenChanged) {
-                    continue; // don't touch cancelled properties
-                }
-
-                if (targetWrapper.isOriginalAsWhenLastTranslating()) {
-                    // shortcut: we have a recent translation already
-                    targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
-                    changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
-                    continue;
-                }
-
-                if (isCancelled && targetWrapper.hasSavedTranslation()
-                        && !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getCurrentValue())
-                        && !StringUtils.equals(targetWrapper.getOriginal(), targetWrapper.getCurrentValue())) {
-                    // = translateWhenChanged override; save manual change. We also exclude the phase during rollout
-                    // where the property is reset to the original value and we have to restore the translation.
-                    LOG.info("Re-translating {} in {} despite manual change", key, resource.getPath());
-                    targetWrapper.saveManualChange();
-                    stats.modifiedButRetranslatedProperties++;
-                }
-
-                if (targetWrapper.hasSavedTranslation()) {
-                    stats.retranslatedProperties++;
-                }
-
-                LOG.debug("Re-translating {} in {}", key, resource.getPath());
-                PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
-                propertyToTranslate.sourceResource = sourceResource;
-                propertyToTranslate.targetResource = resource;
-                propertyToTranslate.propertyName = key;
-                propertiesToTranslate.add(propertyToTranslate);
+        if (sourceResource == null || !autoTranslateConfigService.isTranslatableResource(sourceResource)) {
+            if (sourceResource == null) {
+                LOG.info("No source resource found - translation not touching {}", resource.getPath());
+                // that can happen for new resources in the live copy. Unfortunately it's not really clear if we should
+                // try to translate that or not - we'll probably learn about that in practice.
             }
-        } else {
-            LOG.info("No source resource found - translation not touching {}", resource.getPath());
-            // that can happen for new resources in the live copy. Unfortunately it's not really clear if we should
-            // try to translate that or not - we'll probably learn about that in practice.
+            return false;
+        }
+        ValueMap sourceValueMap = sourceResource.getValueMap();
+        ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
+        for (String key : autoTranslateConfigService.translateableAttributes(sourceResource)) {
+            if (AITranslatePropertyWrapper.isAiTranslateProperty(key)) {
+                continue;
+            }
+            stats.translateableProperties++;
+            AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
+            boolean isCancelled = relationship.getStatus() != null && (
+                    relationship.getStatus().isCancelled() ||
+                            relationship.getStatus().getCanceledProperties().contains(key)
+            );
+
+            // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
+            // or if we have a current translation.
+
+            if (isCancelled && !translationParameters.translateWhenChanged) {
+                continue; // don't touch cancelled properties
+            }
+
+            if (targetWrapper.isOriginalAsWhenLastTranslating()) {
+                // shortcut: we have a recent translation already
+                targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
+                changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
+                continue;
+            }
+
+            if (isCancelled && targetWrapper.hasSavedTranslation()
+                    && !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getCurrentValue())
+                    && !StringUtils.equals(targetWrapper.getOriginal(), targetWrapper.getCurrentValue())) {
+                // = translateWhenChanged override; save manual change. We also exclude the phase during rollout
+                // where the property is reset to the original value and we have to restore the translation.
+                LOG.info("Re-translating {} in {} despite manual change", key, resource.getPath());
+                targetWrapper.saveManualChange();
+                stats.modifiedButRetranslatedProperties++;
+            }
+
+            if (targetWrapper.hasSavedTranslation()) {
+                stats.retranslatedProperties++;
+            }
+
+            LOG.debug("Re-translating {} in {}", key, resource.getPath());
+            PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
+            propertyToTranslate.sourceResource = sourceResource;
+            propertyToTranslate.targetResource = resource;
+            propertyToTranslate.propertyName = key;
+            propertiesToTranslate.add(propertyToTranslate);
         }
         for (Resource child : resource.getChildren()) {
             if (!PATTERN_IGNORED_SUBNODE_NAMES.matcher(child.getName()).matches()) {

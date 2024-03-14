@@ -136,7 +136,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 .map(r -> new TranslationPageImpl(r.getPath()))
                 .collect(Collectors.toList());
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
-        run.status = "scheduled";
+        run.status = "queued";
         run.user = resourceResolver.getUserID();
         run.configuration = configuration;
         stateService.getTranslationRuns().add(run);
@@ -281,6 +281,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public TranslationPageImpl(String resourcePath) {
             this.resourcePath = resourcePath;
             pagePath = ResourceUtil.getParent(resourcePath); // remove jcr:content
+            this.status = "queued";
         }
     }
 

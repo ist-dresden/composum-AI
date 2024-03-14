@@ -16,9 +16,15 @@
                     <sly data-sly-use.runmodel="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateRunModel"
                          data-sly-set.model="${runmodel.model}">
                         <section class="coral-Form-fieldset"><h2
-                                    class="coral-Form-fieldset-legend">Translation run details</h2>
+                                    class="coral-Form-fieldset-legend">Translation run details for ${model.rootPath}</h2>
                             <div class="coral-Form coral-Form--vertical foundation-form">
                                 <input type="hidden" name="_charset_" value="utf-8">
+                                <coral-alert variant="error" data-sly-test="${!model}">
+                                    <coral-alert-header>EXPIRED</coral-alert-header>
+                                    <coral-alert-content>
+                                        The data about this translation run is no longer available.
+                                    </coral-alert-content>
+                                </coral-alert>
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                     <span class="coral-Form-field foundation-layout-util-breakword">
                                         <strong>Status:</strong> ${model.status}
@@ -48,6 +54,7 @@
                                        the number of paths that were found and relocated to a copy with the appropriate language
                                        versus the total number of paths found in the page.
                                        For modified pages a link into the editor is provided.
+                                       Please refresh this page to update the status.
                                        </span>
                                </span>
                                 <div class="coral-Form-fieldwrapper">
@@ -77,10 +84,11 @@
                                                 </sly>
                                             </td>
                                             <td is="coral-table-cell">
-                                                <a data-sly-unwrap="${!item.stats.hasChanges}"
+                                                <a
                                                    target="_blank"
-                                                   href="/editor.html${item.pagePath}.html">${item.pagePath}
-                                                </a></td>
+                                                   href="${item.editorUrl}">${item.pagePath}
+                                                </a>
+                                            </td>
                                         </tr>
                                         </tbody>
                                     </table>

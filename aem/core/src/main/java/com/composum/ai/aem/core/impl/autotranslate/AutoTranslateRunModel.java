@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -30,6 +32,7 @@ public class AutoTranslateRunModel {
         }
     }
 
+    @Nullable
     public AutoTranslateService.TranslationRun getModel() {
         RequestPathInfo requestPathInfo = request.getRequestPathInfo();
         String suffix = requestPathInfo.getSuffix();
@@ -40,7 +43,7 @@ public class AutoTranslateRunModel {
         return autoTranslateService.getTranslationRuns().stream()
                 .filter(run -> id.equals(run.id))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("no such run: " + id));
+                .orElse(null);
     }
 
     public String cancel() {
