@@ -1,5 +1,33 @@
 # Feature specification of the automatic translation process
 
+## Table of contents
+
+- [Rationale](#rationale)
+- [Basic idea](#basic-idea)
+- [Assumed site structure](#assumed-site-structure)
+- [Dealing with references to assets and similar](#dealing-with-references-to-assets-and-similar)
+    - [Experience Fragments](#experience-fragments)
+    - [Content Fragments](#content-fragments)
+    - [Assets (images etc.)](#assets-images-etc)
+    - [AEM Language copies as comparison](#aem-language-copies-as-comparison)
+    - [Approach to these assets](#approach-to-these-assets)
+- [Triggering the translation with a proof of concept UI](#triggering-the-translation-with-a-proof-of-concept-ui)
+- [Triggering the translation as a rollout action](#triggering-the-translation-as-a-rollout-action)
+    - [Open points for the rollout configuration](#open-points-for-the-rollout-configuration)
+- [Some technical details](#some-technical-details)
+    - [Analysis of saving the original and translated texts](#analysis-of-saving-the-original-and-translated-texts)
+    - [Heuristics for translateable attribute recognition](#heuristics-for-translateable-attribute-recognition)
+    - [Identification of the translation source](#identification-of-the-translation-source)
+- [Open points](#open-points)
+- [Development](#development)
+    - [REST interface for the UI](#rest-interface-for-the-ui)
+    - [Background information about live copies](#background-information-about-live-copies)
+    - [Testing on WKND Site](#testing-on-wknd-site)
+        - [Setup of live copies for testing a full site translation](#setup-of-live-copies-for-testing-a-full-site-translation)
+- [More details](#more-details)
+    - [Differential translation experiment](#differential-translation-experiment)
+- [More ideas](#more-ideas)
+
 ## Rationale
 
 While it is possible to translate item by item with the content creation dialog in AEM or the translation dialog in
@@ -135,6 +163,17 @@ properties selectively.
 - is that triggered on initial copying?
 - are our additional properties kept?
 
+## Integration as Translation Provider
+
+### Links
+
+- https://github.com/Adobe-Marketing-Cloud/aem-translation-framework-bootstrap-connector
+- Translation configurations: /libs/settings/cloudconfigs/translation/msft-translation/msft_trial ,
+  /libs/settings/cloudconfigs/translation/translationcfg/default_translation
+  /conf/global/settings/cloudconfigs/translation/translationcfg/default_translation
+- https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html
+- http://localhost:4502/conf/global/settings/cloudconfigs/translation/translationcfg/default_translation.html / http://localhost:4502/mnt/overlay/cq/translation/cloudservices/tifeditor.html/libs/settings/cloudconfigs/translation/translationcfg/default_translation
+
 ## Some technical details
 
 An easy and pretty reliable, though slow, way would be to translate each text in one request. It would likely improve
@@ -181,21 +220,22 @@ There are the following states for a property:
     - if the inheritance is re-enabled: synchronize component would normally get the value from blueprint. Right way:
       differential-translate the blueprint, but takes time. Bad way: roll back to the old translation. -> 2. (We might
       save the manual changes, though)
-    - rollout: normally no changes -> also do it this way. (Unclear: start manual process with differential 
+    - rollout: normally no changes -> also do it this way. (Unclear: start manual process with differential
       translation?) -> still at 4.
 
-An invariant is that if inheritance is not broken, the saved translation is equal to the text. This is only broken 
-temporarily during a rollout when inheritance is not broken, the text ist reset to the 
-blueprint's state, which has to be fixed during the execution of the translation - either by putting the result of 
+An invariant is that if inheritance is not broken, the saved translation is equal to the text. This is only broken
+temporarily during a rollout when inheritance is not broken, the text ist reset to the
+blueprint's state, which has to be fixed during the execution of the translation - either by putting the result of
 the previous manual translation into the text, or by re-translating the text if the blueprint has changed.
 
-Open point: it's not clear to me when to apply the differential retranslation, nor where the manual translation 
+Open point: it's not clear to me when to apply the differential retranslation, nor where the manual translation
 result should come from.
-- During rollout probably nothing should change if inheritance is broken; if not it could be applied but what would 
+
+- During rollout probably nothing should change if inheritance is broken; if not it could be applied but what would
   be the approved manual translation?
-- If the inheritance is re-enabled, the user expects a reset, so the old manual translation is probably not the 
+- If the inheritance is re-enabled, the user expects a reset, so the old manual translation is probably not the
   approved translation.
-Two thinkable ways:
+  Two thinkable ways:
 - Manual process (possibly supported by a workflow)
 - Automatically during rollout when inheritance is cancelled - that must be switchable, though.
 
