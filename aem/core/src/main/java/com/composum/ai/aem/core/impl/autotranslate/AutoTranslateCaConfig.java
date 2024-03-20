@@ -1,4 +1,4 @@
-package com.composum.ai.aem.core.impl.autotranslate.rollout;
+package com.composum.ai.aem.core.impl.autotranslate;
 
 import org.apache.sling.caconfig.annotation.Configuration;
 import org.apache.sling.caconfig.annotation.Property;
@@ -7,7 +7,7 @@ import org.apache.sling.caconfig.annotation.Property;
         description = "Configures rollout details for automatic translation. This is a demo and not yet fully functional.",
         property = {"category=Composum-AI"})
 // is also added to Sling-ContextAware-Configuration-Classes bnd header in pom.xml
-public @interface AutoTranslateLiveActionConfig {
+public @interface AutoTranslateCaConfig {
 
     @Property(label = "Additional Instructions", description = "Additional instructions for the automatic translation.")
     String additionalInstructions();

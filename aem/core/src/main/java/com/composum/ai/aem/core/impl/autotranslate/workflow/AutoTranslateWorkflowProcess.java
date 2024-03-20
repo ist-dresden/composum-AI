@@ -26,7 +26,7 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
-import com.composum.ai.aem.core.impl.autotranslate.rollout.AutoTranslateLiveActionConfig;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.Page;
@@ -122,11 +122,11 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
 
         TranslationParameters parms = getTranslationParameters(processArguments);
         ConfigurationBuilder confBuilder = Objects.requireNonNull(page.getContentResource().adaptTo(ConfigurationBuilder.class));
-        AutoTranslateLiveActionConfig autoTranslateLiveActionConfig = confBuilder.as(AutoTranslateLiveActionConfig.class);
-        if (autoTranslateLiveActionConfig != null && autoTranslateLiveActionConfig.additionalInstructions() != null) {
+        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
+        if (autoTranslateCaConfig != null && autoTranslateCaConfig.additionalInstructions() != null) {
             parms.additionalInstructions =
                     StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
-                    autoTranslateLiveActionConfig.additionalInstructions();
+                    autoTranslateCaConfig.additionalInstructions();
         }
 
         try {

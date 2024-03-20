@@ -7,9 +7,9 @@ This is an automatically generated overview.
 
 Configures rollout details for automatic translation. This is a demo and not yet fully functional.
 
-| id                      | label                    | type   | default value | description                                       |
-|-------------------------|--------------------------|--------|---------------|---------------------------------------------------|
-| additionalInstructions  | Additional Instructions  | String |               | Additional instructions for the automatic translation. |
+| id                    | label                     | type   | default value | description                                      |
+|-----------------------|---------------------------|--------|---------------|--------------------------------------------------|
+| additionalInstructions | Additional Instructions   | String |               | Additional instructions for the automatic translation. |
 
 ## Composum AI Permission Configuration (slingbase)
 
