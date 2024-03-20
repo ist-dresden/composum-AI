@@ -5,10 +5,12 @@ import static com.adobe.granite.workflow.PayloadMap.TYPE_JCR_PATH;
 import java.util.Iterator;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -24,6 +26,7 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
+import com.composum.ai.aem.core.impl.autotranslate.rollout.AutoTranslateLiveActionConfig;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.Page;
@@ -40,9 +43,9 @@ import com.google.gson.JsonSyntaxException;
                 Constants.SERVICE_VENDOR + "=IST Gmbh Dresden" +
                         Constants.SERVICE_DESCRIPTION + "=Automatic translation of the page tree from it's blueprint.",
         })
-public class AutoTranslateWorkflow implements WorkflowProcess {
+public class AutoTranslateWorkflowProcess implements WorkflowProcess {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateWorkflow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateWorkflowProcess.class);
 
     @Reference
     protected ResourceResolverFactory resourceResolverFactory;
@@ -68,7 +71,6 @@ public class AutoTranslateWorkflow implements WorkflowProcess {
         // e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false}
         String processArguments = metaDataMap.get("PROCESS_ARGS", String.class);
         LOG.info("Autotranslate workflow started for {} , args {}", payload, processArguments);
-        TranslationParameters parameters = getTranslationParameters(processArguments);
 
         try {
             ResourceResolver resourceResolver = workflowSession.adaptTo(ResourceResolver.class);
@@ -80,7 +82,7 @@ public class AutoTranslateWorkflow implements WorkflowProcess {
                 Page page = resource != null ? pageManager.getPage(path) : null;
                 if (page != null) {
                     LOG.info("Autotranslate workflow started for page: {}", page.getPath());
-                    translate(page, parameters);
+                    translate(page, processArguments);
                 } else {
                     LOG.error("Autotranslate workflow started with wrong payload path - no page found: {}", path);
                 }
@@ -94,7 +96,7 @@ public class AutoTranslateWorkflow implements WorkflowProcess {
         LOG.info("Autotranslate workflow finished for {}", payload);
     }
 
-    private TranslationParameters getTranslationParameters(String processArguments) throws WorkflowException {
+    protected TranslationParameters getTranslationParameters(String processArguments) throws WorkflowException {
         TranslationParameters parameters;
         try {
             parameters = gson.fromJson(processArguments, TranslationParameters.class);
@@ -112,7 +114,21 @@ public class AutoTranslateWorkflow implements WorkflowProcess {
         return parameters;
     }
 
-    protected void translate(Page page, TranslationParameters parms) throws PersistenceException, WCMException {
+    protected void translate(Page page, String processArguments) throws PersistenceException, WCMException, WorkflowException {
+        if (page.getContentResource() == null) {
+            LOG.info("No need to translate page without content: {}", page.getPath());
+            return;
+        }
+
+        TranslationParameters parms = getTranslationParameters(processArguments);
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(page.getContentResource().adaptTo(ConfigurationBuilder.class));
+        AutoTranslateLiveActionConfig autoTranslateLiveActionConfig = confBuilder.as(AutoTranslateLiveActionConfig.class);
+        if (autoTranslateLiveActionConfig != null && autoTranslateLiveActionConfig.additionalInstructions() != null) {
+            parms.additionalInstructions =
+                    StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
+                    autoTranslateLiveActionConfig.additionalInstructions();
+        }
+
         try {
             Resource contentResource = page.getContentResource();
             if (contentResource != null) {
@@ -126,7 +142,7 @@ public class AutoTranslateWorkflow implements WorkflowProcess {
 
         if (parms.recursive) {
             for (Iterator<Page> it = page.listChildren(); it.hasNext(); ) {
-                translate(it.next(), parms);
+                translate(it.next(), processArguments);
             }
         }
     }

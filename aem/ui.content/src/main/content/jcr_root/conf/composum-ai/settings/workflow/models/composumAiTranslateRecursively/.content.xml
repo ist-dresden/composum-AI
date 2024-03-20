@@ -21,7 +21,7 @@
                     jcr:title="Composum AI Autotranslate WorkflowProcess">
                 <metaData
                         jcr:primaryType="nt:unstructured"
-                        PROCESS="com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflow"
+                        PROCESS="com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess"
                         PROCESS_ARGS="\{&quot;autoSave&quot;:false,&quot;breakInheritance&quot;:false,&quot;translateWhenChanged&quot;:true,&quot;recursive&quot;:true}"
                         PROCESS_AUTO_ADVANCE="true"/>
             </process>
