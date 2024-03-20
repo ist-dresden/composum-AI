@@ -1,6 +1,6 @@
-/* AIGenVersion(2ff4c648, osgiconfigurations.prompt-7103703e, GPTChatCompletionServiceImpl.java-6b3b2a03) */
+/* AIGenVersion(75625058, osgiconfigurations.prompt-6befc847, GPTChatCompletionServiceImpl.java-6b3b2a03) */
 
-## Composum AI OpenAI Configuration (GPTChatCompletionServiceConfig)
+## GPTChatCompletionServiceConfig (backend)
 
 Provides rather low level access to the GPT chat completion - use the other services for more specific services.
 
@@ -18,6 +18,6 @@ Provides rather low level access to the GPT chat completion - use the other serv
 | maximumTokensPerResponse | Maximum output tokens per request | int | 4096 | Maximum number of tokens to return in the response. Must not exceed the capabilities of the model - as of 10/03/24 this is 4096 for most OpenAI models - which is the default, so no need to set that. |
 | connectionTimeout | Connection timeout in seconds | int | 20 | Default 20 |
 | requestTimeout | Request timeout in seconds | int | 120 | Default 120 |
-| requestsPerMinute | Maximum requests per minute | int |  | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default 100 |
-| requestsPerHour | Maximum requests per hour | int |  | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 1000 |
-| requestsPerDay | Maximum requests per day | int |  | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 3000 |
+| requestsPerMinute | Maximum requests per minute | int | 100 | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default 100 |
+| requestsPerHour | Maximum requests per hour | int | 1000 | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 1000 |
+| requestsPerDay | Maximum requests per day | int | 3000 | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 3000 |

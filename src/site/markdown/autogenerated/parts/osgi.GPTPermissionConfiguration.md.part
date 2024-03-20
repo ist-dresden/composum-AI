@@ -1,4 +1,4 @@
-/* AIGenVersion(6c22c3fb, osgiconfigurations.prompt-7103703e, GPTPermissionConfiguration.java-2cf47031) */
+/* AIGenVersion(6c4942ca, osgiconfigurations.prompt-6befc847, GPTPermissionConfiguration.java-2cf47031) */
 
 ## Composum AI Permission Configuration (slingbase)
 
@@ -12,7 +12,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | 20 | Allowed Users | String[] | [.*] | Regular expressions for allowed users or user groups. If not present, no user is allowed from this configuration. |
 | 30 | Denied Users | String[] |  | Regular expressions for denied users or user groups. Takes precedence over allowed users. |
 | 40 | Allowed Paths | String[] | [/content/.*] | Regular expressions for allowed content paths. If not present, no paths are allowed. |
-| 50 | Denied Paths | String[] | [/content/dam/.*] | Regular expressions for denied content paths. Takes precedence over allowed paths. |
+| 50 | Denied Paths | String[] | [/content/dam/.*] | Regular expressions for denied content paths. Takes precedence over allowed paths. Content fragments are not allowed by default since there has been trouble in the UI. |
 | 60 | Allowed Views | String[] | [.*] | Regular expressions for allowed views - that is, for URLs like /editor.html/.*. If not present, no views are allowed. Use .* to allow all views. |
 | 70 | Denied Views | String[] |  | Regular expressions for denied views. Takes precedence over allowed views. |
 | 80 | Allowed Components | String[] | [.*] | Regular expressions for allowed resource types of components. If not present, no components are allowed. |

@@ -1,6 +1,7 @@
 Print a markdown file that contains a subsection for the Apache Sling CA-configuration in the java file.
-The subsection should be named like the name of the @Configuration label and the module (e.g. basename) in parentheses,
-continue with description of the @Configuration
+The subsection should be named like the name of the @Configuration label and the module directory name in parentheses.
+(The module directory name is the name of the directory containing the src/main/java.)
+The subsection should contain a description of the @Configuration
 and then have a table that lists all attributes and has the following columns, according to the method and @AttributeDefinition:
 - id
 - label

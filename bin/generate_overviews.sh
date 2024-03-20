@@ -18,6 +18,8 @@ done
 (
   echo "# OSGi Configurations"
   echo
+  echo "This is an automatically generated overview."
+  echo
   cat $DIR/parts/osgi.*.md.part | fgrep -v AIGenVersion
 ) > $DIR/osgiconfigurations.md
 
@@ -30,6 +32,8 @@ done
 
 (
   echo "# Sling Context Aware Configurations"
+  echo
+  echo "This is an automatically generated overview."
   echo
   cat $DIR/parts/slingca.*.md.part | fgrep -v AIGenVersion
 ) > $DIR/slingcaconfigurations.md
