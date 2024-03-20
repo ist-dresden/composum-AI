@@ -1,0 +1,21 @@
+/* AIGenVersion(6c22c3fb, osgiconfigurations.prompt-7103703e, GPTPermissionConfiguration.java-2cf47031) */
+
+## Composum AI Permission Configuration (slingbase)
+
+A configuration for allowed AI services. There can be multiple configurations, and the allowed services are aggregated.
+There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
+If configured, Sling Context Aware Configuration takes precedence over OSGI configuration.
+
+| ID | Name | Type | Default Value | Description |
+|----|------|------|---------------|-------------|
+| 10 | Services | String[] | [CATEGORIZE, CREATE, SIDEPANEL, TRANSLATE] | List of services to which this configuration applies. Possible values are: CATEGORIZE, CREATE, SIDEPANEL, TRANSLATE. For AEM only create and sidepanel are supported. |
+| 20 | Allowed Users | String[] | [.*] | Regular expressions for allowed users or user groups. If not present, no user is allowed from this configuration. |
+| 30 | Denied Users | String[] |  | Regular expressions for denied users or user groups. Takes precedence over allowed users. |
+| 40 | Allowed Paths | String[] | [/content/.*] | Regular expressions for allowed content paths. If not present, no paths are allowed. |
+| 50 | Denied Paths | String[] | [/content/dam/.*] | Regular expressions for denied content paths. Takes precedence over allowed paths. |
+| 60 | Allowed Views | String[] | [.*] | Regular expressions for allowed views - that is, for URLs like /editor.html/.*. If not present, no views are allowed. Use .* to allow all views. |
+| 70 | Denied Views | String[] |  | Regular expressions for denied views. Takes precedence over allowed views. |
+| 80 | Allowed Components | String[] | [.*] | Regular expressions for allowed resource types of components. If not present, no components are allowed. |
+| 90 | Denied Components | String[] |  | Regular expressions for denied resource types of components. Takes precedence over allowed components. |
+| 100 | Allowed Page Templates | String[] | [.*] | Regular expressions for allowed page templates. If not present, all page templates are allowed. |
+| 110 | Denied Page Templates | String[] |  | Regular expressions for denied page templates. Takes precedence over allowed page templates. |

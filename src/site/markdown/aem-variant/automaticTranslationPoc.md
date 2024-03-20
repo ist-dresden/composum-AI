@@ -112,4 +112,8 @@ lost. When employing an LLM, it'd be possible to give it:
 3. the text that was manually changed into
 4. the new version of the language master
 and ask the LLM to translate the new version and to replicate the manual changes between 2 and 3 into the new version.
-This could minimize the manual work for such cases.
+This could minimize the manual work for such cases. 
+
+If you like playing around with that - 
+  [here is a small demonstration app](https://aigenpipeline.stoerr.net/differentialReTranslation/differentialReTranslation.html)
+  for the idea. (It needs an OpenAI API key to work, but you can look at some English to German examples without that.) 

@@ -1,0 +1,9 @@
+Print a markdown file that contains a subsection for the OSGI configuration in the java file.
+The subsection should be named like the name of the @ObjectClassDefinition and the module (e.g. basename) in parentheses,
+continue with description of the @ObjectClassDefinition
+and then have a table that lists all attributes and has the following columns, according to the method and @AttributeDefinition:
+- id
+- name
+- type
+- default value
+- description

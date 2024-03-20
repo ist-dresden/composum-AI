@@ -1,0 +1,11 @@
+/* AIGenVersion(2f3c2e79, osgiconfigurations.prompt-7103703e, GPTTranslationServiceImpl.java-428c1df4) */
+
+### Composum AI Translation Service Configuration (GPTTranslationServiceImpl)
+
+Configuration for the basic Composum AI Translation Service
+
+| id | name | type | default value | description |
+|----|------|------|---------------|-------------|
+| disabled | Disable the translation service | boolean | false | Disable the translation service |
+| fakeTranslation | Fake translation | boolean | false | For quick and inexpensive testing, when you just want to check that the translation does something for e.g. a bulk of texts, you can enable this. The "translation" then just turns the text iNtO tHiS cApItAlIsAtIoN. Easy to spot, but probably doesn't destroy the content completely. |
+| diskCache | Disk cache | String | "" | Path to a directory where to cache the translations. If empty, no caching is done. If the path is relative, it is relative to the current working directory. If the path is absolute, it is used as is. |
