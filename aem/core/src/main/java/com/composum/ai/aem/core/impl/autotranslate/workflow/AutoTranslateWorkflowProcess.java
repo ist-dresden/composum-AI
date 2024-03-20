@@ -125,14 +125,18 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
         if (autoTranslateCaConfig != null && autoTranslateCaConfig.additionalInstructions() != null) {
             parms.additionalInstructions =
-                    StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
-                    autoTranslateCaConfig.additionalInstructions();
+                    (StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
+                    autoTranslateCaConfig.additionalInstructions()).trim();
         }
 
         try {
             Resource contentResource = page.getContentResource();
             if (contentResource != null) {
                 GPTConfiguration config = configurationService.getGPTConfiguration(contentResource.getResourceResolver(), contentResource.getPath());
+                if (parms.additionalInstructions != null) {
+                    config = GPTConfiguration.merge(config,
+                            new GPTConfiguration(null, null, null, parms.additionalInstructions));
+                }
                 autoPageTranslateService.translateLiveCopy(contentResource, config, parms);
             }
         } catch (PersistenceException | WCMException | RuntimeException e) { // make sure we log the actual path
