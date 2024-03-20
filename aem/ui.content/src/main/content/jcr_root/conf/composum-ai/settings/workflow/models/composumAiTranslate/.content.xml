@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+        xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+        jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="cq/workflow/components/pages/model"
+            cq:designPath="/libs/settings/wcm/designs/default"
+            cq:template="/libs/cq/workflow/templates/model"
+            jcr:description="Translates a page from it's blueprint.&#xd;&#xa;It assumes that the page is a live copy."
+            jcr:title="Composum AI Translate Page"
+            lastSynced="{Date}2024-03-20T14:06:20.733+01:00">
+        <flow
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="foundation/components/parsys">
+            <process
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/workflow/components/model/process"
+                    jcr:description="Translates the page that is given as payload from it's blueprint.&#xd;&#xa;The page has to be a live copy of the page it's translated from.&#xd;&#xa;Configured as not recursive: only translates that page, not child pages."
+                    jcr:title="Composum AI Autotranslate WorkflowProcess">
+                <metaData
+                        jcr:primaryType="nt:unstructured"
+                        PROCESS="com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflow"
+                        PROCESS_ARGS="\{&quot;autoSave&quot;:false,&quot;breakInheritance&quot;:false,&quot;translateWhenChanged&quot;:true,&quot;recursive&quot;:false}"
+                        PROCESS_AUTO_ADVANCE="true"/>
+            </process>
+        </flow>
+    </jcr:content>
+</jcr:root>

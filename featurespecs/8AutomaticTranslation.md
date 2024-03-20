@@ -285,6 +285,7 @@ This corresponds to a live copy 'rollout' with integrated translation.
 https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
 https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html?lang=en -
 Workflow when updating a language copy
+https://experienceleague.adobe.com/en/docs/experience-manager-65/content/implementing/developing/extending-aem/extending-workflows/workflows
 
 https://medium.com/@vsr061/create-custom-aem-menu-tools-with-granite-ui-shell-53c56e435f8a - Custom AEM menu tools
 https://medium.com/@jlanssie/how-to-create-a-custom-tool-in-aem-78d14c1f66d5
@@ -305,6 +306,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/content/sites/admi
 https://medium.com/@jlanssie/translate-entires-websites-in-aem-automatically-with-openai-944875cbfa22 workflow to
 translate pages. Interesting points: translates text in the for of JSON.
 https://medium.com/@jlanssie/create-a-custom-workflow-model-in-aem-with-a-full-code-coverage-unit-test-4178b2263b81
+https://experienceleague.adobe.com/en/docs/experience-manager-65/content/implementing/developing/extending-aem/extending-workflows/workflows
 
 ## Development
 

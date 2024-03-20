@@ -69,6 +69,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                                    @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException {
         LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
+        if (resource.getChild("jcr:content") != null) {
+            resource = resource.getChild("jcr:content");
+        }
         Stats stats = new Stats();
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters);
@@ -113,7 +116,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
                     liveRelationship, targetWrapper.allAiKeys(), false);
 
-            markAsAiTranslated(resourceToTranslate, liveRelationship);
+            markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters);
             stats.translatedProperties++;
             changed = true;
 
@@ -124,7 +127,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         changed |= migratePathsToLanguageCopy(resource, language, stats);
         if (changed) {
-            markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, false));
+            markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, false), translationParameters);
         }
         if (translationParameters.autoSave) {
             resource.getResourceResolver().commit();
@@ -133,10 +136,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return stats;
     }
 
-    protected void markAsAiTranslated(Resource resource, LiveRelationship liveRelationship) throws WCMException {
+    protected void markAsAiTranslated(Resource resource, LiveRelationship liveRelationship, AutoTranslateService.TranslationParameters parameters) throws WCMException {
         ModifiableValueMap valueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(null, valueMap, null);
-        targetWrapper.setAiTranslatedBy(resource.getResourceResolver().getUserID());
+        String userID = parameters.userId != null ? parameters.userId : resource.getResourceResolver().getUserID();
+        targetWrapper.setAiTranslatedBy(userID);
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
         if (liveRelationship != null) {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
@@ -346,7 +350,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 stats.retranslatedProperties++;
             }
 
-            LOG.debug("Re-translating {} in {}", key, resource.getPath());
+            LOG.trace("Translating {} in {}", key, resource.getPath());
             PropertyToTranslate propertyToTranslate = new PropertyToTranslate();
             propertyToTranslate.sourceResource = sourceResource;
             propertyToTranslate.targetResource = resource;
