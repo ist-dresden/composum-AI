@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -63,6 +62,23 @@ public interface AutoTranslateService {
          * If true the changes are saved ({@link ResourceResolver#commit()}) after each page.
          */
         public boolean autoSave = true;
+
+        /**
+         * If set, this is used as user id that is saved to denote who translated the resource.
+         */
+        String userId = null;
+
+        @Override
+        public String toString() {
+            return "TranslationParameters{" +
+                    "recursive=" + recursive +
+                    ", translateWhenChanged=" + translateWhenChanged +
+                    ", breakInheritance=" + breakInheritance +
+                    ", autoSave=" + autoSave +
+                    ", userId='" + userId + '\'' +
+                    ", additionalInstructions='" + additionalInstructions + '\'' +
+                    '}';
+        }
     }
 
     static abstract class TranslationRun {
@@ -103,7 +119,7 @@ public interface AutoTranslateService {
         public AutoPageTranslateService.Stats stats;
 
         public String editorUrl() {
-            if (startsWith(pagePath,  "/content/dam")) {
+            if (startsWith(pagePath, "/content/dam")) {
                 if (IMAGE_VIDEO_PATTERN.matcher(pagePath).find()) {
                     return "/assetdetails.html" + pagePath;
                 }

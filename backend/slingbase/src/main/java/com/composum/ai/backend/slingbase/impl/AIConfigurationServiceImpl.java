@@ -80,6 +80,9 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     @Override
     @Nullable
     public GPTPermissionInfo allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
+        if (contentPath == null || !contentPath.startsWith("/content/")) {
+            return null;
+        }
         GPTConfiguration gptConfiguration = getGPTConfiguration(request.getResourceResolver(), contentPath);
         GPTPermissionInfo result = null;
         if (chatCompletionService.isEnabled(gptConfiguration)) {

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
@@ -69,8 +70,8 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         parms.autoSave = autoSave;
         parms.breakInheritance = false;
         ConfigurationBuilder confBuilder = Objects.requireNonNull(target.adaptTo(ConfigurationBuilder.class));
-        AutoTranslateLiveActionConfig autoTranslateLiveActionConfig = confBuilder.as(AutoTranslateLiveActionConfig.class);
-        parms.additionalInstructions = autoTranslateLiveActionConfig.additionalInstructions();
+        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
+        parms.additionalInstructions = autoTranslateCaConfig.additionalInstructions();
         // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;

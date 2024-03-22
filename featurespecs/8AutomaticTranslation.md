@@ -1,5 +1,33 @@
 # Feature specification of the automatic translation process
 
+## Table of contents
+
+- [Rationale](#rationale)
+- [Basic idea](#basic-idea)
+- [Assumed site structure](#assumed-site-structure)
+- [Dealing with references to assets and similar](#dealing-with-references-to-assets-and-similar)
+    - [Experience Fragments](#experience-fragments)
+    - [Content Fragments](#content-fragments)
+    - [Assets (images etc.)](#assets-images-etc)
+    - [AEM Language copies as comparison](#aem-language-copies-as-comparison)
+    - [Approach to these assets](#approach-to-these-assets)
+- [Triggering the translation with a proof of concept UI](#triggering-the-translation-with-a-proof-of-concept-ui)
+- [Triggering the translation as a rollout action](#triggering-the-translation-as-a-rollout-action)
+    - [Open points for the rollout configuration](#open-points-for-the-rollout-configuration)
+- [Some technical details](#some-technical-details)
+    - [Analysis of saving the original and translated texts](#analysis-of-saving-the-original-and-translated-texts)
+    - [Heuristics for translateable attribute recognition](#heuristics-for-translateable-attribute-recognition)
+    - [Identification of the translation source](#identification-of-the-translation-source)
+- [Open points](#open-points)
+- [Development](#development)
+    - [REST interface for the UI](#rest-interface-for-the-ui)
+    - [Background information about live copies](#background-information-about-live-copies)
+    - [Testing on WKND Site](#testing-on-wknd-site)
+        - [Setup of live copies for testing a full site translation](#setup-of-live-copies-for-testing-a-full-site-translation)
+- [More details](#more-details)
+    - [Differential translation experiment](#differential-translation-experiment)
+- [More ideas](#more-ideas)
+
 ## Rationale
 
 While it is possible to translate item by item with the content creation dialog in AEM or the translation dialog in
@@ -118,7 +146,8 @@ Parameters for the translation process are:
 
 ## Triggering the translation as a rollout action
 
-We define a rollout configuration that triggers the translation process for the pages that are rolled out with that
+We define a rollout configuration "Composum AI Autotranslate POC"
+that triggers the translation process for the pages that are rolled out with that
 configuration. This is an additional configuration - to get the pages copied we need e.g. the standard rollout
 configuration, and then the translation rollout configuration to get the pages transparently translated.
 
@@ -128,12 +157,41 @@ properties selectively.
 
 ### Open points for the rollout configuration
 
-- how to do that in the background
-- is there a way to avoid order dependence with other rollout configurations?
+- how to do that best in the background
+- is there a way to avoid ordering dependence with other rollout configurations?
 - how to view statistics
 - configuration?
 - is that triggered on initial copying?
-- are our additional properties kept?
+
+## Workflows
+
+There are two workflows "Composum AI Translate Page" and "Composum AI Translate Page Tree" that trigger a
+translation of the page they are triggered on. They require the page is set up as a live copy of the primary language.
+com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess defines the step.
+
+## How about integration as Translation Provider
+
+The 
+(normal translation process)[https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html] 
+uses language copies. Unfortunately, integrating into that process is a bit difficult. The machine translation 
+process in translation connectors is heavily geared towards translating individual texts independently from the 
+translated page. Ultimately this amounts to implementing the method
+[TranslationService.translateArray](https://developer.adobe.
+com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html#translateArray-java.lang.String:A-java.lang.String-java.lang.String-com.adobe.granite.translation.api.TranslationConstants.ContentType-java.lang.String-)
+in the connector, which doesn't even get any information about the current page. Thus, most of the discussed advantages
+of LLM based translations cannot be materialized. It might be possible to use process for human translations, but 
+that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be 
+simpler for the editors in practice.
+
+
+### Links
+
+- https://github.com/Adobe-Marketing-Cloud/aem-translation-framework-bootstrap-connector
+- Translation configurations: /libs/settings/cloudconfigs/translation/msft-translation/msft_trial ,
+  /libs/settings/cloudconfigs/translation/translationcfg/default_translation
+  /conf/global/settings/cloudconfigs/translation/translationcfg/default_translation
+- https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html
+- http://localhost:4502/conf/global/settings/cloudconfigs/translation/translationcfg/default_translation.html / http://localhost:4502/mnt/overlay/cq/translation/cloudservices/tifeditor.html/libs/settings/cloudconfigs/translation/translationcfg/default_translation
 
 ## Some technical details
 
@@ -181,21 +239,22 @@ There are the following states for a property:
     - if the inheritance is re-enabled: synchronize component would normally get the value from blueprint. Right way:
       differential-translate the blueprint, but takes time. Bad way: roll back to the old translation. -> 2. (We might
       save the manual changes, though)
-    - rollout: normally no changes -> also do it this way. (Unclear: start manual process with differential 
+    - rollout: normally no changes -> also do it this way. (Unclear: start manual process with differential
       translation?) -> still at 4.
 
-An invariant is that if inheritance is not broken, the saved translation is equal to the text. This is only broken 
-temporarily during a rollout when inheritance is not broken, the text ist reset to the 
-blueprint's state, which has to be fixed during the execution of the translation - either by putting the result of 
+An invariant is that if inheritance is not broken, the saved translation is equal to the text. This is only broken
+temporarily during a rollout when inheritance is not broken, the text ist reset to the
+blueprint's state, which has to be fixed during the execution of the translation - either by putting the result of
 the previous manual translation into the text, or by re-translating the text if the blueprint has changed.
 
-Open point: it's not clear to me when to apply the differential retranslation, nor where the manual translation 
+Open point: it's not clear to me when to apply the differential retranslation, nor where the manual translation
 result should come from.
-- During rollout probably nothing should change if inheritance is broken; if not it could be applied but what would 
+
+- During rollout probably nothing should change if inheritance is broken; if not it could be applied but what would
   be the approved manual translation?
-- If the inheritance is re-enabled, the user expects a reset, so the old manual translation is probably not the 
+- If the inheritance is re-enabled, the user expects a reset, so the old manual translation is probably not the
   approved translation.
-Two thinkable ways:
+  Two thinkable ways:
 - Manual process (possibly supported by a workflow)
 - Automatically during rollout when inheritance is cancelled - that must be switchable, though.
 
@@ -227,16 +286,17 @@ This corresponds to a live copy 'rollout' with integrated translation.
 - How well do languages with very different character systems (ja, es, ru, chinese zh, korean ko) work? A
   translation is performed, looks nicely and when translated back with Deepl the texts make sense, but it'd be
   interesting how skilled the translation is. Also, that might need additional instructions for the translator to
-  choose the right variant, tone etc. (Simplified chinese might be zh-CN , traditional zh-Hant).
+  choose the right variant, tone etc. (Simplified chinese might be zh-CN , traditional zh-Hant). We checked with 
+  [Deepl Translator](https://www.deepl.com/translator) but that needs a native speaker to judge.
 - Currently the translator can be switched on or off, but there is no configuration for whom it is available and no
   configuration in what content areas it can be used.
 - If a manual correction was made and the translation is updated, anyway, the manual correction should be saved for
-  later fixing.
-- For content fragments likely the models have to be translated.
+  later fixing. It's not quite clear how to collect that information, though.
+- For content fragments likely the models have to be translated. That'd need some dedicated process.
 - In general - how to deal with i18n of components? (Probably out of scope, but needs discussion.)
-- rewrite to use
+- possibl rewrite to use
   [Sling Jobs](https://medium.com/@jlanssie/translate-entires-websites-in-aem-automatically-with-openai-944875cbfa22)
-  for the translation
+  for the translation, or always use workflows
 - If it's a synchronization action - how to check whether it's finished?
 - Custom tool: show only conditionally?
 
@@ -245,6 +305,7 @@ This corresponds to a live copy 'rollout' with integrated translation.
 https://www.youtube.com/watch?v=MMtS8ag6OUE - AEM automatic translation
 https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html?lang=en -
 Workflow when updating a language copy
+https://experienceleague.adobe.com/en/docs/experience-manager-65/content/implementing/developing/extending-aem/extending-workflows/workflows
 
 https://medium.com/@vsr061/create-custom-aem-menu-tools-with-granite-ui-shell-53c56e435f8a - Custom AEM menu tools
 https://medium.com/@jlanssie/how-to-create-a-custom-tool-in-aem-78d14c1f66d5
@@ -265,6 +326,7 @@ https://experienceleague.adobe.com/docs/experience-manager-65/content/sites/admi
 https://medium.com/@jlanssie/translate-entires-websites-in-aem-automatically-with-openai-944875cbfa22 workflow to
 translate pages. Interesting points: translates text in the for of JSON.
 https://medium.com/@jlanssie/create-a-custom-workflow-model-in-aem-with-a-full-code-coverage-unit-test-4178b2263b81
+https://experienceleague.adobe.com/en/docs/experience-manager-65/content/implementing/developing/extending-aem/extending-workflows/workflows
 
 ## Development
 

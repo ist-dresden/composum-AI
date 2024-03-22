@@ -46,12 +46,15 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
 
     @Override
     @Nullable
-    public List<GPTPermissionConfiguration> allowedServices(SlingHttpServletRequest request, String contentPath) {
+    public List<GPTPermissionConfiguration> allowedServices(@NotNull SlingHttpServletRequest request, @NotNull String contentPath) {
         if (!enabled) {
             return null;
         }
         LOG.debug("allowedServices({}, {})", request.getResource().getPath(), contentPath);
         Resource resource = determineResource(request.getResourceResolver(), request.getResource(), contentPath);
+        if (resource == null) {
+            return null;
+        }
 
         ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
         Collection<GPTPermissionConfiguration> configs = confBuilder.asCollection(GPTPermissionConfiguration.class);
@@ -67,6 +70,9 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         }
         LOG.debug("getGPTConfiguration({}, {})", contentPath);
         Resource resource = determineResource(resourceResolver, null, contentPath);
+        if (resource == null) {
+            return null;
+        }
 
         ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
         OpenAIConfig config = confBuilder.as(OpenAIConfig.class);
@@ -111,7 +117,7 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
             return null;
         }
         if (!resource.getPath().startsWith("/content/")) {
-            LOG.warn("Path {} is not a /content/ path", resource.getPath());
+            LOG.debug("Path {} is not a /content/ path", resource.getPath());
             return null;
         }
         return resource;

@@ -81,8 +81,8 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
             contentPath = "/content" + StringUtils.removeStart(contentPath, "/mnt/overlay");
         }
         String editorUrl = request.getParameter(PARAM_EDITORURL);
-        GPTPermissionInfo permissionInfo = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
         final Map<String, Boolean> allowedServices = new HashMap<>();
+        GPTPermissionInfo permissionInfo = aiConfigurationService.allowedServices(request, contentPath, editorUrl);
         if (permissionInfo != null) {
             permissionInfo.getServicePermissions().stream()
                     .filter(Objects::nonNull)

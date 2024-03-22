@@ -44,8 +44,8 @@
                         <configuration>
                             <bnd><![CDATA[
 Export-Package: com.composum.ai.aem.core.impl.autotranslate
-Import-Package: javax.annotation;version=0.0.0,*
-Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotranslate.rollout.AutoTranslateLiveActionConfig
+Import-Package: javax.annotation;version=0.0.0,org.apache.sling.api.request.*;version="[2.4.1,3)",org.apache.sling.api.resource.*;version="[2.8.0,3)",org.apache.sling.api.servlets.*;version="[2.1.1,3)",org.apache.sling.api.*;version="[2.2.2,3)",*
+Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig
 ]]></bnd>
                         </configuration>
                     </execution>

@@ -126,6 +126,10 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            org.apache.sling.api.request.*;version="[2.4.1,3)",
+                            org.apache.sling.api.resource.*;version="[2.8.0,3)",
+                            org.apache.sling.api.servlets.*;version="[2.1.1,3)",
+                            org.apache.sling.api.*;version="[2.2.2,3)",
                             javax.annotation;version="[1,4)",
                             !javax.annotation.meta,
                             *

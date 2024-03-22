@@ -1,0 +1,10 @@
+/* AIGenVersion(1c9aa9cd, osgiconfigurations.prompt-6befc847, HtmlToApproximateMarkdownServicePlugin.java-249355c6) */
+
+## Composum AI Html To Approximate Markdown Service Plugin (slingbase)
+
+A plugin for the ApproximateMarkdownService that transforms the rendered HTML of components to markdown, which can work better than trying to guess the text content from the JCR representation (as is the default) but probably doesn't work for all components. So it can be enabled for some sling resource types by regex. We will not use this for the first two levels below the page, as that could include unwanted stuff like headers and footers.
+
+| id | name | type | default value | description |
+|----|------|------|---------------|-------------|
+| Allowed resource types | allowedResourceTypes | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
+| Denied resource types | deniedResourceTypes | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |

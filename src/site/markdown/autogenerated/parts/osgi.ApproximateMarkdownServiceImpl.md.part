@@ -1,0 +1,12 @@
+/* AIGenVersion(4357e29e, osgiconfigurations.prompt-6befc847, ApproximateMarkdownServiceImpl.java-24940f63) */
+
+## Composum AI Approximate Markdown Service Configuration (slingbase)
+
+Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.
+
+| id | name | type | default value | description |
+|----|------|------|---------------|-------------|
+| 1 | Text Attributes | String[] |  | List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text. |
+| 2 | Labeled Attribute Pattern Allow | String[] |  | Regular expressions for attributes that are output with a label. If not present, none will be output except the text attributes. |
+| 3 | Labeled Attribute Pattern Deny | String[] |  | Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list. |
+| 4 | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |

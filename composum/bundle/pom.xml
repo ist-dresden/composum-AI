@@ -186,6 +186,10 @@
 							com.composum.sling.clientlibs.*;version="[3,5)",
 							com.composum.sling.cpnl.*;version="[3,5)",
 							javax.annotation.*;version="[0,4)",
+							org.apache.sling.api.request.*;version="[2.4.1,3)",
+							org.apache.sling.api.resource.*;version="[2.8.0,3)",
+							org.apache.sling.api.servlets.*;version="[2.1.1,3)",
+							org.apache.sling.api.*;version="[2.2.2,3)",
 							!javax.annotation.meta,
 							*
 						</Import-Package>

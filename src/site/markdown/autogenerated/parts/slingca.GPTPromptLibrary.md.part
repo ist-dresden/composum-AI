@@ -1,0 +1,12 @@
+/* AIGenVersion(72f699ba, slingcaconfigurations.prompt-395da17f, GPTPromptLibrary.java-52793081) */
+
+### Composum AI Prompt Library Configuration (slingbase)
+
+Location for the prompt library for Composum AI. There can be multiple configurations, and the allowed services are aggregated.
+There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
+If configured, Sling Context Aware Configuration takes precedence over OSGI configuration.
+
+| id                        | label                           | type   | default value | description                                       |
+|---------------------------|---------------------------------|--------|---------------|---------------------------------------------------|
+| contentCreationPromptsPath | Content Creation Prompts Path   | String |               | Path to the content creation prompts.             |
+| sidePanelPromptsPath       | Side Panel Prompts Path         | String |               | Path to the side panel prompts.                   |

@@ -1,0 +1,10 @@
+/* AIGenVersion(36fb8444, slingcaconfigurations.prompt-395da17f, OpenAIConfig.java-4928e7fd) */
+
+## Composum AI OpenAI Configuration (slingbase)
+
+Configurations for the OpenAI backend for Composum AI
+
+| id              | label               | type   | default value | description                                                                                                                             |
+|-----------------|---------------------|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| openAiApiKey    | OpenAI API Key      | String |               | OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key . |
+| openAiOrganizationId | OpenAI Organization ID | String |               | Optionally, OpenAI Organization ID from https://platform.openai.com/.                                                                   |

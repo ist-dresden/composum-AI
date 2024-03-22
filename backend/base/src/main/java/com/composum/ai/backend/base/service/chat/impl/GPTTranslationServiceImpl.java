@@ -170,7 +170,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         if (config.fakeTranslation()) {
             translatedRealTexts = realTexts.stream().map(GPTTranslationServiceImpl::fakeTranslation).collect(Collectors.toList());
         } else {
-            translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(5));
+            translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(10));
         }
 
         Map<String, String> translatedRealTextsMap = new LinkedHashMap<>();
@@ -318,10 +318,11 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                         "targetlanguage", targetLanguage,
                         "addition", addition));
         request.addMessages(messages);
-        // set request.setMaxTokens to about 2 times the number of words in the text to translate
-        // since that seems a generous limit for the translation, but give a leeway for error messages.
-        // this splitting is quite an overestimation, but that's better than underestimating in this context.
-        int maxTokens = 2 * text.split(" |[^a-z]").length + 50;
+        // set request.setMaxTokens to about 2 times the number of tokens in the text to translate
+        // since that seems a generous limit for the translation, but gives a leeway for error messages.
+        // this is quite an overestimation, but that's better than underestimating in this context.
+
+        int maxTokens = 2 * chatCompletionService.countTokens(text) + 50;
         request.setMaxTokens(maxTokens);
         return request;
     }
