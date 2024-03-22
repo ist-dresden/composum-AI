@@ -146,7 +146,8 @@ Parameters for the translation process are:
 
 ## Triggering the translation as a rollout action
 
-We define a rollout configuration that triggers the translation process for the pages that are rolled out with that
+We define a rollout configuration "Composum AI Autotranslate POC"
+that triggers the translation process for the pages that are rolled out with that
 configuration. This is an additional configuration - to get the pages copied we need e.g. the standard rollout
 configuration, and then the translation rollout configuration to get the pages transparently translated.
 
@@ -156,14 +157,32 @@ properties selectively.
 
 ### Open points for the rollout configuration
 
-- how to do that in the background
-- is there a way to avoid order dependence with other rollout configurations?
+- how to do that best in the background
+- is there a way to avoid ordering dependence with other rollout configurations?
 - how to view statistics
 - configuration?
 - is that triggered on initial copying?
-- are our additional properties kept?
 
-## Integration as Translation Provider
+## Workflows
+
+There are two workflows "Composum AI Translate Page" and "Composum AI Translate Page Tree" that trigger a
+translation of the page they are triggered on. They require the page is set up as a live copy of the primary language.
+com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess defines the step.
+
+## How about integration as Translation Provider
+
+The 
+(normal translation process)[https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html] 
+uses language copies. Unfortunately, integrating into that process is a bit difficult. The machine translation 
+process in translation connectors is heavily geared towards translating individual texts independently from the 
+translated page. Ultimately this amounts to implementing the method
+[TranslationService.translateArray](https://developer.adobe.
+com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html#translateArray-java.lang.String:A-java.lang.String-java.lang.String-com.adobe.granite.translation.api.TranslationConstants.ContentType-java.lang.String-)
+in the connector, which doesn't even get any information about the current page. Thus, most of the discussed advantages
+of LLM based translations cannot be materialized. It might be possible to use process for human translations, but 
+that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be 
+simpler for the editors in practice.
+
 
 ### Links
 
@@ -267,16 +286,17 @@ This corresponds to a live copy 'rollout' with integrated translation.
 - How well do languages with very different character systems (ja, es, ru, chinese zh, korean ko) work? A
   translation is performed, looks nicely and when translated back with Deepl the texts make sense, but it'd be
   interesting how skilled the translation is. Also, that might need additional instructions for the translator to
-  choose the right variant, tone etc. (Simplified chinese might be zh-CN , traditional zh-Hant).
+  choose the right variant, tone etc. (Simplified chinese might be zh-CN , traditional zh-Hant). We checked with 
+  [Deepl Translator](https://www.deepl.com/translator) but that needs a native speaker to judge.
 - Currently the translator can be switched on or off, but there is no configuration for whom it is available and no
   configuration in what content areas it can be used.
 - If a manual correction was made and the translation is updated, anyway, the manual correction should be saved for
-  later fixing.
-- For content fragments likely the models have to be translated.
+  later fixing. It's not quite clear how to collect that information, though.
+- For content fragments likely the models have to be translated. That'd need some dedicated process.
 - In general - how to deal with i18n of components? (Probably out of scope, but needs discussion.)
-- rewrite to use
+- possibl rewrite to use
   [Sling Jobs](https://medium.com/@jlanssie/translate-entires-websites-in-aem-automatically-with-openai-944875cbfa22)
-  for the translation
+  for the translation, or always use workflows
 - If it's a synchronization action - how to check whether it's finished?
 - Custom tool: show only conditionally?
 

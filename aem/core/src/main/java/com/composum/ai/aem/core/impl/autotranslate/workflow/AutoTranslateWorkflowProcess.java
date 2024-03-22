@@ -36,7 +36,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * Autotranslate workflow.
+ * Autotranslate workflow. This triggers a automatic translation of a live copy from it's blueprint. As process
+ * arguments a JSON can be given that configures the translation process - a serialization of {@link TranslationParameters},
+ * e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false} .
  */
 @Component(service = WorkflowProcess.class,
         property = {"process.label=Composum AI Autotranslate page tree",
