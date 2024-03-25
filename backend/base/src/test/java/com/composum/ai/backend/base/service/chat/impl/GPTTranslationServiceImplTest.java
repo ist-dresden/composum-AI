@@ -84,15 +84,26 @@ public class GPTTranslationServiceImplTest extends TestCase {
     @Test
     public void testSimulateRealTranslation() {
         String result = "\n" +
-                "```%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 397360 %%%%%%%%%%%%%%%%\n" +
+                "```%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 397360 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
                 "Hallo!\n" +
-                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 319439 %%%%%%%%%%%%%%%%\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 319439 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
                 "Guten Morgen\n" +
-                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%```";
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%```";
         List<String> ids = asList("397360", "319439");
         List<String> texts = asList("Hi!", "Good morning");
         List<String> resultTexts = GPTTranslationServiceImpl.separateResultTexts(result, texts, ids, result);
         assertEquals(asList("Hallo!", "Guten Morgen"), resultTexts);
+    }
+
+    @Test
+    public void testSimulateError() {
+        String result = "Äh, %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 357056 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
+                "Äh, Über Uns\n" +
+                "Äh, %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 566470 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+        List<String> ids = asList("357056", "566470");
+        List<String> texts = asList("About us");
+        List<String> resultTexts = GPTTranslationServiceImpl.separateResultTexts(result, texts, ids, result);
+        assertEquals(asList("Äh, Über Uns\nÄh,"), resultTexts);
     }
 
     @Test

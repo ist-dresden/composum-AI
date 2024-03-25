@@ -131,15 +131,15 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     protected static final String MULTITRANSLATION_SEPARATOR_START = "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ";
 
     /**
-     * End of separator like `573472 %%%%%%%%%%%%%%%%` .
+     * End of separator like `573472 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%` .
      */
-    protected static final String MULTITRANSLATION_SEPARATOR_END = " %%%%%%%%%%%%%%%%\n";
+    protected static final String MULTITRANSLATION_SEPARATOR_END = " %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
 
     /**
-     * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` (group "id" matches the number).
+     * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%` (group "id" matches the number).
      * The \n cannot be directly matched since at the start it's sometimes ```%%%%...
      */
-    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("(?<!%)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%(?!%)");
+    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("(?<!%)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%(?!%)");
 
     protected static final String LASTID = "424242";
 
