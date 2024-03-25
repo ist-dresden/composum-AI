@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,8 +42,6 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -148,9 +147,10 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         String streamId = UUID.randomUUID().toString();
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
         if (streams == null) {
-            streams = (Map<String, EventStream>) (Map) CacheBuilder.newBuilder()
-                    .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).build().asMap();
-            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
+            streams = new LinkedHashMap<>();
+        }
+        if (streams.size() > 5) { // normally that should be cleaned up automatically by retrieveStream, just to be sure.
+            streams.remove(streams.keySet().iterator().next());
         }
         streams.put(streamId, stream);
         stream.setId(streamId);
@@ -325,7 +325,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         // on 202 with Location header Chrome freezes in $.ajax for  AEM 6.5.7 8-{} . So we have to do it differently.
         response.setContentType("application/json");
-        gson.toJson(ImmutableMap.of(PARAMETER_STREAMID, id), response.getWriter());
+        gson.toJson(Collections.singletonMap(PARAMETER_STREAMID, id), response.getWriter());
         LOG.info("Returning stream id {}", id);
     }
 

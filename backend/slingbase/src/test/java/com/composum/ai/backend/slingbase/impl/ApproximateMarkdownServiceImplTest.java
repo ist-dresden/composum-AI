@@ -28,7 +28,6 @@ import org.mockito.Mockito;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Test for {@link ApproximateMarkdownServiceImpl}, mostly generated with the AI and then fixed.
@@ -70,7 +69,10 @@ public class ApproximateMarkdownServiceImplTest {
 
     @Test
     public void testApproximateMarkdownForSuccess() {
-        Resource component = createMockResource("res", ImmutableMap.of("text", "This is a test string.", "title", "This is a test heading"));
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("text", "This is a test string.");
+        parameters.put("title", "This is a test heading");
+        Resource component = createMockResource("res", parameters);
         service.approximateMarkdown(component, printWriter, request, response);
         assertEquals("## This is a test heading\n" +
                 "This is a test string.\n" +
@@ -101,13 +103,13 @@ public class ApproximateMarkdownServiceImplTest {
 
     @Test
     public void testLabelledAttributes() {
-        Resource component = createMockResource("nt:unstructured",
-                ImmutableMap.of("jcr:title", "unlabelled",
-                        "asecond", "Should be the second labelled attribute",
-                        "thefirst", "the first labelled attribute",
-                        "unmentioned", "other lattr",
-                        "is:ignored", "denied"
-                ));
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("jcr:title", "unlabelled");
+        parameters.put("asecond", "Should be the second labelled attribute");
+        parameters.put("thefirst", "the first labelled attribute");
+        parameters.put("unmentioned", "other lattr");
+        parameters.put("is:ignored", "denied");
+        Resource component = createMockResource("nt:unstructured", parameters);
 
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput =
@@ -122,13 +124,12 @@ public class ApproximateMarkdownServiceImplTest {
 
     @Test
     public void testLabelledAttributesIgnoredValues() {
-        Resource component = createMockResource("nt:unstructured",
-                ImmutableMap.of(
-                        "thefirst", "this is there",
-                        "ignoredValue1", "true",
-                        "ignoredValue2", "123",
-                        "is:ignored", "denied"
-                ));
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("thefirst", "this is there");
+        parameters.put("ignoredValue1", "true");
+        parameters.put("ignoredValue2", "123");
+        parameters.put("is:ignored", "denied");
+        Resource component = createMockResource("nt:unstructured", parameters);
 
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput =
@@ -147,15 +148,15 @@ public class ApproximateMarkdownServiceImplTest {
     public void testGetComponentLinks() {
         // Setup Mock Resources
         Resource rootResource = context.create().resource("/content/parent/path/jcr:content/res",
-                ImmutableMap.of("link1", "/content/parent/path/res1"));
+                Collections.singletonMap("link1", "/content/parent/path/res1"));
         context.create().resource("/content/parent/path/jcr:content/res/child",
-                ImmutableMap.of("link2", "/content/parent/path/child1"));
+                Collections.singletonMap("link2", "/content/parent/path/child1"));
         // set up resources for the links, one with a title, one with a jcr:title
         context.create().resource("/content/parent/path/res1",
-                ImmutableMap.of("jcr:title", "res1"));
+                Collections.singletonMap("title", "res1"));
         context.create().resource("/content/parent/path/child1");
         context.create().resource("/content/parent/path/child1/jcr:content",
-                ImmutableMap.of("title", "child1"));
+                Collections.singletonMap("title", "child1"));
 
         // Execute Method
         List<ApproximateMarkdownService.Link> links = service.getComponentLinks(rootResource);

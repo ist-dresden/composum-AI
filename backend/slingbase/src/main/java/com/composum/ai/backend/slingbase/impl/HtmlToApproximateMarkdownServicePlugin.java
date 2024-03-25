@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -53,8 +54,6 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * A plugin for the {@link com.composum.ai.backend.slingbase.ApproximateMarkdownService} that transforms the rendered
@@ -79,9 +78,9 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
     /**
      * ResourceTypes we ignore since their rendering uses unsupported methods.
      * Blacklisting for only 1h since there might be a deployment in the meantime.
+     * Maps the resource type to the time (ms) until it is blacklisted.
      */
-    protected Cache<String, Boolean> blacklistedResourceType =
-            CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build();
+    protected Map<String, Long> blacklistedResourceType = new ConcurrentHashMap<>();
 
     @NotNull
     @Override
@@ -93,8 +92,13 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             return PluginResult.NOT_HANDLED;
         }
         String resourceType = resource.getResourceType();
-        if (Boolean.TRUE.equals(blacklistedResourceType.getIfPresent(resourceType) != null)) {
-            return PluginResult.NOT_HANDLED;
+        if (blacklistedResourceType.containsKey(resourceType)) {
+            Long timeout = blacklistedResourceType.get(resourceType);
+            if (timeout != null && timeout > System.currentTimeMillis()) {
+                return PluginResult.NOT_HANDLED;
+            } else if (timeout != null) {
+                blacklistedResourceType.remove(resourceType);
+            }
         }
 
         if (allowedResourceTypePattern != null && allowedResourceTypePattern.matcher(resourceType).matches()) {
@@ -122,7 +126,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             } catch (ServletException | IOException | RuntimeException e) {
                 if (isBecauseOfUnsupportedOperation(e)) {
                     LOG.warn("Blacklisting because of using unsupported operations: resource type {} (at {})", resource.getResourceType(), resource.getPath());
-                    blacklistedResourceType.put(resourceType, true);
+                    blacklistedResourceType.put(resourceType, System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
                     return PluginResult.NOT_HANDLED;
                 }
                 LOG.error("Error rendering resource {} with resource type {}", resource.getPath(), resource.getResourceType(), e);

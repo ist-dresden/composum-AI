@@ -23,7 +23,6 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements generating keywords.
@@ -67,7 +66,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         GPTChatRequest request = new GPTChatRequest(configuration);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         List<GPTChatMessage> messages = template.getMessages(
-                ImmutableMap.of(PLACEHOLDER_TEXT, shortenedText));
+                Collections.singletonMap(PLACEHOLDER_TEXT, shortenedText));
         request.addMessages(messages);
         request.setMaxTokens(50); // pretty arbitrary limit for now, needs testing.
         String response = chatCompletionService.getSingleChatCompletion(request);
@@ -147,8 +146,10 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         // TODO use intelligent algorithm to determine this limit, but that's pretty hard here.
         // also, the user should be alerted about that.
-        List<GPTChatMessage> messages = template.getMessages(
-                ImmutableMap.of(PLACEHOLDER_TEXT, shortenedText, "prompt", prompt));
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(PLACEHOLDER_TEXT, shortenedText);
+        placeholders.put("prompt", prompt);
+        List<GPTChatMessage> messages = template.getMessages(placeholders);
         GPTChatRequest request = new GPTChatRequest();
         request.addMessages(messages);
         request.mergeIn(additionalParameters);

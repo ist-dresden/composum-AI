@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,6 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Building on {@link GPTChatCompletionService} this implements translation.
@@ -83,7 +82,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 response = fakeTranslation(text);
             } else {
 
-                if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(targetLanguage)) {
+                if (text == null || text.trim().isEmpty() || targetLanguage == null || targetLanguage.trim().isEmpty()) {
                     return "";
                 }
 
@@ -110,7 +109,9 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     public void streamingSingleTranslation(@Nonnull String text, @Nonnull String sourceLanguage, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration, @Nonnull GPTCompletionCallback callback) throws GPTException {
         ensureEnabled();
 
-        if (Strings.isNullOrEmpty(text) || Strings.isNullOrEmpty(sourceLanguage) || Strings.isNullOrEmpty(targetLanguage)) {
+        if (text == null || text.trim().isEmpty() ||
+                sourceLanguage == null || sourceLanguage.trim().isEmpty() ||
+                targetLanguage == null || targetLanguage.trim().isEmpty()) {
             throw new IllegalArgumentException("Empty text or languages");
         }
         if (config.fakeTranslation()) {
@@ -312,11 +313,12 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             }
             addition += (addition.isEmpty() ? "" : "\n\n") + "Output HTML; start the translation with " + firstTag;
         }
-        List<GPTChatMessage> messages = template.getMessages(
-                ImmutableMap.of("sourcelanguage", sourceLanguage != null ? sourceLanguage : "guess it from the text",
-                        "sourcephrase", text,
-                        "targetlanguage", targetLanguage,
-                        "addition", addition));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("sourcelanguage", sourceLanguage != null ? sourceLanguage : "guess it from the text");
+        parameters.put("sourcephrase", text);
+        parameters.put("targetlanguage", targetLanguage);
+        parameters.put("addition", addition);
+        List<GPTChatMessage> messages = template.getMessages(parameters);
         request.addMessages(messages);
         // set request.setMaxTokens to about 2 times the number of tokens in the text to translate
         // since that seems a generous limit for the translation, but gives a leeway for error messages.

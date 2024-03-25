@@ -1,6 +1,10 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collections;
 
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
@@ -8,7 +12,6 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
-import com.google.common.io.Resources;
 
 /**
  * Asks ChatGPT about an image.
@@ -41,10 +44,16 @@ public class RunGPTChatCompletionServiceImgAnalysisImpl extends AbstractGPTRunne
 
     protected GPTChatMessage makeImageChatMessage() throws IOException {
         // GPTChatMessage imgMsg = new GPTChatMessage(GPTMessageRole.USER, null, "https://www.composum.com/assets/pages/composum-pages-edit-view.jpg");
-        byte[] imageBytes = Resources.toByteArray(getClass().getResource("/imgtest/imgtest.png"));
-        String imageUrl = "data:image/png;base64," + java.util.Base64.getEncoder().encodeToString(imageBytes);
-        GPTChatMessage imgMsg = new GPTChatMessage(GPTMessageRole.USER, null, imageUrl);
-        return imgMsg;
+        try (InputStream imgStream = getClass().getResource("/imgtest/imgtest.png").openStream()) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            for(int data = imgStream.read(); data != -1; data = imgStream.read()) {
+                buffer.write(data);
+            }
+            byte[] imageBytes = buffer.toByteArray();
+            String imageUrl = "data:image/png;base64," + java.util.Base64.getEncoder().encodeToString(imageBytes);
+            GPTChatMessage imgMsg = new GPTChatMessage(GPTMessageRole.USER, null, imageUrl);
+            return imgMsg;
+        }
     }
 
     @Override

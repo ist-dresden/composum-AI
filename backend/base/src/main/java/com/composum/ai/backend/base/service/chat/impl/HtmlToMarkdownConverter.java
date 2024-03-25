@@ -1,6 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,8 +25,6 @@ import org.jsoup.nodes.XmlDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-
 /**
  * A quick HTML markdown converter that handles the tags [a, strong, code, em, p, br, u, ul, li, ol] used in rich text editor.
  * Not threadsafe, use only once.
@@ -41,10 +40,15 @@ public class HtmlToMarkdownConverter {
 
     private static Set<String> missingTags = new ConcurrentSkipListSet<>();
 
-    private static final Map<String, String> HEADER_TAGS =
-            ImmutableMap.<String, String>builder()
-                    .put("h1", "# ").put("h2", "## ").put("h3", "### ").put("h4", "#### ")
-                    .put("h5", "##### ").put("h6", "###### ").build();
+    private static final Map<String, String> HEADER_TAGS = new HashMap<>();
+    {{
+        HEADER_TAGS.put("h1", "# ");
+        HEADER_TAGS.put("h2", "## ");
+        HEADER_TAGS.put("h3", "### ");
+        HEADER_TAGS.put("h4", "#### ");
+        HEADER_TAGS.put("h5", "##### ");
+        HEADER_TAGS.put("h6", "###### ");
+    }}
 
     /**
      * Important table attributes we need to keep.

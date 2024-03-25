@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +47,6 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.PluginResult;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Implementation for {@link ApproximateMarkdownService}.
@@ -55,13 +55,14 @@ import com.google.common.collect.ImmutableMap;
 @Designate(ocd = ApproximateMarkdownServiceImpl.Config.class)
 public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownService {
 
-    public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = ImmutableMap.of(
-            "jcr:title", "## ",
-            "title", "## ",
-            "subtitle", "### ",
-            "cq:panelTitle", "#### "
-            // , "code", "```" handled in extra method
-    );
+    public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = new HashMap<>();
+    {{
+        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("jcr:title", "## ");
+        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("title", "## ");
+        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("subtitle", "### ");
+        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("cq:panelTitle", "#### ");
+        // , "code", "```" handled in extra method
+    }}
 
     /**
      * Ignored values for labelled output: "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target .

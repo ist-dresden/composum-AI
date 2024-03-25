@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,8 +64,6 @@ import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.servlet.Status;
 import com.composum.sling.core.util.XSS;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -207,10 +206,7 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected BundleContext bundleContext;
 
-    protected Cache<List<String>, String> translationCache;
-
     protected Gson gson = new Gson();
-
 
     public enum Extension {json, sse}
 
@@ -240,15 +236,6 @@ public class AIServlet extends AbstractServiceServlet {
         }
         operations.setOperation(GET, Extension.sse, Operation.streamresponse,
                 new StreamResponseOperation());
-        // FIXME(hps,19.04.23) at least make it configurable.
-        translationCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(30, TimeUnit.MINUTES)
-                .expireAfterWrite(120, TimeUnit.MINUTES)
-                .maximumSize(128)  // each entry can be at most a few kilobytes, so that'd be less than one megabyte
-                .removalListener(notification -> {
-                    LOG.debug("Removing translation from cache: {}", notification.getKey());
-                })
-                .build();
     }
 
     @Activate
@@ -263,9 +250,10 @@ public class AIServlet extends AbstractServiceServlet {
         String streamId = UUID.randomUUID().toString();
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
         if (streams == null) {
-            streams = (Map<String, EventStream>) (Map) CacheBuilder.newBuilder()
-                    .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).build().asMap();
-            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
+            streams = new LinkedHashMap<>();
+        }
+        if (streams.size() > 5) { // normally that should be emptied by retrieveStream; just to be sure remove oldest:
+            streams.remove(streams.keySet().iterator().next());
         }
         streams.put(streamId, stream);
         stream.setId(streamId);
@@ -379,11 +367,6 @@ public class AIServlet extends AbstractServiceServlet {
             if (status.isValid()) {
                 String translation = null;
                 List<String> cachekey = List.of(sourceLanguage, targetLanguage, text);
-                String cached = translationCache.getIfPresent(cachekey);
-                if (isNotBlank(cached)) {
-                    LOG.info("Using cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cached);
-                    translation = cached;
-                }
                 if (!streaming && isBlank(translation)) {
                     translation = translationService.singleTranslation(text, sourceLanguage, targetLanguage, mergedConfig);
                     translation = XSS.filter(translation);

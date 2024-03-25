@@ -1,13 +1,9 @@
 package com.composum.ai.backend.base.service.chat;
 
-import static com.google.common.base.Objects.toStringHelper;
-
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.google.common.base.Objects.ToStringHelper;
 
 /**
  * A configuration to use for accessing the external LLM service. That currently contains the API key for ChatGPT,
@@ -122,14 +118,20 @@ public class GPTConfiguration {
 
     @Override
     public String toString() {
-        ToStringHelper helper = toStringHelper(this);
-        if (answerType != null) {
-            helper.add("answerType", answerType);
-        }
+        StringBuilder sb = new StringBuilder("GPTConfiguration{");
         if (apiKey != null) {
-            helper.add("apiKey", "(hidden)");
+            sb.append("apiKey='").append(apiKey).append('\'');
         }
-        return helper.toString();
+        if (organizationId != null) {
+            sb.append(", organizationId='").append(organizationId).append('\'');
+        }
+        if (answerType != null) {
+            sb.append(", answerType=").append(answerType);
+        }
+        if (additionalInstructions != null) {
+            sb.append(", additionalInstructions='").append(additionalInstructions).append('\'');
+        }
+        return sb.append('}').toString();
     }
 
     public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, null, AnswerType.MARKDOWN);

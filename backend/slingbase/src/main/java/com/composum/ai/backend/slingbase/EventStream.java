@@ -3,6 +3,8 @@ package com.composum.ai.backend.slingbase;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
 public class EventStream implements GPTCompletionCallback {
@@ -89,9 +90,10 @@ public class EventStream implements GPTCompletionCallback {
         LOG.debug("EventStream.onFinish for {} : {}", id, finishReason);
         slowdown.flush();
         this.finishReason = finishReason;
-        Map<String, Object> status = ImmutableMap.of("success", true,
-                "data", ImmutableMap.of(
-                        "result", ImmutableMap.of("finishreason", finishReason.name())));
+        Map<String, Object> status = new HashMap<>();
+        status.put("success", true);
+        status.put("data", Collections.singletonMap("result",
+                Collections.singletonMap("finishreason", finishReason.name())));
         queue.add("");
         queue.add("event: finished");
         queue.add("data: " + gson.toJson(status));
@@ -146,9 +148,13 @@ public class EventStream implements GPTCompletionCallback {
     public void onError(Throwable throwable) {
         LOG.error("EventStream.onError for {} : {}", id, throwable.toString(), throwable);
         String errorDescription = throwable.toString();
-        Map<String, Object> status = ImmutableMap.of("success", false,
-                "title", "Internal error",
-                "messages", Arrays.asList(ImmutableMap.of("level", "error", "text", errorDescription)));
+        Map<String, Object> status = new HashMap<>();
+        status.put("success", false);
+        status.put("title", "Internal error");
+        Map<String, Object> messages = new HashMap<>();
+        messages.put("level", "error");
+        messages.put("text", errorDescription);
+        status.put("messages", Collections.singletonList(messages));
         queue.add("");
         queue.add("event: exception"); // do not use 'error' as event name as that is received when the connection is closed.
         queue.add("data: " + gson.toJson(status));

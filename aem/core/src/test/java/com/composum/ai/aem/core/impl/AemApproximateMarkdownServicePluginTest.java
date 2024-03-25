@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.impl.ApproximateMarkdownServiceImpl;
-import com.google.common.collect.ImmutableMap;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -78,10 +77,11 @@ public class AemApproximateMarkdownServicePluginTest {
 
     @Test
     public void testPageHandlingWithPageResource() {
-        component = createMockResource("cq:PageContent",
-                ImmutableMap.of("jcr:title", "myPage",
-                        "jcr:description", "The best page!",
-                        "category", "test, dummy"));
+        Map<String, Object> attr = new HashMap<>();
+        attr.put("jcr:title", "myPage");
+        attr.put("jcr:description", "The best page!");
+        attr.put("category", "test, dummy");
+        component = createMockResource("cq:PageContent", attr);
 
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput =
@@ -141,10 +141,11 @@ public class AemApproximateMarkdownServicePluginTest {
 
     @Test
     public void testExperienceFragment() {
-        context.create().resource("/content/experience-fragments/foo/master/jcr:content/root", ImmutableMap.of(JCR_TITLE, "thetitle"));
+        context.create().resource("/content/experience-fragments/foo/master/jcr:content/root",
+                Collections.singletonMap(JCR_TITLE, "thetitle"));
 
         component = createMockResource("core/wcm/components/experiencefragment/v1/experiencefragment",
-                ImmutableMap.of("fragmentVariationPath", "/content/experience-fragments/foo/master"));
+                Collections.singletonMap("fragmentVariationPath", "/content/experience-fragments/foo/master"));
 
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "## thetitle\n\n";
@@ -154,11 +155,13 @@ public class AemApproximateMarkdownServicePluginTest {
     @Test
     public void testContentFragment() {
         context.create().resource("/content/dam/cf/foo/jcr:content/data/variation",
-                ImmutableMap.of("a", "theA", "b", "<p>theB</p>", "b@ContentType", "text/html", "c", "theC"));
+                "a", "theA", "b", "<p>theB</p>", "b@ContentType", "text/html", "c", "theC");
 
-        component = createMockResource("core/wcm/components/contentfragment/v1/contentfragment",
-                ImmutableMap.of("fragmentPath", "/content/dam/cf/foo",
-                        "variationName", "variation", "elementNames", new String[]{"a", "b"}));
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("fragmentPath", "/content/dam/cf/foo");
+        attributes.put("variationName", "variation");
+        attributes.put("elementNames", new String[]{"a", "b"});
+        component = createMockResource("core/wcm/components/contentfragment/v1/contentfragment", attributes);
 
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "theA\n" +
@@ -190,11 +193,12 @@ public class AemApproximateMarkdownServicePluginTest {
                 "  }\n" +
                 "}\n");
 
-        Resource master = context.create().resource("/content/dam/cf/foo/jcr:content/data/master", ImmutableMap.of("a", "theA", "b", "theB"));
+        Resource master = context.create().resource("/content/dam/cf/foo/jcr:content/data/master",
+                "a", "theA", "b", "theB");
         master.getParent().adaptTo(ModifiableValueMap.class).put("cq:model", cqModel.getPath());
 
         component = createMockResource("core/wcm/components/contentfragment/v1/contentfragment",
-                ImmutableMap.of("fragmentPath", "/content/dam/cf/foo"));
+                Collections.singletonMap("fragmentPath", "/content/dam/cf/foo"));
 
         service.approximateMarkdown(component, printWriter, request, response);
         String expectedOutput = "An B: theB\n" +
