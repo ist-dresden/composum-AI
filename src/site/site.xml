@@ -31,7 +31,7 @@
             <item name="Installation" href="aem-variant/installation.html"/>
             <item name="Configuration" href="aem-variant/configuration.html"/>
             <item name="Usage" href="aem-variant/usage.html"/>
-            <item name="Automatic Translation" href="aem-variant/automaticTranslationPoc.html"/>
+            <item name="Automatic Translation" href="aem-variant/automaticTranslation.html"/>
         </menu>
         <menu name="Composum-Variant">
             <item name="Overview" href="composum-variant/index.html"/>

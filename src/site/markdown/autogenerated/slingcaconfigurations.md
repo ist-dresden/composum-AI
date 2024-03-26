@@ -3,13 +3,13 @@
 This is an automatically generated overview.
 
 <a name="slingca.AutoTranslateCaConfig"></a>
-## Composum AI Automatic Translation POC Rollout Configuration (aem-core)
+## Composum AI Automatic Translation POC Configuration (aem-core)
 
-Configures rollout details for automatic translation. This is a demo and not yet fully functional.
+Configures rollout details for automatic translation. This is a proof of concept and may not yet be fully functional.
 
-| id                    | label                     | type   | default value | description                                      |
-|-----------------------|---------------------------|--------|---------------|--------------------------------------------------|
-| additionalInstructions | Additional Instructions   | String |               | Additional instructions for the automatic translation. |
+| id                    | label                    | type   | default value | description                                      |
+|-----------------------|--------------------------|--------|---------------|--------------------------------------------------|
+| additionalInstructions | Additional Instructions  | String |               | Additional instructions for the automatic translation. |
 
 <a name="slingca.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)
