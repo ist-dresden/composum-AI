@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.composum.ai.aem.core.impl"},{"l":"com.composum.ai.aem.core.impl.autotranslate"}]
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.composum.ai.aem.core.impl"},{"l":"com.composum.ai.aem.core.impl.autotranslate"},{"l":"com.composum.ai.aem.core.impl.autotranslate.rollout"},{"l":"com.composum.ai.aem.core.impl.autotranslate.workflow"}]
