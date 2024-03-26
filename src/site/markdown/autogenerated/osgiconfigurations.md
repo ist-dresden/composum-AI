@@ -2,7 +2,7 @@
 
 This is an automatically generated overview.
 
-
+<a name="osgi.ApproximateMarkdownServiceImpl"></a>
 ## Composum AI Approximate Markdown Service Configuration (slingbase)
 
 Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.
@@ -14,6 +14,7 @@ Configuration for the Approximate Markdown Service used to get a text representa
 | 3 | Labeled Attribute Pattern Deny | String[] |  | Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list. |
 | 4 | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |
 
+<a name="osgi.AutoTranslateConfig"></a>
 ## Composum AI Autotranslate Configuration (aem-core)
 
 Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found. Proof of concept quality - give it a try. :-)
@@ -27,6 +28,7 @@ Configuration of the automatic translation of AEM pages. The OSGI configuration 
 | deniedAttributesRegexes | Denied Attributes | String[] |  | Attributes that are explicitly denied to be translated. Can be used to override the heuristics / standard attributes. Same syntax as allowed attributes. |
 | ignoreAssetsExceptContentFragments | Ignore Assets except Content Fragments | boolean | true | If true, assets are ignored for translation, except for content fragments. (Otherwise the translator would translate metadata of images and videos.) |
 
+<a name="osgi.GPTChatCompletionServiceImpl"></a>
 ## GPTChatCompletionServiceConfig (backend)
 
 Provides rather low level access to the GPT chat completion - use the other services for more specific services.
@@ -49,6 +51,7 @@ Provides rather low level access to the GPT chat completion - use the other serv
 | requestsPerHour | Maximum requests per hour | int | 1000 | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 1000 |
 | requestsPerDay | Maximum requests per day | int | 3000 | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 3000 |
 
+<a name="osgi.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)
 
 A configuration for allowed AI services. There can be multiple configurations, and the allowed services are aggregated.
@@ -69,6 +72,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | 100 | Allowed Page Templates | String[] | [.*] | Regular expressions for allowed page templates. If not present, all page templates are allowed. |
 | 110 | Denied Page Templates | String[] |  | Regular expressions for denied page templates. Takes precedence over allowed page templates. |
 
+<a name="osgi.GPTPromptLibrary"></a>
 ## Composum AI Prompt Library Configuration (slingbase)
 
 Location for the prompt library for Composum AI. There can be multiple configurations, and the allowed services are aggregated.
@@ -80,6 +84,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | contentCreationPromptsPath | Content Creation Prompts Path | String |  | Path to the content creation prompts. Either a JSON file, or a page. |
 | sidePanelPromptsPath | Side Panel Prompts Path | String |  | Path to the side panel prompts. Either a JSON file, or a page. |
 
+<a name="osgi.GPTTranslationServiceImpl"></a>
 ## Composum AI Translation Service Configuration (backend)
 
 Configuration for the basic Composum AI Translation Service
@@ -88,8 +93,9 @@ Configuration for the basic Composum AI Translation Service
 |----|------|------|---------------|-------------|
 | disabled | Disable the translation service | boolean | false | Disable the translation service |
 | fakeTranslation | Fake translation | boolean | false | For quick and inexpensive testing, when you just want to check that the translation does something for e.g. a bulk of texts, you can enable this. The "translation" then just turns the text iNtO tHiS cApItAlIsAtIoN. Easy to spot, but probably doesn't destroy the content completely. |
-| diskCache | Disk cache | String |  | Path to a directory where to cache the translations. If empty, no caching is done. If the path is relative, it is relative to the current working directory. If the path is absolute, it is used as is. |
+| diskCache | Disk cache | String | "" | Path to a directory where to cache the translations. If empty, no caching is done. If the path is relative, it is relative to the current working directory. If the path is absolute, it is used as is. |
 
+<a name="osgi.HtmlToApproximateMarkdownServicePlugin"></a>
 ## Composum AI Html To Approximate Markdown Service Plugin (slingbase)
 
 A plugin for the ApproximateMarkdownService that transforms the rendered HTML of components to markdown, which can work better than trying to guess the text content from the JCR representation (as is the default) but probably doesn't work for all components. So it can be enabled for some sling resource types by regex. We will not use this for the first two levels below the page, as that could include unwanted stuff like headers and footers.
@@ -99,6 +105,7 @@ A plugin for the ApproximateMarkdownService that transforms the rendered HTML of
 | Allowed resource types | allowedResourceTypes | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
 | Denied resource types | deniedResourceTypes | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |
 
+<a name="osgi.SlingCaConfigPluginImpl"></a>
 ## Composum AI SlingCaConfig Plugin (slingbase)
 
 Allows enabling / disabling the Sling Context Aware Configuration of the Composum AI.

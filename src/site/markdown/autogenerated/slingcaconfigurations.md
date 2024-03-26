@@ -2,7 +2,7 @@
 
 This is an automatically generated overview.
 
-
+<a name="slingca.AutoTranslateCaConfig"></a>
 ## Composum AI Automatic Translation POC Rollout Configuration (aem-core)
 
 Configures rollout details for automatic translation. This is a demo and not yet fully functional.
@@ -11,6 +11,7 @@ Configures rollout details for automatic translation. This is a demo and not yet
 |-----------------------|---------------------------|--------|---------------|--------------------------------------------------|
 | additionalInstructions | Additional Instructions   | String |               | Additional instructions for the automatic translation. |
 
+<a name="slingca.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)
 
 A configuration for allowed AI services. There can be multiple configurations, and the allowed services are aggregated.
@@ -31,6 +32,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | allowedPageTemplates| Allowed Page Templates | String[] | .*            | Regular expressions for allowed page templates. If not present, all page templates are allowed.                  |
 | deniedPageTemplates | Denied Page Templates  | String[] | -             | Regular expressions for denied page templates. Takes precedence over allowed page templates.                      |
 
+<a name="slingca.GPTPromptLibrary"></a>
 ### Composum AI Prompt Library Configuration (slingbase)
 
 Location for the prompt library for Composum AI. There can be multiple configurations, and the allowed services are aggregated.
@@ -42,6 +44,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | contentCreationPromptsPath | Content Creation Prompts Path   | String |               | Path to the content creation prompts.             |
 | sidePanelPromptsPath       | Side Panel Prompts Path         | String |               | Path to the side panel prompts.                   |
 
+<a name="slingca.OpenAIConfig"></a>
 ## Composum AI OpenAI Configuration (slingbase)
 
 Configurations for the OpenAI backend for Composum AI
@@ -50,3 +53,4 @@ Configurations for the OpenAI backend for Composum AI
 |-----------------|---------------------|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | openAiApiKey    | OpenAI API Key      | String |               | OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key . |
 | openAiOrganizationId | OpenAI Organization ID | String |               | Optionally, OpenAI Organization ID from https://platform.openai.com/.                                                                   |
+

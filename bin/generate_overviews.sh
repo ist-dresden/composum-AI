@@ -20,7 +20,12 @@ done
   echo
   echo "This is an automatically generated overview."
   echo
-  cat $DIR/parts/osgi.*.md.part | fgrep -v AIGenVersion
+  for fil in $DIR/parts/osgi.*.md.part; do
+    echo "<a name=\"$(basename $fil .md.part)\"></a>"
+    # remove AIGenVersion and any empty lines at the beginning only
+    cat $fil | fgrep -v AIGenVersion | sed '/./,$!d'
+    echo
+  done
 ) > $DIR/osgiconfigurations.md
 
 #same thing for @Configuration and @Property
@@ -35,5 +40,10 @@ done
   echo
   echo "This is an automatically generated overview."
   echo
-  cat $DIR/parts/slingca.*.md.part | fgrep -v AIGenVersion
+  for fil in $DIR/parts/slingca.*.md.part; do
+    echo "<a name=\"$(basename $fil .md.part)\"></a>"
+    # remove AIGenVersion
+    cat $fil | fgrep -v AIGenVersion | sed '/./,$!d'
+    echo
+  done
 ) > $DIR/slingcaconfigurations.md
