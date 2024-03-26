@@ -85,8 +85,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return stats;
         }
 
+        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : null;
+        String pageAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
+        boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, pageAdditionalInstructions);
+
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
-        boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters);
+        boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
 
         LOG.debug("Set of property names to translate in {} : {}", resource.getPath(),
                 propertiesToTranslate.stream()
@@ -131,6 +135,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             if (translationParameters.breakInheritance) {
                 cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
             }
+        }
+
+        if (additionalInstructionsChanged) {
+            ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
+            mvm.put(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, additionalInstructions);
+            changed = true;
         }
 
         changed |= migratePathsToLanguageCopy(resource, language, stats);
@@ -308,11 +318,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Searches for properties we have to translate.
      *
+     * @param force all properties have to be retranslated
      * @return true if something was changed already
      */
     protected boolean collectPropertiesToTranslate(
             @Nonnull Resource resource, @Nonnull List<PropertyToTranslate> propertiesToTranslate, @Nonnull Stats stats,
-            @Nonnull AutoTranslateService.TranslationParameters translationParameters) throws WCMException {
+            @Nonnull AutoTranslateService.TranslationParameters translationParameters, boolean force) throws WCMException {
         boolean changed = false;
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
         if (relationship == null) {
@@ -349,14 +360,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 continue; // don't touch cancelled properties
             }
 
-            if (targetWrapper.isOriginalAsWhenLastTranslating()) {
+            if (targetWrapper.isOriginalAsWhenLastTranslating() && !force) {
                 // shortcut: we have a recent translation already
                 targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
                 changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
                 continue;
             }
 
-            if (isCancelled && targetWrapper.hasSavedTranslation()
+            if (isCancelled && targetWrapper.hasSavedTranslation() && translationParameters.translateWhenChanged
                     && !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getCurrentValue())
                     && !StringUtils.equals(targetWrapper.getOriginal(), targetWrapper.getCurrentValue())) {
                 // = translateWhenChanged override; save manual change. We also exclude the phase during rollout
@@ -379,7 +390,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         for (Resource child : resource.getChildren()) {
             if (!PATTERN_IGNORED_SUBNODE_NAMES.matcher(child.getName()).matches()) {
-                boolean childChanged = collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters);
+                boolean childChanged = collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters, force);
                 changed |= childChanged;
             }
         }

@@ -14,6 +14,11 @@ import org.apache.sling.api.resource.ValueMap;
 class AITranslatePropertyWrapper {
 
     /**
+     * PageContent only property: saves the additional instructions the page was translated with.
+     */
+    public static final String PROPERTY_AI_ADDINSTRUCTIONS = "ai_additionalInstructions";
+
+    /**
      * Saves the date when a resource was automatically translated.
      * Find translated resources with /content//*[@ai_translated] .
      */
@@ -148,6 +153,9 @@ class AITranslatePropertyWrapper {
     }
 
     public String[] allAiKeys() {
+        if (propertyName.startsWith(AI_PREFIX) || propertyName.startsWith(LC_PREFIX)) {
+            throw new IllegalArgumentException("Property name must not start with " + AI_PREFIX + " or " + LC_PREFIX + ": " + propertyName);
+        }
         return new String[]{
                 AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
                 AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX),

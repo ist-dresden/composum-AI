@@ -74,7 +74,7 @@ public class AutoPageTranslateServiceImplTest {
         List<AutoPageTranslateServiceImpl.PropertyToTranslate> props = new java.util.ArrayList<>();
         AutoPageTranslateServiceImpl.Stats stats = new AutoPageTranslateServiceImpl.Stats();
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
-        service.collectPropertiesToTranslate(copy, props, stats, parms);
+        service.collectPropertiesToTranslate(copy, props, stats, parms, false);
         assertEquals(2, props.size());
         assertEquals("something", props.get(0).propertyName);
         assertEquals("/content/de/jcr:content", props.get(0).targetResource.getPath());
