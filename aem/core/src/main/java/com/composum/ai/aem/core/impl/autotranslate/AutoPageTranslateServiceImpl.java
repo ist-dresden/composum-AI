@@ -73,6 +73,18 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             resource = resource.getChild("jcr:content");
         }
         Stats stats = new Stats();
+
+        String language = SelectorUtils.findLanguage(resource);
+        if (language == null) {
+            throw new IllegalArgumentException("No language found for " + resource.getPath());
+        }
+        String languageName = SelectorUtils.getLanguageName(language);
+        String sourceLanguage = determineSourceLanguage(resource);
+        if (StringUtils.equals(language, sourceLanguage)) {
+            LOG.info("Skipping translation because language and source language are {} for {}", language, resource.getPath());
+            return stats;
+        }
+
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters);
 
@@ -84,11 +96,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         List<String> valuesToTranslate = propertiesToTranslate.stream()
                 .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))
                 .collect(Collectors.toList());
-        String language = SelectorUtils.findLanguage(resource);
-        if (language == null) {
-            throw new IllegalArgumentException("No language found for " + resource.getPath());
-        }
-        String languageName = SelectorUtils.getLanguageName(language);
+
         List<String> translatedValues =
                 translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
 
@@ -134,6 +142,18 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         LOG.debug("<<< translateLiveCopy: {} {}", resource.getPath(), stats);
         return stats;
+    }
+
+    private String determineSourceLanguage(Resource resource) throws WCMException {
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        if (relationship == null) {
+            throw new IllegalArgumentException("No live relationship for " + resource.getPath());
+        }
+        String sourceLanguage = SelectorUtils.findLanguage(resource.getResourceResolver().getResource(relationship.getSourcePath()));
+        if (sourceLanguage == null) {
+            throw new IllegalArgumentException("No source language found for " + resource.getPath());
+        }
+        return sourceLanguage;
     }
 
     protected void markAsAiTranslated(Resource resource, LiveRelationship liveRelationship, AutoTranslateService.TranslationParameters parameters) throws WCMException {
