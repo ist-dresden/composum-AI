@@ -1,0 +1,76 @@
+/* AIGenVersion(1641e5b7, 2css.prompt-5434cae6, README.md-1.0, differentialReTranslation.html-35ff6cec) */
+
+/* differentialReTranslation.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #007bff;
+}
+
+p {
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn {
+    margin-top: 10px;
+}
+
+/* Add space below buttons */
+.btn {
+    margin-bottom: 20px;
+}
+
+/* Additional styling for form elements */
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    textarea {
+        padding: 8px;
+    }
+
+    .btn {
+        margin-bottom: 15px;
+    }
+}
+
+/*  */

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Differential Re-Translation POC</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="differentialReTranslation.css">
+</head>
+
+<body>
+    <div class="container">
+        <form>
+            <h1 class="mt-4">Differential Re-Translation POC</h1>
+            <p class="mb-4">Proof of concept: explores how the reasoning capabilities of an LLM (ChatGPT) can support automatic adaption of new translations according to previous manual corrections. This is intended for the following scenario. A text is automatically translated, checked by the user and changed manually. Now a new version of the original comes in. The idea of the differential re-translation is to translate the new version of the original text automatically, while having the LLM keep the manual changes as far as possible.
+            </p>
+
+            <div class="form-group">
+                <label for="examplesDropdown">Choose an Example</label>
+                <select class="form-control" id="examplesDropdown">
+                    <!-- Options filled by JavaScript from differentialReTranslationExamples.js -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="instructionsField">Instructions for Translation</label>
+                <p>Enter the specific requirements for the translation, such as tone, formality level, or additional contextual information.</p>
+                <textarea class="form-control" id="instructionsField" rows="4">Translate this text into </textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="originalTextField">Original Text</label>
+                <p>Input the text you wish to translate. This will serve as the base for the initial automatic translation.</p>
+                <textarea class="form-control" id="originalTextField" rows="4"></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="translateButton">Translate</button>
+
+            <div class="form-group">
+                <label for="autoTranslatedTextField">Automatically Translated Text</label>
+                <p>View the initial translation of your original text. This text is generated based on the general instructions.</p>
+                <textarea class="form-control" id="autoTranslatedTextField" rows="4" readonly></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="correctedTextField">Manually Corrected Translation</label>
+                <p>Make adjustments to the automatic translation to better meet your requirements or correct inaccuracies.</p>
+                <textarea class="form-control" id="correctedTextField" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="changedTextField">Revised Original Text</label>
+                <p>Enter a modified version of the original text to see how the application adapts the translation to reflect these changes.</p>
+                <textarea class="form-control" id="changedTextField" rows="4"></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="retranslateButton">Differential Re-translation</button>
+
+            <div class="form-group">
+                <label for="retranslatedResultField">Result of differential re-translation</label>
+                <p>View the result of the translation of the changed original text while trying to maintain the manual corrections.</p>
+                <textarea class="form-control" id="retranslatedResultField" rows="4" readonly></textarea>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="differentialReTranslation.js"></script>
+    <script src="differentialReTranslationExamples.js"></script>
+</body>
+
+</html>
+
+<!-- AIGenVersion(35ff6cec, 1html.prompt-7ce5e2d3, README.md-2deb7062, dialogelements.txt-4684af8d) -->
