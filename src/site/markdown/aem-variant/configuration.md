@@ -66,6 +66,39 @@ where sk-****** should be replaced by the actual OpenAI API key.
 
 <div style="clear: both;"></div>
 
+<a name="promptlibconf"></a>
+
+## Composum AI Prompt Library Configuration
+
+Composum AI provides a default prompt library for the Content Creation Assistant and the Side Panel Assistant. It is
+quite likely that you will want to customize the prompts or add new prompts for your specific use case, or use prompts
+in a different language than english. This can be
+done with the "Composum AI Prompt Library Configuration". There is an OSGI configuration that can set system-wide
+default paths, and a Sling Context Aware Configuration that can override these defaults for specific parts of the site.
+
+| id                         | label                         | type   | default value | description                           |
+|----------------------------|-------------------------------|--------|---------------|---------------------------------------|
+| contentCreationPromptsPath | Content Creation Prompts Path | String |               | Path to the content creation prompts. |
+| sidePanelPromptsPath       | Side Panel Prompts Path       | String |               | Path to the side panel prompts.       |
+
+These paths can be paths to a JSON file like
+[predefinedprompts.json](https://github.com/ist-dresden/composum-AI/blob/develop/composum/bundle/src/main/resources/create/predefinedprompts.json)
+. To make it easy to maintain a prompt library, it is also possible to use content pages as prompt library. The
+content page should have a simple structure and the prompts should be as components in exactly one container containing
+components with the prompts. Usable for the prompt components are e.g. teasers or other components that have:
+
+1. a title property (`jcr:title`, `title` or `subtitle`) that is taken as title of the prompt, and
+2. a text property (`jcr:description`, `description` or `text`) that is taken as the text of the prompt.
+
+If you want to adapt the default prompt libraries  
+`/conf/composum-ai/settings/dialogs/contentcreation/predefinedprompts`
+`/conf/composum-ai/settings/dialogs/sidepanel-ai/predefinedprompts`
+: these can be copied into the site or some other place and edited there. They do, however, use components and page 
+template of the WKND site, so you might need to change the components and page templates to match your site.
+
+If the paths to the prompt libraries contain language specific subpages (`en`, `de` and so forth), the prompt library
+in the language of the site is taken, falling back to `en`.
+
 ## AI Permission Configuration
 
 <div style="float: right; margin-left: 20px;">

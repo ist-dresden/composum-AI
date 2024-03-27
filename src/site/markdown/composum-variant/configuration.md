@@ -62,6 +62,33 @@ desired, a global default can be set at e.g.
 
 where sk-****** should be replaced by the actual OpenAI API key.
 
+<a name="promptlibconf"></a>
+
+## Composum AI Prompt Library Configuration
+
+Composum AI provides a default prompt library for the Content Creation Assistant and the Side Panel Assistant. It is
+quite likely that you will want to customize the prompts or add new prompts for your specific use case, or use prompts
+in a different language than english. This can be
+done with the "Composum AI Prompt Library Configuration". There is an OSGI configuration that can set system-wide
+default paths, and a Sling Context Aware Configuration that can override these defaults for specific parts of the site.
+
+| id                         | label                         | type   | default value | description                           |
+|----------------------------|-------------------------------|--------|---------------|---------------------------------------|
+| contentCreationPromptsPath | Content Creation Prompts Path | String |               | Path to the content creation prompts. |
+| sidePanelPromptsPath       | Side Panel Prompts Path       | String |               | Path to the side panel prompts.       |
+
+These paths can be paths to a JSON file like
+[predefinedprompts.json](https://github.com/ist-dresden/composum-AI/blob/develop/composum/bundle/src/main/resources/create/predefinedprompts.json)
+. To make it easy to maintain a prompt library, it is also possible to use content pages as prompt library. The
+content page should have a simple structure and the prompts should be as components in exactly one paragraph system 
+containing text components with the prompts. The subtitle in the text component is taken as the title of the prompt, and
+the text is taken as the text of the prompt.
+
+If you want to adapt the default prompt libraries 
+`/libs/composum/pages/options/ai/dialogs/create/defaultprompts`
+`/libs/composum/pages/options/ai/tools/sidebar/defaultprompts`
+: these can be copied into the site or some other place and edited there.
+
 <div style="clear: both;"></div>
 
 ## AI Permission Configuration

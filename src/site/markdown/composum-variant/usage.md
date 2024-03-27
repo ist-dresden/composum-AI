@@ -126,7 +126,9 @@ Selecting one of these options replaces the 'Source' text area with the chosen t
 ### Predefined prompts
 
 The predefined prompts are valuable as they are, but please take them as an inspiration what you can do with the
-text. Some examples are:
+text. Please note that it is possible to replace the predefined prompts with 
+[your own library of prompts](configuration.html#promptlibconf). 
+Some examples are:
 
 - **Summarize:** The selected text is summarized.
 - **Introduction:** The AI writes an introduction for the text.
@@ -194,7 +196,10 @@ requests to the AI. The dialog also has a history, which is specific to the disp
 ### Predefined prompts
 
 We collected a number of prompts that might be useful for you when improving the text. As always, please feel free to
-extend / clarify / refine them, or to write your own requests. Among them are
+extend / clarify / refine them, or to write your own requests. 
+(Again, please note that it is possible to replace the predefined prompts with 
+[your own library of prompts](configuration.html#promptlibconf).)
+Among the default prompts are:
 
 - **Review:** The text is checked for good text flow, contradictions, repetitions, redundancy, etc.
 - **Content Flow:** Checks for problems with the flow of the tex
