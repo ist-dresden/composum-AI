@@ -87,6 +87,7 @@ public class AemAIConfigurationPlugin implements AIConfigurationPlugin {
 
         // we don't know exactly which component is used, and which attributes. So we try several attribute names.
         Map<String, String> prompts = new LinkedHashMap<>();
+        prompts.put("", "");
         for (Resource prompt : promptContainer.get().getRight()) {
             String title = TITLE_ATTRIBS.stream()
                     .map(a -> prompt.getValueMap().get(a, String.class))

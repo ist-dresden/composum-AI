@@ -83,6 +83,7 @@ public class ComposumAIConfigurationPlugin implements AIConfigurationPlugin {
         List<Resource> prompts = promptContainer.get().getRight();
         // we assume that the prompts are standard text components with the prompt name as the title and the prompt as the text.
         Map<String, String> result = new LinkedHashMap<>();
+        result.put("", "");
         for (Resource prompt : prompts) {
             Text model = new Text(context, prompt);
             String title = model.getTitle();

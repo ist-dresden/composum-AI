@@ -32,6 +32,7 @@ public class SidebarDialogModel extends FrameModel {
         if (paths != null) {
             String path = paths.sidePanelPromptsPath();
             Map<String, String> map = getAIConfigurationService().getGPTConfigurationMap(getContext().getRequest(), path, null);
+            map.remove(""); // empty start entry is explicitly given in JSP with a text.
             return map;
         }
         LOG.error("No paths for predefined prompts found for {}", getPath());
