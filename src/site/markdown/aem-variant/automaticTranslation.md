@@ -3,9 +3,9 @@
 ## A proof of concept and preliminary implementation
 
 Translating a site is often a rather large effort. Since modern LLM can both speak many languages and integrate
-advanced reasoning capabilities, they can be a big help in translating a site - to the point that translating a site
-can amount to an automatic process where the editor only has to check the results and only occasionally make minor
-changes.
+advanced reasoning capabilities, they can be a big help in translating a site - possibly to the point that 
+translating a site can amount to an automatic process where the editor only has to check the results and only 
+occasionally make minor changes.
 
 We integrated a proof of concept into the Composum AI that can translate individual pages or entire sites quickly.
 It is very promising: a test translating the [WKND site](https://wknd.site/us/en.html) from English into German took

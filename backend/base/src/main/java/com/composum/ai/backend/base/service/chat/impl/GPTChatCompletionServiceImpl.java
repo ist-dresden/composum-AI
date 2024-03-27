@@ -698,7 +698,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         String temperature();
 
         @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
-                "That's about a half of the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
+                "That's about a twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
                 defaultValue = "50000", required = false)
         int maximumTokensPerRequest();
 

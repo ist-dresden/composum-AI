@@ -251,6 +251,7 @@ public class AIServlet extends AbstractServiceServlet {
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
         if (streams == null) {
             streams = new LinkedHashMap<>();
+            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
         }
         if (streams.size() > 5) { // normally that should be emptied by retrieveStream; just to be sure remove oldest:
             streams.remove(streams.keySet().iterator().next());
