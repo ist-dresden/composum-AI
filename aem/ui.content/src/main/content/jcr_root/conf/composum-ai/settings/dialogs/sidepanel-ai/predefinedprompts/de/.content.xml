@@ -6,122 +6,122 @@
           jcr:primaryType="cq:Page">
     <jcr:content
             jcr:primaryType="cq:PageContent"
-            sling:resourceType="core/wcm/components/page/v2/page"
+            sling:resourceType="wknd/components/page"
             cq:template="/conf/wknd/settings/wcm/templates/content-page-template"
             jcr:language="de"
             jcr:title="Standard-Seitenleisten-Promptbibliothek, Deutsch"
             hideInNav="true">
         <root
                 jcr:primaryType="nt:unstructured"
-                sling:resourceType="core/wcm/components/container/v1/container"
+                sling:resourceType="wknd/components/container"
                 layout="responsiveGrid">
             <container
                     jcr:primaryType="nt:unstructured"
-                    sling:resourceType="core/wcm/components/container/v1/container"
+                    sling:resourceType="wknd/components/container"
                     layout="responsiveGrid">
                 <teaser_1
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Fasse zusammen"
                         jcr:description="Schreibe bitte eine prägnante Zusammenfassung des Textes. Die Zusammenfassung soll die Hauptideen im Stil des Textes einfangen, als könnte sie vor dem Text stehen. Sorge dafür, dass sie deutlich kürzer als das Original ist. Die Zusammenfassung soll dem Zweck und Ziel des Textes sowie den Schlüsselpunkten aller Themenbereiche gerecht werden. Schreibe klar und einfach, um Genauigkeit und Vollständigkeit zu gewährleisten. Nutze nur die im Text gegebenen Informationen; verwende keine Informationen, die du über die Welt weißt."/>
                 <teaser_2
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Frage"
                         jcr:description="Bitte beantworte die folgende Frage auf Basis des gegebenen Textes:&lt;br>"/>
                 <teaser_3
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Vereinfache"
                         jcr:description="Identifiziere Teile des Textes, die vereinfacht oder leichter verständlich gemacht werden könnten. Nenne diese Teile und mache Vorschläge für alternative Formulierungen."/>
                 <teaser_4
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Inhaltsfluss"
                         jcr:description="Analysiere den Fluss des Inhalts. Verläuft er logisch? Gibt es eine klare Einführung, Hauptteil und Schlussfolgerung?"/>
                 <teaser_5
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Überprüfe"
                         jcr:description="Prüfe, ob es einen guten Textfluss gibt und ob Widersprüche oder Wiederholungen und Redundanzen im Text, inkonsistenter Stil oder Ton und stilistische Probleme vorhanden sind. Überprüfe lange und komplizierte Sätze, die einfacher und verständlicher gemacht werden könnten. Gib Verbesserungsvorschläge. Sei kritisch."/>
                 <teaser_6
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="10 Überschriften"
                         jcr:description="Bitte schreibe 10 Vorschläge für eine Überschrift für den Text. Gib nur die rohe Überschrift an, keine Erklärungen und keine Zitate. Verwende einen geschäftsmäßigen, informativen Stil."/>
                 <teaser_7
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="10 Überschriften + Unterüberschriften"
                         jcr:description="Bitte schreibe 10 Vorschläge für eine Überschrift und eine Unterüberschrift für den Text. Gib für jeden Vorschlag nur die rohe Überschrift und in der nächsten Zeile eine Unterüberschrift an. Bitte keine Erklärungen und kein Einfassen mit Anführungszeichen. Verwende einen geschäftsmäßigen, informativen Stil."/>
                 <teaser_8
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Sentimentanalyse"
                         jcr:description="Analysiere das durch den Text vermittelte Sentiment. Ist es positiv, negativ oder neutral? Wie stark ist das Sentiment?"/>
                 <teaser_9
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="AIDA-Inhaltsprüfung"
                         jcr:description="Überprüfe den bereitgestellten Text und schlage Verbesserungen vor, die dem AIDA-Modell (Aufmerksamkeit, Interesse, Verlangen und Handlung) folgen. Zeige Bereiche auf, in denen das Erregen von Aufmerksamkeit, das Wecken von Interesse, die Verstärkung des Verlangens oder der Aufruf zur Handlung fehlen könnte, und liefere Vorschläge zur Verbesserung jedes Aspekts."/>
                 <teaser_10
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="BAB-Inhaltsprüfung"
                         jcr:description="Überprüfe den bereitgestellten Text und schlage Verbesserungen vor, die dem BAB (Before-After-Bridge) Modell folgen. Gib Vorschläge zur Verbesserung der 'Vorher'-Situation, der 'Nachher'-Vision und der 'Brücke'-Lösung an, sodass der Leser die Transformation klar erkennen und die Rolle unseres Produkts/unsere Dienstleistung darin verstehen kann."/>
                 <teaser_11
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="CTA-Bewertung"
                         jcr:description="Untersuche den aktuellen Call-to-Action (CTA) im Text. Motiviert er den Leser zur gewünschten Handlung? Ist er klar und überzeugend? Gibt es Möglichkeiten zur Verbesserung? Wenn kein CTA vorhanden ist, schlage einen vor, der zum Inhalt und zur beabsichtigten Zielgruppe passt. Priorisiere CTAs, die handlungsorientiert, emotional ansprechend und prägnant sind."/>
                 <teaser_12
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="CTA-Vorschläge"
                         jcr:description="Basierend auf dem Hauptthema des Inhalts, bitte fünf verschiedene Call-to-Action (CTA)-Phrasen vorschlagen, die Leser dazu motivieren könnten, sich weiter mit dem Inhalt oder der Marke zu beschäftigen. Die CTAs sollten klar, prägnant sein und ein Gefühl der Dringlichkeit erzeugen."/>
                 <teaser_13
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Inhaltslückenanalyse"
                         jcr:description="Analysiere den Text, um Themen oder Unterthemen zu identifizieren, die nicht abgedeckt sind, aber für das Publikum relevant und wertvoll sein könnten. Überlege, welche Fragen der Leser nach der Lektüre des Textes noch haben könnte und welche zusätzlichen Informationen oder Perspektiven einbezogen werden könnten, um den Text umfassender und informativer zu gestalten."/>
                 <teaser_14
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Adressierung von Inhaltslücken"
                         jcr:description="Basierend auf den identifizierten Inhaltslücken, gib spezifische Vorschläge, wie diese Lücken gefüllt werden können. Beinhalte Ideen für neue Abschnitte, Themen oder Arten von Informationen, die dem Text hinzugefügt werden könnten, sowie Änderungen an der Organisation oder am Fluss des Textes, die helfen könnten, diesen neuen Inhalt zu integrieren."/>
                 <teaser_15
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Reaktionssimulation"
                         jcr:description="Simuliere eine positive, eine negative und eine neutrale Reaktion eines Lesers auf den bereitgestellten Text."/>
                 <teaser_16
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Tonanalyse"
                         jcr:description="Analysiere den Ton des Textes. Ist er formell, informell, freundlich, konfrontativ, enthusiastisch, neutral usw.?"/>
                 <teaser_17
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Publikumseignung"
                         jcr:description="Bewerte, ob der Text für das folgende Publikumsprofil geeignet ist, und schlage notwendige Verbesserungen vor:"/>
                 <teaser_18
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Relevanzbewertung"
                         jcr:description="Bewerte, ob der Inhalt des Textes für das folgende Thema oder den Zweck relevant ist:"/>
                 <teaser_19
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Faktenprüfung"
                         jcr:description="Identifiziere etwaige faktische Behauptungen im Text und gib an, ob sie allgemein als korrekt, falsch oder unsicher betrachtet werden."/>
                 <teaser_20
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Korrekturlesen"
                         jcr:description="Bitte überprüfe den Text auf Rechtschreib-, Grammatik- oder Zeichensetzungsfehler, Tippfehler, falsche Satzstruktur und falschen/ungeeigneten Wortgebrauch, Bandwurmsätze, falsche Subjekt-Verb-Übereinstimmung, fehlende oder wiederholte Wörter. Bei jedem Problembericht gib den Teil des Satzes an, in dem das Problem auftritt, und wie dieser Teil des Satzes verbessert werden könnte. Sortiere die gemeldeten Probleme nach Schweregrad."/>
                 <teaser_21
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="core/wcm/components/teaser/v1/teaser"
+                        sling:resourceType="wknd/components/teaser"
                         jcr:title="Schlüsselwortdichte"
                         jcr:description="Identifiziere die am häufigsten verwendeten Wörter oder Phrasen im Text, ausgenommen allgemeine Funktionswörter."/>
             </container>
