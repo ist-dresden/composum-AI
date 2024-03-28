@@ -156,9 +156,14 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         }
 
         if (parms.recursive) {
+            // recursively looks for other jcr:content nodes
             Iterator<Resource> childIterator = resource.listChildren();
             while (childIterator.hasNext()) {
-                translate(childIterator.next(), processArguments);
+                Resource child = childIterator.next();
+                // skip jcr:content node since that has been translated already
+                if (!child.getPath().contains("/jcr:content")) {
+                    translate(child, processArguments);
+                }
             }
         }
     }
