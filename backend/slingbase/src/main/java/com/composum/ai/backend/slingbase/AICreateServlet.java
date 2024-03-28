@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -148,6 +147,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         Map<String, EventStream> streams = (Map<String, EventStream>) request.getSession().getAttribute(SESSIONKEY_STREAMING);
         if (streams == null) {
             streams = new LinkedHashMap<>();
+            request.getSession().setAttribute(SESSIONKEY_STREAMING, streams);
         }
         if (streams.size() > 5) { // normally that should be cleaned up automatically by retrieveStream, just to be sure.
             streams.remove(streams.keySet().iterator().next());

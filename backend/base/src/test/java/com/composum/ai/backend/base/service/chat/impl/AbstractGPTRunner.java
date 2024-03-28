@@ -8,19 +8,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.sling.commons.threads.ThreadPoolManager;
-import org.apache.sling.commons.threads.impl.DefaultThreadPool;
-import org.mockito.Mockito;
-
 public abstract class AbstractGPTRunner {
 
     protected GPTChatCompletionServiceImpl chatCompletionService;
 
+    protected String chatCompletionUrl = CHAT_COMPLETION_URL;
+
+    protected String apiKey;
+
     protected void setup() throws IOException {
+
         chatCompletionService = new GPTChatCompletionServiceImpl();
-        // read key from file ~/.openaiapi
-        Path filePath = Paths.get(System.getProperty("user.home"), ".openaiapi");
-        String apiKey = new String(Files.readAllBytes(filePath));
+        // read key from file ~/.openai-api-key.txt
+        Path filePath = Paths.get(System.getProperty("user.home"), ".openai-api-key.txt");
+        apiKey = System.getenv("OPENAI_API_KEY");
+        if (Files.isReadable(filePath)) {
+            apiKey = new String(Files.readAllBytes(filePath));
+        }
 
         chatCompletionService.activate(new GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig() {
             @Override
@@ -35,7 +39,7 @@ public abstract class AbstractGPTRunner {
 
             @Override
             public String chatCompletionUrl() {
-                return CHAT_COMPLETION_URL;
+                return chatCompletionUrl;
             }
 
             @Override

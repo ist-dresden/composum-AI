@@ -3,6 +3,7 @@ package com.composum.ai.backend.slingbase.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -82,6 +84,8 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
      */
     protected Map<String, Long> blacklistedResourceType = new ConcurrentHashMap<>();
 
+    protected volatile Long blacklistedResourceTypeCleanupTime = Long.MIN_VALUE;
+
     @NotNull
     @Override
     public PluginResult maybeHandle(
@@ -100,6 +104,7 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
                 blacklistedResourceType.remove(resourceType);
             }
         }
+        cleanupBlacklist();
 
         if (allowedResourceTypePattern != null && allowedResourceTypePattern.matcher(resourceType).matches()) {
             if (deniedResourceTypePattern != null && deniedResourceTypePattern.matcher(resourceType).matches()) {
@@ -134,6 +139,22 @@ public class HtmlToApproximateMarkdownServicePlugin implements ApproximateMarkdo
             }
         }
         return PluginResult.NOT_HANDLED;
+    }
+
+    protected void cleanupBlacklist() {
+        if (System.currentTimeMillis() > blacklistedResourceTypeCleanupTime) {
+            synchronized (blacklistedResourceType) {
+                if (System.currentTimeMillis() > blacklistedResourceTypeCleanupTime) {
+                    long currentTime = System.currentTimeMillis();
+                    blacklistedResourceTypeCleanupTime = currentTime + TimeUnit.HOURS.toMillis(1);
+                    List<String> entriesToRemove = blacklistedResourceType.entrySet().stream()
+                            .filter(entry -> entry.getValue() < currentTime)
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.toList());
+                    entriesToRemove.forEach(blacklistedResourceType::remove);
+                }
+            }
+        }
     }
 
     @Nullable
