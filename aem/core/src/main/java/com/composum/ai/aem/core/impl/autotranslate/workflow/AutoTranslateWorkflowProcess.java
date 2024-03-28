@@ -5,6 +5,8 @@ import static com.adobe.granite.workflow.PayloadMap.TYPE_JCR_PATH;
 import java.util.Iterator;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -24,13 +26,11 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.exec.WorkflowProcess;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -76,17 +76,19 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
 
         try {
             ResourceResolver resourceResolver = workflowSession.adaptTo(ResourceResolver.class);
-            PageManager pageManager = Objects.requireNonNull(resourceResolver.adaptTo(PageManager.class), "No Pagemanager.");
             WorkflowData workflowData = workItem.getWorkflowData();
             if (workflowData.getPayloadType().equals(TYPE_JCR_PATH)) {
                 String path = workflowData.getPayload().toString();
+                if (path == null || !path.startsWith("/content/")) {
+                    LOG.error("Workflow started with wrong payload path {}", path);
+                    throw new IllegalArgumentException("Workflow started with wrong payload path: " + path);
+                }
                 Resource resource = path != null ? resourceResolver.getResource(path) : null;
-                Page page = resource != null ? pageManager.getPage(path) : null;
-                if (page != null) {
-                    LOG.info("Autotranslate workflow started for page: {}", page.getPath());
-                    translate(page, processArguments);
+                if (resource != null) {
+                    LOG.info("Autotranslate workflow started for: {}", resource.getPath());
+                    translate(resource, processArguments);
                 } else {
-                    LOG.error("Autotranslate workflow started with wrong payload path - no page found: {}", path);
+                    LOG.error("Autotranslate workflow started with wrong payload path - no resource found: {}", path);
                 }
             } else {
                 LOG.error("Autotranslate workflow started with wrong payload type: {}", workflowData.getPayloadType());
@@ -116,39 +118,47 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         return parameters;
     }
 
-    protected void translate(Page page, String processArguments) throws PersistenceException, WCMException, WorkflowException {
-        if (page.getContentResource() == null) {
-            LOG.info("No need to translate page without content: {}", page.getPath());
-            return;
-        }
-
+    /**
+     * We only translate jcr:content resources or resources that are within a jcr:content. If recursive is enabled, we search for the jcr:content recursively.
+     */
+    protected void translate(@Nonnull Resource resource, String processArguments) throws PersistenceException, WCMException, WorkflowException {
         TranslationParameters parms = getTranslationParameters(processArguments);
-        ConfigurationBuilder confBuilder = Objects.requireNonNull(page.getContentResource().adaptTo(ConfigurationBuilder.class));
-        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-        if (autoTranslateCaConfig != null && autoTranslateCaConfig.additionalInstructions() != null) {
-            parms.additionalInstructions =
-                    (StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
-                    autoTranslateCaConfig.additionalInstructions()).trim();
+
+        Resource contentResource = null;
+        if (resource.getPath().contains("/jcr:content")) {
+            contentResource = resource;
+        } else if (resource.getChild("jcr:content") != null) {
+            contentResource = resource.getChild("jcr:content");
         }
 
-        try {
-            Resource contentResource = page.getContentResource();
-            if (contentResource != null) {
+        if (contentResource != null) {
+            ConfigurationBuilder confBuilder = Objects.requireNonNull(contentResource.adaptTo(ConfigurationBuilder.class));
+            AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
+            if (autoTranslateCaConfig != null && autoTranslateCaConfig.additionalInstructions() != null) {
+                parms.additionalInstructions =
+                        (StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
+                                autoTranslateCaConfig.additionalInstructions()).trim();
+            }
+
+            try {
                 GPTConfiguration config = configurationService.getGPTConfiguration(contentResource.getResourceResolver(), contentResource.getPath());
                 if (parms.additionalInstructions != null) {
                     config = GPTConfiguration.merge(config,
                             new GPTConfiguration(null, null, null, parms.additionalInstructions));
                 }
                 autoPageTranslateService.translateLiveCopy(contentResource, config, parms);
+            } catch (PersistenceException | WCMException | RuntimeException e) { // make sure we log the actual path
+                LOG.error("Failed to translate resource: {}", resource.getPath(), e);
+                throw e;
             }
-        } catch (PersistenceException | WCMException | RuntimeException e) { // make sure we log the actual path
-            LOG.error("Failed to translate page: {}", page.getPath(), e);
-            throw e;
+        } else {
+            LOG.info("No need to translate resource without content: {}", resource.getPath());
         }
 
         if (parms.recursive) {
-            for (Iterator<Page> it = page.listChildren(); it.hasNext(); ) {
-                translate(it.next(), processArguments);
+            Iterator<Resource> childIterator = resource.listChildren();
+            while (childIterator.hasNext()) {
+                translate(childIterator.next(), processArguments);
             }
         }
     }
