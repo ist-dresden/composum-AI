@@ -107,6 +107,20 @@ public class GPTTranslationServiceImplTest extends TestCase {
     }
 
     @Test
+    public void testSimulateDifference() {
+        // wrong number of % by local model
+        String result = "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 357056 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
+                "Über uns\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 566470 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
+                "WKND ist eine Gruppe von Outdoor-, Musik-, Handwerk-, Abenteuersport- und Reisebegeisterten, die es sich zum Ziel gesetzt, unsere Erfahrungen, Verbindungen und Expertisen der Welt zu teilen.\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%";
+        List<String> ids = asList("357056", "566470");
+        List<String> texts = asList("About us", "...");
+        List<String> resultTexts = GPTTranslationServiceImpl.separateResultTexts(result, texts, ids, result);
+        assertEquals(2, resultTexts.size());
+    }
+
+    @Test
     public void testFakeTranslation() {
         assertEquals(null, fakeTranslation(null));
         assertEquals("", fakeTranslation(""));

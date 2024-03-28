@@ -282,6 +282,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     @Override
     public void rollback(Resource resource) throws WCMException {
+        if (resource == null) {
+            throw new IllegalArgumentException("Resource does not exist.");
+        }
         for (Resource child : resource.getChildren()) {
             rollback(child);
         }

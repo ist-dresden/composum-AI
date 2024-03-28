@@ -138,8 +138,9 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     /**
      * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%` (group "id" matches the number).
      * The \n cannot be directly matched since at the start it's sometimes ```%%%%...
+     * We give the pattern a bit of leeway since some models get the number of % wrong.
      */
-    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("(?<!%)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% (?<id>\\d{6}) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%(?!%)");
+    protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("(?<!%)%{20,40} (?<id>\\d{6}) %{20,40}(?!%)");
 
     protected static final String LASTID = "424242";
 

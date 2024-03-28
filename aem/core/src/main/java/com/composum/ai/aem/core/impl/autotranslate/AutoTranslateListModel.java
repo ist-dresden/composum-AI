@@ -10,6 +10,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
@@ -17,6 +19,8 @@ import com.day.cq.wcm.api.WCMException;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class AutoTranslateListModel {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateListModel.class);
 
     @OSGiService
     private AutoTranslateService autoTranslateService;
@@ -67,18 +71,26 @@ public class AutoTranslateListModel {
     }
 
     public String rollback() throws WCMException, PersistenceException {
-        if (isDisabled()) {
-            throw new IllegalStateException("AutoTranslateService is not available");
-        }
         String path = request.getParameter("path");
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("path parameter is required");
+        try {
+            if (isDisabled()) {
+                throw new IllegalStateException("AutoTranslateService is not available");
+            }
+            if (path == null || path.isEmpty()) {
+                throw new IllegalArgumentException("path parameter is required");
+            }
+            path = path.replaceAll("_jcr_content", "jcr:content").trim();
+            Resource resource = request.getResourceResolver().getResource(path);
+            if (resource == null) {
+                return "CAUTION: resource not found: " + path;
+            }
+            autoTranslateService.rollback(resource);
+            request.getResourceResolver().commit();
+            return "rolled back for " + path;
+        } catch (Exception e) {
+            LOG.error("rollback failed for " + path, e);
+            return "CAUTION: rollback failed for " + path + ": " + e.getMessage();
         }
-        path = path.replaceAll("_jcr_content", "jcr:content").trim();
-        Resource resource = request.getResourceResolver().getResource(path);
-        autoTranslateService.rollback(resource);
-        request.getResourceResolver().commit();
-        return "rolled back for " + path;
     }
 
 }
