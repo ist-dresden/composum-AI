@@ -66,7 +66,11 @@ is already commercially available at scale, competitively priced and arguably th
 we currently use it as backend. If there is demand, we intend to provide alternative backends using other systems
 as they become commercially available,
 especially as those might be preferred by European customers because of stricter privacy and
-data security rules. It's likely that in time there will also be LLM that can be run on premise.
+data security rules. 
+It's likely that in time there will also be sufficient LLM that can be run on premise -
+[LM Studio](https://lmstudio.ai/) or 
+[ollama](https://github.com/ollama/ollama) support an OpenAI compatible API, so Composum AI can be configured to use 
+them, though a >= GPT-3.5 performance model would needed for our purpose.
 
 ## Functionality Overview
 

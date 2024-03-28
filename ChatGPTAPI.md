@@ -5,6 +5,10 @@ with gpt-3.5-turbo , since that model is likely appropriate and sufficient for o
 [competitively priced](https://openai.com/pricing) at
 $0.002 / 1K tokens (= about 600-700 words), as of 4/2023.
 
+The CHATGPT API is also used for local models with e.g. [LM Studio](https://lmstudio.ai/) or 
+[ollama](https://github.com/ollama/ollama) - since the URL is configurable, they could be used, too, though a >= 
+GPT-3.5 performance model is needed. 
+
 ## Libraries
 
 There is a list of [ChatGPT community libraries](https://platform.openai.com/docs/libraries/community-libraries)

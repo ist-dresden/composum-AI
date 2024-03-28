@@ -1,13 +1,9 @@
 # Next steps in the implementation
 
-- ??? Konfiguration f. Seiten?
-- ??? Input prompt nicht ersetzen? Predefined
-
 ## Small bugs
 
-- ??? Stacked Modals: scroll des untersten?
-- ??? Bug, please report: no widget found for /content/ist/composum/home/pages/setup/jcr:
-  content/main/row/column-0/section/codeblock/code
+- ??? "Bug, please report: no widget found for /content/ist/composum/home/pages/setup/jcr:
+  content/main/row/column-0/section/codeblock/code"
 
 ## In evaluation
 
@@ -23,16 +19,14 @@
 ## Possible improvements later
 
 - possibly: edit text in translation, after all? That's better because only there you see the original.
-- batch mode translation for a whole page / site
+- batch mode translation for a whole page / site for Composum, too
 - Prompt registry where people can put interesting prompts and like them (social component)
-- perhaps use moderation api to check for troublesome user messages and troublesome responses
-- use Composum platform caching service, possibly with an abstraction.
+- perhaps use moderation api to check for troublesome user messages and troublesome responses (?)
 
 ## Won't do
 
 - (Extend content creation assistent with selection as input. (Not possible on page, but there.) -> could also
-  replace the selection / insert created text at point. Alternative: explicit input. Isn't really necessary, since
-  user can just incorporate that into the prompt, or put it into the content suggestion field and iterate over that.)
+  replace copy the selection and put that into the explicit input. )
 - Check where it should appear in Pages and where not - extend tag.
   - Autor, key Felder
 
