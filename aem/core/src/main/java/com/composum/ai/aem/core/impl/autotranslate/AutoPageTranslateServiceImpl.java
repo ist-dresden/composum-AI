@@ -80,7 +80,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         String languageName = SelectorUtils.getLanguageName(language);
         String sourceLanguage = determineSourceLanguage(resource);
-        if (StringUtils.equals(language, sourceLanguage)) {
+        if (sourceLanguage == null || StringUtils.equals(language, sourceLanguage)) {
             LOG.info("Skipping translation because language and source language are {} for {}", language, resource.getPath());
             return stats;
         }
@@ -157,11 +157,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     private String determineSourceLanguage(Resource resource) throws WCMException {
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
         if (relationship == null) {
-            throw new IllegalArgumentException("No live relationship for " + resource.getPath());
+            return null;
         }
         String sourceLanguage = SelectorUtils.findLanguage(resource.getResourceResolver().getResource(relationship.getSourcePath()));
         if (sourceLanguage == null) {
-            throw new IllegalArgumentException("No source language found for " + resource.getPath());
+            return null;
         }
         return sourceLanguage;
     }
