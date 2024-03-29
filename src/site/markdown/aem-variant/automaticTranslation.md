@@ -22,8 +22,7 @@ It's quick and easy to try that on your own site - install it locally or on one 
 the result!
 Please let us know what you think and how it works for you and contact us on any trouble!
 
-## A quick demo
-
+<div style="float: right;  margin-top: 2em;  margin-bottom: 2em; padding-left: 2em; padding-right: 2em;">
 <a href="../image/ai/video/AEMAutoTranslation.mp4" target="_blank">
 <figure>
 <img src="../image/ai/video/AEMAutoTranslatePoster.png" alt="Composum AI for AEM automatic translation Quick Demo" 
@@ -33,6 +32,7 @@ Quick demonstration of automatic translation of an AEM site with Composum AI
 </figcaption>
 </figure>
 </a>
+</div>
 
 ## Advantages of our approach using of LLM for translation
 
