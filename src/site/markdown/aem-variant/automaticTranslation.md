@@ -22,6 +22,18 @@ It's quick and easy to try that on your own site - install it locally or on one 
 the result!
 Please let us know what you think and how it works for you and contact us on any trouble!
 
+## A quick demo
+
+<a href="../image/ai/video/AEMAutoTranslation.mp4" target="_blank">
+<figure>
+<img src="../image/ai/video/AEMAutoTranslatePoster.png" alt="Composum AI for AEM automatic translation Quick Demo" 
+width="500px"/><br/>
+<figcaption>
+Quick demonstration of automatic translation of an AEM site with Composum AI
+</figcaption>
+</figure>
+</a>
+
 ## Advantages of our approach using of LLM for translation
 
 While being employable for providing quick and inexpensive machine translation, LLMs like ChatGPT offer advanced
