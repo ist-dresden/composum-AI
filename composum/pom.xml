@@ -18,7 +18,7 @@
     <url>${siteurl}</url>
 
     <properties>
-        <composum.nodes.version>4.2.1</composum.nodes.version>
+        <composum.nodes.version>4.3.1</composum.nodes.version>
         <composum.platform.version>1.7.0</composum.platform.version>
         <composum.pages.version>1.5.1</composum.pages.version>
 
