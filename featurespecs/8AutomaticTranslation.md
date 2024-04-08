@@ -46,6 +46,9 @@ all components of the translated tree and replace the texts in the text properti
 inheritance). This would
 provide an initial translation; for updating the translation, the live copy mechanism could be used in conjunction with
 a translation by the content creation dialog, or the translation could be updated by the process.
+Please notice that that changes the semantics of "inheritance" in live copies somewhat: if the inheritance is unbroken,
+the live copy is the AI translated version of the original page, and if the inheritance is broken, the live copy 
+has manual changes.
 
 This process can be triggered separately, or with a special action performed on rollout - e.g. a new
 [synchronization action](https://experienceleague.adobe.com/docs/experience-manager-65/content/sites/administering/introduction/msm-sync.html?lang=en#installed-synchronization-actions)
@@ -176,8 +179,7 @@ The
 uses language copies. Unfortunately, integrating into that process is a bit difficult. The machine translation 
 process in translation connectors is heavily geared towards translating individual texts independently from the 
 translated page. Ultimately this amounts to implementing the method
-[TranslationService.translateArray](https://developer.adobe.
-com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html#translateArray-java.lang.String:A-java.lang.String-java.lang.String-com.adobe.granite.translation.api.TranslationConstants.ContentType-java.lang.String-)
+[TranslationService.translateArray](https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/cm/adobe/granite/translation/api/TranslationService.html#translateArray-java.lang.String:A-java.lang.String-java.lang.String-com.adobe.granite.translation.api.TranslationConstants.ContentType-java.lang.String-)
 in the connector, which doesn't even get any information about the current page. Thus, most of the discussed advantages
 of LLM based translations cannot be materialized. It might be possible to use process for human translations, but 
 that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be 

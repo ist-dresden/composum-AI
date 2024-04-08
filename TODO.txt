@@ -1,5 +1,7 @@
 # List of minor Todos
 
+Use Claude, Gemini, https://octo.ai/product/text-generation/ , local
+
 Image description from URL?
 
 AEM for content fragments?
@@ -32,7 +34,7 @@ ignore: align, fileReference, target, style, element
 
 ## Check out Adobe Sensei GenAI
 
-https://business.adobe.com/summit/2023/sessions/opening-keynote-gs1.html at 1:20:00 or something
+https://business.adobe.com/summit/2023/sessions/opening-keynote-gs1.html at 1:20:00 or something, 1:35:00 text generation
 
 ## Images
 

@@ -5,3 +5,18 @@ fix project url in maven repo. Or point it to maven site?
 Link check:
 linkchecker linklint -http -host https://ist-dresden.github.io/composum-AI/ /#/# -doc .
 https://www.brokenlinkcheck.com/broken-links.php
+
+
+Auto-Translation Haiku:
+
+Live copy's swift change,
+Rollout whispers, language range,
+Borders now estrange.
+
+In AEM's embrace,
+Composum AI weaves tongues,
+Seamless, swift, it blends.
+
+Language models weave,
+Context and tone they perceive,
+Artistry achieve.

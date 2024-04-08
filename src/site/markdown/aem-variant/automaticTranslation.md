@@ -1,5 +1,10 @@
 # Rethinking automatic translation in AEM with LLMs
 
+>  In AEM's embrace,\
+>  Composum AI weaves tongues,\
+>  Seamless, swift, it blends.\
+> -- ChatGPT
+
 ## A proof of concept and preliminary implementation
 
 Translating a site is often a rather large effort. Since modern LLM can both speak many languages and integrate
@@ -115,7 +120,9 @@ The translation will be automatically done on rollout under the following condit
 - As rollout configuration there should be a configuration like the standard rollout config that updates the page,
   and then (only after that!) the "Composum AI Autotranslate POC" rollout configuration.
 
-Then the pages will be transparently be translated on each rollout.
+Then the pages will be transparently be translated on each rollout. Please notice that this changes the semantics of
+the inheritance somewhat: if a component inherits from the blueprint that means that the texts of the component are 
+the AI translated texts of the blueprint, and if inheritance is cancelled the texts are manually changed. 
 
 For the initial live copy creation we recommend to
 
@@ -210,3 +217,8 @@ If you like playing around with that -
 [here is a small demonstration app](https://aigenpipeline.stoerr.net/differentialReTranslation/differentialReTranslation.html)
 for the idea. (It needs an OpenAI API key to work, but you can look at some English to German examples even without 
 that.) 
+
+> Language models weave,\
+> Context and tone they perceive,\
+> Artistry achieve.\
+> -- ChatGPT

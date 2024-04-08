@@ -46,8 +46,12 @@ especially as those might be preferred by European customers because of stricter
 data security rules. 
 It's likely that in time there will also be sufficient LLM that can be run on premise - 
 [LM Studio](https://lmstudio.ai/) or 
-[ollama](https://github.com/ollama/ollama) support an OpenAI compatible API, and can already be used, though a >= 
-GPT-3.5 performance model is needed for our purpose.
+[ollama](https://github.com/ollama/ollama) support an OpenAI compatible API, and can already be used, though a model 
+with >= GPT-3.5 performance is needed for our purpose.
+
+For AEM, there is also an automatic translation for sites or page trees implemented that integrates transparently
+into the rollout process for live copies - see
+[here for more documentation](https://ist-dresden.github.io/composum-AI/aem-variant/automaticTranslation.html).
 
 ## Functionality
 
