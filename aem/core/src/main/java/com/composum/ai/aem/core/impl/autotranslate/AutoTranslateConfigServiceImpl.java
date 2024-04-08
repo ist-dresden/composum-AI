@@ -50,10 +50,10 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
     protected static final Pattern PATTERN_HAS_WHITESPACE = Pattern.compile("\\s");
 
     /**
-     * As additional heuristic - the text should have at least one word with >= 4 letters.
-     * That will break down very different languages, I know, but this is a POC. :-)
+     * As additional heuristic - the text should have at least one word with >= 5 letters.
+     * That will break languages very different from english, I know, but this is a POC. :-)
      */
-    protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{L}{4}");
+    protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{L}{5}");
 
     protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
 

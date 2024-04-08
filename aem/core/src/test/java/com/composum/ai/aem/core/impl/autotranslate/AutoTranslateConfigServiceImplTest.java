@@ -35,8 +35,8 @@ public class AutoTranslateConfigServiceImplTest {
     @Test
     public void testTranslateableAttributes() {
         AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
-        Resource res = context.create().resource("/foo", "sling:resourceType", "wknd/components/page", "heuristicAttr", "some text", "allowedAttr", "7", "deniedAttr", "some text");
-        Resource sub = context.create().resource("/foo/bar", "subHeuristicAttr", "some text", "subAllowedAttr", "7", "subDeniedAttr", "some text");
+        Resource res = context.create().resource("/foo", "sling:resourceType", "wknd/components/page", "heuristicAttr", "some texts", "allowedAttr", "7", "deniedAttr", "some texts");
+        Resource sub = context.create().resource("/foo/bar", "subHeuristicAttr", "some texts", "subAllowedAttr", "7", "subDeniedAttr", "some texts");
         when(config.allowedAttributeRegexes()).thenReturn(
                 new String[]{".*%allowedAttr", "wknd/components/page%bar/subAllowedAttr"});
         when(config.deniedAttributesRegexes()).thenReturn(
@@ -86,26 +86,26 @@ public class AutoTranslateConfigServiceImplTest {
         assertFalse(isHeuristicallyTranslatableProperty("propertyName", "abcd"));
 
         // Test with string value with whitespace and 4 letter sequence
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd efgh"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd efghi"));
 
 
         // Test with string value with multiple whitespace sequences
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efgh"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efghi"));
 
         // Test with string value with multiple 4 letter sequences
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd efgh ijkl"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd efgh ijklm"));
 
         // Test with string value with multiple whitespace sequences and multiple 4 letter sequences
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efgh  ijkl"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efgh  ijklm"));
 
         // Test with string value with multiple whitespace sequences
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efgh"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efghi"));
 
         // Test with string value with multiple 4 letter sequences
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd efgh ijkl"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd efgh ijklm"));
 
         // Test with string value with multiple whitespace sequences and multiple 4 letter sequences
-        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efgh  ijkl"));
+        assertTrue(isHeuristicallyTranslatableProperty("propertyName", "abcd  efgh  ijklm"));
 
         // that's likely a boolean property
         assertFalse(isHeuristicallyTranslatableProperty("displayPopupTitle", "true"));
@@ -114,7 +114,7 @@ public class AutoTranslateConfigServiceImplTest {
         // dates are not translateable
         assertFalse(isHeuristicallyTranslatableProperty("propertyName", "2022-01-01"));
         assertFalse(isHeuristicallyTranslatableProperty("propertyName", "2022-01-01T00:00:00.000Z"));
-        assertFalse(isHeuristicallyTranslatableProperty("propertyName", new Date().toString()));
+        assertFalse(isHeuristicallyTranslatableProperty("propertyName", "Mon Apr 08 09:43:43 CEST 2024"));
 
         // rather do not translate anything that looks like a boolean, even if it's a whitelisted property
         assertFalse(isHeuristicallyTranslatableProperty("shortDescription", "true"));
