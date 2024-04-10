@@ -41,7 +41,7 @@ Provides rather low level access to the GPT chat completion - use the other serv
 | openAiOrganizationId | OpenAI Organization ID | String |  | Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization . |
 | openAiApiKeyFile | OpenAI API key file | String |  | Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there. |
 | defaultModel | Default model | String | gpt-3.5-turbo | Default model to use for the chat completion. The default if not set is gpt-3.5-turbo. Please consider the varying prices https://openai.com/pricing . |
-| imageModel | Vision model | String | gpt-4-vision-preview | Optional, a model that is used if an image is given as input, e.g. gpt-4-vision-preview. If not given, image recognition is rejected. |
+| imageModel | Vision model | String | gpt-4-turbo | Optional, a model that is used if an image is given as input, e.g. gpt-4-turbo. If not given, image recognition is rejected. |
 | temperature | Temperature | String |  | Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0 |
 | maximumTokensPerRequest | Maximum Tokens per Request | int | 50000 | If > 0 limit to the maximum number of tokens per request. That's about a twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more. |
 | maximumTokensPerResponse | Maximum output tokens per request | int | 4096 | Maximum number of tokens to return in the response. Must not exceed the capabilities of the model - as of 10/03/24 this is 4096 for most OpenAI models - which is the default, so no need to set that. |

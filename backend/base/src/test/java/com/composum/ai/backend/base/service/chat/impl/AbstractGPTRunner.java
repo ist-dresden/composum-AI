@@ -64,7 +64,7 @@ public abstract class AbstractGPTRunner {
 
             @Override
             public String imageModel() {
-                return "gpt-4-vision-preview";
+                return "gpt-4-turbo";
             }
 
             @Override

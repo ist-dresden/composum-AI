@@ -11,11 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +39,7 @@ public class GPTChatCompletionServiceImplLengthTest {
             mock(GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class);
     protected BundleContext bundleContext = mock(BundleContext.class);
 
-    public static final List<String> models = Arrays.asList("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-turbo-preview", "gpt-4-vision-preview");
+    public static final List<String> models = Arrays.asList("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-turbo");
 
     @Before
     public void setUp() throws NoSuchFieldException {
@@ -100,7 +98,7 @@ public class GPTChatCompletionServiceImplLengthTest {
             StringBuilder hugetext = new StringBuilder();
             for (int i = 0; i < 50000; i++) {
                 // hopefully enough to trigger the error.
-                // as of 22.2.2024, the gpt-4-turbo-preview has 128,000 tokens, which would cost 1.28 euro!
+                // as of 22.2.2024, the gpt-4-turbo has 128,000 tokens, which would cost 1.28 euro!
                 // I guess we'd rather not test that for GPT-4. :-)
                 hugetext.append("§:");
             }

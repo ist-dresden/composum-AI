@@ -1,6 +1,6 @@
 {
   "defaultModel": "gpt-3.5-turbo",
-  "imageModel": "gpt-4-vision-preview",
+  "imageModel": "gpt-4-turbo",
   "disable": false,
   "openAiApiKey": "${openai.api.key}"
 }
