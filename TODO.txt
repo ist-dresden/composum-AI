@@ -1,5 +1,7 @@
 # List of minor Todos
 
+GPT-4 preview raus, "gpt-4-turbo"
+
 Use Claude, Gemini, https://octo.ai/product/text-generation/ , local
 
 Image description from URL?

@@ -56,11 +56,11 @@ public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet 
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         Map<String, String> contentSelectors = readPredefinedContentSelectors(request);
         String path = request.getParameter(PARAMETER_PATH);
-        String property = request.getParameter("property");
-        if (StringUtils.isNotBlank(property)) {
-            path = path + "/" + property;
-        }
         Resource resource = request.getResourceResolver().getResource(path);
+        String property = request.getParameter("property");
+        if (StringUtils.isNotBlank(property) && resource != null && resource.getChild(property) != null) {
+            resource = resource.getChild(property);
+        }
         if (resource != null) {
             addContentPaths(resource, contentSelectors);
         }
