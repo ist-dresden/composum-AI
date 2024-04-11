@@ -67,10 +67,10 @@ we currently use it as backend. If there is demand, we intend to provide alterna
 as they become commercially available,
 especially as those might be preferred by European customers because of stricter privacy and
 data security rules. 
-It's likely that in time there will also be sufficient LLM that can be run on premise -
+There are also some LLM that can in principle run on premise, e.g. with 
 [LM Studio](https://lmstudio.ai/) or 
-[ollama](https://github.com/ollama/ollama) support an OpenAI compatible API, so Composum AI can be configured to use 
-them, though a >= GPT-3.5 performance model would needed for our purpose.
+[ollama](https://github.com/ollama/ollama) that support an OpenAI compatible API, and can reasonably be used for 
+various tasks, though you'll be better off with a hosted >= GPT 3.5 performance model.
 
 ## Functionality Overview
 
