@@ -244,7 +244,7 @@
                     jcr:primaryType="cpp:Element"
                     sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
                     title="Slogan"
-                    text="Based on the given text, please create a catchy and memorable slogan that captures its main theme. Output it as it could be put in front of the text.">
+                    text="Based on the given text, please create a catchy and memorable slogan that captures its main theme.">
                 <i18n
                         jcr:primaryType="nt:unstructured">
                     <de

@@ -131,7 +131,7 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/teaser"
                         jcr:title="Slogan"
-                        jcr:description="Based on the given text, please create a catchy and memorable slogan that captures its main theme. Output it as it could be put in front of the text."
+                        jcr:description="Based on the given text, please create a catchy and memorable slogan that captures its main theme."
                 />
                 <teaser_19
                         jcr:primaryType="nt:unstructured"

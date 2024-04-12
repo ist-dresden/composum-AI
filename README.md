@@ -9,7 +9,8 @@ We provide several content creation assistants that are tightly integrated into
 [Composum Pages](https://www.composum.com/) or
 [Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html) (AEM)
 putting the power of AI supported content creation at your fingertips.
-For a quick overview - here are two 2.5min demonstrations, one for AEM and one for Composum Pages:
+For a quick overview - here are two 2.5min demonstrations, one for AEM and one for Composum Pages.
+You'll find a more detailed demonstration for the AEM version [on youtube](https://www.youtube.com/watch?v=SgZ9OH2aMDI).
 
 [Click for a 2.5min demonstration video for Adobe AEM](https://github.com/ist-dresden/composum-AI/assets/999184/70b7e6a1-41f2-4dbf-8e5d-7db6bf17233d)
 

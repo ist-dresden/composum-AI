@@ -1,8 +1,14 @@
 # List of minor Todos
 
-GPT-4 preview raus, "gpt-4-turbo"
-
+Offer parent container as content creation dialog source
 Use Claude, Gemini, https://octo.ai/product/text-generation/ , local
+BUG: initial loading is strange in content dialog - unclear what to do, this is weird. Keep only prompt and source setting?
+    Button to load last setting?
+            if (!historyMap[historyPath]) {
+                const lastEntry = localStorage.getItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE);
+                historyMap[historyPath] = lastEntry ? [JSON.parse(lastEntry)] : [];
+            }
+BUG: reset preset selector when entering prompt
 
 Image description from URL?
 
@@ -37,6 +43,7 @@ ignore: align, fileReference, target, style, element
 ## Check out Adobe Sensei GenAI
 
 https://business.adobe.com/summit/2023/sessions/opening-keynote-gs1.html at 1:20:00 or something, 1:35:00 text generation
+https://business.adobe.com/summit/2024/sessions/getting-started-with-genai-in-adobe-experience-man-s410.html at 16:30 demo
 
 ## Images
 

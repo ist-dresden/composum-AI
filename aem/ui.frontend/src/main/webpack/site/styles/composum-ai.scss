@@ -26,6 +26,10 @@
         margin-bottom: 0;
     }
 
+    .composum-ai-prompt-column, .composum-ai-source-column {
+        max-width: 50%;
+    }
+
 }
 
 .cq-Dialog .composum-ai-dialog .composum-ai-prompt-columns {
