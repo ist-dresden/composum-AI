@@ -29,7 +29,7 @@ Configuration of the automatic translation of AEM pages. The OSGI configuration 
 | ignoreAssetsExceptContentFragments | Ignore Assets except Content Fragments | boolean | true | If true, assets are ignored for translation, except for content fragments. (Otherwise the translator would translate metadata of images and videos.) |
 
 <a name="osgi.GPTChatCompletionServiceImpl"></a>
-## GPTChatCompletionServiceConfig (backend-base)
+## Composum AI OpenAI Configuration (backend-base)
 
 Provides rather low level access to the GPT chat completion - use the other services for more specific services.
 
@@ -113,3 +113,4 @@ Allows enabling / disabling the Sling Context Aware Configuration of the Composu
 | id | name   | type    | default value | description                                                |
 |----|--------|---------|---------------|------------------------------------------------------------|
 | 1  | Enabled| Boolean | true          | Whether the Sling Context Aware Configuration of the Composum AI is enabled. |
+

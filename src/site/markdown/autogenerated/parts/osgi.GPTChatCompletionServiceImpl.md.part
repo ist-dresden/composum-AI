@@ -1,6 +1,6 @@
-/* AIGenVersion(72a23c78, osgiconfigurations.prompt-6befc847, GPTChatCompletionServiceImpl.java-4c292a52) */
+/* AIGenVersion(55b3efea, osgiconfigurations.prompt-6befc847, GPTChatCompletionServiceImpl.java-4d5e38e9) */
 
-## GPTChatCompletionServiceConfig (backend-base)
+## Composum AI OpenAI Configuration (backend-base)
 
 Provides rather low level access to the GPT chat completion - use the other services for more specific services.
 
