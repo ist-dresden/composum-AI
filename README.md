@@ -52,7 +52,7 @@ various tasks, though you'll be better off with a hosted >= GPT 3.5 performance 
 
 For AEM, there is also an automatic translation for sites or page trees implemented that integrates transparently
 into the rollout process for live copies - see
-[here for more documentation](https://ist-dresden.github.io/composum-AI/aem-variant/automaticTranslation.html).
+[here for more documentation](https://ai.composum.com/aem-variant/automaticTranslation.html).
 
 ## Functionality
 

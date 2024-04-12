@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo Perform a link check for the site:stage of https://ist-dresden.github.io/composum-AI/
+echo Perform a link check for the site:stage of https://ai.composum.com/
 
 # for MacOS
 brew upgrade lychee

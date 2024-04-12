@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo Perform a link check for the site https://ist-dresden.github.io/composum-AI/
+echo Perform a link check for the site https://ai.composum.com/
 
 mvn -N clean site
 
@@ -9,7 +9,7 @@ mvn -N clean site
 #linklint -cache .linklint -root target/site/. -host ist-dresden.github.io -net -doc target/linkcheck/. -out target/linkcheck/linklint.log /#/#
 
 # needs to be installed with pip install linkchecker
-# linkchecker linklint -http -host https://ist-dresden.github.io/composum-AI/ /#/# -doc target/linkcheck/.
+# linkchecker linklint -http -host https://ai.composum.com/ /#/# -doc target/linkcheck/.
 
 # for MacOS
 brew upgrade lychee
