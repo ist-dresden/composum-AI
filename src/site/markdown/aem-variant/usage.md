@@ -18,15 +18,35 @@ and capabilities, which are documented in the following sections:
 
 ## A quick demo
 
-<a href="../image/ai/video/ComposumAIforAEMQuickDemo.mp4" target="_blank">
-<figure>
-<img src="../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg" alt="Composum AI for AEM Quick Demo" 
-width="500px"/><br/>
-<figcaption>
-Quick demonstration of Composum AI features
-</figcaption>
-</figure>
-</a>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 2em;">
+  <div style="margin: 2em; text-align: center;"> 
+    <a href="../image/ai/video/ComposumAIforAEMQuickDemo.mp4" target="_blank">
+    <figure>
+    <img src="../image/ai/video/ComposumAIforAEMQuickDemo-poster.jpg" alt="Composum AI for AEM Quick Demo" 
+    width="500px"/><br/>
+    <div style="margin: 1em;">
+    <figcaption>
+    Quick demonstration of Composum AI features
+    </figcaption>
+    </div>
+    </figure>
+    </a>
+  </div>
+
+  <div style="margin: 2em; text-align: center;">
+    <a href="../image/ai/video/ComposumAIforAEM.mp4" target="_blank">
+    <figure>
+    <img src="../image/ai/video/ComposumAIforAEM-poster.jpg" alt="Composum AI for AEM Demo" 
+    width="500px"/><br/>
+    <div style="margin: 1em;">
+    <figcaption>
+    The Composum AI for AEM: generate / rewrite / analyze texts with ChatGPT
+    </figcaption>
+    </div>
+    </figure>
+    </a>
+  </div>
+</div>
 
 ## The content creation assistant
 
