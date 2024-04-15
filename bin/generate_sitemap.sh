@@ -20,6 +20,10 @@ for file in $(find src/site/markdown -type f -name "*.md"); do
     # Remove the leading src/site/markdown/
     html_path="${html_path#src/site/markdown/}"
 
+    if [ "$html_path" == "index.html" ]; then
+        html_path=""
+    fi
+
     # Append the entry to the $SITEMAP
 echo "  <url>" >> $SITEMAP
 echo "    <loc>https://ai.composum.com/$html_path</loc>" >> $SITEMAP
