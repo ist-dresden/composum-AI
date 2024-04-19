@@ -225,6 +225,7 @@ class ContentCreationDialog {
         } else {
             this.$generateButton.attr('disabled', 'disabled');
         }
+        this.$lastPromptsSelector.val('');
     }
 
     onContentSelectorChanged(event) {
@@ -319,8 +320,8 @@ class ContentCreationDialog {
     }
 
     entryItem(entry) {
-        const promptName = entry.prompt.length < 20 ? entry.prompt :
-            entry.prompt.substring(0, 10) + '...' + entry.prompt.substring(entry.prompt.length - 10);
+        const promptName = entry.prompt.length < 40 ? entry.prompt :
+            entry.prompt.substring(0, 30) + ' ... ' + entry.prompt.substring(entry.prompt.length - 10);
         return {
             value: JSON.stringify(entry),
             content: {

@@ -171,6 +171,9 @@ try {
          */
         function prepareDialog(event) {
             if (debug) console.log("prepareDialog", event.type, event.target);
+            if (!event || !event.target || event.target.localName === 'coral-tooltip') {
+                return;
+            }
             try {
                 aiconfig.ifEnabled(SERVICE_CREATE, undefined, () => {
                     Coral.commons.ready(event.target, function () {

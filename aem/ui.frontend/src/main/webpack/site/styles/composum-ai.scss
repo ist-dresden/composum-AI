@@ -51,3 +51,15 @@
 #composumAI-sidebar-panel .betty-ActionBar {
     min-height: 48px;
 }
+
+.composum-ai-dialog {
+
+    coral-tooltip {
+        min-width: 75px;
+    }
+
+    .composum-ai-last-prompt-selector {
+        max-width: 20ex;
+    }
+
+}
