@@ -44,7 +44,6 @@ class SidePanelDialog {
 
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
-        // only for the first prompt container:
         this.$promptContainer.on('change input', '.composum-ai-prompt', this.onPromptAreaChanged.bind(this));
         this.$promptContainer.on('focus', '.composum-ai-prompt', this.expandOnFocus);
         this.$promptContainer.on('blur', '.composum-ai-prompt', this.shrinkOnBlur);
@@ -162,6 +161,7 @@ class SidePanelDialog {
     onPromptAreaChanged(event) {
         if (this.verbose) console.log("onPromptAreaChanged", arguments); // on each key press
         coralSelectValue(this.$predefinedPromptsSelector, '-');
+        coralSelectValue(this.$predefinedPromptsSelector, '');
         this.setAutomaticGenerateButtonState();
     }
 
