@@ -1,6 +1,8 @@
 package com.composum.ai.composum.bundle;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.RequestDispatcher;
@@ -58,15 +60,15 @@ public class AIDialogServlet extends AbstractServiceServlet {
     public void init() throws ServletException {
         super.init();
         // e.g. http://localhost:9090/bin/cpm/ai/dialog.translationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/translate"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.translationDialog, new ShowDialogOperation(Operation.translationDialog, "composum/pages/options/ai/dialogs/translate"));
         // e.g. http://localhost:9090/bin/cpm/ai/dialog.categorizeDialog.html/content/ist/composum/home/platform/_jcr_content/category
         // or http://localhost:9090/bin/cpm/ai/dialog.categorizeDialog.suggestions.html/content/ist/composum/home/platform/_jcr_content/category
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/categorize"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.categorizeDialog, new ShowDialogOperation(Operation.categorizeDialog, "composum/pages/options/ai/dialogs/categorize"));
         // e.g. http://localhost:9090/bin/cpm/ai/dialog.creationDialog.html/content/ist/composum/home/platform/_jcr_content/_jcr_description
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation("composum/pages/options/ai/dialogs/create"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.creationDialog, new ShowDialogOperation(Operation.creationDialog, "composum/pages/options/ai/dialogs/create"));
 
         // primarily for help http://localhost:9090/bin/cpm/ai/dialog.sidebarDialog.help.html
-        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.sidebarDialog, new ShowDialogOperation("composum/pages/options/ai/tools/sidebar"));
+        operations.setOperation(ServletOperationSet.Method.GET, Extension.html, Operation.sidebarDialog, new ShowDialogOperation(Operation.sidebarDialog, "composum/pages/options/ai/tools/sidebar"));
     }
 
     /**
@@ -74,9 +76,11 @@ public class AIDialogServlet extends AbstractServiceServlet {
      */
     protected class ShowDialogOperation implements ServletOperation {
 
+        private final Operation operation;
         private final String dialogResourceType;
 
-        public ShowDialogOperation(String dialogResourceType) {
+        public ShowDialogOperation(Operation operation, String dialogResourceType) {
+            this.operation = operation;
             this.dialogResourceType = dialogResourceType;
         }
 
@@ -88,7 +92,9 @@ public class AIDialogServlet extends AbstractServiceServlet {
                 final RequestDispatcherOptions options = new RequestDispatcherOptions();
                 options.setForceResourceType(dialogResourceType);
 
-                final String selectors = request.getRequestPathInfo().getSelectorString();
+                final String selectors = Arrays.stream(request.getRequestPathInfo().getSelectors())
+                        .filter(s -> !operation.name().equals(s))
+                        .collect(Collectors.joining("."));
                 options.setReplaceSelectors(StringUtils.isNotBlank(selectors) ? selectors : null);
 
                 final RequestDispatcher dispatcher = request.getRequestDispatcher(resource, options);
