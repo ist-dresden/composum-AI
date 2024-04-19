@@ -279,7 +279,7 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/foundation/text"
                                     granite:class="_coral-Tool"
-                                    text="Text Length"/>
+                                    text="Text Length:"/>
                             <textLengthSelector jcr:primaryType="nt:unstructured"
                                                 sling:resourceType="granite/ui/components/coral/foundation/form/select"
                                                 fieldDescription="The desired approximate length of the generated text."
@@ -290,6 +290,17 @@
                                         sling:resourceType="cq/gui/components/common/wcm/datasources/childresources"
                                         path="/conf/composum-ai/settings/dialogs/contentcreation/textlengths"/>
                             </textLengthSelector>
+                            <lastPromptsLabel
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/foundation/text"
+                                    granite:class="_coral-Tool"
+                                    text="Last Prompts:"/>
+                            <lastPromptsSelector jcr:primaryType="nt:unstructured"
+                                                 sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                 fieldDescription="The last prompts you used on this or other resources."
+                                                 name="./lastPromptsSelector"
+                                                 emptyOption="{Boolean}true"
+                                                 granite:class="composum-ai-last-propmt-selector _coral-Tool"/>
                             <loading
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container"
