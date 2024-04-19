@@ -300,7 +300,7 @@
                                                  fieldDescription="The last prompts you used on this or other resources."
                                                  name="./lastPromptsSelector"
                                                  emptyOption="{Boolean}true"
-                                                 granite:class="composum-ai-last-propmt-selector _coral-Tool"/>
+                                                 granite:class="composum-ai-last-prompt-selector _coral-Tool"/>
                             <loading
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container"
