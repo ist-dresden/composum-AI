@@ -7,8 +7,6 @@ import {HelpPage} from './HelpPage.js';
 
 const APPROXIMATED_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated';
 
-const LOCALSTORAGE_KEY_LASTDIALOGSTATE = 'aem-composumAI-contentcreation-lastDialogState';
-
 /** Keeps dialog histories per path. */
 const historyMap = {};
 
@@ -58,8 +56,7 @@ class ContentCreationDialog {
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
         const historyPath = property ? componentPath + '/' + property : componentPath;
         if (!historyMap[historyPath]) {
-            const lastEntry = localStorage.getItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE);
-            historyMap[historyPath] = lastEntry ? [JSON.parse(lastEntry)] : [];
+            historyMap[historyPath] = [];
         }
         this.history = new DialogHistory(this.$dialog, () => this.getDialogStatus(), (status) => this.setDialogStatus(status), historyMap[historyPath]);
 
@@ -137,7 +134,6 @@ class ContentCreationDialog {
             predefinedPrompts: this.$predefinedPromptsSelector.val(),
             response: this.getResponse()
         };
-        localStorage.setItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE, JSON.stringify(status));
         return status;
     }
 
