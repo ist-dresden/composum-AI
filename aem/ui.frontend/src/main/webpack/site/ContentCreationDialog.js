@@ -7,7 +7,10 @@ import {HelpPage} from './HelpPage.js';
 
 const APPROXIMATED_MARKDOWN_SERVLET = '/bin/cpm/ai/approximated';
 
-const LOCALSTORAGE_KEY_LASTDIALOGSTATE = 'aem-composumAI-contentcreation-lastDialogState';
+/** An array of maps with {prompt, contentSelector} maps containing the last prompts. */
+const LOCALSTORAGE_KEY_CONTENTCREATION_PROMPTHISTORY = 'aem-composumAI-contentcreation-promptHistory';
+
+const MAX_LAST_PROMPTS = 20;
 
 /** Keeps dialog histories per path. */
 const historyMap = {};
@@ -58,10 +61,14 @@ class ContentCreationDialog {
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
         const historyPath = property ? componentPath + '/' + property : componentPath;
         if (!historyMap[historyPath]) {
-            const lastEntry = localStorage.getItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE);
-            historyMap[historyPath] = lastEntry ? [JSON.parse(lastEntry)] : [];
+            historyMap[historyPath] = [];
         }
-        this.history = new DialogHistory(this.$dialog, () => this.getDialogStatus(), (status) => this.setDialogStatus(status), historyMap[historyPath]);
+        this.history = new DialogHistory(this.$dialog,
+            () => this.getDialogStatus(),
+            (status) => this.setDialogStatus(status),
+            historyMap[historyPath]);
+        this.lastPrompts = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY_CONTENTCREATION_PROMPTHISTORY)) || [];
+        this.restoreLastPrompts();
 
         this.showError();
         this.setLoading(false);
@@ -117,6 +124,7 @@ class ContentCreationDialog {
         this.$sourceContent = this.isRichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-source-richtext'))
             : findSingleElement(this.$dialog, '.composum-ai-source-plaintext');
         this.$textLengthSelector = findSingleElement(this.$dialog, '.composum-ai-text-length-selector');
+        this.$lastPromptsSelector = findSingleElement(this.$dialog, '.composum-ai-last-prompt-selector');
         this.$response = this.isRichtext ? this.getRte(findSingleElement(this.$dialog, '.composum-ai-response-richtext'))
             : findSingleElement(this.$dialog, '.composum-ai-response-plaintext');
         this.$generateButton = findSingleElement(this.$dialog, '.composum-ai-generate-button');
@@ -135,9 +143,11 @@ class ContentCreationDialog {
             textLength: this.$textLengthSelector.val(),
             contentSelector: this.$contentSelector.val(),
             predefinedPrompts: this.$predefinedPromptsSelector.val(),
+            predefinedPromptsKey: this.$predefinedPromptsSelector.find('option:selected').text(),
+            url: this.$urlField.val(),
             response: this.getResponse()
         };
-        localStorage.setItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE, JSON.stringify(status));
+        this.maybeStoreLastPrompt(status);
         return status;
     }
 
@@ -152,6 +162,9 @@ class ContentCreationDialog {
             this.setSourceContent(this.oldContent);
         }
         this.setResponse(status.response);
+        if (status.url) {
+            this.$urlField.val(status.url);
+        }
         this.onPredefinedPromptsChanged();
         this.onContentSelectorChanged();
         this.onPromptChanged();
@@ -159,6 +172,7 @@ class ContentCreationDialog {
 
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
+        this.$lastPromptsSelector.on('change', this.onLastPromptsChanged.bind(this));
         this.$prompt.on('change input', this.onPromptChanged.bind(this));
         this.$contentSelector.on('change', this.onContentSelectorChanged.bind(this));
         this.$sourceContent.on('change', this.onSourceContentChanged.bind(this));
@@ -216,6 +230,7 @@ class ContentCreationDialog {
         } else {
             this.$generateButton.attr('disabled', 'disabled');
         }
+        this.$lastPromptsSelector.val('');
     }
 
     onContentSelectorChanged(event) {
@@ -291,6 +306,77 @@ class ContentCreationDialog {
                 }
             });
         }
+    }
+
+    maybeStoreLastPrompt(status) {
+        if (this.debug) console.log("maybeStoreLastPrompt", arguments);
+        const entry = {
+            prompt: status.prompt,
+            promptSelector: status.predefinedPrompts,
+            promptSelectorKey: status.predefinedPromptsKey,
+            contentSelector: status.contentSelector,
+            url: status.url
+        };
+        if (this.debug) console.log("maybeStoreLastPrompt entry", entry);
+        const entryString = JSON.stringify(entry);
+        if (!this.lastPrompts || entryString !== JSON.stringify(this.lastPrompts[0])) {
+            // delete entries that are the same as the new one
+            this.lastPrompts = this.lastPrompts.filter((oldentry) => JSON.stringify(oldentry) !== entryString);
+            this.lastPrompts.unshift(entry);
+            if (this.lastPrompts.length > MAX_LAST_PROMPTS) {
+                this.lastPrompts.pop();
+            }
+            localStorage.setItem(LOCALSTORAGE_KEY_CONTENTCREATION_PROMPTHISTORY, JSON.stringify(this.lastPrompts));
+            this.restoreLastPrompts();
+        }
+    }
+
+    entryItem(entry) {
+        let promptName = entry.promptSelectorKey;
+        // the promptSelectorKey is empty if the prompt was entered or changed manually -> use actual prompt.
+        if (!promptName || promptName === '-') {
+            promptName = entry.prompt.length < 40 ? entry.prompt :
+                entry.prompt.substring(0, 30) + ' ... ' + entry.prompt.substring(entry.prompt.length - 10);
+        }
+        return {
+            value: JSON.stringify(entry),
+            content: {
+                textContent: promptName
+            }
+        };
+    }
+
+    restoreLastPrompts() {
+        const items = this.$lastPromptsSelector.get(0).items;
+        items.clear();
+        items.add({value: '', content: {textContent: ''}});
+        this.lastPrompts.forEach((entry) => {
+            items.add(this.entryItem(entry));
+        });
+    }
+
+    onLastPromptsChanged(event) {
+        if (this.debug) console.log("onLastPromptsChanged", arguments);
+        const value = this.$lastPromptsSelector.val();
+        if (value) {
+            const entry = JSON.parse(value);
+            this.$prompt.val(entry.prompt);
+            this.onPromptChanged();
+            if (entry.contentSelector) {
+                this.$contentSelector.val(entry.contentSelector);
+                this.onContentSelectorChanged();
+            }
+            if (entry.promptSelector) {
+                this.$predefinedPromptsSelector.val(entry.promptSelector);
+            }
+            if (entry.url) {
+                this.$urlField.val(entry.url);
+                if (entry.contentSelector === 'url') {
+                    this.onUrlChanged();
+                }
+            }
+        }
+        this.$predefinedPromptsSelector.get(0).scrollIntoView();
     }
 
     getRte($element) {

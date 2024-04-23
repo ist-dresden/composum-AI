@@ -8,15 +8,15 @@ BUG: initial loading is strange in content dialog - unclear what to do, this is 
                 const lastEntry = localStorage.getItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE);
                 historyMap[historyPath] = lastEntry ? [JSON.parse(lastEntry)] : [];
             }
-BUG: reset preset selector when entering prompt
 
 Image description from URL?
 
 AEM for content fragments?
 URL as base text , inner links
 Append button for AEM
-Multi-lingual?
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/blog/pages/composumAI/composumAI-AEM
+
+?? BM25 + WAND search?
 
 Done:
 Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.

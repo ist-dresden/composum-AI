@@ -81,10 +81,15 @@ or just describe what you need without providing any additional base text.
 
 Then you can either select one from a range of predefined prompts, like Summarize, Introduction, Conclusion, Expand,
 Headline suggestions, Improve, ..., and apply these. You are invited to modify or extend the prompt you selected, or
-create your entirely own request to the AI.
+create your entirely own request to the AI. 
 
 A history in the dialog supports you to switch back and forth between your requests, so it's easy to retry and switch
 back if the first generated text was better.
+
+There is also a "Last prompts" drop down menu that sets the prompt and content selector (if applicable) to the last 
+values that have been used to generate content. In contrast to the history this feature retains its data across sessions
+in the current browser and is independent of the currently edited component, making it a useful tool for applying 
+similar prompts to different components or pages.
 
 As the last step, you can replace the edited component field by the generated text, or cancel the operation. The calling
 dialog / the richtext editor from which the content creation was called will still be open for editing.
