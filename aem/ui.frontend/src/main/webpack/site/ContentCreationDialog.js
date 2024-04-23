@@ -317,9 +317,11 @@ class ContentCreationDialog {
             contentSelector: status.contentSelector,
             url: status.url
         };
-        console.log("maybeStoreLastPrompt storing ", entry)
+        if (this.debug) console.log("maybeStoreLastPrompt entry", entry);
         const entryString = JSON.stringify(entry);
         if (!this.lastPrompts || entryString !== JSON.stringify(this.lastPrompts[0])) {
+            // delete entries that are the same as the new one
+            this.lastPrompts = this.lastPrompts.filter((oldentry) => JSON.stringify(oldentry) !== entryString);
             this.lastPrompts.unshift(entry);
             if (this.lastPrompts.length > MAX_LAST_PROMPTS) {
                 this.lastPrompts.pop();
@@ -329,7 +331,6 @@ class ContentCreationDialog {
     }
 
     entryItem(entry) {
-        console.log("entryItem", entry);
         let promptName = entry.promptSelectorKey;
         // the promptSelectorKey is empty if the prompt was entered or changed manually -> use actual prompt.
         if (!promptName || promptName === '-') {
