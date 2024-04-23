@@ -143,6 +143,7 @@ class ContentCreationDialog {
             textLength: this.$textLengthSelector.val(),
             contentSelector: this.$contentSelector.val(),
             predefinedPrompts: this.$predefinedPromptsSelector.val(),
+            url: this.$urlField.val(),
             response: this.getResponse()
         };
         this.maybeStoreLastPrompt(status);
@@ -160,6 +161,9 @@ class ContentCreationDialog {
             this.setSourceContent(this.oldContent);
         }
         this.setResponse(status.response);
+        if (status.url) {
+            this.$urlField.val(status.url);
+        }
         this.onPredefinedPromptsChanged();
         this.onContentSelectorChanged();
         this.onPromptChanged();
@@ -307,7 +311,9 @@ class ContentCreationDialog {
         if (this.debug) console.log("maybeStoreLastPrompt", arguments);
         const entry = {
             prompt: status.prompt,
-            contentSelector: status.contentSelector
+            promptSelector: status.predefinedPrompts,
+            contentSelector: status.contentSelector,
+            url: status.url
         };
         const entryString = JSON.stringify(entry);
         if (!this.lastPrompts || entryString !== JSON.stringify(this.lastPrompts[0])) {
@@ -320,8 +326,11 @@ class ContentCreationDialog {
     }
 
     entryItem(entry) {
-        const promptName = entry.prompt.length < 40 ? entry.prompt :
-            entry.prompt.substring(0, 30) + ' ... ' + entry.prompt.substring(entry.prompt.length - 10);
+        let promptName = this.$predefinedPromptsSelector.val();
+        if (!promptName || promptName === '-') {
+            promptName = entry.prompt.length < 40 ? entry.prompt :
+                entry.prompt.substring(0, 30) + ' ... ' + entry.prompt.substring(entry.prompt.length - 10);
+        }
         return {
             value: JSON.stringify(entry),
             content: {
@@ -349,6 +358,15 @@ class ContentCreationDialog {
             if (entry.contentSelector) {
                 this.$contentSelector.val(entry.contentSelector);
                 this.onContentSelectorChanged();
+            }
+            if (entry.promptSelector) {
+                this.$predefinedPromptsSelector.val(entry.promptSelector);
+            }
+            if (entry.url) {
+                this.$urlField.val(entry.url);
+                if (entry.contentSelector === 'url') {
+                    this.onUrlChanged();
+                }
             }
         }
         this.$predefinedPromptsSelector.get(0).scrollIntoView();
