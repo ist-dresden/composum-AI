@@ -143,6 +143,7 @@ class ContentCreationDialog {
             textLength: this.$textLengthSelector.val(),
             contentSelector: this.$contentSelector.val(),
             predefinedPrompts: this.$predefinedPromptsSelector.val(),
+            predefinedPromptsKey: this.$predefinedPromptsSelector.find('option:selected').text(),
             url: this.$urlField.val(),
             response: this.getResponse()
         };
@@ -312,9 +313,11 @@ class ContentCreationDialog {
         const entry = {
             prompt: status.prompt,
             promptSelector: status.predefinedPrompts,
+            promptSelectorKey: status.predefinedPromptsKey,
             contentSelector: status.contentSelector,
             url: status.url
         };
+        console.log("maybeStoreLastPrompt storing ", entry)
         const entryString = JSON.stringify(entry);
         if (!this.lastPrompts || entryString !== JSON.stringify(this.lastPrompts[0])) {
             this.lastPrompts.unshift(entry);
@@ -326,7 +329,9 @@ class ContentCreationDialog {
     }
 
     entryItem(entry) {
-        let promptName = this.$predefinedPromptsSelector.val();
+        console.log("entryItem", entry);
+        let promptName = entry.promptSelectorKey;
+        // the promptSelectorKey is empty if the prompt was entered or changed manually -> use actual prompt.
         if (!promptName || promptName === '-') {
             promptName = entry.prompt.length < 40 ? entry.prompt :
                 entry.prompt.substring(0, 30) + ' ... ' + entry.prompt.substring(entry.prompt.length - 10);
