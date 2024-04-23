@@ -326,6 +326,7 @@ class ContentCreationDialog {
             if (this.lastPrompts.length > MAX_LAST_PROMPTS) {
                 this.lastPrompts.pop();
             }
+            localStorage.setItem(LOCALSTORAGE_KEY_CONTENTCREATION_PROMPTHISTORY, JSON.stringify(this.lastPrompts));
             this.restoreLastPrompts();
         }
     }
