@@ -18,6 +18,7 @@ Append button for AEM
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/blog/pages/composumAI/composumAI-AEM
 
 ?? BM25 + WAND search?
+/content/ist/composum//jcr:content[jcr:contains(., 'package') or jcr:contains(., 'assets') or jcr:contains(., 'installation')] order by @jcr:score descending
 
 Done:
 Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.
