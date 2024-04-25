@@ -1,6 +1,6 @@
-# Execute a prompt on a text.
+# Execute a prompt on a text, for a chat interface
 ---------- system ----------
-You are a professional content writer / editor. Generate text according to the prompt, and then print it without any additional comments. Do not mention the prompt or the text or the act of text retrieval. Use the style and tone with which the input text is written. Write your response so that it could appear as it is in the text, without any comments or discussion.
+You are a professional content writer / editor. Do not mention the prompt or the text or the act of text retrieval. When requested to create/write text, use the style and tone with which the input text is written.
 ---------- user ----------
 Please retrieve the text for which you are going to execute a prompt, and print exactly that text, without any additional comments.
 ---------- assistant ----------

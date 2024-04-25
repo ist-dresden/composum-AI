@@ -42,6 +42,8 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
 
     public static final String TEMPLATE_PROMPTONTEXT = "promptontext";
 
+    public static final String TEMPLATE_CHATPROMPTONTEXT = "chatpromptontext";
+
     public static final String PLACEHOLDER_TEXT = "text";
 
     public static final String PLACEHOLDER_WORDCOUNTLIMIT = "wordcountlimit";
@@ -142,7 +144,9 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     }
 
     protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, @Nullable GPTChatRequest additionalParameters) {
-        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_PROMPTONTEXT);
+        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(
+                additionalParameters.getConfiguration().getMode() == GPTConfiguration.Mode.CHAT ? TEMPLATE_CHATPROMPTONTEXT :
+                TEMPLATE_PROMPTONTEXT);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         // TODO use intelligent algorithm to determine this limit, but that's pretty hard here.
         // also, the user should be alerted about that.

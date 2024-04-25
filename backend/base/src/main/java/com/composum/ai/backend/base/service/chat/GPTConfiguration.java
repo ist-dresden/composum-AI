@@ -23,6 +23,17 @@ public class GPTConfiguration {
         HTML
     }
 
+    public enum Mode {
+        /**
+         * Uses a system prompt appropriate for text generation.
+         */
+        GENERATE,
+        /**
+         * Uses a system prompt appropriate for a chat.
+         */
+        CHAT
+    }
+
     private final String apiKey;
 
     private final String organizationId;
@@ -31,15 +42,22 @@ public class GPTConfiguration {
 
     private final String additionalInstructions;
 
+    private final Mode mode;
+
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
         this(apiKey, organizationId, answerType, null);
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions) {
+        this(apiKey, organizationId, answerType, additionalInstructions, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
         this.additionalInstructions = additionalInstructions;
+        this.mode = mode;
     }
 
     /**
@@ -74,6 +92,10 @@ public class GPTConfiguration {
         return answerType == AnswerType.HTML;
     }
 
+    public Mode getMode() {
+        return mode;
+    }
+
     /**
      * Creates a configuration that joins the values.
      *
@@ -97,7 +119,8 @@ public class GPTConfiguration {
         }
         String additionalInstructions = this.additionalInstructions == null ? other.additionalInstructions :
                 other.additionalInstructions == null ? this.additionalInstructions : this.additionalInstructions + "\n\n" + other.additionalInstructions;
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions);
+        Mode mode = this.mode != null ? this.mode : other.mode;
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode);
     }
 
     /**
@@ -136,6 +159,8 @@ public class GPTConfiguration {
 
     public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, null, AnswerType.MARKDOWN);
     public static final GPTConfiguration HTML = new GPTConfiguration(null, null, AnswerType.HTML);
+    public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, null, null, Mode.CHAT);
+    public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, null, null, Mode.GENERATE);
 
     @Override
     public boolean equals(Object o) {

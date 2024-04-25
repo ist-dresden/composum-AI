@@ -11,12 +11,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -578,6 +576,7 @@ public class AIServlet extends AbstractServiceServlet {
         protected GPTChatRequest makeAdditionalParameters(int maxtokens, String chat, Status status, GPTConfiguration config) {
             GPTChatRequest additionalParameters = GPTChatRequest.ofMaxTokens(maxtokens).setConfiguration(config);
             if (isNotBlank(chat)) {
+                additionalParameters.setConfiguration(GPTConfiguration.CHAT.merge(config));
                 try {
                     final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
                         // empty

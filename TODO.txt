@@ -1,5 +1,6 @@
 # List of minor Todos
 
+Chat: system message should be chatty
 Offer parent container as content creation dialog source
 Use Claude, Gemini, https://octo.ai/product/text-generation/ , local
 BUG: initial loading is strange in content dialog - unclear what to do, this is weird. Keep only prompt and source setting?
