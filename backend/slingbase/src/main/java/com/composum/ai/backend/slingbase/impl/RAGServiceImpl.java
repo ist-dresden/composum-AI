@@ -19,9 +19,11 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.RAGService;
 
 /**
@@ -31,6 +33,9 @@ import com.composum.ai.backend.slingbase.RAGService;
 public class RAGServiceImpl implements RAGService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RAGServiceImpl.class);
+
+    @Reference
+    protected ApproximateMarkdownService markdownService;
 
     @Override
     @Nonnull
