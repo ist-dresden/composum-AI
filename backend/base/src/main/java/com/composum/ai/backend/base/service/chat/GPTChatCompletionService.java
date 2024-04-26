@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -81,4 +83,8 @@ public interface GPTChatCompletionService {
      * Returns true if vision is enabled.
      */
     boolean isVisionEnabled();
+
+    /** Calculates embeddings for the given list of texts. */
+    List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException;
+
 }

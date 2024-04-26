@@ -92,6 +92,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
     protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
+    protected static final String OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
+
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
 
     /**
@@ -106,6 +108,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4-turbo";
+    public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
 
     protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
     protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 120;
@@ -167,6 +170,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected Integer maximumTokensPerRequest;
     protected Integer maximumTokensPerResponse;
+
+    /**
+     * Rate limiter for embeddings. These are a quite inexpensive service (0.13$ per million tokens), so
+     * we just introduce a limit that should protect against malfunctions for now.
+     */
+    protected volatile RateLimiter embeddingsLimiter = new RateLimiter(
+            new RateLimiter(null, 10000, 1, TimeUnit.DAYS),
+            1000, 1, TimeUnit.MINUTES);
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
@@ -545,7 +556,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         externalRequest.setModel(hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(temperature);
-       Integer maxTokens = request.getMaxTokens();
+        Integer maxTokens = request.getMaxTokens();
         if (maxTokens != null && maxTokens > 0) {
             if (maximumTokensPerResponse != null && maximumTokensPerResponse > 0 && maxTokens > maximumTokensPerResponse) {
                 LOG.debug("Reducing maxTokens from {} to {} because of configured maximumTokensPerResponse", maxTokens, maximumTokensPerResponse);
@@ -561,7 +572,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected void checkEnabled() {
         if (!isEnabled()) {
-            throw new IllegalStateException("No API key configured for the GPT chat completion service. Please configure the service.");
+            throw new IllegalStateException("Not enabled or no API key configured for the GPT chat completion service. Please configure the service.");
         }
     }
 
@@ -576,6 +587,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 apiKey != null && !apiKey.trim().isEmpty() ||
                         gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().trim().isEmpty()
         );
+    }
+
+    protected void checkEnabled(GPTConfiguration gptConfig) {
+        checkEnabled();
+        if (!isEnabled(gptConfig)) {
+            throw new IllegalStateException("No API key configured for the GPT chat completion service. Please configure the service.");
+        }
     }
 
     @Override
@@ -662,6 +680,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         return new HtmlToMarkdownConverter().convert(html).trim();
     }
 
+    @Override
+    public List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException {
+        checkEnabled(configuration);
+        embeddingsLimiter.waitForLimit();
+        long id = requestCounter.incrementAndGet(); // to easily correlate log messages
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
     @ObjectClassDefinition(name = "Composum AI OpenAI Configuration",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
@@ -722,6 +748,14 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         @AttributeDefinition(name = "Maximum requests per day", required = false,
                 description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
         int requestsPerDay();
+
+        @AttributeDefinition(name = "URL of the embeddings service",
+                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
+        String embeddingsUrl();
+
+        @AttributeDefinition(name = "Embeddings model", required = false,
+                description = "Optional model to use for the embeddings. The default is " + DEFAULT_EMBEDDINGS_MODEL + ".")
+        String embeddingsModel() default DEFAULT_EMBEDDINGS_MODEL;
     }
 
     /**

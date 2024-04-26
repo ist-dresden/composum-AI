@@ -1,6 +1,8 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.CHAT_COMPLETION_URL;
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_EMBEDDINGS_MODEL;
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.OPENAI_EMBEDDINGS_URL;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -100,6 +102,16 @@ public abstract class AbstractGPTRunner {
             @Override
             public int requestsPerDay() {
                 return 120;
+            }
+
+            @Override
+            public String embeddingsUrl() {
+                return OPENAI_EMBEDDINGS_URL;
+            }
+
+            @Override
+            public String embeddingsModel() {
+                return DEFAULT_EMBEDDINGS_MODEL;
             }
 
             @Override
