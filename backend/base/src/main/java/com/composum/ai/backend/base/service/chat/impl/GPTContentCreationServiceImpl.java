@@ -144,9 +144,10 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     }
 
     protected GPTChatRequest makeExecuteOnTextRequest(String prompt, String text, @Nullable GPTChatRequest additionalParameters) {
+        boolean chatMode = additionalParameters != null && additionalParameters.getConfiguration() != null &&
+                additionalParameters.getConfiguration().getMode() == GPTConfiguration.Mode.CHAT;
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(
-                additionalParameters.getConfiguration().getMode() == GPTConfiguration.Mode.CHAT ? TEMPLATE_CHATPROMPTONTEXT :
-                TEMPLATE_PROMPTONTEXT);
+                chatMode ? TEMPLATE_CHATPROMPTONTEXT : TEMPLATE_PROMPTONTEXT);
         String shortenedText = chatCompletionService.shorten(text, MAXTOKENS);
         // TODO use intelligent algorithm to determine this limit, but that's pretty hard here.
         // also, the user should be alerted about that.
