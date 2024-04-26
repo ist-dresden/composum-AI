@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -215,11 +216,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         this.disabled = config != null && config.disabled();
         if (!disabled) {
             this.apiKey = retrieveOpenAIKey(config);
-            this.organizationId = config.openAiOrganizationId();
+            this.organizationId = config != null ? config.openAiOrganizationId() : null;
         } else {
             LOG.info("ChatGPT is disabled.");
         }
-        if (config.chatCompletionUrl() != null && !config.chatCompletionUrl().trim().isEmpty()) {
+        if (config != null && config.chatCompletionUrl() != null && !config.chatCompletionUrl().trim().isEmpty()) {
             this.chatCompletionUrl = config.chatCompletionUrl().trim();
         }
         if (isEnabled()) {
@@ -292,7 +293,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 } catch (IOException e) {
                     throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
                 }
-                if (apiKey != null && !apiKey.trim().isEmpty()) {
+                if (!apiKey.trim().isEmpty()) {
                     LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
                     return apiKey.trim();
                 }
@@ -300,12 +301,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
         apiKey = System.getenv(OPENAI_API_KEY);
         if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from environment variable {}.");
+            LOG.info("Using OpenAI API key from environment variable.");
             return apiKey.trim();
         }
         apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
         if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from system property {}.");
+            LOG.info("Using OpenAI API key from system property.");
             return apiKey.trim();
         }
         return null;
@@ -351,15 +352,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             } else {
                 LOG.error("Execution error while call {} to GPT", id, e);
             }
-            if (cause instanceof GPTException || cause instanceof RuntimeException) {
+            if (cause instanceof RuntimeException) {
                 throw (RuntimeException) cause;
             }
             throw new GPTException("Execution Error while calling GPT", e);
         } catch (TimeoutException e) {
             LOG.error("" + e, e);
             throw new GPTException("Timeout while calling GPT", e);
-        } catch (RuntimeException e) {
-            throw e;
         }
     }
 
@@ -705,7 +704,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         request.setModel(embeddingsModel);
         request.setEncodingFormat("float");
         String jsonRequest = gson.toJson(request);
-        LOG.debug("Sending embeddings request {} to GPT: {}", id, jsonRequest);
+        LOG.trace("Sending embeddings request {} to GPT: {}", id, jsonRequest);
         SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration, embeddingsUrl);
         Future<SimpleHttpResponse> call = httpAsyncClient.execute(httpRequest, null);
         String bodyText = null;
@@ -716,6 +715,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 throw new GPTException("Error while calling GPT: " + response);
             }
             bodyText = response.getBodyText();
+            LOG.trace("Response {} from GPT: {}", id, bodyText);
             OpenAIEmbeddings.EmbeddingResponse entity = gson.fromJson(bodyText, OpenAIEmbeddings.EmbeddingResponse.class);
             if (entity.getData() == null) {
                 LOG.error("No data in embeddings response {}", bodyText);
@@ -725,6 +725,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             for (OpenAIEmbeddings.EmbeddingObject embeddingObject : entity.getData()) {
                 result[embeddingObject.getIndex()] = embeddingObject.getEmbedding();
             }
+            Arrays.stream(result).forEach(Objects::requireNonNull);
             return Arrays.asList(result);
         } catch (JsonSyntaxException e) {
             LOG.error("Cannot parse embeddings response because of {}", bodyText, e);

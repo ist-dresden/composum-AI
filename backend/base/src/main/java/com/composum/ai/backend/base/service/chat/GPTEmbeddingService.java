@@ -20,4 +20,9 @@ public interface GPTEmbeddingService {
      */
     List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException;
 
+    /**
+     * Determines the at most limit to query semantically closest of the comparedStrings according to the embedding service.
+     */
+    List<String> findMostRelated(String query, List<String> comparedStrings, int limit, GPTConfiguration configuration);
+
 }

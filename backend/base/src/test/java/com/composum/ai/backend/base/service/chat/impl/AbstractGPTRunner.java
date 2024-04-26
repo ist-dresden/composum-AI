@@ -10,8 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.mockito.Spy;
+
 public abstract class AbstractGPTRunner {
 
+    @Spy
     protected GPTChatCompletionServiceImpl chatCompletionService;
 
     protected String chatCompletionUrl = CHAT_COMPLETION_URL;
