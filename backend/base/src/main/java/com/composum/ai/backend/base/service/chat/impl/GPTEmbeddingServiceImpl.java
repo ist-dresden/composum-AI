@@ -11,7 +11,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
 
-@Component(service = GPTChatCompletionService.class)
+@Component(service = GPTEmbeddingService.class)
 public class GPTEmbeddingServiceImpl implements GPTEmbeddingService {
 
     @Reference

@@ -6,6 +6,8 @@ import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -29,6 +32,7 @@ import javax.annotation.Nullable;
 
 import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -40,6 +44,7 @@ import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
@@ -71,9 +76,11 @@ import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMe
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
@@ -179,6 +186,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             new RateLimiter(null, 10000, 1, TimeUnit.DAYS),
             1000, 1, TimeUnit.MINUTES);
 
+    protected String embeddingsUrl;
+    protected String embeddingsModel;
+
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         LOG.info("Activating GPTChatCompletionService {}", config);
@@ -240,6 +250,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         } else {
             this.httpAsyncClient = null;
         }
+        this.embeddingsUrl = config != null && config.embeddingsUrl() != null && !config.embeddingsUrl().trim().isEmpty() ? config.embeddingsUrl().trim() : OPENAI_EMBEDDINGS_URL;
+        this.embeddingsModel = config != null && config.embeddingsModel() != null && !config.embeddingsModel().trim().isEmpty() ? config.embeddingsModel().trim() : DEFAULT_EMBEDDINGS_MODEL;
         this.bundleContext = bundleContext;
         templates.clear(); // bundleContext changed, after all.
         LOG.info("ChatGPT activated: {}", isEnabled());
@@ -308,7 +320,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             String jsonRequest = createJsonRequest(request);
             LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
             GPTCompletionCallback.GPTCompletionCollector callback = new GPTCompletionCallback.GPTCompletionCollector();
             CompletableFuture<Void> finished = new CompletableFuture<>();
             performCallAsync(finished, id, httpRequest, callback, 0, 2000);
@@ -351,10 +363,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
-    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration, String url) {
         String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
         String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
-        SimpleHttpRequest request = new SimpleHttpRequest("POST", chatCompletionUrl);
+        SimpleHttpRequest request = new SimpleHttpRequest("POST", url);
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
         request.addHeader("Authorization", "Bearer " + actualApiKey);
         if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
@@ -378,7 +390,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 LOG.debug("Sending streaming request {} to GPT: {}", id, shortenedRequest);
             }
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
@@ -682,10 +694,46 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     @Override
     public List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException {
+        if (texts == null || texts.isEmpty()) {
+            return Collections.emptyList();
+        }
         checkEnabled(configuration);
         embeddingsLimiter.waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
-        throw new UnsupportedOperationException("Not yet implemented");
+        OpenAIEmbeddings.EmbeddingRequest request = new OpenAIEmbeddings.EmbeddingRequest();
+        request.setInput(texts);
+        request.setModel(embeddingsModel);
+        request.setEncodingFormat("float");
+        String jsonRequest = gson.toJson(request);
+        LOG.debug("Sending embeddings request {} to GPT: {}", id, jsonRequest);
+        SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration, embeddingsUrl);
+        Future<SimpleHttpResponse> call = httpAsyncClient.execute(httpRequest, null);
+        String bodyText = null;
+        try {
+            SimpleHttpResponse response = call.get();
+            if (response.getCode() != HttpStatus.SC_OK) {
+                LOG.error("Error while call {} to GPT: {}", id, response);
+                throw new GPTException("Error while calling GPT: " + response);
+            }
+            bodyText = response.getBodyText();
+            OpenAIEmbeddings.EmbeddingResponse entity = gson.fromJson(bodyText, OpenAIEmbeddings.EmbeddingResponse.class);
+            if (entity.getData() == null) {
+                LOG.error("No data in embeddings response {}", bodyText);
+                throw new GPTException("No data in embeddings response");
+            }
+            float[][] result = new float[entity.getData().size()][];
+            for (OpenAIEmbeddings.EmbeddingObject embeddingObject : entity.getData()) {
+                result[embeddingObject.getIndex()] = embeddingObject.getEmbedding();
+            }
+            return Arrays.asList(result);
+        } catch (JsonSyntaxException e) {
+            LOG.error("Cannot parse embeddings response because of {}", bodyText, e);
+            throw new GPTException("Cannot parse embeddings response", e);
+        } catch (InterruptedException e) {
+            throw new GPTException("Interrupted while calling GPT", e);
+        } catch (ExecutionException e) {
+            throw new GPTException("Error while calling GPT", e.getCause());
+        }
     }
 
     @ObjectClassDefinition(name = "Composum AI OpenAI Configuration",
