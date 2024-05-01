@@ -78,7 +78,7 @@
         <aemanalyser.version>1.5.8</aemanalyser.version>
         <aem.sdk.api>2023.7.12874.20230726T072051Z-230702</aem.sdk.api>
         <aem.uber.jar.version>6.5.7</aem.uber.jar.version>
-        <osgi.version>6.0.0</osgi.version>
+        <osgi.version>7.0.0</osgi.version>
 
         <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
         <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
