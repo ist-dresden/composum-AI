@@ -16,6 +16,7 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
@@ -82,6 +83,14 @@ public class AIConfigurationServiceImpl implements AIConfigurationService {
     public GPTPermissionInfo allowedServices(@Nonnull SlingHttpServletRequest request, @Nonnull String contentPath, @Nonnull String editorUrl) {
         if (contentPath == null || !contentPath.startsWith("/content/")) {
             return null;
+        }
+        if (request.getResourceResolver().getResource(contentPath) == null) {
+            // During the creation of a new component it's possible that there are new subcomponents that haven't been materialized yet.
+            // Example: in Composum when a row is created, the columns are only created when a subcomponent of the column is saved.
+            if (request.getResourceResolver().getResource(ResourceUtil.getParent(contentPath)) != null &&
+                    !contentPath.endsWith(JcrConstants.JCR_CONTENT)) {
+                contentPath = ResourceUtil.getParent(contentPath);
+            }
         }
         GPTConfiguration gptConfiguration = getGPTConfiguration(request.getResourceResolver(), contentPath);
         GPTPermissionInfo result = null;
