@@ -1,0 +1,3 @@
+Generate a HTML page that contains a form calling the RAGServlet . You can use bootstrap and jquery.
+Include a path and limit field and query textarea and a submit button that triggers the actual call to the RAGServlet.
+The page is deployed on the same host as the servlet.
