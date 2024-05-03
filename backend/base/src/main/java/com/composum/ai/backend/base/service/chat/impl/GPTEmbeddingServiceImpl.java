@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
@@ -19,6 +21,8 @@ import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
 @Component(service = GPTEmbeddingService.class)
 public class GPTEmbeddingServiceImpl implements GPTEmbeddingService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GPTEmbeddingServiceImpl.class);
+
     @Reference
     protected GPTChatCompletionService chatCompletionService;
 
@@ -27,6 +31,7 @@ public class GPTEmbeddingServiceImpl implements GPTEmbeddingService {
 
     @Override
     public List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException {
+        LOG.debug("Getting embeddings for {} texts", texts.size());
         if (cache != null) {
             Map<String, float[]> cached = cache.embeddingsMap(texts);
 
@@ -59,8 +64,13 @@ public class GPTEmbeddingServiceImpl implements GPTEmbeddingService {
         Map<String, Double> withSimilarity = comparedStrings.stream()
                 .collect(Collectors.toMap(s -> s,
                         s -> cosineSimilarity(queryEmbedding, embeddings.get(comparedStrings.indexOf(s)))));
-        return withSimilarity.entrySet().stream()
+        List<Map.Entry<String, Double>> entries = withSimilarity.entrySet().stream()
                 .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
+                .collect(Collectors.toList());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("cosine similarities: " + entries.stream().map(e -> e.getValue().floatValue()).collect(Collectors.toList()));
+        }
+        return entries.stream()
                 .limit(limit)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
