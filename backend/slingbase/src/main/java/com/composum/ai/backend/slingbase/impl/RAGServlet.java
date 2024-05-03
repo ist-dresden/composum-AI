@@ -62,6 +62,11 @@ public class RAGServlet extends SlingSafeMethodsServlet {
      */
     public static final String PARAM_LIMIT = "limit";
 
+    /**
+     * Boolean parameter - if true, the results will be ordered by comparing the embedding with the query embedding.
+     */
+    public static final String PARAM_EMBEDDINGORDER = "embeddingOrder";
+
     @Reference
     protected RAGService ragService;
 
@@ -88,11 +93,17 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             limit = Integer.parseInt(limitRaw);
         }
 
+        boolean embeddingOrder = false;
+        String embeddingOrderRaw = request.getParameter(PARAM_EMBEDDINGORDER);
+        if (embeddingOrderRaw != null && !embeddingOrderRaw.trim().isEmpty()) {
+            embeddingOrder = Boolean.parseBoolean(embeddingOrderRaw);
+        }
+
         List<String> selectors = Arrays.asList(requestInfo.getSelectors());
         Object result;
         try {
             if (selectors.contains("related")) {
-                result = related(request.getResourceResolver(), searchLocation, query, limit);
+                result = related(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response);
             } else {
                 throw new ServletException("Unsupported selector: " + selectors);
             }
@@ -107,13 +118,19 @@ public class RAGServlet extends SlingSafeMethodsServlet {
 
     /**
      * Does a plain search for the terms, without actual RAG.
-     *  E.g. http://localhost:9090/bin/cpm/ai/rag.related.json/content/ist/composum/home?query=AI
+     * E.g. http://localhost:9090/bin/cpm/ai/rag.related.json/content/ist/composum/home?query=AI
      */
-    protected List<?> related(@Nonnull ResourceResolver resourceResolver, @Nonnull Resource searchRoot, @Nonnull String query, int limit) throws RepositoryException {
+    protected List<?> related(@Nonnull ResourceResolver resourceResolver, @Nonnull Resource searchRoot, @Nonnull String query,
+                              int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response) throws RepositoryException {
         List<String> foundPaths = ragService.searchRelated(searchRoot, query, limit);
-        // map resources to Map with keys path, title, description from the corresponding fields.
-        return foundPaths.stream()
+        List<Resource> foundResources = foundPaths.stream()
                 .map(resourceResolver::getResource)
+                .collect(Collectors.toList());
+        if (embeddingOrder) {
+            foundResources = ragService.orderByEmbedding(query, foundResources, request, response, searchRoot);
+        }
+        // map resources to Map with keys path, title, description from the corresponding fields.
+        return foundResources.stream()
                 .filter(Objects::nonNull)
                 .map(r -> {
                     Map<String, String> entry = new LinkedHashMap<>();

@@ -21,6 +21,10 @@
             <input type="number" class="form-control" id="limitField" name="limit" value="10">
         </div>
         <div class="mb-3">
+            <label for="embeddingOrderCheck" class="form-check-label">Order by Embedding:</label>
+            <input type="checkbox" class="form-check-input" id="embeddingOrderCheck" name="embeddingOrder">
+        </div>
+        <div class="mb-3">
             <label for="queryArea" class="form-label">Query:</label>
             <textarea class="form-control" id="queryArea" name="query" rows="3" required
             >What are the setup options for Composum installation / deployment?</textarea>
@@ -43,15 +47,16 @@
             e.preventDefault();
             const path = $('#pathField').val();
             const limit = $('#limitField').val();
+            const embeddingOrder = $('#embeddingOrderCheck').is(':checked');
             const query = $('#queryArea').val();
-            const url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit);
+            const url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit) + '&embeddingOrder=' + embeddingOrder;
 
             $.get(url, function (data) {
                 let htmlContent = '<ul>';
                 data.forEach(function (item) {
                     let cleanPath = item.path.replace(/\/jcr:content$/, '') + '.html';
-                    htmlContent += '<li><a href="' + cleanPath + '" title="' + item.description + '">' + item.path + '</a>';
-                    htmlContent += '<h4>' + item.title + '</h4>';
+                    htmlContent += '<li><a href="' + cleanPath + '">' + item.path + '</a>';
+                    htmlContent += '<h5>' + item.title + '</h5>';
                     if (item.description) {
                         htmlContent += '<p>' + item.description + '</p>';
                     }
@@ -68,4 +73,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(3522cad8, rag.prompt-60f3dad3, RAGServlet.java-2ff80409) -->
+<!-- AIGenVersion(6ed738b1, rag.prompt-6a2f339a, RAGServlet.java-0e7aed22) -->

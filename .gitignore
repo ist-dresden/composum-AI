@@ -34,3 +34,4 @@ target
 .linklint
 .lycheecache
 build.log
+.aigenpipeline
