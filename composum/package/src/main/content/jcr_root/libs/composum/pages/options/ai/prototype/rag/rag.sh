@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Script that uses aigentool to greate rag.html
 
-MYDIR=`dirname $0`
+cd `dirname $0`
 
 # goto project home
-cd $MYDIR/../../../../../../../../../../../../..
-# exit if there is no .git - there is something wrong
-[[ -z "$(git rev-parse --git-dir 2>/dev/null)" ]] && exit 1
-
-# DIR should be the relative path of MYDIR to current dir
-DIR=$(realpath --relative-to="." "$MYDIR")
+PHOME=../../../../../../../../../../../../..
+# exit if there is no directory named .git there - there is something wrong
+# if file $PHOME/.git does not exist, exit
+if [ ! -d "$PHOME/.git" ]; then
+    echo "No .git directory found in $PHOME"
+    exit 1
+fi
 
 set -x
-aigenpipeline -m "gpt-4-turbo" -p $DIR/rag.prompt -o $DIR/rag.html $DIR/rag.html backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
+# model should be at least -m "gpt-4-turbo" or something comparable
+aigenpipeline -v -p rag.prompt -o rag.html rag.html $PHOME/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java

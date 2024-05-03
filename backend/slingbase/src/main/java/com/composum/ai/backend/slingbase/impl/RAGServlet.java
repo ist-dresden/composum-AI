@@ -104,6 +104,8 @@ public class RAGServlet extends SlingSafeMethodsServlet {
         try {
             if (selectors.contains("related")) {
                 result = related(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response);
+            } else if (selectors.contains("ragAnswer")) {
+                result = ragAnswer(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response);
             } else {
                 throw new ServletException("Unsupported selector: " + selectors);
             }
@@ -147,5 +149,14 @@ public class RAGServlet extends SlingSafeMethodsServlet {
                     return entry;
                 })
                 .collect(Collectors.toList());
+    }
+
+    protected String ragAnswer(@Nonnull ResourceResolver resourceResolver, @Nonnull Resource searchRoot, @Nonnull String query,
+                               int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response) throws RepositoryException {
+        List<Resource> foundResources = ragService.searchRelated(searchRoot, query, limit).stream()
+                .map(resourceResolver::getResource)
+                .collect(Collectors.toList());
+        String answer = ragService.ragAnswer(query, foundResources, request, response, searchRoot, 5);
+        return answer;
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -29,8 +30,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.RAGService;
@@ -51,6 +55,11 @@ public class RAGServiceImpl implements RAGService {
 
     @Reference
     protected AIConfigurationService aiConfigurationService;
+
+    @Reference
+    protected GPTChatCompletionService chatCompletionService;
+
+    protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis() / 2);
 
     @Override
     @Nonnull
@@ -152,6 +161,43 @@ public class RAGServiceImpl implements RAGService {
                 .map(pathToResource::get)
                 .collect(Collectors.toList());
         return result;
+    }
+
+    /**
+     * Answer a question with RAG from the given resources, e.g. found with {@link #searchRelated(Resource, String, int)}.
+     *
+     * @param querytext     the query text
+     * @param resources     the list of resources to answer from
+     * @param request       the request to use when determining the markdown approximation - not modified
+     * @param response      the response to use when determining the markdown approximation - not modified
+     * @param rootResource  the root resource to find GPT configuration from
+     * @param limitRagTexts the maximum number of RAG texts to consider
+     * @return the answer text
+     */
+    @Override
+    public String ragAnswer(@Nullable String querytext, @Nonnull List<Resource> resources,
+                            @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response,
+                            @NotNull Resource rootResource, int limitRagTexts) {
+        long id = requestCounter.incrementAndGet();
+        Map<String, String> textToPath = new TreeMap<>();
+        for (Resource resource : resources) {
+            textToPath.put(markdownService.approximateMarkdown(resource, request, response), resource.getPath());
+        }
+        GPTConfiguration config = aiConfigurationService.getGPTConfiguration(rootResource.getResourceResolver(), rootResource.getPath());
+        List<String> bestMatches = embeddingService.findMostRelated(querytext, new ArrayList<>(textToPath.keySet()), limitRagTexts, config);
+        LOG.debug("ragAnswer: query for {} is {}", id, request);
+        GPTChatRequest chatRequest = new GPTChatRequest(config);
+        for (String text : bestMatches) {
+            String textPath = textToPath.get(text);
+            chatRequest.addMessage(GPTMessageRole.USER, "For answering my question later, retrieve the possibly relevant text " + textPath);
+            chatRequest.addMessage(GPTMessageRole.ASSISTANT, text);
+            LOG.debug("ragAnswer: Using for {} path {}", id, textPath);
+        }
+        chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following:\n\n" + querytext);
+        LOG.debug("ragAnswer: request {} : {}", id, request);
+        String answer = chatCompletionService.getSingleChatCompletion(chatRequest);
+        LOG.debug("ragAnswer: response {} : {}", id, answer);
+        return answer;
     }
 
 }
