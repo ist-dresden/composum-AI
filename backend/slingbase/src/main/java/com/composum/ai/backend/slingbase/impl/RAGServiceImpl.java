@@ -23,6 +23,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.RAGService;
 
@@ -36,6 +37,9 @@ public class RAGServiceImpl implements RAGService {
 
     @Reference
     protected ApproximateMarkdownService markdownService;
+
+    @Reference
+    protected GPTEmbeddingService embeddingService;
 
     @Override
     @Nonnull
@@ -55,13 +59,15 @@ public class RAGServiceImpl implements RAGService {
             LOG.error("Error searching for exact query {}", exactQuery, e);
         }
         restOfLimit -= exactResult.size();
+        LOG.trace("Exact query result: {}", exactResult);
 
         @NotNull List<String> normalizedResult = Collections.emptyList();
         try {
-            containsQuery(root, normalizedQuery, restOfLimit);
+            normalizedResult = containsQuery(root, normalizedQuery, restOfLimit);
         } catch (RepositoryException e) {
             LOG.error("Error searching for normalized query {}", normalizedQuery, e);
         }
+        LOG.trace("Normalized query result: {}", normalizedResult);
 
         List<String> result = new ArrayList<>(exactResult);
         result.addAll(normalizedResult);
@@ -74,24 +80,27 @@ public class RAGServiceImpl implements RAGService {
         ResourceResolver resolver = root.getResourceResolver();
         final Session session = resolver.adaptTo(Session.class);
         final QueryManager queryManager = session.getWorkspace().getQueryManager();
-        String statement = "SELECT [jcr:path], [rep:score()] FROM [nt:base] AS content WHERE " +
+        String statement = "SELECT [jcr:path], [jcr:score] FROM [nt:base] AS content WHERE " +
                 "ISDESCENDANTNODE(content, '" + root.getPath() + "') " +
                 "AND NAME(content) = 'jcr:content' " +
                 "AND CONTAINS(content.*, $queryText) " +
-                "ORDER BY [rep:score] DESC";
+                "ORDER BY [jcr:score] DESC";
+        // equivalent Composum Nodes query template for testing
+        // SELECT [jcr:path], [jcr:score] FROM [nt:base] AS content WHERE ISDESCENDANTNODE(content, '${root_path.path}')  AND NAME(content) = 'jcr:content' AND CONTAINS(content.*, '${text.3}') ORDER BY [jcr:score] DESC
         Query query = queryManager.createQuery(statement, Query.JCR_SQL2);
         query.bindValue("queryText", session.getValueFactory().createValue(querytext));
         query.setLimit(restOfLimit);
-        LOG.debug("Executing query: {}", query.getStatement());
+        LOG.trace("Executing query:\n{}\nwith\n{}", query.getStatement(), querytext);
         QueryResult queryResult = query.execute();
         for (RowIterator rowIterator = queryResult.getRows(); rowIterator.hasNext(); ) {
             if (restOfLimit-- <= 0) {
                 return result;
             }
             Row row = rowIterator.nextRow();
-            LOG.debug("Found path {} with score {}", row.getPath(), row.getValue("rep:score()"));
-            if (!result.contains(row.getPath())) {
-                result.add(row.getPath());
+            String path = row.getValue("jcr:path").getString();
+            LOG.trace("Found path {} with score {}", path, row.getValue("jcr:score").getDouble());
+            if (!result.contains(path)) {
+                result.add(path);
             }
         }
         return result;
