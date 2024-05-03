@@ -1,6 +1,7 @@
 package com.composum.ai.backend.slingbase.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -108,18 +109,16 @@ public class RAGServiceImpl implements RAGService {
 
     /**
      * Turn it into a query for the words mentioned in there - that is, remove all meta characters for CONTAINS queries:
-     * AND, OR, words prefixed with -, quotes, backslashes
+     * AND, OR, words prefixed with -, quotes, backslashes. We use an OR query to find pages with as many words as possible.
      */
     @Nonnull
     protected String normalize(@Nonnull String querytext) {
-        return querytext
-                .replaceAll("[\"\\\\]", " ")
-                // words "AND", "OR" (surrounded by word boundaries)
-                .replaceAll("\\b(AND|OR)\\b", " ")
-                // prefixes - of words
-                .replaceAll("(^|\\W)-+", "$1")
-                .replaceAll("\\s+", " ")
-                .trim();
+        return Arrays.asList(querytext.split("\\s+")).stream()
+                .map(s -> s.replaceAll("[\"\\\\']", ""))
+                .map(s -> s.replaceAll("^-+", ""))
+                .filter(s -> !s.equals("OR"))
+                .filter(s -> !s.equals("AND"))
+                .collect(Collectors.joining(" OR "));
     }
 
 }

@@ -98,12 +98,12 @@ public class RAGServiceImplTest {
         RAGServiceImpl service = new RAGServiceImpl();
         collector.checkThat(service.normalize("\"AND\" OR -NOT"), is("NOT"));
         collector.checkThat(service.normalize("Hello-World"), is("Hello-World"));
-        collector.checkThat(service.normalize("-Hello World"), is("Hello World"));
-        collector.checkThat(service.normalize("\"Hello World\""), is("Hello World"));
-        collector.checkThat(service.normalize("Hello\\World"), is("Hello World"));
-        collector.checkThat(service.normalize("Hello  World"), is("Hello World"));
-        collector.checkThat(service.normalize("Hello AND World"), is("Hello World"));
-        collector.checkThat(service.normalize("Hello OR World"), is("Hello World"));
+        collector.checkThat(service.normalize("-Hello World"), is("Hello OR World"));
+        collector.checkThat(service.normalize("\"Hello World\""), is("Hello OR World"));
+        collector.checkThat(service.normalize("Hello\\World"), is("HelloWorld"));
+        collector.checkThat(service.normalize("Hello  World"), is("Hello OR World"));
+        collector.checkThat(service.normalize("Hello AND World"), is("Hello OR World"));
+        collector.checkThat(service.normalize("Hello OR World"), is("Hello OR World"));
     }
 
 }
