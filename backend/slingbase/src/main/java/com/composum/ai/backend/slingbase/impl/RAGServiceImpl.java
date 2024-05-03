@@ -187,13 +187,15 @@ public class RAGServiceImpl implements RAGService {
         List<String> bestMatches = embeddingService.findMostRelated(querytext, new ArrayList<>(textToPath.keySet()), limitRagTexts, config);
         LOG.debug("ragAnswer: query for {} is {}", id, request);
         GPTChatRequest chatRequest = new GPTChatRequest(config);
+        Collections.reverse(bestMatches); // make the most relevant last, near the actual question
         for (String text : bestMatches) {
             String textPath = textToPath.get(text);
-            chatRequest.addMessage(GPTMessageRole.USER, "For answering my question later, retrieve the possibly relevant text " + textPath);
+            chatRequest.addMessage(GPTMessageRole.USER, "For answering my question later, retrieve the text of the possibly relevant page: "
+                    + textPath.replaceAll("/jcr:content", ".html"));
             chatRequest.addMessage(GPTMessageRole.ASSISTANT, text);
             LOG.debug("ragAnswer: Using for {} path {}", id, textPath);
         }
-        chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following:\n\n" + querytext);
+        chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following as Markdown text:\n\n" + querytext);
         LOG.debug("ragAnswer: request {} : {}", id, request);
         String answer = chatCompletionService.getSingleChatCompletion(chatRequest);
         LOG.debug("ragAnswer: response {} : {}", id, answer);

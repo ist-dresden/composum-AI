@@ -3,11 +3,11 @@ You can use bootstrap and jquery.
 Include a path, a limit field, a query textarea
 and a submit button that triggers the actual call to the RAGServlet.
 The page is deployed on the same host as the servlet.
-Parse the result and display the result text in a readonly answer text area.
+Parse the result and display the result text (markdown) with the showdown library converted as HTML.
 Bind enter in the query textarea to submit. Disable the submit button while the request is running.
 Add a stop button that cancels the request and reenables the submit button.
-Resize the answer area after the request so that it is large enough to capture the full text by setting it's height to it's scrollHeight.
 Make it pleasantly colorful with pastel colors, blueish.
+
 
 Default value of path is "/content/ist/composum/home", for limit it's 10, default value of query is
 "What are all the setup options for Composum installation / deployment?"
