@@ -83,8 +83,9 @@ public class RAGServlet extends SlingSafeMethodsServlet {
         }
 
         int limit = Integer.MAX_VALUE;
-        if (request.getParameter(PARAM_LIMIT) != null) {
-            limit = Integer.parseInt(request.getParameter(PARAM_LIMIT));
+        String limitRaw = request.getParameter(PARAM_LIMIT);
+        if (limitRaw != null && !limitRaw.trim().isEmpty()) {
+            limit = Integer.parseInt(limitRaw);
         }
 
         List<String> selectors = Arrays.asList(requestInfo.getSelectors());

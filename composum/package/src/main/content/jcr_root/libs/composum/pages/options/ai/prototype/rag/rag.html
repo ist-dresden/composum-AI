@@ -8,53 +8,64 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2>RAG Search Form</h2>
-        <form id="ragSearchForm" class="mt-4">
-            <div class="mb-3">
-                <label for="pathField" class="form-label">Path:</label>
-                <input type="text" class="form-control" id="pathField" name="path" required>
-            </div>
-            <div class="mb-3">
-                <label for="limitField" class="form-label">Limit:</label>
-                <input type="number" class="form-control" id="limitField" name="limit" value="10">
-            </div>
-            <div class="mb-3">
-                <label for="queryArea" class="form-label">Query:</label>
-                <textarea class="form-control" id="queryArea" name="query" rows="3" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-        <div id="resultArea" class="mt-4"></div>
-    </div>
+<div class="container mt-5">
+    <h2>RAG Search Form</h2>
+    <form id="ragSearchForm" class="mt-4">
+        <div class="mb-3">
+            <label for="pathField" class="form-label">Path:</label>
+            <input type="text" class="form-control" id="pathField" name="path" required
+                   value="/content/ist/composum/home">
+        </div>
+        <div class="mb-3">
+            <label for="limitField" class="form-label">Limit:</label>
+            <input type="number" class="form-control" id="limitField" name="limit" value="10">
+        </div>
+        <div class="mb-3">
+            <label for="queryArea" class="form-label">Query:</label>
+            <textarea class="form-control" id="queryArea" name="query" rows="3" required
+            >What are the setup options for Composum installation / deployment?</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <div id="resultArea" class="mt-4"></div>
+</div>
 
-    <script>
-        $(document).ready(function() {
-            $('#ragSearchForm').on('submit', function(e) {
+<script>
+    $(document).ready(function () {
+        $('#queryArea').keypress(function (e) {
+            if (e.which == 13) {
                 e.preventDefault();
-                const path = $('#pathField').val();
-                const limit = $('#limitField').val();
-                const query = $('#queryArea').val();
-                const url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit);
+                $('#ragSearchForm').submit();
+            }
+        });
 
-                $.get(url, function(data) {
-                    let htmlContent = '<ul class="list-group">';
-                    data.forEach(function(item) {
-                        let cleanPath = item.path.replace(/\/jcr:content$/, '') + '.html';
-                        htmlContent += '<li class="list-group-item">';
-                        htmlContent += '<a href="' + cleanPath + '" title="' + item.description + '">' + item.path + '</a>';
-                        htmlContent += '<span class="ms-2">' + item.title + '</span>';
-                        htmlContent += '</li>';
-                    });
-                    htmlContent += '</ul>';
-                    $('#resultArea').html(htmlContent);
-                }).fail(function() {
-                    $('#resultArea').html('<div class="alert alert-danger" role="alert">Error fetching data.</div>');
+        $('#ragSearchForm').on('submit', function (e) {
+            e.preventDefault();
+            const path = $('#pathField').val();
+            const limit = $('#limitField').val();
+            const query = $('#queryArea').val();
+            const url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit);
+
+            $.get(url, function (data) {
+                let htmlContent = '<ul>';
+                data.forEach(function (item) {
+                    let cleanPath = item.path.replace(/\/jcr:content$/, '') + '.html';
+                    htmlContent += '<li><a href="' + cleanPath + '" title="' + item.description + '">' + item.path + '</a>';
+                    htmlContent += '<h4>' + item.title + '</h4>';
+                    if (item.description) {
+                        htmlContent += '<p>' + item.description + '</p>';
+                    }
+                    htmlContent += '</li>';
                 });
+                htmlContent += '</ul>';
+                $('#resultArea').html(htmlContent);
+            }).fail(function () {
+                $('#resultArea').html('<div class="alert alert-danger" role="alert">Error fetching data.</div>');
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
 
-<!-- AIGenVersion(64497ba3, rag.prompt-4be440de, RAGServlet.java-2ff80409) -->
+<!-- AIGenVersion(3522cad8, rag.prompt-60f3dad3, RAGServlet.java-2ff80409) -->

@@ -1,6 +1,10 @@
 Generate a HTML page that contains a form calling the RAGServlet . You can use bootstrap and jquery.
 Include a path and limit field and query textarea and a submit button that triggers the actual call to the RAGServlet.
 The page is deployed on the same host as the servlet.
-Parse the result list and display the paths as links, leave out a /jcr:content at the end of the path but add a .html
-The text of the link is the path, the title is additional text without link.
-The description should be a tooltip but the title displayed in clear text.
+Parse the result list and display an itemized list with
+the paths as links, leave out a /jcr:content at the end of the path but add a .html
+The text of the link is the path, the title is additional <h5> text without link, then the description, if there is one.
+Bind enter in the query textarea to submit.
+
+Default value of path is "/content/ist/composum/home", for limit it's 10, default value of query is
+"What are the setup options for Composum installation / deployment?"
