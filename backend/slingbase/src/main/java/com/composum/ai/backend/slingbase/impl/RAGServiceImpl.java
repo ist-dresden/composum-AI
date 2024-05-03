@@ -3,8 +3,6 @@ package com.composum.ai.backend.slingbase.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -142,39 +140,18 @@ public class RAGServiceImpl implements RAGService {
     public List<Resource> orderByEmbedding(@Nullable String querytext, @Nonnull List<Resource> resources,
                                            @NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response,
                                            @NotNull Resource rootResource) {
-        Map<String, String> texts = new TreeMap<>();
+        Map<String, String> textToPath = new TreeMap<>();
         for (Resource resource : resources) {
-            texts.put(resource.getPath(), markdownService.approximateMarkdown(resource, request, response));
+            textToPath.put(markdownService.approximateMarkdown(resource, request, response), resource.getPath());
         }
-        List<String> paths = new ArrayList<>(texts.keySet());
         GPTConfiguration config = aiConfigurationService.getGPTConfiguration(rootResource.getResourceResolver(), rootResource.getPath());
-        List<String> markdownTexts = paths.stream().map(texts::get).collect(Collectors.toList());
-        markdownTexts.add(0, querytext);
-        List<float[]> embeddings = embeddingService.getEmbeddings(markdownTexts, config);
-        float[] queryEmbedding = embeddings.get(0);
-        embeddings.remove(0);
-        // now markdown of paths.get(i) has embedding embeddings.get(i)
-        // we want to order by cosine similarity to query embedding
-        Map<String, Double> pathToSimilarity = new HashMap<>();
-        for (int i = 0; i < embeddings.size(); i++) {
-            pathToSimilarity.put(paths.get(i), cosineSimilarity(queryEmbedding, embeddings.get(i)));
-        }
-        return pathToSimilarity.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(e -> resources.get(paths.indexOf(e.getKey())))
+        List<String> relatedTexts = embeddingService.findMostRelated(querytext, new ArrayList<>(textToPath.keySet()), Integer.MAX_VALUE, config);
+        Map<String, Resource> pathToResource = resources.stream().collect(Collectors.toMap(r -> r.getPath(), r -> r));
+        List<Resource> result = relatedTexts.stream()
+                .map(textToPath::get)
+                .map(pathToResource::get)
                 .collect(Collectors.toList());
-    }
-
-    protected double cosineSimilarity(float[] embedding1, float[] embedding2) {
-        double dotProduct = 0;
-        double norm1 = 0;
-        double norm2 = 0;
-        for (int i = 0; i < embedding1.length; i++) {
-            dotProduct += embedding1[i] * embedding2[i];
-            norm1 += embedding1[i] * embedding1[i];
-            norm2 += embedding2[i] * embedding2[i];
-        }
-        return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+        return result;
     }
 
 }
