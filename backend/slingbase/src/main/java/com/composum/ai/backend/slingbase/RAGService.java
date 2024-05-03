@@ -6,6 +6,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
 /**
@@ -24,5 +26,19 @@ public interface RAGService {
      */
     @Nonnull
     List<String> searchRelated(@Nullable Resource root, @Nullable String querytext, int limit) throws RepositoryException;
+
+    /**
+     * Finds the resources whose markdown approximation has embeddings that are the most similar to the querytext embedding.
+     * Useable e.g. as filter after {@link #searchRelated(Resource, String, int)}.
+     *
+     * @param querytext the query text
+     * @param resources the list of resources to search in
+     * @param request   the request to use when determining the markdown approximation - not modified
+     * @param response  the response to use when determining the markdown approximation - not modified
+     * @param rootResource the root resource to search in
+     */
+    List<Resource> orderByEmbedding(@Nullable String querytext, @Nonnull List<Resource> resources,
+                                    @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response,
+                                    @Nonnull Resource rootResource) throws RepositoryException;
 
 }
