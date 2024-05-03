@@ -7,6 +7,7 @@ Parse the result list and display an itemized list with
 the paths as links, leave out a /jcr:content at the end of the path but add a .html
 The text of the link is the path, the title is additional <h5> text without link, then the description, if there is one.
 Bind enter in the query textarea to submit. Disable the submit button while the request is running.
+Make it pleasantly colorful with pastel colors, blueish.
 
 Default value of path is "/content/ist/composum/home", for limit it's 10, default value of query is
 "What are the setup options for Composum installation / deployment?"
