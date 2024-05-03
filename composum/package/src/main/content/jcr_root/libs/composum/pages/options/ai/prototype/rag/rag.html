@@ -8,27 +8,27 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            background-color: #e6f2ff;
+            background-color: #cfe2f3;
         }
         .container {
-            background-color: #d1e7ff;
+            background-color: #f0f8ff;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .btn-primary {
-            background-color: #7ec1ff;
-            border-color: #7ec1ff;
+            background-color: #6495ED;
+            border-color: #6495ED;
         }
         .btn-primary:hover {
-            background-color: #5db2ff;
-            border-color: #5db2ff;
+            background-color: #4169E1;
+            border-color: #4169E1;
         }
     </style>
 </head>
 <body>
 <div class="container mt-5">
-    <h2>AI Assisted Search</h2>
+    <h2>Answer questions with RAG (retrieval augmented generation)</h2>
     <form id="ragSearchForm" class="mt-4">
         <div class="mb-3">
             <label for="pathField" class="form-label">Path:</label>
@@ -42,9 +42,10 @@
         <div class="mb-3">
             <label for="queryArea" class="form-label">Query:</label>
             <textarea class="form-control" id="queryArea" name="query" rows="3" required
-            >What are the setup options for Composum installation / deployment?</textarea>
+            >What are all the setup options for Composum installation / deployment?</textarea>
         </div>
         <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
+        <button type="button" class="btn btn-secondary" id="stopBtn" style="display: none;">Stop</button>
     </form>
     <div class="mt-4">
         <label for="answerArea" class="form-label">Answer:</label>
@@ -53,22 +54,35 @@
 </div>
 
 <script>
+    let xhr;
+
     $(document).ready(function () {
         $('#ragSearchForm').on('submit', function (e) {
             e.preventDefault();
             $('#submitBtn').prop('disabled', true);
+            $('#stopBtn').show();
             const path = $('#pathField').val();
             const limit = $('#limitField').val();
             const query = $('#queryArea').val();
             const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit);
 
-            $.get(url, function (data) {
+            xhr = $.get(url, function (data) {
                 $('#answerArea').val(data);
+                $('#answerArea').css('height', $('#answerArea')[0].scrollHeight + 'px');
             }).fail(function () {
                 $('#answerArea').val('Error fetching data.');
             }).always(function () {
                 $('#submitBtn').prop('disabled', false);
+                $('#stopBtn').hide();
             });
+        });
+
+        $('#stopBtn').on('click', function () {
+            if (xhr) {
+                xhr.abort();
+                $('#submitBtn').prop('disabled', false);
+                $('#stopBtn').hide();
+            }
         });
 
         $('#queryArea').on('keydown', function (e) {
@@ -82,4 +96,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(6252564a, rag.prompt-7d5c9e9f, RAGServlet.java-5ba938ad) -->
+<!-- AIGenVersion(1782c805, rag.prompt-0e12eeae, RAGServlet.java-5ba938ad) -->

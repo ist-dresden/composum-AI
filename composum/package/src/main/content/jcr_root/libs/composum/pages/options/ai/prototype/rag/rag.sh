@@ -14,4 +14,4 @@ fi
 
 set -x
 # model should be at least -m "gpt-4-turbo" or something comparable
-aigenpipeline -v -p rag.prompt -o rag.html rag.html $PHOME/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
+aigenpipeline -p rag.prompt -o rag.html rag.html $PHOME/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
