@@ -12,4 +12,4 @@ cd $MYDIR/../../../../../../../../../../../../..
 DIR=$(realpath --relative-to="." "$MYDIR")
 
 set -x
-aigenpipeline -m "gpt-4-turbo" -p $DIR/rag.prompt -o $DIR/rag.html backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
+aigenpipeline -m "gpt-4-turbo" -p $DIR/rag.prompt -o $DIR/rag.html $DIR/rag.html backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
