@@ -3,6 +3,7 @@ You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors
 
 Include a path, a limit field, a query textarea
 and a submit button that triggers the actual call to the RAGServlet.
+Include a three sentence description what the application does (including what RAG is), and a one sentence description on each field.
 The page is deployed on the same host as the servlet.
 Parse the result and display the result text (markdown) with the showdown library converted as HTML.
 Bind enter in the query textarea to submit. Disable the submit button while the request is running.

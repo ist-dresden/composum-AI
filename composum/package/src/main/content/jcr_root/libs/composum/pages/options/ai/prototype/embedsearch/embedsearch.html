@@ -34,18 +34,19 @@
 <body>
     <div class="container mt-5">
         <h1>AI Assisted Search</h1>
+        <p>This application allows you to perform an AI-assisted search.</p>
         <form id="search-form">
             <div class="form-group">
-                <label for="path">Path:</label>
+                <label for="path">Path (e.g., /content/my-site):</label>
                 <input type="text" class="form-control" id="path" name="path">
             </div>
             <div class="form-group">
-                <label for="limit">Limit:</label>
+                <label for="limit">Limit (default is 10):</label>
                 <input type="number" class="form-control" id="limit" name="limit" value="10">
             </div>
             <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="embeddingOrder" name="embeddingOrder">
-                <label class="form-check-label" for="embeddingOrder">Embedding Order</label>
+                <input type="checkbox" class="form-check-input" id="embeddingOrder" name="embeddingOrder" checked>
+                <label class="form-check-label" for="embeddingOrder">Order by Embedding</label>
             </div>
             <div class="form-group">
                 <label for="query">Query:</label>
@@ -60,7 +61,6 @@
 
     <script>
         $(document).ready(function() {
-            // Load form values from localStorage
             var storedValues = localStorage.getItem('composum-ai-prototype-embedsearch');
             if (storedValues) {
                 var formValues = JSON.parse(storedValues);
@@ -78,8 +78,7 @@
                 var embeddingOrder = $('#embeddingOrder').is(':checked');
                 var query = $('#query').val();
                 var url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + limit + '&embeddingOrder=' + embeddingOrder;
-                
-                // Store form values in localStorage
+
                 var formValues = {
                     path: path,
                     limit: limit,
@@ -111,7 +110,7 @@
             $('#reset-btn').click(function() {
                 $('#path').val('');
                 $('#limit').val('10');
-                $('#embeddingOrder').prop('checked', false);
+                $('#embeddingOrder').prop('checked', true);
                 $('#query').val('');
                 $('#search-results').empty();
                 localStorage.removeItem('composum-ai-prototype-embedsearch');
@@ -121,4 +120,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(0ac484f7, embedsearch.prompt-0ef467ca, RAGServlet.java-5ba938ad) -->
+<!-- AIGenVersion(4c8e3502, embedsearch.prompt-424bb11b, RAGServlet.java-5ba938ad) -->

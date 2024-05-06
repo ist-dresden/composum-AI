@@ -38,13 +38,14 @@
 <body>
 <div class="container mt-5">
     <h2>Answer questions with RAG (retrieval augmented generation)</h2>
+    <p>This application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries. Enter a path, set a limit, write your query, and click Submit to get the answer.</p>
     <form id="ragSearchForm" class="mt-4">
         <div class="mb-3">
-            <label for="pathField" class="form-label">Path:</label>
+            <label for="pathField" class="form-label">Path (e.g. /content/my-site):</label>
             <input type="text" class="form-control" id="pathField" name="path" required>
         </div>
         <div class="mb-3">
-            <label for="limitField" class="form-label">Limit:</label>
+            <label for="limitField" class="form-label">Limit (default is 10):</label>
             <input type="number" class="form-control" id="limitField" name="limit" value="10">
         </div>
         <div class="mb-3">
@@ -122,4 +123,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(361f8894, rag.prompt-1de399c4, RAGServlet.java-5ba938ad) -->
+<!-- AIGenVersion(357e7892, rag.prompt-1299e47d, RAGServlet.java-5ba938ad) -->
