@@ -1,13 +1,13 @@
 Generate a HTML page "Answer questions with RAG (retrieval augmented generation)" that contains a form calling the RAGServlet with the "ragAnswer" selector.
-You can use bootstrap and jquery.
+You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors, blueish.
+
 Include a path, a limit field, a query textarea
 and a submit button that triggers the actual call to the RAGServlet.
 The page is deployed on the same host as the servlet.
 Parse the result and display the result text (markdown) with the showdown library converted as HTML.
 Bind enter in the query textarea to submit. Disable the submit button while the request is running.
-Add a stop button that cancels the request and reenables the submit button.
-Make it pleasantly colorful with pastel colors, blueish.
+Add a stop button that cancels a running request and reenables the submit button.
+There is a reset button that resets the form fields and the result to empty, in the case of the limit field to 10.
 
-
-Default value of path is "/content/ist/composum/home", for limit it's 10, default value of query is
-"What are all the setup options for Composum installation / deployment?"
+On each submit the values of the fields should be stored in localStorage at key composum-ai-prototype-rag ,
+and on first loading of the page the last values should be restored from there.
