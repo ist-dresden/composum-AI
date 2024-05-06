@@ -1,5 +1,9 @@
 # Retrieval Augmented Generation (RAG) Variants
 
+Status: prototypical mini implementation - a servlet and experimental UI <br/>
+Composum: http://localhost:9090/libs/composum/pages/options/ai/prototype.html <br/> 
+AEM: http://localhost:4502/apps/composum-ai/prototype.html
+
 ## Background
 
 We assume that we have an informational website with static content.

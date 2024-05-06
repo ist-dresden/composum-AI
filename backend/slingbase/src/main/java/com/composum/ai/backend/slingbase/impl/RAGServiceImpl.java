@@ -195,7 +195,7 @@ public class RAGServiceImpl implements RAGService {
             chatRequest.addMessage(GPTMessageRole.ASSISTANT, text);
             LOG.debug("ragAnswer: Using for {} path {}", id, textPath);
         }
-        chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following as Markdown text:\n\n" + querytext);
+        chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following as Markdown text, adding links to the source pages:\n\n" + querytext);
         LOG.debug("ragAnswer: request {} : {}", id, request);
         String answer = chatCompletionService.getSingleChatCompletion(chatRequest);
         LOG.debug("ragAnswer: response {} : {}", id, answer);
