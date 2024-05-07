@@ -1,14 +1,8 @@
 # List of minor Todos
 
-Chat: system message should be chatty
 Offer parent container as content creation dialog source
-Use Claude, Gemini, https://octo.ai/product/text-generation/ , local
-BUG: initial loading is strange in content dialog - unclear what to do, this is weird. Keep only prompt and source setting?
-    Button to load last setting?
-            if (!historyMap[historyPath]) {
-                const lastEntry = localStorage.getItem(LOCALSTORAGE_KEY_LASTDIALOGSTATE);
-                historyMap[historyPath] = lastEntry ? [JSON.parse(lastEntry)] : [];
-            }
+Document using Claude, Gemini, https://octo.ai/product/text-generation/ , local
+Bug: no content creation dialog in new component
 
 Image description from URL?
 
@@ -18,6 +12,7 @@ Append button for AEM
 https://cloud.composum.com/bin/pages.html/content/ist/composum/home/blog/pages/composumAI/composumAI-AEM
 
 ?? BM25 + WAND search?
+/content/ist/composum//jcr:content[jcr:contains(., 'package') or jcr:contains(., 'assets') or jcr:contains(., 'installation')] order by @jcr:score descending
 
 Done:
 Markdown to HTML transformation in sidebar -> not necessary, white-space: break-spaces is enough.

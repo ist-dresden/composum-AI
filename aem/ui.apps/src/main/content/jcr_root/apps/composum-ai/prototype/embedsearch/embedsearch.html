@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assisted Search</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #e6f2ff;
+        }
+        .container {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a86e8;
+        }
+        .btn-primary {
+            background-color: #4a86e8;
+            border-color: #4a86e8;
+        }
+        .btn-primary:hover {
+            background-color: #3c78d8;
+            border-color: #3c78d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>AI Assisted Search</h1>
+        <p>This application allows you to perform an AI-assisted search.</p>
+        <form id="search-form">
+            <div class="form-group">
+                <label for="path">Path (e.g., /content/my-site):</label>
+                <input type="text" class="form-control" id="path" name="path">
+            </div>
+            <div class="form-group">
+                <label for="limit">Limit (default is 10):</label>
+                <input type="number" class="form-control" id="limit" name="limit" value="10">
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="embeddingOrder" name="embeddingOrder" checked>
+                <label class="form-check-label" for="embeddingOrder">Order by Embedding</label>
+            </div>
+            <div class="form-group">
+                <label for="query">Query:</label>
+                <textarea class="form-control" id="query" name="query" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
+            <button type="button" class="btn btn-secondary" id="reset-btn">Reset</button>
+        </form>
+        <hr>
+        <div id="search-results"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var storedValues = localStorage.getItem('composum-ai-prototype-embedsearch');
+            if (storedValues) {
+                var formValues = JSON.parse(storedValues);
+                $('#path').val(formValues.path);
+                $('#limit').val(formValues.limit);
+                $('#embeddingOrder').prop('checked', formValues.embeddingOrder);
+                $('#query').val(formValues.query);
+            }
+
+            $('#search-form').submit(function(event) {
+                event.preventDefault();
+                $('#submit-btn').prop('disabled', true);
+                var path = $('#path').val();
+                var limit = $('#limit').val();
+                var embeddingOrder = $('#embeddingOrder').is(':checked');
+                var query = $('#query').val();
+                var url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + limit + '&embeddingOrder=' + embeddingOrder;
+
+                var formValues = {
+                    path: path,
+                    limit: limit,
+                    embeddingOrder: embeddingOrder,
+                    query: query
+                };
+                localStorage.setItem('composum-ai-prototype-embedsearch', JSON.stringify(formValues));
+
+                $.getJSON(url, function(data) {
+                    var results = '';
+                    $.each(data, function(index, item) {
+                        var path = item.path.replace(/\/jcr:content$/, '') + '.html';
+                        var title = item.title ? '<h5>' + item.title + '</h5>' : '';
+                        var description = item.description ? '<p>' + item.description + '</p>' : '';
+                        results += '<li><a href="' + path + '">' + path + '</a>' + title + description + '</li>';
+                    });
+                    $('#search-results').html('<ul>' + results + '</ul>');
+                    $('#submit-btn').prop('disabled', false);
+                });
+            });
+
+            $('#query').keypress(function(event) {
+                if (event.which === 13) {
+                    event.preventDefault();
+                    $('#search-form').submit();
+                }
+            });
+
+            $('#reset-btn').click(function() {
+                $('#path').val('');
+                $('#limit').val('10');
+                $('#embeddingOrder').prop('checked', true);
+                $('#query').val('');
+                $('#search-results').empty();
+                localStorage.removeItem('composum-ai-prototype-embedsearch');
+            });
+        });
+    </script>
+</body>
+</html>
+
+<!-- AIGenVersion(4c8e3502, embedsearch.prompt-424bb11b, RAGServlet.java-5ba938ad) -->

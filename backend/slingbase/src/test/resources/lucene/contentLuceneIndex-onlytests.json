@@ -1,0 +1,104 @@
+{
+  "async": "async",
+  "includePropertyTypes": [
+    "String",
+    "Binary"
+  ],
+  "jcr:primaryType": "oak:QueryIndexDefinition",
+  "reindex": false,
+  "reindexCount": 1,
+  "type": "lucene",
+  "aggregates": {
+    "jcr:primaryType": "nt:unstructured",
+    "nt:unstructured": {
+      "jcr:primaryType": "nt:unstructured",
+      "include0": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*"
+      },
+      "include1": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*"
+      },
+      "include2": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*"
+      },
+      "include3": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*"
+      },
+      "include4": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*/*"
+      },
+      "include5": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*/*/*"
+      },
+      "include6": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*/*/*/*"
+      },
+      "include7": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*/*/*/*/*"
+      },
+      "include8": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*/*/*/*/*/*"
+      },
+      "include9": {
+        "jcr:primaryType": "nt:unstructured",
+        "path": "*/*/*/*/*/*/*/*/*/*"
+      }
+    }
+  },
+  "indexRules": {
+    "jcr:primaryType": "nt:unstructured",
+    "nt:base": {
+      "includePropertyTypes": [
+        "String",
+        "Binary"
+      ],
+      "jcr:primaryType": "nt:unstructured",
+      "properties": {
+        "jcr:primaryType": "nt:unstructured",
+        "sling:alias": {
+          "index": false,
+          "jcr:primaryType": "nt:unstructured",
+          "name": "sling:alias"
+        },
+        "jcr:lastmodifiedby": {
+          "index": false,
+          "jcr:primaryType": "nt:unstructured",
+          "name": "jcr:lastmodifiedby"
+        },
+        "sling:resourcetype": {
+          "index": false,
+          "jcr:primaryType": "nt:unstructured",
+          "name": "sling:resourcetype"
+        },
+        "jcr:createdby": {
+          "index": false,
+          "jcr:primaryType": "nt:unstructured",
+          "name": "jcr:createdby"
+        },
+        "sling:vanitypath": {
+          "index": false,
+          "jcr:primaryType": "nt:unstructured",
+          "name": "sling:vanitypath"
+        },
+        "prop0": {
+          "analyzed": true,
+          "isRegexp": true,
+          "jcr:primaryType": "nt:unstructured",
+          "name": "^[^\\/]*$",
+          "nodeScopeIndex": true,
+          "propertyIndex": false,
+          "useInExcerpt": true
+        }
+      }
+    }
+  }
+}
