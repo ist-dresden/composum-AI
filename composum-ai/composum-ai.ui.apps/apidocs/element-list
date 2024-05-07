@@ -4,3 +4,6 @@ org.apache.sling.scripting.sightly.apps.composum__002d__ai.components.contentcre
 org.apache.sling.scripting.sightly.apps.composum__002d__ai.components.contentcreation.help
 org.apache.sling.scripting.sightly.apps.composum__002d__ai.components.sidepanel__002d__ai
 org.apache.sling.scripting.sightly.apps.composum__002d__ai.components.sidepanel__002d__ai.help
+org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype
+org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype.embedsearch
+org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype.rag
