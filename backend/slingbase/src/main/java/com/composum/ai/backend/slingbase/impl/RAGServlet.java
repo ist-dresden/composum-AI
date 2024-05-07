@@ -58,9 +58,14 @@ public class RAGServlet extends SlingSafeMethodsServlet {
     public static final String PARAM_QUERY = "query";
 
     /**
-     * Maximum number of results.
+     * Maximum number of results from the search that are ranked with the embedding. Default is 20.
      */
     public static final String PARAM_LIMIT = "limit";
+
+    /**
+     * For query answering (ragAnswer): the maximum number of pages that are given to the AI to answer. Default is 5.
+     */
+    public static final String PARAM_LIMITRAGTEXTS = "limitRagTexts";
 
     /**
      * Boolean parameter - if true, the results will be ordered by comparing the embedding with the query embedding.
@@ -87,10 +92,16 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             throw new ServletException("Missing search location in suffix");
         }
 
-        int limit = Integer.MAX_VALUE;
+        int limit = 20;
         String limitRaw = request.getParameter(PARAM_LIMIT);
         if (limitRaw != null && !limitRaw.trim().isEmpty()) {
             limit = Integer.parseInt(limitRaw);
+        }
+
+        int limitRagTexts = 5;
+        String limitRagTextsRaw = request.getParameter(PARAM_LIMITRAGTEXTS);
+        if (limitRagTextsRaw != null && !limitRagTextsRaw.trim().isEmpty()) {
+            limitRagTexts = Integer.parseInt(limitRagTextsRaw);
         }
 
         boolean embeddingOrder = false;
@@ -105,7 +116,7 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             if (selectors.contains("related")) {
                 result = related(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response);
             } else if (selectors.contains("ragAnswer")) {
-                result = ragAnswer(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response);
+                result = ragAnswer(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response, limitRagTexts);
             } else {
                 throw new ServletException("Unsupported selector: " + selectors);
             }
@@ -152,11 +163,12 @@ public class RAGServlet extends SlingSafeMethodsServlet {
     }
 
     protected String ragAnswer(@Nonnull ResourceResolver resourceResolver, @Nonnull Resource searchRoot, @Nonnull String query,
-                               int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response) throws RepositoryException {
+                               int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response,
+                               int limitRagTexts) throws RepositoryException {
         List<Resource> foundResources = ragService.searchRelated(searchRoot, query, limit).stream()
                 .map(resourceResolver::getResource)
                 .collect(Collectors.toList());
-        String answer = ragService.ragAnswer(query, foundResources, request, response, searchRoot, 5);
+        String answer = ragService.ragAnswer(query, foundResources, request, response, searchRoot, limitRagTexts);
         return answer;
     }
 }

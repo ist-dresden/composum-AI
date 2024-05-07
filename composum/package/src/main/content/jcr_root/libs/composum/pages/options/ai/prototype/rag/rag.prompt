@@ -1,7 +1,7 @@
 Generate a HTML page "Answer questions with RAG (retrieval augmented generation)" that contains a form calling the RAGServlet with the "ragAnswer" selector.
 You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors, blueish.
 
-Include a path, a limit field, a query textarea
+Include a path, a limit field, a limitRagTexts field, a query textarea
 and a submit button that triggers the actual call to the RAGServlet.
 Include a three sentence description what the application does (including what RAG is), and a one sentence description on each field.
 The page is deployed on the same host as the servlet.

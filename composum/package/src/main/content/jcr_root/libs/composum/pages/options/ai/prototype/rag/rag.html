@@ -11,24 +11,29 @@
         body {
             background-color: #cfe2f3;
         }
+
         .container {
             background-color: #f0f8ff;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .btn-primary {
             background-color: #6495ED;
             border-color: #6495ED;
         }
+
         .btn-primary:hover {
             background-color: #4169E1;
             border-color: #4169E1;
         }
+
         .btn-secondary {
             background-color: #B0C4DE;
             border-color: #B0C4DE;
         }
+
         .btn-secondary:hover {
             background-color: #778899;
             border-color: #778899;
@@ -38,19 +43,35 @@
 <body>
 <div class="container mt-5">
     <h2>Answer questions with RAG (retrieval augmented generation)</h2>
-    <p>This application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries. Enter a path, set a limit, write your query, and click Submit to get the answer.</p>
+    <p>This mini-application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries.
+        Enter a path, set a limit, set the maximum number of pages for the AI to answer, write your query, and click
+        Submit to get the answer.
+        The application performs a search for pages matching words from the query, ranks the query using an <a
+                href="https://platform.openai.com/docs/guides/embeddings">embedding</a> to closeness to the query
+        and then feeds them together with the query to a large language model (LLM) to get an answer.
+    </p>
     <form id="ragSearchForm" class="mt-4">
         <div class="mb-3">
             <label for="pathField" class="form-label">Path (e.g. /content/my-site):</label>
             <input type="text" class="form-control" id="pathField" name="path" required>
+            <small class="form-text text-muted">Enter the path for the search location.</small>
         </div>
         <div class="mb-3">
-            <label for="limitField" class="form-label">Limit (default is 10):</label>
-            <input type="number" class="form-control" id="limitField" name="limit" value="10">
+            <label for="limitField" class="form-label">Maximum number of pages to be searched and ranked:</label>
+            <input type="number" class="form-control" id="limitField" name="limit" value="20">
+            <small class="form-text text-muted">Set the maximum number of pages to search and rank
+                (default is 20).</small>
+        </div>
+        <div class="mb-3">
+            <label for="limitRagTextsField" class="form-label">Maximum number of pages for AI to answer:</label>
+            <input type="number" class="form-control" id="limitRagTextsField" name="limitRagTexts" value="5">
+            <small class="form-text text-muted">Set the maximum number of pages sent to the AI to generate an answer
+                (default is 5).</small>
         </div>
         <div class="mb-3">
             <label for="queryArea" class="form-label">Query:</label>
             <textarea class="form-control" id="queryArea" name="query" rows="3" required></textarea>
+            <small class="form-text text-muted">Enter your query here.</small>
         </div>
         <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
         <button type="button" class="btn btn-secondary" id="stopBtn" style="display: none;">Stop</button>
@@ -71,6 +92,7 @@
         const storedValues = JSON.parse(localStorage.getItem('composum-ai-prototype-rag')) || {};
         $('#pathField').val(storedValues.path || '');
         $('#limitField').val(storedValues.limit || 10);
+        $('#limitRagTextsField').val(storedValues.limitRagTexts || 5);
         $('#queryArea').val(storedValues.query || '');
 
         $('#ragSearchForm').on('submit', function (e) {
@@ -79,8 +101,9 @@
             $('#stopBtn').show();
             const path = $('#pathField').val();
             const limit = $('#limitField').val();
+            const limitRagTexts = $('#limitRagTextsField').val();
             const query = $('#queryArea').val();
-            const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit);
+            const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit) + '&limitRagTexts=' + encodeURIComponent(limitRagTexts);
 
             xhr = $.get(url, function (data) {
                 const html = converter.makeHtml(data);
@@ -93,7 +116,7 @@
             });
 
             // Store form values in localStorage
-            localStorage.setItem('composum-ai-prototype-rag', JSON.stringify({ path, limit, query }));
+            localStorage.setItem('composum-ai-prototype-rag', JSON.stringify({path, limit, limitRagTexts, query}));
         });
 
         $('#stopBtn').on('click', function () {
@@ -107,6 +130,7 @@
         $('#resetBtn').on('click', function () {
             $('#pathField').val('');
             $('#limitField').val(10);
+            $('#limitRagTextsField').val(5);
             $('#queryArea').val('');
             $('#answerArea').html('');
             localStorage.removeItem('composum-ai-prototype-rag');
@@ -123,4 +147,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(357e7892, rag.prompt-1299e47d, RAGServlet.java-5ba938ad) -->
+<!-- AIGenVersion(7be4b103, rag.prompt-54980687, RAGServlet.java-6494a61e) -->
