@@ -29,7 +29,7 @@ Configuration of the automatic translation of AEM pages. The OSGI configuration 
 | ignoreAssetsExceptContentFragments | Ignore Assets except Content Fragments | boolean | true | If true, assets are ignored for translation, except for content fragments. (Otherwise the translator would translate metadata of images and videos.) |
 
 <a name="osgi.GPTChatCompletionServiceImpl"></a>
-## Composum AI OpenAI Configuration (backend-base)
+## GPTChatCompletionServiceConfig (backend/base)
 
 Provides rather low level access to the GPT chat completion - use the other services for more specific services.
 
@@ -50,6 +50,8 @@ Provides rather low level access to the GPT chat completion - use the other serv
 | requestsPerMinute | Maximum requests per minute | int | 100 | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default 100 |
 | requestsPerHour | Maximum requests per hour | int | 1000 | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 1000 |
 | requestsPerDay | Maximum requests per day | int | 3000 | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 3000 |
+| embeddingsUrl | URL of the embeddings service | String |  | Optional, if not OpenAI's default https://api.openai.com/v1/embeddings |
+| embeddingsModel | Embeddings model | String | text-embedding-3-small | Optional model to use for the embeddings. The default is text-embedding-3-small. |
 
 <a name="osgi.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)

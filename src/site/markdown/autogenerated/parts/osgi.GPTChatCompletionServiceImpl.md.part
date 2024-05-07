@@ -1,6 +1,6 @@
-/* AIGenVersion(55b3efea, osgiconfigurations.prompt-6befc847, GPTChatCompletionServiceImpl.java-4d5e38e9) */
+/* AIGenVersion(45b36999, osgiconfigurations.prompt-6befc847, GPTChatCompletionServiceImpl.java-7a68c53f) */
 
-## Composum AI OpenAI Configuration (backend-base)
+## GPTChatCompletionServiceConfig (backend/base)
 
 Provides rather low level access to the GPT chat completion - use the other services for more specific services.
 
@@ -21,3 +21,5 @@ Provides rather low level access to the GPT chat completion - use the other serv
 | requestsPerMinute | Maximum requests per minute | int | 100 | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default 100 |
 | requestsPerHour | Maximum requests per hour | int | 1000 | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 1000 |
 | requestsPerDay | Maximum requests per day | int | 3000 | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 3000 |
+| embeddingsUrl | URL of the embeddings service | String |  | Optional, if not OpenAI's default https://api.openai.com/v1/embeddings |
+| embeddingsModel | Embeddings model | String | text-embedding-3-small | Optional model to use for the embeddings. The default is text-embedding-3-small. |
