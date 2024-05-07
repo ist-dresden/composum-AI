@@ -12,13 +12,17 @@ Generally, the configuration has several levels of fallbacks. If present,
 overrides all other configuration methods. That falls back to an OSGI configuration, for which there are sometimes
 other fallbacks.
 
-## OpenAI API Key and general configuration
+## LLM API Key and general configuration
 
 <div style="float: right; margin-left: 20px;">
    <a href="../image/ai/configuration/OpenAiConfiguration.png">
-    <img src="../image/ai/configuration/OpenAiConfiguration.png" alt="Sidebar AI" width="400" />
+    <img src="../image/ai/configuration/OpenAiConfiguration.png" alt="LLM configuration" width="400" />
   </a>
 </div>
+
+The Composum AI can be configured to use OpenAI services or other LLM that have a compatible interface, like local LLM.
+
+### Configuration to use OpenAI services
 
 Using the Composum AI needs an [OpenAI API key](https://platform.openai.com/api-keys) that can either be configured for
 the whole server in the OSGI configuration "Composum AI GPT Chat Completion Service" (or "Composum AI OpenAI
@@ -35,16 +39,25 @@ For the OpenAI key there is a fallback hierarchy:
 
 For the OSGI configuration there are the following configurations:
 
-| Configuration Key | Description                                                                                                                | Default Value |
-|-------------------|----------------------------------------------------------------------------------------------------------------------------|---------------|
-| disabled          | Disable the GPT Chat Completion Service                                                                                    | false         |
-| openAiApiKey      | OpenAI API Key from https://platform.openai.com/. If not given, checks key file, environment Variable OPENAI_API_KEY, etc. |               |
-| openAiApiKeyFile  | OpenAI API Key File containing the API key, as an alternative to Open AI Key configuration                                 |               |
-| defaultModel      | Default model to use for the chat completion. Consider varying prices https://openai.com/pricing                           | gpt-3.5-turbo |
-| temperature       | Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0            |               |
-| connectionTimeout | Connection timeout in seconds                                                                                              | 20            |
-| requestTimeout    | Request timeout in seconds                                                                                                 | 60            |
-| imageModel        | Optional, a model that is used if an image is given as input, e.g. gpt-4-turbo. If not given, that is rejected.   |               |
+| Configuration Key        | Description                                                                                                                                                                                            | Default Value          |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| disabled                 | Disable the GPT Chat Completion Service                                                                                                                                                                | false                  |
+| chatCompletionUrl        | URL of the chat completion service. Optional, if not OpenAI's default                                                                                                                                  |                        |
+| openAiApiKey             | OpenAI API Key from https://platform.openai.com/. If not given, checks key file, environment Variable OPENAI_API_KEY, etc.                                                                             |                        |
+| openAiOrganizationId     | Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization.                                                                                                              |                        |
+| openAiApiKeyFile         | OpenAI API Key File containing the API key, as an alternative to Open AI Key configuration                                                                                                             |                        |
+| defaultModel             | Default model to use for the chat completion. Consider varying prices https://openai.com/pricing                                                                                                       | gpt-3.5-turbo          |
+| imageModel               | Optional, a model that is used if an image is given as input, e.g. gpt-4-turbo. If not given, that is rejected.                                                                                        |                        |
+| temperature              | Optional temperature setting that determines variability vs. creativity as a floating point between 0.0 and 1.0                                                                                        |                        |
+| maximumTokensPerRequest  | If > 0 limit to the maximum number of tokens per request. That's about twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.           | 50000                  |
+| maximumTokensPerResponse | Maximum number of tokens to return in the response. Must not exceed the capabilities of the model - as of 10/03/24 this is 4096 for most OpenAI models - which is the default, so no need to set that. | 4096                   |
+| connectionTimeout        | Connection timeout in seconds                                                                                                                                                                          | 20                     |
+| requestTimeout           | Request timeout in seconds                                                                                                                                                                             | 60                     |
+| requestsPerMinute        | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default                                                                    | 100                    |
+| requestsPerHour          | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default                                                                      | 1000                   |
+| requestsPerDay           | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default                                                                       | 3000                   |
+| embeddingsUrl            | URL of the embeddings service. Optional, if not OpenAI's default                                                                                                                                       |                        |
+| embeddingsModel          | Optional model to use for the embeddings. The default is.                                                                                                                                              | text-embedding-3-small |
 
 If Sling Context Aware Configuration contains an entry for `com.composum.ai.backend.slingbase.model.OpenAIConfig`,
 then the OpenAI API Key is taken from the configuration `openAiApiKey` of that `Composum AI OpenAI Configuration` of
@@ -62,7 +75,22 @@ desired, a global default can be set at e.g.
 
 where sk-****** should be replaced by the actual OpenAI API key.
 
+<div style="clear: both;"></div>
+
 <a name="promptlibconf"></a>
+
+### Using local LLM
+
+There are 
+[many ways to run open source LLM locally](https://medium.com/thedeephub/50-open-source-options-for-running-llms-locally-db1ec6f5a54f)
+, e.g. [LM Studio](https://lmstudio.ai/). Often these offer interfaces like the OpenAI chat completion service, and 
+do not need any API key. In that case you'll just need to configure the chatCompletionUrl to the appropriate value 
+of the server.
+
+### Using other LLM
+
+Using other LLM might need some small modifications for authorization headers and possibly a different interface - if
+you need that please [contact us](https://www.composum.com/home/contact.html).
 
 ## Composum AI Prompt Library Configuration
 
@@ -80,11 +108,11 @@ default paths, and a Sling Context Aware Configuration that can override these d
 These paths can be paths to a JSON file like
 [predefinedprompts.json](https://github.com/ist-dresden/composum-AI/blob/develop/composum/bundle/src/main/resources/create/predefinedprompts.json)
 . To make it easy to maintain a prompt library, it is also possible to use content pages as prompt library. The
-content page should have a simple structure and the prompts should be as components in exactly one paragraph system 
+content page should have a simple structure and the prompts should be as components in exactly one paragraph system
 containing text components with the prompts. The subtitle in the text component is taken as the title of the prompt, and
 the text is taken as the text of the prompt.
 
-If you want to adapt the default prompt libraries 
+If you want to adapt the default prompt libraries
 `/libs/composum/pages/options/ai/dialogs/create/defaultprompts`
 `/libs/composum/pages/options/ai/tools/sidebar/defaultprompts`
 : these can be copied into the site or some other place and edited there.

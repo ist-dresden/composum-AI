@@ -24,7 +24,7 @@ content creation in content management systems like [Composum Pages](https://www
 can become considerably easier with the new support by AI systems.
 While [OpenAI](https://openai.com/)'s ChatGPT was and is probably the most noteable forerunner, 
 there is quite number of commercial systems like
-[Anthropic's Claude](https://www.anthropic.com/index/introducing-claude) (UK),
+[Anthropic Claude](https://www.anthropic.com/claude) (UK),
 [Google's Bard](https://bard.google.com/),
 [Aleph's Luminous](https://www.aleph-alpha.com/luminous) (Germany) in development, to name only a few, and 
 increasingly also models you can run on local machines. 
@@ -41,14 +41,13 @@ Where possible and appropriate, components will remain platform-agnostic.
 Since [OpenAI](https://openai.com/)'s chat completion API, also available through as
 [Microsoft Azure OpenAI service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/)
 is already commercially available at scale, competitively priced and arguably the most powerful system at the moment,
-we currently use it as backend. If there is demand, we intend to provide alternative backends using other systems
-as they become commercially available,
-especially as those might be preferred by European customers because of stricter privacy and
-data security rules.
-There are also some LLM that can in principle run on premise, e.g. with 
-[LM Studio](https://lmstudio.ai/) or 
-[ollama](https://github.com/ollama/ollama) that support an OpenAI compatible API, and can reasonably be used for 
-various tasks, though you'll be better off with a hosted >= GPT 3.5 performance model.
+we currently use it as backend. Since various open source LLM
+[can be run with a similar interface](https://medium.com/thedeephub/50-open-source-options-for-running-llms-locally-db1ec6f5a54f)
+it's also possible to use these, e.g. with 
+[LM Studio](https://lmstudio.ai/) or [ollama](https://github.com/ollama/ollama). If you need alternative backends, please
+[contact us](https://www.composum.com/home/contact.html)
+- normally that will need only small changes.
+It's recommendable, though, to use a model with >= GPT 3.5 performance.
 
 For AEM, there is also an automatic translation for sites or page trees implemented that integrates transparently
 into the rollout process for live copies - see
@@ -74,13 +73,13 @@ category dialog, as AEM tags work quite differently.
   to the existing text of the page / component. That way, one could create summaries of the page, or extracts wrt. a
   topic, overviews, orjust request suggestions to reformulate or expand user supplied text fragments, ... Your
   imagination is the limit.
-- an side panel AI that you can chat with and use to analyze the text content of the current page and get suggestions.
+- a side panel AI that you can chat with and use to analyze the text content of the current page and get suggestions.
 - a page category dialog with suggestions for page categories (that are used as SEO keywords)
 
 ## Try it out!
 
-The easiest way to try it is the [Composum Cloud](https://cloud.composum.com) where Composum-AI is deployed. You can 
-get a free account there, create a site and test it. 
+The easiest way to try it is the [Composum Cloud](https://cloud.composum.com) where Composum-AI is deployed. You can
+get a free account there, create a site and test it.
 Second there is the Composum Sling starter (a JAR you can execute locally) or the docker image
 [composum/featurelauncher-composum](https://hub.docker.com/r/composum/featurelauncher-composum)
 available through the
@@ -95,11 +94,6 @@ will need to configure an OpenAI API key as well.
 
 Please compare the release notes of the 
 [latest release](https://github.com/ist-dresden/composum-AI/releases/) for more instructions.
-
-## Further ideas in investigation
-
-- possibly support of the user when searching the site using natural language
-- possibly support of the user by answering questions about the site content
 
 ## Development with ChatGPT and Github Copilot
 

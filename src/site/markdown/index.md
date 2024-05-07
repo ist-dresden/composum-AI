@@ -47,10 +47,11 @@ content creation in content management systems like [Composum Pages](https://www
 can become considerably easier with the new support by AI systems.
 While [OpenAI](https://openai.com/)'s ChatGPT was and is probably the most noteable forerunner,
 there is quite number of commercial systems like
-[Anthropic's Claude](https://www.anthropic.com/index/introducing-claude) (UK),
+[Anthropic Claude](https://www.anthropic.com/claude) (UK),
 [Google's Bard](https://bard.google.com/),
-[Aleph's Luminous](https://www.aleph-alpha.com/luminous) (Germany) in development, to name only a few.
-All of there provide APIs that allow
+[Aleph's Luminous](https://www.aleph-alpha.com/luminous) (Germany) in development, to name only a few, and 
+increasingly also models you can run on local machines. 
+All of there provide APIs that allow 
 them to be used very flexibly in a lot of ways that are useful for supporting a CMS - for translation, content
 creation, review, summarizing, chat, you name it. Optionally it is possible to use the vision capabilities
 on images as well, e.g. to generate alt texts for images.
@@ -63,14 +64,13 @@ Where possible and appropriate, components will remain platform-agnostic.
 Since [OpenAI](https://openai.com/)'s chat completion API, also available through as
 [Microsoft Azure OpenAI service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/)
 is already commercially available at scale, competitively priced and arguably the most powerful system at the moment,
-we currently use it as backend. If there is demand, we intend to provide alternative backends using other systems
-as they become commercially available,
-especially as those might be preferred by European customers because of stricter privacy and
-data security rules. 
-There are also some LLM that can in principle run on premise, e.g. with 
-[LM Studio](https://lmstudio.ai/) or 
-[ollama](https://github.com/ollama/ollama) that support an OpenAI compatible API, and can reasonably be used for 
-various tasks, though you'll be better off with a hosted >= GPT 3.5 performance model.
+we currently use it as backend. Since various open source LLM
+[can be run with a similar interface](https://medium.com/thedeephub/50-open-source-options-for-running-llms-locally-db1ec6f5a54f)
+it's also possible to use these, e.g. with 
+[LM Studio](https://lmstudio.ai/) or [ollama](https://github.com/ollama/ollama). If you need alternative backends, please
+[contact us](https://www.composum.com/home/contact.html)
+- normally that will need only small changes.
+It's recommendable, though, to use a model with >= GPT 3.5 performance.
 
 ## Functionality Overview
 
@@ -87,7 +87,7 @@ category dialog, as AEM tags work quite differently.
 - a translation dialog that can be opened on any edited textfield in multilingual websites and suggests translations
   of the text of a component into other languages the text of page descriptions and summaries, keywords, navigation
   title
-- a multipurpose content creation dialog that can support you by creating text for any edited text fields. The text
+- a multi purpose content creation dialog that can support you by creating text for any edited text fields. The text
   can be created either from a user supplied prompt, or by applying a (user supplied or predefined) ChatGPT prompt
   to the existing text of the page / component. That way, one could create summaries of the page, or extracts wrt. a
   topic, overviews, orjust request suggestions to reformulate or expand user supplied text fragments, ... Your
@@ -115,6 +115,17 @@ will need to configure an OpenAI API key as well. The [installation instructions
 Please also compare the release notes of the
 [latest release](https://github.com/ist-dresden/composum-AI/releases/) for more instructions.
 
+## Development with ChatGPT and Github Copilot
+
+Part of the intention of the project is to evaluate the use of AI services, in particular ChatGPT and the Github
+Copilot IntelliJ plugin, for speeding up development. Some outcomes of that:
+
+- The [feature creation process](featurespecs/FeatureCreationProcess.md) massively improves the quality and speed of
+  specifying a feature and thinking it through. See the [feature specification directory](featurespecs/) for
+  examples of that.
+- Speeding up the development is ongoing, but Github Copilot and ChatGPT certainly
+[speed up a lot of things](http://www.stoerr.net/blog/2023-05-25-developmentWithChatGPTAndCopilot.html).
+
 ## License
 
 Composum AI is open source and uses the MIT license. So you have many freedoms to use it. But please be sure to sent us
@@ -122,4 +133,4 @@ some feedback!
 
 ## Thanks
 
-Thanks to [OPAX](https://github.com/jaketracey/opax) for ideas for prompts.
+Thanks to [OPAX](https://github.com/jaketracey/opax) for many ideas for prompts.
