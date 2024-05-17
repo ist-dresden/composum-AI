@@ -167,6 +167,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
         request.setConfiguration(GPTConfiguration.JSON.merge(config));
+        request.addMessage(GPTMessageRole.SYSTEM, SYSMSG);
 
         for (String url : urls) {
             String markdown = markdownService.getMarkdown(new URI(url));
