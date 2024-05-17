@@ -18,6 +18,8 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -41,6 +43,8 @@ import com.google.gson.stream.JsonWriter;
         })
 public class AITemplatingServlet extends SlingAllMethodsServlet {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AITemplatingServlet.class);
+
     @Reference
     private AITemplatingService aiTemplatingService;
 
@@ -61,7 +65,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
                 resetToPrompts(request, response);
                 break;
             default:
-                response.getWriter().write("Unknown method: " + method);
+                response.setStatus(404);
         }
     }
 
@@ -69,39 +73,45 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
         String resourcePath = request.getParameter("resourcePath");
         String additionalPrompt = request.getParameter("additionalPrompt");
         List<URI> additionalUrls = Stream.of(request.getParameterValues("additionalUrls"))
+                .filter(s -> s != null && !s.trim().isEmpty())
                 .map(URI::create)
                 .collect(Collectors.toList());
         try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
-            Resource resource = request.getResourceResolver().getResource(resourcePath);
-            boolean changed = aiTemplatingService.replacePromptsInResource(resource, additionalPrompt, additionalUrls);
-            writeToResponse(response, true, changed, (changed ? "Successfully " : "No changes made: ") +
-                    "replacing prompts in resource " + resourcePath);
-        } catch (Exception e) {
-            writeToResponse(response, false, false, "Error replacing prompts in resource " + resourcePath + ": " + e);
+            try {
+                Resource resource = request.getResourceResolver().getResource(resourcePath);
+                boolean changed = aiTemplatingService.replacePromptsInResource(resource, additionalPrompt, additionalUrls);
+                writeToResponse(writer, response, true, changed, (changed ? "Successfully " : "No changes made: ") +
+                        "replacing prompts in resource " + resourcePath);
+            } catch (Exception e) {
+                LOG.error("Error replacing prompts in resource " + resourcePath, e);
+                writeToResponse(writer, response, false, false, "Error replacing prompts in resource " + resourcePath + ": " + e);
+            }
         }
     }
 
-    protected void writeToResponse(SlingHttpServletResponse response, boolean success, boolean changes, String message) throws IOException {
-        try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            writer.beginObject();
-            writer.name("success").value(success);
-            writer.name("changes").value(changes);
-            writer.name("message").value(message);
-            writer.endObject();
-        }
+    protected void writeToResponse(JsonWriter writer, SlingHttpServletResponse response, boolean success, boolean changes, String message) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        writer.beginObject();
+        writer.name("success").value(success);
+        writer.name("changes").value(changes);
+        writer.name("message").value(message);
+        writer.endObject();
+        writer.flush();
     }
 
     protected void resetToPrompts(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String resourcePath = request.getParameter("resourcePath");
-        try {
-            Resource resource = request.getResourceResolver().getResource(resourcePath);
-            boolean changed = aiTemplatingService.resetToPrompts(resource);
-            writeToResponse(response, true, changed, (changed ? "Successfully " : "No changes made: ") +
-                    "reset resource " + resourcePath + " to prompts");
-        } catch (Exception e) {
-            writeToResponse(response, false, false, "Error resetting resource " + resourcePath + " to prompts: " + e);
+        try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
+            try {
+                Resource resource = request.getResourceResolver().getResource(resourcePath);
+                boolean changed = aiTemplatingService.resetToPrompts(resource);
+                writeToResponse(writer, response, true, changed, (changed ? "Successfully " : "No changes made: ") +
+                        "reset resource " + resourcePath + " to prompts");
+            } catch (Exception e) {
+                LOG.error("Error resetting resource " + resourcePath + " to prompts", e);
+                writeToResponse(writer, response, false, false, "Error resetting resource " + resourcePath + " to prompts: " + e);
+            }
         }
     }
 }

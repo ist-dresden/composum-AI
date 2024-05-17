@@ -82,8 +82,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      * Matches a text with PROMPTFIELD start and determines the id if there is one given. Either it's
      * <code>PROMPTFIELD: ...</code> or <code>PROMPTFIELD#ID: ...</code>.
      */
-    // FIXME(hps,24/05/17) what about richtext? -> ignore HTML tags before that.
-    protected static final Pattern PROMPTFIELD = Pattern.compile("^PROMPTFIELD((?id)#\\w+):");
+    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(<p>)?\\s*PROMPTFIELD(?<id>#\\w+)?:");
 
     /* A prefix for keys that says this is not a prompt but a text that can be used to analyze the flow of the page. */
     protected static final String PREFIX_INFORMATIONALLY = "informationally";
@@ -164,7 +163,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
-        request.setConfiguration(config.merge(GPTConfiguration.JSON));
+        request.setConfiguration(GPTConfiguration.JSON.merge(config));
 
         for (String url : urls) {
             String markdown = markdownService.getMarkdown(new URI(url));
