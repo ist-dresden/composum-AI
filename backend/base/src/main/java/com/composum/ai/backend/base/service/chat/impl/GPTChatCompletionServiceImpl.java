@@ -567,6 +567,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         externalRequest.setModel(hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(temperature);
+        if (request.getConfiguration() != null && request.getConfiguration().getAnswerType() == GPTConfiguration.AnswerType.JSON) {
+            externalRequest.setResponseFormat(ChatCompletionRequest.JSON);
+        }
         Integer maxTokens = request.getMaxTokens();
         if (maxTokens != null && maxTokens > 0) {
             if (maximumTokensPerResponse != null && maximumTokensPerResponse > 0 && maxTokens > maximumTokensPerResponse) {

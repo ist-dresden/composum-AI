@@ -6,8 +6,13 @@ import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.allowD
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +28,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -56,13 +62,16 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.Plugin
 public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownService {
 
     public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = new HashMap<>();
-    {{
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("jcr:title", "## ");
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("title", "## ");
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("subtitle", "### ");
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("cq:panelTitle", "#### ");
-        // , "code", "```" handled in extra method
-    }}
+
+    {
+        {
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("jcr:title", "## ");
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("title", "## ");
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("subtitle", "### ");
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("cq:panelTitle", "#### ");
+            // , "code", "```" handled in extra method
+        }
+    }
 
     /**
      * Ignored values for labelled output: "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target .
@@ -231,6 +240,30 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             markdown = value.trim();
         }
         return markdown;
+    }
+
+    @NotNull
+    @Override
+    public String getMarkdown(@Nonnull URI uri) throws MalformedURLException, IOException, IllegalArgumentException {
+        URLConnection conn = uri.toURL().openConnection();
+        conn.setConnectTimeout(3000);
+        conn.setReadTimeout(3000);
+        try (InputStream in = conn.getInputStream()) {
+            String contentType = conn.getContentType() == null ? "" : conn.getContentType();
+            if (contentType.contains("text/html") || contentType.contains("application/xhtml+xml")) {
+                Charset charset = conn.getContentEncoding() != null ?
+                        Charset.forName(conn.getContentEncoding()) : Charset.defaultCharset();
+                String result = IOUtils.toString(in, charset);
+                return chatCompletionService.htmlToMarkdown(result);
+            } else if (contentType.contains("text/plain")) {
+                Charset charset = conn.getContentEncoding() != null ?
+                        Charset.forName(conn.getContentEncoding()) : Charset.defaultCharset();
+                // not quite markdown, but there is no sensible conversion and that's likely OK, anyway.
+                return IOUtils.toString(in, charset);
+            } else {
+                throw new IllegalArgumentException("Unsupported content type " + contentType + " for " + uri);
+            }
+        }
     }
 
     protected boolean handleCodeblock(Resource resource, PrintWriter out, boolean printEmptyLine) {

@@ -20,7 +20,11 @@ public class GPTConfiguration {
         /**
          * Real HTML or, more likely, richtext as simplified HTML.
          */
-        HTML
+        HTML,
+        /**
+         * JSON is not yet supported by all models, so a bit dangerous.
+         */
+        JSON
     }
 
     public enum Mode {
@@ -159,6 +163,7 @@ public class GPTConfiguration {
 
     public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, null, AnswerType.MARKDOWN);
     public static final GPTConfiguration HTML = new GPTConfiguration(null, null, AnswerType.HTML);
+    public static final GPTConfiguration JSON = new GPTConfiguration(null, null, AnswerType.JSON);
     public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, null, null, Mode.CHAT);
     public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, null, null, Mode.GENERATE);
 
