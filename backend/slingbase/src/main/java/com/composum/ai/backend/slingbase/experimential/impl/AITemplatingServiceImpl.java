@@ -246,9 +246,11 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     /**
      * Sets all properties from its backup copies starting with {@link #PROPERTY_PREFIX_PROMPT}
      * and removes the backups.
+     *
+     * @return
      */
     @Override
-    public void resetToPrompts(Resource resource) throws PersistenceException {
+    public boolean resetToPrompts(Resource resource) throws PersistenceException {
         resource = normalize(resource);
         AtomicBoolean changed = new AtomicBoolean(false);
         descendantsStream(resource).forEach(descendant -> {
@@ -263,9 +265,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                 changed.set(true);
             }
         });
-        if (changed.get()) {
-            resource.getResourceResolver().commit();
-        }
+        return changed.get();
     }
 
     protected Stream<Resource> descendantsStream(Resource resource) {

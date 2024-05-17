@@ -45,7 +45,6 @@ import com.google.gson.GsonBuilder;
                 ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/rag",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET
         })
-
 public class RAGServlet extends SlingSafeMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(RAGServlet.class);

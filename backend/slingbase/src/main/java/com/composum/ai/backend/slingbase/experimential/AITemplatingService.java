@@ -28,7 +28,8 @@ public interface AITemplatingService {
 
     /**
      * Undo #replacePromptsInResource. Not commited yet.
+     * @return true if the resource was changed, false if it was not changed.
      */
-    void resetToPrompts(Resource resource) throws PersistenceException;
+    boolean resetToPrompts(Resource resource) throws PersistenceException;
 
 }
