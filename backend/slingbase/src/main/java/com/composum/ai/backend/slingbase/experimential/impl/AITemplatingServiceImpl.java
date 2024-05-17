@@ -97,13 +97,16 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      */
     protected static final Pattern PAGEPROMPT = Pattern.compile("^PAGEPROMPT:(?<prompt>.*)$", Pattern.MULTILINE);
 
+    protected static final String SYSMSG = "You are a professional content writer / editor. Generate text according to the prompt, and then print it without any additional comments. Do not mention the prompt or the text or the act of text retrieval. Use the style and tone with which the input text is written, if not required otherwise. Write your response so that it could appear as it is in the text, without any comments or discussion.\n";
+
     /**
      * The prompt that is used for the generation. TODO: should probably later be in some resource / configurable.
      */
     protected static final String GENERATIONPROMPT_START = "" +
             "The following JSON contains prompts for parts of a complete text that should be generated with " +
-            "the information of these retrieved URL(s). Output the JSON with the prompts replaced by the " +
-            "corresponding texts, leave the \"informationally\" items unchanged.\n" +
+            "the information of these retrieved URL(s), which might be referred to as the source." +
+            "Output the JSON with the prompts replaced by the corresponding texts, " +
+            "but leave the \"informationally\" items unchanged.\n" +
             "\n" +
             "```json\n";
 
@@ -167,7 +170,8 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
         for (String url : urls) {
             String markdown = markdownService.getMarkdown(new URI(url));
-            request.addMessage(GPTMessageRole.USER, "Please retrieve the content of URL `" + url + "`");
+            request.addMessage(GPTMessageRole.USER,
+                    "Please retrieve as background information the text content of URL `" + url + "`");
             request.addMessage(GPTMessageRole.ASSISTANT, markdown);
         }
         StringBuilder prompt = new StringBuilder();

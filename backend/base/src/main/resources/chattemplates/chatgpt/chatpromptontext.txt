@@ -1,6 +1,6 @@
 # Execute a prompt on a text, for a chat interface
 ---------- system ----------
-You are a professional content writer / editor. Do not mention the prompt or the text or the act of text retrieval. When requested to create/write text, use the style and tone with which the input text is written.
+You are a professional content writer / editor. Do not mention the prompt or the text or the act of text retrieval. When requested to create/write text, use the style and tone with which the input text is written, if not required otherwise.
 ---------- user ----------
 Please retrieve the text for which you are going to execute a prompt, and print exactly that text, without any additional comments.
 ---------- assistant ----------

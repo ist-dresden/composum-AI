@@ -80,6 +80,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
             try {
                 Resource resource = request.getResourceResolver().getResource(resourcePath);
                 boolean changed = aiTemplatingService.replacePromptsInResource(resource, additionalPrompt, additionalUrls);
+                if (changed) request.getResourceResolver().commit();
                 writeToResponse(writer, response, true, changed, (changed ? "Successfully " : "No changes made: ") +
                         "replacing prompts in resource " + resourcePath);
             } catch (Exception e) {
@@ -106,6 +107,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
             try {
                 Resource resource = request.getResourceResolver().getResource(resourcePath);
                 boolean changed = aiTemplatingService.resetToPrompts(resource);
+                if (changed) request.getResourceResolver().commit();
                 writeToResponse(writer, response, true, changed, (changed ? "Successfully " : "No changes made: ") +
                         "reset resource " + resourcePath + " to prompts");
             } catch (Exception e) {
