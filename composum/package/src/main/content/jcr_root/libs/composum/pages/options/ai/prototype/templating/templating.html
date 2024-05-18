@@ -1,16 +1,17 @@
 <!-- AIGenPromptStart(foobar)
 
-Generate a HTML page "Create a page from a template with AI" that contains a form calling the AITemplatingServlet appropriately
-at its path (no context path).
+Generate a HTML single page application "Create a page from a template with AI" that contains a form calling the
+AITemplatingServlet appropriately at its path (no context path). The page is deployed on the same host as the servlet.
 
-You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors, blueish.
-Include a three sentence description what the application does, and a one sentence description on each field.
-The page is deployed on the same host as the servlet.
+You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors, light blueish.
+Include a one paragraph several sentence description what the application does and what it is for
+(including what the format of the processed page is like / what special placeholders or markers
+it uses including all formats of the possible markers and marker formats), and a one sentence description on each field.
 
 It should include a form that contains the parameters for the AITemplatingServlet. Only one additionalUrls parameter is needed.
 There should be buttons for each of the methods (enum Method) defined in the servlet.
 
-Display the result of the execution in a div below the form.
+Display the result of the execution in a div below the form; lines should be wrapped if larger than the page width.
 Disable the buttons while the request is running.
 
 On each submit the values of the fields should be stored in localStorage at key composum-ai-prototype-templating ,
@@ -18,6 +19,7 @@ and on first loading of the page the last values should be restored from there.
 
 AIGenCommand(foobar)
 templating.html
+../../../../../../../../../../../../../featurespecs/10PageTemplating.md
 ../../../../../../../../../../../../../backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITemplatingService.java
 ../../../../../../../../../../../../../backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITemplatingServlet.java
 AIGenPromptEnd(foobar) -->
@@ -30,42 +32,43 @@ AIGenPromptEnd(foobar) -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #e6f2ff;
+            background-color: #cfe2f3;
         }
         .container {
-            background-color: #d1e7ff;
+            background-color: #b3d7f7;
             padding: 20px;
             border-radius: 10px;
+            margin-top: 20px;
         }
         .btn-primary {
-            background-color: #7fc1ff;
-            border-color: #7fc1ff;
-        }
-        .btn-primary:hover {
             background-color: #5eadff;
             border-color: #5eadff;
+        }
+        .btn-primary:hover {
+            background-color: #3ca9ff;
+            border-color: #3ca9ff;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <h1>Create a page from a template with AI</h1>
-        <p>This application allows you to create a page from a template using AI. It replaces prompts in the resource with the response from the AI, and also provides the option to reset the resource back to its original prompts. You can provide an additional prompt and a URL for the AI to use as context.</p>
+        <p>This single page application allows you to generate a complete text for a page by replacing prompts with AI-generated content. The page structure contains various components with prompts marked by special placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts. Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'.</p>
         <form id="templatingForm">
             <div class="form-group">
                 <label for="resourcePath">Resource Path:</label>
                 <input type="text" class="form-control" id="resourcePath" name="resourcePath" required>
-                <small class="form-text text-muted">Enter the path of the resource to be processed.</small>
+                <small class="form-text text-muted">Enter the path of the resource to process.</small>
             </div>
             <div class="form-group">
                 <label for="additionalPrompt">Additional Prompt:</label>
                 <textarea class="form-control" id="additionalPrompt" name="additionalPrompt" rows="3"></textarea>
-                <small class="form-text text-muted">Provide an additional prompt for the AI to use.</small>
+                <small class="form-text text-muted">Optionally, provide an additional prompt for the AI.</small>
             </div>
             <div class="form-group">
                 <label for="additionalUrls">Additional URL:</label>
                 <input type="url" class="form-control" id="additionalUrls" name="additionalUrls">
-                <small class="form-text text-muted">Enter a URL for the AI to use as context.</small>
+                <small class="form-text text-muted">Enter a URL for context.</small>
             </div>
             <button type="submit" class="btn btn-primary" id="replacePromptsBtn">Replace Prompts</button>
             <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
@@ -74,7 +77,6 @@ AIGenPromptEnd(foobar) -->
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -110,4 +112,4 @@ AIGenPromptEnd(foobar) -->
 </body>
 </html>
 
-<!-- AIGenVersion(2c5b9c6c, templating.html-31d01785, AITemplatingService.java-743252e4, AITemplatingServlet.java-242fa43c) -->
+<!-- AIGenVersion(05cf8abd, templating.html-0ecc355a, 10PageTemplating.md-64b47c2f, AITemplatingService.java-4c6d308a, AITemplatingServlet.java-430ace95) -->
