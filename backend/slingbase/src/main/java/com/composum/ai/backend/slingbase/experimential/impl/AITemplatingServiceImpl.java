@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
@@ -83,7 +84,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      * Matches a text with PROMPTFIELD start and determines the id if there is one given. Either it's
      * <code>PROMPTFIELD: ...</code> or <code>PROMPTFIELD#ID: ...</code>.
      */
-    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(<p>)?\\s*PROMPTFIELD(?<id>#\\w+)?:");
+    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(?<prefix>(<\\w+>\\s*)*)PROMPTFIELD(?<id>#\\w+)?:\\s*");
 
     /* A prefix for keys that says this is not a prompt but a text that can be used to analyze the flow of the page. */
     protected static final String PREFIX_INFORMATIONALLY = "informationally";
@@ -143,7 +144,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     public boolean replacePromptsInResource(Resource resource, String additionalPrompt, List<URI> additionalUrls)
             throws URISyntaxException, IOException {
         resource = normalize(resource);
-        List<Replacement> replacements = collectReplacements(resource);
+        List<Replacement> replacements = collectPossibleReplacements(resource);
         if (replacements.isEmpty()) return false;
 
         Map<String, Replacement> ids = new HashMap<>();
@@ -203,7 +204,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         return request;
     }
 
-    protected @NotNull List<Replacement> collectReplacements(Resource resource) {
+    protected @NotNull List<Replacement> collectPossibleReplacements(Resource resource) {
         List<Replacement> replacements = descendantsStream(resource).flatMap(descendant ->
                 descendant.getValueMap().entrySet().stream()
                         .filter(entry -> !IGNORED_PROPERTIES.matcher(entry.getKey()).matches())
@@ -222,14 +223,15 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             if (idmatch.find()) {
                 String name = idmatch.group("id");
                 id = name != null ? name : "#TEXT" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
+                replacement.text = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
+                if (ids.containsKey(id)) {
+                    LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);
+                    throw new IllegalArgumentException("The resource contains a declaration for the key " + id + " twice.");
+                }
+                ids.put(id, replacement);
             } else {
                 id = PREFIX_INFORMATIONALLY + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
             }
-            if (ids.containsKey(id)) {
-                LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);
-                throw new IllegalArgumentException("The resource contains a declaration for the key " + id + " twice.");
-            }
-            ids.put(id, replacement);
             texts.put(id, replacement.text);
         }
     }
@@ -307,7 +309,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("Replacement{");
-            sb.append("resource=").append(resource.getPath());
+            if (resource != null) sb.append("resource=").append(resource.getPath());
             sb.append(", property='").append(property).append('\'');
             // too much information: sb.append(", prompt='").append(prompt).append('\'');
             sb.append('}');
