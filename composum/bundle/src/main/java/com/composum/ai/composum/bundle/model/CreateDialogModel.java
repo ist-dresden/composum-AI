@@ -80,7 +80,7 @@ public class CreateDialogModel extends AbstractModel {
         return readJsonFile("create/textlengths.json");
     }
 
-    private static final Gson gson = new GsonBuilder().create();
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     static Map<String, String> readJsonFile(String filePath) {
         try {

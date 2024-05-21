@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
@@ -41,7 +42,7 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
 
     private GPTPromptLibrary config;
 
-    protected final Gson gson = new Gson();
+    protected final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     @Activate
     @Modified

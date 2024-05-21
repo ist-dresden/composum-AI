@@ -18,6 +18,7 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.sling.core.servlet.Status;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @deprecated use slingbase EventStream
@@ -45,7 +46,7 @@ public class EventStream implements GPTCompletionCallback {
 
     private volatile GPTFinishReason finishReason;
 
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 250);
 

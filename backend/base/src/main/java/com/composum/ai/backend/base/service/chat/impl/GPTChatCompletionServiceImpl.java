@@ -142,7 +142,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
     protected CloseableHttpAsyncClient httpAsyncClient;
 
-    protected static final Gson gson = new GsonBuilder().create();
+    protected static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 

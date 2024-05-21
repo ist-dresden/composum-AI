@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Writes the prompts defined in /create/predefinedprompts.json as Sling resources in AEM format,
@@ -19,7 +20,7 @@ public class WritePredefinedPromptsInAEMFormat {
     }
 
     static void jsonListToXML(Class<?> mainClass, String jsonfile, boolean swapped) {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
         InputStream in = WritePredefinedPromptsInAEMFormat.class.getResourceAsStream(jsonfile);
         Map<String, String> json = gson.fromJson(new java.io.InputStreamReader(in), Map.class);
         System.out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

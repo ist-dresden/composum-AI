@@ -16,6 +16,8 @@ import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
 import com.composum.ai.backend.slingbase.experimential.impl.AITemplatingServiceImpl.Replacement;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class AITemplatingServiceImplTest {
 
@@ -82,7 +84,16 @@ public class AITemplatingServiceImplTest {
 
         ec.checkThat(r1.text, is("PROMPTFIELD#ID1: bla "));
         ec.checkThat(r2.text, is("PROMPTFIELD:  another name of the product"));
+    }
 
+    @Test
+    public void htmlEscapingInJson() {
+        Gson gson = new GsonBuilder().create(); // deliberately no disablehtmlescaping
+        String json = gson.toJson("<p>a</p>");
+        ec.checkThat(json, is("\"\\u003cp\\u003ea\\u003c/p\\u003e\""));
+        gson = new GsonBuilder().disableHtmlEscaping().create();
+        json = gson.toJson("<p>a</p>");
+        ec.checkThat(json, is("\"<p>a</p>\""));
     }
 
 }

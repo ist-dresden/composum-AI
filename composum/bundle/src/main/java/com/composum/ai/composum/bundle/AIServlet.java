@@ -63,6 +63,7 @@ import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.servlet.Status;
 import com.composum.sling.core.util.XSS;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
@@ -204,7 +205,7 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected BundleContext bundleContext;
 
-    protected Gson gson = new Gson();
+    protected Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public enum Extension {json, sse}
 

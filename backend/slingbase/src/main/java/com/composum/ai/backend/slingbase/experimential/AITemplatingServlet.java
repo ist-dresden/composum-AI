@@ -48,7 +48,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
     @Reference
     private AITemplatingService aiTemplatingService;
 
-    protected final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    protected final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     protected enum Method {
         replacePromptsInResource, resetToPrompts
