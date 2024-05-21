@@ -21,6 +21,7 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -117,7 +118,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
     protected final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Logger LOG = LoggerFactory.getLogger(AITemplatingServiceImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(AITemplatingServiceImpl.class);
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
@@ -142,13 +143,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     public boolean replacePromptsInResource(Resource resource, String additionalPrompt, List<URI> additionalUrls)
             throws URISyntaxException, IOException {
         resource = normalize(resource);
-        List<Replacement> replacements = descendantsStream(resource).flatMap(descendant ->
-                descendant.getValueMap().entrySet().stream()
-                        .filter(entry -> !IGNORED_PROPERTIES.matcher(entry.getKey()).matches())
-                        .filter(entry -> entry.getValue() instanceof String)
-                        .filter(entry -> HAS_WHITESPACE.matcher((String) entry.getValue()).find())
-                        .map(entry -> new Replacement(descendant, entry.getKey(), (String) entry.getValue()))
-        ).collect(Collectors.toList());
+        List<Replacement> replacements = collectReplacements(resource);
         if (replacements.isEmpty()) return false;
 
         Map<String, Replacement> ids = new HashMap<>();
@@ -158,12 +153,34 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
         List<String> urls = extractSourceUrls(replacements);
         if (additionalUrls != null) {
-            for (URI additionalUrl : additionalUrls) {
-                urls.add(additionalUrl.toString());
-            }
+            additionalUrls.stream().map(URI::toString).forEach(urls::add);
         }
         List<String> pagePrompts = extractPagePrompts(replacements);
 
+        GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts);
+
+        String response = chatCompletionService.getSingleChatCompletion(request);
+        Map<String, String> responses = gson.fromJson(response, TYPE_MAP_STRING_STRING);
+
+        executeReplacements(responses, ids);
+        return true;
+    }
+
+    protected static void executeReplacements(Map<String, String> responses, Map<String, Replacement> ids) {
+        for (Map.Entry<String, String> entry : responses.entrySet()) {
+            Replacement replacement = ids.get(entry.getKey());
+            if (entry.getKey().startsWith(PREFIX_INFORMATIONALLY)) {
+                continue;
+            } else if (replacement == null) { // retry? For now, we give up.
+                throw new IllegalStateException("The response contains a key that was not in the prompts: " + entry.getKey());
+            }
+            ModifiableValueMap properties = replacement.resource.adaptTo(ModifiableValueMap.class);
+            properties.put(PROPERTY_PREFIX_PROMPT + replacement.property, properties.get(replacement.property));
+            properties.put(replacement.property, entry.getValue());
+        }
+    }
+
+    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> texts) throws IOException, URISyntaxException {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
         request.setConfiguration(GPTConfiguration.JSON.merge(config));
@@ -183,25 +200,21 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         prompt.append(gson.toJson(texts));
         prompt.append(GENERATIONPROMPT_END);
         request.addMessage(GPTMessageRole.USER, prompt.toString());
-
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        Map<String, String> responses = gson.fromJson(response, TYPE_MAP_STRING_STRING);
-
-        for (Map.Entry<String, String> entry : responses.entrySet()) {
-            Replacement replacement = ids.get(entry.getKey());
-            if (entry.getKey().startsWith(PREFIX_INFORMATIONALLY)) {
-                continue;
-            } else if (replacement == null) { // retry? For now, we give up.
-                throw new IllegalStateException("The response contains a key that was not in the prompts: " + entry.getKey());
-            }
-            ModifiableValueMap properties = replacement.resource.adaptTo(ModifiableValueMap.class);
-            properties.put(PROPERTY_PREFIX_PROMPT + replacement.property, properties.get(replacement.property));
-            properties.put(replacement.property, entry.getValue());
-        }
-        return true;
+        return request;
     }
 
-    private static void collectTexts(List<Replacement> replacements, Map<String, Replacement> ids, Map<String, String> texts) {
+    protected @NotNull List<Replacement> collectReplacements(Resource resource) {
+        List<Replacement> replacements = descendantsStream(resource).flatMap(descendant ->
+                descendant.getValueMap().entrySet().stream()
+                        .filter(entry -> !IGNORED_PROPERTIES.matcher(entry.getKey()).matches())
+                        .filter(entry -> entry.getValue() instanceof String)
+                        .filter(entry -> HAS_WHITESPACE.matcher((String) entry.getValue()).find())
+                        .map(entry -> new Replacement(descendant, entry.getKey(), (String) entry.getValue()))
+        ).collect(Collectors.toList());
+        return replacements;
+    }
+
+    protected static void collectTexts(List<Replacement> replacements, Map<String, Replacement> ids, Map<String, String> texts) {
         AtomicInteger counter = new AtomicInteger();
         for (Replacement replacement : replacements) {
             Matcher idmatch = PROMPTFIELD.matcher(replacement.text);
