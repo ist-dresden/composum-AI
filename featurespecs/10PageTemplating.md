@@ -65,20 +65,20 @@ prompt and what just an informational text, and how the response and general pro
 only contains the results of the prompts, but is easily matched to the input. The JSON contains only the prompts and
 the text fields, not the sources and content of the sources.
 
-#### The request
+#### Idea of the request
 
-PROMPT: 
+PROMPT:
 `The following JSON contains prompts for parts of a complete text that should be generated with the information of these retrieved URL(s). Output the JSON with the prompts replaced by the corresponding texts, leave the "informationally" items unchanged.`
 
 ```json
 {
-  "#NAME": "name of the product",
-  "#TEXT1": "single sentence invitation to check out the product",
-  "informationally": "Key Features",
-  "#TEXT2": "markdown list of key features",
-  "informationally": "Call to action",
-  "#TEXT3": "Why ' and the content of field #NAME",
-  "#TEXT4": "call to action"
+  "PROMPT#NAME": "name of the product",
+  "PROMPT#001": "single sentence invitation to check out the product",
+  "informationally#002": "Key Features",
+  "PROMPT#003": "markdown list of key features",
+  "informationally#004": "Call to action",
+  "PROMPT#005": "Why ' and the content of field #NAME",
+  "PROMPT#006": "call to action"
 }
 ```
 
@@ -86,3 +86,28 @@ PROMPT:
 
 We save the prompts on the page in the JCR, so that it can be reset to the original prompts / the process can be
 repeated.
+
+### System prompt for the task
+
+```
+You are a professional content writer / editor who generates text according to prompts (= instructions). 
+Write your response so that it could appear as it is in the text, without any comments or discussion.
+Never ever mention the prompts in your response.
+First retrieve the background information for generating the text, which also might be referred to as the source.
+
+Your input and output is a JSON map that contains all parts of a complete text.
+Output a map with exactly the same keys as in the input. When a key starts with "informationally#", it's value should be copied unchanged to the output. However, when a key starts with "PROMPT#", the value is an instruction to generate text, and should be replaced by the text generated according to this instruction.
+
+Example:
+{
+  "informationally#001": "English translation of the German word 'Apfel'",
+  "PROMPT#NAME": "English translation of the German word 'Apfel'", 
+  "PROMPT#002": "Write the content of field #NAME two times"
+}
+Output for the example:
+{
+  "informationally#001": "English translation of the German word 'Apfel'",
+  "PROMPT#NAME": "Apple",
+  "PROMPT#002": "Apple Apple"
+}
+```

@@ -49,22 +49,6 @@ import com.google.gson.reflect.TypeToken;
  *   <li>A prompt that applies to the whole page can be put into a multi line field; it begins on a line with <code>PAGEPROMPT: </code></li>
  * </ul>
  */
-// for a structure like
-// - Title: "PROMPTFIELD#NAME: name of the product"
-//- Text: "PROMPTFIELD: single sentence invitation to check out the product"
-//- Title: "Key Features"
-//- Text: "PROMPTFIELD: markdown list of key features"
-//- Title: "PROMPTFIELD: 'Why ' and the content of field #NAME'
-//- Text: "PROMPTFIELD: call to action"
-// we generate a JSON like {
-//  "#NAME": "name of the product",
-//  "#TEXT1": "single sentence invitation to check out the product",
-//  "informationally": "Key Features",
-//  "#TEXT2": "markdown list of key features",
-//  "informationally": "Call to action",
-//  "#TEXT3": "Why ' and the content of field #NAME",
-//  "#TEXT4": "call to action"
-//}
 @Component
 public class AITemplatingServiceImpl implements AITemplatingService {
 
@@ -99,20 +83,25 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      */
     protected static final Pattern PAGEPROMPT = Pattern.compile("^PAGEPROMPT:(?<prompt>.*)$", Pattern.MULTILINE);
 
-    protected static final String SYSMSG = "You are a professional content writer / editor. Generate text according to the prompt, and then print it without any additional comments. Do not mention the prompt or the text or the act of text retrieval. Use the style and tone with which the input text is written, if not required otherwise. Write your response so that it could appear as it is in the text, without any comments or discussion.\n";
-
-    /**
-     * The prompt that is used for the generation. TODO: should probably later be in some resource / configurable.
-     */
-    protected static final String GENERATIONPROMPT_START = "" +
-            "The following JSON contains prompts for parts of a complete text that should be generated with " +
-            "the information of these retrieved URL(s), which might be referred to as the source." +
-            "Output the JSON with the prompts replaced by the corresponding texts, " +
-            "but leave the \"informationally\" items unchanged.\n" +
+    protected static final String SYSMSG = "You are a professional content writer / editor who generates text according to prompts (= instructions). \n" +
+            "Write your response so that it could appear as it is in the text, without any comments or discussion.\n" +
+            "First retrieve the background information for generating the text, which also might be referred to as the source.\n" +
             "\n" +
-            "```json\n";
-
-    protected static final String GENERATIONPROMPT_END = "```";
+            "Your input and output is a JSON map that contains all parts of a complete text.\n" +
+            "Output a map with exactly the same keys as in the input. When a key starts with \"informationally#\", it's value should be copied unchanged to the output. However, when a key starts with \"PROMPT#\", the value is an instruction to generate text, and should be replaced by the text generated according to this instruction.\n" +
+            "\n" +
+            "Example:\n" +
+            "{\n" +
+            "  \"informationally#001\": \"English translation of the German word 'Apfel'\",\n" +
+            "  \"PROMPT#NAME\": \"English translation of the German word 'Apfel'\", \n" +
+            "  \"PROMPT#002\": \"Write the content of field #NAME two times\"\n" +
+            "}\n" +
+            "Output for the example:\n" +
+            "{\n" +
+            "  \"informationally#001\": \"English translation of the German word 'Apfel'\",\n" +
+            "  \"PROMPT#NAME\": \"Apple\",\n" +
+            "  \"PROMPT#002\": \"Apple Apple\"\n" +
+            "}\n";
 
     protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
     }.getType();
@@ -185,22 +174,20 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
         request.setConfiguration(GPTConfiguration.JSON.merge(config));
-        request.addMessage(GPTMessageRole.SYSTEM, SYSMSG);
+        StringBuilder sysprompt = new StringBuilder();
+        sysprompt.append(SYSMSG);
+        for (String pagePrompt : pagePrompts) {
+            sysprompt.append("\n\n").append(pagePrompt);
+        }
+        request.addMessage(GPTMessageRole.SYSTEM, sysprompt.toString());
 
         for (String url : urls) {
             String markdown = markdownService.getMarkdown(new URI(url));
             request.addMessage(GPTMessageRole.USER,
-                    "Please retrieve as background information the text content of URL `" + url + "`");
+                    "Please retrieve as source / background information for later prompts the text content of URL `" + url + "`");
             request.addMessage(GPTMessageRole.ASSISTANT, markdown);
         }
-        StringBuilder prompt = new StringBuilder();
-        for (String pagePrompt : pagePrompts) {
-            prompt.append(pagePrompt).append("\n\n");
-        }
-        prompt.append(GENERATIONPROMPT_START);
-        prompt.append(gson.toJson(texts));
-        prompt.append(GENERATIONPROMPT_END);
-        request.addMessage(GPTMessageRole.USER, prompt.toString());
+        request.addMessage(GPTMessageRole.USER, gson.toJson(texts));
         return request;
     }
 
@@ -222,7 +209,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             String id;
             if (idmatch.find()) {
                 String name = idmatch.group("id");
-                id = name != null ? name : "#TEXT" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
+                id = name != null ? name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
                 replacement.text = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
                 if (ids.containsKey(id)) {
                     LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);
