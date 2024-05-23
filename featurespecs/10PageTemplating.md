@@ -67,19 +67,15 @@ the text fields, not the sources and content of the sources.
 
 #### Idea of the request
 
-PROMPT:
-`The following JSON contains prompts for parts of a complete text that should be generated with the information of these retrieved URL(s). Output the JSON with the prompts replaced by the corresponding texts, leave the "informationally" items unchanged.`
+```
+Create a text for a web page that is based on the retrieved information according to the following instructions which are separated into several parts. The separators like "%%%%%%%% ID %%%%%%%%" should be printed as they are, to structure both the output and the instructions.
 
-```json
-{
-  "PROMPT#NAME": "name of the product",
-  "PROMPT#001": "single sentence invitation to check out the product",
-  "informationally#002": "Key Features",
-  "PROMPT#003": "markdown list of key features",
-  "informationally#004": "Call to action",
-  "PROMPT#005": "Why ' and the content of field #NAME",
-  "PROMPT#006": "call to action"
-}
+%%%%%%%% PROMPT#PRODUCTNAME %%%%%%%%
+Print as plain text: the name of the product
+%%%%%%%% PROMPT#001 %%%%%%%%
+Print as plain text: a 160 character SEO description for the generated web page.</p>
+%%%%%%%% PROMPT#005 %%%%%%%%
+Print as rich text HTML:  a brief overview what the product is. One paragraph.</p>
 ```
 
 ## Implementation remarks
@@ -87,68 +83,6 @@ PROMPT:
 We save the prompts on the page in the JCR, so that it can be reset to the original prompts / the process can be
 repeated.
 
-### System prompt for the task
-
-```
-You are a professional content writer / editor who generates text according to prompts (= instructions). 
-Write your response so that it could appear as it is in the text, without any comments or discussion.
-Never ever mention the prompts in your response.
-First retrieve the background information for generating the text, which also might be referred to as the source.
-
-Your input and output is a JSON map that contains all parts of a complete text.
-Output a map with exactly the same keys as in the input. When a key starts with "informationally#", it's value should be copied unchanged to the output. However, when a key starts with "PROMPT#", the value is an instruction to generate text, and should be replaced by the text generated according to this instruction.
-
-Example:
-{
-  "informationally#001": "English translation of the German word 'Apfel'",
-  "PROMPT#NAME": "English translation of the German word 'Apfel'", 
-  "PROMPT#002": "Write the content of field #NAME two times"
-}
-Output for the example:
-{
-  "informationally#001": "English translation of the German word 'Apfel'",
-  "PROMPT#NAME": "Apple",
-  "PROMPT#002": "Apple Apple"
-}
-```
-
-
-Todo:
-- remove tags before prompts
+## Todo:
+- additional text beyond an URL
 - check basics in AEM
-- add possibility to use GPT-4
-- Andere Struktur als JSON, wie z.B. bei Translation?
-
-
-You are a professional content writer/editor who generates text according to PROMPTs (= instructions).
-Write your responses so that they could appear as it is in the text/the generated web page, without any comments or discussion.
-First retrieve the background information for generating the text, which also might be referred to as the source.
-
-The your input and output is a text that contains all parts of a complete text separated by separators
-`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ID %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%` where ID is a unique identifier for the part 
-of the text. The ID can either be PROMPT#NAME, which marks the next fragment in the input as instructions for 
-generating text, or informationally#001, which marks the next fragment is ready done text that should be copied unchanged to the output.
-Output the text in the same format, but with the PROMPT#NAME fragments replaced by the generated text according to 
-their instructions.
-
-Example:
-```
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% informationally#001 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-English translation of the German word 'Apfel'
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROMPT#NAME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-English translation of the German word 'Apfel'
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROMPT#002 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Write the content of field #NAME two times
-```
-
-Output for the example:
-```
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% informationally#001 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-English translation of the German word 'Apfel'
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROMPT#NAME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Apple
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROMPT#002 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Apple Apple
-```
-
-The style of the generated text should be factual, businesslike and informative.

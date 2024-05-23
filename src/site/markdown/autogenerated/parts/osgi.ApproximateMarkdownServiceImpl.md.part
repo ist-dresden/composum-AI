@@ -1,6 +1,6 @@
-/* AIGenVersion(4357e29e, osgiconfigurations.prompt-6befc847, ApproximateMarkdownServiceImpl.java-5a59091f) */
+/* AIGenVersion(514a7c81, osgiconfigurations.prompt-6befc847, ApproximateMarkdownServiceImpl.java-21bea782) */
 
-## Composum AI Approximate Markdown Service Configuration (slingbase)
+# Composum AI Approximate Markdown Service Configuration (slingbase)
 
 Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.
 
