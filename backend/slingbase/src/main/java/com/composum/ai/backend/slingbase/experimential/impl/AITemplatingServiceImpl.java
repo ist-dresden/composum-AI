@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -91,7 +93,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     protected static final String SYSMSG = "You are a professional content writer / editor.\n" +
             "Generate text according to the prompt, and then print it without any additional comments.\n" +
             "Do not mention the prompt or the text or the act of text retrieval.\n" +
-            "Never ever repeat the prompt.\n" +
+            "Do NEVER EVER repeat the prompt!\n" +
             "Write your responses so that they could appear as they are in a text, without any comments or discussion.";
 
     protected static final String PREFIX_PROMPT = "Create a text for a web page that is based on the retrieved information according to the following instructions which are separated into several parts. The separators like \"%%%%%%%% ID %%%%%%%%\" should be printed as they are, to structure both the output and the instructions.\n\n";
@@ -163,7 +165,8 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                 LOG.info("Retrying since it seems the page was not properly completed. " + e);
                 continue;
             }
-            finished = THE_END_PATTERN.matcher(responses.get("END")).find();
+            String endmarker = responses.get("END");
+            finished = THE_END_PATTERN.matcher(StringUtils.defaultString(endmarker)).find();
             if (finished) break;
             LOG.info("Retrying since it seems the page was not properly completed.");
         }
@@ -187,8 +190,9 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      * Splits the response at the %%%%%%%% ID %%%%%%%% separators and puts the items into a map.
      * Inverse of {@link #joinText(Map)}.
      */
+    @Nonnull
     protected static Map<String, String> extractParts(String response) {
-        Map<String, String> parts = new LinkedHashMap<>();
+        final Map<String, String> parts = new LinkedHashMap<>();
         Matcher matcher = SEPARATOR_PATTERN.matcher(response);
         int lastEnd = 0;
         String id = null;
