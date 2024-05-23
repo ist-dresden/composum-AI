@@ -96,4 +96,14 @@ public class AITemplatingServiceImplTest {
         ec.checkThat(json, is("\"<p>a</p>\""));
     }
 
+    @Test
+    public void joinAndExtract() {
+        Map<String, String> prompts = new LinkedHashMap<>();
+        prompts.put("PROMPT#001", "something");
+        prompts.put("informationally#002", "Print as rich text HTML: <p><strong>markdown list of key features</strong></p>");
+        String joined = AITemplatingServiceImpl.joinText(prompts);
+        Map<String, String> result = AITemplatingServiceImpl.extractParts(joined);
+        ec.checkThat(result, is(prompts));
+    }
+
 }

@@ -94,9 +94,9 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             "Never ever repeat the prompt.\n" +
             "Write your responses so that they could appear as they are in a text, without any comments or discussion.";
 
-    protected static final String PREFIX_PROMPT = "Generate a JSON structure containing text content for a website page " +
-            "utilizing instructions provided below, which are divided into multiple sections. " +
-            "The JSON outcome should retain the original keys from the input, but each value is an instruction to be replaced by it's generated text.\n\n";
+    protected static final String PREFIX_PROMPT = "Create a text for a web page that is based on the retrieved information according to the following instructions which are separated into several parts. The separators like \"%%%%%%%% ID %%%%%%%%\" should be printed as they are, to structure both the output and the instructions.\n\n";
+
+    protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("(?m)^\\s*%{6,10}\\s*(?<id>\\S+)\\s*%{6,10}$");
 
     protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
     }.getType();
@@ -145,10 +145,40 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts);
 
         String response = chatCompletionService.getSingleChatCompletion(request);
-        Map<String, String> responses = gson.fromJson(response, TYPE_MAP_STRING_STRING);
+        Map<String, String> responses = extractParts(response);
 
         executeReplacements(responses, ids);
         return true;
+    }
+
+
+    protected static @NotNull String joinText(Map<String, String> prompts) {
+        StringBuilder prompt = new StringBuilder(PREFIX_PROMPT);
+        for (Map.Entry<String, String> entry : prompts.entrySet()) {
+            prompt.append("%%%%%%%% ").append(entry.getKey()).append(" %%%%%%%%\n");
+            prompt.append(entry.getValue().trim()).append("\n");
+        }
+        prompt.append("%%%%%%%% END %%%%%%%%\n");
+        String joinText = prompt.toString();
+        return joinText;
+    }
+
+    /**
+     * Splits the response at the %%%%%%%% ID %%%%%%%% separators and puts the items into a map.
+     * Inverse of {@link #joinText(Map)}.
+     */
+    protected static Map<String, String> extractParts(String response) {
+        Map<String, String> parts = new LinkedHashMap<>();
+        Matcher matcher = SEPARATOR_PATTERN.matcher(response);
+        int lastEnd = 0;
+        String id = null;
+        while (matcher.find()) {
+            int end = matcher.start();
+            if (id != null) parts.put(id, response.substring(lastEnd, end).trim());
+            lastEnd = matcher.end();
+            id = matcher.group("id");
+        }
+        return parts;
     }
 
     protected static void executeReplacements(Map<String, String> responses, Map<String, Replacement> ids) {
@@ -168,7 +198,6 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts) throws IOException, URISyntaxException {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
-        request.setConfiguration(GPTConfiguration.JSON.merge(config));
         StringBuilder sysprompt = new StringBuilder();
         sysprompt.append(SYSMSG);
         for (String pagePrompt : pagePrompts) {
@@ -182,7 +211,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                     "Please retrieve as source / background information for later prompts the text content of URL `" + url + "`");
             request.addMessage(GPTMessageRole.ASSISTANT, markdown);
         }
-        request.addMessage(GPTMessageRole.USER, PREFIX_PROMPT + gson.toJson(prompts));
+        request.addMessage(GPTMessageRole.USER, joinText(prompts));
         return request;
     }
 
@@ -207,7 +236,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             if (idmatch.find()) {
                 String name = idmatch.group("id");
                 id = name != null ? "PROMPT" + name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
-                prompt =  StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
+                prompt = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
                 prompt = (isRichtext ? "Print as rich text HTML: " : "Print as plain text: ") + prompt;
                 if (ids.containsKey(id)) {
                     LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);
