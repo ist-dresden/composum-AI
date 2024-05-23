@@ -223,6 +223,8 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts) throws IOException, URISyntaxException {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
+        config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config);
+        request.setConfiguration(config);
         StringBuilder sysprompt = new StringBuilder();
         sysprompt.append(SYSMSG);
         for (String pagePrompt : pagePrompts) {
