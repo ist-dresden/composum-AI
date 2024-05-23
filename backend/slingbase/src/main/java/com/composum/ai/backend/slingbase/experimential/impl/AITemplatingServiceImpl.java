@@ -135,7 +135,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     }
 
     @Override
-    public boolean replacePromptsInResource(Resource resource, String additionalPrompt, List<URI> additionalUrls)
+    public boolean replacePromptsInResource(Resource resource, String additionalPrompt, List<URI> additionalUrls, String backgroundInformation)
             throws URISyntaxException, IOException {
         resource = normalize(resource);
         List<Replacement> replacements = collectPossibleReplacements(resource);
@@ -153,7 +153,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         collectPrompts(replacements, ids, texts);
         texts.put("END", THE_END_COMMAND); // check whether the page is complete
 
-        GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts);
+        GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts, backgroundInformation);
 
         Map<String, String> responses = null;
         boolean finished = false;
@@ -220,7 +220,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         }
     }
 
-    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts) throws IOException, URISyntaxException {
+    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts, String backgroundInformation) throws IOException, URISyntaxException {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
         config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config);
@@ -235,8 +235,12 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         for (String url : urls) {
             String markdown = markdownService.getMarkdown(new URI(url));
             request.addMessage(GPTMessageRole.USER,
-                    "Please retrieve as source / background information for later prompts the text content of URL `" + url + "`");
+                    "Retrieve as source / background information for later prompts the text content of URL `" + url + "`");
             request.addMessage(GPTMessageRole.ASSISTANT, markdown);
+        }
+        if (StringUtils.isNotBlank(backgroundInformation)) {
+            request.addMessage(GPTMessageRole.USER, "Retrieve the background information for later prompts.");
+            request.addMessage(GPTMessageRole.ASSISTANT, backgroundInformation.trim());
         }
         request.addMessage(GPTMessageRole.USER, joinText(prompts));
         return request;

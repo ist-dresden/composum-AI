@@ -22,9 +22,11 @@ public interface AITemplatingService {
      *
      * @param resource         the resource to replace the prompts in
      * @param additionalPrompt optionally, an additional prompt to add to the AI request
+     * @param additionalUrls   optionally, additional URLs with background information to provide data to the AI
+     * @param backgroundInformation optionally, additional background information to provide data to the AI (not a prompt!)
      * @return true if the resource was changed, false if it was not changed; no commit yet.
      */
-    boolean replacePromptsInResource(Resource resource, String additionalPrompt, List<URI> additionalUrls) throws URISyntaxException, IOException;
+    boolean replacePromptsInResource(Resource resource, String additionalPrompt, List<URI> additionalUrls, String backgroundInformation) throws URISyntaxException, IOException;
 
     /**
      * Undo #replacePromptsInResource. Not commited yet.

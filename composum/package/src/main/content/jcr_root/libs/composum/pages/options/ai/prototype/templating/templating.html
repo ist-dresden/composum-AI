@@ -8,7 +8,7 @@ Include a one paragraph several sentence description what the application does a
 (including what the format of the processed page is like / what special placeholders or markers
 it uses including all formats of the possible markers and marker formats), and a one sentence description on each field.
 
-It should include a form that contains the parameters for the AITemplatingServlet. Only one additionalUrls parameter is needed.
+It should include a form that contains all the parameters for the AITemplatingServlet. Only one additionalUrls parameter is needed.
 There should be buttons for each of the methods (enum Method) defined in the servlet.
 
 Display the result of the execution in a div below the form; lines should be wrapped if larger than the page width.
@@ -18,7 +18,7 @@ On each submit the values of the fields should be stored in localStorage at key 
 and on first loading of the page the last values should be restored from there.
 
 AIGenCommand(foobar)
--upd
+-m gpt-4o -upd
 ../../../../../../../../../../../../../featurespecs/10PageTemplating.md
 ../../../../../../../../../../../../../backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITemplatingService.java
 ../../../../../../../../../../../../../backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITemplatingServlet.java
@@ -71,6 +71,11 @@ AIGenPromptEnd(foobar) -->
                 <input type="url" class="form-control" id="additionalUrls" name="additionalUrls">
                 <small class="form-text text-muted">Enter a URL for context.</small>
             </div>
+            <div class="form-group">
+                <label for="backgroundInformation">Background Information:</label>
+                <textarea class="form-control" id="backgroundInformation" name="backgroundInformation" rows="3"></textarea>
+                <small class="form-text text-muted">Optionally, provide additional background information for the AI.</small>
+            </div>
             <button type="submit" class="btn btn-primary" id="replacePromptsBtn">Replace Prompts</button>
             <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
         </form>
@@ -86,6 +91,7 @@ AIGenPromptEnd(foobar) -->
             $('#resourcePath').val(formData.resourcePath || '');
             $('#additionalPrompt').val(formData.additionalPrompt || '');
             $('#additionalUrls').val(formData.additionalUrls || '');
+            $('#backgroundInformation').val(formData.backgroundInformation || '');
 
             $('#templatingForm').submit(function(event) {
                 event.preventDefault();
@@ -93,7 +99,8 @@ AIGenPromptEnd(foobar) -->
                 var formData = {
                     resourcePath: $('#resourcePath').val(),
                     additionalPrompt: $('#additionalPrompt').val(),
-                    additionalUrls: $('#additionalUrls').val()
+                    additionalUrls: $('#additionalUrls').val(),
+                    backgroundInformation: $('#backgroundInformation').val()
                 };
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
@@ -115,4 +122,4 @@ AIGenPromptEnd(foobar) -->
 </body>
 </html>
 
-<!-- AIGenVersion(70106ed5, templating.html-5980e6b2, 10PageTemplating.md-0554cec8, AITemplatingService.java-4c6d308a, AITemplatingServlet.java-29577391) -->
+<!-- AIGenVersion(61b2c10c, templating.html-4a6fd7de, 10PageTemplating.md-595abacb, AITemplatingService.java-69773497, AITemplatingServlet.java-00b33607) -->

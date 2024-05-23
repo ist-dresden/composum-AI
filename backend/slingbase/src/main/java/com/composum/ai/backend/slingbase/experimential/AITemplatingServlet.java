@@ -45,6 +45,15 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(AITemplatingServlet.class);
 
+    /** Parameter that gives the page to transform. */
+    public static final String PARAM_RESOURCE_PATH = "resourcePath";
+    /** Parameter that gives an additional prompt to add to the AI request. */
+    public static final String PARAM_ADDITIONAL_PROMPT = "additionalPrompt";
+    /** Parameter that gives additional URLs with background information to provide data to the AI. */
+    public static final String PARAM_ADDITIONAL_URLS = "additionalUrls";
+    /** Parameter that gives additional background information to provide data to the AI (not a prompt!). */
+    public static final String PARAM_BACKGROUND_INFORMATION = "backgroundInformation";
+
     @Reference
     private AITemplatingService aiTemplatingService;
 
@@ -70,17 +79,18 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
     }
 
     protected void replacePromptsInResource(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        String resourcePath = request.getParameter("resourcePath");
-        String additionalPrompt = request.getParameter("additionalPrompt");
-        List<URI> additionalUrls = Stream.of(request.getParameterValues("additionalUrls"))
+        String resourcePath = request.getParameter(PARAM_RESOURCE_PATH);
+        String additionalPrompt = request.getParameter(PARAM_ADDITIONAL_PROMPT);
+        List<URI> additionalUrls = Stream.of(request.getParameterValues(PARAM_ADDITIONAL_URLS))
                 .filter(s -> s != null && !s.trim().isEmpty())
                 .flatMap(s -> Stream.of(s.split("\\s+")))
                 .map(URI::create)
                 .collect(Collectors.toList());
+        String backgroundInformation = request.getParameter(PARAM_BACKGROUND_INFORMATION);
         try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
             try {
                 Resource resource = request.getResourceResolver().getResource(resourcePath);
-                boolean changed = aiTemplatingService.replacePromptsInResource(resource, additionalPrompt, additionalUrls);
+                boolean changed = aiTemplatingService.replacePromptsInResource(resource, additionalPrompt, additionalUrls, backgroundInformation);
                 if (changed) request.getResourceResolver().commit();
                 writeToResponse(writer, response, true, changed, (changed ? "Successfully " : "No changes made: ") +
                         "replacing prompts in resource " + resourcePath);
@@ -103,7 +113,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
     }
 
     protected void resetToPrompts(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        String resourcePath = request.getParameter("resourcePath");
+        String resourcePath = request.getParameter(PARAM_RESOURCE_PATH);
         try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
             try {
                 Resource resource = request.getResourceResolver().getResource(resourcePath);

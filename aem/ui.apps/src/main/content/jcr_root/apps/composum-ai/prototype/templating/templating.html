@@ -52,6 +52,11 @@ AIGenPromptEnd(foobar) -->
                 <input type="url" class="form-control" id="additionalUrls" name="additionalUrls">
                 <small class="form-text text-muted">Enter a URL for context.</small>
             </div>
+            <div class="form-group">
+                <label for="backgroundInformation">Background Information:</label>
+                <textarea class="form-control" id="backgroundInformation" name="backgroundInformation" rows="3"></textarea>
+                <small class="form-text text-muted">Optionally, provide additional background information for the AI.</small>
+            </div>
             <button type="submit" class="btn btn-primary" id="replacePromptsBtn">Replace Prompts</button>
             <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
         </form>
@@ -67,6 +72,7 @@ AIGenPromptEnd(foobar) -->
             $('#resourcePath').val(formData.resourcePath || '');
             $('#additionalPrompt').val(formData.additionalPrompt || '');
             $('#additionalUrls').val(formData.additionalUrls || '');
+            $('#backgroundInformation').val(formData.backgroundInformation || '');
 
             $('#templatingForm').submit(function(event) {
                 event.preventDefault();
@@ -74,7 +80,8 @@ AIGenPromptEnd(foobar) -->
                 var formData = {
                     resourcePath: $('#resourcePath').val(),
                     additionalPrompt: $('#additionalPrompt').val(),
-                    additionalUrls: $('#additionalUrls').val()
+                    additionalUrls: $('#additionalUrls').val(),
+                    backgroundInformation: $('#backgroundInformation').val()
                 };
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
@@ -99,4 +106,4 @@ AIGenPromptEnd(foobar) -->
 <!--  -->
 
 
-<!-- AIGenVersion(0377119a, templating.html-0caedaea, templating.html-70106ed5) -->
+<!-- AIGenVersion(32a9634e, templating.html-0caedaea, templating.html-61b2c10c) -->
