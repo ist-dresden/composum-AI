@@ -81,27 +81,22 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     /**
      * Pattern for a PAGEPROMPT: ... - all lines to the end of the field are in group "url".
      */
-    protected static final Pattern PAGEPROMPT = Pattern.compile("PAGEPROMPT:(?<prompt>.*)$", Pattern.MULTILINE);
+    protected static final Pattern PAGEPROMPT = Pattern.compile("PAGEPROMPT:(?<prompt>.*)$", Pattern.DOTALL);
 
-    protected static final String SYSMSG = "You are a professional content writer / editor who generates text according to prompts (= instructions). \n" +
-            "Write your responses so that they could appear as it is in the text / the generated web page, without any comments or discussion.\n" +
-            "First retrieve the background information for generating the text, which also might be referred to as the source.\n" +
-            "\n" +
-            "Your input and output is a JSON map that contains all parts of a complete text.\n" +
-            "Output a map with exactly the same keys as in the input. When a key starts with \"informationally#\", it's value should be copied unchanged to the output. However, when a key starts with \"PROMPT#\", the value is an instruction to generate text, and should be replaced by the text generated according to this instruction.\n" +
-            "\n" +
-            "Example:\n" +
-            "{\n" +
-            "  \"informationally#001\": \"English translation of the German word 'Apfel'\",\n" +
-            "  \"PROMPT#NAME\": \"English translation of the German word 'Apfel'\", \n" +
-            "  \"PROMPT#002\": \"Write the content of field #NAME two times\"\n" +
-            "}\n" +
-            "Output for the example:\n" +
-            "{\n" +
-            "  \"informationally#001\": \"English translation of the German word 'Apfel'\",\n" +
-            "  \"PROMPT#NAME\": \"Apple\",\n" +
-            "  \"PROMPT#002\": \"Apple Apple\"\n" +
-            "}\n";
+    /**
+     * Heuristics to identify richtext properties: start and end with a HTML tag.
+     */
+    protected static final Pattern RICHTEXT_PATTERN = Pattern.compile("\\s*<\\s*\\w+\\s*>.*</\\s*\\w+\\s*>\\s*", Pattern.DOTALL);
+
+    protected static final String SYSMSG = "You are a professional content writer / editor." +
+            "Generate text according to the prompt, and then print it without any additional comments." +
+            "Do not mention the prompt or the text or the act of text retrieval." +
+            "Never ever repeat the prompt." +
+            "Write your responses so that they could appear as they are in a text, without any comments or discussion.";
+
+    protected static final String PREFIX_PROMPT = "Generate a JSON structure containing text content for a website page " +
+            "utilizing instructions provided below, which are divided into multiple sections. " +
+            "The JSON outcome should retain the original keys from the input, with values transformed as per the corresponding instructions.";
 
     protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
     }.getType();
@@ -139,7 +134,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         Map<String, Replacement> ids = new HashMap<>();
         Map<String, String> texts = new LinkedHashMap<>(); // we want to keep the ordering of the texts!
 
-        collectTexts(replacements, ids, texts);
+        collectPrompts(replacements, ids, texts);
 
         List<String> urls = extractSourceUrls(replacements);
         if (additionalUrls != null) {
@@ -170,7 +165,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         }
     }
 
-    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> texts) throws IOException, URISyntaxException {
+    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts) throws IOException, URISyntaxException {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
         request.setConfiguration(GPTConfiguration.JSON.merge(config));
@@ -187,7 +182,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                     "Please retrieve as source / background information for later prompts the text content of URL `" + url + "`");
             request.addMessage(GPTMessageRole.ASSISTANT, markdown);
         }
-        request.addMessage(GPTMessageRole.USER, gson.toJson(texts));
+        request.addMessage(GPTMessageRole.USER, PREFIX_PROMPT + gson.toJson(prompts));
         return request;
     }
 
@@ -202,15 +197,18 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         return replacements;
     }
 
-    protected static void collectTexts(List<Replacement> replacements, Map<String, Replacement> ids, Map<String, String> texts) {
+    protected static void collectPrompts(List<Replacement> replacements, Map<String, Replacement> ids, Map<String, String> prompts) {
         AtomicInteger counter = new AtomicInteger();
         for (Replacement replacement : replacements) {
+            boolean isRichtext = RICHTEXT_PATTERN.matcher(replacement.text).matches();
+            String prompt;
             Matcher idmatch = PROMPTFIELD.matcher(replacement.text);
             String id;
             if (idmatch.find()) {
                 String name = idmatch.group("id");
                 id = name != null ? name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
-                replacement.text = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
+                prompt = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
+                prompt = (isRichtext ? "Print as rich text HTML: " : "Print as plain text: ") + prompt;
                 if (ids.containsKey(id)) {
                     LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);
                     throw new IllegalArgumentException("The resource contains a declaration for the key " + id + " twice.");
@@ -218,8 +216,9 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                 ids.put(id, replacement);
             } else {
                 id = PREFIX_INFORMATIONALLY + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
+                prompt = "Print unchanged the quoted text without the quotes: ```" + replacement.text + "```";
             }
-            texts.put(id, replacement.text);
+            prompts.put(id, prompt);
         }
     }
 

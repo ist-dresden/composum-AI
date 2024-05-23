@@ -32,7 +32,7 @@ public class AITemplatingServiceImplTest {
     }
 
     @Test
-    public void testCollectTexts_withValidReplacements() {
+    public void testCollectPrompts_withValidReplacements() {
         Replacement r1 = new Replacement(null, "property1", "PROMPTFIELD: single sentence invitation to check out the product");
         Replacement r2 = new Replacement(null, "property2", "PROMPTFIELD#ID1: name of the product");
         Replacement r3 = new Replacement(null, "property3", "<p><strong>PROMPTFIELD: markdown list of key features</strong></p>");
@@ -42,15 +42,15 @@ public class AITemplatingServiceImplTest {
         Map<String, Replacement> ids = new HashMap<>();
         Map<String, String> texts = new LinkedHashMap<>();
 
-        AITemplatingServiceImpl.collectTexts(replacements, ids, texts);
+        AITemplatingServiceImpl.collectPrompts(replacements, ids, texts);
 
         ec.checkThat(texts.size(), is(4));
         ec.checkThat(texts.keySet(), allOf(hasItem("PROMPT#001"), hasItem("#ID1"), hasItem("PROMPT#002"), hasItem("informationally#003")));
 
-        ec.checkThat(texts.get("PROMPT#001"), is("single sentence invitation to check out the product"));
-        ec.checkThat(texts.get("#ID1"), is("name of the product"));
-        ec.checkThat(texts.get("PROMPT#002"), is("<p><strong>markdown list of key features</strong></p>"));
-        ec.checkThat(texts.get("informationally#003"), is("Key Features"));
+        ec.checkThat(texts.get("PROMPT#001"), is("Print as plain text: single sentence invitation to check out the product"));
+        ec.checkThat(texts.get("#ID1"), is("Print as plain text: name of the product"));
+        ec.checkThat(texts.get("PROMPT#002"), is("Print as rich text HTML: <p><strong>markdown list of key features</strong></p>"));
+        ec.checkThat(texts.get("informationally#003"), is("Print unchanged the quoted text without the quotes: ```Key Features```"));
 
         ec.checkThat(ids.size(), is(3));
         ec.checkThat(ids.get("PROMPT#001"), is(r1));
@@ -59,7 +59,7 @@ public class AITemplatingServiceImplTest {
     }
 
     @Test
-    public void testCollectTexts_withDuplicateIds() {
+    public void testCollectPrompts_withDuplicateIds() {
         List<Replacement> replacements = Arrays.asList(
                 new Replacement(null, "property1", "PROMPTFIELD#ID1: name of the product"),
                 new Replacement(null, "property2", "PROMPTFIELD#ID1: another name of the product")
@@ -68,7 +68,7 @@ public class AITemplatingServiceImplTest {
         Map<String, Replacement> ids = new HashMap<>();
         Map<String, String> texts = new LinkedHashMap<>();
 
-        ec.checkThrows(IllegalArgumentException.class, () -> AITemplatingServiceImpl.collectTexts(replacements, ids, texts));
+        ec.checkThrows(IllegalArgumentException.class, () -> AITemplatingServiceImpl.collectPrompts(replacements, ids, texts));
     }
 
     @Test
