@@ -79,7 +79,7 @@ AIGenPromptEnd(foobar) -->
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
                 $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', true);
-                $('#resultDiv').html('');
+                $('#resultDiv').html('Contacting the AI ...');
                 $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
                     .done(function(data) {
                         $('#resultDiv').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
@@ -99,4 +99,4 @@ AIGenPromptEnd(foobar) -->
 <!--  -->
 
 
-<!-- AIGenVersion(4b349df0, templating.html-0caedaea, templating.html-61db2b28) -->
+<!-- AIGenVersion(0377119a, templating.html-0caedaea, templating.html-70106ed5) -->

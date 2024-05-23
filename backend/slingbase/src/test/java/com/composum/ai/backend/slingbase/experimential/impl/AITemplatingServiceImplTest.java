@@ -45,12 +45,12 @@ public class AITemplatingServiceImplTest {
         AITemplatingServiceImpl.collectTexts(replacements, ids, texts);
 
         ec.checkThat(texts.size(), is(4));
-        ec.checkThat(texts.keySet(), allOf(hasItem("PROMPT#001"), hasItem("#ID1"), hasItem("PROMPT#002"), hasItem("informationally003")));
+        ec.checkThat(texts.keySet(), allOf(hasItem("PROMPT#001"), hasItem("#ID1"), hasItem("PROMPT#002"), hasItem("informationally#003")));
 
         ec.checkThat(texts.get("PROMPT#001"), is("single sentence invitation to check out the product"));
         ec.checkThat(texts.get("#ID1"), is("name of the product"));
         ec.checkThat(texts.get("PROMPT#002"), is("<p><strong>markdown list of key features</strong></p>"));
-        ec.checkThat(texts.get("informationally003"), is("Key Features"));
+        ec.checkThat(texts.get("informationally#003"), is("Key Features"));
 
         ec.checkThat(ids.size(), is(3));
         ec.checkThat(ids.get("PROMPT#001"), is(r1));

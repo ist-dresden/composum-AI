@@ -71,7 +71,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(?<prefix>(<\\w+>\\s*)*)PROMPTFIELD(?<id>#\\w+)?:\\s*");
 
     /* A prefix for keys that says this is not a prompt but a text that can be used to analyze the flow of the page. */
-    protected static final String PREFIX_INFORMATIONALLY = "informationally";
+    protected static final String PREFIX_INFORMATIONALLY = "informationally#";
 
     /**
      * Pattern for a <code>SOURCEURL(https://example.com/)</code> to extract the URL - group "url".
@@ -81,10 +81,10 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     /**
      * Pattern for a PAGEPROMPT: ... - all lines to the end of the field are in group "url".
      */
-    protected static final Pattern PAGEPROMPT = Pattern.compile("^PAGEPROMPT:(?<prompt>.*)$", Pattern.MULTILINE);
+    protected static final Pattern PAGEPROMPT = Pattern.compile("PAGEPROMPT:(?<prompt>.*)$", Pattern.MULTILINE);
 
     protected static final String SYSMSG = "You are a professional content writer / editor who generates text according to prompts (= instructions). \n" +
-            "Write your response so that it could appear as it is in the text, without any comments or discussion.\n" +
+            "Write your responses so that they could appear as it is in the text / the generated web page, without any comments or discussion.\n" +
             "First retrieve the background information for generating the text, which also might be referred to as the source.\n" +
             "\n" +
             "Your input and output is a JSON map that contains all parts of a complete text.\n" +

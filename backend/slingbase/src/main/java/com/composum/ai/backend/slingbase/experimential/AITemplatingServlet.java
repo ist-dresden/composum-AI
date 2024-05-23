@@ -74,6 +74,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
         String additionalPrompt = request.getParameter("additionalPrompt");
         List<URI> additionalUrls = Stream.of(request.getParameterValues("additionalUrls"))
                 .filter(s -> s != null && !s.trim().isEmpty())
+                .flatMap(s -> Stream.of(s.split("\\s+")))
                 .map(URI::create)
                 .collect(Collectors.toList());
         try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {

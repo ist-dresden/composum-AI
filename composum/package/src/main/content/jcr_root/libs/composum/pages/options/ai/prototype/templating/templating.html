@@ -12,7 +12,7 @@ It should include a form that contains the parameters for the AITemplatingServle
 There should be buttons for each of the methods (enum Method) defined in the servlet.
 
 Display the result of the execution in a div below the form; lines should be wrapped if larger than the page width.
-Disable the buttons and reset the result while the request is running.
+Disable the buttons and reset the result to 'Contacting the AI ...' while the request is running.
 
 On each submit the values of the fields should be stored in localStorage at key composum-ai-prototype-templating ,
 and on first loading of the page the last values should be restored from there.
@@ -98,7 +98,7 @@ AIGenPromptEnd(foobar) -->
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
                 $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', true);
-                $('#resultDiv').html('');
+                $('#resultDiv').html('Contacting the AI ...');
                 $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
                     .done(function(data) {
                         $('#resultDiv').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
@@ -115,4 +115,4 @@ AIGenPromptEnd(foobar) -->
 </body>
 </html>
 
-<!-- AIGenVersion(61db2b28, templating.html-0eceb851, 10PageTemplating.md-0554cec8, AITemplatingService.java-4c6d308a, AITemplatingServlet.java-04c53c09) -->
+<!-- AIGenVersion(70106ed5, templating.html-5980e6b2, 10PageTemplating.md-0554cec8, AITemplatingService.java-4c6d308a, AITemplatingServlet.java-29577391) -->
