@@ -88,15 +88,15 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      */
     protected static final Pattern RICHTEXT_PATTERN = Pattern.compile("\\s*<\\s*\\w+\\s*>.*</\\s*\\w+\\s*>\\s*", Pattern.DOTALL);
 
-    protected static final String SYSMSG = "You are a professional content writer / editor." +
-            "Generate text according to the prompt, and then print it without any additional comments." +
-            "Do not mention the prompt or the text or the act of text retrieval." +
-            "Never ever repeat the prompt." +
+    protected static final String SYSMSG = "You are a professional content writer / editor.\n" +
+            "Generate text according to the prompt, and then print it without any additional comments.\n" +
+            "Do not mention the prompt or the text or the act of text retrieval.\n" +
+            "Never ever repeat the prompt.\n" +
             "Write your responses so that they could appear as they are in a text, without any comments or discussion.";
 
     protected static final String PREFIX_PROMPT = "Generate a JSON structure containing text content for a website page " +
             "utilizing instructions provided below, which are divided into multiple sections. " +
-            "The JSON outcome should retain the original keys from the input, with values transformed as per the corresponding instructions.";
+            "The JSON outcome should retain the original keys from the input, but each value is an instruction to be replaced by it's generated text.\n\n";
 
     protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
     }.getType();
@@ -134,13 +134,13 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         Map<String, Replacement> ids = new HashMap<>();
         Map<String, String> texts = new LinkedHashMap<>(); // we want to keep the ordering of the texts!
 
-        collectPrompts(replacements, ids, texts);
-
         List<String> urls = extractSourceUrls(replacements);
         if (additionalUrls != null) {
             additionalUrls.stream().map(URI::toString).forEach(urls::add);
         }
-        List<String> pagePrompts = extractPagePrompts(replacements);
+        List<String> pagePrompts = extractPagePrompts(replacements); // before collectPrompts since it removes the page prompts
+
+        collectPrompts(replacements, ids, texts);
 
         GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts);
 
@@ -206,8 +206,8 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             String id;
             if (idmatch.find()) {
                 String name = idmatch.group("id");
-                id = name != null ? name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
-                prompt = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
+                id = name != null ? "PROMPT" + name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
+                prompt =  StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
                 prompt = (isRichtext ? "Print as rich text HTML: " : "Print as plain text: ") + prompt;
                 if (ids.containsKey(id)) {
                     LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);

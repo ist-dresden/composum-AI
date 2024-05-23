@@ -45,16 +45,16 @@ public class AITemplatingServiceImplTest {
         AITemplatingServiceImpl.collectPrompts(replacements, ids, texts);
 
         ec.checkThat(texts.size(), is(4));
-        ec.checkThat(texts.keySet(), allOf(hasItem("PROMPT#001"), hasItem("#ID1"), hasItem("PROMPT#002"), hasItem("informationally#003")));
+        ec.checkThat(texts.keySet(), allOf(hasItem("PROMPT#001"), hasItem("PROMPT#ID1"), hasItem("PROMPT#002"), hasItem("informationally#003")));
 
         ec.checkThat(texts.get("PROMPT#001"), is("Print as plain text: single sentence invitation to check out the product"));
-        ec.checkThat(texts.get("#ID1"), is("Print as plain text: name of the product"));
+        ec.checkThat(texts.get("PROMPT#ID1"), is("Print as plain text: name of the product"));
         ec.checkThat(texts.get("PROMPT#002"), is("Print as rich text HTML: <p><strong>markdown list of key features</strong></p>"));
         ec.checkThat(texts.get("informationally#003"), is("Print unchanged the quoted text without the quotes: ```Key Features```"));
 
         ec.checkThat(ids.size(), is(3));
         ec.checkThat(ids.get("PROMPT#001"), is(r1));
-        ec.checkThat(ids.get("#ID1"), is(r2));
+        ec.checkThat(ids.get("PROMPT#ID1"), is(r2));
         ec.checkThat(ids.get("PROMPT#002"), is(r3));
     }
 
