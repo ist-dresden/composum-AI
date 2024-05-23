@@ -83,6 +83,5 @@ Print as rich text HTML:  a brief overview what the product is. One paragraph.</
 We save the prompts on the page in the JCR, so that it can be reset to the original prompts / the process can be
 repeated.
 
-## Todo:
-- additional text beyond an URL
-- check basics in AEM
+[10PageTemplatingExample.json](samples/10PageTemplatingExample.json) is an example JSON request to create a page 
+from a template (tryable e.g. with https://chatgpttools.stoerr.net/chatgpttools/multiplemessagechat.html).
