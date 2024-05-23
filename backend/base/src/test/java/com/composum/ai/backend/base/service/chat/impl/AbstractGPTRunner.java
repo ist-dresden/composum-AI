@@ -69,7 +69,7 @@ public abstract class AbstractGPTRunner {
 
             @Override
             public String imageModel() {
-                return "gpt-4-turbo";
+                return "gpt-4o";
             }
 
             @Override
