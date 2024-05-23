@@ -98,6 +98,14 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
     protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("(?m)^\\s*%{6,10}\\s*(?<id>\\S+)\\s*%{6,10}$");
 
+    protected static final String THE_END_COMMAND = "Print as plain text: 'end of page' in parentheses";
+
+    /**
+     * Matches a properly executed {@link #THE_END_COMMAND}.
+     */
+    protected static final Pattern THE_END_PATTERN = Pattern.compile("\\(\\s*end of page\\s*\\)");
+
+
     protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
     }.getType();
 
@@ -141,11 +149,25 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         List<String> pagePrompts = extractPagePrompts(replacements); // before collectPrompts since it removes the page prompts
 
         collectPrompts(replacements, ids, texts);
+        texts.put("END", THE_END_COMMAND); // check whether the page is complete
 
         GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts);
 
-        String response = chatCompletionService.getSingleChatCompletion(request);
-        Map<String, String> responses = extractParts(response);
+        Map<String, String> responses = null;
+        boolean finished = false;
+        for (int i = 0; i < 3; ++i) {
+            String response = chatCompletionService.getSingleChatCompletion(request);
+            try {
+                responses = extractParts(response);
+            } catch (AITemplatingRetryableException e) {
+                LOG.info("Retrying since it seems the page was not properly completed. " + e);
+                continue;
+            }
+            finished = THE_END_PATTERN.matcher(responses.get("END")).find();
+            if (finished) break;
+            LOG.info("Retrying since it seems the page was not properly completed.");
+        }
+        LOG.warn("Giving up after 3 tries - template was not properly executed. We still replace it so that it's easier to fix.");
 
         executeReplacements(responses, ids);
         return true;
@@ -158,9 +180,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             prompt.append("%%%%%%%% ").append(entry.getKey()).append(" %%%%%%%%\n");
             prompt.append(entry.getValue().trim()).append("\n");
         }
-        prompt.append("%%%%%%%% END %%%%%%%%\n");
-        String joinText = prompt.toString();
-        return joinText;
+        return prompt.toString();
     }
 
     /**
@@ -178,16 +198,17 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             lastEnd = matcher.end();
             id = matcher.group("id");
         }
+        if (id != null) parts.put(id, response.substring(lastEnd).trim());
         return parts;
     }
 
     protected static void executeReplacements(Map<String, String> responses, Map<String, Replacement> ids) {
         for (Map.Entry<String, String> entry : responses.entrySet()) {
             Replacement replacement = ids.get(entry.getKey());
-            if (entry.getKey().startsWith(PREFIX_INFORMATIONALLY)) {
+            if (entry.getKey().startsWith(PREFIX_INFORMATIONALLY) || entry.getKey().equals("END")) {
                 continue;
             } else if (replacement == null) { // retry? For now, we give up.
-                throw new IllegalStateException("The response contains a key that was not in the prompts: " + entry.getKey());
+                throw new AITemplatingRetryableException("The response contains a key that was not in the prompts: " + entry.getKey());
             }
             ModifiableValueMap properties = replacement.resource.adaptTo(ModifiableValueMap.class);
             properties.put(PROPERTY_PREFIX_PROMPT + replacement.property, properties.get(replacement.property));
@@ -329,6 +350,13 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             // too much information: sb.append(", prompt='").append(prompt).append('\'');
             sb.append('}');
             return sb.toString();
+        }
+    }
+
+    /** An exception that says something is wrong with the response, but that might be temporary and can be retried. */
+    protected static class AITemplatingRetryableException extends RuntimeException {
+        public AITemplatingRetryableException(String message) {
+            super(message);
         }
     }
 
