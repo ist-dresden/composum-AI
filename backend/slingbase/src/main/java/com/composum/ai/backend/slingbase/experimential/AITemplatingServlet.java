@@ -2,6 +2,8 @@ package com.composum.ai.backend.slingbase.experimential;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,6 +11,7 @@ import java.util.stream.Stream;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -21,6 +24,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
@@ -45,17 +49,28 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(AITemplatingServlet.class);
 
-    /** Parameter that gives the page to transform. */
+    /**
+     * Parameter that gives the page to transform.
+     */
     public static final String PARAM_RESOURCE_PATH = "resourcePath";
-    /** Parameter that gives an additional prompt to add to the AI request. */
+    /**
+     * Parameter that gives an additional prompt to add to the AI request.
+     */
     public static final String PARAM_ADDITIONAL_PROMPT = "additionalPrompt";
-    /** Parameter that gives additional URLs with background information to provide data to the AI. */
+    /**
+     * Parameter that gives additional URLs or paths to pages with background information to provide data to the AI.
+     */
     public static final String PARAM_ADDITIONAL_URLS = "additionalUrls";
-    /** Parameter that gives additional background information to provide data to the AI (not a prompt!). */
+    /**
+     * Parameter that gives additional background information to provide data to the AI (not a prompt!).
+     */
     public static final String PARAM_BACKGROUND_INFORMATION = "backgroundInformation";
 
     @Reference
     private AITemplatingService aiTemplatingService;
+
+    @Reference
+    private ApproximateMarkdownService approximateMarkdownService;
 
     protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -81,15 +96,21 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
     protected void replacePromptsInResource(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String resourcePath = request.getParameter(PARAM_RESOURCE_PATH);
         String additionalPrompt = request.getParameter(PARAM_ADDITIONAL_PROMPT);
-        List<URI> additionalUrls = Stream.of(request.getParameterValues(PARAM_ADDITIONAL_URLS))
+        List<URI> additionalUrls = new ArrayList(Stream.of(request.getParameterValues(PARAM_ADDITIONAL_URLS))
                 .filter(s -> s != null && !s.trim().isEmpty())
                 .flatMap(s -> Stream.of(s.split("\\s+")))
                 .map(URI::create)
-                .collect(Collectors.toList());
-        String backgroundInformation = request.getParameter(PARAM_BACKGROUND_INFORMATION);
+                .collect(Collectors.toList()));
         try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
             try {
+                String backgroundInformation = collectBackgroundInfoPaths(request, response, additionalUrls);
+                if (request.getParameter(PARAM_BACKGROUND_INFORMATION) != null) {
+                    backgroundInformation = backgroundInformation + request.getParameter(PARAM_BACKGROUND_INFORMATION);
+                }
                 Resource resource = request.getResourceResolver().getResource(resourcePath);
+                if (resource == null) {
+                    throw new IllegalArgumentException("Resource at " + resourcePath + " does not exist.");
+                }
                 boolean changed = aiTemplatingService.replacePromptsInResource(resource, additionalPrompt, additionalUrls, backgroundInformation);
                 if (changed) request.getResourceResolver().commit();
                 writeToResponse(writer, response, true, changed, (changed ? "Successfully " : "No changes made: ") +
@@ -101,7 +122,36 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
         }
     }
 
-    protected void writeToResponse(JsonWriter writer, SlingHttpServletResponse response, boolean success, boolean changes, String message) throws IOException {
+    /**
+     * If some of the URLs are paths, we read the markdown for those pages. This cannot be done in the service easily since
+     * we need the request and response objects for generating the markdown.
+     */
+    protected String collectBackgroundInfoPaths(SlingHttpServletRequest request, SlingHttpServletResponse response, List<URI> additionalUrls) {
+        StringBuilder backgroundInformation = new StringBuilder();
+        Iterator<URI> additionalUrlsIterator = additionalUrls.iterator();
+        while (additionalUrlsIterator.hasNext()) {
+            URI uri = additionalUrlsIterator.next();
+            if (uri.toString().startsWith("/")) { // assume it's a JCR path.
+                String path = uri.toString();
+                if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+                if (path.endsWith(".html")) path = path.substring(0, path.length() - 5);
+                Resource resource = request.getResourceResolver().getResource(path);
+                if (resource != null) {
+                    String markdown = approximateMarkdownService.approximateMarkdown(resource, request, response);
+                    if (StringUtils.isNotBlank(markdown)) {
+                        backgroundInformation.append(markdown).append("\n\n");
+                    } else {
+                        throw new IllegalArgumentException("Resource at " + path + " does not contain any text.");
+                    }
+                    additionalUrlsIterator.remove();
+                }
+            }
+        }
+        return backgroundInformation.toString();
+    }
+
+    protected void writeToResponse(JsonWriter writer, SlingHttpServletResponse response, boolean success,
+                                   boolean changes, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         writer.beginObject();
@@ -112,7 +162,8 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
         writer.flush();
     }
 
-    protected void resetToPrompts(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+    protected void resetToPrompts(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
+            IOException {
         String resourcePath = request.getParameter(PARAM_RESOURCE_PATH);
         try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
             try {
