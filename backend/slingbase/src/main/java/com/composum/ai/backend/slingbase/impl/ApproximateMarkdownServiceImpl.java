@@ -111,6 +111,16 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @Nullable
     protected Pattern labeledAttributePatternDeny;
 
+    /**
+     * Whitelist for URLs we can connect to get the markdown. Required - the URL has to match one of the patterns.
+     */
+    protected List<Pattern> urlBlacklist;
+
+    /**
+     * Blacklist for URLs we can connect to get the markdown. The URL must not match one of the patterns.
+     */
+    protected List<Pattern> urlWhitelist;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServiceImpl.class);
 
@@ -245,6 +255,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @NotNull
     @Override
     public String getMarkdown(@Nonnull URI uri) throws MalformedURLException, IOException, IllegalArgumentException {
+        checkUrlAdmissible(uri);
         URLConnection conn = uri.toURL().openConnection();
         conn.setConnectTimeout(3000);
         conn.setReadTimeout(3000);
@@ -263,6 +274,15 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             } else {
                 throw new IllegalArgumentException("Unsupported content type " + contentType + " for " + uri);
             }
+        }
+    }
+
+    protected void checkUrlAdmissible(URI uri) {
+        if (urlBlacklist.stream().anyMatch(pattern -> pattern.matcher(uri.toString()).find())) {
+            throw new IllegalArgumentException("URL " + uri + " is blacklisted.");
+        }
+        if (urlWhitelist.isEmpty() || urlWhitelist.stream().noneMatch(pattern -> pattern.matcher(uri.toString()).find())) {
+            throw new IllegalArgumentException("URL " + uri + " is not whitelisted.");
         }
     }
 
@@ -335,6 +355,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         labeledAttributePatternDeny = AllowDenyMatcherUtil.joinPatternsIntoAnyMatcher(config.labelledAttributePatternDeny());
         labelledAttributeOrder = Stream.of(config.labelledAttributeOrder())
                 .filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        urlBlacklist = Stream.of(config.urlSourceBlacklist() != null ? config.urlSourceBlacklist() : new String[0])
+                .filter(StringUtils::isNotBlank).map(Pattern::compile).collect(Collectors.toList());
+        urlWhitelist = Stream.of(config.urlSourceWhitelist() != null ? config.urlSourceWhitelist() : new String[0])
+                .filter(StringUtils::isNotBlank).map(Pattern::compile).collect(Collectors.toList());
     }
 
     @Deactivate
@@ -371,6 +395,23 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         @AttributeDefinition(name = "Labelled Attribute Order",
                 description = "List of labelled attributes that come first if they are present, in the given order.")
         String[] labelledAttributeOrder() default {};
+
+        @AttributeDefinition(name = "URL Source Whitelist Regex",
+                description = "Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off." +
+                        "For security reasons you might want to prevent local addresses to be contacted." +
+                        "To allow everything you might use https?://.* , but make sure you have a good blacklist in that case.")
+        String[] urlSourceWhitelist();
+
+        @AttributeDefinition(name = "URL Source Blacklist Regex",
+                description = "Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist.")
+        String[] urlSourceBlacklist() default {
+                ".*localhost.*",
+                "^(?!https?://).*",  // URLs that are not http / https are not allowed
+                // URLs where the host name is only digits / periods (numeric IPs)
+                ".*://[0-9.]*/.*",
+                // IPv6 hostnames in URLs are not allowed:
+                ".*://\\[[0-9a-fA-F:]*\\].*",
+        };
 
     }
 
