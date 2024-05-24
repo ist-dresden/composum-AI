@@ -9,11 +9,9 @@
 
 - Choose tags from existing tags, AEM like?
 - Page assistant in preview: can also process selected text!
-- Site specific or global templates for prompts.
 - Global configuration for prompts: e.g. glossary, important terms, background information.
 - Bug: translation in all properties component - fill german value and translate to english.
 - Check Error handling. (e.g. connection error.)
-- Unclear: content generation from text in non-default language?
 - better mode of shortening texts if required text length is small.
 
 ## Possible improvements later
@@ -70,3 +68,4 @@
 - DONE: API key in site configuration? Tenant configuration?
 - DONE: AEM announcement and installation and usage description
 - DONE: Update Pages content creation dialog with separate content field like AEM
+- DONE: Site specific or global templates for prompts.

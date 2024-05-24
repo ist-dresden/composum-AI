@@ -42,6 +42,7 @@ public class HtmlToMarkdownConverter {
 
     private static final Map<String, String> HEADER_TAGS = new HashMap<>();
     {{
+        HEADER_TAGS.put("title", "# ");
         HEADER_TAGS.put("h1", "# ");
         HEADER_TAGS.put("h2", "## ");
         HEADER_TAGS.put("h3", "### ");
@@ -213,6 +214,7 @@ public class HtmlToMarkdownConverter {
                 throw new UnsupportedOperationException("Bug: li outside of ul or ol");
 
             case "img":
+            case "video": // video is not quite properly treated here, but likely not very relevant.
                 sb.append("![");
                 sb.append(element.attr("alt"));
                 sb.append("](");
@@ -226,6 +228,7 @@ public class HtmlToMarkdownConverter {
             case "h4":
             case "h5":
             case "h6":
+            case "title":
                 ensureEmptyOrEndsWith("\n\n");
                 String prefix = HEADER_TAGS.get(tagName);
                 sb.append(prefix);
@@ -301,6 +304,8 @@ public class HtmlToMarkdownConverter {
             case "body":
             case "span":
             case "div":
+            case "section":
+            case "button":
                 // ignore the tag
                 convertChildren(element);
                 break;
@@ -308,6 +313,8 @@ public class HtmlToMarkdownConverter {
             case "noscript":
             case "meta":
             case "nav":
+            case "script":
+            case "link":
                 // ignore the content, too
                 break;
 
@@ -334,7 +341,7 @@ public class HtmlToMarkdownConverter {
 
             default:
                 // ignore tags we do not know
-                LOG.warn("Unknown tag {}", tagName);
+                LOG.debug("Unknown tag {}", tagName);
                 missingTags.add(tagName);
                 LOG.warn("Currently unsupported tags: {}", missingTags);
                 convertChildren(element);

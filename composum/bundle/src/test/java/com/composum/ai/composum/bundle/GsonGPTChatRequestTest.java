@@ -14,6 +14,7 @@ import org.junit.rules.ErrorCollector;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class GsonGPTChatRequestTest {
@@ -23,7 +24,7 @@ public class GsonGPTChatRequestTest {
 
     @Test
     public void testSerializeGPTChatRequest() {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
         GPTChatMessage chatMessage1 = new GPTChatMessage(GPTMessageRole.ASSISTANT, "Answer 1");
         GPTChatMessage chatMessage2 = new GPTChatMessage(GPTMessageRole.USER, "Another question");

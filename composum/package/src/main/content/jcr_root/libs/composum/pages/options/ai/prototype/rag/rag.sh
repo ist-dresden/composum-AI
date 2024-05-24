@@ -13,7 +13,7 @@ if [ ! -d "$PHOME/.git" ]; then
 fi
 
 set -x
-# model should be at least -m "gpt-4-turbo" or something comparable
+# model should be at least -m "gpt-4o" or something comparable
 aigenpipeline -p rag.prompt -o rag.html rag.html $PHOME/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
 
 cp -f rag.html $PHOME/aem/ui.apps/src/main/content/jcr_root/apps/composum-ai/prototype/rag/

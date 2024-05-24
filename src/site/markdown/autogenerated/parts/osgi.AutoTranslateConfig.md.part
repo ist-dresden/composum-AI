@@ -1,12 +1,12 @@
-/* AIGenVersion(697c6b0c, osgiconfigurations.prompt-6befc847, AutoTranslateConfig.java-4a4e03ae) */
+/* AIGenVersion(449f006f, osgiconfigurations.prompt-1.1, AutoTranslateConfig.java-4a4e03ae) */
 
-## Composum AI Autotranslate Configuration (aem-core)
+## Composum AI Autotranslate Configuration (core)
 
 Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found. Proof of concept quality - give it a try. :-)
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| pocUiEnabled | Proof of concept UI | boolean | false | Enable the Autotranslate proof of concept UI at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
+| pocUiEnabled | Proof of concept UI | boolean | false | Enable the Autotranslate proof of concept UI at at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
 | disabled | Disable the Autotranslate service | boolean | false |  |
 | deniedResourceTypes | Denied Resource Types | String[] |  | Regexes for denied Resource Types - if the sling:resourceType matches that, then no attributes or child nodes are touched by the automatic translation. |
 | allowedAttributeRegexes | Allowed Additional Attributes | String[] |  | Matches for Attributes that are explicitly allowed to be translated, in addition to standard attributes and heuristically recognized attributes. The heuristics is that the value has to have letters and whitespaces. Syntax: regular expressions that match resource type % attribute name - e.g. myapp/component/html%markup |

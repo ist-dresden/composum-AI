@@ -28,6 +28,7 @@ import com.adobe.granite.ui.components.ds.DataSource;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Servlet that reads the content selectors from a JSON file, adds links in the content and provides that to the dialog.
@@ -39,7 +40,7 @@ import com.google.gson.Gson;
         })
 public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
 
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     /**
      * JCR path to a JSON with the basic content selectors supported by the dialog.

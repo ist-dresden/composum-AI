@@ -22,6 +22,9 @@ public class ChatCompletionRequest {
     @SerializedName("temperature")
     private Double temperature;
 
+    @SerializedName("response_format")
+    private ResponseFormat responseFormat;
+
     // Getters and setters
     public String getModel() {
         return model;
@@ -63,6 +66,14 @@ public class ChatCompletionRequest {
         this.temperature = temperature;
     }
 
+    public ResponseFormat getResponseFormat() {
+        return responseFormat;
+    }
+
+    public void setResponseFormat(ResponseFormat responseFormat) {
+        this.responseFormat = responseFormat;
+    }
+
     public enum Role {
         @SerializedName("user")
         USER,
@@ -84,4 +95,41 @@ public class ChatCompletionRequest {
             }
         }
     }
+
+    public enum ResponseFormatType {
+        @SerializedName("text")
+        TEXT,
+        @SerializedName("json_object")
+        JSON_OBJECT;
+
+        public static ResponseFormatType make(String type) {
+            switch (type) {
+                case "text":
+                    return TEXT;
+                case "json_object":
+                    return JSON_OBJECT;
+                default:
+                    throw new IllegalArgumentException("Unknown response format type " + type);
+            }
+        }
+    }
+
+    public static class ResponseFormat {
+        @SerializedName("type")
+        private ResponseFormatType type;
+
+        public ResponseFormatType getType() {
+            return type;
+        }
+
+        public void setType(ResponseFormatType type) {
+            this.type = type;
+        }
+    }
+
+    public static final ResponseFormat JSON = new ResponseFormat();
+    {{
+        JSON.setType(ResponseFormatType.JSON_OBJECT);
+    }};
+
 }

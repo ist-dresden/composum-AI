@@ -6,8 +6,13 @@ import static com.composum.ai.backend.slingbase.impl.AllowDenyMatcherUtil.allowD
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +28,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -56,13 +62,16 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin.Plugin
 public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownService {
 
     public static final Map<String, String> ATTRIBUTE_TO_MARKDOWN_PREFIX = new HashMap<>();
-    {{
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("jcr:title", "## ");
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("title", "## ");
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("subtitle", "### ");
-        ATTRIBUTE_TO_MARKDOWN_PREFIX.put("cq:panelTitle", "#### ");
-        // , "code", "```" handled in extra method
-    }}
+
+    {
+        {
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("jcr:title", "## ");
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("title", "## ");
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("subtitle", "### ");
+            ATTRIBUTE_TO_MARKDOWN_PREFIX.put("cq:panelTitle", "#### ");
+            // , "code", "```" handled in extra method
+        }
+    }
 
     /**
      * Ignored values for labelled output: "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target .
@@ -101,6 +110,16 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
      */
     @Nullable
     protected Pattern labeledAttributePatternDeny;
+
+    /**
+     * Whitelist for URLs we can connect to get the markdown. Required - the URL has to match one of the patterns.
+     */
+    protected List<Pattern> urlBlacklist;
+
+    /**
+     * Blacklist for URLs we can connect to get the markdown. The URL must not match one of the patterns.
+     */
+    protected List<Pattern> urlWhitelist;
 
 
     private static final Logger LOG = LoggerFactory.getLogger(ApproximateMarkdownServiceImpl.class);
@@ -233,6 +252,42 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         return markdown;
     }
 
+    @NotNull
+    @Override
+    public String getMarkdown(@Nonnull URI uri) throws MalformedURLException, IOException, IllegalArgumentException {
+        URLConnection conn = checkUrlAdmissible(uri).toURL().openConnection();
+        conn.setConnectTimeout(3000);
+        conn.setReadTimeout(3000);
+        try (InputStream in = conn.getInputStream()) {
+            String contentType = conn.getContentType() == null ? "" : conn.getContentType();
+            if (contentType.contains("text/html") || contentType.contains("application/xhtml+xml")) {
+                Charset charset = conn.getContentEncoding() != null ?
+                        Charset.forName(conn.getContentEncoding()) : Charset.defaultCharset();
+                String result = IOUtils.toString(in, charset);
+                return chatCompletionService.htmlToMarkdown(result);
+            } else if (contentType.contains("text/plain")) {
+                Charset charset = conn.getContentEncoding() != null ?
+                        Charset.forName(conn.getContentEncoding()) : Charset.defaultCharset();
+                // not quite markdown, but there is no sensible conversion and that's likely OK, anyway.
+                return IOUtils.toString(in, charset);
+            } else {
+                throw new IllegalArgumentException("Unsupported content type " + contentType + " for " + uri);
+            }
+        }
+    }
+
+    protected URI checkUrlAdmissible(URI uri) {
+        if (urlBlacklist.stream().anyMatch(pattern -> pattern.matcher(uri.toString()).find())) {
+            throw new IllegalArgumentException("URL " + uri + " is blacklisted " +
+                    "in OSGI configuration 'Composum AI Approximate Markdown Service Configuration'");
+        }
+        if (urlWhitelist.isEmpty() || urlWhitelist.stream().noneMatch(pattern -> pattern.matcher(uri.toString()).find())) {
+            throw new IllegalArgumentException("URL " + uri + " is not whitelisted " +
+                    "in OSGI configuration 'Composum AI Approximate Markdown Service Configuration'");
+        }
+        return uri;
+    }
+
     protected boolean handleCodeblock(Resource resource, PrintWriter out, boolean printEmptyLine) {
         String code = resource.getValueMap().get("code", String.class);
         if (isNotBlank(code)) {
@@ -302,6 +357,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         labeledAttributePatternDeny = AllowDenyMatcherUtil.joinPatternsIntoAnyMatcher(config.labelledAttributePatternDeny());
         labelledAttributeOrder = Stream.of(config.labelledAttributeOrder())
                 .filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        urlBlacklist = Stream.of(config.urlSourceBlacklist() != null ? config.urlSourceBlacklist() : new String[0])
+                .filter(StringUtils::isNotBlank).map(Pattern::compile).collect(Collectors.toList());
+        urlWhitelist = Stream.of(config.urlSourceWhitelist() != null ? config.urlSourceWhitelist() : new String[0])
+                .filter(StringUtils::isNotBlank).map(Pattern::compile).collect(Collectors.toList());
     }
 
     @Deactivate
@@ -314,6 +373,23 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
      */
     @ObjectClassDefinition(name = "Composum AI Approximate Markdown Service Configuration", description = "Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.")
     public @interface Config {
+
+        @AttributeDefinition(name = "URL Source Whitelist Regex",
+                description = "Only if using URLs as external source: Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off." +
+                        "For security reasons you might want to prevent local addresses to be contacted." +
+                        "To allow everything you might use https?://.* , but make sure you have a good blacklist in that case.")
+        String[] urlSourceWhitelist();
+
+        @AttributeDefinition(name = "URL Source Blacklist Regex",
+                description = "Only if using URLs as external source: Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist.")
+        String[] urlSourceBlacklist() default {
+                ".*localhost.*",
+                "^(?!https?://).*",  // URLs that are not http / https are not allowed
+                // URLs where the host name is only digits / periods (numeric IPs)
+                ".*://[0-9.]*/.*",
+                // IPv6 hostnames in URLs are not allowed:
+                ".*://\\[[0-9a-fA-F:]*\\].*",
+        };
 
         @AttributeDefinition(name = "Text Attributes",
                 description = "List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text.")

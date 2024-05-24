@@ -1,12 +1,14 @@
-/* AIGenVersion(4357e29e, osgiconfigurations.prompt-6befc847, ApproximateMarkdownServiceImpl.java-5a59091f) */
+/* AIGenVersion(331ae3c2, osgiconfigurations.prompt-1.1, ApproximateMarkdownServiceImpl.java-2fdb1955) */
 
-## Composum AI Approximate Markdown Service Configuration (slingbase)
+# Composum AI Approximate Markdown Service Configuration (slingbase)
 
 Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| 1 | Text Attributes | String[] |  | List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text. |
-| 2 | Labeled Attribute Pattern Allow | String[] |  | Regular expressions for attributes that are output with a label. If not present, none will be output except the text attributes. |
-| 3 | Labeled Attribute Pattern Deny | String[] |  | Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list. |
-| 4 | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |
+| urlSourceWhitelist | URL Source Whitelist Regex | String[] |  | Only if using URLs as external source: Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off. For security reasons you might want to prevent local addresses to be contacted. To allow everything you might use https?://.* , but make sure you have a good blacklist in that case. |
+| urlSourceBlacklist | URL Source Blacklist Regex | String[] |  | Only if using URLs as external source: Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist. |
+| textAttributes | Text Attributes | String[] |  | List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text. |
+| labelledAttributePatternAllow | Labeled Attribute Pattern Allow | String[] |  | Regular expressions for attributes that are output with a label. If not present, none will be output except the text attributes. |
+| labelledAttributePatternDeny | Labeled Attribute Pattern Deny | String[] |  | Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list. |
+| labelledAttributeOrder | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |

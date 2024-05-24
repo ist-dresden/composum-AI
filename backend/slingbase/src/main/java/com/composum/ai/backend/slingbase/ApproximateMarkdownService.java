@@ -1,6 +1,9 @@
 package com.composum.ai.backend.slingbase;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,6 +55,12 @@ public interface ApproximateMarkdownService {
      */
     @Nonnull
     String getMarkdown(@Nullable String value);
+
+    /**
+     * Retrieves the text content for an URL.
+     */
+    @Nonnull
+    String getMarkdown(@Nonnull URI uri) throws MalformedURLException, IOException, IllegalArgumentException;
 
     /**
      * Returns a number of links that are saved in the component or siblings of the component that could be used as

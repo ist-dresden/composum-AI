@@ -1,4 +1,4 @@
-/* AIGenVersion(385943ab, osgiconfigurations.prompt-6befc847, GPTPromptLibrary.java-52793081) */
+/* AIGenVersion(720abb7c, osgiconfigurations.prompt-1.1, GPTPromptLibrary.java-52793081) */
 
 ## Composum AI Prompt Library Configuration (slingbase)
 
@@ -6,7 +6,7 @@ Location for the prompt library for Composum AI. There can be multiple configura
 There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
 If configured, Sling Context Aware Configuration takes precedence over OSGI configuration.
 
-| id | name | type | default value | description |
-|----|------|------|---------------|-------------|
-| contentCreationPromptsPath | Content Creation Prompts Path | String |  | Path to the content creation prompts. Either a JSON file, or a page. |
-| sidePanelPromptsPath | Side Panel Prompts Path | String |  | Path to the side panel prompts. Either a JSON file, or a page. |
+| id                        | name                           | type   | default value | description                                                                                      |
+|---------------------------|--------------------------------|--------|---------------|--------------------------------------------------------------------------------------------------|
+| contentCreationPromptsPath | Content Creation Prompts Path  | String |               | Path to the content creation prompts. Either a JSON file, or a page.                            |
+| sidePanelPromptsPath       | Side Panel Prompts Path        | String |               | Path to the side panel prompts. Either a JSON file, or a page.                                  |

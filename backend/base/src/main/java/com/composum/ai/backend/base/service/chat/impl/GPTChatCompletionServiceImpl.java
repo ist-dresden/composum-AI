@@ -115,8 +115,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
     public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
-    public static final String DEFAULT_IMAGE_MODEL = "gpt-4-turbo";
+    public static final String DEFAULT_IMAGE_MODEL = "gpt-4o";
     public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
+    public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4o";
 
     protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
     protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 120;
@@ -137,12 +138,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected String apiKey;
     protected String organizationId;
     protected String defaultModel;
+    protected String highIntelligenceModel;
     protected String imageModel;
     protected String chatCompletionUrl = CHAT_COMPLETION_URL;
 
     protected CloseableHttpAsyncClient httpAsyncClient;
 
-    protected static final Gson gson = new GsonBuilder().create();
+    protected static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
@@ -201,6 +203,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         int limitPerMinute = config != null && config.requestsPerMinute() > 0 ? config.requestsPerMinute() : DEFAULTVALUE_REQUESTS_PER_MINUTE;
         this.limiter = new RateLimiter(hourLimiter, limitPerMinute, 1, TimeUnit.MINUTES);
         this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
+        this.highIntelligenceModel = config != null && config.highIntelligenceModel() != null && !config.highIntelligenceModel().trim().isEmpty() ? config.highIntelligenceModel().trim() : DEFAULT_HIGH_INTELLIGENCE_MODEL;
         this.imageModel = config != null && config.imageModel() != null && !config.imageModel().trim().isEmpty() ? config.imageModel().trim() : null;
         this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
@@ -564,9 +567,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             throw new IllegalArgumentException("Cannot use image as input, no image model configured.");
         }
         ChatCompletionRequest externalRequest = new ChatCompletionRequest();
-        externalRequest.setModel(hasImage ? imageModel : defaultModel);
+        boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().isHighIntelligenceNeeded();
+        externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(temperature);
+        if (request.getConfiguration() != null && request.getConfiguration().getAnswerType() == GPTConfiguration.AnswerType.JSON) {
+            externalRequest.setResponseFormat(ChatCompletionRequest.JSON);
+        }
         Integer maxTokens = request.getMaxTokens();
         if (maxTokens != null && maxTokens > 0) {
             if (maximumTokensPerResponse != null && maximumTokensPerResponse > 0 && maxTokens > maximumTokensPerResponse) {
@@ -763,8 +770,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 description = "Default model to use for the chat completion. The default if not set is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
         String defaultModel() default DEFAULT_MODEL;
 
+        @AttributeDefinition(name = "High intelligence model", required = false,
+                description = "The model that is used for requests that need more reasoning performance. The default if not set is " + DEFAULT_HIGH_INTELLIGENCE_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
+        String highIntelligenceModel() default DEFAULT_HIGH_INTELLIGENCE_MODEL;
+
         @AttributeDefinition(name = "Vision model", required = false,
-                description = "Optional, a model that is used if an image is given as input, e.g. gpt-4-turbo. If not given, image recognition is rejected.",
+                description = "Optional, a model that is used if an image is given as input, e.g. gpt-4o. If not given, image recognition is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel() default DEFAULT_IMAGE_MODEL;
 

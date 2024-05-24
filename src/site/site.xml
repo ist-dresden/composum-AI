@@ -41,6 +41,8 @@
         <menu name="Overview">
             <item name="Introduction" href="index.html"/>
             <item name="Development documentation" href="development.html"/>
+            <item name="Prototypes" href="prototypes.html"/>
+            <item name="AI Page Templating" href="aiPageTemplating.html"/>
             <item name="Contact Us" href="https://www.composum.com/home/contact.html"/>
         </menu>
         <menu name="AEM-Variant">

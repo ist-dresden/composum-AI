@@ -1,4 +1,4 @@
-/* AIGenVersion(6c4942ca, osgiconfigurations.prompt-6befc847, GPTPermissionConfiguration.java-2cf47031) */
+/* AIGenVersion(7e1869b1, osgiconfigurations.prompt-1.1, GPTPermissionConfiguration.java-2cf47031) */
 
 ## Composum AI Permission Configuration (slingbase)
 
@@ -6,13 +6,13 @@ A configuration for allowed AI services. There can be multiple configurations, a
 There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
 If configured, Sling Context Aware Configuration takes precedence over OSGI configuration.
 
-| ID | Name | Type | Default Value | Description |
+| id | name | type | default value | description |
 |----|------|------|---------------|-------------|
 | 10 | Services | String[] | [CATEGORIZE, CREATE, SIDEPANEL, TRANSLATE] | List of services to which this configuration applies. Possible values are: CATEGORIZE, CREATE, SIDEPANEL, TRANSLATE. For AEM only create and sidepanel are supported. |
 | 20 | Allowed Users | String[] | [.*] | Regular expressions for allowed users or user groups. If not present, no user is allowed from this configuration. |
 | 30 | Denied Users | String[] |  | Regular expressions for denied users or user groups. Takes precedence over allowed users. |
 | 40 | Allowed Paths | String[] | [/content/.*] | Regular expressions for allowed content paths. If not present, no paths are allowed. |
-| 50 | Denied Paths | String[] | [/content/dam/.*] | Regular expressions for denied content paths. Takes precedence over allowed paths. Content fragments are not allowed by default since there has been trouble in the UI. |
+| 50 | Denied Paths | String[] | [/content/dam/.*] | Regular expressions for denied content paths. Takes precedence over allowed paths. |
 | 60 | Allowed Views | String[] | [.*] | Regular expressions for allowed views - that is, for URLs like /editor.html/.*. If not present, no views are allowed. Use .* to allow all views. |
 | 70 | Denied Views | String[] |  | Regular expressions for denied views. Takes precedence over allowed views. |
 | 80 | Allowed Components | String[] | [.*] | Regular expressions for allowed resource types of components. If not present, no components are allowed. |

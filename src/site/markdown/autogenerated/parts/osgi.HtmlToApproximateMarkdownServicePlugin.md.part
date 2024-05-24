@@ -1,4 +1,4 @@
-/* AIGenVersion(1c9aa9cd, osgiconfigurations.prompt-6befc847, HtmlToApproximateMarkdownServicePlugin.java-7ff5f346) */
+/* AIGenVersion(5f633ee5, osgiconfigurations.prompt-1.1, HtmlToApproximateMarkdownServicePlugin.java-7ff5f346) */
 
 ## Composum AI Html To Approximate Markdown Service Plugin (slingbase)
 
@@ -6,5 +6,5 @@ A plugin for the ApproximateMarkdownService that transforms the rendered HTML of
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| Allowed resource types | allowedResourceTypes | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
-| Denied resource types | deniedResourceTypes | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |
+| allowedResourceTypes | Allowed resource types | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
+| deniedResourceTypes | Denied resource types | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |

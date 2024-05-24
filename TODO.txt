@@ -2,7 +2,9 @@
 
 Offer parent container as content creation dialog source
 Document using Claude, Gemini, https://octo.ai/product/text-generation/ , local
-Bug: no content creation dialog in new component
+Problems in Composum version:
+- when using assistant on creation dialog, and then opening it again, it should have the same settings as when creating (?)
+- last 20 prompts not yet implemented
 
 Image description from URL?
 

@@ -1,0 +1,125 @@
+<!-- AIGenPromptStart(foobar)
+
+Generate a HTML single page application "Create a page from a template with AI" that contains a form calling the
+AITemplatingServlet appropriately at its path (no context path). The page is deployed on the same host as the servlet.
+
+You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors, light blueish.
+Include a one paragraph several sentence description what the application does and what it is for
+(including what the format of the processed page is like / what special placeholders or markers
+it uses including all formats of the possible markers and marker formats), and a one sentence description on each field.
+
+It should include a form that contains all the parameters for the AITemplatingServlet. Only one additionalUrls parameter is needed.
+There should be buttons for each of the methods (enum Method) defined in the servlet.
+
+Display the result of the execution in a div below the form; lines should be wrapped if larger than the page width.
+Disable the buttons and reset the result to 'Contacting the AI ...' while the request is running.
+
+On each submit the values of the fields should be stored in localStorage at key composum-ai-prototype-templating ,
+and on first loading of the page the last values should be restored from there.
+
+AIGenCommand(foobar)
+-m gpt-4o -upd
+../../../../../../../../../../../../../featurespecs/10PageTemplating.md
+../../../../../../../../../../../../../backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITemplatingService.java
+../../../../../../../../../../../../../backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITemplatingServlet.java
+AIGenPromptEnd(foobar) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a page from a template with AI</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #cfe2f3;
+        }
+        .container {
+            background-color: #b3d7f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: #5eadff;
+            border-color: #5eadff;
+        }
+        .btn-primary:hover {
+            background-color: #3ca9ff;
+            border-color: #3ca9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create a page from a template with AI</h1>
+        <p>This single page application allows you to generate a complete text for a page by replacing prompts with AI-generated content. The page structure contains various components with prompts marked by special placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts. Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'. The application interacts with the AITemplatingServlet to process the page template.</p>
+        
+        <form id="templatingForm">
+            <div class="form-group">
+                <label for="resourcePath">Resource Path:</label>
+                <input type="text" class="form-control" id="resourcePath" name="resourcePath" required>
+                <small class="form-text text-muted">Enter the path of the resource to process.</small>
+            </div>
+            <div class="form-group">
+                <label for="additionalPrompt">Additional Prompt:</label>
+                <textarea class="form-control" id="additionalPrompt" name="additionalPrompt" rows="3"></textarea>
+                <small class="form-text text-muted">Optionally, provide an additional prompt for the AI.</small>
+            </div>
+            <div class="form-group">
+                <label for="additionalUrls">Additional URL:</label>
+                <input type="url" class="form-control" id="additionalUrls" name="additionalUrls">
+                <small class="form-text text-muted">Enter a URL for context.</small>
+            </div>
+            <div class="form-group">
+                <label for="backgroundInformation">Background Information:</label>
+                <textarea class="form-control" id="backgroundInformation" name="backgroundInformation" rows="3"></textarea>
+                <small class="form-text text-muted">Optionally, provide additional background information for the AI.</small>
+            </div>
+            <button type="submit" class="btn btn-primary" id="replacePromptsBtn">Replace Prompts</button>
+            <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
+        </form>
+        
+        <div class="mt-4"><pre style="white-space: pre-wrap;" id="resultDiv"></pre></div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var formData = JSON.parse(localStorage.getItem('composum-ai-prototype-templating')) || {};
+            $('#resourcePath').val(formData.resourcePath || '');
+            $('#additionalPrompt').val(formData.additionalPrompt || '');
+            $('#additionalUrls').val(formData.additionalUrls || '');
+            $('#backgroundInformation').val(formData.backgroundInformation || '');
+
+            $('#templatingForm').submit(function(event) {
+                event.preventDefault();
+                var method = event.originalEvent.submitter.id === 'replacePromptsBtn' ? 'replacePromptsInResource' : 'resetToPrompts';
+                var formData = {
+                    resourcePath: $('#resourcePath').val(),
+                    additionalPrompt: $('#additionalPrompt').val(),
+                    additionalUrls: $('#additionalUrls').val(),
+                    backgroundInformation: $('#backgroundInformation').val()
+                };
+                localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
+
+                $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', true);
+                $('#resultDiv').text('Contacting the AI ...');
+                $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
+                    .done(function(data) {
+                        $('#resultDiv').text(JSON.stringify(data, null, 2));
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        $('#resultDiv').text('Error: ' + errorThrown);
+                    })
+                    .always(function() {
+                        $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
+
+<!-- AIGenVersion(20fd7529, templating.html-4a6fd7de, 10PageTemplating.md-23af1b8a, AITemplatingService.java-69773497, AITemplatingServlet.java-00b33607) -->

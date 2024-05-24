@@ -2,6 +2,9 @@ package com.composum.ai.backend.base.service.chat.impl;
 
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.CHAT_COMPLETION_URL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_EMBEDDINGS_MODEL;
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_HIGH_INTELLIGENCE_MODEL;
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_IMAGE_MODEL;
+import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.OPENAI_EMBEDDINGS_URL;
 
 import java.io.IOException;
@@ -64,12 +67,17 @@ public abstract class AbstractGPTRunner {
 
             @Override
             public String defaultModel() {
-                return "gpt-3.5-turbo";
+                return DEFAULT_MODEL;
+            }
+
+            @Override
+            public String highIntelligenceModel() {
+                return DEFAULT_HIGH_INTELLIGENCE_MODEL;
             }
 
             @Override
             public String imageModel() {
-                return "gpt-4-turbo";
+                return DEFAULT_IMAGE_MODEL;
             }
 
             @Override

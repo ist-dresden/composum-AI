@@ -8,8 +8,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,8 @@ public class ApproximateMarkdownServiceImplTest {
         service.activate(config);
 
         service.chatCompletionService = mock(GPTChatCompletionService.class);
+        when(service.chatCompletionService.htmlToMarkdown(Mockito.anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         writer = new StringWriter();
         printWriter = new PrintWriter(writer);
         service.plugins = Collections.emptyList();
@@ -167,6 +172,31 @@ public class ApproximateMarkdownServiceImplTest {
         ec.checkThat(links.get(0).getTitle(), is("res1")); // Check first link title
         ec.checkThat(links.get(1).getPath(), is("/content/parent/path/child1")); // Check second link path
         ec.checkThat(links.get(1).getTitle(), is("child1")); // Check second link title
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNoWhitelist() throws URISyntaxException, IOException {
+        service.getMarkdown(new URI("http://example.com"));
+    }
+
+    @Test
+    public void testUrlBlacklisting() throws URISyntaxException, IOException, NoSuchMethodException {
+        // in method setup we make sure the default is returned by config
+        when(config.urlSourceWhitelist()).thenReturn(new String[]{".*"});
+        service.activate(config);
+        service.getMarkdown(new URI("http://example.com"));
+        for (String url : new String[]
+                {"http://localhost/", "https://localhost/", "http://1.2.3.4/", "http://[::1]/", "http://1.2.3.4/:8080", "http://[::1]/:8080"}) {
+            ec.checkThrows(IllegalArgumentException.class, () -> service.getMarkdown(new URI("http://localhost/")));
+        }
+    }
+
+    @Test
+    public void testUrlWhitelisting() throws URISyntaxException, IOException, NoSuchMethodException {
+        when(config.urlSourceWhitelist()).thenReturn(new String[]{"https://www.example.net/.*"});
+        service.activate(config);
+        service.getMarkdown(new URI("https://www.example.net/"));
+        ec.checkThrows(IllegalArgumentException.class, () -> service.getMarkdown(new URI("http://example.org")));
     }
 
 }

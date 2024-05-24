@@ -20,7 +20,11 @@ public class GPTConfiguration {
         /**
          * Real HTML or, more likely, richtext as simplified HTML.
          */
-        HTML
+        HTML,
+        /**
+         * JSON is not yet supported by all models, so a bit dangerous.
+         */
+        JSON
     }
 
     public enum Mode {
@@ -44,6 +48,8 @@ public class GPTConfiguration {
 
     private final Mode mode;
 
+    private final Boolean highIntelligenceNeeded;
+
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
         this(apiKey, organizationId, answerType, null);
     }
@@ -53,11 +59,16 @@ public class GPTConfiguration {
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
         this.additionalInstructions = additionalInstructions;
         this.mode = mode;
+        this.highIntelligenceNeeded = highIntelligenceNeeded;
     }
 
     /**
@@ -94,6 +105,11 @@ public class GPTConfiguration {
 
     public Mode getMode() {
         return mode;
+    }
+
+    /** Uses the slower and more expensive high intelligence model - use sparingly for more challenging tasks. */
+    public Boolean isHighIntelligenceNeeded() {
+        return highIntelligenceNeeded;
     }
 
     /**
@@ -154,13 +170,22 @@ public class GPTConfiguration {
         if (additionalInstructions != null) {
             sb.append(", additionalInstructions='").append(additionalInstructions).append('\'');
         }
+        if (mode != null) {
+            sb.append(", mode=").append(mode);
+        }
+        if (highIntelligenceNeeded != null) {
+            sb.append(", highIntelligenceNeeded=").append(highIntelligenceNeeded);
+        }
         return sb.append('}').toString();
     }
 
     public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, null, AnswerType.MARKDOWN);
     public static final GPTConfiguration HTML = new GPTConfiguration(null, null, AnswerType.HTML);
+    public static final GPTConfiguration JSON = new GPTConfiguration(null, null, AnswerType.JSON);
     public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, null, null, Mode.CHAT);
     public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, null, null, Mode.GENERATE);
+    /** Requests slower and more expensive "high intelligence" model - use sparingly. */
+    public static final GPTConfiguration HIGH_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, true);
 
     @Override
     public boolean equals(Object o) {

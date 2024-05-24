@@ -42,6 +42,7 @@ import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
@@ -131,7 +132,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
 
     protected BundleContext bundleContext;
 
-    protected Gson gson = new Gson();
+    protected Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     @Activate
     public void activate(final BundleContext bundleContext) {
