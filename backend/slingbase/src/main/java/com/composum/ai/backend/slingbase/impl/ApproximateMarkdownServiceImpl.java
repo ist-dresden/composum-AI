@@ -255,8 +255,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @NotNull
     @Override
     public String getMarkdown(@Nonnull URI uri) throws MalformedURLException, IOException, IllegalArgumentException {
-        checkUrlAdmissible(uri);
-        URLConnection conn = uri.toURL().openConnection();
+        URLConnection conn = checkUrlAdmissible(uri).toURL().openConnection();
         conn.setConnectTimeout(3000);
         conn.setReadTimeout(3000);
         try (InputStream in = conn.getInputStream()) {
@@ -277,13 +276,16 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         }
     }
 
-    protected void checkUrlAdmissible(URI uri) {
+    protected URI checkUrlAdmissible(URI uri) {
         if (urlBlacklist.stream().anyMatch(pattern -> pattern.matcher(uri.toString()).find())) {
-            throw new IllegalArgumentException("URL " + uri + " is blacklisted.");
+            throw new IllegalArgumentException("URL " + uri + " is blacklisted " +
+                    "in OSGI configuration 'Composum AI Approximate Markdown Service Configuration'");
         }
         if (urlWhitelist.isEmpty() || urlWhitelist.stream().noneMatch(pattern -> pattern.matcher(uri.toString()).find())) {
-            throw new IllegalArgumentException("URL " + uri + " is not whitelisted.");
+            throw new IllegalArgumentException("URL " + uri + " is not whitelisted " +
+                    "in OSGI configuration 'Composum AI Approximate Markdown Service Configuration'");
         }
+        return uri;
     }
 
     protected boolean handleCodeblock(Resource resource, PrintWriter out, boolean printEmptyLine) {

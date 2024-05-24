@@ -61,7 +61,7 @@ AIGenPromptEnd(foobar) -->
             <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
         </form>
         
-        <div id="resultDiv" class="mt-4"></div>
+        <div class="mt-4"><pre style="white-space: pre-wrap;" id="resultDiv"></pre></div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -86,13 +86,13 @@ AIGenPromptEnd(foobar) -->
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
                 $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', true);
-                $('#resultDiv').html('Contacting the AI ...');
+                $('#resultDiv').text('Contacting the AI ...');
                 $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
                     .done(function(data) {
-                        $('#resultDiv').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                        $('#resultDiv').text(JSON.stringify(data, null, 2));
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
-                        $('#resultDiv').html('<pre>Error: ' + errorThrown + '</pre>');
+                        $('#resultDiv').text('Error: ' + errorThrown);
                     })
                     .always(function() {
                         $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
@@ -106,4 +106,4 @@ AIGenPromptEnd(foobar) -->
 <!--  -->
 
 
-<!-- AIGenVersion(32a9634e, templating.html-0caedaea, templating.html-61b2c10c) -->
+<!-- AIGenVersion(794dd7c5, templating.html-0caedaea, templating.html-20fd7529) -->
