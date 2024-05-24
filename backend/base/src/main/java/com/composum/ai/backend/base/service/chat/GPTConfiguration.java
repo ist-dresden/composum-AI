@@ -107,7 +107,11 @@ public class GPTConfiguration {
         return mode;
     }
 
-    /** Uses the slower and more expensive high intelligence model - use sparingly for more challenging tasks. */
+    /**
+     * Uses the slower and more expensive high intelligence model - use sparingly for more challenging tasks.
+     * <p>
+     * Caution: Boolean not boolean - use Boolean.TRUE.equals. :-)
+     */
     public Boolean isHighIntelligenceNeeded() {
         return highIntelligenceNeeded;
     }
@@ -136,7 +140,8 @@ public class GPTConfiguration {
         String additionalInstructions = this.additionalInstructions == null ? other.additionalInstructions :
                 other.additionalInstructions == null ? this.additionalInstructions : this.additionalInstructions + "\n\n" + other.additionalInstructions;
         Mode mode = this.mode != null ? this.mode : other.mode;
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode);
+        Boolean highIntelligenceNeeded = this.highIntelligenceNeeded != null ? this.highIntelligenceNeeded : other.highIntelligenceNeeded;
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded);
     }
 
     /**
@@ -184,7 +189,9 @@ public class GPTConfiguration {
     public static final GPTConfiguration JSON = new GPTConfiguration(null, null, AnswerType.JSON);
     public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, null, null, Mode.CHAT);
     public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, null, null, Mode.GENERATE);
-    /** Requests slower and more expensive "high intelligence" model - use sparingly. */
+    /**
+     * Requests slower and more expensive "high intelligence" model - use sparingly.
+     */
     public static final GPTConfiguration HIGH_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, true);
 
     @Override

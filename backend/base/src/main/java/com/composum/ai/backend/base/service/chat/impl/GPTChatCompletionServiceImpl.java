@@ -567,7 +567,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             throw new IllegalArgumentException("Cannot use image as input, no image model configured.");
         }
         ChatCompletionRequest externalRequest = new ChatCompletionRequest();
-        boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().isHighIntelligenceNeeded();
+        boolean highIntelligenceRequired = request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().isHighIntelligenceNeeded());
         externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(temperature);
