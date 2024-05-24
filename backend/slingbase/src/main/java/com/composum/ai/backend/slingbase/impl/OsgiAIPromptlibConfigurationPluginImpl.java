@@ -42,7 +42,7 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
 
     private GPTPromptLibrary config;
 
-    protected final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     @Activate
     @Modified

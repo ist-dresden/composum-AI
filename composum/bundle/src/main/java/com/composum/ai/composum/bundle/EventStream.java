@@ -46,7 +46,7 @@ public class EventStream implements GPTCompletionCallback {
 
     private volatile GPTFinishReason finishReason;
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 250);
 

@@ -20,7 +20,7 @@ public class WriteSidebarPredefinedPromptsInAEMFormat {
     }
 
     static void jsonListToXML(Class<?> mainClass, String jsonfile, boolean swapped) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         InputStream in = WriteSidebarPredefinedPromptsInAEMFormat.class.getResourceAsStream(jsonfile);
         Map<String, String> json = gson.fromJson(new java.io.InputStreamReader(in), Map.class);
         System.out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

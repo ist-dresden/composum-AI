@@ -72,7 +72,7 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
     @Reference
     private AIConfigurationService aiConfigurationService;
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {

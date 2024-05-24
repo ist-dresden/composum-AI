@@ -40,7 +40,7 @@ import com.google.gson.GsonBuilder;
         })
 public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     /**
      * JCR path to a JSON with the basic content selectors supported by the dialog.

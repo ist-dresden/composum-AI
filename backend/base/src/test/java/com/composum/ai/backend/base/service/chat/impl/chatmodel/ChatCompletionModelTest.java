@@ -9,7 +9,7 @@ import com.google.gson.GsonBuilder;
 
 public class ChatCompletionModelTest {
 
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     private String removeWhitespaceAndNewlines(String str) {
         return str.replaceAll("\\s+", "");

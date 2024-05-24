@@ -62,7 +62,7 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
     @Reference
     protected AIConfigurationService configurationService;
 
-    protected final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {

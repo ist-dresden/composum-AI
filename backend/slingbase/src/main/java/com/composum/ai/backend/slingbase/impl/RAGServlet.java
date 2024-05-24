@@ -49,7 +49,7 @@ public class RAGServlet extends SlingSafeMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(RAGServlet.class);
 
-    protected final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     /**
      * The actual search query.

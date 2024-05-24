@@ -24,7 +24,7 @@ public class GsonGPTChatRequestTest {
 
     @Test
     public void testSerializeGPTChatRequest() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         GPTChatMessage chatMessage1 = new GPTChatMessage(GPTMessageRole.ASSISTANT, "Answer 1");
         GPTChatMessage chatMessage2 = new GPTChatMessage(GPTMessageRole.USER, "Another question");

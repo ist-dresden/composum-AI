@@ -132,7 +132,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
 
     protected BundleContext bundleContext;
 
-    protected Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    protected Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     @Activate
     public void activate(final BundleContext bundleContext) {

@@ -205,7 +205,7 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected BundleContext bundleContext;
 
-    protected Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    protected Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     public enum Extension {json, sse}
 

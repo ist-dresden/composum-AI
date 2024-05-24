@@ -111,7 +111,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
     }.getType();
 
-    protected final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     protected static final Logger LOG = LoggerFactory.getLogger(AITemplatingServiceImpl.class);
 
