@@ -37,6 +37,7 @@ AIGenPromptEnd(foobar) -->
         <p>This single page application allows you to generate a complete text for a page by replacing prompts with AI-generated content. The page structure contains various components with prompts marked by special placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts. Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'. The application interacts with the AITemplatingServlet to process the page template.</p>
         
         <form id="templatingForm">
+            <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
             <div class="form-group">
                 <label for="resourcePath">Resource Path:</label>
                 <input type="text" class="form-control" id="resourcePath" name="resourcePath" required>
@@ -68,6 +69,12 @@ AIGenPromptEnd(foobar) -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Load CSRF token
+            $.getJSON('/libs/granite/csrf/token.json', function(data) {
+                $('#cq_csrf_token').val(data.token);
+            });
+
+            // Restore form data from localStorage
             var formData = JSON.parse(localStorage.getItem('composum-ai-prototype-templating')) || {};
             $('#resourcePath').val(formData.resourcePath || '');
             $('#additionalPrompt').val(formData.additionalPrompt || '');
@@ -81,7 +88,8 @@ AIGenPromptEnd(foobar) -->
                     resourcePath: $('#resourcePath').val(),
                     additionalPrompt: $('#additionalPrompt').val(),
                     additionalUrls: $('#additionalUrls').val(),
-                    backgroundInformation: $('#backgroundInformation').val()
+                    backgroundInformation: $('#backgroundInformation').val(),
+                    ':cq_csrf_token': $('#cq_csrf_token').val()
                 };
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
@@ -106,4 +114,4 @@ AIGenPromptEnd(foobar) -->
 <!--  -->
 
 
-<!-- AIGenVersion(794dd7c5, templating.html-0caedaea, templating.html-20fd7529) -->
+<!-- AIGenVersion(0764d3cc, templating.html-0caedaea, templating.html-4e9b2575) -->
