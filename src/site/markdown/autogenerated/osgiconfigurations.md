@@ -9,19 +9,21 @@ Configuration for the Approximate Markdown Service used to get a text representa
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| 1 | Text Attributes | String[] |  | List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text. |
-| 2 | Labeled Attribute Pattern Allow | String[] |  | Regular expressions for attributes that are output with a label. If not present, none will be output except the text attributes. |
-| 3 | Labeled Attribute Pattern Deny | String[] |  | Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list. |
-| 4 | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |
+| textAttributes | Text Attributes | String[] |  | List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text. |
+| labelledAttributePatternAllow | Labeled Attribute Pattern Allow | String[] | .* | Regular expressions for attributes that are output with a label. If not present, none will be output except the text attributes. |
+| labelledAttributePatternDeny | Labeled Attribute Pattern Deny | String[] | .*:.*, layout, backgroundColor, color, textColor, template, theme, variation, buttonSymbol, columns, icon, elementType, textAlignment, alignment, linkTarget, interval, fileReference, height, width, textIsRich, style, padding.*, .*[cC]ss[cC]lass.* | Regular expressions for attributes that are not output with a label. Takes precedence over the corresponding allow regexp list. |
+| labelledAttributeOrder | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |
+| urlSourceWhitelist | URL Source Whitelist Regex | String[] |  | Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off. For security reasons you might want to prevent local addresses to be contacted. To allow everything you might use https?://.* , but make sure you have a good blacklist in that case. |
+| urlSourceBlacklist | URL Source Blacklist Regex | String[] | .*localhost.*, ^(?!https?://).* | Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist. |
 
 <a name="osgi.AutoTranslateConfig"></a>
-## Composum AI Autotranslate Configuration (aem-core)
+## Composum AI Autotranslate Configuration (core)
 
 Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found. Proof of concept quality - give it a try. :-)
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| pocUiEnabled | Proof of concept UI | boolean | false | Enable the Autotranslate proof of concept UI at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
+| pocUiEnabled | Proof of concept UI | boolean | false | Enable the Autotranslate proof of concept UI at at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
 | disabled | Disable the Autotranslate service | boolean | false |  |
 | deniedResourceTypes | Denied Resource Types | String[] |  | Regexes for denied Resource Types - if the sling:resourceType matches that, then no attributes or child nodes are touched by the automatic translation. |
 | allowedAttributeRegexes | Allowed Additional Attributes | String[] |  | Matches for Attributes that are explicitly allowed to be translated, in addition to standard attributes and heuristically recognized attributes. The heuristics is that the value has to have letters and whitespaces. Syntax: regular expressions that match resource type % attribute name - e.g. myapp/component/html%markup |
@@ -82,10 +84,10 @@ Location for the prompt library for Composum AI. There can be multiple configura
 There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
 If configured, Sling Context Aware Configuration takes precedence over OSGI configuration.
 
-| id | name | type | default value | description |
-|----|------|------|---------------|-------------|
-| contentCreationPromptsPath | Content Creation Prompts Path | String |  | Path to the content creation prompts. Either a JSON file, or a page. |
-| sidePanelPromptsPath | Side Panel Prompts Path | String |  | Path to the side panel prompts. Either a JSON file, or a page. |
+| id                        | name                           | type   | default value | description                                                                                      |
+|---------------------------|--------------------------------|--------|---------------|--------------------------------------------------------------------------------------------------|
+| contentCreationPromptsPath | Content Creation Prompts Path  | String |               | Path to the content creation prompts. Either a JSON file, or a page.                            |
+| sidePanelPromptsPath       | Side Panel Prompts Path        | String |               | Path to the side panel prompts. Either a JSON file, or a page.                                  |
 
 <a name="osgi.GPTTranslationServiceImpl"></a>
 ## Composum AI Translation Service Configuration (backend)
@@ -105,14 +107,15 @@ A plugin for the ApproximateMarkdownService that transforms the rendered HTML of
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| Allowed resource types | allowedResourceTypes | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
-| Denied resource types | deniedResourceTypes | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |
+| allowedResourceTypes | Allowed resource types | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
+| deniedResourceTypes | Denied resource types | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |
 
 <a name="osgi.SlingCaConfigPluginImpl"></a>
-## Composum AI SlingCaConfig Plugin (slingbase)
+### Composum AI SlingCaConfig Plugin (slingbase)
 
 Allows enabling / disabling the Sling Context Aware Configuration of the Composum AI.
 
 | id | name   | type    | default value | description                                                |
 |----|--------|---------|---------------|------------------------------------------------------------|
-| 1  | Enabled| Boolean | true          | Whether the Sling Context Aware Configuration of the Composum AI is enabled. |
+| 1  | Enabled| boolean | true          | Whether the Sling Context Aware Configuration of the Composum AI is enabled. |
+
