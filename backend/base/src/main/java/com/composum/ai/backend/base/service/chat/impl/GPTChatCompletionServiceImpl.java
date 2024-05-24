@@ -770,7 +770,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                 description = "Default model to use for the chat completion. The default if not set is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
         String defaultModel() default DEFAULT_MODEL;
 
-        @AttributeDefinition(name = "Highend model", required = false,
+        @AttributeDefinition(name = "High intelligence model", required = false,
                 description = "The model that is used for requests that need more reasoning performance. The default if not set is " + DEFAULT_HIGH_INTELLIGENCE_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
         String highIntelligenceModel() default DEFAULT_HIGH_INTELLIGENCE_MODEL;
 

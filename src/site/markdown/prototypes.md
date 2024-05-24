@@ -16,8 +16,8 @@ even sites. Please consider the [separate documentation](aem-variant/automaticTr
 
 This is a prototype how to support search with AI techniques like embeddings and how to support question answering with
 RAG (retrieval augmented generation) techniques. It provides a servlet (RAGServlet at /bin/cpm/ai/rag) and two mini
-applications that let you access the servlet for demonstration purposes. There is not yet an actual component that 
-uses the search since the way it is used is likely quite project specific and might be implemented in Javascript, 
+applications that let you access the servlet for demonstration purposes. There is not yet an actual component that
+uses the search since the way it is used is likely quite project specific and might be implemented in Javascript,
 anyway, so that the servlet could be used as a backend.
 
 - a search that searches for all words that are in the query and rates the top n results using AI embeddings before
@@ -36,3 +36,15 @@ https://github.com/ist-dresden/composum-AI/blob/develop/backend/slingbase/src/te
 
 More discussion / ideas are in
 https://github.com/ist-dresden/composum-AI/blob/develop/featurespecs/9RAGvariants.md
+
+## AI Page Templating : AI supported page creation in one step
+
+While the content creation dialog can support you when working on individual texts in a page, you might sometimes
+want support for creating whole pages at once. That's the idea for page templating: you create a template page that
+contains prompts (instructions) to create the individual texts in the page. For creating an actual page from that
+template you copy it and supply the AI with text(s) from which it can gather the information you want to present on the 
+page (currently either in form of one or more URL(s) or a text).
+Since it'll likely take some work to get the prompts right, that will likely only be useful if you have quite a
+number of very similar pages to create about different topics / products etc.
+
+For more details see the [AI Page Templating](aiPageTemplating.md).

@@ -372,6 +372,23 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @ObjectClassDefinition(name = "Composum AI Approximate Markdown Service Configuration", description = "Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.")
     public @interface Config {
 
+        @AttributeDefinition(name = "URL Source Whitelist Regex",
+                description = "Only if using URLs as external source: Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off." +
+                        "For security reasons you might want to prevent local addresses to be contacted." +
+                        "To allow everything you might use https?://.* , but make sure you have a good blacklist in that case.")
+        String[] urlSourceWhitelist();
+
+        @AttributeDefinition(name = "URL Source Blacklist Regex",
+                description = "Only if using URLs as external source: Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist.")
+        String[] urlSourceBlacklist() default {
+                ".*localhost.*",
+                "^(?!https?://).*",  // URLs that are not http / https are not allowed
+                // URLs where the host name is only digits / periods (numeric IPs)
+                ".*://[0-9.]*/.*",
+                // IPv6 hostnames in URLs are not allowed:
+                ".*://\\[[0-9a-fA-F:]*\\].*",
+        };
+
         @AttributeDefinition(name = "Text Attributes",
                 description = "List of attributes that are treated as text and converted to markdown. If not present, no attributes are treated as text.")
         String[] textAttributes() default {
@@ -395,23 +412,6 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         @AttributeDefinition(name = "Labelled Attribute Order",
                 description = "List of labelled attributes that come first if they are present, in the given order.")
         String[] labelledAttributeOrder() default {};
-
-        @AttributeDefinition(name = "URL Source Whitelist Regex",
-                description = "Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off." +
-                        "For security reasons you might want to prevent local addresses to be contacted." +
-                        "To allow everything you might use https?://.* , but make sure you have a good blacklist in that case.")
-        String[] urlSourceWhitelist();
-
-        @AttributeDefinition(name = "URL Source Blacklist Regex",
-                description = "Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist.")
-        String[] urlSourceBlacklist() default {
-                ".*localhost.*",
-                "^(?!https?://).*",  // URLs that are not http / https are not allowed
-                // URLs where the host name is only digits / periods (numeric IPs)
-                ".*://[0-9.]*/.*",
-                // IPv6 hostnames in URLs are not allowed:
-                ".*://\\[[0-9a-fA-F:]*\\].*",
-        };
 
     }
 
