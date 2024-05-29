@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
+import com.composum.ai.backend.slingbase.PageCachedValueService;
 
 /**
  * Implements a cache for markdown of pages.
@@ -40,12 +41,13 @@ import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
  * in a property.
  */
 @Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {ApproximateMarkdownServicePlugin.class, PageCachedValueService.class},
         property = {
                 Constants.SERVICE_VENDOR + "=IST Gmbh Dresden" +
                         Constants.SERVICE_DESCRIPTION + "=Composum AI: Caching for approximate markdown of pages.",
         })
 @Designate(ocd = MarkdownSlingCacheImpl.Config.class)
-public class MarkdownSlingCacheImpl implements ApproximateMarkdownServicePlugin {
+public class MarkdownSlingCacheImpl implements ApproximateMarkdownServicePlugin, PageCachedValueService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MarkdownSlingCacheImpl.class);
 
@@ -55,10 +57,10 @@ public class MarkdownSlingCacheImpl implements ApproximateMarkdownServicePlugin 
     public static final String PROPERTY_MARKDOWN = "ai_approximateMarkdown";
 
     /**
-     * The page modification date when {@link #PROPERTY_MARKDOWN} was generated. If the actual modification date is different,
-     * the cache is removed.
+     * Suffix for a property that saves the page modification date when the corresponding property was generated.
+     * If the actual modification date is different, the cache is removed.
      */
-    public static final String PROPERTY_MARKDOWN_PAGE_MODIFICATION_DATE = "ai_approximateMarkdownPageModificationDate";
+    public static final String SUFFIX_PAGE_MODIFICATION_DATE = "PageModificationDate";
 
     @Reference
     protected ResourceResolverFactory resourceResolverFactory;
@@ -88,34 +90,47 @@ public class MarkdownSlingCacheImpl implements ApproximateMarkdownServicePlugin 
         if (!isEnabled() || resource == null || !resource.getName().equals(JcrConstants.JCR_CONTENT)) {
             return PluginResult.NOT_HANDLED;
         }
-        try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(null)) {
-            Resource cacheResource = getOrCreateCacheResource(serviceResourceResolver, resource.getPath(), false);
-            if (cacheResource != null) {
-                ValueMap cacheVM = cacheResource.getValueMap();
-                boolean isModified = isModified(resource, cacheVM);
-                if (!isModified) {
-                    String markdown = cacheVM.get(PROPERTY_MARKDOWN, String.class);
-                    if (markdown != null) {
-                        out.print(markdown);
-                        return PluginResult.HANDLED_ALL;
-                    }
-                }
-            }
-        } catch (PersistenceException | RuntimeException | LoginException e) {
-            LOG.warn("Could not read cache for {} because of {}", resource.getPath(), e.toString(), e);
+        String markdown = getPageCachedValue(PROPERTY_MARKDOWN, resource);
+        if (markdown != null) {
+            out.print(markdown);
+            return PluginResult.HANDLED_ALL;
         }
         return PluginResult.NOT_HANDLED;
     }
 
-    protected static boolean isModified(@NotNull Resource resource, ValueMap cacheVM) {
+    public String getPageCachedValue(String propertyName, @Nonnull Resource resource) {
+        try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(null)) {
+            Resource cacheResource = getOrCreateCacheResource(serviceResourceResolver, resource.getPath(), false);
+            if (cacheResource != null) {
+                ValueMap cacheVM = cacheResource.getValueMap();
+                boolean isModified = isModified(resource, cacheVM, propertyName);
+                if (!isModified) {
+                    String value = cacheVM.get(propertyName, String.class);
+                    if (value != null) {
+                        return value;
+                    }
+                }
+            }
+        } catch (PersistenceException | RuntimeException | LoginException e) {
+            String path = resource != null ? resource.getPath() : "null";
+            LOG.warn("Could not read cache for {} because of {}", resource.getPath(), e.toString(), e);
+        }
+        return null;
+    }
+
+    protected static boolean isModified(@NotNull Resource resource, ValueMap cacheVM, String propertyName) {
         Calendar lastModified = getLastModified(resource);
-        Calendar cacheLastModified = cacheVM.get(PROPERTY_MARKDOWN_PAGE_MODIFICATION_DATE, Calendar.class);
+        Calendar cacheLastModified = cacheVM.get(propertyName + SUFFIX_PAGE_MODIFICATION_DATE, Calendar.class);
         boolean isModified = lastModified != null && cacheLastModified != null && !lastModified.equals(cacheLastModified);
         return isModified;
     }
 
     @Override
-    public void cacheMarkdown(@Nonnull Resource resource, @Nonnull String markdown) {
+    public void cacheMarkdown(@NotNull Resource resource, @NotNull String markdown) {
+        putPageCachedValue(PROPERTY_MARKDOWN, resource, markdown);
+    }
+
+    public void putPageCachedValue(String propertyName, @Nonnull Resource resource, @Nonnull String markdown) {
         if (!isEnabled() || resource == null || markdown == null || markdown.isEmpty() ||
                 !resource.getName().equals(JcrConstants.JCR_CONTENT)) {
             return;
@@ -123,15 +138,15 @@ public class MarkdownSlingCacheImpl implements ApproximateMarkdownServicePlugin 
         try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(null)) {
             Resource cacheResource = getOrCreateCacheResource(serviceResourceResolver, resource.getPath(), true);
             if (cacheResource != null && (
-                    isModified(resource, cacheResource.getValueMap()) ||
-                            !markdown.equals(cacheResource.getValueMap().get(PROPERTY_MARKDOWN, String.class)))) {
+                    isModified(resource, cacheResource.getValueMap(), propertyName) ||
+                            !markdown.equals(cacheResource.getValueMap().get(propertyName, String.class)))) {
                 Calendar lastModified = getLastModified(resource);
                 if (lastModified != null) {
                     ModifiableValueMap mvm = cacheResource.adaptTo(ModifiableValueMap.class);
-                    mvm.put(PROPERTY_MARKDOWN_PAGE_MODIFICATION_DATE, lastModified);
-                    mvm.put(PROPERTY_MARKDOWN, markdown);
+                    mvm.put(propertyName + SUFFIX_PAGE_MODIFICATION_DATE, lastModified);
+                    mvm.put(propertyName, markdown);
                     cacheResource.getResourceResolver().commit();
-                    if (isModified(resource, cacheResource.getValueMap())) {
+                    if (isModified(resource, cacheResource.getValueMap(), propertyName)) {
                         LOG.error("BUG: sanity check failed - shouldn't be in a modified state anymore", resource.getPath());
                     }
                 }
