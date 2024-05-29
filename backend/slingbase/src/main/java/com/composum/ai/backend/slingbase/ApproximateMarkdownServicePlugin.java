@@ -47,7 +47,9 @@ public interface ApproximateMarkdownServicePlugin {
      * If the plugin cannot handle this resource, it should return null.
      */
     @Nullable
-    String getImageUrl(@Nullable Resource imageResource);
+    default String getImageUrl(@Nullable Resource imageResource) {
+        return null;
+    }
 
     /**
      * Returns true when the sling:resourceType or one of the sling:resourceSuperType of the sling:resourceType match the pattern.
@@ -75,6 +77,14 @@ public interface ApproximateMarkdownServicePlugin {
     @Nonnull
     default Collection<? extends ApproximateMarkdownService.Link> getMasterLinks(Resource resource) {
         return Collections.emptyList();
+    }
+
+    /**
+     * An optional way to cache calculated markdowns - if a plugin implements this, it can retrieve that
+     * on {@link #maybeHandle(Resource, PrintWriter, ApproximateMarkdownService, SlingHttpServletRequest, SlingHttpServletResponse)}.
+     */
+    default void cacheMarkdown(@Nonnull Resource resource, @Nonnull String markdown) {
+        // do nothing
     }
 
 }

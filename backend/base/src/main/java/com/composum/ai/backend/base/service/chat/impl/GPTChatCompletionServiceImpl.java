@@ -744,6 +744,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
     }
 
+    @Override
+    public String getEmbeddingsModel() {
+        return embeddingsModel;
+    }
+
     @ObjectClassDefinition(name = "Composum AI OpenAI Configuration",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {

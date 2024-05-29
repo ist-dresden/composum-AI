@@ -1,0 +1,11 @@
+/* AIGenVersion(786e7c01, osgiconfigurations.prompt-1.1, MarkdownSlingCacheImpl.java-24b4736e) */
+
+## Composum AI Approximate Markdown Cache Service Configuration (slingbase)
+
+If configured, caches the calculated approximate markdown of pages.  
+CAUTION: the page content must be independent of the user, or you might leak one user's data to another!
+
+| id | name | type | default value | description |
+|----|------|------|---------------|-------------|
+| disabled | Disable | boolean | false | Disable the service |
+| cacheRootPath | Cache Root Path | String | | The JCR root path where the markdown is stored. If not set, no caching is done. Suggestion: /var/composum/ai-markdown-cache. To set this up you'll need to create this path in the repository, add a service user for this bundle's name (composum-ai-integration-backend-slingbase) and make the path writeable for this user. |

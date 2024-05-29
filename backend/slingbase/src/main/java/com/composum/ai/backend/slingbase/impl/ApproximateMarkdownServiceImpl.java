@@ -161,7 +161,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     @Override
     public void approximateMarkdown(
-            @Nullable Resource resource, @Nonnull PrintWriter out,
+            @Nullable Resource resource, @Nonnull PrintWriter realOutput,
             @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         if (resource == null || IGNORED_NODE_NAMES.matcher(resource.getName()).matches()) {
             // The content of i18n nodes would be a duplication as it was already printed as "text" attribute in the parent node.
@@ -175,6 +175,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         if (!resource.getPath().contains("/jcr:content") && resource.getChild("jcr:content") != null) {
             resource = resource.getChild("jcr:content");
         }
+        StringWriter buf = new StringWriter();
+        PrintWriter out = new PrintWriter(buf, false);
         PluginResult pluginResult = executePlugins(resource, out, request, response);
         boolean printEmptyLine = false;
         if (pluginResult == NOT_HANDLED) {
@@ -195,6 +197,15 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             resource.getChildren().forEach(child -> approximateMarkdown(child, out, request, response));
         }
         logUnhandledAttributes(resource);
+
+        out.close();
+        String markdown = buf.toString();
+        if (!markdown.isEmpty()) {
+            realOutput.print(markdown);
+            for (ApproximateMarkdownServicePlugin plugin : plugins) {
+                plugin.cacheMarkdown(resource, markdown);
+            }
+        }
     }
 
     protected boolean handleResource(@NotNull Resource resource, @NotNull PrintWriter out, boolean printEmptyLine) {

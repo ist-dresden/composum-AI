@@ -87,4 +87,7 @@ public interface GPTChatCompletionService {
     /** Calculates embeddings for the given list of texts. */
     List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException;
 
+    /** Returns the model used for {@link #getEmbeddings(List, GPTConfiguration)}. */
+    String getEmbeddingsModel();
+
 }

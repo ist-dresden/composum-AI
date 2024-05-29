@@ -18,7 +18,7 @@ public interface RAGService {
 
     /**
      * Returns a list of up to limit paths that might be related to the query. We search for the whole query, andy quoted strings inside and
-     * then for all single words in the query, scored. The paths are returned in descending order of score.
+     * then for all single words in the query, scored. The paths are returned in descending order of lucene score.
      *
      * @param root      the root resource to search in
      * @param querytext the query text

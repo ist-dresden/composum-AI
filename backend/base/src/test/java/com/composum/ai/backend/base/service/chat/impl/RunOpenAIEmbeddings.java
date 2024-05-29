@@ -22,28 +22,6 @@ import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
  */
 public class RunOpenAIEmbeddings extends AbstractGPTRunner {
 
-    @Spy
-    private GPTEmbeddingCache cache = new GPTEmbeddingCache() {
-
-        private Map<String, float[]> cacheMap = new HashMap<>();
-
-        @Nullable
-        @Override
-        public float[] get(@Nullable String text) {
-            return cacheMap.get(text);
-        }
-
-        @Override
-        public void put(@Nullable String text, @Nonnull float[] embedding) {
-            cacheMap.put(text, embedding);
-        }
-
-        @Override
-        public void clearIfNotModel(String model) {
-            cacheMap.clear();
-        }
-    };
-
     @InjectMocks
     private GPTEmbeddingService embeddingsService = new GPTEmbeddingServiceImpl();
 
@@ -63,7 +41,7 @@ public class RunOpenAIEmbeddings extends AbstractGPTRunner {
         });
         String compared = "What is Composum Pages?";
         GPTConfiguration configuration = null;
-        List<String> topN = embeddingsService.findMostRelated(compared, comparedStrings, 2, configuration);
+        List<String> topN = embeddingsService.findMostRelated(compared, comparedStrings, 2, configuration, null);
         Assert.assertEquals(2, topN.size());
         for (String s : topN) {
             System.out.println("Most related to '" + compared + "': " + s);

@@ -17,7 +17,7 @@ public @interface AutoTranslateConfig {
                     "/apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration.", defaultValue = "false")
     boolean pocUiEnabled() default false;
 
-    @AttributeDefinition(name = "Disable the Autotranslate service", defaultValue = "false")
+    @AttributeDefinition(name = "Disable", description = "Disable the Autotranslate service", defaultValue = "false")
     boolean disabled() default false;
 
     @AttributeDefinition(name = "Denied Resource Types",

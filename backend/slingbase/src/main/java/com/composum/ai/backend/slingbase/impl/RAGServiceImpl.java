@@ -27,6 +27,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
+import com.composum.ai.backend.slingbase.PageCachedValueService;
 import com.composum.ai.backend.slingbase.RAGService;
 
 /**
@@ -58,6 +60,9 @@ public class RAGServiceImpl implements RAGService {
 
     @Reference
     protected GPTChatCompletionService chatCompletionService;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+    protected PageCachedValueService pageCachedValueService;
 
     protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis() / 2);
 
@@ -150,11 +155,15 @@ public class RAGServiceImpl implements RAGService {
                                            @NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response,
                                            @NotNull Resource rootResource) {
         Map<String, String> textToPath = new TreeMap<>();
+        Map<String, Resource> textToResource = new TreeMap<>();
         for (Resource resource : resources) {
-            textToPath.put(markdownService.approximateMarkdown(resource, request, response), resource.getPath());
+            String markdown = markdownService.approximateMarkdown(resource, request, response);
+            textToPath.put(markdown, resource.getPath());
+            textToResource.put(markdown, resource);
         }
         GPTConfiguration config = aiConfigurationService.getGPTConfiguration(rootResource.getResourceResolver(), rootResource.getPath());
-        List<String> relatedTexts = embeddingService.findMostRelated(querytext, new ArrayList<>(textToPath.keySet()), Integer.MAX_VALUE, config);
+        List<String> relatedTexts = embeddingService.findMostRelated(querytext, new ArrayList<>(textToPath.keySet()),
+                Integer.MAX_VALUE, config, getEmbeddingsCache(textToResource));
         Map<String, Resource> pathToResource = resources.stream().collect(Collectors.toMap(r -> r.getPath(), r -> r));
         List<Resource> result = relatedTexts.stream()
                 .map(textToPath::get)
@@ -180,11 +189,15 @@ public class RAGServiceImpl implements RAGService {
                             @NotNull Resource rootResource, int limitRagTexts) {
         long id = requestCounter.incrementAndGet();
         Map<String, String> textToPath = new TreeMap<>();
+        Map<String, Resource> textToResource = new TreeMap<>();
         for (Resource resource : resources) {
-            textToPath.put(markdownService.approximateMarkdown(resource, request, response), resource.getPath());
+            String markdown = markdownService.approximateMarkdown(resource, request, response);
+            textToPath.put(markdown, resource.getPath());
+            textToResource.put(markdown, resource);
         }
         GPTConfiguration config = aiConfigurationService.getGPTConfiguration(rootResource.getResourceResolver(), rootResource.getPath());
-        List<String> bestMatches = embeddingService.findMostRelated(querytext, new ArrayList<>(textToPath.keySet()), limitRagTexts, config);
+        List<String> bestMatches = embeddingService.findMostRelated(querytext,
+                new ArrayList<>(textToPath.keySet()), limitRagTexts, config, getEmbeddingsCache(textToResource));
         LOG.debug("ragAnswer: query for {} is {}", id, request);
         GPTChatRequest chatRequest = new GPTChatRequest(config);
         Collections.reverse(bestMatches); // make the most relevant last, near the actual question
@@ -200,6 +213,26 @@ public class RAGServiceImpl implements RAGService {
         String answer = chatCompletionService.getSingleChatCompletion(chatRequest);
         LOG.debug("ragAnswer: response {} : {}", id, answer);
         return answer;
+    }
+
+    protected GPTEmbeddingService.EmbeddingsCache getEmbeddingsCache(final Map<String, Resource> textToResource) {
+        final String key = "pagemarkdown-embedding-" + chatCompletionService.getEmbeddingsModel();
+        return new GPTEmbeddingService.EmbeddingsCache() {
+
+            @Override
+            public String getCachedEmbedding(String text) {
+                Resource resource = textToResource.get(text);
+                return resource != null ? pageCachedValueService.getPageCachedValue(key, resource) : null;
+            }
+
+            @Override
+            public void putCachedEmbedding(String text, String embedding) {
+                Resource resource = textToResource.get(text);
+                if (resource != null) {
+                    pageCachedValueService.putPageCachedValue(key, resource, embedding);
+                }
+            }
+        };
     }
 
 }
