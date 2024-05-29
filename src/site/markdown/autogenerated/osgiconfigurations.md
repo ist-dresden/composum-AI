@@ -17,14 +17,14 @@ Configuration for the Approximate Markdown Service used to get a text representa
 | labelledAttributeOrder | Labelled Attribute Order | String[] |  | List of labelled attributes that come first if they are present, in the given order. |
 
 <a name="osgi.AutoTranslateConfig"></a>
-## Composum AI Autotranslate Configuration (core)
+## Composum AI Autotranslate Configuration (aem/core)
 
 Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found. Proof of concept quality - give it a try. :-)
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
 | pocUiEnabled | Proof of concept UI | boolean | false | Enable the Autotranslate proof of concept UI at at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
-| disabled | Disable the Autotranslate service | boolean | false |  |
+| disabled | Disable | boolean | false | Disable the Autotranslate service |
 | deniedResourceTypes | Denied Resource Types | String[] |  | Regexes for denied Resource Types - if the sling:resourceType matches that, then no attributes or child nodes are touched by the automatic translation. |
 | allowedAttributeRegexes | Allowed Additional Attributes | String[] |  | Matches for Attributes that are explicitly allowed to be translated, in addition to standard attributes and heuristically recognized attributes. The heuristics is that the value has to have letters and whitespaces. Syntax: regular expressions that match resource type % attribute name - e.g. myapp/component/html%markup |
 | deniedAttributesRegexes | Denied Attributes | String[] |  | Attributes that are explicitly denied to be translated. Can be used to override the heuristics / standard attributes. Same syntax as allowed attributes. |
@@ -109,6 +109,17 @@ A plugin for the ApproximateMarkdownService that transforms the rendered HTML of
 |----|------|------|---------------|-------------|
 | allowedResourceTypes | Allowed resource types | String[] | {".*"} | Regular expressions for allowed resource types. If not present, no resource types are allowed. |
 | deniedResourceTypes | Denied resource types | String[] | {} | Regular expressions for denied resource types. Takes precedence over allowed resource types. |
+
+<a name="osgi.MarkdownSlingCacheImpl"></a>
+## Composum AI Approximate Markdown Cache Service Configuration (slingbase)
+
+If configured, caches the calculated approximate markdown of pages.  
+CAUTION: the page content must be independent of the user, or you might leak one user's data to another!
+
+| id | name | type | default value | description |
+|----|------|------|---------------|-------------|
+| disabled | Disable | boolean | false | Disable the service |
+| cacheRootPath | Cache Root Path | String | | The JCR root path where the markdown is stored. If not set, no caching is done. Suggestion: /var/composum/ai-markdown-cache. To set this up you'll need to create this path in the repository, add a service user for this bundle's name (composum-ai-integration-backend-slingbase) and make the path writeable for this user. |
 
 <a name="osgi.SlingCaConfigPluginImpl"></a>
 ### Composum AI SlingCaConfig Plugin (slingbase)
