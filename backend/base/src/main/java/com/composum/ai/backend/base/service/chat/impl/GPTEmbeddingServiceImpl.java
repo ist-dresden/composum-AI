@@ -36,7 +36,7 @@ public class GPTEmbeddingServiceImpl implements GPTEmbeddingService {
     @Nonnull
     Map<String, float[]> embeddingsMap(@Nullable List<String> texts , @Nullable EmbeddingsCache cache) {
         Map<String, float[]> result = new java.util.HashMap<>();
-        if (texts != null) {
+        if (cache != null && texts != null) {
             texts.stream()
                     .filter(Objects::nonNull)
                     .distinct()

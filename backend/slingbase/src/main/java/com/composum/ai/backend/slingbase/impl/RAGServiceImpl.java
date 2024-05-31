@@ -216,6 +216,9 @@ public class RAGServiceImpl implements RAGService {
     }
 
     protected GPTEmbeddingService.EmbeddingsCache getEmbeddingsCache(final Map<String, Resource> textToResource) {
+        if (pageCachedValueService == null) {
+            return null;
+        }
         final String key = "pagemarkdown-embedding-" + chatCompletionService.getEmbeddingsModel();
         return new GPTEmbeddingService.EmbeddingsCache() {
 

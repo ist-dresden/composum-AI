@@ -85,6 +85,7 @@ public interface GPTChatCompletionService {
     boolean isVisionEnabled();
 
     /** Calculates embeddings for the given list of texts. */
+    @Nonnull
     List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException;
 
     /** Returns the model used for {@link #getEmbeddings(List, GPTConfiguration)}. */
