@@ -42,4 +42,8 @@ public @interface AutoTranslateConfig {
                     "(Otherwise the translator would translate metadata of images and videos.)")
     boolean ignoreAssetsExceptContentFragments() default true;
 
+    @AttributeDefinition(name = "Use High Intelligence Model",
+            description  ="If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true.")
+    boolean useHighIntelligenceModel() default true;
+
 }
