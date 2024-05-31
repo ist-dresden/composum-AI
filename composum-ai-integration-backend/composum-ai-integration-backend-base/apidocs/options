@@ -18,11 +18,11 @@
 -docencoding
 'UTF-8'
 -doctitle
-'Composum AI::Backend::Base 1.0.0 API'
+'Composum AI::Backend::Base 1.1.0 API'
 -linkoffline
 'https://docs.oracle.com/javase/8/docs/api' '/home/runner/work/composum-AI/composum-AI/backend/base/target/javadoc-bundle-options'
 -notimestamp
 -use
 -version
 -windowtitle
-'Composum AI::Backend::Base 1.0.0 API'
+'Composum AI::Backend::Base 1.1.0 API'

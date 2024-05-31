@@ -7,3 +7,4 @@ org.apache.sling.scripting.sightly.apps.composum__002d__ai.components.sidepanel_
 org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype
 org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype.embedsearch
 org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype.rag
+org.apache.sling.scripting.sightly.apps.composum__002d__ai.prototype.templating

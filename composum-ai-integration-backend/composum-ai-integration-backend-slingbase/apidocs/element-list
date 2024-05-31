@@ -1,3 +1,5 @@
 com.composum.ai.backend.slingbase
+com.composum.ai.backend.slingbase.experimential
+com.composum.ai.backend.slingbase.experimential.impl
 com.composum.ai.backend.slingbase.impl
 com.composum.ai.backend.slingbase.model
