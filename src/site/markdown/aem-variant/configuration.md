@@ -1,7 +1,7 @@
 # Configuration of Composum AI in AEM
 
 Using the Composum AI needs an [OpenAI API key](https://platform.openai.com/api-keys) that can either be configured for
-the whole server in the OSGI configuration "Composum AI GPT Chat Completion Service" or flexibly per site or
+the whole server in the OSGI configuration "Composum AI OpenAI Configuration" or flexibly per site or
 content-tree with Sling Context Aware Configuration in the "Composum AI OpenAI Configuration".
 
 If you want Composum AI to be available to the editors whereever it's supported, you only need to configure the
@@ -29,15 +29,14 @@ The Composum AI can be configured to use OpenAI services or other LLM that have 
 ### Configuration to use OpenAI services
 
 Using the Composum AI needs an [OpenAI API key](https://platform.openai.com/api-keys) that can either be configured for
-the whole server in the OSGI configuration "Composum AI GPT Chat Completion Service" (or "Composum AI OpenAI
-Configuration") or flexibly per site or
+the whole server in the OSGI configuration "Composum AI OpenAI Configuration" or flexibly per site or
 content-tree with Sling Context Aware Configuration in the "Composum AI OpenAI Configuration".
 
 For the OpenAI key there is a fallback hierarchy:
 
 - Sling Context Aware Configuration with the configuration class
   `com.composum.ai.backend.slingbase.model.OpenAIConfig`
-- OSGI configuration at "Composum AI GPT Chat Completion Service" / "Composum AI OpenAI Configuration"
+- OSGI configuration at "Composum AI OpenAI Configuration"
 - Environment variable OPENAI_API_KEY
 - System property openai.api.key
 

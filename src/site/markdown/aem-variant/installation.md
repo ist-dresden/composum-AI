@@ -11,7 +11,7 @@ The release notes are available
 For the access to the ChatGPT backend an [OpenAI API Key](https://platform.openai.com/api-keys)
 is necessary. If you're trying out Composum AI locally on a development server or a AEM 6.5 standard installation,
 it might be easiest to put it into an environment variable `OPENAI_API_KEY` or configure it via
-OSGI in the "Composum AI GPT Chat Completion Service" / "Composum AI OpenAI Configuration" in the Felix console.
+OSGI in the "Composum AI OpenAI Configuration" in the Felix console.
 For a testing or production environment there are also several other ways to configure the key -
 compare the [configuration instructions](configuration.md). If you're just trying it out on a test system and want
 it to be available for everybody it is sufficient to put it into a
