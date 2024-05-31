@@ -73,7 +73,7 @@ public class ComposumApproximateMarkdownServicePluginTest {
 
     @Test
     public void testTableHandlingWithTableResource() {
-        ResourceBuilder tableBuilder = context.build().resource("/content/test", "sling:resourceType", "composum/pages/components/composed/table", "title", "Test Table");
+        ResourceBuilder tableBuilder = context.build().resource("/content/test/foo", "sling:resourceType", "composum/pages/components/composed/table", "title", "Test Table");
         Resource table = tableBuilder.getCurrentParent();
         ResourceBuilder row1Builder = tableBuilder.resource("row1", "sling:resourceType", "composum/pages/components/composed/table/row");
         row1Builder.resource("r1c1", "sling:resourceType", "composum/pages/components/composed/table/cell", "text", "r1c1");
