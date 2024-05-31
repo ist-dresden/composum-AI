@@ -14,6 +14,6 @@ fi
 
 set -x
 # model at least -m "gpt-4o" or equivalent
-aigenpipeline -p embedsearch.prompt -o embedsearch.html embedsearch.html $PHOME/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
+aigenpipeline -upd -p embedsearch.prompt -o embedsearch.html $PHOME/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/impl/RAGServlet.java
 
 cp -f embedsearch.html $PHOME/aem/ui.apps/src/main/content/jcr_root/apps/composum-ai/prototype/embedsearch/
