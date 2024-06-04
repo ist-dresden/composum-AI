@@ -87,6 +87,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     protected final static Pattern VIDEO_PATTERN = Pattern.compile("\\.(mp4|mov)(/|$)", Pattern.CASE_INSENSITIVE);
 
+    /** We allow generating markdown for subpaths of /content, /public and /preview . */
+    public static final Pattern ADMISSIBLE_PATH_PATTERN = Pattern.compile("/(content|preview|public)/.*/.*");
+
     /**
      * A list of attributes that are output (in that ordering) without any label, each on a line for itself.
      */
@@ -169,8 +172,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             // Also, it'd be not quite clear what language we should take. That's Composum only, though.
             return;
         }
-        if (!ResourceUtil.normalize(resource.getPath()).startsWith("/content/")) {
-            throw new IllegalArgumentException("For security reasons the resource must be in /content but is: " + resource.getPath());
+        if (!ADMISSIBLE_PATH_PATTERN.matcher(ResourceUtil.normalize(resource.getPath())).matches()) {
+            throw new IllegalArgumentException("For security reasons the resource must be in /content,/preview,/public but is: " + resource.getPath());
         }
         if (!resource.getPath().contains("/jcr:content") && resource.getChild("jcr:content") != null) {
             resource = resource.getChild("jcr:content");

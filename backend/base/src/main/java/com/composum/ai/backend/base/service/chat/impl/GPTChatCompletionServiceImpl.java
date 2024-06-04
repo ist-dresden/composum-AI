@@ -699,6 +699,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     @Override
+    @Nonnull
     public List<float[]> getEmbeddings(List<String> texts, GPTConfiguration configuration) throws GPTException {
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();

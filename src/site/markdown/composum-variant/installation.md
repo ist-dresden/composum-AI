@@ -15,8 +15,7 @@ available through the
 You will need an [OpenAI API key](https://platform.openai.com/account/api-keys) secret key to run it, which can
 either be put into an environment variable `OPENAI_API_KEY` or be configured via OSGI configuration in the Felix
 console [/system/console/configMgr](http://localhost:8080/system/console/configMgr) at "Composum AI OpenAI
-Configuration"
-(or "Composum AI GPT Chat Completion Service", depending on the version) - see the
+Configuration" - see the
 [configuration instructions](configuration.md) for details and other configuration options.
 
 ## Installation in Composum Pages

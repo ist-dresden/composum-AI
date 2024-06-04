@@ -14,3 +14,5 @@ The default for order by embedding is true.
 
 On each submit the values of the fields should be stored in localStorage at key composum-ai-prototype-embedsearch ,
 and on first loading of the page the last values should be restored from there.
+
+If the request to the servlet returns an error, display the error (status message and body of the response) instead of the results.

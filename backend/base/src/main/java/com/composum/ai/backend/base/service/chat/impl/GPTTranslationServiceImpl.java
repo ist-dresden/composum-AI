@@ -146,7 +146,9 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
     protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
 
-    /** Separate whitespace at the beginning and end from the non-whitespace text. */
+    /**
+     * Separate whitespace at the beginning and end from the non-whitespace text.
+     */
     protected static final Pattern PATTERN_SEPARATE_WHITESPACE = Pattern.compile("\\A(\\s*)(.*?)(\\s*)\\Z", Pattern.DOTALL);
 
     /**
@@ -305,6 +307,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
+        request.setConfiguration(configuration);
         String addition = configuration != null && configuration.getAdditionalInstructions() != null ? "\n\n" + configuration.getAdditionalInstructions() : "";
         if (configuration != null && configuration.isHtml()) {
             Matcher m = HTML_TAG_AT_START.matcher(text);
@@ -377,7 +380,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         for (char c : request.toString().toCharArray()) {
             hash = 92821 * hash + c;
         }
-        return Integer.toHexString(Math.abs(hash));
+        boolean hi = request.getConfiguration() != null ? request.getConfiguration().isHighIntelligenceNeeded() : false;
+        return (hi ? "hi-" : "") + Integer.toHexString(Math.abs(hash));
     }
 
     protected void cacheResponse(String cacheKey, GPTChatRequest request, String response) {

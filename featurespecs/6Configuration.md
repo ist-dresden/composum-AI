@@ -52,7 +52,7 @@ public @interface OpenAIConfig {
 We have a fallback hierarchy for the OpenAI API key:
 
 - Sling Context Aware Configuration
-- OSGI configuration at "Composum AI GPT Chat Completion Service" - this is configured by default for AEMaaCS
+- OSGI configuration at "Composum AI OpenAI Configuration" - this is configured by default for AEMaaCS
   as $[secret:OPENAI_API_KEY] to retrieve a value configurable in the cloud manager
 - Environment variable OPENAI_API_KEY
 

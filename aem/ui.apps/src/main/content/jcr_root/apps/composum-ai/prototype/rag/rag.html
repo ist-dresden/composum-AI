@@ -58,9 +58,9 @@
         </div>
         <div class="mb-3">
             <label for="limitField" class="form-label">Maximum number of pages to be searched and ranked:</label>
-            <input type="number" class="form-control" id="limitField" name="limit" value="20">
+            <input type="number" class="form-control" id="limitField" name="limit" value="10">
             <small class="form-text text-muted">Set the maximum number of pages to search and rank
-                (default is 20).</small>
+                (default is 10).</small>
         </div>
         <div class="mb-3">
             <label for="limitRagTextsField" class="form-label">Maximum number of pages for AI to answer:</label>
@@ -108,8 +108,8 @@
             xhr = $.get(url, function (data) {
                 const html = converter.makeHtml(data);
                 $('#answerArea').html(html);
-            }).fail(function () {
-                $('#answerArea').html('<p>Error fetching data.</p>');
+            }).fail(function (xhr) {
+                $('#answerArea').html('<p>Error: ' + xhr.status + ' - ' + xhr.responseText + '</p>');
             }).always(function () {
                 $('#submitBtn').prop('disabled', false);
                 $('#stopBtn').hide();
@@ -147,4 +147,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(7be4b103, rag.prompt-54980687, RAGServlet.java-6494a61e) -->
+<!-- AIGenVersion(3471e978, rag.prompt-0b7823cd, RAGServlet.java-042fca60) -->

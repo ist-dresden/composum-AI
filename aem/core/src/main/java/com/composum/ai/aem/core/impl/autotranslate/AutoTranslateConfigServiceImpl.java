@@ -112,6 +112,11 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
     }
 
     @Override
+    public boolean isUseHighIntelligenceModel() {
+        return config != null && config.useHighIntelligenceModel();
+    }
+
+    @Override
     public boolean isTranslatableResource(@Nullable final Resource resource) {
         if (!isEnabled() || resource == null) {
             return false;

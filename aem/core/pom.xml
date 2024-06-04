@@ -56,6 +56,7 @@ Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotran
                 <artifactId>bnd-baseline-maven-plugin</artifactId>
                 <configuration>
                     <failOnMissing>false</failOnMissing>
+                    <continueOnError>true</continueOnError>
                 </configuration>
                 <executions>
                     <execution>

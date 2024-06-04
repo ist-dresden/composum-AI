@@ -38,11 +38,11 @@
         <form id="search-form">
             <div class="form-group">
                 <label for="path">Path (e.g., /content/my-site):</label>
-                <input type="text" class="form-control" id="path" name="path">
+                <input type="text" class="form-control" id="path" name="path" placeholder="Enter the path">
             </div>
             <div class="form-group">
                 <label for="limit">Limit (default is 10):</label>
-                <input type="number" class="form-control" id="limit" name="limit" value="10">
+                <input type="number" class="form-control" id="limit" name="limit" value="10" placeholder="Enter the limit">
             </div>
             <div class="form-group form-check">
                 <input type="checkbox" class="form-check-input" id="embeddingOrder" name="embeddingOrder" checked>
@@ -50,7 +50,7 @@
             </div>
             <div class="form-group">
                 <label for="query">Query:</label>
-                <textarea class="form-control" id="query" name="query" rows="3"></textarea>
+                <textarea class="form-control" id="query" name="query" rows="3" placeholder="Enter your query"></textarea>
             </div>
             <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
             <button type="button" class="btn btn-secondary" id="reset-btn">Reset</button>
@@ -87,17 +87,23 @@
                 };
                 localStorage.setItem('composum-ai-prototype-embedsearch', JSON.stringify(formValues));
 
-                $.getJSON(url, function(data) {
-                    var results = '';
-                    $.each(data, function(index, item) {
-                        var path = item.path.replace(/\/jcr:content$/, '') + '.html';
-                        var title = item.title ? '<h5>' + item.title + '</h5>' : '';
-                        var description = item.description ? '<p>' + item.description + '</p>' : '';
-                        results += '<li><a href="' + path + '">' + path + '</a>' + title + description + '</li>';
+                $.getJSON(url)
+                    .done(function(data) {
+                        var results = '';
+                        $.each(data, function(index, item) {
+                            var path = item.path.replace(/\/jcr:content$/, '') + '.html';
+                            var title = item.title ? '<h5>' + item.title + '</h5>' : '';
+                            var description = item.description ? '<p>' + item.description + '</p>' : '';
+                            results += '<li><a href="' + path + '">' + path + '</a>' + title + description + '</li>';
+                        });
+                        $('#search-results').html('<ul>' + results + '</ul>');
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        $('#search-results').html('<p>Error: ' + errorThrown + '</p><p>' + jqXHR.responseText + '</p>');
+                    })
+                    .always(function() {
+                        $('#submit-btn').prop('disabled', false);
                     });
-                    $('#search-results').html('<ul>' + results + '</ul>');
-                    $('#submit-btn').prop('disabled', false);
-                });
             });
 
             $('#query').keypress(function(event) {
@@ -120,4 +126,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(4c8e3502, embedsearch.prompt-424bb11b, RAGServlet.java-5ba938ad) -->
+<!-- AIGenVersion(0aca62bb, embedsearch.prompt-34c7f3ec, RAGServlet.java-042fca60) -->
