@@ -25,6 +25,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +59,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     @Reference
     protected GPTTranslationService translationService;
 
-    @Reference
-    protected AutoTranslateConfigService autoTranslateConfigService;
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected volatile AutoTranslateConfigService autoTranslateConfigService;
 
     @Reference
     protected LiveRelationshipManager liveRelationshipManager;

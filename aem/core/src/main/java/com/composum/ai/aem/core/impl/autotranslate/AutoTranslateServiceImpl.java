@@ -22,6 +22,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +50,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     @Reference
     private AutoPageTranslateService pageTranslateService;
 
-    @Reference
-    protected AutoTranslateConfigService autoTranslateConfigService;
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected volatile AutoTranslateConfigService autoTranslateConfigService;
 
     private ThreadPool threadPool;
 
