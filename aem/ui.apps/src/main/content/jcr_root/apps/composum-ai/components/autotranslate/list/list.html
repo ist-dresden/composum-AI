@@ -83,9 +83,17 @@
                                                           name="additionalInstructions" value=""
                                                           labelledby="label-vertical-textarea-1"></textarea>
                                             </div>
-                                            <button type="submit" class="coral-Button coral-Button--primary">Start
-                                                Translation
-                                                Process
+                                            <div class="coral-Form-fieldwrapper">
+                                                <label class="coral-Form-fieldlabel" for="selectmodel">Model</label>
+                                                <coral-select class="coral-Form-field _coral-Dropdown" name="translationmodel"
+                                                              placeholder="" variant="default">
+                                                    <coral-select-item value="default" selected="">default</coral-select-item>
+                                                    <coral-select-item value="standard">Standard</coral-select-item>
+                                                    <coral-select-item value="highintelligence">High</coral-select-item>
+                                                </coral-select>
+                                            </div>
+                                            <button type="submit" class="coral-Button coral-Button--primary">
+                                                Start Translation Process
                                             </button>
                                         </div>
                                     </section>

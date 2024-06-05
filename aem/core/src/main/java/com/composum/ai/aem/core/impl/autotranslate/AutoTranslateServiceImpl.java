@@ -222,7 +222,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     mergedConfiguration = new GPTConfiguration(null, null, null,
                             translationParameters.additionalInstructions).merge(configuration);
                 }
-                if (autoTranslateConfigService.isUseHighIntelligenceModel()) {
+                if (autoTranslateConfigService.isUseHighIntelligenceModel() &&
+                        (mergedConfiguration == null || mergedConfiguration.isHighIntelligenceNeeded() == null)) {
                     mergedConfiguration = GPTConfiguration.HIGH_INTELLIGENCE.merge(mergedConfiguration);
                 }
                 for (TranslationPageImpl page : translatedPages) {

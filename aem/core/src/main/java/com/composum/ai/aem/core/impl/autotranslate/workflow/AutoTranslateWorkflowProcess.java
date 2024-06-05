@@ -143,6 +143,12 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
 
             try {
                 GPTConfiguration config = configurationService.getGPTConfiguration(contentResource.getResourceResolver(), contentResource.getPath());
+                if (autoTranslateCaConfig != null && autoTranslateCaConfig.model() == AutoTranslateCaConfig.RequiredModel.HIGH_INTELLIGENCE_MODEL) {
+                    config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
+                } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.model() == AutoTranslateCaConfig.RequiredModel.STANDARD_MODEL) {
+                    config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
+                }
+
                 if (parms.additionalInstructions != null) {
                     config = GPTConfiguration.merge(config,
                             new GPTConfiguration(null, null, null, parms.additionalInstructions));
