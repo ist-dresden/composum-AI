@@ -119,22 +119,35 @@ public class GPTConfiguration {
     /**
      * Creates a configuration that joins the values.
      *
-     * @throws IllegalArgumentException if values conflict
+     * @throws IllegalArgumentException if values conflict - that's checked for apiKey and organizationId and answerType.
      */
     public GPTConfiguration merge(@Nullable GPTConfiguration other) throws IllegalArgumentException {
+        return merge(other, false);
+    }
+
+    /**
+     * Creates a configuration that joins the values.
+     *
+     * @param override if true, values set in this configuration will override values set in the other configuration.
+     *                 Otherwise, a conflict will throw an exception.
+     * @param other    the other configuration to merge with (optional)
+     * @throws IllegalArgumentException if values conflict
+     * @return a new configuration
+     */
+    public GPTConfiguration merge(@Nullable GPTConfiguration other, boolean override) throws IllegalArgumentException {
         if (other == null) {
             return this;
         }
         String apiKey = this.apiKey != null ? this.apiKey : other.apiKey;
-        if (this.apiKey != null && other.apiKey != null && !this.apiKey.equals(other.apiKey)) {
+        if (!override && this.apiKey != null && other.apiKey != null && !this.apiKey.equals(other.apiKey)) {
             throw new IllegalArgumentException("Cannot merge conflicting API keys: " + this.apiKey + " vs. " + other.apiKey);
         }
         String organizationId = this.organizationId != null ? this.organizationId : other.organizationId;
-        if (this.organizationId != null && other.organizationId != null && !this.organizationId.equals(other.organizationId)) {
+        if (!override && this.organizationId != null && other.organizationId != null && !this.organizationId.equals(other.organizationId)) {
             throw new IllegalArgumentException("Cannot merge conflicting organization ids: " + this.organizationId + " vs. " + other.organizationId);
         }
         AnswerType answerType = this.answerType != null ? this.answerType : other.answerType;
-        if (this.answerType != null && other.answerType != null && !this.answerType.equals(other.answerType)) {
+        if (!override && this.answerType != null && other.answerType != null && !this.answerType.equals(other.answerType)) {
             throw new IllegalArgumentException("Cannot merge conflicting answer types: " + this.answerType + " vs. " + other.answerType);
         }
         String additionalInstructions = this.additionalInstructions == null ? other.additionalInstructions :
@@ -193,6 +206,10 @@ public class GPTConfiguration {
      * Requests slower and more expensive "high intelligence" model - use sparingly.
      */
     public static final GPTConfiguration HIGH_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, true);
+    /**
+     * Requests faster and less expensive "normal intelligence" model.
+     */
+    public static final GPTConfiguration STANDARD_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, false);
 
     @Override
     public boolean equals(Object o) {
