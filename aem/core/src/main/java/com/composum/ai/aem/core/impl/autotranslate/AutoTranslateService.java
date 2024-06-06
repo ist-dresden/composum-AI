@@ -34,7 +34,7 @@ public interface AutoTranslateService {
     /**
      * Rolls the translation results at this resource back - mostly for debugging.
      */
-    void rollback(Resource resource) throws WCMException;
+    void rollback(Resource resource) throws WCMException, PersistenceException;
 
     boolean isEnabled();
 

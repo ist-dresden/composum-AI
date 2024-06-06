@@ -282,13 +282,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     }
 
     @Override
-    public void rollback(Resource resource) throws WCMException {
+    public void rollback(Resource resource) throws WCMException, PersistenceException {
         if (resource == null) {
             throw new IllegalArgumentException("Resource does not exist.");
         }
-        for (Resource child : resource.getChildren()) {
-            rollback(child);
-        }
+        LOG.debug("Rolling back {}", resource.getPath());
+        boolean changes = false;
         ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
         Set<String> resetPropertyExclusionKeys = new HashSet<>();
@@ -299,10 +298,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(null, mvm, key);
             if (targetWrapper.hasSavedTranslation()) {
+                changes = true;
                 targetWrapper.setCurrentValue(targetWrapper.getOriginalCopy());
                 reenableInheritance(resource, key, relationship);
             }
             if (isNotBlank(targetWrapper.getLcOriginal())) {
+                changes = true;
                 targetWrapper.setCurrentValue(targetWrapper.getLcOriginal());
                 reenableInheritance(resource, key, relationship);
             }
@@ -313,9 +314,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             targetWrapper.setAiTranslatedDate(null);
             resetPropertyExclusionKeys.addAll(Arrays.asList(targetWrapper.allGeneralKeys()));
         }
-        if (relationship != null) {
+        if (relationship != null && changes) {
             liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship,
                     resetPropertyExclusionKeys.toArray(new String[0]), false);
+            resource.getResourceResolver().commit();
+        }
+        for (Resource child : resource.getChildren()) {
+            rollback(child);
         }
     }
 

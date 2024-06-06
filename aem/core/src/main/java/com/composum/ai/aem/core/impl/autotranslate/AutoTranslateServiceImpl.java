@@ -160,7 +160,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     @Override
-    public void rollback(Resource resource) throws WCMException {
+    public void rollback(Resource resource) throws WCMException, PersistenceException {
         pageTranslateService.rollback(resource);
     }
 

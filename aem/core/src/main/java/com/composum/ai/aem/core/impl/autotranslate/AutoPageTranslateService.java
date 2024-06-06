@@ -25,7 +25,7 @@ public interface AutoPageTranslateService {
     /**
      * Rolls everything back in the resource - mostly for testing purposes.
      */
-    void rollback(Resource resource) throws WCMException;
+    void rollback(Resource resource) throws WCMException, PersistenceException;
 
     public static class Stats {
         public int translateableProperties;
