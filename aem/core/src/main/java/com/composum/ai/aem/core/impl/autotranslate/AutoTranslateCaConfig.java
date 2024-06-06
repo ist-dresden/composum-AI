@@ -9,15 +9,13 @@ import org.apache.sling.caconfig.annotation.Property;
 // is also added to Sling-ContextAware-Configuration-Classes bnd header in pom.xml
 public @interface AutoTranslateCaConfig {
 
-    enum RequiredModel {
-        HIGH_INTELLIGENCE_MODEL,
-        STANDARD_MODEL
-    }
-
     @Property(label = "Additional Instructions", description = "Additional instructions for the automatic translation.")
     String additionalInstructions();
 
-    @Property(label = "Model", description = "If set, this model will be used for translation. If not set, a default will be used.")
-    RequiredModel model();
+    @Property(label = "Prefer High Intelligence Model", description = "If set, the high intelligence model will be used for translation.")
+    boolean preferHighIntelligenceModel();
+
+    @Property(label = "Prefer Standard Model", description = "If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.")
+    boolean preferStandardModel();
 
 }

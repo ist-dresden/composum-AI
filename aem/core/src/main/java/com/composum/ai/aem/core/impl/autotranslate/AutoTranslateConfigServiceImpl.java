@@ -30,9 +30,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 /**
  * Serves the configurations for the automatic translation service.
  */
-@Component(service = AutoTranslateConfigService.class, scope = ServiceScope.SINGLETON,
-// pid: backwards compatibility
-        configurationPid = "com.composum.ai.aem.core.impl.autotranslate.AutoTranslateServiceImpl")
+@Component(service = AutoTranslateConfigService.class, scope = ServiceScope.SINGLETON)
 @Designate(ocd = AutoTranslateConfig.class)
 public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigService {
 
