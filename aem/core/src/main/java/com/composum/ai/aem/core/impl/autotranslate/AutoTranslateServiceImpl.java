@@ -118,7 +118,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
         List<Resource> resources;
         if (translationParameters.recursive) {
-            resources = collectPages(root, translationParameters.maxDepth);
+            int maxDepth = translationParameters.maxDepth != null ? translationParameters.maxDepth : Integer.MAX_VALUE;
+            resources = collectPages(root, maxDepth);
         } else {
             if (root.isResourceType("cq:Page")) {
                 resources = Collections.singletonList(root.getChild("jcr:content"));
@@ -146,7 +147,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     protected List<Resource> collectPages(Resource root, int maxDepth) {
-        if (maxDepth <= 0) {
+        if (maxDepth < 0) {
             return Collections.emptyList();
         }
         if (root.getPath().contains("/jcr:content")) {
