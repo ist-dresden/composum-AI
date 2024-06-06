@@ -129,7 +129,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
                     liveRelationship, targetWrapper.allAiKeys(), false);
 
-            markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters);
+            markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters, configuration);
             stats.translatedProperties++;
             changed = true;
 
@@ -146,7 +146,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         changed |= migratePathsToLanguageCopy(resource, language, stats);
         if (changed) {
-            markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, false), translationParameters);
+            markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, false), translationParameters, configuration);
         }
         if (translationParameters.autoSave) {
             resource.getResourceResolver().commit();
@@ -167,12 +167,15 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return sourceLanguage;
     }
 
-    protected void markAsAiTranslated(Resource resource, LiveRelationship liveRelationship, AutoTranslateService.TranslationParameters parameters) throws WCMException {
+    protected void markAsAiTranslated(Resource resource, LiveRelationship liveRelationship, AutoTranslateService.TranslationParameters parameters, GPTConfiguration configuration) throws WCMException {
         ModifiableValueMap valueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(null, valueMap, null);
         String userID = parameters.userId != null ? parameters.userId : resource.getResourceResolver().getUserID();
         targetWrapper.setAiTranslatedBy(userID);
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
+        if (configuration != null) {
+            targetWrapper.setAiTranslatedModel(configuration.isHighIntelligenceNeeded() ? "hi" : "standard");
+        }
         if (liveRelationship != null) {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
                     liveRelationship, targetWrapper.allGeneralKeys(), false);
@@ -312,6 +315,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             resetPropertyExclusionKeys.addAll(Arrays.asList(allKeys));
             targetWrapper.setAiTranslatedBy(null);
             targetWrapper.setAiTranslatedDate(null);
+            targetWrapper.setAiTranslatedModel(null);
             resetPropertyExclusionKeys.addAll(Arrays.asList(targetWrapper.allGeneralKeys()));
         }
         if (relationship != null && changes) {
