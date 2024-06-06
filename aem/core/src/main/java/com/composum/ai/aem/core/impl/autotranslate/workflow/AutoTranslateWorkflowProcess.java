@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
@@ -49,9 +48,6 @@ import com.google.gson.JsonSyntaxException;
 public class AutoTranslateWorkflowProcess implements WorkflowProcess {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateWorkflowProcess.class);
-
-    @Reference
-    protected ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     protected AutoPageTranslateService autoPageTranslateService;
@@ -122,8 +118,18 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
     /**
      * We only translate jcr:content resources or resources that are within a jcr:content. If recursive is enabled, we search for the jcr:content recursively.
      */
-    protected void translate(@Nonnull Resource resource, String processArguments) throws PersistenceException, WCMException, WorkflowException {
+    protected void translate(@Nonnull Resource resource, String processArguments)
+            throws PersistenceException, WCMException, WorkflowException {
         TranslationParameters parms = getTranslationParameters(processArguments);
+        translate(resource, parms, 0);
+    }
+
+    protected void translate(@Nonnull Resource resource, TranslationParameters parms, int depth)
+            throws PersistenceException, WCMException, WorkflowException {
+        if (parms.maxDepth != null && depth > parms.maxDepth) {
+            LOG.info("Ignoring because max depth reached for resource: {}", resource.getPath());
+            return;
+        }
 
         Resource contentResource = null;
         if (resource.getPath().contains("/jcr:content")) {
@@ -169,7 +175,7 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
                 Resource child = childIterator.next();
                 // skip jcr:content node since that has been translated already
                 if (!child.getPath().contains("/jcr:content")) {
-                    translate(child, processArguments);
+                    translate(child, parms, depth + 1);
                 }
             }
         }

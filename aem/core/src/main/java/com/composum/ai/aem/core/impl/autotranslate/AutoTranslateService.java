@@ -45,6 +45,11 @@ public interface AutoTranslateService {
         public boolean recursive;
 
         /**
+         * Maximum depth of the recursion.
+         */
+        public Integer maxDepth;
+
+        /**
          * Also re-translate properties where the original was changed.
          */
         public boolean translateWhenChanged;
@@ -72,6 +77,7 @@ public interface AutoTranslateService {
         public String toString() {
             return "TranslationParameters{" +
                     "recursive=" + recursive +
+                    ", maxDepth=" + maxDepth +
                     ", translateWhenChanged=" + translateWhenChanged +
                     ", breakInheritance=" + breakInheritance +
                     ", autoSave=" + autoSave +
