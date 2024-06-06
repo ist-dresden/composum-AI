@@ -1,9 +1,11 @@
-/* AIGenVersion(1a6e2313, slingcaconfigurations.prompt-395da17f, AutoTranslateCaConfig.java-5f087c2c) */
+/* AIGenVersion(769ab43e, slingcaconfigurations.prompt-395da17f, AutoTranslateCaConfig.java-127c2a17) */
 
 ## Composum AI Automatic Translation POC Configuration (aem-core)
 
 Configures rollout details for automatic translation. This is a proof of concept and may not yet be fully functional.
 
-| id                    | label                    | type   | default value | description                                      |
-|-----------------------|--------------------------|--------|---------------|--------------------------------------------------|
-| additionalInstructions | Additional Instructions  | String |               | Additional instructions for the automatic translation. |
+| id                        | label                              | type    | default value | description                                                                                   |
+|---------------------------|------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------|
+| additionalInstructions    | Additional Instructions             | String  |               | Additional instructions for the automatic translation.                                        |
+| preferHighIntelligenceModel| Prefer High Intelligence Model      | boolean |               | If set, the high intelligence model will be used for translation.                              |
+| preferStandardModel       | Prefer Standard Model               | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'. |

@@ -1,6 +1,6 @@
-/* AIGenVersion(5c59d438, osgiconfigurations.prompt-1.1, GPTTranslationServiceImpl.java-7b6a5cb1) */
+/* AIGenVersion(2c44f697, osgiconfigurations.prompt-1.1, GPTTranslationServiceImpl.java-32142105) */
 
-## Composum AI Translation Service Configuration (backend)
+## Composum AI Translation Service Configuration (backend/base)
 
 Configuration for the basic Composum AI Translation Service
 
