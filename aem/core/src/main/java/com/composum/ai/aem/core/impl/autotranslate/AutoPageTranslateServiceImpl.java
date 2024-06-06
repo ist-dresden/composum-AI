@@ -290,9 +290,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             throw new IllegalArgumentException("Resource does not exist.");
         }
         LOG.debug("Rolling back {}", resource.getPath());
-        boolean changes = false;
         ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = null;
         Set<String> resetPropertyExclusionKeys = new HashSet<>();
         for (String key : new ArrayList<>(mvm.keySet())) {
             if (AITranslatePropertyWrapper.isAiTranslateProperty(key)) {
@@ -300,16 +299,22 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
 
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(null, mvm, key);
+            boolean reenable = false;
             if (targetWrapper.hasSavedTranslation()) {
-                changes = true;
                 targetWrapper.setCurrentValue(targetWrapper.getOriginalCopy());
-                reenableInheritance(resource, key, relationship);
+                reenable = true;
             }
             if (isNotBlank(targetWrapper.getLcOriginal())) {
-                changes = true;
                 targetWrapper.setCurrentValue(targetWrapper.getLcOriginal());
+                reenable = true;
+            }
+            if (reenable) {
+                if (relationship == null) { // on demand since expensive calculation
+                    relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+                }
                 reenableInheritance(resource, key, relationship);
             }
+
             String[] allKeys = targetWrapper.allKeys();
             Arrays.stream(allKeys).forEach(mvm::remove);
             resetPropertyExclusionKeys.addAll(Arrays.asList(allKeys));
@@ -318,7 +323,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             targetWrapper.setAiTranslatedModel(null);
             resetPropertyExclusionKeys.addAll(Arrays.asList(targetWrapper.allGeneralKeys()));
         }
-        if (relationship != null && changes) {
+        if (relationship != null) {
             liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship,
                     resetPropertyExclusionKeys.toArray(new String[0]), false);
             resource.getResourceResolver().commit();
