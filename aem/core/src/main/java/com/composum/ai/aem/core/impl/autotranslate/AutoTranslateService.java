@@ -34,7 +34,7 @@ public interface AutoTranslateService {
     /**
      * Rolls the translation results at this resource back - mostly for debugging.
      */
-    void rollback(Resource resource) throws WCMException;
+    void rollback(Resource resource) throws WCMException, PersistenceException;
 
     boolean isEnabled();
 
@@ -43,6 +43,11 @@ public interface AutoTranslateService {
          * Translate subpages as well.
          */
         public boolean recursive;
+
+        /**
+         * Maximum depth of the recursion.
+         */
+        public Integer maxDepth;
 
         /**
          * Also re-translate properties where the original was changed.
@@ -72,6 +77,7 @@ public interface AutoTranslateService {
         public String toString() {
             return "TranslationParameters{" +
                     "recursive=" + recursive +
+                    ", maxDepth=" + maxDepth +
                     ", translateWhenChanged=" + translateWhenChanged +
                     ", breakInheritance=" + breakInheritance +
                     ", autoSave=" + autoSave +

@@ -29,6 +29,7 @@ Configuration of the automatic translation of AEM pages. The OSGI configuration 
 | allowedAttributeRegexes | Allowed Additional Attributes | String[] |  | Matches for Attributes that are explicitly allowed to be translated, in addition to standard attributes and heuristically recognized attributes. The heuristics is that the value has to have letters and whitespaces. Syntax: regular expressions that match resource type % attribute name - e.g. myapp/component/html%markup |
 | deniedAttributesRegexes | Denied Attributes | String[] |  | Attributes that are explicitly denied to be translated. Can be used to override the heuristics / standard attributes. Same syntax as allowed attributes. |
 | ignoreAssetsExceptContentFragments | Ignore Assets except Content Fragments | boolean | true | If true, assets are ignored for translation, except for content fragments. (Otherwise the translator would translate metadata of images and videos.) |
+| useHighIntelligenceModel | Use High Intelligence Model | boolean | true | If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true. |
 
 <a name="osgi.GPTChatCompletionServiceImpl"></a>
 ## Composum AI OpenAI Configuration (backend/base)

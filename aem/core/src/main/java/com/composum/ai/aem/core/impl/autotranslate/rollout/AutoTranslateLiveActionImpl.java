@@ -72,9 +72,9 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         ConfigurationBuilder confBuilder = Objects.requireNonNull(target.adaptTo(ConfigurationBuilder.class));
         AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
         parms.additionalInstructions = autoTranslateCaConfig.additionalInstructions();
-        if (autoTranslateCaConfig != null && autoTranslateCaConfig.model() == AutoTranslateCaConfig.RequiredModel.HIGH_INTELLIGENCE_MODEL) {
+        if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferHighIntelligenceModel()) {
             config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
-        } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.model() == AutoTranslateCaConfig.RequiredModel.STANDARD_MODEL) {
+        } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferStandardModel()) {
             config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
         }
         // parms.translateWhenChanged probably only makes sense when differential translation is integrated.

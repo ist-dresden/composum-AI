@@ -30,6 +30,11 @@ class AITranslatePropertyWrapper {
     public static final String PROPERTY_AI_TRANSLATED_BY = "ai_translatedBy";
 
     /**
+     * Informationally, saves the model that was used.
+     */
+    public static final String PROPERTY_AI_TRANSLATED_MODEL = "ai_translatedModel";
+
+    /**
      * Prefix for property names of saved values.
      */
     public static final String AI_PREFIX = "ai_";
@@ -126,6 +131,10 @@ class AITranslatePropertyWrapper {
 
     public void setAiTranslatedDate(Calendar value) {
         setValue(PROPERTY_AI_TRANSLATED_DATE, value != null ? value.toInstant().toString() : null);
+    }
+
+    public void setAiTranslatedModel(String value) {
+        setValue(PROPERTY_AI_TRANSLATED_MODEL, value);
     }
 
     /**

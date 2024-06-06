@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -60,13 +61,17 @@ public class AutoTranslateListModel {
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean breakInheritance = request.getParameter("breakInheritance") != null;
             GPTConfiguration configuration = configurationService.getGPTConfiguration(request.getResourceResolver(), path);
+            AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");
             if ("standard".equals(translationmodel)) {
                 configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
             } else if ("highintelligence".equals(translationmodel)) {
                 configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
             }
-            AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
+            String maxdepth = request.getParameter("maxdepth");
+            if (StringUtils.isNotBlank(maxdepth)) {
+                parms.maxDepth = Integer.parseInt(maxdepth);
+            }
             parms.recursive = recursive;
             parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
