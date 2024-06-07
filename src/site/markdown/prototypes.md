@@ -6,12 +6,6 @@ they would need some more optimization for production usage.
 But you are welcome to try them out, even now they might just be what you need.
 Please make sure to give us feedback on what you think about them and what you would like to see improved!
 
-## Automatic translation
-
-For AEM, we have a concept of automatic translation that goes beyond the standard AEM capabilities in ease of use
-and allows put the reasoning capabilities of large language models (LLM) to good use for translating entire pages or
-even sites. Please consider the [separate documentation](aem-variant/automaticTranslation.md) for further details.
-
 ## AI supported search / RAG assisted question answering
 
 This is a prototype how to support search with AI techniques like embeddings and how to support question answering with

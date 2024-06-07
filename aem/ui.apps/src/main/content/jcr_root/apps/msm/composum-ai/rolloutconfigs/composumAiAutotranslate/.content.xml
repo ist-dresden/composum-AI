@@ -4,7 +4,7 @@
           jcr:primaryType="cq:RolloutConfig"
           cq:trigger="rollout"
           jcr:description="Triggers the Composum AI automatic translation proof of concept action"
-          jcr:title="Composum AI Autotranslate POC">
+          jcr:title="Composum AI Autotranslate">
     <composumAiAutoTranslate
             jcr:primaryType="cq:LiveSyncAction"/>
 </jcr:root>

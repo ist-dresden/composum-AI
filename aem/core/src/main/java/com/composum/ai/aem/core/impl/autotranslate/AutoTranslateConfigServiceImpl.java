@@ -49,7 +49,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
 
     /**
      * As additional heuristic - the text should have at least one word with >= 5 letters.
-     * That will break languages very different from english, I know, but this is a POC. :-)
+     * That will break source languages very different from english, I know, but this is a POC. :-)
      */
     protected static final Pattern PATTERN_HAS_WORD = Pattern.compile("\\p{L}{5}");
 

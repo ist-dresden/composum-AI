@@ -3,9 +3,9 @@
 This is an automatically generated overview.
 
 <a name="slingca.AutoTranslateCaConfig"></a>
-## Composum AI Automatic Translation POC Configuration (aem-core)
+## Composum AI Automatic Translation Configuration (aem-core)
 
-Configures rollout details for automatic translation. This is a proof of concept and may not yet be fully functional.
+Configures rollout details for automatic translation.
 
 | id                        | label                              | type    | default value | description                                                                                   |
 |---------------------------|------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------|
@@ -55,4 +55,3 @@ Configurations for the OpenAI backend for Composum AI
 |-----------------|---------------------|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | openAiApiKey    | OpenAI API Key      | String |               | OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key . |
 | openAiOrganizationId | OpenAI Organization ID | String |               | Optionally, OpenAI Organization ID from https://platform.openai.com/.                                                                   |
-

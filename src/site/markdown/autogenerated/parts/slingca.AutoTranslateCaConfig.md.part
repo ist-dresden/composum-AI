@@ -1,8 +1,8 @@
 /* AIGenVersion(769ab43e, slingcaconfigurations.prompt-395da17f, AutoTranslateCaConfig.java-127c2a17) */
 
-## Composum AI Automatic Translation POC Configuration (aem-core)
+## Composum AI Automatic Translation Configuration (aem-core)
 
-Configures rollout details for automatic translation. This is a proof of concept and may not yet be fully functional.
+Configures rollout details for automatic translation.
 
 | id                        | label                              | type    | default value | description                                                                                   |
 |---------------------------|------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------|

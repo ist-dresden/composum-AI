@@ -149,7 +149,7 @@ Parameters for the translation process are:
 
 ## Triggering the translation as a rollout action
 
-We define a rollout configuration "Composum AI Autotranslate POC"
+We define a rollout configuration "Composum AI Autotranslate"
 that triggers the translation process for the pages that are rolled out with that
 configuration. This is an additional configuration - to get the pages copied we need e.g. the standard rollout
 configuration, and then the translation rollout configuration to get the pages transparently translated.
