@@ -113,7 +113,7 @@ public class SelectorUtils {
             return Collections.emptyMap();
         }
         language = language != null ? language : "en";
-        String languageName = getLanguageName(language);
+        String languageName = getLanguageName(language, null); // in the language itself since that's for human display
 
         Map<String, String> result = new LinkedHashMap<>();
         prompts.forEach((key, value) -> {
@@ -122,12 +122,14 @@ public class SelectorUtils {
         return result;
     }
 
-    /* Determine the actual language name of the page - language is the language code, not the name.
-     * the name of the language needs to be the human-readable name of the language in the language itself. */
-    public static String getLanguageName(String language) {
-        language = StringUtils.replaceChars(language, "_", "-");
-        Locale locale = Locale.forLanguageTag(language);
-        String languageName = locale.getDisplayLanguage(locale);
+    /* Determine the actual language name of the page.
+     * @param languageCode - is the language code, not the name.
+     * @param targetLocale - the locale name of the returned language name for languageCode; if null,
+     * the language name is returned in the language itself. */
+    public static String getLanguageName(@Nonnull String languageCode, @Nullable Locale targetLocale) {
+        languageCode = StringUtils.replaceChars(languageCode, "_", "-");
+        Locale locale = Locale.forLanguageTag(languageCode);
+        String languageName = locale.getDisplayName(targetLocale != null ? targetLocale : locale);
         return languageName;
     }
 
