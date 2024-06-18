@@ -324,12 +324,15 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         parameters.put("addition", addition);
         List<GPTChatMessage> messages = template.getMessages(parameters);
         request.addMessages(messages);
-        // set request.setMaxTokens to about 2 times the number of tokens in the text to translate
+        // set request.setMaxTokens to about 3 times the number of tokens in the text to translate
         // since that seems a generous limit for the translation, but gives a leeway for error messages.
-        // this is quite an overestimation, but that's better than underestimating in this context.
+        // this usually quite an overestimation, but that's better than underestimating in this context.
+        // 3 times since e.g. korean seems to take that many times tokens as english.
 
-        int maxTokens = 2 * chatCompletionService.countTokens(text) + 50;
-        request.setMaxTokens(maxTokens);
+        int maxTokens = 3 * chatCompletionService.countTokens(text) + 100;
+        if (maxTokens < 4096) { // setting more than that could lead to trouble with weaker models - length restriction will hit anyway.
+            request.setMaxTokens(maxTokens);
+        }
         return request;
     }
 
