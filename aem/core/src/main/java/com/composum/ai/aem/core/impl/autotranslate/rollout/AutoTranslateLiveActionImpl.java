@@ -3,8 +3,11 @@ package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 import java.util.Objects;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.caconfig.ConfigurationBuilder;
@@ -16,7 +19,6 @@ import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
-import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveAction;
 import com.day.cq.wcm.msm.api.LiveRelationship;
@@ -51,7 +53,9 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     @Override
     protected boolean handles(Resource source, Resource target, LiveRelationship relation, boolean isResetRollout)
             throws RepositoryException, WCMException {
-        boolean isContentNode = target != null && JcrConstants.JCR_CONTENT.equals(target.getName());
+        boolean isContentNode = source != null && target != null && BaseAction.isPage(source.adaptTo(Node.class))
+                && target.adaptTo(Node.class) != null;
+        // target != null && JcrConstants.JCR_CONTENT.equals(target.getName()) && !source.isResourceType(NT_RESOURCE);
         if (isContentNode) {
             LOG.debug("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
         } else {
@@ -63,7 +67,8 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     @Override
     protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave)
             throws RepositoryException, WCMException {
-        LOG.debug("doExecute({}, {}, {})", liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
+        String id = (Math.abs(Math.random()) + "").substring(2, 8);
+        LOG.debug(">>>{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         GPTConfiguration config = configurationService.getGPTConfiguration(target.getResourceResolver(), target.getPath());
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
         parms.recursive = false;
@@ -90,10 +95,10 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             } else {
                 autoPageTranslateService.translateLiveCopy(target, config, parms);
             }
-//        } catch (PersistenceException | LoginException e) {
-//            throw new WCMException("Error translating " + source.getPath(), e);
-        } catch (Exception e) { // rather log exception for now since a demo is coming...
-            LOG.error("Error translating " + source.getPath(), e);
+        } catch (PersistenceException | RuntimeException | LoginException e) {
+            throw new WCMException("Error translating " + source.getPath() + "\n" + e, e);
+        } finally {
+            LOG.debug("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         }
     }
 
