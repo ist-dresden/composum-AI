@@ -18,4 +18,7 @@ public @interface AutoTranslateCaConfig {
     @Property(label = "Prefer Standard Model", description = "If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.")
     boolean preferStandardModel();
 
+    @Property(label = "Rules that give additional instructions for translation if certain words or phrases are present in the page.")
+    AutoTranslateRuleConfig[] rules() default {};
+
 }
