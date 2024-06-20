@@ -1,10 +1,16 @@
 # List of minor Todos
 
+- Marker on page whenever a translation is in progress
+- Display errors in workflows?
+-
+
 Offer parent container as content creation dialog source
 Document using Claude, Gemini, https://octo.ai/product/text-generation/ , local
 Problems in Composum version:
 - when using assistant on creation dialog, and then opening it again, it should have the same settings as when creating (?)
 - last 20 prompts not yet implemented
+
+perhaps: chat could be high intelligence powered
 
 Image description from URL?
 
