@@ -323,6 +323,10 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
             String jsonRequest = createJsonRequest(request);
+            if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
+                LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, jsonRequest);
+                return jsonRequest;
+            }
             LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
 
             SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
@@ -386,11 +390,17 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         try {
             String jsonRequest = createJsonRequest(request);
             callback.setRequest(jsonRequest);
-
             if (LOG.isDebugEnabled()) {
                 // replace data:image/jpeg;base64,{base64_image} with data:image/jpeg;base64, ...
                 String shortenedRequest = jsonRequest.replaceAll("data:image/[^;]+;base64,[^\\}]+\\}", "data:image/jpeg;base64,{base64_image}");
                 LOG.debug("Sending streaming request {} to GPT: {}", id, shortenedRequest);
+            }
+
+            if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
+                LOG.debug("Request not sent - debugging requested.");
+                callback.onNext(jsonRequest);
+                callback.onFinish(GPTFinishReason.STOP);
+                return;
             }
 
             SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);

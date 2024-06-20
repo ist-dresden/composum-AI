@@ -50,6 +50,8 @@ public class GPTConfiguration {
 
     private final Boolean highIntelligenceNeeded;
 
+    private final Boolean debug;
+
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
         this(apiKey, organizationId, answerType, null);
     }
@@ -63,12 +65,17 @@ public class GPTConfiguration {
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
         this.additionalInstructions = additionalInstructions;
         this.mode = mode;
         this.highIntelligenceNeeded = highIntelligenceNeeded;
+        this.debug = debug;
     }
 
     /**
@@ -117,6 +124,13 @@ public class GPTConfiguration {
     }
 
     /**
+     * If this is set, then the services will not call the AI and return the JSON request instead of the AI response.
+     */
+    public Boolean getDebug() {
+        return debug;
+    }
+
+    /**
      * Creates a configuration that joins the values.
      *
      * @throws IllegalArgumentException if values conflict - that's checked for apiKey and organizationId and answerType.
@@ -131,8 +145,8 @@ public class GPTConfiguration {
      * @param override if true, values set in this configuration will override values set in the other configuration.
      *                 Otherwise, a conflict will throw an exception.
      * @param other    the other configuration to merge with (optional)
-     * @throws IllegalArgumentException if values conflict
      * @return a new configuration
+     * @throws IllegalArgumentException if values conflict
      */
     public GPTConfiguration merge(@Nullable GPTConfiguration other, boolean override) throws IllegalArgumentException {
         if (other == null) {
@@ -154,7 +168,11 @@ public class GPTConfiguration {
                 other.additionalInstructions == null ? this.additionalInstructions : this.additionalInstructions + "\n\n" + other.additionalInstructions;
         Mode mode = this.mode != null ? this.mode : other.mode;
         Boolean highIntelligenceNeeded = this.highIntelligenceNeeded != null ? this.highIntelligenceNeeded : other.highIntelligenceNeeded;
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded);
+        Boolean debug = this.debug != null ? this.debug : other.debug;
+        if (this.debug != null && other.debug != null && (this.debug || other.debug)) {
+            debug = true;
+        }
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug);
     }
 
     /**
@@ -210,6 +228,11 @@ public class GPTConfiguration {
      * Requests faster and less expensive "normal intelligence" model.
      */
     public static final GPTConfiguration STANDARD_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, false);
+
+    /**
+     * If set, the AI services will not call the AI but return the JSON request as response, for debugging purposes.
+     */
+    public static final GPTConfiguration DEBUG = new GPTConfiguration(null, null, null, null, null, null, true);
 
     @Override
     public boolean equals(Object o) {
