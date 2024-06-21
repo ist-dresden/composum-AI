@@ -38,7 +38,7 @@ public interface AutoTranslateService {
 
     boolean isEnabled();
 
-    static class TranslationParameters {
+    static class TranslationParameters implements Cloneable {
         /**
          * Translate subpages as well.
          */
@@ -69,6 +69,12 @@ public interface AutoTranslateService {
         public boolean autoSave = true;
 
         /**
+         * Optionally, a number of rules that give additional instructions for translation if certain words or phrases
+         * are present in the page.
+         */
+        public List<AutoTranslateRuleConfig> rules;
+
+        /**
          * If set, this is used as user id that is saved to denote who translated the resource.
          */
         String userId = null;
@@ -84,6 +90,15 @@ public interface AutoTranslateService {
                     ", userId='" + userId + '\'' +
                     ", additionalInstructions='" + additionalInstructions + '\'' +
                     '}';
+        }
+
+        @Override
+        public TranslationParameters clone() {
+            try {
+                return (TranslationParameters) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

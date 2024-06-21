@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate.workflow;
 
 import static com.adobe.granite.workflow.PayloadMap.TYPE_JCR_PATH;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -141,10 +142,13 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         if (contentResource != null) {
             ConfigurationBuilder confBuilder = Objects.requireNonNull(contentResource.adaptTo(ConfigurationBuilder.class));
             AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-            if (autoTranslateCaConfig != null && autoTranslateCaConfig.additionalInstructions() != null) {
+            if (autoTranslateCaConfig.additionalInstructions() != null) {
                 parms.additionalInstructions =
                         (StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
                                 autoTranslateCaConfig.additionalInstructions()).trim();
+            }
+            if (autoTranslateCaConfig.rules() != null) {
+                parms.rules = Arrays.asList(autoTranslateCaConfig.rules());
             }
 
             try {
@@ -155,10 +159,6 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
                     config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
                 }
 
-                if (parms.additionalInstructions != null) {
-                    config = GPTConfiguration.merge(config,
-                            new GPTConfiguration(null, null, null, parms.additionalInstructions));
-                }
                 autoPageTranslateService.translateLiveCopy(contentResource, config, parms);
             } catch (PersistenceException | WCMException | RuntimeException e) { // make sure we log the actual path
                 LOG.error("Failed to translate resource: {}", resource.getPath(), e);

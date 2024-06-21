@@ -1,20 +1,24 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.apache.sling.commons.threads.ThreadPool;
 import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
@@ -221,11 +225,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 startTime = new Date().toString();
                 boolean interrupted = false;
                 GPTConfiguration mergedConfiguration = configuration;
-                if (translationParameters.additionalInstructions != null &&
-                        !translationParameters.additionalInstructions.trim().isEmpty()) {
-                    mergedConfiguration = new GPTConfiguration(null, null, null,
-                            translationParameters.additionalInstructions).merge(configuration);
-                }
                 if (autoTranslateConfigService.isUseHighIntelligenceModel() &&
                         (mergedConfiguration == null || mergedConfiguration.isHighIntelligenceNeeded() == null)) {
                     mergedConfiguration = GPTConfiguration.HIGH_INTELLIGENCE.merge(mergedConfiguration);
@@ -249,6 +248,19 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         resourceResolver.revert();
                         resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
+                        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
+                        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
+                        TranslationParameters pageTranslationParameters = translationParameters.clone();
+                        pageTranslationParameters.additionalInstructions = StringUtils.defaultIfBlank(
+                                StringUtils.defaultString(pageTranslationParameters.additionalInstructions) + "\n\n" +
+                                        StringUtils.defaultString(autoTranslateCaConfig.additionalInstructions()), null);
+                        if (autoTranslateCaConfig.rules() != null) {
+                            pageTranslationParameters.rules = new ArrayList<>();
+                            if (translationParameters.rules != null) {
+                                pageTranslationParameters.rules.addAll(translationParameters.rules);
+                            }
+                            pageTranslationParameters.rules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+                        }
                         AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
                                 mergedConfiguration, translationParameters);
                         page.stats = stats;

@@ -87,7 +87,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return stats;
         }
 
-        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : null;
+        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : "";
+        if (translationParameters.additionalInstructions != null) {
+            additionalInstructions = additionalInstructions + "\n\n" + translationParameters.additionalInstructions;
+        }
+        additionalInstructions = StringUtils.defaultIfBlank(additionalInstructions, null);
         String pageAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
         boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, pageAdditionalInstructions);
         stats.collectedAdditionalInstructions = additionalInstructions;

@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.jcr.Node;
@@ -75,9 +76,12 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         ConfigurationBuilder confBuilder = Objects.requireNonNull(target.adaptTo(ConfigurationBuilder.class));
         AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
         parms.additionalInstructions = autoTranslateCaConfig.additionalInstructions();
-        if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferHighIntelligenceModel()) {
+        if (autoTranslateCaConfig.rules() != null) {
+            parms.rules = Arrays.asList(autoTranslateCaConfig.rules());
+        }
+        if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
             config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
-        } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferStandardModel()) {
+        } else if (autoTranslateCaConfig.preferStandardModel()) {
             config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
         }
         // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
