@@ -419,6 +419,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     return;
                 }
                 ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
+                if (chunk == null || chunk.getChoices() == null || chunk.getChoices().isEmpty()) {
+                    LOG.error("No chunks - id {} Cannot deserialize {}", id, line);
+                    GPTException gptException = new GPTException("No chunks - cannot deserialize " + line);
+                    callback.onError(gptException);
+                    throw gptException;
+                }
                 ChatCompletionChoice choice = chunk.getChoices().get(0);
                 String content = choice.getDelta().getContent();
                 if (content != null && !content.isEmpty()) {
