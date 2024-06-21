@@ -914,7 +914,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @Override
         public void failed(Exception cause) {
-            LOG.info("Response {} from GPT failed: {}", id, cause.toString());
+            LOG.info("Response {} from GPT failed: {}", id, cause.toString(), cause);
             result.completeExceptionally(cause);
             if (!(cause instanceof RetryableException)) {
                 callback.onError(cause);
