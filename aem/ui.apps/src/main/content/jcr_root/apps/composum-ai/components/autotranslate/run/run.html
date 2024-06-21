@@ -55,6 +55,7 @@
                                        versus the total number of paths found in the page.
                                        For modified pages a link into the editor is provided.
                                        Please refresh this page to update the status.
+                                       (i) has the additional instructions that were collected for this page as title.
                                        </span>
                                </span>
                                 <div class="coral-Form-fieldwrapper">
@@ -81,6 +82,9 @@
                                                     ${item.stats.translateableProperties} ,
                                                     &nbsp;&nbsp;
                                                     ${item.stats.relocatedPaths} / ${item.stats.paths}
+                                                    <span title="${item.stats.collectedAdditionalInstructions}"
+                                                          test="${item.stats.collectedAdditionalInstructions}">
+                                                        (i)</span>
                                                 </sly>
                                             </td>
                                             <td is="coral-table-cell">

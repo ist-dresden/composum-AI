@@ -6,8 +6,6 @@ import java.util.Objects;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.caconfig.ConfigurationBuilder;
@@ -95,8 +93,10 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             } else {
                 autoPageTranslateService.translateLiveCopy(target, config, parms);
             }
-        } catch (PersistenceException | RuntimeException | LoginException e) {
-            throw new WCMException("Error translating " + source.getPath() + "\n" + e, e);
+//        } catch (PersistenceException | RuntimeException | LoginException e) {
+//            throw new WCMException("Error translating " + source.getPath() + "\n" + e, e);
+        } catch (Exception e) { // rather log exception for now since a demo is coming...
+            LOG.error("Error translating " + source.getPath(), e);
         } finally {
             LOG.debug("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         }

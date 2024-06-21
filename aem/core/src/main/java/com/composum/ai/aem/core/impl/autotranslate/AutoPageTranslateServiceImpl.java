@@ -90,6 +90,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : null;
         String pageAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
         boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, pageAdditionalInstructions);
+        stats.collectedAdditionalInstructions = additionalInstructions;
 
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
