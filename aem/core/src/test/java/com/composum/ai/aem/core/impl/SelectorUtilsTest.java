@@ -4,11 +4,8 @@ import static com.composum.ai.aem.core.impl.SelectorUtils.getLanguageName;
 import static com.composum.ai.aem.core.impl.SelectorUtils.getLanguageSiblings;
 import static com.composum.ai.aem.core.impl.SelectorUtils.isLocaleName;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
+import java.util.Locale;
 
 import org.apache.sling.api.resource.Resource;
 import org.junit.jupiter.api.Test;
@@ -20,11 +17,20 @@ public class SelectorUtilsTest extends TestCase {
 
     @Test
     public void testGetLanguageName() {
-        assertEquals("English", getLanguageName("en"));
-        assertEquals("Deutsch", getLanguageName("de"));
-        assertEquals("Deutsch", getLanguageName("de_DE"));
-        assertEquals("English", getLanguageName("en_CA"));
-        assertEquals("français", getLanguageName("fr_CA"));
+        assertEquals("English", getLanguageName("en", null));
+        assertEquals("English", getLanguageName("en", Locale.ENGLISH));
+
+        assertEquals("Deutsch", getLanguageName("de", null));
+        assertEquals("German", getLanguageName("de", Locale.ENGLISH));
+
+        assertEquals("Deutsch (Deutschland)", getLanguageName("de_DE", null));
+        assertEquals("German (Germany)", getLanguageName("de_DE", Locale.ENGLISH));
+
+        assertEquals("English (Canada)", getLanguageName("en_CA", null));
+        assertEquals("English (Canada)", getLanguageName("en_CA", Locale.ENGLISH));
+
+        assertEquals("français (Canada)", getLanguageName("fr_CA", null));
+        assertEquals("French (Canada)", getLanguageName("fr_CA", Locale.ENGLISH));
     }
 
     @Test

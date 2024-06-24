@@ -86,6 +86,7 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
+import com.knuddels.jtokkit.api.IntArrayList;
 
 /**
  * Implements the actual access to the ChatGPT chat API.
@@ -418,6 +419,12 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
                     return;
                 }
                 ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
+                if (chunk == null || chunk.getChoices() == null || chunk.getChoices().isEmpty()) {
+                    LOG.error("No chunks - id {} Cannot deserialize {}", id, line);
+                    GPTException gptException = new GPTException("No chunks - cannot deserialize " + line);
+                    callback.onError(gptException);
+                    throw gptException;
+                }
                 ChatCompletionChoice choice = chunk.getChoices().get(0);
                 String content = choice.getDelta().getContent();
                 if (content != null && !content.isEmpty()) {
@@ -641,21 +648,28 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         if (text == null) {
             return "";
         }
-        List<Integer> markerTokens = enc.encodeOrdinary(TRUNCATE_MARKER);
+        IntArrayList markerTokens = enc.encodeOrdinary(TRUNCATE_MARKER);
         if (maxTokens <= markerTokens.size() + 6) {
             // this is absurd, probably usage error.
             LOG.warn("Cannot shorten text to {} tokens, too short. Returning original text.", maxTokens);
             return text;
         }
 
-        List<Integer> encoded = enc.encodeOrdinary(text);
+        IntArrayList encoded = enc.encodeOrdinary(text);
         if (encoded.size() <= maxTokens) {
             return text;
         }
         int borderTokens = (maxTokens - markerTokens.size()) / 2;
-        List<Integer> result = encoded.subList(0, borderTokens);
-        result.addAll(markerTokens);
-        result.addAll(encoded.subList(encoded.size() - maxTokens + result.size(), encoded.size()));
+        IntArrayList result = new IntArrayList(maxTokens);
+        for (int i = 0; i < borderTokens; i++) {
+            result.add(encoded.get(i));
+        }
+        for (int i = 0; i < markerTokens.size(); i++) {
+            result.add(markerTokens.get(i));
+        }
+        for (int i = encoded.size() - maxTokens + result.size(); i < encoded.size(); i++) {
+            result.add(encoded.get(i));
+        }
         return enc.decode(result);
     }
 
@@ -914,7 +928,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
 
         @Override
         public void failed(Exception cause) {
-            LOG.info("Response {} from GPT failed: {}", id, cause.toString());
+            LOG.info("Response {} from GPT failed: {}", id, cause.toString(), cause);
             result.completeExceptionally(cause);
             if (!(cause instanceof RetryableException)) {
                 callback.onError(cause);

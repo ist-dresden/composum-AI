@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -79,7 +80,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         if (language == null) {
             throw new IllegalArgumentException("No language found for " + resource.getPath());
         }
-        String languageName = SelectorUtils.getLanguageName(language);
+        String languageName = SelectorUtils.getLanguageName(language, Locale.ENGLISH);
         String sourceLanguage = determineSourceLanguage(resource);
         if (sourceLanguage == null || StringUtils.equals(language, sourceLanguage)) {
             LOG.info("Skipping translation because language and source language are {} for {}", language, resource.getPath());

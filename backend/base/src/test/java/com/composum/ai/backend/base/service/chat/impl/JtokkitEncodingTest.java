@@ -11,6 +11,7 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 import com.knuddels.jtokkit.api.EncodingType;
+import com.knuddels.jtokkit.api.IntArrayList;
 
 /**
  * Play around with encoding.
@@ -23,11 +24,13 @@ public class JtokkitEncodingTest {
     @Test
     public void testTokenization() {
         String text = "hallo";
-        List<Integer> encoded = enc.encode(text);
+        IntArrayList encoded = enc.encode(text);
         // make a list of strings that correspond to the tokens
         List<String> decoded = new ArrayList<>();
         for (int i = 0; i < encoded.size(); i++) {
-            decoded.add(enc.decode(Arrays.asList(encoded.get(i))));
+            IntArrayList token = new IntArrayList();
+            token.add(encoded.get(i));
+            decoded.add(enc.decode(token));
         }
         Assert.assertEquals(Arrays.asList("hal", "lo"), decoded);
     }
