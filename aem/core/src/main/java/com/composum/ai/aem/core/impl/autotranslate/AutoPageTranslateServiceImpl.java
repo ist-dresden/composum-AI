@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -92,8 +93,17 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             additionalInstructions = additionalInstructions + "\n\n" + translationParameters.additionalInstructions;
         }
         additionalInstructions = StringUtils.defaultIfBlank(additionalInstructions, null);
-        String pageAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
-        boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, pageAdditionalInstructions);
+
+        // collect translation rules that apply
+        List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
+        collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
+        String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, translationParameters.rules);
+        if (translationRules != null) {
+            additionalInstructions = additionalInstructions + "\n\n" + translationRules;
+        }
+
+        String previousAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
+        boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, previousAdditionalInstructions);
         stats.collectedAdditionalInstructions = additionalInstructions;
 
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
@@ -146,7 +156,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         if (additionalInstructionsChanged) {
             ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-            mvm.put(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, additionalInstructions);
+            if (additionalInstructions == null) {
+                mvm.remove(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS);
+            } else {
+                mvm.put(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, additionalInstructions);
+            }
             changed = true;
         }
 
@@ -342,7 +356,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Searches for properties we have to translate.
      *
-     * @param force all properties have to be retranslated
+     * @param propertiesToTranslate list to add the properties to translate to - output parameter
+     * @param force                 all properties have to be retranslated
      * @return true if something was changed already
      */
     protected boolean collectPropertiesToTranslate(
@@ -421,6 +436,57 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return changed;
     }
 
+    protected String collectTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
+        if (rules == null) {
+            return null;
+        }
+        StringBuilder applicableRules = new StringBuilder();
+        for (AutoTranslateRuleConfig rule : rules) {
+            if (isApplicable(rule, path, allTranslateableProperties)) {
+                applicableRules.append(rule.toString()).append("\n");
+            }
+        }
+        return applicableRules.length() > 0 ? applicableRules.toString() : null;
+    }
+
+    protected boolean isApplicable(@Nonnull AutoTranslateRuleConfig rule, @Nonnull String path, @Nonnull List<PropertyToTranslate> allTranslateableProperties) {
+        if (allTranslateableProperties == null || StringUtils.isNotBlank(rule.contentMatch())) {
+            return false;
+        }
+        if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex())) {
+            return false;
+        }
+        try {
+            Pattern contentPattern = compileContentPattern(rule.contentMatch());
+            if (contentPattern != null && !allTranslateableProperties.stream()
+                    .map(propertyToTranslate -> propertyToTranslate.getSourceValue())
+                    .anyMatch(value -> value != null && contentPattern.matcher(value).find())) {
+                return true;
+            }
+            return false;
+        } catch (PatternSyntaxException e) {
+            LOG.error("Error in pattern syntax for rule {} applicable to path {}", rule, path, e);
+            return false;
+        }
+    }
+
+    /**
+     * The content match can be a word or phrase that must be present in the content of the page for the rule to match.
+     * For example, 'Product' will match all pages that contain the word 'Product'. Spaces will also match any whitespace.
+     * If it contains any of the regex meta characters []()* it'll be treated as a regex.
+     */
+    protected static Pattern compileContentPattern(String contentMatch) {
+        if (contentMatch.matches(".*[\\[\\(\\*\\?].*")) {
+            return Pattern.compile(contentMatch);
+        }
+        if (contentMatch.contains("*") || contentMatch.contains("?") || contentMatch.contains("[") ||
+                contentMatch.contains("]") || contentMatch.contains("(") || contentMatch.contains(")")) {
+            return Pattern.compile(contentMatch);
+        }
+        // whitespace in the pattern will be replaced with a regex that matches any whitespace
+        return Pattern.compile(contentMatch.replaceAll("\\s+", "\\\\s+"));
+    }
+
     /**
      * Searches for properties
      */
@@ -440,6 +506,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
          */
         protected Resource targetResource;
         protected String propertyName;
+
+        public String getSourceValue() {
+            return sourceResource.getValueMap().get(propertyName, String.class);
+        }
+
+        public String getTargetValue() {
+            return targetResource.getValueMap().get(propertyName, String.class);
+        }
 
         @Override
         public String toString() {
