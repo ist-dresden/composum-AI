@@ -38,6 +38,7 @@ import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
+
 /**
  * <p>
  * Translated would normally be properties that "obviously" contain text, like jcr:title, jcr:description, text, title
@@ -391,14 +392,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
-            boolean isCancelled = relationship.getStatus() != null && (
-                    relationship.getStatus().isCancelled() ||
-                            relationship.getStatus().getCanceledProperties().contains(key)
-            );
 
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.
-
+            boolean isCancelled = isCancelled(resource, key, relationship);
             if (isCancelled && !translationParameters.translateWhenChanged) {
                 continue; // don't touch cancelled properties
             }
@@ -438,6 +435,23 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
         }
         return changed;
+    }
+
+    protected static boolean isCancelled(Resource resource, String key, LiveRelationship relationship) {
+        if (relationship.getStatus() == null) {
+            return false;
+        }
+        if (relationship.getStatus().isCancelled()) {
+            return true;
+        }
+        if (relationship.getStatus().getCanceledProperties().contains(key)) {
+            return true;
+        }
+        String[] cancelledProps = resource.getValueMap().get("cq:propertyInheritanceCancelled", String[].class);
+        if (cancelledProps != null) {
+            return Arrays.asList(cancelledProps).contains(key);
+        }
+        return false;
     }
 
     protected String collectTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
