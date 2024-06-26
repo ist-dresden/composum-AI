@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
-
 /**
  * <p>
  * Translated would normally be properties that "obviously" contain text, like jcr:title, jcr:description, text, title
@@ -88,11 +88,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return stats;
         }
 
-        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : "";
+        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : null;
         if (translationParameters.additionalInstructions != null) {
-            additionalInstructions = additionalInstructions + "\n\n" + translationParameters.additionalInstructions;
+            additionalInstructions = defaultIfBlank(additionalInstructions, "") + "\n\n" + translationParameters.additionalInstructions;
         }
-        additionalInstructions = StringUtils.defaultIfBlank(additionalInstructions, null);
+        additionalInstructions = defaultIfBlank(additionalInstructions, null);
 
         // collect translation rules that apply
         List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
@@ -101,10 +101,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         if (translationRules != null) {
             additionalInstructions = additionalInstructions + "\n\n" + translationRules;
         }
+        additionalInstructions = StringUtils.trimToNull(additionalInstructions);
 
         String previousAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
         boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, previousAdditionalInstructions);
         stats.collectedAdditionalInstructions = additionalInstructions;
+        if (additionalInstructionsChanged) {
+            LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
+        }
 
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
@@ -443,14 +447,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         StringBuilder applicableRules = new StringBuilder();
         for (AutoTranslateRuleConfig rule : rules) {
             if (isApplicable(rule, path, allTranslateableProperties)) {
-                applicableRules.append(rule.toString()).append("\n");
+                applicableRules.append(rule.additionalInstructions()).append("\n");
             }
         }
         return applicableRules.length() > 0 ? applicableRules.toString() : null;
     }
 
     protected boolean isApplicable(@Nonnull AutoTranslateRuleConfig rule, @Nonnull String path, @Nonnull List<PropertyToTranslate> allTranslateableProperties) {
-        if (allTranslateableProperties == null || StringUtils.isNotBlank(rule.contentMatch())) {
+        if (allTranslateableProperties == null || StringUtils.isBlank(rule.contentMatch())) {
             return false;
         }
         if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex())) {
@@ -458,12 +462,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         try {
             Pattern contentPattern = compileContentPattern(rule.contentMatch());
-            if (contentPattern != null && !allTranslateableProperties.stream()
-                    .map(propertyToTranslate -> propertyToTranslate.getSourceValue())
-                    .anyMatch(value -> value != null && contentPattern.matcher(value).find())) {
-                return true;
-            }
-            return false;
+            return allTranslateableProperties.stream()
+                    .map(PropertyToTranslate::getSourceValue)
+                    .anyMatch(value -> value != null && contentPattern.matcher(value).find());
         } catch (PatternSyntaxException e) {
             LOG.error("Error in pattern syntax for rule {} applicable to path {}", rule, path, e);
             return false;
@@ -472,19 +473,21 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     /**
      * The content match can be a word or phrase that must be present in the content of the page for the rule to match.
-     * For example, 'Product' will match all pages that contain the word 'Product'. Spaces will also match any whitespace.
+     * For example, 'Product' will match all pages that contain the word 'Product', case-insensitive.
+     * Spaces will also match any whitespace.
      * If it contains any of the regex meta characters []()* it'll be treated as a regex.
      */
+    @Nonnull
     protected static Pattern compileContentPattern(String contentMatch) {
         if (contentMatch.matches(".*[\\[\\(\\*\\?].*")) {
-            return Pattern.compile(contentMatch);
+            return Pattern.compile(contentMatch, Pattern.CASE_INSENSITIVE);
         }
         if (contentMatch.contains("*") || contentMatch.contains("?") || contentMatch.contains("[") ||
                 contentMatch.contains("]") || contentMatch.contains("(") || contentMatch.contains(")")) {
-            return Pattern.compile(contentMatch);
+            return Pattern.compile(contentMatch, Pattern.CASE_INSENSITIVE);
         }
         // whitespace in the pattern will be replaced with a regex that matches any whitespace
-        return Pattern.compile(contentMatch.replaceAll("\\s+", "\\\\s+"));
+        return Pattern.compile(contentMatch.replaceAll("\\s+", "\\\\s+"), Pattern.CASE_INSENSITIVE);
     }
 
     /**

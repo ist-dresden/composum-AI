@@ -95,6 +95,7 @@ public class AutoPageTranslateServiceImplTest {
         assertTrue(pattern.matcher("two words").matches());
         assertTrue(pattern.matcher("two  words").matches());
         assertTrue(pattern.matcher("two \n words").matches());
+        assertTrue(pattern.matcher("tWo  WordS").matches());
     }
 
 }

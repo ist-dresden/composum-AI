@@ -13,7 +13,7 @@ public @interface AutoTranslateRuleConfig {
     String pathRegex();
 
     @Property(label = "Content match", description = "A word or phrase that must be present in the content of the page for the rule to match. " +
-            "E.g. 'Product' will match all pages that contain the word 'Product'. Spaces will also match any whitespace. " +
+            "E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. Spaces will also match any whitespace. " +
             "If it contains any of the regex meta characters []|()* it'll be treated as a regex.", order = 2)
     String contentMatch();
 

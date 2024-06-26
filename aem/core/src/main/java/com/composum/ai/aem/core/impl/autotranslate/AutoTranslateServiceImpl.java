@@ -262,7 +262,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                             pageTranslationParameters.rules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
                         }
                         AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
-                                mergedConfiguration, translationParameters);
+                                mergedConfiguration, pageTranslationParameters);
                         page.stats = stats;
                         page.status = stats.hasChanges() ? "done" : "unchanged";
                     } catch (Exception e) {
