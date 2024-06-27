@@ -83,31 +83,36 @@ try {
 
         function showCreateDialog(parameters) {
             if (debug) console.log("showCreateDialog", parameters);
-            const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
+            try {
+                const dialogId = 'composumAI-create-dialog'; // possibly use editable.path to make it unique
 
-            $.ajax({
-                url: CREATE_DIALOG_URL + "?richtext=" + parameters.isRichtext +
-                    '&path=' + encodeURIComponent(parameters.componentPath) +
-                    '&property=' + encodeURIComponent(parameters.property),
-                type: "GET",
-                dataType: "html",
-                success: function (data) {
-                    if (debug) console.log("showCreateDialog ajax", data);
-                    // reload the dialog since otherwise we get an internal error in Coral on second show.
-                    $(dialogId).remove();
-                    // throw away HTML head and so forth:
-                    const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
-                    dialog.attr('id', dialogId);
-                    dialog.appendTo('body');
-                    $(dialog).trigger('foundation-contentloaded');
-                    dialog.get()[0].show(); // call Coral function on the element.
-                    parameters.dialog = dialog;
-                    new ContentCreationDialog(parameters);
-                }.bind(this),
-                error: function (xhr, status, error) {
-                    console.log("error loading create dialog", xhr, status, error);
-                }
-            });
+                $.ajax({
+                    url: CREATE_DIALOG_URL + "?richtext=" + parameters.isRichtext +
+                        '&path=' + encodeURIComponent(parameters.componentPath) +
+                        '&property=' + encodeURIComponent(parameters.property),
+                    type: "GET",
+                    dataType: "html",
+                    success: function (data) {
+                        if (debug) console.log("showCreateDialog ajax", data);
+                        // reload the dialog since otherwise we get an internal error in Coral on second show.
+                        $(dialogId).remove();
+                        // throw away HTML head and so forth:
+                        const dialog = $('<div>').append($.parseHTML(data)).find('coral-dialog');
+                        dialog.attr('id', dialogId);
+                        dialog.appendTo('body');
+                        $(dialog).trigger('foundation-contentloaded');
+                        dialog.get()[0].show(); // call Coral function on the element.
+                        parameters.dialog = dialog;
+                        new ContentCreationDialog(parameters);
+                    }.bind(this),
+                    error: function (xhr, status, error) {
+                        console.log("error loading create dialog", xhr, status, error);
+                    }
+                });
+            } catch (e) {
+                console.error("error showing create dialog", parameters, e);
+                debugger;
+            }
         }
 
         const fieldlabeliconHTML =
@@ -122,44 +127,48 @@ try {
          */
         function insertCreateButtonsForTextareas(element) {
             if (debug) console.log("insertCreateButton", arguments);
-            if ($(element).find('.composum-ai-dialog').length > 0) {
-                return; // don't insert buttons into our own dialog
-            }
-            $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
-                function (index, textarea) {
-                    if (debug) console.log("insertCreateButton textarea", textarea);
-                    const resourceType = $(textarea).closest('coral-dialog-content').find('input[name="./sling:resourceType"]').val();
-                    if (!resourceType) {
-                        // debugger;
-                    }
-                    aiconfig.ifEnabled(SERVICE_CREATE, resourceType, () => {
-                        const gearsEdit = $(fieldlabeliconHTML);
-                        if ($(textarea.parentElement).find('coral-icon').length > 0) {
-                            gearsEdit.addClass('composum-ai-iconshiftleft'); // help icon is there
-                        }
-                        gearsEdit.insertAfter(textarea);
-                        textarea.setAttribute('data-comp-ai-iconsadded', 'true');
-                        gearsEdit.click(function (event) {
-                            if (debug) console.log("createButton click", arguments);
-                            const formPath = $(textarea).closest('form').attr('action');
-                            var property = $(textarea).attr('name');
-                            property = property && property.startsWith('./') && property.substring(2);
-                            if (formPath && formPath.startsWith('/content')) {
-                                showCreateDialog({
-                                    componentPath: formPath,
-                                    property,
-                                    oldContent: textarea.value,
-                                    writebackCallback: (newvalue) => $(textarea).val(newvalue),
-                                    isRichtext: false,
-                                    stackeddialog: true
-                                });
-                            } else {
-                                console.error('Could not determine path of form for ', textarea && textarea.get());
-                            }
-                        });
-                    });
+            try {
+                if ($(element).find('.composum-ai-dialog').length > 0) {
+                    return; // don't insert buttons into our own dialog
                 }
-            );
+                $(element).find('div.coral-Form-fieldwrapper textarea.coral-Form-field[data-comp-ai-iconsadded!="true"]').each(
+                    function (index, textarea) {
+                        if (debug) console.log("insertCreateButton textarea", textarea);
+                        const resourceType = $(textarea).closest('coral-dialog-content').find('input[name="./sling:resourceType"]').val();
+                        if (!resourceType) {
+                            // debugger;
+                        }
+                        aiconfig.ifEnabled(SERVICE_CREATE, resourceType, () => {
+                            const gearsEdit = $(fieldlabeliconHTML);
+                            if ($(textarea.parentElement).find('coral-icon').length > 0) {
+                                gearsEdit.addClass('composum-ai-iconshiftleft'); // help icon is there
+                            }
+                            gearsEdit.insertAfter(textarea);
+                            textarea.setAttribute('data-comp-ai-iconsadded', 'true');
+                            gearsEdit.click(function (event) {
+                                if (debug) console.log("createButton click", arguments);
+                                const formPath = $(textarea).closest('form').attr('action');
+                                var property = $(textarea).attr('name');
+                                property = property && property.startsWith('./') && property.substring(2);
+                                if (formPath && formPath.startsWith('/content')) {
+                                    showCreateDialog({
+                                        componentPath: formPath,
+                                        property,
+                                        oldContent: textarea.value,
+                                        writebackCallback: (newvalue) => $(textarea).val(newvalue),
+                                        isRichtext: false,
+                                        stackeddialog: true
+                                    });
+                                } else {
+                                    console.error('Could not determine path of form for ', textarea && textarea.get());
+                                }
+                            });
+                        });
+                    }
+                );
+            } catch (e) {
+                console.error("error inserting create buttons", parameters, e);
+            }
         }
 
         // for dialogs coral-overlay:open, for content-fragments foundation-contentloaded
@@ -182,7 +191,7 @@ try {
                     });
                 });
             } catch (e) {
-                console.error("error preparing dialog", event, e);
+                console.error("error preparing dialog", parameters, e);
                 debugger;
             }
         }
@@ -203,8 +212,7 @@ try {
                     ?.off('editing-start', onRteEditingStart)
                     ?.on('editing-start', onRteEditingStart);
             } catch (e) {
-                console.error("error initializing RTE hooks", event, e);
-                debugger;
+                console.error("error initializing RTE hooks", parameters, e);
             }
         }
 
@@ -233,7 +241,8 @@ try {
                 let propertyName = undefined;
                 let rteinstance = $target.data('rteinstance') || $target.data('richText');
                 if (!rteinstance) {
-                    debugger; // FIXME
+                    console.error("no rteinstance found", event.type, event.target, editable);
+                    return;
                 }
                 if (debug) console.log("onRteEditingStart rte found", event.type, event.target, editable);
 
@@ -260,63 +269,73 @@ try {
 
         function insertCreateButtons(target, editable, componentPath, resourceType, propertyName, rteinstance) {
             if (debug) console.log("insertCreateButtons", arguments);
-            let buttongroups = channel.find('#InlineEditingUI .rte-ui > div > coral-buttongroup, coral-dialog[fullscreen] .rte-ui > div > coral-buttongroup');
-            const $target = $(target);
-            if ($target.hasClass('cq-RichText-editable')) { // maximized editor
-                buttongroups = buttongroups.add($target.parent().find('.rte-ui > div > coral-buttongroup').get());
-            }
-            if ($target.hasClass('cfm-multieditor-richtext-editor')) { // content fragment editor
-                buttongroups = buttongroups.add($target.closest('div[data-form-view-container]').find('.rte-ui > div > coral-buttongroup'));
-            }
-            if (buttongroups.length === 0) {
-                console.log("Warning: no buttongroups found", target, editable, componentPath, resourceType, propertyName, rteinstance);
-            }
-            buttongroups.each(function (index, buttongroup) {
-                if ($(buttongroup).closest('.composum-ai-dialog').length === 0 &&
-                    $(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
-                    registerContentDialogInToolbar(buttongroup, target, editable, componentPath, resourceType, propertyName, rteinstance);
+            try {
+                let buttongroups = channel.find('#InlineEditingUI .rte-ui > div > coral-buttongroup, coral-dialog[fullscreen] .rte-ui > div > coral-buttongroup');
+                const $target = $(target);
+                if ($target.hasClass('cq-RichText-editable')) { // maximized editor
+                    buttongroups = buttongroups.add($target.parent().find('.rte-ui > div > coral-buttongroup').get());
                 }
-            });
+                if ($target.hasClass('cfm-multieditor-richtext-editor')) { // content fragment editor
+                    buttongroups = buttongroups.add($target.closest('div[data-form-view-container]').find('.rte-ui > div > coral-buttongroup'));
+                }
+                if (buttongroups.length === 0) {
+                    console.log("Warning: no buttongroups found", target, editable, componentPath, resourceType, propertyName, rteinstance);
+                }
+                buttongroups.each(function (index, buttongroup) {
+                    if ($(buttongroup).closest('.composum-ai-dialog').length === 0 &&
+                        $(buttongroup).find('.composum-ai-create-dialog-action').length === 0) {
+                        registerContentDialogInToolbar(buttongroup, target, editable, componentPath, resourceType, propertyName, rteinstance);
+                    }
+                });
+            } catch (e) {
+                console.error("error inserting create buttons", parameters, e);
+                debugger;
+            }
         }
 
         /** Registers the content creation dialog in the richtext editor toolbar */
         function registerContentDialogInToolbar(buttongroup, target, editable, componentPath, resourceType, propertyName, rteinstance) {
             if (debug) console.log("registerContentDialogInToolbar", arguments);
-            const $button = $(rtebuttonHTML);
-            $(buttongroup).append($button);
-            $button.click(function (clickevent) {
-                if (debug) console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
+            try {
+                const $button = $(rtebuttonHTML);
+                $(buttongroup).append($button);
+                $button.click(function (clickevent) {
+                    if (debug) console.log("createButtonText click", typeof clickevent.type, clickevent.target, editable, target, buttongroup);
 
-                const rteproperty = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
-                propertyName = rteproperty || propertyName;
-                propertyName = propertyName && propertyName.startsWith('./') && propertyName.substring(2);
-                propertyName = propertyName || 'text'; // normal case for a rte - when it's an inline rte in the content it's really hard to find out.
+                    const rteproperty = $(buttongroup).closest('.richtext-container').find('[data-cq-richtext-editable=true]').attr('name');
+                    propertyName = rteproperty || propertyName;
+                    propertyName = propertyName && propertyName.startsWith('./') && propertyName.substring(2);
+                    propertyName = propertyName || 'text'; // normal case for a rte - when it's an inline rte in the content it's really hard to find out.
 
-                clickevent.preventDefault();
-                clickevent.stopPropagation();
-                const oldContent = rteinstance.getContent();
-                rteinstance.suspend();
-                const backdropOpen = $('.cq-dialog-backdrop').hasClass('is-open');
+                    clickevent.preventDefault();
+                    clickevent.stopPropagation();
+                    const oldContent = rteinstance.getContent();
+                    rteinstance.suspend();
+                    const backdropOpen = $('.cq-dialog-backdrop').hasClass('is-open');
 
-                showCreateDialog({
-                    componentPath,
-                    property: propertyName,
-                    oldContent,
-                    writebackCallback: function (newvalue) {
-                        rteinstance.setContent(newvalue);
-                    },
-                    isRichtext: true,
-                    stackeddialog: true,
-                    onFinishCallback: function () {
-                        if (!backdropOpen) { // only hide if we weren't called from a dialog but an inline editor:
-                            $('.cq-dialog-backdrop').removeClass('is-open').hide();
+                    showCreateDialog({
+                        componentPath,
+                        property: propertyName,
+                        oldContent,
+                        writebackCallback: function (newvalue) {
+                            rteinstance.setContent(newvalue);
+                        },
+                        isRichtext: true,
+                        stackeddialog: true,
+                        onFinishCallback: function () {
+                            if (!backdropOpen) { // only hide if we weren't called from a dialog but an inline editor:
+                                $('.cq-dialog-backdrop').removeClass('is-open').hide();
+                            }
+                            rteinstance.reactivate();
+                            rteinstance.setContent(oldContent);
+                            rteinstance.focus();
                         }
-                        rteinstance.reactivate();
-                        rteinstance.setContent(oldContent);
-                        rteinstance.focus();
-                    }
+                    });
                 });
-            });
+            } catch (e) {
+                console.error("error registering content dialog in toolbar", parameters, e);
+                debugger;
+            }
         }
 
         /** Determines the "most specific" editable containing the DOM element, in the sense of
