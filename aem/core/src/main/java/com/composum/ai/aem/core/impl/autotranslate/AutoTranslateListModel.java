@@ -14,7 +14,6 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 
@@ -60,13 +59,14 @@ public class AutoTranslateListModel {
             boolean changed = request.getParameter("translateWhenChanged") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean breakInheritance = request.getParameter("breakInheritance") != null;
-            GPTConfiguration configuration = configurationService.getGPTConfiguration(request.getResourceResolver(), path);
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");
             if ("standard".equals(translationmodel)) {
-                configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
+                parms.preferStandardModel = true;
             } else if ("highintelligence".equals(translationmodel)) {
-                configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
+                parms.preferHighIntelligenceModel = true;
+            } else {
+                parms.preferHighIntelligenceModel = autoTranslateConfigService.isUseHighIntelligenceModel();
             }
             String maxdepth = request.getParameter("maxdepth");
             if (StringUtils.isNotBlank(maxdepth)) {
@@ -76,7 +76,7 @@ public class AutoTranslateListModel {
             parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
             parms.breakInheritance = breakInheritance;
-            run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms, configuration);
+            run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms);
         }
         return run;
     }

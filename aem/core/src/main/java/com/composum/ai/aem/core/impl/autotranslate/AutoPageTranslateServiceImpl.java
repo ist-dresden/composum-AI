@@ -1,7 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -26,6 +26,7 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
@@ -66,10 +68,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected volatile AutoTranslateConfigService autoTranslateConfigService;
 
     @Reference
+    protected AIConfigurationService configurationService;
+
+    @Reference
     protected LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public Stats translateLiveCopy(@Nonnull Resource resource, @Nullable GPTConfiguration configuration,
+    public Stats translateLiveCopy(@Nonnull Resource resource,
                                    @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException {
         LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
@@ -89,18 +94,28 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return stats;
         }
 
-        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : null;
-        if (translationParameters.additionalInstructions != null) {
-            additionalInstructions = defaultIfBlank(additionalInstructions, "") + "\n\n" + translationParameters.additionalInstructions;
+        GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
+        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
+
+        String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
+        if (StringUtils.isNotBlank(autoTranslateCaConfig.additionalInstructions())) {
+            additionalInstructions = additionalInstructions + "\n\n" + autoTranslateCaConfig.additionalInstructions().trim();
         }
-        additionalInstructions = defaultIfBlank(additionalInstructions, null);
+        List<AutoTranslateRuleConfig> allRules = new ArrayList<>();
+        if (translationParameters.rules != null) {
+            allRules.addAll(translationParameters.rules);
+        }
+        if (autoTranslateCaConfig.rules() != null) {
+            allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+        }
 
         // collect translation rules that apply
         List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
         collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
-        String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, translationParameters.rules);
+        String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
         if (translationRules != null) {
-            additionalInstructions = additionalInstructions + "\n\n" + translationRules;
+            additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
         }
         additionalInstructions = StringUtils.trimToNull(additionalInstructions);
 
@@ -110,6 +125,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         if (additionalInstructionsChanged) {
             LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
         }
+        configuration = configuration.merge(GPTConfiguration.ofAdditionalInstructions(additionalInstructions));
 
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);

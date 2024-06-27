@@ -1,20 +1,15 @@
 package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
@@ -24,6 +19,7 @@ import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.commons.BaseAction;
 import com.day.cq.wcm.msm.commons.BaseActionFactory;
 
+/** Implementation for the rollout configuration.  */
 public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTranslateLiveAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateLiveActionImpl.class);
@@ -73,17 +69,6 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         parms.recursive = false;
         parms.autoSave = autoSave;
         parms.breakInheritance = false;
-        ConfigurationBuilder confBuilder = Objects.requireNonNull(target.adaptTo(ConfigurationBuilder.class));
-        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-        parms.additionalInstructions = autoTranslateCaConfig.additionalInstructions();
-        if (autoTranslateCaConfig.rules() != null) {
-            parms.rules = Arrays.asList(autoTranslateCaConfig.rules());
-        }
-        if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
-            config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
-        } else if (autoTranslateCaConfig.preferStandardModel()) {
-            config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
-        }
         // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
@@ -93,9 +78,9 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             if (duringLiveCopyCreation) {
                 // do that afterward since we cannot access all live relationships from the manager
                 // and cancel properties since they aren't saved yet, or the user is waiting for us.
-                autoTranslateService.startTranslation(target.getResourceResolver(), target.getPath(), parms, config);
+                autoTranslateService.startTranslation(target.getResourceResolver(), target.getPath(), parms);
             } else {
-                autoPageTranslateService.translateLiveCopy(target, config, parms);
+                autoPageTranslateService.translateLiveCopy(target, parms);
             }
 //        } catch (PersistenceException | RuntimeException | LoginException e) {
 //            throw new WCMException("Error translating " + source.getPath() + "\n" + e, e);

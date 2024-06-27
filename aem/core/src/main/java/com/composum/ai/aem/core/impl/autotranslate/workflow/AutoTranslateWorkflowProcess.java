@@ -2,17 +2,13 @@ package com.composum.ai.aem.core.impl.autotranslate.workflow;
 
 import static com.adobe.granite.workflow.PayloadMap.TYPE_JCR_PATH;
 
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -26,10 +22,8 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.exec.WorkflowProcess;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.google.gson.Gson;
@@ -140,26 +134,8 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         }
 
         if (contentResource != null) {
-            ConfigurationBuilder confBuilder = Objects.requireNonNull(contentResource.adaptTo(ConfigurationBuilder.class));
-            AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-            if (autoTranslateCaConfig.additionalInstructions() != null) {
-                parms.additionalInstructions =
-                        (StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
-                                autoTranslateCaConfig.additionalInstructions()).trim();
-            }
-            if (autoTranslateCaConfig.rules() != null) {
-                parms.rules = Arrays.asList(autoTranslateCaConfig.rules());
-            }
-
             try {
-                GPTConfiguration config = configurationService.getGPTConfiguration(contentResource.getResourceResolver(), contentResource.getPath());
-                if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferHighIntelligenceModel()) {
-                    config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
-                } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferStandardModel()) {
-                    config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
-                }
-
-                autoPageTranslateService.translateLiveCopy(contentResource, config, parms);
+                autoPageTranslateService.translateLiveCopy(contentResource, parms);
             } catch (PersistenceException | WCMException | RuntimeException e) { // make sure we log the actual path
                 LOG.error("Failed to translate resource: {}", resource.getPath(), e);
                 throw e;

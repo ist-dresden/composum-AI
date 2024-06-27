@@ -1,24 +1,19 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.apache.sling.commons.threads.ThreadPool;
 import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
@@ -30,7 +25,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -97,7 +91,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     @Override
     public TranslationRun startTranslation(
             @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
-            @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)
+            @Nonnull TranslationParameters translationParameters)
             throws LoginException, PersistenceException {
         if (!isEnabled()) {
             throw new IllegalStateException("AutoTranslateService is disabled");
@@ -144,7 +138,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
         run.status = "queued";
         run.user = resourceResolver.getUserID();
-        run.configuration = configuration;
         stateService.getTranslationRuns().add(run);
         run.future = getThreadPool().submit(() -> run.execute(processResolver));
         return run;
@@ -186,7 +179,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public Future<?> future;
         public long waituntil;
         List<TranslationPageImpl> translatedPages;
-        GPTConfiguration configuration;
         TranslationParameters translationParameters;
 
         @Override
@@ -224,11 +216,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 boolean hasErrors = false;
                 startTime = new Date().toString();
                 boolean interrupted = false;
-                GPTConfiguration mergedConfiguration = configuration;
-                if (autoTranslateConfigService.isUseHighIntelligenceModel() &&
-                        (mergedConfiguration == null || mergedConfiguration.isHighIntelligenceNeeded() == null)) {
-                    mergedConfiguration = GPTConfiguration.HIGH_INTELLIGENCE.merge(mergedConfiguration);
-                }
                 for (TranslationPageImpl page : translatedPages) {
                     interrupted = interrupted || future == null || future.isCancelled();
                     if (!interrupted && Thread.interrupted()) {
@@ -248,21 +235,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         resourceResolver.revert();
                         resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
-                        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-                        TranslationParameters pageTranslationParameters = translationParameters.clone();
-                        pageTranslationParameters.additionalInstructions = StringUtils.defaultIfBlank(
-                                StringUtils.defaultString(pageTranslationParameters.additionalInstructions) + "\n\n" +
-                                        StringUtils.defaultString(autoTranslateCaConfig.additionalInstructions()), null);
-                        if (autoTranslateCaConfig.rules() != null) {
-                            pageTranslationParameters.rules = new ArrayList<>();
-                            if (translationParameters.rules != null) {
-                                pageTranslationParameters.rules.addAll(translationParameters.rules);
-                            }
-                            pageTranslationParameters.rules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
-                        }
-                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
-                                mergedConfiguration, pageTranslationParameters);
+                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
                         page.stats = stats;
                         page.status = stats.hasChanges() ? "done" : "unchanged";
                     } catch (Exception e) {

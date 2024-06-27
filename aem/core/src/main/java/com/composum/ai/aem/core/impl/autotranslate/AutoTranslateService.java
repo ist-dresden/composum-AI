@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.day.cq.wcm.api.WCMException;
 
 public interface AutoTranslateService {
@@ -28,7 +26,7 @@ public interface AutoTranslateService {
      */
     TranslationRun startTranslation(
             @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
-            @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)
+            @Nonnull TranslationParameters translationParameters)
             throws LoginException, PersistenceException;
 
     /**
@@ -79,6 +77,16 @@ public interface AutoTranslateService {
          */
         String userId = null;
 
+        /**
+         * Prefer High Intelligence Model : If set, the high intelligence model will be used for translation.
+         */
+        boolean preferHighIntelligenceModel = false;
+
+        /**
+         * Prefer Standard Model : If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'
+         */
+        boolean preferStandardModel = false;
+
         @Override
         public String toString() {
             return "TranslationParameters{" +
@@ -88,6 +96,8 @@ public interface AutoTranslateService {
                     ", breakInheritance=" + breakInheritance +
                     ", autoSave=" + autoSave +
                     ", userId='" + userId + '\'' +
+                    ", preferHighIntelligenceModel=" + preferHighIntelligenceModel +
+                    ", preferStandardModel=" + preferStandardModel +
                     ", additionalInstructions='" + additionalInstructions + '\'' +
                     '}';
         }

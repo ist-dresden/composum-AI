@@ -191,6 +191,11 @@ public class GPTConfiguration {
         return new GPTConfiguration(null, null, richText ? AnswerType.HTML : AnswerType.MARKDOWN);
     }
 
+    @Nonnull
+    public static GPTConfiguration ofAdditionalInstructions(@Nullable String additionalInstructions) {
+        return new GPTConfiguration(null, null, null, additionalInstructions);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("GPTConfiguration{");
