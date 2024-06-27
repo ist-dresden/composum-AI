@@ -125,7 +125,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         if (additionalInstructionsChanged) {
             LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
         }
-        configuration = configuration.merge(GPTConfiguration.ofAdditionalInstructions(additionalInstructions));
+        configuration = GPTConfiguration.ofAdditionalInstructions(additionalInstructions).merge(configuration);
 
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
@@ -202,9 +202,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return null;
         }
         String sourceLanguage = SelectorUtils.findLanguage(resource.getResourceResolver().getResource(relationship.getSourcePath()));
-        if (sourceLanguage == null) {
-            return null;
-        }
         return sourceLanguage;
     }
 
@@ -215,7 +212,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         targetWrapper.setAiTranslatedBy(userID);
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
         if (configuration != null) {
-            targetWrapper.setAiTranslatedModel(configuration.isHighIntelligenceNeeded() ? "hi" : "standard");
+            targetWrapper.setAiTranslatedModel(configuration.highIntelligenceNeededIsSet() ? "hi" : "standard");
         }
         if (liveRelationship != null) {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
@@ -509,7 +506,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      */
     @Nonnull
     protected static Pattern compileContentPattern(String contentMatch) {
-        if (contentMatch.matches(".*[\\[\\(\\*\\?].*")) {
+        if (contentMatch.matches(".*[\\[(*?].*")) {
             return Pattern.compile(contentMatch, Pattern.CASE_INSENSITIVE);
         }
         if (contentMatch.contains("*") || contentMatch.contains("?") || contentMatch.contains("[") ||

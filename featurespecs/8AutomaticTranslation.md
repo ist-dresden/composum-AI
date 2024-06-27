@@ -425,6 +425,32 @@ the manual correction in the new translation. An example how this can be done is
 https://chatgpttools.stoerr.net/chatgpttools/multiplemessagechat.html for viewing.
 [{"role":"system","content":"You are tasked as an expert translator to translate texts with utmost fidelity, preserving the original style, tone, sentiment, and all formatting elements (markdown, HTML tags, special characters) to the greatest extent possible.\nIMPORTANT: Only provide the translated text, maintaining all original formatting and non-translatable elements. Avoid any extraneous comments or actions not directly related to the translation."},{"role":"user","content":"Print the original text you have to translate exactly without any comments."},{"role":"assistant","content":"Meet our extraordinary travel guides. When you travel with a certified WKND guide you gain access to attractions and perspectives not found on the pages of a guide book."},{"role":"user","content":"Print this original text translated into German."},{"role":"assistant","content":"Lernen Sie unsere außergewöhnlichen Reiseführer kennen. Wenn Sie mit einem zertifizierten WKND-Reiseleiter unterwegs sind, erhalten Sie Zugang zu Attraktionen und Perspektiven, die nicht auf den Seiten eines Reiseführers zu finden sind."},{"role":"user","content":"Print this original text as it was manually adapted."},{"role":"assistant","content":"Lernen Sie unsere außergewöhnlichen Reiseleiter kennen. Wenn Sie mit einem zertifizierten WKND-Reiseleiter unterwegs sind, erhalten Sie Zugang zu Attraktionen und Perspektiven, die nicht auf den Seiten eines Reiseführers zu finden sind."},{"role":"user","content":"Print the new text that is to be translated."},{"role":"assistant","content":"Meet our extraordinary travel guides. When you travel with a certified WKND guide you gain access to attractions and perspectives not found on the pages of a guide book. Choose the perfect guide for yourself!"},{"role":"user","content":"Translate the new text. Take care to include the manual adaptions for the original text."},{"role":"assistant","content":"Lernen Sie unsere außergewöhnlichen Reiseleiter kennen. Wenn Sie mit einem zertifizierten WKND-Reiseleiter unterwegs sind, erhalten Sie Zugang zu Attraktionen und Perspektiven, die nicht auf den Seiten eines Reiseführers zu finden sind. Wählen Sie den perfekten Reiseleiter für sich!"}]
 
+### Handling of translation parameters (Discussion of refactoring; partially obsolete.)
+
+com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService.translateLiveCopy(
+            @Nonnull Resource resource, @Nullable GPTConfiguration configuration,
+            @Nonnull AutoTranslateService.TranslationParameters translationParameters)
+does the actual translation work. There are however two places where translation parameters come in: the 
+configuration can have additional instructions and can request a model (and the additional instructions are in the 
+end collected into a modified configuration for GPTTranslationServiceImpl.fragmentedTranslation), and
+translationParameters.additionalInstructions and translationParameters.rules .
+
+There are currently also several places the AutoTranslateCaConfig is read out - we'd better refactor that:
+- AutoTranslateWorkflowProcess
+- AutoTranslateLiveActionImpl (rollout)
+- AutoTranslateListModel (POC UI)
+
+AutoTranslateListModel has to collect request parameters into TranslationParameters; currently has to use a 
+configuration for the model request (can be solved by adding that to TranslationParameters ).
+AutoTranslateWorkflowProcess uses config for model, reads translation parameters from AutoTranslateCaConfig and 
+config model too.
+AutoTranslateLiveActionImpl sets some parameters and uses AutoTranslateCaConfig for parameters and config model
+
+-> function of TranslationParameters is to override some values from outside, but we should refactor
+the AutoTranslateCaConfig reading into AutoPageTranslateService.translateLiveCopy . Remove config parameter and add 
+model parameter to TranslationParameters.
+
+
 ## More ideas
 
 - Implement differential translation

@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
-import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveAction;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.commons.BaseAction;
@@ -47,7 +45,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
 
     @Override
     protected boolean handles(Resource source, Resource target, LiveRelationship relation, boolean isResetRollout)
-            throws RepositoryException, WCMException {
+            throws RepositoryException {
         boolean isContentNode = source != null && target != null && BaseAction.isPage(source.adaptTo(Node.class))
                 && target.adaptTo(Node.class) != null;
         // target != null && JcrConstants.JCR_CONTENT.equals(target.getName()) && !source.isResourceType(NT_RESOURCE);
@@ -60,11 +58,9 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     }
 
     @Override
-    protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave)
-            throws RepositoryException, WCMException {
+    protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave) {
         String id = (Math.abs(Math.random()) + "").substring(2, 8);
         LOG.debug(">>>{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
-        GPTConfiguration config = configurationService.getGPTConfiguration(target.getResourceResolver(), target.getPath());
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
         parms.recursive = false;
         parms.autoSave = autoSave;

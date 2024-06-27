@@ -383,7 +383,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         for (char c : request.toString().toCharArray()) {
             hash = 92821 * hash + c;
         }
-        boolean hi = request.getConfiguration() != null ? request.getConfiguration().isHighIntelligenceNeeded() : false;
+        boolean hi = request.getConfiguration() != null ? request.getConfiguration().highIntelligenceNeededIsSet() : false;
         return (hi ? "hi-" : "") + Integer.toHexString(Math.abs(hash));
     }
 

@@ -36,7 +36,7 @@ public interface AutoTranslateService {
 
     boolean isEnabled();
 
-    static class TranslationParameters implements Cloneable {
+    class TranslationParameters implements Cloneable {
         /**
          * Translate subpages as well.
          */
@@ -112,7 +112,7 @@ public interface AutoTranslateService {
         }
     }
 
-    static abstract class TranslationRun {
+    abstract class TranslationRun {
         public String id;
         public String status;
         public String startTime;
@@ -141,7 +141,7 @@ public interface AutoTranslateService {
 
     }
 
-    static abstract class TranslationPage {
+    abstract class TranslationPage {
         private final static Pattern IMAGE_VIDEO_PATTERN =
                 Pattern.compile("\\.(png|jpg|jpeg|gif|svg|mp3|mov|mp4)(/|$)", Pattern.CASE_INSENSITIVE);
 

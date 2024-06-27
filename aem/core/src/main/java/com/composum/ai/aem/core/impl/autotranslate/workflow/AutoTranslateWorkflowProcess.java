@@ -24,7 +24,6 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
-import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,9 +49,6 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
     @Reference
     protected AutoTranslateConfigService autoTranslateConfigService;
 
-    @Reference
-    protected AIConfigurationService configurationService;
-
     protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     @Override
@@ -66,8 +62,7 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         String processArguments = metaDataMap.get("PROCESS_ARGS", String.class);
         LOG.info("Autotranslate workflow started for {} , args {}", payload, processArguments);
 
-        try {
-            ResourceResolver resourceResolver = workflowSession.adaptTo(ResourceResolver.class);
+        try (ResourceResolver resourceResolver = workflowSession.adaptTo(ResourceResolver.class)) {
             WorkflowData workflowData = workItem.getWorkflowData();
             if (workflowData.getPayloadType().equals(TYPE_JCR_PATH)) {
                 String path = workflowData.getPayload().toString();

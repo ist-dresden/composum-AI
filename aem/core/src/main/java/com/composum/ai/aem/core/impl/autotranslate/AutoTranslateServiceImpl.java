@@ -55,8 +55,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     @Override
     public List<TranslationRun> getTranslationRuns() {
-        List<TranslationRun> runs = new ArrayList<>();
-        runs.addAll(stateService.getTranslationRuns());
+        List<TranslationRun> runs = new ArrayList<>(stateService.getTranslationRuns());
         Collections.reverse(runs);
         return runs;
     }
@@ -92,7 +91,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     public TranslationRun startTranslation(
             @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
             @Nonnull TranslationParameters translationParameters)
-            throws LoginException, PersistenceException {
+            throws LoginException {
         if (!isEnabled()) {
             throw new IllegalStateException("AutoTranslateService is disabled");
         }
@@ -198,7 +197,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             try {
                 AutoTranslateServiceImpl.this.doRollback(resourceResolver, this);
             } catch (PersistenceException | WCMException | RuntimeException e) {
-                messages.append("Error rolling back: " + e.toString() + "\n");
+                messages.append("Error rolling back: ").append(e).append("\n");
                 throw e;
             }
         }
@@ -229,24 +228,20 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     }
 
                     page.status = "running";
-                    ResourceResolver resourceResolver = null;
-                    try {
-                        resourceResolver = callResourceResolver.clone(null);
+                    try (ResourceResolver resourceResolver = callResourceResolver.clone(null)) {
                         resourceResolver.revert();
                         resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
-                        page.stats = stats;
-                        page.status = stats.hasChanges() ? "done" : "unchanged";
+                        if (resource != null) {
+                            AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
+                            page.stats = stats;
+                            page.status = stats.hasChanges() ? "done" : "unchanged";
+                        }
                     } catch (Exception e) {
                         page.status = "error";
-                        this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
+                        this.messages.append("Error translating ").append(page.pagePath).append(": ").append(e).append("\n");
                         LOG.error("Error translating " + page.pagePath, e);
                         hasErrors = true;
-                    } finally {
-                        if (resourceResolver != null) {
-                            resourceResolver.close();
-                        }
                     }
                 }
                 status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
@@ -257,7 +252,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             } catch (Exception e) {
                 LOG.error("Error during " + this, e);
                 status = "error";
-                messages.append("Error: " + e.toString() + "\n");
+                messages.append("Error: ").append(e).append("\n");
             } finally {
                 stopTime = new Date().toString();
                 if (status == null) {

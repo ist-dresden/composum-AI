@@ -115,12 +115,17 @@ public class GPTConfiguration {
     }
 
     /**
-     * Uses the slower and more expensive high intelligence model - use sparingly for more challenging tasks.
-     * <p>
-     * Caution: Boolean not boolean - use Boolean.TRUE.equals. :-)
+     * If true, this requires to uses the slower and more expensive high intelligence model - use sparingly for more challenging tasks.
      */
-    public Boolean isHighIntelligenceNeeded() {
-        return highIntelligenceNeeded;
+    public boolean highIntelligenceNeededIsSet() {
+        return Boolean.TRUE.equals(highIntelligenceNeeded);
+    }
+
+    /**
+     * If true, there is no information whether a "high intelligence model" is used - uses the default.
+     */
+    public boolean highIntelligenceNeededIsUnset() {
+        return highIntelligenceNeeded == null;
     }
 
     /**
