@@ -481,14 +481,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     }
 
     protected boolean isApplicable(@Nonnull AutoTranslateRuleConfig rule, @Nonnull String path, @Nonnull List<PropertyToTranslate> allTranslateableProperties) {
-        if (allTranslateableProperties == null || StringUtils.isBlank(rule.contentMatch())) {
+        if (allTranslateableProperties == null || StringUtils.isBlank(rule.contentPattern())) {
             return false;
         }
         if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex())) {
             return false;
         }
         try {
-            Pattern contentPattern = compileContentPattern(rule.contentMatch());
+            Pattern contentPattern = compileContentPattern(rule.contentPattern());
             return allTranslateableProperties.stream()
                     .map(PropertyToTranslate::getSourceValue)
                     .anyMatch(value -> value != null && contentPattern.matcher(value).find());
@@ -502,11 +502,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * The content match can be a word or phrase that must be present in the content of the page for the rule to match.
      * For example, 'Product' will match all pages that contain the word 'Product', case-insensitive.
      * Spaces will also match any whitespace.
-     * If it contains any of the regex meta characters []()* it'll be treated as a regex.
+     * If it contains any of the regex meta characters []()*+ it'll be treated as a regex.
      */
     @Nonnull
     protected static Pattern compileContentPattern(String contentMatch) {
-        if (contentMatch.matches(".*[\\[(*?].*")) {
+        if (contentMatch.matches(".*[\\[(*+?].*")) {
             return Pattern.compile(contentMatch, Pattern.CASE_INSENSITIVE);
         }
         if (contentMatch.contains("*") || contentMatch.contains("?") || contentMatch.contains("[") ||
