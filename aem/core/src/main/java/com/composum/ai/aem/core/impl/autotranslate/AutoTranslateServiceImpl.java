@@ -8,7 +8,6 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -26,7 +25,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -57,8 +55,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
 
     @Override
     public List<TranslationRun> getTranslationRuns() {
-        List<TranslationRun> runs = new ArrayList<>();
-        runs.addAll(stateService.getTranslationRuns());
+        List<TranslationRun> runs = new ArrayList<>(stateService.getTranslationRuns());
         Collections.reverse(runs);
         return runs;
     }
@@ -93,8 +90,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     @Override
     public TranslationRun startTranslation(
             @Nonnull ResourceResolver resourceResolver, @Nonnull String path,
-            @Nonnull TranslationParameters translationParameters, @Nullable GPTConfiguration configuration)
-            throws LoginException, PersistenceException {
+            @Nonnull TranslationParameters translationParameters)
+            throws LoginException {
         if (!isEnabled()) {
             throw new IllegalStateException("AutoTranslateService is disabled");
         }
@@ -140,7 +137,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
         run.status = "queued";
         run.user = resourceResolver.getUserID();
-        run.configuration = configuration;
         stateService.getTranslationRuns().add(run);
         run.future = getThreadPool().submit(() -> run.execute(processResolver));
         return run;
@@ -182,7 +178,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public Future<?> future;
         public long waituntil;
         List<TranslationPageImpl> translatedPages;
-        GPTConfiguration configuration;
         TranslationParameters translationParameters;
 
         @Override
@@ -202,7 +197,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             try {
                 AutoTranslateServiceImpl.this.doRollback(resourceResolver, this);
             } catch (PersistenceException | WCMException | RuntimeException e) {
-                messages.append("Error rolling back: " + e.toString() + "\n");
+                messages.append("Error rolling back: ").append(e).append("\n");
                 throw e;
             }
         }
@@ -220,16 +215,6 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 boolean hasErrors = false;
                 startTime = new Date().toString();
                 boolean interrupted = false;
-                GPTConfiguration mergedConfiguration = configuration;
-                if (translationParameters.additionalInstructions != null &&
-                        !translationParameters.additionalInstructions.trim().isEmpty()) {
-                    mergedConfiguration = new GPTConfiguration(null, null, null,
-                            translationParameters.additionalInstructions).merge(configuration);
-                }
-                if (autoTranslateConfigService.isUseHighIntelligenceModel() &&
-                        (mergedConfiguration == null || mergedConfiguration.isHighIntelligenceNeeded() == null)) {
-                    mergedConfiguration = GPTConfiguration.HIGH_INTELLIGENCE.merge(mergedConfiguration);
-                }
                 for (TranslationPageImpl page : translatedPages) {
                     interrupted = interrupted || future == null || future.isCancelled();
                     if (!interrupted && Thread.interrupted()) {
@@ -243,25 +228,20 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                     }
 
                     page.status = "running";
-                    ResourceResolver resourceResolver = null;
-                    try {
-                        resourceResolver = callResourceResolver.clone(null);
+                    try (ResourceResolver resourceResolver = callResourceResolver.clone(null)) {
                         resourceResolver.revert();
                         resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource,
-                                mergedConfiguration, translationParameters);
-                        page.stats = stats;
-                        page.status = stats.hasChanges() ? "done" : "unchanged";
+                        if (resource != null) {
+                            AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
+                            page.stats = stats;
+                            page.status = stats.hasChanges() ? "done" : "unchanged";
+                        }
                     } catch (Exception e) {
                         page.status = "error";
-                        this.messages.append("Error translating " + page.pagePath + ": " + e.toString() + "\n");
+                        this.messages.append("Error translating ").append(page.pagePath).append(": ").append(e).append("\n");
                         LOG.error("Error translating " + page.pagePath, e);
                         hasErrors = true;
-                    } finally {
-                        if (resourceResolver != null) {
-                            resourceResolver.close();
-                        }
                     }
                 }
                 status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
@@ -272,7 +252,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             } catch (Exception e) {
                 LOG.error("Error during " + this, e);
                 status = "error";
-                messages.append("Error: " + e.toString() + "\n");
+                messages.append("Error: ").append(e).append("\n");
             } finally {
                 stopTime = new Date().toString();
                 if (status == null) {

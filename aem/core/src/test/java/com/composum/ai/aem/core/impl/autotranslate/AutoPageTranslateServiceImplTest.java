@@ -1,8 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 
+import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.compileContentPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.sling.api.resource.Resource;
 import org.junit.jupiter.api.AfterEach;
@@ -53,7 +54,6 @@ public class AutoPageTranslateServiceImplTest {
     }
 
 
-
     // problems on /content/wknd/language-masters/es/adventures/beervana-portland/jcr:content : displayPopupTitle true appears in list
     @Test
     public void testCollectPropertiesToTranslate() throws WCMException {
@@ -82,6 +82,20 @@ public class AutoPageTranslateServiceImplTest {
         assertEquals("jcr:title", props.get(1).propertyName);
         assertEquals("/content/de/jcr:content/foo", props.get(1).targetResource.getPath());
         assertEquals("/content/en/jcr:content/foo", props.get(1).sourceResource.getPath());
+    }
+
+    @Test
+    public void testCompileContentPattern() {
+        assertEquals("a|b", compileContentPattern("a|b").pattern());
+        assertEquals("a(b)", compileContentPattern("a(b)").pattern());
+        assertEquals("a[b]", compileContentPattern("a[b]").pattern());
+        assertEquals("word", compileContentPattern("word").pattern());
+        Pattern pattern = compileContentPattern("two   \nwords");
+        assertEquals("two\\s+words", pattern.pattern());
+        assertTrue(pattern.matcher("two words").matches());
+        assertTrue(pattern.matcher("two  words").matches());
+        assertTrue(pattern.matcher("two \n words").matches());
+        assertTrue(pattern.matcher("tWo  WordS").matches());
     }
 
 }

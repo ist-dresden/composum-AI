@@ -1,28 +1,23 @@
 package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 
-import java.util.Objects;
-
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveAction;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.commons.BaseAction;
 import com.day.cq.wcm.msm.commons.BaseActionFactory;
 
+/** Implementation for the rollout configuration.  */
 public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTranslateLiveAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateLiveActionImpl.class);
@@ -50,8 +45,10 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
 
     @Override
     protected boolean handles(Resource source, Resource target, LiveRelationship relation, boolean isResetRollout)
-            throws RepositoryException, WCMException {
-        boolean isContentNode = target != null && JcrConstants.JCR_CONTENT.equals(target.getName());
+            throws RepositoryException {
+        boolean isContentNode = source != null && target != null && BaseAction.isPage(source.adaptTo(Node.class))
+                && target.adaptTo(Node.class) != null;
+        // target != null && JcrConstants.JCR_CONTENT.equals(target.getName()) && !source.isResourceType(NT_RESOURCE);
         if (isContentNode) {
             LOG.debug("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
         } else {
@@ -61,22 +58,13 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     }
 
     @Override
-    protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave)
-            throws RepositoryException, WCMException {
-        LOG.debug("doExecute({}, {}, {})", liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
-        GPTConfiguration config = configurationService.getGPTConfiguration(target.getResourceResolver(), target.getPath());
+    protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave) {
+        String id = (Math.abs(Math.random()) + "").substring(2, 8);
+        LOG.debug(">>>{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
         parms.recursive = false;
         parms.autoSave = autoSave;
         parms.breakInheritance = false;
-        ConfigurationBuilder confBuilder = Objects.requireNonNull(target.adaptTo(ConfigurationBuilder.class));
-        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-        parms.additionalInstructions = autoTranslateCaConfig.additionalInstructions();
-        if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferHighIntelligenceModel()) {
-            config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
-        } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferStandardModel()) {
-            config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
-        }
         // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
@@ -86,14 +74,16 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             if (duringLiveCopyCreation) {
                 // do that afterward since we cannot access all live relationships from the manager
                 // and cancel properties since they aren't saved yet, or the user is waiting for us.
-                autoTranslateService.startTranslation(target.getResourceResolver(), target.getPath(), parms, config);
+                autoTranslateService.startTranslation(target.getResourceResolver(), target.getPath(), parms);
             } else {
-                autoPageTranslateService.translateLiveCopy(target, config, parms);
+                autoPageTranslateService.translateLiveCopy(target, parms);
             }
-//        } catch (PersistenceException | LoginException e) {
-//            throw new WCMException("Error translating " + source.getPath(), e);
+//        } catch (PersistenceException | RuntimeException | LoginException e) {
+//            throw new WCMException("Error translating " + source.getPath() + "\n" + e, e);
         } catch (Exception e) { // rather log exception for now since a demo is coming...
             LOG.error("Error translating " + source.getPath(), e);
+        } finally {
+            LOG.debug("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         }
     }
 

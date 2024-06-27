@@ -11,8 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -24,6 +26,7 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -33,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
@@ -64,10 +68,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected volatile AutoTranslateConfigService autoTranslateConfigService;
 
     @Reference
+    protected AIConfigurationService configurationService;
+
+    @Reference
     protected LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public Stats translateLiveCopy(@Nonnull Resource resource, @Nullable GPTConfiguration configuration,
+    public Stats translateLiveCopy(@Nonnull Resource resource,
                                    @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException {
         LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
@@ -87,9 +94,38 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return stats;
         }
 
-        String additionalInstructions = configuration != null ? configuration.getAdditionalInstructions() : null;
-        String pageAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
-        boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, pageAdditionalInstructions);
+        GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
+        ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
+        AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
+
+        String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
+        if (StringUtils.isNotBlank(autoTranslateCaConfig.additionalInstructions())) {
+            additionalInstructions = additionalInstructions + "\n\n" + autoTranslateCaConfig.additionalInstructions().trim();
+        }
+        List<AutoTranslateRuleConfig> allRules = new ArrayList<>();
+        if (translationParameters.rules != null) {
+            allRules.addAll(translationParameters.rules);
+        }
+        if (autoTranslateCaConfig.rules() != null) {
+            allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+        }
+
+        // collect translation rules that apply
+        List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
+        collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
+        String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
+        if (translationRules != null) {
+            additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
+        }
+        additionalInstructions = StringUtils.trimToNull(additionalInstructions);
+
+        String previousAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
+        boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, previousAdditionalInstructions);
+        stats.collectedAdditionalInstructions = additionalInstructions;
+        if (additionalInstructionsChanged) {
+            LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
+        }
+        configuration = GPTConfiguration.ofAdditionalInstructions(additionalInstructions).merge(configuration);
 
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
@@ -141,7 +177,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         if (additionalInstructionsChanged) {
             ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-            mvm.put(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, additionalInstructions);
+            if (additionalInstructions == null) {
+                mvm.remove(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS);
+            } else {
+                mvm.put(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, additionalInstructions);
+            }
             changed = true;
         }
 
@@ -162,9 +202,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             return null;
         }
         String sourceLanguage = SelectorUtils.findLanguage(resource.getResourceResolver().getResource(relationship.getSourcePath()));
-        if (sourceLanguage == null) {
-            return null;
-        }
         return sourceLanguage;
     }
 
@@ -175,7 +212,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         targetWrapper.setAiTranslatedBy(userID);
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
         if (configuration != null) {
-            targetWrapper.setAiTranslatedModel(configuration.isHighIntelligenceNeeded() ? "hi" : "standard");
+            targetWrapper.setAiTranslatedModel(configuration.highIntelligenceNeededIsSet() ? "hi" : "standard");
         }
         if (liveRelationship != null) {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
@@ -337,7 +374,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Searches for properties we have to translate.
      *
-     * @param force all properties have to be retranslated
+     * @param propertiesToTranslate list to add the properties to translate to - output parameter
+     * @param force                 all properties have to be retranslated
      * @return true if something was changed already
      */
     protected boolean collectPropertiesToTranslate(
@@ -367,14 +405,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
-            boolean isCancelled = relationship.getStatus() != null && (
-                    relationship.getStatus().isCancelled() ||
-                            relationship.getStatus().getCanceledProperties().contains(key)
-            );
 
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.
-
+            boolean isCancelled = isCancelled(resource, key, relationship);
             if (isCancelled && !translationParameters.translateWhenChanged) {
                 continue; // don't touch cancelled properties
             }
@@ -416,6 +450,73 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return changed;
     }
 
+    protected static boolean isCancelled(Resource resource, String key, LiveRelationship relationship) {
+        if (relationship.getStatus() == null) {
+            return false;
+        }
+        if (relationship.getStatus().isCancelled()) {
+            return true;
+        }
+        if (relationship.getStatus().getCanceledProperties().contains(key)) {
+            return true;
+        }
+        String[] cancelledProps = resource.getValueMap().get("cq:propertyInheritanceCancelled", String[].class);
+        if (cancelledProps != null) {
+            return Arrays.asList(cancelledProps).contains(key);
+        }
+        return false;
+    }
+
+    protected String collectTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
+        if (rules == null) {
+            return null;
+        }
+        StringBuilder applicableRules = new StringBuilder();
+        for (AutoTranslateRuleConfig rule : rules) {
+            if (isApplicable(rule, path, allTranslateableProperties)) {
+                applicableRules.append(rule.additionalInstructions()).append("\n");
+            }
+        }
+        return applicableRules.length() > 0 ? applicableRules.toString() : null;
+    }
+
+    protected boolean isApplicable(@Nonnull AutoTranslateRuleConfig rule, @Nonnull String path, @Nonnull List<PropertyToTranslate> allTranslateableProperties) {
+        if (allTranslateableProperties == null || StringUtils.isBlank(rule.contentPattern())) {
+            return false;
+        }
+        if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex())) {
+            return false;
+        }
+        try {
+            Pattern contentPattern = compileContentPattern(rule.contentPattern());
+            return allTranslateableProperties.stream()
+                    .map(PropertyToTranslate::getSourceValue)
+                    .anyMatch(value -> value != null && contentPattern.matcher(value).find());
+        } catch (PatternSyntaxException e) {
+            LOG.error("Error in pattern syntax for rule {} applicable to path {}", rule, path, e);
+            return false;
+        }
+    }
+
+    /**
+     * The content match can be a word or phrase that must be present in the content of the page for the rule to match.
+     * For example, 'Product' will match all pages that contain the word 'Product', case-insensitive.
+     * Spaces will also match any whitespace.
+     * If it contains any of the regex meta characters []()*+ it'll be treated as a regex.
+     */
+    @Nonnull
+    protected static Pattern compileContentPattern(String contentMatch) {
+        if (contentMatch.matches(".*[\\[(*+?].*")) {
+            return Pattern.compile(contentMatch, Pattern.CASE_INSENSITIVE);
+        }
+        if (contentMatch.contains("*") || contentMatch.contains("?") || contentMatch.contains("[") ||
+                contentMatch.contains("]") || contentMatch.contains("(") || contentMatch.contains(")")) {
+            return Pattern.compile(contentMatch, Pattern.CASE_INSENSITIVE);
+        }
+        // whitespace in the pattern will be replaced with a regex that matches any whitespace
+        return Pattern.compile(contentMatch.replaceAll("\\s+", "\\\\s+"), Pattern.CASE_INSENSITIVE);
+    }
+
     /**
      * Searches for properties
      */
@@ -435,6 +536,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
          */
         protected Resource targetResource;
         protected String propertyName;
+
+        public String getSourceValue() {
+            return sourceResource.getValueMap().get(propertyName, String.class);
+        }
+
+        public String getTargetValue() {
+            return targetResource.getValueMap().get(propertyName, String.class);
+        }
 
         @Override
         public String toString() {

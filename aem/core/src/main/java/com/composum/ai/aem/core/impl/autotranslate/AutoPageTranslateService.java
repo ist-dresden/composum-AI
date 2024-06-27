@@ -1,12 +1,10 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -18,7 +16,7 @@ public interface AutoPageTranslateService {
      * Implements the actual translation for one page or asset.
      */
     Stats translateLiveCopy(
-            @Nonnull Resource resource, @Nullable GPTConfiguration configuration,
+            @Nonnull Resource resource,
             @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException;
 
@@ -27,7 +25,7 @@ public interface AutoPageTranslateService {
      */
     void rollback(Resource resource) throws WCMException, PersistenceException;
 
-    public static class Stats {
+    class Stats {
         public int translateableProperties;
 
         public int translatedProperties;
@@ -47,6 +45,8 @@ public interface AutoPageTranslateService {
         public int paths;
 
         public int relocatedPaths;
+
+        public String collectedAdditionalInstructions;
 
         public boolean hasChanges() {
             return translatedProperties + retranslatedProperties + modifiedButRetranslatedProperties + relocatedPaths > 0;

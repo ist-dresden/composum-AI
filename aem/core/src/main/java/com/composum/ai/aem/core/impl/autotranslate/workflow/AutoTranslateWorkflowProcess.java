@@ -3,15 +3,12 @@ package com.composum.ai.aem.core.impl.autotranslate.workflow;
 import static com.adobe.granite.workflow.PayloadMap.TYPE_JCR_PATH;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -25,11 +22,8 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.exec.WorkflowProcess;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateCaConfig;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -55,9 +49,6 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
     @Reference
     protected AutoTranslateConfigService autoTranslateConfigService;
 
-    @Reference
-    protected AIConfigurationService configurationService;
-
     protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     @Override
@@ -71,8 +62,7 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         String processArguments = metaDataMap.get("PROCESS_ARGS", String.class);
         LOG.info("Autotranslate workflow started for {} , args {}", payload, processArguments);
 
-        try {
-            ResourceResolver resourceResolver = workflowSession.adaptTo(ResourceResolver.class);
+        try (ResourceResolver resourceResolver = workflowSession.adaptTo(ResourceResolver.class)) {
             WorkflowData workflowData = workItem.getWorkflowData();
             if (workflowData.getPayloadType().equals(TYPE_JCR_PATH)) {
                 String path = workflowData.getPayload().toString();
@@ -139,27 +129,8 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
         }
 
         if (contentResource != null) {
-            ConfigurationBuilder confBuilder = Objects.requireNonNull(contentResource.adaptTo(ConfigurationBuilder.class));
-            AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-            if (autoTranslateCaConfig != null && autoTranslateCaConfig.additionalInstructions() != null) {
-                parms.additionalInstructions =
-                        (StringUtils.defaultString(parms.additionalInstructions) + "\n\n" +
-                                autoTranslateCaConfig.additionalInstructions()).trim();
-            }
-
             try {
-                GPTConfiguration config = configurationService.getGPTConfiguration(contentResource.getResourceResolver(), contentResource.getPath());
-                if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferHighIntelligenceModel()) {
-                    config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config, true);
-                } else if (autoTranslateCaConfig != null && autoTranslateCaConfig.preferStandardModel()) {
-                    config = GPTConfiguration.STANDARD_INTELLIGENCE.merge(config, true);
-                }
-
-                if (parms.additionalInstructions != null) {
-                    config = GPTConfiguration.merge(config,
-                            new GPTConfiguration(null, null, null, parms.additionalInstructions));
-                }
-                autoPageTranslateService.translateLiveCopy(contentResource, config, parms);
+                autoPageTranslateService.translateLiveCopy(contentResource, parms);
             } catch (PersistenceException | WCMException | RuntimeException e) { // make sure we log the actual path
                 LOG.error("Failed to translate resource: {}", resource.getPath(), e);
                 throw e;

@@ -24,6 +24,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -192,6 +193,7 @@ public class ApproximateMarkdownServiceImplTest {
     }
 
     @Test
+    @Ignore("Doesn't work without internet connection")
     public void testUrlWhitelisting() throws URISyntaxException, IOException, NoSuchMethodException {
         when(config.urlSourceWhitelist()).thenReturn(new String[]{"https://www.example.net/.*"});
         service.activate(config);
