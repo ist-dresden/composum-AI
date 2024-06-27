@@ -31,7 +31,7 @@ done
 
 #same thing for @Configuration and @Property
 
-for file in $(fgrep -l -R --include="*.java" '@Configuration'); do
+for file in $(egrep -l -R --include="*.java" '@Configuration|org.apache.sling.caconfig.annotation.Property'); do
   mdname=$DIR/parts/slingca.$(basename $file .java).md.part
   aigenpipeline -cn -p $DIR/slingcaconfigurations.prompt $file -o $mdname
 done

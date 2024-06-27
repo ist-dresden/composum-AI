@@ -91,7 +91,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | sidePanelPromptsPath       | Side Panel Prompts Path        | String |               | Path to the side panel prompts. Either a JSON file, or a page.                                  |
 
 <a name="osgi.GPTTranslationServiceImpl"></a>
-## Composum AI Translation Service Configuration (backend)
+## Composum AI Translation Service Configuration (backend/base)
 
 Configuration for the basic Composum AI Translation Service
 

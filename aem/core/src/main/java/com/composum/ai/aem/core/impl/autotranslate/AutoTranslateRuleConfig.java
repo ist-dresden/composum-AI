@@ -3,7 +3,8 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import org.apache.sling.caconfig.annotation.Property;
 
 /**
- * A rule to be added to the translation instructions for pages matching the rule.
+ * A rule to be added to the Composum AI Automatic Translation Configuration
+ * with translation instructions for pages matching the rule.
  * We have properties: pathRegex, contentRegex, additionalInstructions.
  */
 public @interface AutoTranslateRuleConfig {

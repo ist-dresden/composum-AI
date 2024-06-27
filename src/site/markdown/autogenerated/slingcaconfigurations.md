@@ -7,11 +7,23 @@ This is an automatically generated overview.
 
 Configures rollout details for automatic translation.
 
-| id                        | label                              | type    | default value | description                                                                                   |
-|---------------------------|------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------|
-| additionalInstructions    | Additional Instructions             | String  |               | Additional instructions for the automatic translation.                                        |
-| preferHighIntelligenceModel| Prefer High Intelligence Model      | boolean |               | If set, the high intelligence model will be used for translation.                              |
-| preferStandardModel       | Prefer Standard Model               | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'. |
+| id                       | label                           | type    | default value | description                                                                                      |
+|--------------------------|---------------------------------|---------|---------------|--------------------------------------------------------------------------------------------------|
+| additionalInstructions    | Additional Instructions          | String  |               | Additional instructions for the automatic translation.                                           |
+| preferHighIntelligenceModel | Prefer High Intelligence Model  | boolean |               | If set, the high intelligence model will be used for translation.                                 |
+| preferStandardModel       | Prefer Standard Model            | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'. |
+| rules                     | Rules                           |         |               | Rules that give additional instructions for translation if certain words or phrases are present in the page. |
+
+<a name="slingca.AutoTranslateRuleConfig"></a>
+### AutoTranslateRuleConfig (aem-core)
+
+A rule to be added to the Composum AI Automatic Translation Configuration with translation instructions for pages matching the rule.
+
+| id           | label                 | type   | default value | description                                                                                                      |
+|--------------|-----------------------|--------|---------------|------------------------------------------------------------------------------------------------------------------|
+| pathRegex    | Path Regex            | String |               | A regular expression matching the absolute path to the page. E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match. |
+| contentPattern | Content pattern      | String |               | A word or phrase that must be present in the content of the page for the rule to match. E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. Spaces will also match any whitespace. If it contains any of the regex meta characters []|()*+ it'll be treated as a regex. |
+| additionalInstructions | Additional Instructions | String |               | Additional instructions for the automatic translation in case this rule matches.                                  |
 
 <a name="slingca.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)
