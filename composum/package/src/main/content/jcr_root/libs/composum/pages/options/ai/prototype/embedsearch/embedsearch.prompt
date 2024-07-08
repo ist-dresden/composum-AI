@@ -6,7 +6,7 @@ and a submit button that triggers the actual call to the RAGServlet.
 Add a three sentence description what the application does, and on each field a one sentence description what it does.
 The page is deployed on the same host as the servlet.
 Parse the result list and display an itemized list with
-the paths as links, leave out a /jcr:content at the end of the path but add a .html
+the paths as links with target _blank, leave out a /jcr:content at the end of the path but add a .html
 The text of the link is the path, the title is additional <h5> text without link, then the description, if there is one.
 Bind enter in the query textarea to submit. Disable the submit button while the request is running.
 There is a reset button that resets the form fields and the result to empty, in the case of the limit field to 10.
