@@ -31,6 +31,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
@@ -201,18 +202,31 @@ public class RAGServiceImpl implements RAGService {
         LOG.debug("ragAnswer: query for {} is {}", id, request);
         GPTChatRequest chatRequest = new GPTChatRequest(config);
         Collections.reverse(bestMatches); // make the most relevant last, near the actual question
-        for (String text : bestMatches) {
-            String textPath = textToPath.get(text);
-            chatRequest.addMessage(GPTMessageRole.USER, "For answering my question later, retrieve the text of the possibly relevant page: "
-                    + textPath.replaceAll("/jcr:content", ".html"));
-            chatRequest.addMessage(GPTMessageRole.ASSISTANT, text);
-            LOG.debug("ragAnswer: Using for {} path {}", id, textPath);
+        int limit = bestMatches.size();
+        while (limit >= 1) {
+            try {
+                for (String text : bestMatches.subList(0, limit)) {
+                    String textPath = textToPath.get(text);
+                    chatRequest.addMessage(GPTMessageRole.USER, "For answering my question later, retrieve the text of the possibly relevant page: "
+                            + textPath.replaceAll("/jcr:content", ".html"));
+                    chatRequest.addMessage(GPTMessageRole.ASSISTANT, text);
+                    LOG.debug("ragAnswer: Using for {} path {}", id, textPath);
+                }
+                chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following as Markdown text without enumeration, including links to the relevant retrieved pages above:\n\n" + querytext);
+                LOG.debug("ragAnswer: request {} : {}", id, request);
+                String answer = chatCompletionService.getSingleChatCompletion(chatRequest);
+                LOG.debug("ragAnswer: response {} : {}", id, answer);
+                return answer;
+            } catch (GPTException.GPTContextLengthExceededException e) {
+                // retry with lower number of texts
+                limit = limit * 2 / 3;
+                LOG.info("ragAnswer: retrying with lower number of texts because of content length exceeded exception: {}", limit);
+            }
         }
-        chatRequest.addMessage(GPTMessageRole.USER, "Considering this information, please answer the following as Markdown text without enumeration, including links to the relevant retrieved pages above:\n\n" + querytext);
-        LOG.debug("ragAnswer: request {} : {}", id, request);
-        String answer = chatCompletionService.getSingleChatCompletion(chatRequest);
-        LOG.debug("ragAnswer: response {} : {}", id, answer);
-        return answer;
+        if (limit == 0 && !bestMatches.isEmpty()) {
+            return "(No answer: context length exceeded.)";
+        }
+        return "(No answer found).";
     }
 
     protected GPTEmbeddingService.EmbeddingsCache getEmbeddingsCache(final Map<String, Resource> textToResource) {
