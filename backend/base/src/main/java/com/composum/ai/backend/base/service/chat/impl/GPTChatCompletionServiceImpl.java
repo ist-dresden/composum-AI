@@ -120,8 +120,8 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
     public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4o";
 
-    protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 20;
-    protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 120;
+    protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 30;
+    protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 300;
 
     protected static final int DEFAULTVALUE_REQUESTS_PER_MINUTE = 100;
     protected static final int DEFAULTVALUE_REQUESTS_PER_HOUR = 1000;
