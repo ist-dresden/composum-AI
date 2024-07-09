@@ -20,6 +20,8 @@
     <properties>
         <!-- Do not upgrade to 3.0.48 etc. since this doesn't work with the Java version in AEM. -->
         <wikitext.version>3.0.42</wikitext.version>
+        <httpcomponents.client5.version>5.3.1</httpcomponents.client5.version>
+        <httpcomponents.core5.version>5.2.5</httpcomponents.core5.version>
     </properties>
 
     <dependencies>
@@ -35,22 +37,24 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.3.1</version>
+            <version>${httpcomponents.client5.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.core5/httpcore5 -->
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5</artifactId>
-            <version>5.2.3</version>
+            <version>${httpcomponents.core5.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5-h2</artifactId>
-            <version>5.2.4</version>
+            <version>${httpcomponents.core5.version}</version>
         </dependency>
 
         <!-- OSGi, Felix -->
