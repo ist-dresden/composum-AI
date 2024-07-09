@@ -60,7 +60,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     @Override
     protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave) {
         String id = (Math.abs(Math.random()) + "").substring(2, 8);
-        LOG.debug(">>>{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
+        LOG.info(">>>{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
         parms.recursive = false;
         parms.autoSave = autoSave;
@@ -70,7 +70,9 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
             // that works only for the root page. For the rest we use this hack to determine whether the user is waiting or this is an asynchronous rollout.
             duringLiveCopyCreation = duringLiveCopyCreation || (target.getResourceResolver().getAttribute("sling.authType") != null);
-            LOG.debug("duringLiveCopyCreation: {}", duringLiveCopyCreation);
+            if (duringLiveCopyCreation) {
+                LOG.info("duringLiveCopyCreation: {}", duringLiveCopyCreation);
+            }
             if (duringLiveCopyCreation) {
                 // do that afterward since we cannot access all live relationships from the manager
                 // and cancel properties since they aren't saved yet, or the user is waiting for us.
@@ -83,7 +85,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         } catch (Exception e) { // rather log exception for now since a demo is coming...
             LOG.error("Error translating " + source.getPath(), e);
         } finally {
-            LOG.debug("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
+            LOG.info("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         }
     }
 
