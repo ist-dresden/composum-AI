@@ -507,12 +507,16 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     }
 
     protected static RetryableException extractRetryableException(Throwable e) {
+        // We also treat NullPointerException as retryable as this seems to happen randomly in a weird
+        // at com.nr.agent.instrumentation.httpclient50.InstrumentationUtils.createInboundParams(InstrumentationUtils.java:80)
+        // - probably doesn't hurt.
         RetryableException retryable = null;
-        if (e instanceof RetryableException) {
+        if (e instanceof RetryableException || e instanceof NullPointerException) {
             retryable = (RetryableException) e;
         } else if (e instanceof CompletionException) {
             CompletionException completionException = (CompletionException) e;
-            if (completionException.getCause() instanceof RetryableException) {
+            if (completionException.getCause() instanceof RetryableException
+                    || completionException.getCause() instanceof NullPointerException) {
                 retryable = (RetryableException) completionException.getCause();
             }
         }
