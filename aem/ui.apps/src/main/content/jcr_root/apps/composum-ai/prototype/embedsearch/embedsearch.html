@@ -94,7 +94,7 @@
                             var path = item.path.replace(/\/jcr:content$/, '') + '.html';
                             var title = item.title ? '<h5>' + item.title + '</h5>' : '';
                             var description = item.description ? '<p>' + item.description + '</p>' : '';
-                            results += '<li><a href="' + path + '">' + path + '</a>' + title + description + '</li>';
+                            results += '<li><a href="' + path + '" target="_blank">' + path + '</a>' + title + description + '</li>';
                         });
                         $('#search-results').html('<ul>' + results + '</ul>');
                     })
@@ -126,4 +126,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(0aca62bb, embedsearch.prompt-34c7f3ec, RAGServlet.java-042fca60) -->
+<!-- AIGenVersion(41761347, embedsearch.prompt-45fa4d87, RAGServlet.java-042fca60) -->

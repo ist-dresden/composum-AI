@@ -327,7 +327,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         if (resource == null) {
             throw new IllegalArgumentException("Resource does not exist.");
         }
-        LOG.debug("Rolling back {}", resource.getPath());
+        LOG.info("Rolling back {}", resource.getPath());
         ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         LiveRelationship relationship = null;
         Set<String> resetPropertyExclusionKeys = new HashSet<>();

@@ -4,6 +4,7 @@ import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,8 @@ import com.day.cq.wcm.msm.commons.BaseActionFactory;
 @Component(service = LiveActionFactory.class,
         property = {
                 LiveActionFactory.LIVE_ACTION_NAME + "=" + AutoTranslateLiveActionImpl.NAME
-        }
+        },
+        immediate = true
 )
 public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTranslateLiveAction> {
 
@@ -42,6 +44,11 @@ public class AutoTranslateLiveActionFactory extends BaseActionFactory<AutoTransl
     @Activate
     protected void activate(ComponentContext componentContext) {
         LOG.info("AutoTranslateLiveActionFactory.activate ({})", componentContext.getProperties());
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext componentContext) {
+        LOG.info("AutoTranslateLiveActionFactory.deactivate ({})", componentContext.getProperties());
     }
 
     @Override
