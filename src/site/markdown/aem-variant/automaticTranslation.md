@@ -5,14 +5,15 @@
 >  Seamless, swift, it blends.\
 > -- ChatGPT
 
-## A proof of concept and preliminary implementation
+## A preliminary implementation
 
 Translating a site is often a rather large effort. Since modern LLM can both speak many languages and integrate
 advanced reasoning capabilities, they can be a big help in translating a site - possibly to the point that 
 translating a site can amount to an automatic process where the editor only has to check the results and only 
 occasionally make minor changes.
 
-We integrated a proof of concept into the Composum AI that can translate individual pages or entire sites quickly.
+We integrated a preliminary implementation into the Composum AI that can translate individual pages or entire sites 
+quickly.
 It is very promising: a test translating the [WKND site](https://wknd.site/us/en.html) from English into German took
 only about 10 minutes,
 and the translation showed little need for manual corrections. Translating into other languages like Spanish, Japanese,
@@ -136,9 +137,9 @@ There are two workflow models "Composum AI Translate Page" and "Composum AI Tran
 translation of the page they are triggered on, resp. the page tree. They require the page is set up as a live copy of
 the primary language.
 
-## Usage of the POC UI
+## Usage of the Debugging UI
 
-For quick experimentation and evaluation, we provide a very simple proof of concept style UI. The entry point for the
+For quick experimentation and evaluation, we provide a very simple debugging style UI. The entry point for the
 translation is the URL in the author server
 [/apps/composum-ai/components/autotranslate/list.html](http://localhost:4502/apps/composum-ai/components/autotranslate/list.html)
 It allows entering a path for a page or content / experience fragment or whole site and starting a translation process
@@ -155,7 +156,7 @@ translated texts to the state before the automatic translation.
 
 ## Installation / Configuration
 
-The proof of concept is integrated into the Composum AI version >= 0.8.0. The POC UI has to be enabled by OSGI
+The preliminary implementation is integrated into the Composum AI version >= 0.8.0. The POC UI has to be enabled by OSGI
 configuration. If you are newly installing the Composum AI:
 it needs at least [configuration of the API key](configuration.md) for Composum AI in general; if you want to use
 the POC UI you need to enable that in the "Composum AI Autotranslate Configuration"

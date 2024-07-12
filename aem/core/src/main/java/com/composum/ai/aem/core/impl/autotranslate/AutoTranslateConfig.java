@@ -8,12 +8,11 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
  */
 @ObjectClassDefinition(name = "Composum AI Autotranslate Configuration",
         description = "Configuration of the automatic translation of AEM pages." +
-                "The OSGI configuration is only used if no Sling CAConfig configuration is found." +
-                "Proof of concept quality - give it a try. :-)")
+                "The OSGI configuration is only used if no Sling CAConfig configuration is found.")
 public @interface AutoTranslateConfig {
 
-    @AttributeDefinition(name = "Proof of concept UI",
-            description = "Enable the Autotranslate proof of concept UI at at " +
+    @AttributeDefinition(name = "Debugging UI",
+            description = "Enable the Autotranslate debugging UI at at " +
                     "/apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration.", defaultValue = "false")
     boolean pocUiEnabled() default false;
 

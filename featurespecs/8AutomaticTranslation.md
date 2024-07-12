@@ -11,7 +11,7 @@
     - [Assets (images etc.)](#assets-images-etc)
     - [AEM Language copies as comparison](#aem-language-copies-as-comparison)
     - [Approach to these assets](#approach-to-these-assets)
-- [Triggering the translation with a proof of concept UI](#triggering-the-translation-with-a-proof-of-concept-ui)
+- [Triggering the translation with a debugging UI](#triggering-the-translation-with-a-proof-of-concept-ui)
 - [Triggering the translation as a rollout action](#triggering-the-translation-as-a-rollout-action)
     - [Open points for the rollout configuration](#open-points-for-the-rollout-configuration)
 - [Some technical details](#some-technical-details)
@@ -134,7 +134,7 @@ can be created as live copies or just copies and translated with the UI. During 
 check all paths for having a translated language sister path and replace them with the translated paths.
 (Not quite sure whether it's right to cut inheritance or not.)
 
-## Triggering the translation with a proof of concept UI
+## Triggering the translation with a debugging UI
 
 The translation process would be a long running process in the server, translating page by page. Thus, it needs to
 display progress information, allow for cancellation and provide a way to inspect the results. There has to be a form to

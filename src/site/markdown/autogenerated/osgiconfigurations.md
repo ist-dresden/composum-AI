@@ -19,11 +19,11 @@ Configuration for the Approximate Markdown Service used to get a text representa
 <a name="osgi.AutoTranslateConfig"></a>
 ## Composum AI Autotranslate Configuration (aem/core)
 
-Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found. Proof of concept quality - give it a try. :-)
+Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found.
 
 | id | name | type | default value | description |
 |----|------|------|---------------|-------------|
-| pocUiEnabled | Proof of concept UI | boolean | false | Enable the Autotranslate proof of concept UI at at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
+| pocUiEnabled | Debugging UI | boolean | false | Enable the Autotranslate debugging UI at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
 | disabled | Disable | boolean | false | Disable the Autotranslate service |
 | deniedResourceTypes | Denied Resource Types | String[] |  | Regexes for denied Resource Types - if the sling:resourceType matches that, then no attributes or child nodes are touched by the automatic translation. |
 | allowedAttributeRegexes | Allowed Additional Attributes | String[] |  | Matches for Attributes that are explicitly allowed to be translated, in addition to standard attributes and heuristically recognized attributes. The heuristics is that the value has to have letters and whitespaces. Syntax: regular expressions that match resource type % attribute name - e.g. myapp/component/html%markup |
@@ -49,8 +49,8 @@ Provides rather low level access to the GPT chat completion - use the other serv
 | temperature | Temperature | String |  | Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0 |
 | maximumTokensPerRequest | Maximum Tokens per Request | int | 50000 | If > 0 limit to the maximum number of tokens per request. That's about a twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more. |
 | maximumTokensPerResponse | Maximum output tokens per request | int | 4096 | Maximum number of tokens to return in the response. Must not exceed the capabilities of the model - as of 10/03/24 this is 4096 for most OpenAI models - which is the default, so no need to set that. |
-| connectionTimeout | Connection timeout in seconds | int | 20 | Default 20 |
-| requestTimeout | Request timeout in seconds | int | 120 | Default 120 |
+| connectionTimeout | Connection timeout in seconds | int | 30 | Default 30 |
+| requestTimeout | Request timeout in seconds | int | 300 | Default 300 |
 | requestsPerMinute | Maximum requests per minute | int | 100 | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default 100 |
 | requestsPerHour | Maximum requests per hour | int | 1000 | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 1000 |
 | requestsPerDay | Maximum requests per day | int | 3000 | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 3000 |
