@@ -36,9 +36,9 @@ import com.google.gson.JsonSyntaxException;
  * e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false} .
  */
 @Component(service = WorkflowProcess.class,
-        property = {"process.label=Composum AI Autotranslate page tree",
+        property = {"process.label=Composum AI Rollout To Here",
                 Constants.SERVICE_VENDOR + "=IST Gmbh Dresden" +
-                        Constants.SERVICE_DESCRIPTION + "=Automatic translation of the page tree from it's blueprint.",
+                        Constants.SERVICE_DESCRIPTION + "=Rolls out the current page (optionally recursively) from it's blueprint, triggering automatic translation if that's configured as rollout configuration.",
         })
 public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
 
