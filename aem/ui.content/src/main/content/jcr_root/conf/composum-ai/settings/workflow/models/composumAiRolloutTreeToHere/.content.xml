@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+        xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+        xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+        jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="cq/workflow/components/pages/model"
+            cq:designPath="/libs/settings/wcm/designs/default"
+            cq:template="/libs/cq/workflow/templates/model"
+            jcr:description="Triggers a AI translation of a tree of pages from it's blueprint, assuming the autotranslate rollout configuration is set.&#xd;&#xa;It assumes that the page is a live copy."
+            jcr:title="Composum AI Rollout Tree To Here"
+            lastSynced="{Date}2024-07-11T00:00:00.000+01:00">
+        <flow
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="foundation/components/parsys">
+            <process
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/workflow/components/model/process"
+                    jcr:description="Translates the page that is given as payload from it's blueprint.&#xd;&#xa;The page has to be a live copy of the page it's translated from.&#xd;&#xa;Configured as recursive: rolls out tree of pages."
+                    jcr:title="Composum AI Rollout To Here WorkflowProcess">
+                <metaData
+                        jcr:primaryType="nt:unstructured"
+                        PROCESS="com.composum.ai.aem.core.impl.autotranslate.workflow.TriggerRolloutWorkflowProcess"
+                        PROCESS_ARGS="\{&quot;recursive&quot;:true}"
+                        PROCESS_AUTO_ADVANCE="true"/>
+            </process>
+        </flow>
+    </jcr:content>
+</jcr:root>
