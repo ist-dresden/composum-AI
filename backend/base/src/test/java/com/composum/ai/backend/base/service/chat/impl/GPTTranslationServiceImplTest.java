@@ -6,6 +6,7 @@ import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServi
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.fakeTranslation;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.sort;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -124,7 +125,9 @@ public class GPTTranslationServiceImplTest extends TestCase {
     public void testFakeTranslation() {
         assertEquals(null, fakeTranslation(null));
         assertEquals("", fakeTranslation(""));
-        assertEquals("THiS iS a tEsT <code>aNd sOmE COdE</code>", fakeTranslation("This is a test <code>and some Code</code>"));
+        String faked = fakeTranslation("This is a test <code>and some Code</code>");
+        assertEquals("this is a test <code>and some code</code>", faked.toLowerCase());
+        System.out.println(faked); // random case; that's a bit hard to test
     }
 
     @Test
@@ -135,13 +138,13 @@ public class GPTTranslationServiceImplTest extends TestCase {
         service.activate(config);
         assertTrue(service.fragmentedTranslation(null, null, null).isEmpty());
         assertTrue(service.fragmentedTranslation(asList(), null, null).isEmpty());
-        assertEquals(Arrays.asList("", "\n", "hOlLa", ""), service.fragmentedTranslation(asList("", "\n", "holla", ""), null, null));
-        assertEquals(Arrays.asList("hOlLa", "\nmIaU hO HO "), service.fragmentedTranslation(asList("holla", "\nmiau ho Ho "), null, null));
+        assertEquals(Arrays.asList("", "\n", "holla", "").toString(), service.fragmentedTranslation(asList("", "\n", "holla", ""), null, null).toString().toLowerCase());
+        assertEquals(Arrays.asList("holla", "\nmiau ho ho ").toString(), service.fragmentedTranslation(asList("holla", "\nmiau ho Ho "), null, null).toString().toLowerCase());
 
         assertEquals(null, service.singleTranslation(null, null, "de",null));
         assertEquals("", service.singleTranslation("", null, "de",null));
-        assertEquals("hAlLo", service.singleTranslation("hallo", null, "de",null));
-        assertEquals("\nHU hO ", service.singleTranslation("\nHu ho ", null, "de",null));
+        assertEquals("hallo", service.singleTranslation("hallo", null, "de",null).toLowerCase());
+        assertEquals("\nhu ho ", service.singleTranslation("\nHu ho ", null, "de",null).toLowerCase());
     }
 
     @Test
