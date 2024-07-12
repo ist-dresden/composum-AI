@@ -60,7 +60,6 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
         if (!autoTranslateConfigService.isEnabled()) {
             throw new IllegalStateException("AutoTranslate is not enabled");
         }
-        LOG.info("Some debugging info: {}, {}, {}, {}, {}", workItem.getContentPath(), workItem.getWorkflow(), workItem.getWorkflowData(), workItem.getMetaDataMap(), workItem.getCurrentAssignee());
         TriggerRolloutParameters processArguments = getParameters(workItem, metaDataMap);
         String path = null;
 
@@ -94,7 +93,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
         TriggerRolloutParameters triggerRolloutParameters = new TriggerRolloutParameters();
         Object payload = workItem.getWorkflowData().getPayload();
         String processArguments = metaDataMap.get("PROCESS_ARGS", String.class); // e.g. {"recursive":false}
-        LOG.info("TriggerRollout workflow receivedr {} , args {}", payload, processArguments);
+        LOG.info("TriggerRollout workflow receiver {} , args {}", payload, processArguments);
         if (StringUtils.isNotBlank(processArguments)) {
             try {
                 triggerRolloutParameters = gson.fromJson(processArguments, TriggerRolloutParameters.class);
@@ -111,7 +110,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
      */
     protected void performRollouts(Resource resource, TriggerRolloutParameters parms) throws PersistenceException, WCMException {
         Resource contentResource = resource.getName().equals(JcrConstants.JCR_CONTENT) ? resource : resource.getChild("jcr:content");
-        if (contentResource != null && contentResource.isResourceType("cq:Page")) {
+        if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
             LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, false);
             if (liveRelationship != null) {
                 LOG.info("Triggering rollout for {}", contentResource.getPath());
