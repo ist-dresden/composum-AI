@@ -130,7 +130,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
 
-        LOG.debug("Set of property names to translate in {} : {}", resource.getPath(),
+        LOG.debug("Set of property names to newly translate in {} : {}", resource.getPath(),
                 propertiesToTranslate.stream()
                         .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
         LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
@@ -185,7 +185,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             changed = true;
         }
 
-        changed |= migratePathsToLanguageCopy(resource, language, stats);
+        boolean pathsChanged = migratePathsToLanguageCopy(resource, language, stats);
+        changed = pathsChanged || changed;
         if (changed) {
             markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, false), translationParameters, configuration);
         }
@@ -229,7 +230,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected boolean migratePathsToLanguageCopy(Resource resource, String language, Stats stats) throws WCMException {
         boolean changed = false;
         for (Resource child : resource.getChildren()) {
-            changed |= migratePathsToLanguageCopy(child, language, stats);
+            boolean pathsChanged = migratePathsToLanguageCopy(child, language, stats);
+            changed = pathsChanged || changed;
         }
         ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
         if (mvm != null) {
@@ -444,7 +446,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         for (Resource child : resource.getChildren()) {
             if (!PATTERN_IGNORED_SUBNODE_NAMES.matcher(child.getName()).matches()) {
                 boolean childChanged = collectPropertiesToTranslate(child, propertiesToTranslate, stats, translationParameters, force);
-                changed |= childChanged;
+                changed = childChanged || changed;
             }
         }
         return changed;
