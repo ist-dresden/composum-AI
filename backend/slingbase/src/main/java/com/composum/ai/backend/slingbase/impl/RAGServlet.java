@@ -119,7 +119,8 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             } else {
                 throw new ServletException("Unsupported selector: " + selectors);
             }
-        } catch (RepositoryException e) {
+        } catch (Exception e) {
+            LOG.error("Error in RAG servlet for query {} limit {} location {}", query, limit, searchLocation, e);
             throw new ServletException(e);
         }
         String json = gson.toJson(result);
