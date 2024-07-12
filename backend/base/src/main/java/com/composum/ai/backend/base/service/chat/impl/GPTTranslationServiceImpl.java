@@ -358,7 +358,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 result.append(c);
             } else {
                 if (Character.isLetter(c)) {
-                    if (Math.random() < 0.5) {
+                    if (Math.random() < 0.8) {
                         result.append(c);
                     } else {
                         result.append(Character.isUpperCase(c) ? Character.toLowerCase(c) : Character.toUpperCase(c));

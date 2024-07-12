@@ -177,6 +177,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         if (additionalInstructionsChanged) {
             ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
+            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, false);
+            liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
+                    liveRelationship, new String[]{AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS}, false);
             if (additionalInstructions == null) {
                 mvm.remove(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS);
             } else {

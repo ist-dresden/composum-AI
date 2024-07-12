@@ -73,7 +73,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
                 }
                 Resource resource = resourceResolver.getResource(path);
                 if (resource != null) {
-                    LOG.info("TriggerRollout workflow started for: {}", resource.getPath());
+                    LOG.debug("TriggerRollout workflow started for: {}", resource.getPath());
                     performRollouts(resource, processArguments);
                 } else {
                     LOG.error("Autotranslate workflow started with wrong payload path - no resource found: {}", path);
