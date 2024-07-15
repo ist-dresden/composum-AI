@@ -126,12 +126,6 @@ Then the pages will be transparently be translated on each rollout. Please notic
 the inheritance somewhat: if a component inherits from the blueprint that means that the texts of the component are 
 the AI translated texts of the blueprint, and if inheritance is cancelled the texts are manually changed. 
 
-For the initial live copy creation we recommend to
-
-1. set up the live copy with the right language setting,
-2. try the translation using the workflow or the POC UI on a few pages, and
-3. then add the rollout configuration to the root of the tree to be automatically translated.
-
 Caution: When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a single 
 page will do the job and trigger the rollout configuration. However, as of 07/24, when a rollout is triggered 
 for a page including all subpages in AEMaaCS, only those subpages are rolled out again whose blueprint is changed, 
@@ -145,6 +139,9 @@ triggered on a automatically translated page, it will check this page and all it
 copies and, if so, trigger a rollout from the blueprint to this page. It can be used in a workflow by adding a 
 workflow process step "Composum AI Rollout To Here" with arguments `{"recursive":false}` or `{"recursive":true}`, 
 depending on whether subpages should be rolled out. 
+Suggested title for the process step: "Composum AI Rollout Tree To Here Recursively" (if recursive=true) and 
+description: "Translates the page that is given as payload from it's blueprint. 
+The page has to be a live copy of the page it's translated from. Configured as recursive: rolls out tree of pages."
 
 There is also a deprecated action com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess 
 that can be used to trigger a translation of the page from a workflow. It requires that the page is set up as a live 
