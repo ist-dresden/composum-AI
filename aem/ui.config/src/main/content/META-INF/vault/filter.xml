@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/apps/composum-ai/osgiconfig"/>
+    <filter root="/var/workflow/models/conf/composum-ai"/>
+    <filter root="/conf/composum-ai-addon/settings/workflow/models"/>
 </workspaceFilter>
