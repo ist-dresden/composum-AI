@@ -348,7 +348,6 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         }
         StringBuilder result = new StringBuilder();
         boolean inTag = false;
-        boolean oddChar = true;
         for (char c : text.toCharArray()) {
             if (c == '<') {
                 inTag = true;
@@ -359,15 +358,13 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 result.append(c);
             } else {
                 if (Character.isLetter(c)) {
-                    if (oddChar) {
+                    if (Math.random() < 0.8) {
                         result.append(c);
                     } else {
                         result.append(Character.isUpperCase(c) ? Character.toLowerCase(c) : Character.toUpperCase(c));
                     }
-                    oddChar = !oddChar;
                 } else {
                     result.append(c);
-                    oddChar = true;
                 }
             }
         }

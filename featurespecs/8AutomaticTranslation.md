@@ -11,7 +11,7 @@
     - [Assets (images etc.)](#assets-images-etc)
     - [AEM Language copies as comparison](#aem-language-copies-as-comparison)
     - [Approach to these assets](#approach-to-these-assets)
-- [Triggering the translation with a proof of concept UI](#triggering-the-translation-with-a-proof-of-concept-ui)
+- [Triggering the translation with a debugging UI](#triggering-the-translation-with-a-proof-of-concept-ui)
 - [Triggering the translation as a rollout action](#triggering-the-translation-as-a-rollout-action)
     - [Open points for the rollout configuration](#open-points-for-the-rollout-configuration)
 - [Some technical details](#some-technical-details)
@@ -134,7 +134,7 @@ can be created as live copies or just copies and translated with the UI. During 
 check all paths for having a translated language sister path and replace them with the translated paths.
 (Not quite sure whether it's right to cut inheritance or not.)
 
-## Triggering the translation with a proof of concept UI
+## Triggering the translation with a debugging UI
 
 The translation process would be a long running process in the server, translating page by page. Thus, it needs to
 display progress information, allow for cancellation and provide a way to inspect the results. There has to be a form to
@@ -158,6 +158,13 @@ Rollout of a component or re-enabling the inheritance of the component resets th
 remove the properties we save our translation information in. To avoid that we break inheritance for these
 properties selectively.
 
+When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a single 
+page will do the job and trigger the rollout configuration. However, as of 7/24, when a rollout is triggered for a 
+page including all subpages in AEMaaCS, only those subpages are rolled out again whose blueprint is changed, so this 
+might not lead to the desired result. For this case, a workflow process TriggerRolloutWorkflowProcess is provided, 
+which can be used to create a workflow that rolls out all subpages again individually, so that all rollout 
+configurations are triggered.   
+
 ### Open points for the rollout configuration
 
 - how to do that best in the background
@@ -168,9 +175,17 @@ properties selectively.
 
 ## Workflows
 
-There are two workflows "Composum AI Translate Page" and "Composum AI Translate Page Tree" that trigger a
-translation of the page they are triggered on. They require the page is set up as a live copy of the primary language.
-com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess defines the step.
+The com.composum.ai.aem.core.impl.autotranslate.workflow.TriggerRolloutWorkflowProcess can be used in a workflow to 
+trigger a rollout to a given page and all subpages from their blueprints. That is, if the corresponding workflow is 
+triggered on a automatically translated page, it will check this page and all it's subpages whether they are live 
+copies and, if so, trigger a rollout from the blueprint to this page. It can be used in a workflow by adding a 
+workflow process step "Composum AI Rollout To Here" with arguments `{"recursive":false}` or `{"recursive":true}`, 
+depending on whether subpages should be rolled out. 
+
+There is also a deprecated action com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess 
+that can be used to trigger a translation of the page from a workflow. It requires that the page is set up as a live 
+copy of the primary language. This is deprecated in favor of triggering a rollout, if needed by 
+TriggerRolloutWorkflowProcess.
 
 ## How about integration as Translation Provider
 

@@ -33,11 +33,12 @@ import com.google.gson.JsonSyntaxException;
  * Autotranslate workflow. This triggers a automatic translation of a live copy from it's blueprint. As process
  * arguments a JSON can be given that configures the translation process - a serialization of {@link TranslationParameters},
  * e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false} .
+ * @deprecated rather use {@link TriggerRolloutWorkflowProcess}
  */
 @Component(service = WorkflowProcess.class,
-        property = {"process.label=Composum AI Autotranslate page tree",
+        property = {"process.label=Composum AI Autotranslate page tree (deprecated)",
                 Constants.SERVICE_VENDOR + "=IST Gmbh Dresden" +
-                        Constants.SERVICE_DESCRIPTION + "=Automatic translation of the page tree from it's blueprint.",
+                        Constants.SERVICE_DESCRIPTION + "=Automatic translation of the page tree from it's blueprint. (Deprecated in favor of 'rollout to here')",
         })
 public class AutoTranslateWorkflowProcess implements WorkflowProcess {
 

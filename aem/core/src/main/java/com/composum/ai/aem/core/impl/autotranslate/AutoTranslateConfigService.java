@@ -12,7 +12,7 @@ import org.apache.sling.api.resource.Resource;
 public interface AutoTranslateConfigService {
 
     /**
-     * Whether the proof of concept UI is enabled.
+     * Whether the debugging UI is enabled.
      */
     boolean isPocUiEnabled();
 

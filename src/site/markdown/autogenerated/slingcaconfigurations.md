@@ -19,11 +19,11 @@ Configures rollout details for automatic translation.
 
 A rule to be added to the Composum AI Automatic Translation Configuration with translation instructions for pages matching the rule.
 
-| id           | label                 | type   | default value | description                                                                                                      |
-|--------------|-----------------------|--------|---------------|------------------------------------------------------------------------------------------------------------------|
-| pathRegex    | Path Regex            | String |               | A regular expression matching the absolute path to the page. E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match. |
-| contentPattern | Content pattern      | String |               | A word or phrase that must be present in the content of the page for the rule to match. E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. Spaces will also match any whitespace. If it contains any of the regex meta characters []|()*+ it'll be treated as a regex. |
-| additionalInstructions | Additional Instructions | String |               | Additional instructions for the automatic translation in case this rule matches.                                  |
+| id          | label                  | type   | default value | description                                                                                                      |
+|-------------|------------------------|--------|---------------|------------------------------------------------------------------------------------------------------------------|
+| pathRegex   | Path Regex             | String |               | A regular expression matching the absolute path to the page. E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match. |
+| contentPattern | Content Pattern      | String |               | A word or phrase that must be present in the content of the page for the rule to match. E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. Spaces will also match any whitespace. If it contains any of the regex meta characters []|()*+ it'll be treated as a regex. |
+| additionalInstructions | Additional Instructions | String |         | Additional instructions for the automatic translation in case this rule matches.                                  |
 
 <a name="slingca.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)
@@ -67,3 +67,4 @@ Configurations for the OpenAI backend for Composum AI
 |-----------------|---------------------|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | openAiApiKey    | OpenAI API Key      | String |               | OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key . |
 | openAiOrganizationId | OpenAI Organization ID | String |               | Optionally, OpenAI Organization ID from https://platform.openai.com/.                                                                   |
+
