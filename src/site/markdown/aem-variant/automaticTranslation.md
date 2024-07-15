@@ -12,10 +12,10 @@ advanced reasoning capabilities, they can be a big help in translating a site - 
 translating a site can amount to an automatic process where the editor only has to check the results and only 
 occasionally make minor changes.
 
-We integrated a preliminary implementation into the Composum AI that can translate individual pages or entire sites 
+We integrated a implementation into the Composum AI that can translate individual pages or entire sites 
 quickly.
 It is very promising: a test translating the [WKND site](https://wknd.site/us/en.html) from English into German took
-only about 10 minutes,
+only about 10 minutes (with GPT-3.5, though),
 and the translation showed little need for manual corrections. Translating into other languages like Spanish, Japanese,
 Chinese, Korean seem to work nicely as well, as far as we can judge by translating the text back with
 [Deepl Translator](https://www.deepl.com/translator) .
@@ -72,12 +72,13 @@ translates all texts into the language configured for the rollout target during 
 
 ## Usage
 
-There are currently three ways to use the prototype (see below):
+There are currently three ways to trigger the translation (see below):
 
-- a mini UI that can be used to translate pages / page trees and roll back the translations. That can be used to
-  easily try out the results.
-- two workflows for translating a page or page tree from its blueprint
 - an additional rollout configuration that transparently translates the rolled out page during rollout
+- a workflow process that can trigger a rollout with these rollout configurations for translating a page or page 
+  tree from its blueprint
+- for experimentation: a mini UI that can be used to translate pages / page trees and roll back the translations. That 
+  can be used to easily try out the results, but is not intended for production use.
 
 Please notice that this only works of the page to translate is a live copy of the original.
 
@@ -131,11 +132,29 @@ For the initial live copy creation we recommend to
 2. try the translation using the workflow or the POC UI on a few pages, and
 3. then add the rollout configuration to the root of the tree to be automatically translated.
 
+Caution: When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a single 
+page will do the job and trigger the rollout configuration. However, as of 07/24, when a rollout is triggered 
+for a page including all subpages in AEMaaCS, only those subpages are rolled out again whose blueprint is changed, 
+so this might not lead to the desired result. For this case a workflow process is provided (see below).
+
 ## Triggering translation with the workflows
 
-There are two workflow models "Composum AI Translate Page" and "Composum AI Translate Page Tree" that trigger a
-translation of the page they are triggered on, resp. the page tree. They require the page is set up as a live copy of
-the primary language.
+The com.composum.ai.aem.core.impl.autotranslate.workflow.TriggerRolloutWorkflowProcess can be used in a workflow to 
+trigger a rollout to a given page and all subpages from their blueprints. That is, if the corresponding workflow is 
+triggered on a automatically translated page, it will check this page and all it's subpages whether they are live 
+copies and, if so, trigger a rollout from the blueprint to this page. It can be used in a workflow by adding a 
+workflow process step "Composum AI Rollout To Here" with arguments `{"recursive":false}` or `{"recursive":true}`, 
+depending on whether subpages should be rolled out. 
+
+There is also a deprecated action com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess 
+that can be used to trigger a translation of the page from a workflow. It requires that the page is set up as a live 
+copy of the primary language. This is deprecated in favor of triggering a rollout, if needed by 
+TriggerRolloutWorkflowProcess.
+
+Caveat: a workflow process step is called with a workflow service user, likely workflow-process-service . Thus, we 
+cannot easily make sure that the workflow initiator has the rights to perform this action and modify the page 
+through this rollout. This has to be made sure by other means in the workflow, e.g. by 
+[applying ACL for the specific workflow model to /var/workflow/models.](https://experienceleague.adobe.com/en/docs/experience-manager-65/content/sites/administering/operations/workflows-managing)
 
 ## Usage of the Debugging UI
 
