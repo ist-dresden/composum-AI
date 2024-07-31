@@ -238,7 +238,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
                 startTagCount++;
             }
         }
-        LOG.debug("Tagcount: {}, textInTags percentage: {}", tagcount, (100L * textInTags) / textLength);
+        LOG.trace("Tagcount: {}, textInTags percentage: {}", tagcount, (100L * textInTags) / textLength);
         boolean isHtml = tagcount > 10 && textInTags > textLength / 3 && startTagCount > 5 && endTagCount > 5;
         if (isHtml) {
             LOG.warn("Attribute {} contained a large HTML fragment and should probably be excluded from translation.", name);

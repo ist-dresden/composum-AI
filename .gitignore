@@ -30,7 +30,7 @@ target
 *.orig
 /tags
 
-.cgptdevbench/llmsearch.db
+.cgptcodeveloper/llmsearch.db
 .linklint
 .lycheecache
 build.log

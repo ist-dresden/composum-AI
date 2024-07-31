@@ -115,7 +115,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
      */
     public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
-    public static final String DEFAULT_MODEL = "gpt-3.5-turbo";
+    public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4o";
     public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
     public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4o";
@@ -164,9 +164,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
 
     /**
-     * Tokenizer used for GPT-3.5 and GPT-4.
+     * Tokenizer used for GPT-4 variants.
      */
-    protected Encoding enc = registry.getEncoding(EncodingType.CL100K_BASE);
+    protected Encoding enc = registry.getEncoding(EncodingType.O200K_BASE);
 
     protected BundleContext bundleContext;
 

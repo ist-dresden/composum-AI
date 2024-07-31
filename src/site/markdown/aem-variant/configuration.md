@@ -49,7 +49,7 @@ For the OSGI configuration there are the following configurations:
 | openAiApiKey | OpenAI API key | String |  | OpenAI API key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key . |
 | openAiOrganizationId | OpenAI Organization ID | String |  | Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization . |
 | openAiApiKeyFile | OpenAI API key file | String |  | Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there. |
-| defaultModel | Default model | String | gpt-3.5-turbo | Default model to use for the chat completion. The default if not set is gpt-3.5-turbo. Please consider the varying prices https://openai.com/pricing . |
+| defaultModel | Default model | String | gpt-4o-mini | Default model to use for the chat completion. The default if not set is gpt-4o-mini. Please consider the varying prices https://openai.com/pricing . |
 | highIntelligenceModel | High intelligence model | String | gpt-4o | The model that is used for requests that need more reasoning performance. The default if not set is gpt-4o. Please consider the varying prices https://openai.com/pricing . |
 | imageModel | Vision model | String | gpt-4o | Optional, a model that is used if an image is given as input, e.g. gpt-4o. If not given, image recognition is rejected. |
 | temperature | Temperature | String |  | Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0 |

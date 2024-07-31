@@ -10,7 +10,7 @@ async function handleTranslate() {
   }
 
   const requestBody = {
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
@@ -68,7 +68,7 @@ async function handleRetranslate() {
   const apiKey = localStorage.getItem('openai_api_key');
 
   const requestBody = {
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
