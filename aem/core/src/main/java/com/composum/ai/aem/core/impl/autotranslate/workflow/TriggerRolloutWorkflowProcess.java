@@ -2,6 +2,9 @@ package com.composum.ai.aem.core.impl.autotranslate.workflow;
 
 import static com.adobe.granite.workflow.PayloadMap.TYPE_JCR_PATH;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jackrabbit.JcrConstants;
@@ -31,9 +34,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * Translates the page that is given as payload from it's blueprint.&#xd;&#xa;The page has to be a live copy of the page it's translated from.&#xd;&#xa;Configured as recursive: rolls out tree of pages. As process
+ * Translates the page that is given as payload from it's blueprint.&#xd;&#xa;The page has to be a live copy of the page it's translated from.&#xd;&#xa;Configured as recursive: rolls out tree of pages.
+ * This is conservative in that it only rolls out (again) pages that already have been rolled out, and where the source still exists. It does not delete old pages or create new pages, even when recursive.
+ * <p>As process
  * arguments a JSON can be given that configures the translation process - a serialization of {@link TriggerRolloutParameters},
- * e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false} .
+ * e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false} .</p>
  */
 @Component(service = WorkflowProcess.class,
         property = {"process.label=Composum AI Rollout To Here",
@@ -109,14 +114,51 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
      * Triggers a rollout for the jcr:content cq:Page or all such subnodes if {@link TriggerRolloutParameters#recursive}.
      */
     protected void performRollouts(Resource resource, TriggerRolloutParameters parms) throws PersistenceException, WCMException {
+        List<String> pathsToRollout = new ArrayList<>();
+        collectPathsToRollout(resource, pathsToRollout, parms);
+        ResourceResolver resourceResolver = resource.getResourceResolver();
+        for (String path : pathsToRollout) {
+            Resource contentResource = resourceResolver.getResource(path);
+            if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
+                LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, false);
+                if (liveRelationship != null) {
+                    Resource source = resource.getResourceResolver().getResource(liveRelationship.getSourcePath());
+                    if (source != null) {
+                        LOG.info("Triggering rollout for {}", contentResource.getPath());
+                        rolloutManager.rollout(resource.getResourceResolver(), liveRelationship, false, true);
+                    } else {
+                        LOG.info("Ignoring: no source found for {}", contentResource.getPath());
+                    }
+                } else {
+                    LOG.info("Ignoring: no live relationship found for {}", contentResource.getPath());
+                }
+            }
+        }
+    }
+
+    protected void collectPathsToRollout(Resource resource, List<String> pathsToRollout, TriggerRolloutParameters parms) {
         Resource contentResource = resource.getName().equals(JcrConstants.JCR_CONTENT) ? resource : resource.getChild("jcr:content");
+        if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
+            pathsToRollout.add(contentResource.getPath());
+        }
+        if (parms.recursive) {
+            for (Resource child : resource.getChildren()) {
+                if (!child.getName().equals(JcrConstants.JCR_CONTENT)) { // jcr:content was already done
+                    collectPathsToRollout(child, pathsToRollout, parms);
+                }
+            }
+        }
+    }
+
+    protected void performRolloutForPage(Resource contentResource, TriggerRolloutParameters parms)
+            throws PersistenceException, WCMException {
         if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
             LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, false);
             if (liveRelationship != null) {
-                Resource source = resource.getResourceResolver().getResource(liveRelationship.getSourcePath());
+                Resource source = contentResource.getResourceResolver().getResource(liveRelationship.getSourcePath());
                 if (source != null) {
                     LOG.info("Triggering rollout for {}", contentResource.getPath());
-                    rolloutManager.rollout(resource.getResourceResolver(), liveRelationship, false, true);
+                    rolloutManager.rollout(contentResource.getResourceResolver(), liveRelationship, false, true);
                 } else {
                     LOG.info("Ignoring: no source found for {}", contentResource.getPath());
                 }
@@ -124,14 +166,8 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
                 LOG.info("Ignoring: no live relationship found for {}", contentResource.getPath());
             }
         }
-        if (parms.recursive) {
-            for (Resource child : resource.getChildren()) {
-                if (!child.getName().equals(JcrConstants.JCR_CONTENT)) { // jcr:content was already done
-                    performRollouts(child, parms);
-                }
-            }
-        }
     }
+
 
     public class TriggerRolloutParameters {
         public boolean recursive = false;
