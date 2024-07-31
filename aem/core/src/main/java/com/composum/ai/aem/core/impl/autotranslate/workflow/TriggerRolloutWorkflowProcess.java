@@ -113,8 +113,13 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
         if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
             LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, false);
             if (liveRelationship != null) {
-                LOG.info("Triggering rollout for {}", contentResource.getPath());
-                rolloutManager.rollout(resource.getResourceResolver(), liveRelationship, false, true);
+                Resource source = resource.getResourceResolver().getResource(liveRelationship.getSourcePath());
+                if (source != null) {
+                    LOG.info("Triggering rollout for {}", contentResource.getPath());
+                    rolloutManager.rollout(resource.getResourceResolver(), liveRelationship, false, true);
+                } else {
+                    LOG.info("Ignoring: no source found for {}", contentResource.getPath());
+                }
             } else {
                 LOG.info("Ignoring: no live relationship found for {}", contentResource.getPath());
             }
