@@ -44,7 +44,7 @@ public class HttpClient5Run {
             CloseableHttpAsyncClient client = HttpAsyncClients.custom().build();
             client.start();
             String requestBody = "{\n" +
-                    "    \"model\": \"gpt-3.5-turbo\",\n" +
+                    "    \"model\": \"gpt-4o-mini\",\n" +
                     "    \"messages\": [\n" +
                     "      {\n" +
                     "        \"role\": \"user\",\n" +

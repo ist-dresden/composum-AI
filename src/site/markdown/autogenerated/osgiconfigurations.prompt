@@ -4,7 +4,7 @@ The subsection should be named like the name of the @ObjectClassDefinition and t
 (The module directory name is the name of the directory containing the src/main/java.)
 The subsection should contain the description of the @ObjectClassDefinition
 and then have a table that lists all attributes and has the following columns, according to the method and @AttributeDefinition:
-- id
+- id (method name of the @AttributeDefinition)
 - name
 - type (prefer using exactly the type given in the Java configuration class - often the simple type)
 - default value

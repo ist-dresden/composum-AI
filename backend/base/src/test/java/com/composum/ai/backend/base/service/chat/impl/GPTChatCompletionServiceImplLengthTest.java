@@ -88,7 +88,7 @@ public class GPTChatCompletionServiceImplLengthTest {
         int oldLevel = currentLevelField.getInt(LOG_IMPL);
 
         // do NOT test this with gpt-4, since a maximum context length request would cost > 10 euro if it goes through!
-        when(config.defaultModel()).thenReturn("gpt-3.5-turbo");
+        when(config.defaultModel()).thenReturn("gpt-4o-mini");
         service.activate(config, bundleContext);
 
         try {
