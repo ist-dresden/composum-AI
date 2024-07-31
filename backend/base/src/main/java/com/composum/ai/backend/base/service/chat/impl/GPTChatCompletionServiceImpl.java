@@ -164,9 +164,9 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
     protected EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
 
     /**
-     * Tokenizer used for GPT-3.5 and GPT-4.
+     * Tokenizer used for GPT-4 variants.
      */
-    protected Encoding enc = registry.getEncoding(EncodingType.CL100K_BASE);
+    protected Encoding enc = registry.getEncoding(EncodingType.O200K_BASE);
 
     protected BundleContext bundleContext;
 
