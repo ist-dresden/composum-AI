@@ -169,7 +169,7 @@ Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotran
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.models.impl</artifactId>
-            <version>1.4.4</version>
+            <version>1.7.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
