@@ -43,12 +43,9 @@
 <body>
 <div class="container mt-5">
     <h2>Answer questions with RAG (retrieval augmented generation)</h2>
-    <p>This mini-application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries.
-        Enter a path, set a limit, set the maximum number of pages for the AI to answer, write your query, and click
-        Submit to get the answer.
-        The application performs a search for pages matching words from the query, ranks the query using an <a
-                href="https://platform.openai.com/docs/guides/embeddings">embedding</a> to closeness to the query
-        and then feeds them together with the query to a large language model (LLM) to get an answer.
+    <p>This application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries. 
+        RAG combines traditional search with AI to generate answers by retrieving relevant documents and using them to inform the response. 
+        Enter your query and parameters, and click Submit to get an answer.
     </p>
     <form id="ragSearchForm" class="mt-4">
         <div class="mb-3">
@@ -57,16 +54,24 @@
             <small class="form-text text-muted">Enter the path for the search location.</small>
         </div>
         <div class="mb-3">
-            <label for="limitField" class="form-label">Maximum number of pages to be searched and ranked:</label>
+            <label for="limitField" class="form-label">Maximum number of results:</label>
             <input type="number" class="form-control" id="limitField" name="limit" value="10">
-            <small class="form-text text-muted">Set the maximum number of pages to search and rank
-                (default is 10).</small>
+            <small class="form-text text-muted">Set the maximum number of results to return (default is 10).</small>
         </div>
         <div class="mb-3">
             <label for="limitRagTextsField" class="form-label">Maximum number of pages for AI to answer:</label>
             <input type="number" class="form-control" id="limitRagTextsField" name="limitRagTexts" value="5">
-            <small class="form-text text-muted">Set the maximum number of pages sent to the AI to generate an answer
-                (default is 5).</small>
+            <small class="form-text text-muted">Set the maximum number of pages sent to the AI (default is 5).</small>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="embeddingOrderField" name="embeddingOrder" checked>
+            <label class="form-check-label" for="embeddingOrderField">Use embedding order</label>
+            <small class="form-text text-muted">Check to order results by embedding similarity.</small>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="preprocessQueryField" name="preprocessQuery" checked>
+            <label class="form-check-label" for="preprocessQueryField">Preprocess query</label>
+            <small class="form-text text-muted">Check to preprocess the query to have the AI generate keywords from the query for better results.</small>
         </div>
         <div class="mb-3">
             <label for="queryArea" class="form-label">Query:</label>
@@ -102,8 +107,10 @@
             const path = $('#pathField').val();
             const limit = $('#limitField').val();
             const limitRagTexts = $('#limitRagTextsField').val();
+            const embeddingOrder = $('#embeddingOrderField').is(':checked');
+            const preprocessQuery = $('#preprocessQueryField').is(':checked');
             const query = $('#queryArea').val();
-            const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit) + '&limitRagTexts=' + encodeURIComponent(limitRagTexts);
+            const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit) + '&limitRagTexts=' + encodeURIComponent(limitRagTexts) + '&embeddingOrder=' + encodeURIComponent(embeddingOrder) + '&preprocessQuery=' + encodeURIComponent(preprocessQuery);
 
             xhr = $.get(url, function (data) {
                 const html = converter.makeHtml(data);
@@ -116,7 +123,7 @@
             });
 
             // Store form values in localStorage
-            localStorage.setItem('composum-ai-prototype-rag', JSON.stringify({path, limit, limitRagTexts, query}));
+            localStorage.setItem('composum-ai-prototype-rag', JSON.stringify({path, limit, limitRagTexts, embeddingOrder, preprocessQuery, query}));
         });
 
         $('#stopBtn').on('click', function () {
@@ -131,6 +138,8 @@
             $('#pathField').val('');
             $('#limitField').val(10);
             $('#limitRagTextsField').val(5);
+            $('#embeddingOrderField').prop('checked', true);
+            $('#preprocessQueryField').prop('checked', true);
             $('#queryArea').val('');
             $('#answerArea').html('');
             localStorage.removeItem('composum-ai-prototype-rag');
@@ -147,4 +156,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(3471e978, rag.prompt-0b7823cd, RAGServlet.java-042fca60) -->
+<!-- AIGenVersion(285c6592, rag.prompt-34db3ff2, RAGServlet.java-6f50ba07) -->
