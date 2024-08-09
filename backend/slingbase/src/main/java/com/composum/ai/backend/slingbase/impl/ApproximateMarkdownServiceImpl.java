@@ -90,6 +90,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     /** We allow generating markdown for subpaths of /content, /public and /preview . */
     public static final Pattern ADMISSIBLE_PATH_PATTERN = Pattern.compile("/(content|preview|public)/.*/.*");
 
+    /** If that occurs in a string it has several words. */
+    public static final Pattern THREE_WHITESPACE_PATTERN = Pattern.compile("\\s\\S+\\s+\\S+\\s");
+
     /**
      * A list of attributes that are output (in that ordering) without any label, each on a line for itself.
      */
@@ -139,7 +142,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
             if (entry.getValue() instanceof String) {
                 String value = (String) entry.getValue();
-                if (!textAttributes.contains(entry.getKey()) && value.matches(".*\\s+.*\\s+.*\\s+.*") &&
+                if (!textAttributes.contains(entry.getKey()) && value.contains(" ") && THREE_WHITESPACE_PATTERN.matcher(value).find() &&
                         !allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
                     // check whether we forgot something
                     LOG.info("Ignoring text attribute {} in {}", entry.getKey(), resource.getPath());
@@ -151,6 +154,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     @Nonnull
     @Override
     public String approximateMarkdown(@Nullable Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        LOG.debug(">>> approximateMarkdown for {}", resource != null ? resource.getPath() : null);
         try (StringWriter s = new StringWriter()) {
             try (PrintWriter out = new PrintWriter(s)) {
                 approximateMarkdown(resource, out, request, response);
@@ -159,6 +163,8 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         } catch (IOException e) {
             // pretty much impossible for a StringWriter , no sensible handling.
             throw new IllegalStateException(e);
+        } finally {
+            LOG.debug("<<< approximateMarkdown for {}", resource != null ? resource.getPath() : null);
         }
     }
 
