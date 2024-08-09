@@ -746,11 +746,11 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         String bodyText = null;
         try {
             SimpleHttpResponse response = call.get();
-            if (response.getCode() != HttpStatus.SC_OK) {
-                LOG.error("Error while call {} to GPT: {}", id, response);
-                throw new GPTException("Error while calling GPT: " + response);
-            }
             bodyText = response.getBodyText();
+            if (response.getCode() != HttpStatus.SC_OK) {
+                LOG.error("Error while call {} to GPT: {} {}", id, response, bodyText);
+                throw new GPTException("Error while calling GPT: " + response + ", " + bodyText);
+            }
             LOG.trace("Response {} from GPT: {}", id, bodyText);
             OpenAIEmbeddings.EmbeddingResponse entity = gson.fromJson(bodyText, OpenAIEmbeddings.EmbeddingResponse.class);
             if (entity.getData() == null) {

@@ -9,34 +9,34 @@
     <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
     <style>
         body {
-            background-color: #cfe2f3;
+            background-color: #e0f7fa;
         }
 
         .container {
-            background-color: #f0f8ff;
+            background-color: #ffffff;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary {
-            background-color: #6495ED;
-            border-color: #6495ED;
+            background-color: #4db6e1;
+            border-color: #4db6e1;
         }
 
         .btn-primary:hover {
-            background-color: #4169E1;
-            border-color: #4169E1;
+            background-color: #29b6f6;
+            border-color: #29b6f6;
         }
 
         .btn-secondary {
-            background-color: #B0C4DE;
-            border-color: #B0C4DE;
+            background-color: #b2ebf2;
+            border-color: #b2ebf2;
         }
 
         .btn-secondary:hover {
-            background-color: #778899;
-            border-color: #778899;
+            background-color: #80deea;
+            border-color: #80deea;
         }
     </style>
 </head>
@@ -99,6 +99,8 @@
         $('#limitField').val(storedValues.limit || 10);
         $('#limitRagTextsField').val(storedValues.limitRagTexts || 5);
         $('#queryArea').val(storedValues.query || '');
+        $('#embeddingOrderField').prop('checked', storedValues.embeddingOrder);
+        $('#preprocessQueryField').prop('checked', storedValues.preprocessQuery);
 
         $('#ragSearchForm').on('submit', function (e) {
             e.preventDefault();
@@ -156,4 +158,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(285c6592, rag.prompt-34db3ff2, RAGServlet.java-6f50ba07) -->
+<!-- AIGenVersion(06969805, rag.prompt-3c678f2d, RAGServlet.java-6f50ba07) -->

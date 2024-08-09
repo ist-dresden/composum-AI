@@ -12,7 +12,7 @@ Bind enter in the query textarea to submit. Disable the submit button while the 
 Add a stop button that cancels a running request and reenables the submit button.
 There is a reset button that resets the form fields and the result to empty, in the case of the limit field to 10.
 
-On each submit the values of the fields should be stored in localStorage at key composum-ai-prototype-rag ,
+On each submit the values of the fields and checkboxes should be stored in localStorage at key composum-ai-prototype-rag ,
 and on first loading of the page the last values should be restored from there.
 
 If the request to the servlet returns an error, display the error (status message and body of the response) instead of the results.
