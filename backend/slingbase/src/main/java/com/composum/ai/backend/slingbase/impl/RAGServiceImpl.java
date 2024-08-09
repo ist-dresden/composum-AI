@@ -267,7 +267,9 @@ public class RAGServiceImpl implements RAGService {
         GPTConfiguration config = aiConfigurationService.getGPTConfiguration(rootResource.getResourceResolver(), rootResource.getPath());
         GPTChatRequest request = new GPTChatRequest(config)
                 .addMessage(GPTMessageRole.SYSTEM, "Print up to 7 keywords to search for in documents with a BM25 algorithm which are likely to appear in documents answering the users question, but not in documents irrelevant to that.\n" +
-                        "The keywords should be selected to maximize the relevance of the retrieved high scoring documents, specifically aiming to answer the user's question. Print the keywords (single words) as comma separated list.")
+                        "The keywords should be selected to maximize the relevance of the retrieved high scoring documents, specifically aiming to answer the user's question.\n" +
+                        "The keywords can be words from the users question, synonyms or other words you would expect to be present especially in a document answering the question.\n" +
+                        "Print the keywords (single words) as comma separated list.")
                 .addMessage(GPTMessageRole.USER, querytext);
         String result = chatCompletionService.getSingleChatCompletion(request);
         LOG.debug("collectSearchKeywords: for '{}' got '{}'", querytext, result);

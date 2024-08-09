@@ -734,6 +734,13 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();
         }
+
+        if (texts.contains(null) || texts.contains("")) {
+            texts = texts.stream() // the API does not like empty strings
+                    .map(text -> text == null || text.isEmpty() ? " " : text)
+                    .collect(Collectors.toList());
+        }
+
         checkEnabled(configuration);
         embeddingsLimiter.waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
@@ -762,9 +769,6 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             result.addAll(firsthalfEmbeddings);
             result.addAll(restEmbeddings);
             return result;
-        } catch (RuntimeException e) {
-            LOG.error("" + e, e);
-            throw e;
         }
 
     }
@@ -784,6 +788,7 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
             bodyText = response.getBodyText();
             if (response.getCode() != HttpStatus.SC_OK) {
                 LOG.info("Error while call {} to GPT: {} {}", id, response, bodyText);
+                LOG.trace("Request was {}", jsonRequest);
                 throw GPTException.buildException(response.getCode(), bodyText);
             }
             LOG.trace("Response {} from GPT: {}", id, bodyText);
