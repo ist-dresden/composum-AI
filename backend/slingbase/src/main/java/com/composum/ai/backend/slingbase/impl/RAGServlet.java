@@ -123,6 +123,9 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             preprocessQuery = Boolean.parseBoolean(preprocessQueryRaw);
         }
 
+        LOG.info("RAG query {} limit {} location {} embeddingOrder {} preprocessQuery {} selectors {}",
+                query, limit, searchLocation, embeddingOrder, preprocessQuery, Arrays.toString(requestInfo.getSelectors()));
+
         List<String> selectors = Arrays.asList(requestInfo.getSelectors());
         Object result;
         try {
