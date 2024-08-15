@@ -95,6 +95,19 @@ public class AIDictationServlet extends SlingAllMethodsServlet {
     }
 
     /**
+     * Returns whether dictation is enabled for the content in the suffix: status code OK means it's available, otherwise 404.
+     */
+    @Override
+    protected void doGet(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
+        String suffix = request.getRequestPathInfo().getSuffix();
+        GPTConfiguration config = null;
+        if (suffix != null) {
+            config = configurationService.getGPTConfiguration(request.getResourceResolver(), suffix);
+        }
+        response.setStatus(dictationService.isAvailable(config) ? HttpServletResponse.SC_OK : HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    /**
      * Implements the transcription operation. Input parameters are (as a multipart form):
      * <ul>
      *     <li>file: the audio stream to transcribe</li>
