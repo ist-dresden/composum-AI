@@ -31,6 +31,7 @@ import com.composum.ai.backend.base.service.chat.GPTDictationService;
         property = {
                 Constants.SERVICE_DESCRIPTION + "=Composum AI Backend Servlet",
                 ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/cpm/ai/dictate",
+                ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST
         })
 public class AIDictationServlet extends SlingAllMethodsServlet {

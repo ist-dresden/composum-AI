@@ -52,7 +52,7 @@ public class GPTDictationServiceImpl implements GPTDictationService {
 
     public static final String URL_OPENAI_TRANSCRIPTIONS = "https://api.openai.com/v1/audio/transcriptions";
 
-    protected static final int DEFAULTVALUE_REQUESTS_PER_MINUTE = 10;
+    protected static final int DEFAULTVALUE_REQUESTS_PER_MINUTE = 30;
     protected static final int DEFAULTVALUE_REQUESTS_PER_HOUR = 100;
     protected static final int DEFAULTVALUE_REQUESTS_PER_DAY = 300;
     protected static final String DEFAULT_MODEL = "whisper-1";
