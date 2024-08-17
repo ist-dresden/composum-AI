@@ -1,6 +1,7 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
+import {AIDictate} from './AIDictate.js';
 import {errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
@@ -59,6 +60,7 @@ class ContentCreationDialog {
         this.assignElements();
         this.bindActions();
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+        this.dictate = new AIDictate(this.$dialog.find('.composum-ai-dictate-button'), this.$prompt);
         const historyPath = property ? componentPath + '/' + property : componentPath;
         if (!historyMap[historyPath]) {
             historyMap[historyPath] = [];
