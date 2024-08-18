@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -38,8 +39,6 @@ import com.composum.ai.backend.base.impl.RateLimiter;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTDictationService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 @Component(service = GPTDictationService.class)
 @Designate(ocd = GPTDictationServiceImpl.GPTDictationServiceConfig.class)
@@ -55,8 +54,6 @@ public class GPTDictationServiceImpl implements GPTDictationService {
     protected static final String DEFAULT_MODEL = "whisper-1";
     protected static final int DEFAULT_MAX_REQUEST_SIZE = 5000000;
 
-    private final Gson gson = new GsonBuilder().create();
-
     protected CloseableHttpClient httpClient;
     protected RateLimiter limiter;
     protected boolean enabled;
@@ -70,8 +67,12 @@ public class GPTDictationServiceImpl implements GPTDictationService {
     protected void activate(GPTDictationServiceConfig config) throws URISyntaxException {
         this.enabled = config != null && !config.disabled();
         if (enabled) {
-            httpClient = HttpClients.createSystem();
-            // httpClient = HttpClients.custom().setProxy(HttpHost.create("localhost:8080")).build();
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setResponseTimeout(10, TimeUnit.SECONDS)
+                    .setConnectionRequestTimeout(2, TimeUnit.SECONDS)
+                    .setConnectTimeout(3, TimeUnit.SECONDS)
+                    .build();
+            httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
 
             // since it costs a bit of money and there are remote limits, we do limit it somewhat, especially for the case of errors.
             int limitPerDay = config.requestsPerDay() > 0 ? config.requestsPerDay() : DEFAULTVALUE_REQUESTS_PER_DAY;
