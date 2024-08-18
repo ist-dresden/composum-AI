@@ -1,11 +1,11 @@
 /** Implementation for the actions of the Content Creation Dialog - button actions, drop down list actions etc. */
 
 import {AICreate} from './AICreate.js';
-import {contentFragmentPath, errorText, findSingleElement, coralSelectValue} from './common.js';
+import {AIDictate} from './AIDictate.js';
+import {contentFragmentPath, coralSelectValue, errorText, findSingleElement} from './common.js';
 import {DialogHistory} from './DialogHistory.js';
 import {HelpPage} from './HelpPage.js';
 
-/** Keeps dialog histories per path. */
 const historyMap = {};
 
 class SidePanelDialog {
@@ -22,6 +22,14 @@ class SidePanelDialog {
         this.setLoading(false);
         findSingleElement(this.$dialog, '.composum-ai-templates').hide(); // class hidden isn't present in content fragment editor
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
+
+        // Initialize AIDictate
+        this.dictate = new AIDictate(
+            this.$dialog.find('.composum-ai-dictate-button'), 
+            this.$promptContainer.find('.composum-ai-prompt:first'),
+            this.onPromptAreaChanged.bind(this),
+            this.showError.bind(this)
+        );
 
         const historyPath = this.getContentPath();
         if (!historyMap[historyPath]) {
@@ -45,12 +53,11 @@ class SidePanelDialog {
     bindActions() {
         this.$predefinedPromptsSelector.on('change', this.onPredefinedPromptsChanged.bind(this));
         this.$promptContainer.on('change input', '.composum-ai-prompt', this.onPromptAreaChanged.bind(this));
-        this.$promptContainer.on('focus', '.composum-ai-prompt', this.expandOnFocus);
+        this.$promptContainer.on('focus', '.composum-ai-prompt', this.onPromptFocus.bind(this)); // Update dictate textarea on focus
         this.$promptContainer.on('blur', '.composum-ai-prompt', this.shrinkOnBlur);
         this.$generateButton.on('click', this.onGenerateButtonClicked.bind(this));
         this.$stopButton.on('click', this.onStopClicked.bind(this));
         findSingleElement(this.$dialog, '.composum-ai-reset-button').on('click', this.resetForm.bind(this));
-        // bind enter key (without any modifiers) in .composum-ai-promptcontainer .composum-ai-prompt to submit
         findSingleElement(this.$dialog, '.composum-ai-promptcontainer').on('keydown', '.composum-ai-prompt', (function (event) {
             if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
                 event.preventDefault();
@@ -158,11 +165,17 @@ class SidePanelDialog {
         }
     }
 
-    onPromptAreaChanged(event) {
+    onPromptAreaChanged() {
         if (this.verbose) console.log("onPromptAreaChanged", arguments); // on each key press
         coralSelectValue(this.$predefinedPromptsSelector, '-');
         coralSelectValue(this.$predefinedPromptsSelector, '');
         this.setAutomaticGenerateButtonState();
+    }
+
+    onPromptFocus(event) {
+        const focusedElement = $(event.target);
+        this.dictate.setTextarea(focusedElement); // Update the textarea in the AIDictate instance
+        console.log("Updated dictate textarea to", focusedElement);
     }
 
     // TODO: possibly use resize on typing https://stackoverflow.com/questions/454202/creating-a-textarea-with-auto-resize/77155208

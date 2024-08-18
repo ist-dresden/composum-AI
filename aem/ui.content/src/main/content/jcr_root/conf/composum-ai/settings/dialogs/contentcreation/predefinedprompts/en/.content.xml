@@ -151,6 +151,12 @@
                         jcr:title="Describe image"
                         jcr:description="Please describe the following image in a way that a blind person can understand it."
                 />
+                <teaser_22
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Dictation fixup"
+                        jcr:description="Please fix any dictation errors in the following dictated text, and follow embedded editing instructions:&#xA;&#xA;"
+                />
             </container>
         </root>
     </jcr:content>
