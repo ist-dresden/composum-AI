@@ -219,6 +219,7 @@ class ContentCreationDialog {
         if (predefinedPrompt !== '-') {
             // this.history.maybeSaveToHistory(); // debatable: doesn't make sense if user just skips through the list.
             this.$prompt.val(predefinedPrompt);
+            this.$prompt[0].setSelectionRange(predefinedPrompt.length, predefinedPrompt.length);
             this.onPromptChanged();
         }
     }
@@ -235,6 +236,7 @@ class ContentCreationDialog {
             this.$generateButton.attr('disabled', 'disabled');
         }
         this.$lastPromptsSelector.val('');
+        this.dictate.setTextarea(this.$prompt);
     }
 
     onContentSelectorChanged(event) {

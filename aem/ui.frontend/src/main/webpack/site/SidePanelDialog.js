@@ -161,6 +161,9 @@ class SidePanelDialog {
             const promptArea = this.$promptContainer.find('.composum-ai-prompt');
             promptArea.val(prompt);
             this.expandOnFocus({target: promptArea[0]});
+            // set cursor to the end of the prompt
+            promptArea[0].selectionStart = promptArea.val().length;
+            this.dictate.setTextarea(promptArea);
             this.setAutomaticGenerateButtonState();
         }
     }
