@@ -130,6 +130,12 @@
                         sling:resourceType="wknd/components/teaser"
                         jcr:title="Beschreibe Bild"
                         jcr:description="Bitte beschreibe das folgende Bild so, dass es eine blinde Person verstehen kann."/>
+                <teaser_22
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Dictation fixup"
+                        jcr:description="Behebe bitte alle Diktierfehler im folgenden diktierten Text und befolge die eingebetteten Bearbeitungsanweisungen:&#xA;&#xA;"/>
+                /
             </container>
         </root>
     </jcr:content>

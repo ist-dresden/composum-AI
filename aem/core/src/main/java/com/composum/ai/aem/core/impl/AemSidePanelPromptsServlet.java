@@ -51,8 +51,8 @@ public class AemSidePanelPromptsServlet extends SlingSafeMethodsServlet {
         Map<String, String> prompts = Collections.emptyMap();
 
         GPTPromptLibrary paths = aiConfigurationService.getGPTPromptLibraryPaths(request, pagePath);
-        if (paths != null && paths.contentCreationPromptsPath() != null) {
-            String path = paths.contentCreationPromptsPath();
+        if (paths != null && paths.sidePanelPromptsPath() != null) {
+            String path = paths.sidePanelPromptsPath();
             prompts = aiConfigurationService.getGPTConfigurationMap(request, path, language);
         } else {
             LOG.warn("No content creation prompts path found for page " + pagePath);
