@@ -9,17 +9,21 @@ class AIDictate {
 
     constructor(dictatebutton, textarea) {
         this.dictatebutton = $(dictatebutton)[0];
-        this.textarea = $(textarea)[0];
+        this.setTextarea(textarea);
         this.recorder = null;
         this.audioStream = null;
         this.timeoutCall = null;
         this.isRecording = false;
         this.isStoppingRecording = false;
-        this.lastPosition = 0;
         this.dictateUrl = Granite.HTTP.externalize(AIDICTATE_SERVLET) + ".txt" + new AIConfig().getContentURL();
         console.log("AIDictate constructor", this.dictatebutton, this.textarea);
         this.enableCheck();
         this.attachEventListeners();
+    }
+
+    setTextarea(textarea) {
+        this.textarea = $(textarea)[0];
+        this.lastPosition = this.textarea.selectionStart;
     }
 
     /** Performs a GET request to the servlet with current page path as suffix, and if that answers with 200 enable() is called. */
