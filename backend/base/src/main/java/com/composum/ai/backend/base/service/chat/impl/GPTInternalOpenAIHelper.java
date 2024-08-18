@@ -18,6 +18,12 @@ public interface GPTInternalOpenAIHelper {
      */
     GPTInternalOpenAIHelperInst getInstance();
 
+    /**
+     * Checks whether ChatGPT is generally and whether gptConfig enables executing GPT calls.
+     * (That is currently whether there is an api key either globally or in the gptConfig).
+     */
+    boolean isEnabled(GPTConfiguration gptConfig);
+
     abstract class GPTInternalOpenAIHelperInst {
 
         /**

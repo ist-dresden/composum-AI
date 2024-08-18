@@ -1,9 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 
-import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.OPENAI_API_KEY;
-import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.OPENAI_API_KEY_SYSPROP;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,7 +105,7 @@ public class GPTDictationServiceImpl implements GPTDictationService {
 
     @Override
     public boolean isAvailable(@Nullable GPTConfiguration configuration) {
-        return enabled && retrieveOpenAIKey(configuration) != null;
+        return enabled && openAIHelper.isEnabled(configuration);
     }
 
     @Override
@@ -162,31 +159,6 @@ public class GPTDictationServiceImpl implements GPTDictationService {
 
         HttpEntity multipart = builder.build();
         return multipart;
-    }
-
-    protected String retrieveOpenAIKey(@Nullable GPTConfiguration config) {
-        String apiKey = null;
-        if (config != null) {
-            apiKey = config.getApiKey();
-            if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("$[secret")) {
-                LOG.info("Using OpenAI API key from configuration.");
-                return apiKey.trim();
-            }
-        }
-        if (this.apiKey != null && !this.apiKey.trim().isEmpty()) {
-            return this.apiKey.trim();
-        }
-        apiKey = System.getenv(OPENAI_API_KEY);
-        if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from environment variable.");
-            return apiKey.trim();
-        }
-        apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
-        if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from system property.");
-            return apiKey.trim();
-        }
-        return null;
     }
 
     /**
