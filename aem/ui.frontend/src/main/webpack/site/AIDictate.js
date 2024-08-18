@@ -57,10 +57,10 @@ class AIDictate {
     startRecording = async () => {
         if (!this.isRecording && !this.isStoppingRecording) {
             console.log('Recording...');
-            this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            this.audioStream = await navigator.mediaDevices.getUserMedia({audio: true});
             const audioContext = new AudioContext();
             const input = audioContext.createMediaStreamSource(this.audioStream);
-            this.recorder = new Recorder(input, { numChannels: 1 });
+            this.recorder = new Recorder(input, {numChannels: 1});
             this.recorder.record();
             this.timeoutCall = setTimeout(this.stopRecording, 120000); // Stop recording after 2 minutes
             this.isRecording = true;
@@ -76,22 +76,23 @@ class AIDictate {
         clearTimeout(this.timeoutCall);
         this.audioStream.getTracks().forEach(track => track.stop());
         this.recorder.exportWAV(async (blob) => {
-            console.log('Exported WAV');
-            const formData = new FormData();
-            formData.append('audioStream', blob);
-            formData.append('contentType', 'audio/wav');
-            formData.append('language', 'en'); // Replace with desired language code or dynamic value
-            // Optionally append the prompt
-            const promptText = this.textarea.value.substring(0, this.textarea.selectionStart);
-            formData.append('prompt', promptText);
-
             Granite.csrf.refreshToken().then(token => {
+                const promptText = this.textarea.value && this.textarea.selectionStart &&
+                    this.textarea.value.substring(0, this.textarea.selectionStart);
+                console.log('Exported WAV');
+                const formData = new FormData();
+                formData.append('audioStream', blob);
+                formData.append('contentType', 'audio/wav');
+                formData.append('language', 'en'); // Replace with desired language code or dynamic value
+                // Optionally append the prompt
+                formData.append('prompt', promptText);
+
                 console.log('Sending request');
                 fetch(this.dictateUrl, {
                     method: 'POST',
                     body: formData,
-                    headers: { 'CSRF-Token': token }
-                } ).then(response => {
+                    headers: {'CSRF-Token': token}
+                }).then(response => {
                     console.log('Received response', response.status);
                     if (response.ok) {
                         return response.text();
@@ -146,6 +147,6 @@ class AIDictate {
 
 }
 
-export { AIDictate };
+export {AIDictate};
 
 console.log("AIDictate.js loaded", AIDictate);
