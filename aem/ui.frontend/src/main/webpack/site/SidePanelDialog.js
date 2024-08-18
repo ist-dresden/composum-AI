@@ -26,7 +26,9 @@ class SidePanelDialog {
         // Initialize AIDictate
         this.dictate = new AIDictate(
             this.$dialog.find('.composum-ai-dictate-button'), 
-            this.$promptContainer.find('.composum-ai-prompt:first')
+            this.$promptContainer.find('.composum-ai-prompt:first'),
+            this.onPromptAreaChanged.bind(this),
+            this.showError.bind(this)
         );
 
         const historyPath = this.getContentPath();
@@ -163,7 +165,7 @@ class SidePanelDialog {
         }
     }
 
-    onPromptAreaChanged(event) {
+    onPromptAreaChanged() {
         if (this.verbose) console.log("onPromptAreaChanged", arguments); // on each key press
         coralSelectValue(this.$predefinedPromptsSelector, '-');
         coralSelectValue(this.$predefinedPromptsSelector, '');
@@ -172,7 +174,7 @@ class SidePanelDialog {
 
     onPromptFocus(event) {
         const focusedElement = $(event.target);
-        this.dictate.textarea = focusedElement; // Update the textarea in the AIDictate instance
+        this.dictate.setTextarea(focusedElement); // Update the textarea in the AIDictate instance
         console.log("Updated dictate textarea to", focusedElement);
     }
 
