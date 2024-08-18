@@ -25,12 +25,12 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.io.CloseMode;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -56,20 +56,22 @@ public class GPTDictationServiceImpl implements GPTDictationService {
     protected static final int DEFAULTVALUE_REQUESTS_PER_HOUR = 100;
     protected static final int DEFAULTVALUE_REQUESTS_PER_DAY = 300;
     protected static final String DEFAULT_MODEL = "whisper-1";
+    protected static final int DEFAULT_MAX_REQUEST_SIZE = 5000000;
 
     private final Gson gson = new GsonBuilder().create();
 
     protected CloseableHttpClient httpClient;
     protected RateLimiter limiter;
     protected boolean enabled;
-    protected String apiKey;
-    protected String organizationId;
     protected String model;
     protected long maxRequestSize = 1000000;
 
+    @Reference
+    protected GPTInternalOpenAIHelper openAIHelper;
+
     @Activate
     protected void activate(GPTDictationServiceConfig config) throws URISyntaxException {
-        this.enabled = config != null && config.enabled();
+        this.enabled = config != null && !config.disabled();
         if (enabled) {
             httpClient = HttpClients.createSystem();
             // httpClient = HttpClients.custom().setProxy(HttpHost.create("localhost:8080")).build();
@@ -81,10 +83,8 @@ public class GPTDictationServiceImpl implements GPTDictationService {
             RateLimiter hourLimiter = new RateLimiter(dayLimiter, limitPerHour, 1, TimeUnit.HOURS);
             int limitPerMinute = config.requestsPerMinute() > 0 ? config.requestsPerMinute() : DEFAULTVALUE_REQUESTS_PER_MINUTE;
             this.limiter = new RateLimiter(hourLimiter, limitPerMinute, 1, TimeUnit.MINUTES);
-            this.apiKey = config.apiKey();
-            this.organizationId = config.organizationId();
-            this.model = config.model();
-            this.maxRequestSize = config.maxRequestSize() > 0 ? config.maxRequestSize() : 1000000;
+            this.model = config.model() != null && !config.model().trim().isEmpty() ? config.model().trim() : DEFAULT_MODEL;
+            this.maxRequestSize = config.maxRequestSize() > 0 ? config.maxRequestSize() : DEFAULT_MAX_REQUEST_SIZE;
         }
     }
 
@@ -117,24 +117,12 @@ public class GPTDictationServiceImpl implements GPTDictationService {
         if (!isAvailable(configuration)) {
             throw new IllegalStateException("GPT Dictation Service is not available.");
         }
-        String currentApiKey = retrieveOpenAIKey(configuration);
-        if (currentApiKey == null) {
-            throw new IllegalStateException("OpenAI API key is not available.");
-        }
-        String currentOrganizationId = configuration != null && configuration.getOrganizationId() != null &&
-                !configuration.getOrganizationId().isEmpty() ?
-                configuration.getOrganizationId() :
-                this.organizationId;
-
         limiter.waitForLimit();
 
         try {
             String url = URL_OPENAI_TRANSCRIPTIONS;
             HttpPost postRequest = new HttpPost(url);
-            postRequest.addHeader(new BasicHeader("Authorization", "Bearer " + currentApiKey));
-            if (currentOrganizationId != null && !currentOrganizationId.trim().isEmpty()) {
-                postRequest.addHeader(new BasicHeader("OpenAI-Organization", currentOrganizationId.trim()));
-            }
+            openAIHelper.getInstance().initOpenAIRequest(postRequest, configuration);
             postRequest.setEntity(createEntity(audioStream, contentType, prompt, language));
 
             try (CloseableHttpResponse response = httpClient.execute(postRequest)) {
@@ -160,7 +148,7 @@ public class GPTDictationServiceImpl implements GPTDictationService {
     private HttpEntity createEntity(InputStream audioStream, String contentType, String prompt, String language) {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setMode(HttpMultipartMode.STRICT);
-        builder.addTextBody("model", "whisper-1", ContentType.TEXT_PLAIN);
+        builder.addTextBody("model", model, ContentType.TEXT_PLAIN);
         builder.addTextBody("response_format", "text", ContentType.TEXT_PLAIN);
         if (prompt != null && !prompt.trim().isEmpty()) {
             builder.addTextBody("prompt", prompt);
@@ -207,10 +195,10 @@ public class GPTDictationServiceImpl implements GPTDictationService {
     @ObjectClassDefinition(name = "GPT Dictation Service Configuration")
     public @interface GPTDictationServiceConfig {
 
-        @AttributeDefinition(name = "Enabled", description = "Whether the service is enabled and properly configured.")
-        boolean enabled() default false;
+        @AttributeDefinition(name = "Disabled", description = "Whether the service is disabled.")
+        boolean disabled() default false;
 
-        @AttributeDefinition(name = "Model", description = "The model to use for dictation.", defaultValue = "")
+        @AttributeDefinition(name = "Model", description = "The model to use for dictation, default " + DEFAULT_MODEL, defaultValue = "")
         String model() default DEFAULT_MODEL;
 
         @AttributeDefinition(name = "Maximum requests per minute", required = false,
@@ -225,17 +213,9 @@ public class GPTDictationServiceImpl implements GPTDictationService {
                 description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY, defaultValue = "")
         int requestsPerDay() default DEFAULTVALUE_REQUESTS_PER_MINUTE;
 
-        @AttributeDefinition(name = "Maximum request size", required = false,
-                description = "Maximum request size in bytes, default 100000.", defaultValue = "")
-        int maxRequestSize() default 1000000;
-
-        @AttributeDefinition(name = "OpenAI API Key", required = false,
-                description = "The API key for OpenAI, if not set here, it will be read from the environment variable " + OPENAI_API_KEY + " or the system property " + OPENAI_API_KEY_SYSPROP, defaultValue = "")
-        String apiKey();
-
-        @AttributeDefinition(name = "Organization ID", required = false,
-                description = "The organization ID for OpenAI, optional.", defaultValue = "")
-        String organizationId();
+        @AttributeDefinition(name = "Maximum request size in bytes", required = false,
+                description = "Maximum request size in bytes, default " + DEFAULT_MAX_REQUEST_SIZE, defaultValue = "")
+        int maxRequestSize() default DEFAULT_MAX_REQUEST_SIZE; // about one minute of stereo audio with 44.1 kHz and 16 bit
     }
 
     protected class LimitedInputStream extends FilterInputStream {

@@ -35,6 +35,7 @@ import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
@@ -94,9 +95,10 @@ import com.knuddels.jtokkit.api.IntArrayList;
  * @see "https://platform.openai.com/docs/api-reference/chat/create"
  * @see "https://platform.openai.com/docs/guides/chat"
  */
-@Component(service = GPTChatCompletionService.class)
+@Component(service = {GPTChatCompletionService.class, GPTInternalOpenAIHelper.class})
 @Designate(ocd = GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig.class)
-public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
+public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInternalOpenAIHelperInst
+        implements GPTChatCompletionService, GPTInternalOpenAIHelper {
 
     protected static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
@@ -972,6 +974,21 @@ public class GPTChatCompletionServiceImpl implements GPTChatCompletionService {
         }
         return new GPTException("Error response from GPT (status " + errorStatusCode
                 + ") : " + result);
+    }
+
+    @Override
+    public GPTInternalOpenAIHelperInst getInstance() {
+        return this;
+    }
+
+    @Override
+    void initOpenAIRequest(@Nonnull HttpPost request, @Nullable GPTConfiguration gptConfiguration) {
+        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
+        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
+        request.addHeader("Authorization", "Bearer " + actualApiKey);
+        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
+            request.addHeader("OpenAI-Organization", actualOrganizationId);
+        }
     }
 
     /**
