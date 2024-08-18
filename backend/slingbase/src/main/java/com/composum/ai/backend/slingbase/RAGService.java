@@ -46,11 +46,11 @@ public interface RAGService {
     /**
      * Answer a question with RAG from the given resources, e.g. found with {@link #searchRelated(Resource, String, int)}.
      *
-     * @param querytext the query text
-     * @param resources the list of resources to answer from
-     * @param request   the request to use when determining the markdown approximation - not modified
-     * @param response  the response to use when determining the markdown approximation - not modified
-     * @param rootResource the root resource to find GPT configuration from
+     * @param querytext     the query text
+     * @param resources     the list of resources to answer from
+     * @param request       the request to use when determining the markdown approximation - not modified
+     * @param response      the response to use when determining the markdown approximation - not modified
+     * @param rootResource  the root resource to find GPT configuration from
      * @param limitRagTexts the maximum number of RAG texts to consider
      * @return the answer text
      */
@@ -58,5 +58,16 @@ public interface RAGService {
     String ragAnswer(@Nullable String querytext, @Nonnull List<Resource> resources,
                      @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response,
                      @NotNull Resource rootResource, int limitRagTexts);
+
+    /**
+     * Processes a query to have the AI suggest a couple of search keywords for use with the other methods that might find the most relevant results.
+     *
+     * @param querytext   the query text for which we find keywords
+     * @param rootResource  the root resource to find GPT configuration from
+     * @return a list of keywords
+     * @throws RepositoryException
+     */
+    @Nonnull
+    List<String> collectSearchKeywords(@Nullable String querytext, @Nonnull Resource rootResource) throws RepositoryException;
 
 }

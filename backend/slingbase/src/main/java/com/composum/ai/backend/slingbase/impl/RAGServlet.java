@@ -71,6 +71,14 @@ public class RAGServlet extends SlingSafeMethodsServlet {
      */
     public static final String PARAM_EMBEDDINGORDER = "embeddingOrder";
 
+    /**
+     * Boolean parameter - if true, the query will be preprocessed before searching to generate
+     * likely keywords.
+     *
+     * @see RAGService#collectSearchKeywords(String, Resource)
+     */
+    public static final String PARAM_PREPROCESS_QUERY = "preprocessQuery";
+
     @Reference
     protected RAGService ragService;
 
@@ -109,13 +117,22 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             embeddingOrder = Boolean.parseBoolean(embeddingOrderRaw);
         }
 
+        boolean preprocessQuery = false;
+        String preprocessQueryRaw = request.getParameter(PARAM_PREPROCESS_QUERY);
+        if (preprocessQueryRaw != null && !preprocessQueryRaw.trim().isEmpty()) {
+            preprocessQuery = Boolean.parseBoolean(preprocessQueryRaw);
+        }
+
+        LOG.info("RAG query {} limit {} location {} embeddingOrder {} preprocessQuery {} selectors {}",
+                query, limit, searchLocation, embeddingOrder, preprocessQuery, Arrays.toString(requestInfo.getSelectors()));
+
         List<String> selectors = Arrays.asList(requestInfo.getSelectors());
         Object result;
         try {
             if (selectors.contains("related")) {
-                result = related(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response);
+                result = related(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response, preprocessQuery);
             } else if (selectors.contains("ragAnswer")) {
-                result = ragAnswer(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response, limitRagTexts);
+                result = ragAnswer(request.getResourceResolver(), searchLocation, query, limit, embeddingOrder, request, response, limitRagTexts, preprocessQuery);
             } else {
                 throw new ServletException("Unsupported selector: " + selectors);
             }
@@ -134,8 +151,9 @@ public class RAGServlet extends SlingSafeMethodsServlet {
      * E.g. http://localhost:9090/bin/cpm/ai/rag.related.json/content/ist/composum/home?query=AI
      */
     protected List<?> related(@Nonnull ResourceResolver resourceResolver, @Nonnull Resource searchRoot, @Nonnull String query,
-                              int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response) throws RepositoryException {
-        List<String> foundPaths = ragService.searchRelated(searchRoot, query, limit);
+                              int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response, boolean preprocessQuery) throws RepositoryException {
+        String keywordsQuery = getKeywordsQuery(searchRoot, query, preprocessQuery);
+        List<String> foundPaths = ragService.searchRelated(searchRoot, keywordsQuery, limit);
         List<Resource> foundResources = foundPaths.stream()
                 .map(resourceResolver::getResource)
                 .collect(Collectors.toList());
@@ -162,10 +180,18 @@ public class RAGServlet extends SlingSafeMethodsServlet {
                 .collect(Collectors.toList());
     }
 
+    private String getKeywordsQuery(@NotNull Resource searchRoot, @NotNull String query, boolean preprocessQuery) throws RepositoryException {
+        String keywordsQuery = preprocessQuery ?
+                ragService.collectSearchKeywords(query, searchRoot).stream().collect(Collectors.joining(" "))
+                : query;
+        return StringUtils.defaultIfBlank(keywordsQuery, query);
+    }
+
     protected String ragAnswer(@Nonnull ResourceResolver resourceResolver, @Nonnull Resource searchRoot, @Nonnull String query,
                                int limit, boolean embeddingOrder, SlingHttpServletRequest request, SlingHttpServletResponse response,
-                               int limitRagTexts) throws RepositoryException {
-        List<Resource> foundResources = ragService.searchRelated(searchRoot, query, limit).stream()
+                               int limitRagTexts, boolean preprocessQuery) throws RepositoryException {
+        String keywordsQuery = getKeywordsQuery(searchRoot, query, preprocessQuery);
+        List<Resource> foundResources = ragService.searchRelated(searchRoot, keywordsQuery, limit).stream()
                 .map(resourceResolver::getResource)
                 .collect(Collectors.toList());
         String answer = ragService.ragAnswer(query, foundResources, request, response, searchRoot, limitRagTexts);

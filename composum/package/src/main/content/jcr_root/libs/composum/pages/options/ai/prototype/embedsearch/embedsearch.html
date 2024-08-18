@@ -34,23 +34,32 @@
 <body>
     <div class="container mt-5">
         <h1>AI Assisted Search</h1>
-        <p>This application allows you to perform an AI-assisted search.</p>
+        <p>This application allows you to perform an AI-assisted search using the RAG service. You can specify a path, limit the number of results, and choose whether to order by embedding or preprocess the query. The results will be displayed as clickable links with additional information.</p>
         <form id="search-form">
             <div class="form-group">
                 <label for="path">Path (e.g., /content/my-site):</label>
                 <input type="text" class="form-control" id="path" name="path" placeholder="Enter the path">
+                <small class="form-text text-muted">Specify the path to search within.</small>
             </div>
             <div class="form-group">
                 <label for="limit">Limit (default is 10):</label>
                 <input type="number" class="form-control" id="limit" name="limit" value="10" placeholder="Enter the limit">
+                <small class="form-text text-muted">Set the maximum number of results to return.</small>
             </div>
             <div class="form-group form-check">
                 <input type="checkbox" class="form-check-input" id="embeddingOrder" name="embeddingOrder" checked>
                 <label class="form-check-label" for="embeddingOrder">Order by Embedding</label>
+                <small class="form-text text-muted">Check to order results by embedding similarity.</small>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="preprocessQuery" name="preprocessQuery" checked>
+                <label class="form-check-label" for="preprocessQuery">Preprocess Query</label>
+                <small class="form-text text-muted">Check to preprocess the query to have the AI generate keywords from the query for better results.</small>
             </div>
             <div class="form-group">
                 <label for="query">Query:</label>
                 <textarea class="form-control" id="query" name="query" rows="3" placeholder="Enter your query"></textarea>
+                <small class="form-text text-muted">Enter the search terms you want to find.</small>
             </div>
             <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
             <button type="button" class="btn btn-secondary" id="reset-btn">Reset</button>
@@ -67,6 +76,7 @@
                 $('#path').val(formValues.path);
                 $('#limit').val(formValues.limit);
                 $('#embeddingOrder').prop('checked', formValues.embeddingOrder);
+                $('#preprocessQuery').prop('checked', formValues.preprocessQuery);
                 $('#query').val(formValues.query);
             }
 
@@ -76,13 +86,15 @@
                 var path = $('#path').val();
                 var limit = $('#limit').val();
                 var embeddingOrder = $('#embeddingOrder').is(':checked');
+                var preprocessQuery = $('#preprocessQuery').is(':checked');
                 var query = $('#query').val();
-                var url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + limit + '&embeddingOrder=' + embeddingOrder;
+                var url = '/bin/cpm/ai/rag.related.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + limit + '&embeddingOrder=' + embeddingOrder + '&preprocessQuery=' + preprocessQuery;
 
                 var formValues = {
                     path: path,
                     limit: limit,
                     embeddingOrder: embeddingOrder,
+                    preprocessQuery: preprocessQuery,
                     query: query
                 };
                 localStorage.setItem('composum-ai-prototype-embedsearch', JSON.stringify(formValues));
@@ -117,6 +129,7 @@
                 $('#path').val('');
                 $('#limit').val('10');
                 $('#embeddingOrder').prop('checked', true);
+                $('#preprocessQuery').prop('checked', true);
                 $('#query').val('');
                 $('#search-results').empty();
                 localStorage.removeItem('composum-ai-prototype-embedsearch');
@@ -126,4 +139,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(41761347, embedsearch.prompt-45fa4d87, RAGServlet.java-042fca60) -->
+<!-- AIGenVersion(5d927d87, embedsearch.prompt-489f7037, RAGServlet.java-6f50ba07) -->

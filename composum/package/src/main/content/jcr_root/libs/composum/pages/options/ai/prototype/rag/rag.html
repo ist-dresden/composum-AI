@@ -9,46 +9,43 @@
     <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
     <style>
         body {
-            background-color: #cfe2f3;
+            background-color: #e0f7fa;
         }
 
         .container {
-            background-color: #f0f8ff;
+            background-color: #ffffff;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary {
-            background-color: #6495ED;
-            border-color: #6495ED;
+            background-color: #4db6e1;
+            border-color: #4db6e1;
         }
 
         .btn-primary:hover {
-            background-color: #4169E1;
-            border-color: #4169E1;
+            background-color: #29b6f6;
+            border-color: #29b6f6;
         }
 
         .btn-secondary {
-            background-color: #B0C4DE;
-            border-color: #B0C4DE;
+            background-color: #b2ebf2;
+            border-color: #b2ebf2;
         }
 
         .btn-secondary:hover {
-            background-color: #778899;
-            border-color: #778899;
+            background-color: #80deea;
+            border-color: #80deea;
         }
     </style>
 </head>
 <body>
 <div class="container mt-5">
     <h2>Answer questions with RAG (retrieval augmented generation)</h2>
-    <p>This mini-application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries.
-        Enter a path, set a limit, set the maximum number of pages for the AI to answer, write your query, and click
-        Submit to get the answer.
-        The application performs a search for pages matching words from the query, ranks the query using an <a
-                href="https://platform.openai.com/docs/guides/embeddings">embedding</a> to closeness to the query
-        and then feeds them together with the query to a large language model (LLM) to get an answer.
+    <p>This application uses Retrieval Augmented Generation (RAG) to answer questions based on provided queries. 
+        RAG combines traditional search with AI to generate answers by retrieving relevant documents and using them to inform the response. 
+        Enter your query and parameters, and click Submit to get an answer.
     </p>
     <form id="ragSearchForm" class="mt-4">
         <div class="mb-3">
@@ -57,16 +54,24 @@
             <small class="form-text text-muted">Enter the path for the search location.</small>
         </div>
         <div class="mb-3">
-            <label for="limitField" class="form-label">Maximum number of pages to be searched and ranked:</label>
+            <label for="limitField" class="form-label">Maximum number of results:</label>
             <input type="number" class="form-control" id="limitField" name="limit" value="10">
-            <small class="form-text text-muted">Set the maximum number of pages to search and rank
-                (default is 10).</small>
+            <small class="form-text text-muted">Set the maximum number of results to return (default is 10).</small>
         </div>
         <div class="mb-3">
             <label for="limitRagTextsField" class="form-label">Maximum number of pages for AI to answer:</label>
             <input type="number" class="form-control" id="limitRagTextsField" name="limitRagTexts" value="5">
-            <small class="form-text text-muted">Set the maximum number of pages sent to the AI to generate an answer
-                (default is 5).</small>
+            <small class="form-text text-muted">Set the maximum number of pages sent to the AI (default is 5).</small>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="embeddingOrderField" name="embeddingOrder" checked>
+            <label class="form-check-label" for="embeddingOrderField">Use embedding order</label>
+            <small class="form-text text-muted">Check to order results by embedding similarity.</small>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="preprocessQueryField" name="preprocessQuery" checked>
+            <label class="form-check-label" for="preprocessQueryField">Preprocess query</label>
+            <small class="form-text text-muted">Check to preprocess the query to have the AI generate keywords from the query for better results.</small>
         </div>
         <div class="mb-3">
             <label for="queryArea" class="form-label">Query:</label>
@@ -94,6 +99,8 @@
         $('#limitField').val(storedValues.limit || 10);
         $('#limitRagTextsField').val(storedValues.limitRagTexts || 5);
         $('#queryArea').val(storedValues.query || '');
+        $('#embeddingOrderField').prop('checked', storedValues.embeddingOrder);
+        $('#preprocessQueryField').prop('checked', storedValues.preprocessQuery);
 
         $('#ragSearchForm').on('submit', function (e) {
             e.preventDefault();
@@ -102,8 +109,10 @@
             const path = $('#pathField').val();
             const limit = $('#limitField').val();
             const limitRagTexts = $('#limitRagTextsField').val();
+            const embeddingOrder = $('#embeddingOrderField').is(':checked');
+            const preprocessQuery = $('#preprocessQueryField').is(':checked');
             const query = $('#queryArea').val();
-            const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit) + '&limitRagTexts=' + encodeURIComponent(limitRagTexts);
+            const url = '/bin/cpm/ai/rag.ragAnswer.json' + path + '?query=' + encodeURIComponent(query) + '&limit=' + encodeURIComponent(limit) + '&limitRagTexts=' + encodeURIComponent(limitRagTexts) + '&embeddingOrder=' + encodeURIComponent(embeddingOrder) + '&preprocessQuery=' + encodeURIComponent(preprocessQuery);
 
             xhr = $.get(url, function (data) {
                 const html = converter.makeHtml(data);
@@ -116,7 +125,7 @@
             });
 
             // Store form values in localStorage
-            localStorage.setItem('composum-ai-prototype-rag', JSON.stringify({path, limit, limitRagTexts, query}));
+            localStorage.setItem('composum-ai-prototype-rag', JSON.stringify({path, limit, limitRagTexts, embeddingOrder, preprocessQuery, query}));
         });
 
         $('#stopBtn').on('click', function () {
@@ -131,6 +140,8 @@
             $('#pathField').val('');
             $('#limitField').val(10);
             $('#limitRagTextsField').val(5);
+            $('#embeddingOrderField').prop('checked', true);
+            $('#preprocessQueryField').prop('checked', true);
             $('#queryArea').val('');
             $('#answerArea').html('');
             localStorage.removeItem('composum-ai-prototype-rag');
@@ -147,4 +158,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(3471e978, rag.prompt-0b7823cd, RAGServlet.java-042fca60) -->
+<!-- AIGenVersion(06969805, rag.prompt-3c678f2d, RAGServlet.java-6f50ba07) -->

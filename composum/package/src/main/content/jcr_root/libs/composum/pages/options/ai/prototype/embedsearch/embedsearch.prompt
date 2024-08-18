@@ -1,7 +1,8 @@
 Generate a HTML page "AI assisted search" that contains a form calling the RAGServlet with the "related" selector.
 You can use bootstrap and jquery. Make it pleasantly colorful with pastel colors, blueish.
 
-Include a path, a limit field, a checkbox for embeddingOrder, a query textarea
+Include a path, a limit field, a checkbox for embeddingOrder (initially checked),
+a checkbox for preprocessQuery (initially checked), a query textarea
 and a submit button that triggers the actual call to the RAGServlet.
 Add a three sentence description what the application does, and on each field a one sentence description what it does.
 The page is deployed on the same host as the servlet.

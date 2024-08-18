@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
+import static java.util.Collections.singletonList;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.CharBuffer;
@@ -734,9 +736,46 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();
         }
+
+        if (texts.contains(null) || texts.contains("")) {
+            texts = texts.stream() // the API does not like empty strings
+                    .map(text -> text == null || text.isEmpty() ? " " : text)
+                    .collect(Collectors.toList());
+        }
+
         checkEnabled(configuration);
         embeddingsLimiter.waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
+        List<float[]> result = getEmbeddingsImplDivideAndConquer(texts, configuration, id);
+        return result;
+    }
+
+    protected List<float[]> getEmbeddingsImplDivideAndConquer(List<String> texts, GPTConfiguration configuration, long id) {
+        try {
+            return getEmbeddingsImpl(texts, configuration, id);
+        } catch (GPTException.GPTContextLengthExceededException e) { // try divide and conquer
+            if (texts.size() == 1) { // split text in half and ignore the rest. No chance but to loose information give up
+                LOG.info("Context length exceeded for single text while call {} to GPT, loosing half of the text", id);
+                String text = texts.get(0);
+                if (text == null || text.length() < 100) {
+                    throw new GPTException("Bug: unexpected context length exceeded exception", e);
+                }
+                return getEmbeddingsImplDivideAndConquer(singletonList(text.substring(0, text.length() / 2)), configuration, id);
+            }
+            List<String> firsthalf = texts.subList(0, texts.size() / 2);
+            List<String> rest = texts.subList(texts.size() / 2, texts.size());
+            // TODO: ideally that'd be in parallel
+            List<float[]> firsthalfEmbeddings = getEmbeddingsImplDivideAndConquer(firsthalf, configuration, id);
+            List<float[]> restEmbeddings = getEmbeddingsImplDivideAndConquer(rest, configuration, id);
+            List<float[]> result = new ArrayList<>(firsthalfEmbeddings.size() + restEmbeddings.size());
+            result.addAll(firsthalfEmbeddings);
+            result.addAll(restEmbeddings);
+            return result;
+        }
+
+    }
+
+    protected List<float[]> getEmbeddingsImpl(List<String> texts, GPTConfiguration configuration, long id) {
         OpenAIEmbeddings.EmbeddingRequest request = new OpenAIEmbeddings.EmbeddingRequest();
         request.setInput(texts);
         request.setModel(embeddingsModel);
@@ -748,11 +787,12 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         String bodyText = null;
         try {
             SimpleHttpResponse response = call.get();
-            if (response.getCode() != HttpStatus.SC_OK) {
-                LOG.error("Error while call {} to GPT: {}", id, response);
-                throw new GPTException("Error while calling GPT: " + response);
-            }
             bodyText = response.getBodyText();
+            if (response.getCode() != HttpStatus.SC_OK) {
+                LOG.info("Error while call {} to GPT: {} {}", id, response, bodyText);
+                LOG.trace("Request was {}", jsonRequest);
+                throw GPTException.buildException(response.getCode(), bodyText);
+            }
             LOG.trace("Response {} from GPT: {}", id, bodyText);
             OpenAIEmbeddings.EmbeddingResponse entity = gson.fromJson(bodyText, OpenAIEmbeddings.EmbeddingResponse.class);
             if (entity.getData() == null) {
@@ -933,7 +973,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     result.completeExceptionally(retryableException);
                     throw retryableException;
                 }
-                GPTException gptException = buildException(errorStatusCode, resultBuilder.toString());
+                GPTException gptException = GPTException.buildException(errorStatusCode, resultBuilder.toString());
                 callback.onError(gptException);
                 result.completeExceptionally(gptException);
                 throw gptException;
@@ -961,19 +1001,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             // nothing to do
         }
 
-    }
-
-    protected static GPTException buildException(Integer errorStatusCode, String result) {
-        // this is annoyingly heuristic and seems to break once in a while.
-        if (Integer.valueOf(400).equals(errorStatusCode) && result != null
-                && result.contains("invalid_request_error") &&
-                (result.contains("context_length_exceeded") || result.contains("max_tokens") ||
-                        result.contains("model supports at most") ||
-                        result.contains("maximum context length"))) {
-            return new GPTException.GPTContextLengthExceededException(result);
-        }
-        return new GPTException("Error response from GPT (status " + errorStatusCode
-                + ") : " + result);
     }
 
     @Override

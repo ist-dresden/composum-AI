@@ -252,4 +252,31 @@ public class RAGServiceImpl implements RAGService {
         };
     }
 
+
+    /**
+     * Processes a query to have the AI suggest a couple of search keywords for use with the other methods that might find the most relevant results.
+     *
+     * @param querytext   the query text for which we find keywords
+     * @param rootResource  the root resource to find GPT configuration from
+     * @return a list of keywords
+     * @throws RepositoryException
+     */
+    @Override
+    @Nonnull
+    public List<String> collectSearchKeywords(@Nullable String querytext, @Nonnull Resource rootResource) throws RepositoryException {
+        GPTConfiguration config = aiConfigurationService.getGPTConfiguration(rootResource.getResourceResolver(), rootResource.getPath());
+        GPTChatRequest request = new GPTChatRequest(config)
+                .addMessage(GPTMessageRole.SYSTEM, "Print up to 7 keywords to search for in documents with a BM25 algorithm which are likely to appear in documents answering the users question, but not in documents irrelevant to that.\n" +
+                        "The keywords should be selected to maximize the relevance of the retrieved high scoring documents, specifically aiming to answer the user's question.\n" +
+                        "The keywords can be words from the users question, synonyms or other words you would expect to be present especially in a document answering the question.\n" +
+                        "Print the keywords (single words) as comma separated list.")
+                .addMessage(GPTMessageRole.USER, querytext);
+        String result = chatCompletionService.getSingleChatCompletion(request);
+        LOG.debug("collectSearchKeywords: for '{}' got '{}'", querytext, result);
+        if (result == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(result.trim().split("\\s*,\\s*"));
+    }
+
 }
