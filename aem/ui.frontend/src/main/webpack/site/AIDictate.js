@@ -98,9 +98,9 @@ class AIDictate {
                 const formData = new FormData();
                 formData.append('audioStream', blob);
                 formData.append('contentType', 'audio/wav');
-                formData.append('language', 'en'); // Replace with desired language code or dynamic value
-                // Optionally append the prompt
-                formData.append('prompt', promptText);
+                if (promptText) {
+                    formData.append('prompt', promptText);
+                }
 
                 console.log('Sending request');
                 fetch(this.dictateUrl, {
