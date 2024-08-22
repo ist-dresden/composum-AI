@@ -149,7 +149,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     /**
      * Separate whitespace at the beginning and end from the non-whitespace text.
      */
-    protected static final Pattern PATTERN_SEPARATE_WHITESPACE = Pattern.compile("\\A(\\s*)(.*?)(\\s*)\\Z", Pattern.DOTALL);
+    protected static final Pattern PATTERN_SEPARATE_WHITESPACE = Pattern.compile("\\A(\\s*+)(.*?)(\\s*+)\\Z", Pattern.DOTALL);
 
     /**
      * We join all text fragments we have to translate into one big texts separated with separators like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` and

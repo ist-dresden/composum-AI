@@ -499,7 +499,7 @@ public class AIServlet extends AbstractServiceServlet {
         protected void performOperation(@Nonnull Status status, @Nonnull SlingHttpServletRequest request,
                                         @Nonnull SlingHttpServletResponse response, @Nullable GPTConfiguration config) {
             String prompt = status.getRequiredParameter(PARAMETER_PROMPT,
-                    Pattern.compile("(?s).*\\S.*"), "No prompt given");
+                    Pattern.compile("(?s)\\s*\\S.*", Pattern.DOTALL), "No prompt given");
             boolean streaming = "true".equals(request.getParameter(PARAMETER_STREAMING));
             String textLength = request.getParameter("textLength");
             String inputPath = request.getParameter("inputPath");

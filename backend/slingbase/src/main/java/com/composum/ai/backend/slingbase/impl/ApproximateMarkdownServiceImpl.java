@@ -76,7 +76,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     /**
      * Ignored values for labelled output: "true"/ "false" / single number (int / float) attributes or array of numbers attributes, or shorter than 3 digits or path, or array or type date or boolean or {Date} or {Boolean} , inherit, blank, html tags, target .
      */
-    protected final static Pattern IGNORED_VALUE_PATTERN = Pattern.compile("true|false|[0-9][0-9]?[0-9]?|/(conf|content|etc)/.*|\\{Boolean\\}(true|false)|inherit|blank|target|h[0-9]|div|p");
+    protected final static Pattern IGNORED_VALUE_PATTERN = Pattern.compile("true|false|[0-9][0-9]?[0-9]?|/(conf|content|etc|apps|libs|var|preview|public|mnt)/.*|\\{Boolean\\}(true|false)|inherit|blank|target|h[0-9]|div|p");
 
     /**
      * We ignore nodes named i18n or renditions and nodes starting with rep:, dam:, cq:
