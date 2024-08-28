@@ -19,6 +19,11 @@ anyway, so that the servlet could be used as a backend.
 - a RAG supported query answering (no chat) that does this kind of search and then provides the AI with the texts of the
   top 5 found pages for answering the query.
 
+Optionally, both use 
+[hybrid retrieval](https://generativeai.pub/advanced-rag-retrieval-strategies-hybrid-retrieval-997d39659720)
+having the AI generate keywords from the query and using them for retrieval, and combining the results of that with the 
+retrieval based on the queries words itself.
+
 The mini applications are available at the following URLs (for a local installation):
 
 - Composum: http://localhost:9090/libs/composum/pages/options/ai/prototype.html
