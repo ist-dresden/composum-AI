@@ -59,6 +59,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     protected GPTChatCompletionService chatCompletionService;
 
     protected Config config;
+    protected Double temperature;
+    protected Integer seed;
 
     protected Path cacheDir;
 
@@ -303,10 +305,11 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
     public static final Pattern HTML_TAG_AT_START = Pattern.compile("\\A\\s*(<[^>]*>)");
 
-    private GPTChatRequest makeRequest(String text, String sourceLanguage, String targetLanguage, @Nullable GPTConfiguration configuration) {
+    private GPTChatRequest makeRequest(String text, String sourceLanguage, String targetLanguage, @Nullable GPTConfiguration outerConfiguration) {
         // fetch the GPTChatMessagesTemplate, replace the placeholders and call the chatCompletionService
         GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_SINGLETRANSLATION);
         GPTChatRequest request = new GPTChatRequest();
+        GPTConfiguration configuration = getServiceConfiguration().merge(outerConfiguration);
         request.setConfiguration(configuration);
         String addition = configuration != null && configuration.getAdditionalInstructions() != null ? "\n\n" + configuration.getAdditionalInstructions() : "";
         if (configuration != null && configuration.isHtml()) {
@@ -334,6 +337,10 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             request.setMaxTokens(maxTokens);
         }
         return request;
+    }
+
+    protected GPTConfiguration getServiceConfiguration() {
+        return new GPTConfiguration(null, null, null, null, null, null, null, temperature, seed);
     }
 
     /**
@@ -418,14 +425,30 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Modified
     protected void activate(Config config) {
         this.config = config;
-        File cacheDir = config.diskCache() != null && !config.diskCache().trim().isEmpty() ? new File(config.diskCache().trim()) : null;
-        this.cacheDir = null;
-        if (cacheDir != null) {
-            if (cacheDir.exists()) {
-                LOG.info("Using disk cache for translations at {}", cacheDir);
-                this.cacheDir = cacheDir.toPath();
-            } else {
-                LOG.error("Disk cache for translations does not exist: {}", cacheDir);
+        if (config != null) {
+            File cacheDir = config.diskCache() != null && !config.diskCache().trim().isEmpty() ? new File(config.diskCache().trim()) : null;
+            this.cacheDir = null;
+            if (cacheDir != null) {
+                if (cacheDir.exists()) {
+                    LOG.info("Using disk cache for translations at {}", cacheDir);
+                    this.cacheDir = cacheDir.toPath();
+                } else {
+                    LOG.error("Disk cache for translations does not exist: {}", cacheDir);
+                }
+            }
+            if (config.temperature() != null && !config.temperature().trim().isEmpty()) {
+                try {
+                    this.temperature = Double.parseDouble(config.temperature().trim());
+                } catch (NumberFormatException e) {
+                    LOG.error("Invalid temperature value: {}", config.temperature());
+                }
+            }
+            if (config.seed() != null && !config.seed().trim().isEmpty()) {
+                try {
+                    this.seed = Integer.parseInt(config.seed().trim());
+                } catch (NumberFormatException e) {
+                    LOG.error("Invalid seed value: {}", config.seed());
+                }
             }
         }
     }
@@ -433,6 +456,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     @Deactivate
     protected void deactivate() {
         this.config = null;
+        this.seed = null;
+        this.temperature = null;
     }
 
     protected void ensureEnabled() {
@@ -459,5 +484,13 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 "If empty, no caching is done. If the path is relative, it is relative to the current working directory. " +
                 "If the path is absolute, it is used as is.", defaultValue = "")
         String diskCache();
+
+        @AttributeDefinition(name = "temperature", description = "The sampling temperature, between 0 and 1. " +
+                "Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.")
+        String temperature() default "";
+
+        @AttributeDefinition(name = "seed", description = "If specified, OpenAI will make a best effort to sample deterministically, " +
+                "such that repeated requests with the same seed and parameters should return the same result.")
+        String seed() default "";
     }
 }

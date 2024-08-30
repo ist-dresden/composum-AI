@@ -52,6 +52,10 @@ public class GPTConfiguration {
 
     private final Boolean debug;
 
+    private Double temperature;
+
+    private Integer seed;
+
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
         this(apiKey, organizationId, answerType, null);
     }
@@ -69,6 +73,14 @@ public class GPTConfiguration {
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
@@ -76,6 +88,8 @@ public class GPTConfiguration {
         this.mode = mode;
         this.highIntelligenceNeeded = highIntelligenceNeeded;
         this.debug = debug;
+        this.temperature = temperature;
+        this.seed = seed;
     }
 
     /**
@@ -136,6 +150,22 @@ public class GPTConfiguration {
     }
 
     /**
+     * The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
+     */
+    public Double getTemperature() {
+        return temperature;
+    }
+
+    /**
+     * If specified, our system will make a best effort to sample deterministically, such that repeated requests with
+     * the same seed and parameters should return the same result. Determinism is not guaranteed, and you should refer
+     * to the system_fingerprint response parameter to monitor changes in the backend. Beta feature of OpenAI.
+     */
+    public Integer getSeed() {
+        return seed;
+    }
+
+    /**
      * Creates a configuration that joins the values.
      *
      * @throws IllegalArgumentException if values conflict - that's checked for apiKey and organizationId and answerType.
@@ -177,7 +207,9 @@ public class GPTConfiguration {
         if (this.debug != null && other.debug != null && (this.debug || other.debug)) {
             debug = true;
         }
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug);
+        Double temperature = this.temperature != null ? this.temperature : other.temperature;
+        Integer seed = this.seed != null ? this.seed : other.seed;
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed);
     }
 
     /**
@@ -221,6 +253,15 @@ public class GPTConfiguration {
         }
         if (highIntelligenceNeeded != null) {
             sb.append(", highIntelligenceNeeded=").append(highIntelligenceNeeded);
+        }
+        if (debug != null) {
+            sb.append(", debug=").append(debug);
+        }
+        if (temperature != null) {
+            sb.append(", temperature=").append(temperature);
+        }
+        if (seed != null) {
+            sb.append(", seed=").append(seed);
         }
         return sb.append('}').toString();
     }

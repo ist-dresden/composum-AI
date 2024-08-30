@@ -86,6 +86,11 @@ public abstract class AbstractGPTRunner {
             }
 
             @Override
+            public String seed() {
+                return null;
+            }
+
+            @Override
             public int maximumTokensPerRequest() {
                 return 0;
             }
