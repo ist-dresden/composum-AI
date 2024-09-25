@@ -167,7 +167,7 @@ try {
                     }
                 );
             } catch (e) {
-                console.error("error inserting create buttons", parameters, e);
+                console.error("error inserting create buttons", arguments, e);
             }
         }
 
@@ -191,7 +191,7 @@ try {
                     });
                 });
             } catch (e) {
-                console.error("error preparing dialog", parameters, e);
+                console.error("error preparing dialog", arguments, e);
                 debugger;
             }
         }
@@ -212,7 +212,7 @@ try {
                     ?.off('editing-start', onRteEditingStart)
                     ?.on('editing-start', onRteEditingStart);
             } catch (e) {
-                console.error("error initializing RTE hooks", parameters, e);
+                console.error("error initializing RTE hooks", arguments, e);
             }
         }
 
@@ -288,7 +288,7 @@ try {
                     }
                 });
             } catch (e) {
-                console.error("error inserting create buttons", parameters, e);
+                console.error("error inserting create buttons", arguments, e);
                 debugger;
             }
         }
@@ -333,7 +333,7 @@ try {
                     });
                 });
             } catch (e) {
-                console.error("error registering content dialog in toolbar", parameters, e);
+                console.error("error registering content dialog in toolbar", arguments, e);
                 debugger;
             }
         }

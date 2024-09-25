@@ -128,7 +128,7 @@ class AIConfig {
                 });
             }
         } catch (e) { // rather catch all exceptions than break something outside
-            console.error("AIConfig ifEnabled error", parameters, e);
+            console.error("AIConfig ifEnabled error", arguments, e);
             debugger;
         }
     }
