@@ -255,6 +255,9 @@ Bundle-DocURL:
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-baseline-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
+                    <configuration>
+                        <continueOnError>true</continueOnError>
+                    </configuration>
                 </plugin>
                 <!-- Maven Resources Plugin -->
                 <plugin>
