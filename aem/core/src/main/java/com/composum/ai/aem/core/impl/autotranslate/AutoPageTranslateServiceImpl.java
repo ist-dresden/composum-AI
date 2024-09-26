@@ -486,11 +486,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     }
 
     protected boolean isApplicable(@Nonnull AutoTranslateRuleConfig rule, @Nonnull String path, @Nonnull List<PropertyToTranslate> allTranslateableProperties) {
-        if (allTranslateableProperties == null || StringUtils.isBlank(rule.contentPattern())) {
+        if (allTranslateableProperties == null) {
             return false;
         }
         if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex())) {
             return false;
+        }
+        if (StringUtils.isBlank(rule.contentPattern())) {
+            return true;
         }
         try {
             Pattern contentPattern = compileContentPattern(rule.contentPattern());
