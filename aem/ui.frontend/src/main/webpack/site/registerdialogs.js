@@ -25,7 +25,7 @@ try {
         const SERVICE_CREATE = 'create';
         const SERVICE_SIDEPANEL = 'sidepanel';
         const aiconfig = new AIConfig();
-        var debug = true;
+        var debug = false;
 
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
         // for AEM 6.5.7 we, strangely, don't get the cq-sidepanel-loaded event. Try something else.
