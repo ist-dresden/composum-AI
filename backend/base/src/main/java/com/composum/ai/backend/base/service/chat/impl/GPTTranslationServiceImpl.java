@@ -38,6 +38,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 
 /**
@@ -160,7 +161,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      */
     @Nonnull
     @Override
-    public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration) throws GPTException {
+    public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration,
+                                              @Nullable List<GPTResponseCheck> translationChecks) throws GPTException {
         ensureEnabled();
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();
