@@ -66,7 +66,8 @@ Or course, the full power of the [Composum AI](usage.md) can then be used to fur
 Our translation process differs from the translation process Adobe suggests by one important point: the translated
 site(s) are live copies of the primary language, not language copies. The reason for that is: while language copies
 nicely allow translating a site initially, they are more difficult to handle when you are updating the site. But
-live copies are just made for that: change a page and hit "rollout" and the changes are transferred. So our
+live copies are just made for that: change a page and hit "rollout" and the changes are transferred,
+including structure changes like new components or component deletions. So our
 translation process integrates transparently into the rollout process: an additional rollout configuration
 translates all texts into the language configured for the rollout target during the rollout action.
 

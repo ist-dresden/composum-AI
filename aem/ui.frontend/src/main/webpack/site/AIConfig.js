@@ -71,7 +71,7 @@ class AIConfig {
             // weird case in content fragment editor where that URL is just wrong. Remove that prefix.
             contentURL = contentURL.replace("/mnt/overlay/dam/cfm/admin/content/v2/fragment-editor.html", "");
         }
-        if (contentURL.endsWith(".html")) {
+        if (contentURL && contentURL.endsWith(".html")) {
             contentURL = contentURL.substring(0, contentURL.length - 5);
         }
         return contentURL;
@@ -128,7 +128,7 @@ class AIConfig {
                 });
             }
         } catch (e) { // rather catch all exceptions than break something outside
-            console.error("AIConfig ifEnabled error", parameters, e);
+            console.error("AIConfig ifEnabled error", arguments, e);
             debugger;
         }
     }

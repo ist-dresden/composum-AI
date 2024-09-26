@@ -98,7 +98,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
     protected static final String PREFIX_PROMPT = "Create a text for a web page that is based on the retrieved information according to the following instructions which are separated into several parts. The separators like \"%%%%%%%% ID %%%%%%%%\" should be printed as they are, to structure both the output and the instructions.\n\n";
 
-    protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("(?m)^\\s*%{6,10}\\s*(?<id>\\S+)\\s*%{6,10}$");
+    protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("(?m)^\\s*%{6,10}\\s*(?<id>\\S+)\\s*%{6,10} *$");
 
     protected static final String THE_END_COMMAND = "Print as plain text: 'end of page' in parentheses";
 

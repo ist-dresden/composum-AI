@@ -61,6 +61,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected static final Pattern PATTERN_IGNORED_SUBNODE_NAMES =
             Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*|sling:members");
 
+    public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS";
+
     @Reference
     protected GPTTranslationService translationService;
 
@@ -134,7 +136,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         LOG.debug("Set of property names to newly translate in {} : {}", resource.getPath(),
                 propertiesToTranslate.stream()
                         .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
-        LOG.info("Translating {} properties in {}", propertiesToTranslate.size(), resource.getPath());
+        LOG.info("Translating {} properties in {} using additional instructions", propertiesToTranslate.size(), resource.getPath(), additionalInstructions);
+        if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
+            throw new RuntimeException("Here are the additional instructions for " + resource.getPath() + " for debugging (aborting translation):\n" +
+                    additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
+        }
 
         List<String> valuesToTranslate = propertiesToTranslate.stream()
                 .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))

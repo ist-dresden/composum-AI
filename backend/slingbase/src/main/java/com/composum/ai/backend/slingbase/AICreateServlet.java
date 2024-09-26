@@ -275,7 +275,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         int maxtokens = maxTokensParam != null ? maxTokensParam : 1000; // some arbitrary default.
         // Synchronize with cutoff in GPTChatCompletionServiceImpl as it's used in the sidebar!
         if (isNotBlank(textLength)) {
-            Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
+            Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*+(.*)").matcher(textLength);
             if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
                 maxtokens = Integer.parseInt(matcher.group(1));
                 textLength = matcher.group(2);

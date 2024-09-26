@@ -54,7 +54,7 @@ public class AutoTranslateListModel {
             if (path == null || path.isEmpty()) {
                 throw new IllegalArgumentException("path parameter is required");
             }
-            path = path.replaceAll("_jcr_content", "jcr:content").trim();
+            path = path.replaceAll("_jcr_content", "jcr:content").replaceAll("\\.html$", "").trim();
             boolean recursive = request.getParameter("recursive") != null;
             boolean changed = request.getParameter("translateWhenChanged") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
