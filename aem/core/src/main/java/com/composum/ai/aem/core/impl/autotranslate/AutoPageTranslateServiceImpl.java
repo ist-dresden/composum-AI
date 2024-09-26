@@ -78,8 +78,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                                    @Nonnull AutoTranslateService.TranslationParameters translationParameters)
             throws WCMException, PersistenceException {
         LOG.debug(">>> translateLiveCopy: {}", resource.getPath());
-        if (resource.getChild("jcr:content") != null) {
-            resource = resource.getChild("jcr:content");
+        Resource child = resource.getChild("jcr:content");
+        if (child != null) {
+            resource = child;
         }
         Stats stats = new Stats();
 
