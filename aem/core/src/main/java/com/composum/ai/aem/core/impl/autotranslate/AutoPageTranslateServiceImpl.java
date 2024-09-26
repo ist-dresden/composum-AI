@@ -485,18 +485,23 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return applicableRules.length() > 0 ? applicableRules.toString() : null;
     }
 
+    /**
+     * Returns whether the rule is applicable. It is not applicable if there are no translateable properties, anyway,
+     * if there is a {@link AutoTranslateRuleConfig#pathRegex()} that doesn't match the path, or
+     * if there is a {@link AutoTranslateRuleConfig#contentPattern()} that doesn't match the content.
+     */
     protected boolean isApplicable(@Nonnull AutoTranslateRuleConfig rule, @Nonnull String path, @Nonnull List<PropertyToTranslate> allTranslateableProperties) {
         if (allTranslateableProperties == null) {
             return false;
         }
-        if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex())) {
+        if (StringUtils.isNotBlank(rule.pathRegex()) && !path.matches(rule.pathRegex().trim())) {
             return false;
         }
         if (StringUtils.isBlank(rule.contentPattern())) {
             return true;
         }
         try {
-            Pattern contentPattern = compileContentPattern(rule.contentPattern());
+            Pattern contentPattern = compileContentPattern(rule.contentPattern().trim());
             return allTranslateableProperties.stream()
                     .map(PropertyToTranslate::getSourceValue)
                     .anyMatch(value -> value != null && contentPattern.matcher(value).find());
