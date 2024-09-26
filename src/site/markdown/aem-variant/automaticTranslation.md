@@ -5,7 +5,7 @@
 >  Seamless, swift, it blends.\
 > -- ChatGPT
 
-## A preliminary implementation
+## General idea
 
 Translating a site is often a rather large effort. Since modern LLM can both speak many languages and integrate
 advanced reasoning capabilities, they can be a big help in translating a site - possibly to the point that 
