@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
@@ -147,7 +149,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 .collect(Collectors.toList());
 
         List<String> translatedValues =
-                translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration);
+                translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
+                        Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
 
         Map<String, LiveRelationship> relationships = new HashMap<>();
 

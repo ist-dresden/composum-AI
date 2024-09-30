@@ -36,7 +36,7 @@ public class GPTResponseCheckTest {
         String result = KEEP_HREF_TRANSLATION_CHECK.responseProblem(source, translation);
         assertNotNull(result);
         assertTrue(result.contains(CAUTIONMSG));
-        assertEquals(CAUTIONMSG + " href=\"http://example.com\" .", result);
+        assertEquals(CAUTIONMSG + "href=\"http://example.com\" .", result);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class GPTResponseCheckTest {
         String brokenTranslation = "<h2>Starke Fokussierung auf Kundenorientierung</h2><p>Wir verbinden <a title=\"Automations-, Fertigungs- und Verbindungstechnologien\" href=\"/content/site/es/es-es/Technologien.html\" target=\"_self\" rel=\"noopener noreferrer\">Ressourcen</a>, Technologie und <a href=\"http://www.example.net/intelligent/produkte/und/loesungen\" target=\"_blank\" title=\"intelligenter Produkte und Lösungen\">Menschen</a>, um gemeinsam einen positiven Wandel</p>";
         result = KEEP_HREF_TRANSLATION_CHECK.responseProblem(source, brokenTranslation);
         assertEquals(CAUTIONMSG +
-                " href=\"/content/site/es/es-es/technologies.html\", href=\"http://www.example.net/intelligent/products/and/solutions\" .", result);
+                "href=\"/content/site/es/es-es/technologies.html\", href=\"http://www.example.net/intelligent/products/and/solutions\" .", result);
     }
 
 }
