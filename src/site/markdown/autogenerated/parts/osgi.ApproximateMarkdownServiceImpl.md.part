@@ -1,10 +1,10 @@
-/* AIGenVersion(73c43d1f, osgiconfigurations.prompt-1.1, ApproximateMarkdownServiceImpl.java-32bf27d9) */
+/* AIGenVersion(5f808194, osgiconfigurations.prompt-1.1, ApproximateMarkdownServiceImpl.java-6389947f) */
 
 # Composum AI Approximate Markdown Service Configuration (slingbase)
 
 Configuration for the Approximate Markdown Service used to get a text representation of a page or component for use with the AI.
 
-| id | name | type | default value | description |
+| id                        | name                          | type                | default value                                                                 | description                                                                                                                                                                                                                       |
 |----|------|------|---------------|-------------|
 | urlSourceWhitelist | URL Source Whitelist Regex | String[] |  | Only if using URLs as external source: Whitelist for URLs that can be read and turned into markdown. If not set, reading URLs is turned off. For security reasons you might want to prevent local addresses to be contacted. To allow everything you might use https?://.* , but make sure you have a good blacklist in that case. |
 | urlSourceBlacklist | URL Source Blacklist Regex | String[] |  | Only if using URLs as external source: Blacklist for URLs that can be read and turned into markdown. Has precendence over whitelist. |
