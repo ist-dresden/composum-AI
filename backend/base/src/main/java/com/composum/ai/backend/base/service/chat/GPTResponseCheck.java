@@ -24,6 +24,23 @@ public interface GPTResponseCheck {
     @Nullable
     String responseProblem(@Nonnull String source, @Nonnull String translation);
 
+    /**
+     * Finds problems of translation wrt. source and any of the checks.
+     */
+    static String collectResponseProblems(@Nullable List<GPTResponseCheck> checks, @Nullable String source, @Nullable String translation) {
+        if (checks == null || source == null || translation == null) {
+            // source / translation null is a doubful thing here, but the problem is not in the response check.
+            return null;
+        }
+        StringBuilder problems = new StringBuilder();
+        for (GPTResponseCheck check : checks) {
+            String problem = check.responseProblem(source, translation);
+            if (problem != null) {
+                problems.append(problem.trim()).append("\n\n");
+            }
+        }
+        return problems.length() > 0 ? "\n\n" + problems.toString() : null;
+    }
 
     /**
      * A check that all href attributes in richtext appear in the translation.
