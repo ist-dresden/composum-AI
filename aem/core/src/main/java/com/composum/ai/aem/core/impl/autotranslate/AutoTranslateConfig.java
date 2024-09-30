@@ -42,7 +42,13 @@ public @interface AutoTranslateConfig {
     boolean ignoreAssetsExceptContentFragments() default true;
 
     @AttributeDefinition(name = "Use High Intelligence Model",
-            description  ="If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true.")
+            description = "If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true.")
     boolean useHighIntelligenceModel() default true;
+
+    @AttributeDefinition(name = "Include Already Translated Values",
+            description = "If a page is re-translated with only a few modified texts: " +
+                    "if set we include the unchanged texts that don't have to be translated again, too, as they are in the target language." +
+                    "This might guide the translation of the now (re-)translated properties.")
+    boolean includeAlreadyTranslatedValues() default true;
 
 }

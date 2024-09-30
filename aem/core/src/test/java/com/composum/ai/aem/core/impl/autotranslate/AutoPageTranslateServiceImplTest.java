@@ -6,22 +6,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.caconfig.ConfigurationBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import com.composum.ai.backend.base.service.chat.GPTTranslationService;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
@@ -34,6 +40,14 @@ public class AutoPageTranslateServiceImplTest {
     protected LiveRelationshipManager liveRelationshipManager;
     @Mock
     protected AutoTranslateService autoTranslateService;
+    @Mock
+    protected AIConfigurationService configurationService;
+    @Mock
+    protected ConfigurationBuilder configurationBuilder;
+    @Mock
+    AutoTranslateCaConfig config;
+    @Mock
+    GPTTranslationService translationService;
     @Spy
     protected AutoTranslateConfigService autoTranslateConfigService = new AutoTranslateConfigServiceImpl();
 
@@ -64,7 +78,7 @@ public class AutoPageTranslateServiceImplTest {
         Resource copysub = context.create().resource("/content/de/jcr:content/foo", "jcr:title", "This is also to be translated");
 
 
-        when(liveRelationshipManager.getLiveRelationship(Mockito.any(), anyBoolean())).then(invocation -> {
+        when(liveRelationshipManager.getLiveRelationship(any(), anyBoolean())).then(invocation -> {
             Resource resource = invocation.getArgument(0);
             LiveRelationship liveRelationship = mock(LiveRelationship.class);
             when(liveRelationship.getSourcePath()).thenReturn(resource.getPath().replace("/de/", "/en/"));
@@ -97,5 +111,37 @@ public class AutoPageTranslateServiceImplTest {
         assertTrue(pattern.matcher("two \n words").matches());
         assertTrue(pattern.matcher("tWo  WordS").matches());
     }
+
+    @Test
+    public void testTranslate() throws WCMException, PersistenceException {
+        AemContext context = new AemContext();
+
+        Resource orig = context.create().resource("/content/en/jcr:content", "something", "This is to be translated", "displayPopupTitle", "true");
+        Resource origsub = context.create().resource("/content/en/jcr:content/foo", "jcr:title", "This is also to be translated");
+        Resource copy = spy(context.create().resource("/content/de/jcr:content", "something", "This is to be translated", "displayPopupTitle", "true"));
+        Resource copysub = context.create().resource("/content/de/jcr:content/foo", "jcr:title", "This is also to be translated");
+
+        when(copy.adaptTo(ConfigurationBuilder.class)).thenReturn(configurationBuilder);
+        when(configurationBuilder.as(AutoTranslateCaConfig.class)).thenReturn(config);
+
+        when(liveRelationshipManager.getLiveRelationship(any(), anyBoolean())).then(invocation -> {
+            Resource resource = invocation.getArgument(0);
+            LiveRelationship liveRelationship = mock(LiveRelationship.class);
+            doReturn(resource.getPath().replace("/de/", "/en/")).when(liveRelationship).getSourcePath();
+            return liveRelationship;
+        });
+
+        when(translationService.fragmentedTranslation(any(), any(), any(), any()))
+                .then(invocation -> {
+                    List<String> texts = invocation.getArgument(0);
+                    return texts.stream().map(String::toUpperCase).collect(Collectors.toList());
+                });
+
+        AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
+        service.translateLiveCopy(copy, parms);
+        assertEquals("THIS IS TO BE TRANSLATED", copy.getValueMap().get("something"));
+        assertEquals("THIS IS ALSO TO BE TRANSLATED", copysub.getValueMap().get("jcr:title"));
+    }
+
 
 }

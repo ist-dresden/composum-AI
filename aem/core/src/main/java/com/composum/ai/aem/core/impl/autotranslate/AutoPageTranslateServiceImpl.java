@@ -135,53 +135,66 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
         boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
 
-        LOG.debug("Set of property names to newly translate in {} : {}", resource.getPath(),
-                propertiesToTranslate.stream()
-                        .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
-        LOG.info("Translating {} properties in {} using additional instructions", propertiesToTranslate.size(), resource.getPath(), additionalInstructions);
-        if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
-            throw new RuntimeException("Here are the additional instructions for " + resource.getPath() + " for debugging (aborting translation):\n" +
-                    additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
-        }
-
-        List<String> valuesToTranslate = propertiesToTranslate.stream()
-                .map(p -> p.sourceResource.getValueMap().get(p.propertyName, String.class))
-                .collect(Collectors.toList());
-
-        List<String> translatedValues =
-                translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
-                        Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
-
-        Map<String, LiveRelationship> relationships = new HashMap<>();
-
-        for (int i = 0; i < propertiesToTranslate.size(); i++) {
-            PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
-            String originalValue = valuesToTranslate.get(i);
-            String translatedValue = translatedValues.get(i);
-            String propertyName = propertyToTranslate.propertyName;
-            Resource resourceToTranslate = propertyToTranslate.targetResource;
-            LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.targetResource.getPath(), translatedValue);
-            ModifiableValueMap valueMap = requireNonNull(resourceToTranslate.adaptTo(ModifiableValueMap.class));
-            AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(propertyToTranslate.sourceResource.getValueMap(), valueMap, propertyName);
-            targetWrapper.setOriginalCopy(originalValue);
-            targetWrapper.setTranslatedCopy(translatedValue);
-            targetWrapper.setCurrentValue(translatedValue);
-
-            LiveRelationship liveRelationship = relationships.get(propertyToTranslate.targetResource.getPath());
-            if (liveRelationship == null) {
-                liveRelationship = liveRelationshipManager.getLiveRelationship(propertyToTranslate.targetResource, false);
-                relationships.put(propertyToTranslate.targetResource.getPath(), liveRelationship);
+        int countPropertiesToTranslate = propertiesToTranslate.stream()
+                .filter(propertyToTranslate -> !propertyToTranslate.isAlreadyCorrectlyTranslated)
+                .collect(Collectors.counting()).intValue();
+        if (countPropertiesToTranslate <= 0) {
+            LOG.debug("Nothing to translate in {}", resource.getPath());
+        } else {
+            LOG.debug("Set of property names to newly translate in {} : {}", resource.getPath(),
+                    propertiesToTranslate.stream()
+                            .filter(propertyToTranslate -> !propertyToTranslate.isAlreadyCorrectlyTranslated)
+                            .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
+            LOG.info("Translating {} properties in {} using additional instructions", countPropertiesToTranslate, resource.getPath(), additionalInstructions);
+            if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
+                throw new RuntimeException("Here are the additional instructions for " + resource.getPath() + " for debugging (aborting translation):\n" +
+                        additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
             }
 
-            liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
-                    liveRelationship, targetWrapper.allAiKeys(), false);
+            // We also insert texts that are already translated since they might guide the translation process
+            List<String> valuesToTranslate = propertiesToTranslate.stream()
+                    .filter(p -> autoTranslateConfigService.includeAlreadyTranslatedValues() || !p.isAlreadyCorrectlyTranslated)
+                    .map(p -> p.isAlreadyCorrectlyTranslated ? p.getTargetValue() : p.getSourceValue())
+                    .collect(Collectors.toList());
 
-            markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters, configuration);
-            stats.translatedProperties++;
-            changed = true;
+            List<String> translatedValues =
+                    translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
+                            Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
 
-            if (translationParameters.breakInheritance) {
-                cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
+            Map<String, LiveRelationship> relationships = new HashMap<>();
+
+            for (int i = 0; i < propertiesToTranslate.size(); i++) {
+                PropertyToTranslate propertyToTranslate = propertiesToTranslate.get(i);
+                if (propertyToTranslate.isAlreadyCorrectlyTranslated) {
+                    continue; // was just included for context
+                }
+                String originalValue = valuesToTranslate.get(i);
+                String translatedValue = translatedValues.get(i);
+                String propertyName = propertyToTranslate.propertyName;
+                Resource resourceToTranslate = propertyToTranslate.targetResource;
+                LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.targetResource.getPath(), translatedValue);
+                ModifiableValueMap valueMap = requireNonNull(resourceToTranslate.adaptTo(ModifiableValueMap.class));
+                AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(propertyToTranslate.sourceResource.getValueMap(), valueMap, propertyName);
+                targetWrapper.setOriginalCopy(originalValue);
+                targetWrapper.setTranslatedCopy(translatedValue);
+                targetWrapper.setCurrentValue(translatedValue);
+
+                LiveRelationship liveRelationship = relationships.get(propertyToTranslate.targetResource.getPath());
+                if (liveRelationship == null) {
+                    liveRelationship = liveRelationshipManager.getLiveRelationship(propertyToTranslate.targetResource, false);
+                    relationships.put(propertyToTranslate.targetResource.getPath(), liveRelationship);
+                }
+
+                liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
+                        liveRelationship, targetWrapper.allAiKeys(), false);
+
+                markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters, configuration);
+                stats.translatedProperties++;
+                changed = true;
+
+                if (translationParameters.breakInheritance) {
+                    cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
+                }
             }
         }
 
@@ -428,11 +441,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 continue; // don't touch cancelled properties
             }
 
+            boolean isAlreadyCorrectlyTranslated = false;
             if (targetWrapper.isOriginalAsWhenLastTranslating() && !force) {
                 // shortcut: we have a recent translation already
                 targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
                 changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
-                continue;
+                isAlreadyCorrectlyTranslated = true;
             }
 
             if (isCancelled && targetWrapper.hasSavedTranslation() && translationParameters.translateWhenChanged
@@ -454,6 +468,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             propertyToTranslate.sourceResource = sourceResource;
             propertyToTranslate.targetResource = resource;
             propertyToTranslate.propertyName = key;
+            propertyToTranslate.isAlreadyCorrectlyTranslated = isAlreadyCorrectlyTranslated;
             propertiesToTranslate.add(propertyToTranslate);
         }
         for (Resource child : resource.getChildren()) {
@@ -560,6 +575,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         protected Resource targetResource;
         protected String propertyName;
 
+        /**
+         * True if the source value wasn't changed since the last translation - that is, the target value
+         * still has a correct translation and should not be modified.
+         */
+        protected boolean isAlreadyCorrectlyTranslated;
+
         public String getSourceValue() {
             return sourceResource.getValueMap().get(propertyName, String.class);
         }
@@ -577,6 +598,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 sb.append(" (from ");
                 sb.append(sourceResource.getPath());
                 sb.append(")");
+            }
+            if (isAlreadyCorrectlyTranslated) {
+                sb.append(" (already translated)");
             }
             return sb.toString();
         }

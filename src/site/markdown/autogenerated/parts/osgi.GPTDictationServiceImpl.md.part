@@ -1,0 +1,14 @@
+/* AIGenVersion(7d76c3b2, osgiconfigurations.prompt-1.1, GPTDictationServiceImpl.java-3160cd7e) */
+
+## GPT Dictation Service Configuration (base)
+
+Configures whether it's enabled (default false), the model and the request counts, and the maximum request size.
+
+| id                     | name                               | type | default value | description                                                                                       |
+|-----------------------|------------------------------------|------|---------------|---------------------------------------------------------------------------------------------------|
+| disabled               | Disabled                           | boolean | false         | Whether the service is disabled.                                                                   |
+| model                  | Model                              | String | whisper-1     | The model to use for dictation, default whisper-1.                                               |
+| requestsPerMinute      | Maximum requests per minute        | int    | 30            | Maximum count of requests to ChatGPT per minute - from the second half there will be a slowdown to avoid hitting the limit. Default 30. |
+| requestsPerHour        | Maximum requests per hour          | int    | 100           | Maximum count of requests to ChatGPT per hour - from the second half there will be a slowdown to avoid hitting the limit. Default 100. |
+| requestsPerDay         | Maximum requests per day           | int    | 300           | Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default 300. |
+| maxRequestSize         | Maximum request size in bytes      | int    | 5000000       | Maximum request size in bytes, default 5000000. (about one minute of stereo audio with 44.1 kHz and 16 bit) |

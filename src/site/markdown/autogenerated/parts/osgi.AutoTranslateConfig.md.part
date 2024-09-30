@@ -1,15 +1,16 @@
-/* AIGenVersion(52132854, osgiconfigurations.prompt-1.1, AutoTranslateConfig.java-21d9f005) */
+/* AIGenVersion(5a369cc2, osgiconfigurations.prompt-1.1, AutoTranslateConfig.java-1f8eea62) */
 
 ## Composum AI Autotranslate Configuration (aem/core)
 
 Configuration of the automatic translation of AEM pages. The OSGI configuration is only used if no Sling CAConfig configuration is found.
 
-| id | name | type | default value | description |
+| id                                   | name                                   | type    | default value | description                                                                                                                                                                                                                       |
 |----|------|------|---------------|-------------|
 | pocUiEnabled | Debugging UI | boolean | false | Enable the Autotranslate debugging UI at /apps/composum-ai/components/autotranslate/list/list.html , normally disabled. Only read from OSGI configuration. |
 | disabled | Disable | boolean | false | Disable the Autotranslate service |
 | deniedResourceTypes | Denied Resource Types | String[] |  | Regexes for denied Resource Types - if the sling:resourceType matches that, then no attributes or child nodes are touched by the automatic translation. |
 | allowedAttributeRegexes | Allowed Additional Attributes | String[] |  | Matches for Attributes that are explicitly allowed to be translated, in addition to standard attributes and heuristically recognized attributes. The heuristics is that the value has to have letters and whitespaces. Syntax: regular expressions that match resource type % attribute name - e.g. myapp/component/html%markup |
 | deniedAttributesRegexes | Denied Attributes | String[] |  | Attributes that are explicitly denied to be translated. Can be used to override the heuristics / standard attributes. Same syntax as allowed attributes. |
-| ignoreAssetsExceptContentFragments | Ignore Assets except Content Fragments | boolean | true | If true, assets are ignored for translation, except for content fragments. (Otherwise the translator would translate metadata of images and videos.) |
-| useHighIntelligenceModel | Use High Intelligence Model | boolean | true | If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true. |
+| ignoreAssetsExceptContentFragments    | Ignore Assets except Content Fragments | boolean | true          | If true, assets are ignored for translation, except for content fragments. (Otherwise the translator would translate metadata of images and videos.)                                                                                |
+| useHighIntelligenceModel             | Use High Intelligence Model            | boolean | true          | If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true.                                                                                                              |
+| includeAlreadyTranslatedValues        | Include Already Translated Values      | boolean | true          | If a page is re-translated with only a few modified texts: if set we include the unchanged texts that don't have to be translated again, too, as they are in the target language. This might guide the translation of the now (re-)translated properties. |
