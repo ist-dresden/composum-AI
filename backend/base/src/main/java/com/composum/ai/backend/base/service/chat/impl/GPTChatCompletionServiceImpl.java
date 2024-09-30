@@ -178,6 +178,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     protected int requestTimeout;
     protected int connectionTimeout;
     protected Double temperature;
+    protected Integer seed;
 
     protected boolean disabled;
 
@@ -220,6 +221,12 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         } catch (NumberFormatException e) {
             LOG.error("Cannot parse temperature {}", config.temperature(), e);
             this.temperature = null;
+        }
+        try {
+            this.seed = config != null && !StringUtil.isBlank(config.seed()) ? Integer.valueOf(config.seed()) : null;
+        } catch (NumberFormatException e) {
+            LOG.error("Cannot parse seed {}", config.seed(), e);
+            this.seed = null;
         }
         this.disabled = config != null && config.disabled();
         if (!disabled) {
@@ -281,6 +288,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         this.bundleContext = null;
         this.templates.clear();
         this.temperature = null;
+        this.seed = null;
         if (scheduledExecutorService != null) {
             scheduledExecutorService.shutdownNow();
             scheduledExecutorService = null;
@@ -595,7 +603,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().highIntelligenceNeededIsSet();
         externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
-        externalRequest.setTemperature(temperature);
+        externalRequest.setTemperature(request.getConfiguration() != null ? request.getConfiguration().getTemperature() : temperature);
+        externalRequest.setSeed(request.getConfiguration() != null ? request.getConfiguration().getSeed() : seed);
         if (request.getConfiguration() != null && request.getConfiguration().getAnswerType() == GPTConfiguration.AnswerType.JSON) {
             externalRequest.setResponseFormat(ChatCompletionRequest.JSON);
         }
@@ -858,6 +867,10 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         @AttributeDefinition(name = "Temperature", required = false,
                 description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0", defaultValue = "")
         String temperature();
+
+        @AttributeDefinition(name = "seed", description = "If specified, OpenAI will make a best effort to sample deterministically, " +
+                "such that repeated requests with the same seed and parameters should return the same result.")
+        String seed() default "";
 
         @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
                 "That's about a twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",

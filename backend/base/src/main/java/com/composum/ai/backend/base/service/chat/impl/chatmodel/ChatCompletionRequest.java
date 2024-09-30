@@ -25,6 +25,9 @@ public class ChatCompletionRequest {
     @SerializedName("response_format")
     private ResponseFormat responseFormat;
 
+    @SerializedName("seed")
+    private Integer seed;
+
     // Getters and setters
     public String getModel() {
         return model;
@@ -72,6 +75,14 @@ public class ChatCompletionRequest {
 
     public void setResponseFormat(ResponseFormat responseFormat) {
         this.responseFormat = responseFormat;
+    }
+
+    public Integer getSeed() {
+        return seed;
+    }
+
+    public void setSeed(Integer seed) {
+        this.seed = seed;
     }
 
     public enum Role {
