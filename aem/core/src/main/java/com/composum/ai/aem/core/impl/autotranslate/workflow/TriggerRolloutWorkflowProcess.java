@@ -34,7 +34,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * Translates the page that is given as payload from it's blueprint.&#xd;&#xa;The page has to be a live copy of the page it's translated from.&#xd;&#xa;Configured as recursive: rolls out tree of pages.
+ * Translates the page that is given as payload from it's blueprint. The page has to be a live copy of the page it's translated from.
+ * Configured as recursive: rolls out tree of pages.
  * This is conservative in that it only rolls out (again) pages that already have been rolled out, and where the source still exists. It does not delete old pages or create new pages, even when recursive.
  * <p>As process
  * arguments a JSON can be given that configures the translation process - a serialization of {@link TriggerRolloutParameters},
