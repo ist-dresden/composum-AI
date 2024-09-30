@@ -167,6 +167,11 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
         return result;
     }
 
+    @Override
+    public boolean includeAlreadyTranslatedValues() {
+        return config == null || config.includeAlreadyTranslatedValues();
+    }
+
     /**
      * Checks whether the property is one of jcr:title, jcr:description, title, alt, cq:panelTitle, shortDescription,
      * actionText, accessibilityLabel, pretitle, displayPopupTitle, helpMessage , or alternatively don't have a colon

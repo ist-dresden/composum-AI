@@ -18,7 +18,9 @@ public interface AutoTranslateConfigService {
 
     boolean isEnabled();
 
-    /** If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. */
+    /**
+     * If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation.
+     */
     boolean isUseHighIntelligenceModel();
 
     boolean isTranslatableResource(@Nullable Resource resource);
@@ -27,5 +29,13 @@ public interface AutoTranslateConfigService {
      * Returns those attributes that should be translated. (Of the resource, not children.)
      */
     List<String> translateableAttributes(@Nullable Resource resource);
+
+    /**
+     * If a page is re-translated with only a few modified texts:
+     * If true we include the texts that do not have to be translated, too, to guide the translation, and in the
+     * target language; otherwise
+     * we only include the texts that have to be translated.
+     */
+    boolean includeAlreadyTranslatedValues();
 
 }
