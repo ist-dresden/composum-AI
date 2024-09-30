@@ -37,7 +37,9 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 
 /**
@@ -160,7 +162,8 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      */
     @Nonnull
     @Override
-    public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration) throws GPTException {
+    public List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration,
+                                              @Nullable List<GPTResponseCheck> translationChecks) throws GPTException {
         ensureEnabled();
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();
@@ -176,7 +179,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         if (config.fakeTranslation()) {
             translatedRealTexts = realTexts.stream().map(GPTTranslationServiceImpl::fakeTranslation).collect(Collectors.toList());
         } else {
-            translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(10));
+            translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(10), translationChecks);
         }
 
         Map<String, String> translatedRealTextsMap = new LinkedHashMap<>();
@@ -209,10 +212,10 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      * We try to translate the whole lot of texts. If that leads to an exception because we are out of tokens or the response was garbled, we split it into two and translate these individually. If even one text is too long, we are lost and give up.
      */
     protected List<String> fragmentedTranslationDivideAndConquer(@Nonnull List<String> texts, @Nonnull String targetLanguage,
-                                                                 @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries) throws GPTException {
+                                                                 @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries, List<GPTResponseCheck> translationChecks) throws GPTException {
         if (texts.isEmpty()) {
             return Collections.emptyList();
-        } else if (texts.size() == 1) {
+        } else if (texts.size() == 1 && (translationChecks == null || translationChecks.isEmpty())) {
             return Collections.singletonList(singleTranslation(texts.get(0), null, targetLanguage, configuration));
         }
 
@@ -222,7 +225,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         }
 
         try {
-            return fragmentedTranslation(texts, targetLanguage, configuration, permittedRetries);
+            return fragmentedTranslation(texts, targetLanguage, configuration, permittedRetries, translationChecks);
         } catch (GPTException.GPTRetryableResponseErrorException e) {
             // is hopefully rare - otherwise we likely have to rethink this.
             LOG.info("Splitting translation because of retryable error: {}", e.toString());
@@ -238,13 +241,14 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         List<String> firstHalf = texts.subList(0, half);
         List<String> secondHalf = texts.subList(half, texts.size());
         List<String> result = new ArrayList<>();
-        result.addAll(fragmentedTranslationDivideAndConquer(firstHalf, targetLanguage, configuration, permittedRetries));
-        result.addAll(fragmentedTranslationDivideAndConquer(secondHalf, targetLanguage, configuration, permittedRetries));
+        result.addAll(fragmentedTranslationDivideAndConquer(firstHalf, targetLanguage, configuration, permittedRetries, translationChecks));
+        result.addAll(fragmentedTranslationDivideAndConquer(secondHalf, targetLanguage, configuration, permittedRetries, translationChecks));
         return result;
     }
 
     protected List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage,
-                                                 @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries) throws GPTException {
+                                                 @Nullable GPTConfiguration configuration, @Nonnull AtomicInteger permittedRetries,
+                                                 @Nullable List<GPTResponseCheck> translationChecks) throws GPTException {
         if (texts == null || texts.isEmpty()) {
             return Collections.emptyList();
         }
@@ -253,6 +257,16 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         String joinedtexts = joinTexts(texts, ids);
 
         String response = singleTranslation(joinedtexts, null, targetLanguage, configuration);
+        String responseProblems;
+        while((responseProblems = GPTResponseCheck.collectResponseProblems(translationChecks, joinedtexts, response)) != null) {
+            if (permittedRetries.decrementAndGet() <= 0) {
+                LOG.error("Too many retries with response problems for fragmented translation, to {} found problems {} text {}", targetLanguage, responseProblems, texts);
+                throw new GPTException("Too many retries for fragmented translation, response problems: " + responseProblems);
+            }
+            GPTConfiguration fixupInstructions = GPTConfiguration.ofAdditionalInstructions(responseProblems);
+            GPTConfiguration retryConfig = configuration != null ? configuration.merge(fixupInstructions) : fixupInstructions;
+            response = singleTranslation(joinedtexts, null, targetLanguage, retryConfig);
+        }
 
         return separateResultTexts(response, texts, ids, joinedtexts);
     }

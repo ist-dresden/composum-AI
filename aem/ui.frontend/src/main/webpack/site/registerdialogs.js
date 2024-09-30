@@ -35,7 +35,7 @@ try {
          * Loads the Sidebar Panel AI if it wasn't loaded already and if there's a sidebar present.
          */
         function loadSidebarPanelDialog() {
-            if (true) console.log("loadSidebarPanelDialog", arguments);
+            if (debug) console.log("loadSidebarPanelDialog", arguments);
             try {
                 const url = SIDEPANEL_DIALOG_URL + "?path=" + encodeURIComponent(aiconfig.getContentURL());
                 aiconfig.ifEnabled(SERVICE_SIDEPANEL, undefined, () => {

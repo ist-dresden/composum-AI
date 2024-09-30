@@ -122,6 +122,7 @@ public class AIDictationServlet extends SlingAllMethodsServlet {
      */
     @Override
     protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
+        LOG.info(">>> Dictation request on " + request.getRequestPathInfo().getSuffix());
         try {
             String suffix = request.getRequestPathInfo().getSuffix();
             GPTConfiguration config = null;
@@ -151,6 +152,8 @@ public class AIDictationServlet extends SlingAllMethodsServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType("text/plain");
             response.getWriter().write("Error: " + e);
+        } finally {
+            LOG.info("<<< Dictation request on " + request.getRequestPathInfo().getSuffix());
         }
     }
 

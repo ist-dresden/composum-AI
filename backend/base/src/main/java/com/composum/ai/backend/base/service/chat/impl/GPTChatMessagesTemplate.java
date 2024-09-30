@@ -24,6 +24,16 @@ import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 
+/**
+ * A template for chat messages, with placeholders.
+ * <p>
+ * The template can be read from classpath, a stream or an OSGI bundle.
+ * The file is read as UTF-8 text, and the lines are split into messages by lines that match the pattern "^-{5,}\\s+(?<role>system|user|assistant)\\s+-{5,}$".
+ * The role is one of "system", "user", "assistant".
+ * <p>
+ * The messages can contain placeholders like ${name}, which are replaced by the values in the map given to getMessages.
+ * If a placeholder is missing, we throw an error, as this is a misusage of the template.
+ */
 public class GPTChatMessagesTemplate {
     static final Logger LOG = LoggerFactory.getLogger(GPTChatMessagesTemplate.class);
 
@@ -46,6 +56,13 @@ public class GPTChatMessagesTemplate {
 
     private final String templateName;
 
+    /**
+     * Reads the template from the stream, which is closed afterwards.
+     *
+     * @param stream the stream to read from
+     * @param name   the name of the template, for error messages
+     * @throws GPTException if the stream is null
+     */
     public GPTChatMessagesTemplate(InputStream stream, @Nonnull String name) throws GPTException {
         if (stream == null) {
             throw new GPTException("Could not find template " + name);
@@ -65,6 +82,13 @@ public class GPTChatMessagesTemplate {
         }
     }
 
+    /**
+     * Reads the template from the classloader.
+     *
+     * @param classLoader the classloader to use, or null for the default
+     * @param name        the name of the template, for error messages
+     * @throws GPTException if the template is not found
+     */
     public GPTChatMessagesTemplate(@Nullable ClassLoader classLoader, @Nonnull String name) throws GPTException {
         this(getGetTemplateStreamFromClassloader(classLoader, name), name);
     }
@@ -80,6 +104,13 @@ public class GPTChatMessagesTemplate {
         }
     }
 
+    /**
+     * Reads the template from an OSGI bundle.
+     *
+     * @param bundle       the bundle to read from
+     * @param templateName the name of the template, for error messages
+     * @throws GPTException if the template is not found
+     */
     public GPTChatMessagesTemplate(@Nonnull Bundle bundle, @Nonnull String templateName) throws GPTException {
         this(getGetTemplateStreamFromBundle(bundle, templateName), templateName);
     }
@@ -116,7 +147,7 @@ public class GPTChatMessagesTemplate {
         for (List<String> b : blocks) {
             Matcher matcher = MESSAGE_SEPARATOR.matcher(b.get(0));
             if (!matcher.matches()) { // impossible
-                LOG.error("Bug in template parsing of template {}", templateName);
+                LOG.error("Bug in template parsing of template {} at {}", templateName, b.get(0));
                 throw new GPTException("Bug in template parsing of template.");
             }
             String role = matcher.group("role");
