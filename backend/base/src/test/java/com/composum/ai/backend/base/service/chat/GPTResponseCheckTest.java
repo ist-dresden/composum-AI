@@ -8,9 +8,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Mostly tests for {@link GPTResponseCheck#KEEP_HREF_TRANSLATION_CHECK}.
+ */
 public class GPTResponseCheckTest {
 
-    public static final String CAUTIONMSG = "CAUTION: Do not translate or change absolute or relative URLs in href attributes in HTML links, such as";
+    public static final String CAUTIONMSG = "CAUTION: Do not translate or change absolute or relative URLs in href attributes in HTML links, such as ";
 
     @Test
     public void responseProblem_noHrefsInSource_returnsNull() {
@@ -33,7 +36,7 @@ public class GPTResponseCheckTest {
         String result = KEEP_HREF_TRANSLATION_CHECK.responseProblem(source, translation);
         assertNotNull(result);
         assertTrue(result.contains(CAUTIONMSG));
-        assertEquals( CAUTIONMSG + " href=\"http://example.com\" .", result);
+        assertEquals(CAUTIONMSG + " href=\"http://example.com\" .", result);
     }
 
     @Test
@@ -48,7 +51,7 @@ public class GPTResponseCheckTest {
     @Test
     public void responseProblem_longHref_ignoresHref() {
         String longlong = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        String source = "<a href=\"" + longlong + longlong + longlong  + "\">Link</a>";
+        String source = "<a href=\"" + longlong + longlong + longlong + "\">Link</a>";
         String translation = "Missing but no report";
         assertNull(KEEP_HREF_TRANSLATION_CHECK.responseProblem(source, translation));
     }
