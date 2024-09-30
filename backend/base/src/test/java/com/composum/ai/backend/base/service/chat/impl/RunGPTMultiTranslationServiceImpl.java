@@ -28,7 +28,7 @@ public class RunGPTMultiTranslationServiceImpl extends AbstractGPTRunner {
         // checkTranslation(Arrays.asList());
         // checkTranslation(Arrays.asList("Hi!", "Good morning"));
         checkTranslation(Arrays.asList("Hi!", "Good morning", "How are you?", "More", "Let's translate as translate can."), null);
-        String richtext = "<h2>Strong focus on customer orientation</h2><p>We combine <a title=\"Automation, manufacturing and connection technologies\" href=\"/content/site/es/es-es/technologies.html\" target=\"_self\" rel=\"noopener noreferrer\">resources</a>, technology and <a href=\"http://www.example.net/intelligent/products/and/solutions\" target=\"_blank\" title=\"intelligent products and solutions\">people</a> to jointly create a positive change</p>";
+        String richtext = "<h2>Strong focus on customer orientation</h2><p>We combine <a title=\"Automation, manufacturing and connection technologies\" href=\"/content/site/es/es-es/technologies.html\" title=\"our technologies summary page\" target=\"_self\" rel=\"noopener noreferrer\">resources</a>, technology and <a href=\"http://www.example.net/intelligent/products/and/solutions\" target=\"_blank\" title=\"intelligent products and solutions\">people</a> to jointly create a positive change</p>";
         checkTranslation(Arrays.asList(richtext), GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK);
         if (0 == 1) {
             List<String> veryLongArray = new ArrayList<>();
