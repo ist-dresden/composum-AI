@@ -12,6 +12,7 @@ class AIDictate {
      * @param {string} dictatebutton - Selector for the button that starts and stops recording.
      * @param {string} textarea - Selector for the textarea where the transcription is inserted.
      * @param {function} onChangeCallback - Callback function that is called after the transcription is inserted.
+     * @param {function} onErrorCallback - Callback function that is called when an error occurs.
      */
     constructor(dictatebutton, textarea, onChangeCallback, onErrorCallback) {
         this.dictatebutton = $(dictatebutton)[0];
@@ -22,6 +23,8 @@ class AIDictate {
         this.timeoutCall = null;
         this.isRecording = false;
         this.isStoppingRecording = false;
+        this.isStartingRecording = false;
+        this.onErrorCallback = onErrorCallback;
         this.dictateUrl = Granite.HTTP.externalize(AIDICTATE_SERVLET) + ".txt" + new AIConfig().getContentURL();
         console.log("AIDictate constructor", this.dictatebutton, this.textarea);
         this.enableCheck();
@@ -68,7 +71,8 @@ class AIDictate {
     }
 
     startRecording = async () => {
-        if (!this.isRecording && !this.isStoppingRecording) {
+        if (!this.isRecording && !this.isStoppingRecording && !this.isStartingRecording) try {
+            this.isStartingRecording = true;
             console.log('Recording...');
             this.audioStream = await navigator.mediaDevices.getUserMedia({audio: true});
             const audioContext = new AudioContext();
@@ -77,10 +81,20 @@ class AIDictate {
             this.recorder.record();
             this.timeoutCall = setTimeout(this.stopRecording, 120000); // Stop recording after 2 minutes
             this.isRecording = true;
+        } finally {
+            this.isStartingRecording = false;
         }
     };
 
     stopRecording = async () => {
+        if (this.isStartingRecording) {
+            console.log('You probably did a double click. Please use "push to talk" - press and hold the button to record. Retrying to stop recording');
+            if (this.onErrorCallback) {
+                this.onErrorCallback('You probably did a double click. Please use "push to talk" - press and hold the button to record.');
+            }
+            setTimeout(this.stopRecording, 1000);
+            return;
+        }
         if (!this.isRecording || this.isStoppingRecording) {
             return;
         }
@@ -103,33 +117,42 @@ class AIDictate {
                 }
 
                 console.log('Sending request');
-                fetch(this.dictateUrl, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {'CSRF-Token': token}
-                }).then(response => {
-                    console.log('Received response', response.status);
-                    if (response.ok) {
-                        return response.text();
-                    } else {
-                        throw new Error(`Error: ${response.statusText}`);
-                    }
-                }).then(data => {
-                    console.log('Received data', data);
-                    this.insertResult(data.trim());
-                }).catch(error => {
-                    this.onError(error);
-                    debugger;
-                }).finally(() => {
-                    console.log('Finished, enabling button');
-                    this.dictatebutton.disabled = false;
-                    this.recorder = null;
-                    this.isRecording = false;
-                    this.isStoppingRecording = false;
-                });
+                try {
+                    fetch(this.dictateUrl, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {'CSRF-Token': token}
+                    }).then(response => {
+                        console.log('Received response', response.status);
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error(`Error: ${response.statusText}`);
+                        }
+                    }).then(data => {
+                        console.log('Received data', data);
+                        this.insertResult(data.trim());
+                    }).catch(error => {
+                        this.onError(error);
+                        debugger;
+                    }).finally(() => {
+                        console.log('Finished, enabling button');
+                        this._resetButtons();
+                    });
+                } catch (error) {
+                    console.log('Error starting fetch', error);
+                    this._resetButtons();
+                }
             });
         });
     };
+
+    _resetButtons() {
+        this.dictatebutton.disabled = false;
+        this.recorder = null;
+        this.isRecording = false;
+        this.isStoppingRecording = false;
+    }
 
     insertResult(data) {
         // Insert transcription at current cursor position

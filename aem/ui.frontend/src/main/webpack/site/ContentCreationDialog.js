@@ -61,7 +61,8 @@ class ContentCreationDialog {
         this.bindActions();
         this.createServlet = new AICreate(this.streamingCallback.bind(this), this.doneCallback.bind(this), this.errorCallback.bind(this));
         this.dictate = new AIDictate(this.$dialog.find('.composum-ai-dictate-button'),
-            this.$prompt, this.onPromptChanged.bind(this)
+            this.$prompt, this.onPromptChanged.bind(this),
+            this.showError.bind(this)
         );
         const historyPath = property ? componentPath + '/' + property : componentPath;
         if (!historyMap[historyPath]) {
