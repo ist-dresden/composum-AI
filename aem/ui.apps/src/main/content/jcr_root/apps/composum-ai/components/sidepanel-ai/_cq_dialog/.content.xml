@@ -103,12 +103,6 @@
                                     sling:resourceType="granite/ui/components/coral/foundation/actionbar">
                                 <primary
                                         jcr:primaryType="nt:unstructured">
-                                    <dictate
-                                            jcr:primaryType="nt:unstructured"
-                                            icon="stage"
-                                            sling:resourceType="granite/ui/components/coral/foundation/button"
-                                            granite:title="Dictate your prompt to the AI: while pressed, audio is recorded and after releasing the button it's transcribed and inserted into the prompt."
-                                            granite:class="composum-ai-dictate-button hide"/>
                                     <generate
                                             jcr:primaryType="nt:unstructured" icon="play"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
@@ -124,6 +118,12 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
                                             granite:class="composum-ai-reset-button"
                                             granite:title="Resets the form to the state when you opened it."/>
+                                    <dictate
+                                            jcr:primaryType="nt:unstructured"
+                                            icon="stage"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            granite:title="Dictate your prompt to the AI: while pressed, audio is recorded and after releasing the button it's transcribed and inserted into the prompt."
+                                            granite:class="composum-ai-dictate-button hide"/>
                                     <help
                                             jcr:primaryType="nt:unstructured" icon="help"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
