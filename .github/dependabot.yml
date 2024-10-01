@@ -8,11 +8,11 @@
    - package-ecosystem: "maven" # See documentation for possible values
      directory: "/" # Location of package manifests
      schedule:
-       interval: "daily"
+       interval: "monthly"
 #     ignore:
 #       - dependency-name: "*"
 #         update-types: ["version-update:semver-major"]
-     open-pull-requests-limit: 50
+     open-pull-requests-limit: 0
 
    - package-ecosystem: "npm"
      directory: "/"
