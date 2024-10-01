@@ -3,15 +3,27 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
-# version: 2
-# updates:
-#   - package-ecosystem: "maven" # See documentation for possible values
-#     directory: "/" # Location of package manifests
-#     schedule:
-#       interval: "monthly"
+ version: 2
+ updates:
+   - package-ecosystem: "maven" # See documentation for possible values
+     directory: "/" # Location of package manifests
+     schedule:
+       interval: "daily"
 #     ignore:
 #       - dependency-name: "*"
 #         update-types: ["version-update:semver-major"]
+     open-pull-requests-limit: 50
+
+   - package-ecosystem: "npm"
+     directory: "/"
+     schedule:
+       interval: "monthly"
+     open-pull-requests-limit: 0
+
 #   - package-ecosystem: "npm"
+#     schedule:
+#       interval: "monthly"
 #     ignore:
+#       # Disable version updates for npm dependencies since that's from the AEM archetype and not embedded, anyway.
 #       - dependency-name: "*"
+#     open-pull-requests-limit: 0
