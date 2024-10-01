@@ -112,7 +112,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <!-- 3.3.1 fails with "We have duplicated artifacts attached." during release creation. -->
+                <version>3.2.1</version>
                 <inherited>true</inherited>
                 <executions>
                     <execution>
