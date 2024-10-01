@@ -31,7 +31,7 @@ public class GPTException extends RuntimeException {
     }
 
     /**
-     * <code><pre>
+     * <pre><code>
      * {
      *   "error": {
      *     "message": "This model's maximum context length is 4097 tokens. However, you requested 4671 tokens (1203 in the messages, 3468 in the completion). Please reduce the length of the messages or completion.",
@@ -40,7 +40,7 @@ public class GPTException extends RuntimeException {
      *     "code": "context_length_exceeded"
      *   }
      * }
-     * </pre></code>
+     * </code></pre>
      */
     public static class GPTContextLengthExceededException extends GPTException {
         public GPTContextLengthExceededException(String message) {
