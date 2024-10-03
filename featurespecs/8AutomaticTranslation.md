@@ -275,6 +275,12 @@ result should come from.
 - Manual process (possibly supported by a workflow)
 - Automatically during rollout when inheritance is cancelled - that must be switchable, though.
 
+#### The case of links in richtext
+
+When there are links within richtext they might need to be rewritten. That is done by the AEM live copy mechanism as 
+well, but it seems safer to take the original text from the blueprint since it's clear that this is the correct 
+source language text in all cases. Thus, we need to replicate the link replacement mechanism. 
+
 ### Heuristics for translateable attribute recognition.
 
 To avoid having to configure the translation for all properties we use a heuristic to recognize translated

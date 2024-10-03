@@ -211,6 +211,10 @@ that can be used to add additional instructions how to translate the pages in th
   but that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be
   simpler for the editors in practice.
 
+For more details you can look at the
+[specification](https://github.com/ist-dresden/composum-AI/blob/84b07ece77536f7db0034a7bb8b41ddf324b06a5/featurespecs/8AutomaticTranslation.md)
+.
+
 ## Possible extensions
 
 <a id="difftranslation"></a>

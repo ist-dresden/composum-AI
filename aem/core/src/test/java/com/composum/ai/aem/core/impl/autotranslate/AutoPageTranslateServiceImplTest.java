@@ -29,6 +29,7 @@ import org.mockito.Spy;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveCopy;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
@@ -124,10 +125,15 @@ public class AutoPageTranslateServiceImplTest {
         when(copy.adaptTo(ConfigurationBuilder.class)).thenReturn(configurationBuilder);
         when(configurationBuilder.as(AutoTranslateCaConfig.class)).thenReturn(config);
 
+        LiveCopy liveCopy = mock(LiveCopy.class);
+        when(liveCopy.getBlueprintPath()).thenReturn("/content/en");
+        when(liveCopy.getPath()).thenReturn("/content/de");
+
         when(liveRelationshipManager.getLiveRelationship(any(), anyBoolean())).then(invocation -> {
             Resource resource = invocation.getArgument(0);
             LiveRelationship liveRelationship = mock(LiveRelationship.class);
             doReturn(resource.getPath().replace("/de/", "/en/")).when(liveRelationship).getSourcePath();
+            doReturn(liveCopy).when(liveRelationship).getLiveCopy();
             return liveRelationship;
         });
 
@@ -143,5 +149,21 @@ public class AutoPageTranslateServiceImplTest {
         assertEquals("THIS IS ALSO TO BE TRANSLATED", copysub.getValueMap().get("jcr:title"));
     }
 
+    @Test
+    public void testRemapPaths() {
+        AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl();
+        assertEquals("Some text containing a <a href=\"/content/livecopy/path/to/resource\">Link</a> here",
+                service.remapPaths("Some text containing a <a href=\"/content/blueprint/path/to/resource\">Link</a> here", "/content/blueprint", "/content/livecopy"));
+        assertEquals("<a href=\"/content/other/path/to/resource\">Link</a>",
+                service.remapPaths("<a href=\"/content/other/path/to/resource\">Link</a>", "/content/blueprint", "/content/livecopy"));
+        assertEquals("<a href=\"/content/livecopy/path1\">Link1</a><a href=\"/content/livecopy/path2\">Link2</a>",
+                service.remapPaths("<a href=\"/content/blueprint/path1\">Link1</a><a href=\"/content/blueprint/path2\">Link2</a>", "/content/blueprint", "/content/livecopy"));
+        assertEquals("<a>Link</a>",
+                service.remapPaths("<a>Link</a>", "/content/blueprint", "/content/livecopy"));
+        assertEquals("",
+                service.remapPaths("", "/content/blueprint", "/content/livecopy"));
+        assertEquals(null,
+                service.remapPaths((String) null, "/content/blueprint", "/content/livecopy"));
+    }
 
 }

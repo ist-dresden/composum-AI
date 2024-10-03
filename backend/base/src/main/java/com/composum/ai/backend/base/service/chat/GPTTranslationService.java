@@ -52,6 +52,7 @@ public interface GPTTranslationService {
      * @param translationChecks additional checks to verify the translation
      * @return the translated texts
      */
+    @Nonnull
     List<String> fragmentedTranslation(@Nonnull List<String> texts, @Nonnull String targetLanguage, @Nullable GPTConfiguration configuration,
                                        @Nullable List<GPTResponseCheck> translationChecks) throws GPTException;
 

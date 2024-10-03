@@ -87,6 +87,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             resource = child;
         }
         Stats stats = new Stats();
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        if (relationship == null) {
+            throw new IllegalArgumentException("No live relationship for " + resource.getPath());
+        }
 
         String language = SelectorUtils.findLanguage(resource);
         if (language == null) {
@@ -160,6 +164,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
                             Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
+            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath()
+            );
 
             Map<String, LiveRelationship> relationships = new HashMap<>();
 
@@ -221,6 +227,28 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         LOG.debug("<<< translateLiveCopy: {} {}", resource.getPath(), stats);
         return stats;
+    }
+
+    /**
+     * Checks whether there are href="path" in the translatedValues where path is within blueprintPath
+     * and replaces those with the according path in the live copy.
+     */
+    protected List<String> remapPaths(List<String> translatedValues, String blueprintPath, String livecopyPath) {
+        return translatedValues.stream().map(val -> remapPaths(val, blueprintPath, livecopyPath)).collect(Collectors.toList());
+    }
+
+    /**
+     * We find all href="path" patterns
+     *
+     * @see #remapPaths(List, String, String)
+     */
+    protected String remapPaths(String translatedValue, String blueprintPath, String livecopyPath) {
+        if (translatedValue == null) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("href=\"" +
+                Pattern.quote(blueprintPath) + "(/[^\"]*)\"");
+        return pattern.matcher(translatedValue).replaceAll("href=\"" + livecopyPath + "$1\"");
     }
 
     private String determineSourceLanguage(Resource resource) throws WCMException {
