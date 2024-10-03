@@ -158,7 +158,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             // We also insert texts that are already translated since they might guide the translation process
             List<String> valuesToTranslate = propertiesToTranslate.stream()
                     .filter(p -> autoTranslateConfigService.includeAlreadyTranslatedValues() || !p.isAlreadyCorrectlyTranslated)
-                    .map(p -> p.isAlreadyCorrectlyTranslated ? p.getTargetValue() : p.getSourceValue())
+                    .map(PropertyToTranslate::getSourceValue)
                     .collect(Collectors.toList());
 
             List<String> translatedValues =
@@ -248,7 +248,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         Pattern pattern = Pattern.compile("href=\"" +
                 Pattern.quote(blueprintPath) + "(/[^\"]*)\"");
-        return pattern.matcher(translatedValue).replaceAll("href=\"" + livecopyPath + "$1\"");
+        String result = pattern.matcher(translatedValue).replaceAll("href=\"" + livecopyPath + "$1\"");
+        if (translatedValue.contains("href")) { // FIXME(hps,24/10/03) no checkin
+            LOG.trace("Remapping paths from {} to {} in {}", blueprintPath, livecopyPath, translatedValue);
+        }
+        return result;
     }
 
     private String determineSourceLanguage(Resource resource) throws WCMException {
@@ -461,6 +465,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
+
+            if (StringUtils.contains(targetWrapper.getOriginalCopy(), "href")) { // FIXME(hps,24/10/03) no checkin
+                LOG.trace("Skipping {} in {} because it contains href", key, resource.getPath());
+            }
 
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.
