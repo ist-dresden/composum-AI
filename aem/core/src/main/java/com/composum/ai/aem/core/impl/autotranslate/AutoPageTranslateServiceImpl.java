@@ -167,6 +167,17 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath()
             );
 
+            // Already translated text is given as example.
+            String alreadyTranslatedText = propertiesToTranslate.stream()
+                    .filter(p -> p.isAlreadyCorrectlyTranslated)
+                    .map(PropertyToTranslate::getTargetValue)
+                    .collect(Collectors.joining("\n"));
+            if (StringUtils.isNotBlank(alreadyTranslatedText)) {
+                configuration = configuration.merge(GPTConfiguration.ofContext(
+                        "This was the result of a previous translation. You can draw on that for translation examples and context of the translation.",
+                        alreadyTranslatedText));
+            }
+
             Map<String, LiveRelationship> relationships = new HashMap<>();
 
             for (int i = 0; i < propertiesToTranslate.size(); i++) {
