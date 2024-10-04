@@ -45,11 +45,16 @@ public @interface AutoTranslateConfig {
             description = "If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true.")
     boolean useHighIntelligenceModel() default true;
 
-    @AttributeDefinition(name = "Include Already Translated Values",
-            description = "If a page is re-translated with only a few modified texts: " +
-                    "If true we include the source texts that do not have to be translated, too, " +
-                    "to provide better context to the translation; otherwise " +
-                    "we only include the texts that have to be translated.")
-    boolean includeAlreadyTranslatedValues() default true;
+    @AttributeDefinition(name = "Include Full Page during Retranslation",
+            description = "If true we do not only provide changed texts to the AI during re-translating a page with some changes," +
+                    "but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely" +
+                    "improves the result.")
+    boolean includeFullPageInRetranslation() default true;
+
+    @AttributeDefinition(name = "Include Existing Translations in Retranslation",
+            description = "If true, when retranslating a page with some changes we provide" +
+                    "the existing translations of that page to the AI as well as additional context with examples. " +
+                    "That is a bit slower and a bit more expensive, but likely improves the result.")
+    boolean includeExistingTranslationsInRetranslation() default true;
 
 }

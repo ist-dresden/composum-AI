@@ -157,25 +157,25 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
             // We also insert texts that are already translated since they might guide the translation process
             List<String> valuesToTranslate = propertiesToTranslate.stream()
-                    .filter(p -> autoTranslateConfigService.includeAlreadyTranslatedValues() || !p.isAlreadyCorrectlyTranslated)
+                    .filter(p -> autoTranslateConfigService.includeFullPageInRetranslation() || !p.isAlreadyCorrectlyTranslated)
                     .map(PropertyToTranslate::getSourceValue)
                     .collect(Collectors.toList());
-
-            List<String> translatedValues =
-                    translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
-                            Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
-            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath());
 
             // Already translated text is given as example.
             String alreadyTranslatedText = propertiesToTranslate.stream()
                     .filter(p -> p.isAlreadyCorrectlyTranslated)
                     .map(PropertyToTranslate::getTargetValue)
                     .collect(Collectors.joining("\n"));
-            if (StringUtils.isNotBlank(alreadyTranslatedText)) {
+            if (autoTranslateConfigService.includeExistingTranslationsInRetranslation() && StringUtils.isNotBlank(alreadyTranslatedText)) {
                 configuration = configuration.merge(GPTConfiguration.ofContext(
                         "Print a result of a previous translation of parts of the text. You can draw on that for translation examples and context of the translation.",
                         alreadyTranslatedText));
             }
+
+            List<String> translatedValues =
+                    translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
+                            Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
+            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath());
 
             Map<String, LiveRelationship> relationships = new HashMap<>();
 
