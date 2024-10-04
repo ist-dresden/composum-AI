@@ -21,4 +21,17 @@ public @interface AutoTranslateCaConfig {
     @Property(label = "Rules that give additional instructions for translation if certain words or phrases are present in the page.")
     AutoTranslateRuleConfig[] rules() default {};
 
+    @Property(label = "Include Full Page during Retranslation",
+            description = "If true we do not only provide changed texts to the AI during re-translating a page with some changes," +
+                    "but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely" +
+                    "improves the result. This overrides the default from OSGI configuration.")
+    boolean[] includeFullPageInRetranslation();
+
+    @Property(label = "Include Existing Translations in Retranslation",
+            description = "If true, when retranslating a page with some changes we provide" +
+                    "the existing translations of that page to the AI as well as additional context with examples. " +
+                    "That is a bit slower and a bit more expensive, but likely improves the result." +
+                    "This overrides the default from OSGI configuration.")
+    boolean[] includeExistingTranslationsInRetranslation() default true;
+
 }

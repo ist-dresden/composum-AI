@@ -158,26 +158,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
             }
 
-            // We also insert texts that are already translated since they might guide the translation process
-            List<String> valuesToTranslate = propertiesToTranslate.stream()
-                    .filter(p -> autoTranslateConfigService.includeFullPageInRetranslation() || !p.isAlreadyCorrectlyTranslated)
-                    .map(PropertyToTranslate::getSourceValue)
-                    .collect(Collectors.toList());
+            List<String> valuesToTranslate = collectValuesToTranslate(autoTranslateCaConfig, propertiesToTranslate);
 
-            // Already translated text is given as example.
-            String alreadyTranslatedText = propertiesToTranslate.stream()
-                    .filter(p -> p.isAlreadyCorrectlyTranslated)
-                    .map(PropertyToTranslate::getTargetValue)
-                    .collect(Collectors.joining("\n"));
-            if (autoTranslateConfigService.includeExistingTranslationsInRetranslation() && StringUtils.isNotBlank(alreadyTranslatedText)) {
-                configuration = configuration.merge(GPTConfiguration.ofContext(
-                        "Retrieve the result of a previous translation of parts of the text. You don't need to translate this - this is just contextual information and you can draw on that for translation examples and context of the translation that is done later.",
-                        // we have to follow the final format or that is confusing for the AI
-                        MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END +
-                                alreadyTranslatedText +
-                                MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END
-                ));
-            }
+            configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);
 
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
@@ -244,6 +227,54 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         LOG.debug("<<< translateLiveCopy: {} {}", resource.getPath(), stats);
         return stats;
+    }
+
+    /**
+     * Collects the values we need to translate.
+     * If configured, we also insert texts that are already translated since they might guide the translation process.
+     */
+    protected List<String> collectValuesToTranslate(AutoTranslateCaConfig autoTranslateCaConfig, List<PropertyToTranslate> propertiesToTranslate) {
+        boolean includeFullPageInRetranslation = autoTranslateConfigService.includeFullPageInRetranslation()
+                || trueTristateCaConfig(autoTranslateCaConfig.includeFullPageInRetranslation());
+        List<String> valuesToTranslate = propertiesToTranslate.stream()
+                .filter(p -> includeFullPageInRetranslation || !p.isAlreadyCorrectlyTranslated)
+                .map(PropertyToTranslate::getSourceValue)
+                .collect(Collectors.toList());
+        return valuesToTranslate;
+    }
+
+    /**
+     * If configured, we include the already translated parts of the page as example.
+     */
+    protected GPTConfiguration maybeIncludeAlreadyTranslatedTextAsExample(
+            List<PropertyToTranslate> propertiesToTranslate,
+            AutoTranslateCaConfig autoTranslateCaConfig, GPTConfiguration configuration) {
+        boolean includeExistingTranslationsInRetranslation =
+                autoTranslateConfigService.includeExistingTranslationsInRetranslation() ||
+                        trueTristateCaConfig(autoTranslateCaConfig.includeExistingTranslationsInRetranslation());
+
+        String alreadyTranslatedText = propertiesToTranslate.stream()
+                .filter(p -> p.isAlreadyCorrectlyTranslated)
+                .map(PropertyToTranslate::getTargetValue)
+                .collect(Collectors.joining("\n"));
+
+        if (includeExistingTranslationsInRetranslation && StringUtils.isNotBlank(alreadyTranslatedText)) {
+            configuration = configuration.merge(GPTConfiguration.ofContext(
+                    "Retrieve the result of a previous translation of parts of the text. You don't need to translate this - this is just contextual information and you can draw on that for translation examples and context of the translation that is done later.",
+                    // we have to follow the final format or that is confusing for the AI
+                    MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END +
+                            alreadyTranslatedText +
+                            MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END
+            ));
+        }
+        return configuration;
+    }
+
+    /**
+     * Is counted as true if there is a true value in the array.
+     */
+    protected boolean trueTristateCaConfig(boolean[] value) {
+        return value != null && Arrays.asList(value).contains(true);
     }
 
     /**
