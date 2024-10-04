@@ -168,8 +168,13 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
     }
 
     @Override
-    public boolean includeAlreadyTranslatedValues() {
-        return config == null || config.includeAlreadyTranslatedValues();
+    public boolean includeFullPageInRetranslation() {
+        return config == null || config.includeFullPageInRetranslation();
+    }
+
+    @Override
+    public boolean includeExistingTranslationsInRetranslation() {
+        return config == null || config.includeExistingTranslationsInRetranslation();
     }
 
     /**

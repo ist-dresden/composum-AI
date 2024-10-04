@@ -1,5 +1,8 @@
 package com.composum.ai.backend.base.service.chat;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -52,9 +55,12 @@ public class GPTConfiguration {
 
     private final Boolean debug;
 
-    private Double temperature;
+    private final Double temperature;
 
-    private Integer seed;
+    private final Integer seed;
+
+    private final List<GPTContextInfo> contexts;
+
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
         this(apiKey, organizationId, answerType, null);
@@ -81,6 +87,10 @@ public class GPTConfiguration {
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
@@ -90,6 +100,7 @@ public class GPTConfiguration {
         this.debug = debug;
         this.temperature = temperature;
         this.seed = seed;
+        this.contexts = contexts;
     }
 
     /**
@@ -209,7 +220,29 @@ public class GPTConfiguration {
         }
         Double temperature = this.temperature != null ? this.temperature : other.temperature;
         Integer seed = this.seed != null ? this.seed : other.seed;
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed);
+        List<GPTContextInfo> contextInfos = new ArrayList<>();
+        if (this.contexts != null) {
+            contextInfos.addAll(this.contexts);
+        }
+        if (other.contexts != null) {
+            contextInfos.addAll(other.contexts);
+        }
+        contextInfos = contextInfos.isEmpty() ? null : Collections.unmodifiableList(contextInfos);
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos);
+    }
+
+    /**
+     * Additional context information to provide to the AI. Not actual instructions, just background information.
+     */
+    public List<GPTContextInfo> getContexts() {
+        return contexts;
+    }
+
+    /**
+     * Returns a copy with the contexts replaced.
+     */
+    public GPTConfiguration replaceContexts(List<GPTContextInfo> newContexts) {
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, newContexts);
     }
 
     /**
@@ -231,6 +264,16 @@ public class GPTConfiguration {
     @Nonnull
     public static GPTConfiguration ofAdditionalInstructions(@Nullable String additionalInstructions) {
         return new GPTConfiguration(null, null, null, additionalInstructions);
+    }
+
+    @Nonnull
+    public static GPTConfiguration ofContexts(@Nullable List<GPTContextInfo> contexts) {
+        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, contexts);
+    }
+
+    @Nonnull
+    public static GPTConfiguration ofContext(@Nonnull String usermsg, @Nonnull String assistantmsg) {
+        return ofContexts(Collections.singletonList(new GPTContextInfo(usermsg, assistantmsg)));
     }
 
     @Override
@@ -262,6 +305,9 @@ public class GPTConfiguration {
         }
         if (seed != null) {
             sb.append(", seed=").append(seed);
+        }
+        if (contexts != null) {
+            sb.append(", contexts=").append(contexts);
         }
         return sb.append('}').toString();
     }
@@ -297,4 +343,50 @@ public class GPTConfiguration {
     public int hashCode() {
         return Objects.hash(getApiKey(), getAnswerType());
     }
+
+
+    /**
+     * Gives the conversation a history - additional assistant - user message pair.
+     */
+    public static class GPTContextInfo {
+
+        private final String userMsg;
+        private final String assistantMsg;
+
+        public GPTContextInfo(String title, String assistantMsg) {
+            this.userMsg = title;
+            this.assistantMsg = assistantMsg;
+        }
+
+        public String getTitle() {
+            return userMsg;
+        }
+
+        public String getText() {
+            return assistantMsg;
+        }
+
+        @Override
+        public String toString() {
+            return "GPTContextInfo{" +
+                    "userMsg='" + userMsg + '\'' +
+                    ", assistantMsg='" + assistantMsg + '\'' +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof GPTContextInfo)) return false;
+            GPTContextInfo that = (GPTContextInfo) o;
+            return Objects.equals(getTitle(), that.getTitle()) && Objects.equals(getText(), that.getText());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getTitle(), getText());
+        }
+
+    }
+
 }

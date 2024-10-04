@@ -31,11 +31,17 @@ public interface AutoTranslateConfigService {
     List<String> translateableAttributes(@Nullable Resource resource);
 
     /**
-     * If a page is re-translated with only a few modified texts:
-     * If true we include the source texts that do not have to be translated, too,
-     * to provide better context to the translation; otherwise
-     * we only include the texts that have to be translated.
+     * If true, we do not only provide changed texts to the AI during re-translating a page with some changes,
+     * but give the entire page to provide better context.
+     * That is a bit slower and a bit more expensive, but likely improves the result.
      */
-    boolean includeAlreadyTranslatedValues();
+    boolean includeFullPageInRetranslation();
+
+    /**
+     * If true, we when retranslating a page with some changes we provide the existing translations of that page
+     * to the AI as well as additional context with examples.
+     * That is a bit slower and a bit more expensive, but likely improves the result."
+     */
+    boolean includeExistingTranslationsInRetranslation();
 
 }

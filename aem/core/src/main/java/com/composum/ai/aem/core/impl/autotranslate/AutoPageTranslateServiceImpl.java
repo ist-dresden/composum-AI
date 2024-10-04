@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -155,17 +158,17 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
             }
 
-            // We also insert texts that are already translated since they might guide the translation process
+            configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);
+
+            propertiesToTranslate = reducePropertiesToTranslate(propertiesToTranslate, autoTranslateCaConfig);
             List<String> valuesToTranslate = propertiesToTranslate.stream()
-                    .filter(p -> autoTranslateConfigService.includeAlreadyTranslatedValues() || !p.isAlreadyCorrectlyTranslated)
                     .map(PropertyToTranslate::getSourceValue)
                     .collect(Collectors.toList());
 
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
                             Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
-            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath()
-            );
+            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath());
 
             Map<String, LiveRelationship> relationships = new HashMap<>();
 
@@ -227,6 +230,85 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         LOG.debug("<<< translateLiveCopy: {} {}", resource.getPath(), stats);
         return stats;
+    }
+
+    /**
+     * Collects the values we need to translate.
+     * If configured, we also insert texts that are already translated since they might guide the translation process.
+     */
+    protected List<PropertyToTranslate> reducePropertiesToTranslate(List<PropertyToTranslate> propertiesToTranslate, AutoTranslateCaConfig autoTranslateCaConfig) {
+        boolean includeFullPageInRetranslation = autoTranslateConfigService.includeFullPageInRetranslation()
+                || trueTristateCaConfig(autoTranslateCaConfig.includeFullPageInRetranslation());
+        boolean[] includeIndizes = new boolean[propertiesToTranslate.size()];
+        for (int i = 0; i < propertiesToTranslate.size(); i++) {
+            includeIndizes[i] = includeFullPageInRetranslation || !propertiesToTranslate.get(i).isAlreadyCorrectlyTranslated;
+        }
+
+        expandSelection(includeIndizes, 2);
+
+        List<PropertyToTranslate> reducedProps = new ArrayList<>();
+        for (int i = 0; i < propertiesToTranslate.size(); i++) {
+            if (includeIndizes[i]) {
+                reducedProps.add(propertiesToTranslate.get(i));
+            }
+        }
+        return reducedProps;
+    }
+
+    /**
+     * Also include 2 items before those already set, and 2 items after those already set, to have some context.
+     */
+    protected static void expandSelection(boolean[] includeIndizes, int selectRange) {
+        int lastSetIndex = Integer.MIN_VALUE;
+        for (int i = 0; i < includeIndizes.length; i++) {
+            if (includeIndizes[i]) {
+                lastSetIndex = i;
+            } else if (i <= lastSetIndex + selectRange) {
+                includeIndizes[i] = true;
+            }
+        }
+        lastSetIndex = Integer.MAX_VALUE;
+        for (int i = includeIndizes.length - 1; i >= 0; i--) {
+            if (includeIndizes[i]) {
+                lastSetIndex = i;
+            } else if (i >= lastSetIndex - selectRange) {
+                includeIndizes[i] = true;
+            }
+        }
+    }
+
+    /**
+     * If configured, we include the already translated parts of the page as example.
+     */
+    protected GPTConfiguration maybeIncludeAlreadyTranslatedTextAsExample(
+            List<PropertyToTranslate> propertiesToTranslate,
+            AutoTranslateCaConfig autoTranslateCaConfig, GPTConfiguration configuration) {
+        boolean includeExistingTranslationsInRetranslation =
+                autoTranslateConfigService.includeExistingTranslationsInRetranslation() ||
+                        trueTristateCaConfig(autoTranslateCaConfig.includeExistingTranslationsInRetranslation());
+
+        String alreadyTranslatedText = propertiesToTranslate.stream()
+                .filter(p -> p.isAlreadyCorrectlyTranslated)
+                .map(PropertyToTranslate::getTargetValue)
+                .collect(Collectors.joining("\n"));
+
+        if (includeExistingTranslationsInRetranslation && StringUtils.isNotBlank(alreadyTranslatedText)) {
+            configuration = configuration.merge(GPTConfiguration.ofContext(
+                    "Retrieve the result of a previous translation of parts of the text. You don't need to translate this - this is just contextual information and you can draw on that for translation examples and context of the translation that is done later.",
+                    // we have to follow the final format or that is confusing for the AI
+                    MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END +
+                            alreadyTranslatedText +
+                            MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END
+            ));
+        }
+        return configuration;
+    }
+
+    /**
+     * Is counted as true if there is a true value in the array.
+     */
+    protected boolean trueTristateCaConfig(boolean[] value) {
+        return value != null && Arrays.asList(value).contains(true);
     }
 
     /**
