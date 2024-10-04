@@ -87,6 +87,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             resource = child;
         }
         Stats stats = new Stats();
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        if (relationship == null) {
+            throw new IllegalArgumentException("No live relationship for " + resource.getPath());
+        }
 
         String language = SelectorUtils.findLanguage(resource);
         if (language == null) {
@@ -154,12 +158,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             // We also insert texts that are already translated since they might guide the translation process
             List<String> valuesToTranslate = propertiesToTranslate.stream()
                     .filter(p -> autoTranslateConfigService.includeAlreadyTranslatedValues() || !p.isAlreadyCorrectlyTranslated)
-                    .map(p -> p.isAlreadyCorrectlyTranslated ? p.getTargetValue() : p.getSourceValue())
+                    .map(PropertyToTranslate::getSourceValue)
                     .collect(Collectors.toList());
 
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
                             Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
+            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath()
+            );
 
             Map<String, LiveRelationship> relationships = new HashMap<>();
 
@@ -221,6 +227,32 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         LOG.debug("<<< translateLiveCopy: {} {}", resource.getPath(), stats);
         return stats;
+    }
+
+    /**
+     * Checks whether there are href="path" in the translatedValues where path is within blueprintPath
+     * and replaces those with the according path in the live copy.
+     */
+    protected List<String> remapPaths(List<String> translatedValues, String blueprintPath, String livecopyPath) {
+        return translatedValues.stream().map(val -> remapPaths(val, blueprintPath, livecopyPath)).collect(Collectors.toList());
+    }
+
+    /**
+     * We find all href="path" patterns
+     *
+     * @see #remapPaths(List, String, String)
+     */
+    protected String remapPaths(String translatedValue, String blueprintPath, String livecopyPath) {
+        if (translatedValue == null) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("href=\"" +
+                Pattern.quote(blueprintPath) + "(/[^\"]*)\"");
+        String result = pattern.matcher(translatedValue).replaceAll("href=\"" + livecopyPath + "$1\"");
+        if (translatedValue.contains("href")) { // FIXME(hps,24/10/03) no checkin
+            LOG.trace("Remapping paths from {} to {} in {}", blueprintPath, livecopyPath, translatedValue);
+        }
+        return result;
     }
 
     private String determineSourceLanguage(Resource resource) throws WCMException {
@@ -433,6 +465,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
+
+            if (StringUtils.contains(targetWrapper.getOriginalCopy(), "href")) { // FIXME(hps,24/10/03) no checkin
+                LOG.trace("Skipping {} in {} because it contains href", key, resource.getPath());
+            }
 
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.

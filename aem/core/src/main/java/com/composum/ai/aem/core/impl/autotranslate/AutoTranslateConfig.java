@@ -47,8 +47,9 @@ public @interface AutoTranslateConfig {
 
     @AttributeDefinition(name = "Include Already Translated Values",
             description = "If a page is re-translated with only a few modified texts: " +
-                    "if set we include the unchanged texts that don't have to be translated again, too, as they are in the target language." +
-                    "This might guide the translation of the now (re-)translated properties.")
+                    "If true we include the source texts that do not have to be translated, too, " +
+                    "to provide better context to the translation; otherwise " +
+                    "we only include the texts that have to be translated.")
     boolean includeAlreadyTranslatedValues() default true;
 
 }
