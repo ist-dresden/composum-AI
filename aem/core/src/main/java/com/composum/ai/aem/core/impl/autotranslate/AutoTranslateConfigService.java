@@ -32,8 +32,8 @@ public interface AutoTranslateConfigService {
 
     /**
      * If a page is re-translated with only a few modified texts:
-     * If true we include the texts that do not have to be translated, too, to guide the translation, and in the
-     * target language; otherwise
+     * If true we include the source texts that do not have to be translated, too,
+     * to provide better context to the translation; otherwise
      * we only include the texts that have to be translated.
      */
     boolean includeAlreadyTranslatedValues();
