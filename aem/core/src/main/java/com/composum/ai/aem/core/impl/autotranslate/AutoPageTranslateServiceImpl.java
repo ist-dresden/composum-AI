@@ -158,9 +158,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
             }
 
-            List<String> valuesToTranslate = collectValuesToTranslate(autoTranslateCaConfig, propertiesToTranslate);
-
             configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);
+
+            propertiesToTranslate = reducePropertiesToTranslate(propertiesToTranslate, autoTranslateCaConfig);
+            List<String> valuesToTranslate = propertiesToTranslate.stream()
+                    .map(PropertyToTranslate::getSourceValue)
+                    .collect(Collectors.toList());
 
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
@@ -233,14 +236,45 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * Collects the values we need to translate.
      * If configured, we also insert texts that are already translated since they might guide the translation process.
      */
-    protected List<String> collectValuesToTranslate(AutoTranslateCaConfig autoTranslateCaConfig, List<PropertyToTranslate> propertiesToTranslate) {
+    protected List<PropertyToTranslate> reducePropertiesToTranslate(List<PropertyToTranslate> propertiesToTranslate, AutoTranslateCaConfig autoTranslateCaConfig) {
         boolean includeFullPageInRetranslation = autoTranslateConfigService.includeFullPageInRetranslation()
                 || trueTristateCaConfig(autoTranslateCaConfig.includeFullPageInRetranslation());
-        List<String> valuesToTranslate = propertiesToTranslate.stream()
-                .filter(p -> includeFullPageInRetranslation || !p.isAlreadyCorrectlyTranslated)
-                .map(PropertyToTranslate::getSourceValue)
-                .collect(Collectors.toList());
-        return valuesToTranslate;
+        boolean[] includeIndizes = new boolean[propertiesToTranslate.size()];
+        for (int i = 0; i < propertiesToTranslate.size(); i++) {
+            includeIndizes[i] = includeFullPageInRetranslation || !propertiesToTranslate.get(i).isAlreadyCorrectlyTranslated;
+        }
+
+        expandSelection(includeIndizes, 2);
+
+        List<PropertyToTranslate> reducedProps = new ArrayList<>();
+        for (int i = 0; i < propertiesToTranslate.size(); i++) {
+            if (includeIndizes[i]) {
+                reducedProps.add(propertiesToTranslate.get(i));
+            }
+        }
+        return reducedProps;
+    }
+
+    /**
+     * Also include 2 items before those already set, and 2 items after those already set, to have some context.
+     */
+    protected static void expandSelection(boolean[] includeIndizes, int selectRange) {
+        int lastSetIndex = Integer.MIN_VALUE;
+        for (int i = 0; i < includeIndizes.length; i++) {
+            if (includeIndizes[i]) {
+                lastSetIndex = i;
+            } else if (i <= lastSetIndex + selectRange) {
+                includeIndizes[i] = true;
+            }
+        }
+        lastSetIndex = Integer.MAX_VALUE;
+        for (int i = includeIndizes.length - 1; i >= 0; i--) {
+            if (includeIndizes[i]) {
+                lastSetIndex = i;
+            } else if (i >= lastSetIndex - selectRange) {
+                includeIndizes[i] = true;
+            }
+        }
     }
 
     /**

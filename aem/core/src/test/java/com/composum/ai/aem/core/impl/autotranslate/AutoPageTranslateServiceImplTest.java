@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 
 import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.compileContentPattern;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -165,5 +167,48 @@ public class AutoPageTranslateServiceImplTest {
         assertEquals(null,
                 service.remapPaths((String) null, "/content/blueprint", "/content/livecopy"));
     }
+
+    @Test
+    public void expandSelection_includesContextBeforeAndAfter() {
+        boolean[] includeIndizes = {false, false, true, false, false};
+        AutoPageTranslateServiceImpl.expandSelection(includeIndizes, 2);
+        assertArrayEquals(new boolean[]{true, true, true, true, true}, includeIndizes);
+    }
+
+    @Test
+    public void expandSelection_noInitialSelection() {
+        boolean[] includeIndizes = {false, false, false, false, false};
+        AutoPageTranslateServiceImpl.expandSelection(includeIndizes, 2);
+        assertArrayEquals(new boolean[]{false, false, false, false, false}, includeIndizes);
+    }
+
+    @Test
+    public void expandSelection_singleSelectionAtStart() {
+        boolean[] includeIndizes = {true, false, false, false, false};
+        AutoPageTranslateServiceImpl.expandSelection(includeIndizes, 2);
+        assertArrayEquals(new boolean[]{true, true, true, false, false}, includeIndizes);
+    }
+
+    @Test
+    public void expandSelection_singleSelectionAtEnd() {
+        boolean[] includeIndizes = {false, false, false, false, true};
+        AutoPageTranslateServiceImpl.expandSelection(includeIndizes, 2);
+        assertArrayEquals(new boolean[]{false, false, true, true, true}, includeIndizes);
+    }
+
+    @Test
+    public void expandSelection_multipleSelections() {
+        boolean[] includeIndizes = {false, true, false, true, false};
+        AutoPageTranslateServiceImpl.expandSelection(includeIndizes, 2);
+        assertArrayEquals(new boolean[]{true, true, true, true, true}, includeIndizes);
+    }
+
+    @Test
+    public void expandSelection_long() {
+        boolean[] includeIndizes = {false, false, false, true, false, true, false, false, false};
+        AutoPageTranslateServiceImpl.expandSelection(includeIndizes, 2);
+        assertArrayEquals(new boolean[]{false, true, true, true, true, true, true, true, false}, includeIndizes);
+    }
+
 
 }
