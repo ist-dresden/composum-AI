@@ -39,6 +39,7 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 
@@ -237,12 +238,15 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             // everything is fine - that doesn't cost anything. Just split
         }
 
+        // The loss of context is a problem, but we go for graceful degradation here.
+        GPTConfiguration cleanedConfiguration = configuration.replaceContexts(null);
+
         int half = texts.size() / 2;
         List<String> firstHalf = texts.subList(0, half);
         List<String> secondHalf = texts.subList(half, texts.size());
         List<String> result = new ArrayList<>();
-        result.addAll(fragmentedTranslationDivideAndConquer(firstHalf, targetLanguage, configuration, permittedRetries, translationChecks));
-        result.addAll(fragmentedTranslationDivideAndConquer(secondHalf, targetLanguage, configuration, permittedRetries, translationChecks));
+        result.addAll(fragmentedTranslationDivideAndConquer(firstHalf, targetLanguage, cleanedConfiguration, permittedRetries, translationChecks));
+        result.addAll(fragmentedTranslationDivideAndConquer(secondHalf, targetLanguage, cleanedConfiguration, permittedRetries, translationChecks));
         return result;
     }
 
@@ -340,7 +344,15 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         parameters.put("targetlanguage", targetLanguage);
         parameters.put("addition", addition);
         List<GPTChatMessage> messages = template.getMessages(parameters);
+        if (configuration.getContexts() != null && !configuration.getContexts().isEmpty()) {
+            for (int i = configuration.getContexts().size() - 1; i >= 0; i--) {
+                GPTConfiguration.GPTContextInfo context = configuration.getContexts().get(i);
+                GPTChatMessage contextMessage = new GPTChatMessage(GPTMessageRole.USER, context.getTitle());
+                messages.add(0, contextMessage);
+            }
+        }
         request.addMessages(messages);
+
         // set request.setMaxTokens to about 3 times the number of tokens in the text to translate
         // since that seems a generous limit for the translation, but gives a leeway for error messages.
         // this usually quite an overestimation, but that's better than underestimating in this context.

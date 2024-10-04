@@ -164,8 +164,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             List<String> translatedValues =
                     translationService.fragmentedTranslation(valuesToTranslate, languageName, configuration,
                             Collections.singletonList(GPTResponseCheck.KEEP_HREF_TRANSLATION_CHECK));
-            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath()
-            );
+            translatedValues = remapPaths(translatedValues, relationship.getLiveCopy().getBlueprintPath(), relationship.getLiveCopy().getPath());
 
             // Already translated text is given as example.
             String alreadyTranslatedText = propertiesToTranslate.stream()
@@ -174,7 +173,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     .collect(Collectors.joining("\n"));
             if (StringUtils.isNotBlank(alreadyTranslatedText)) {
                 configuration = configuration.merge(GPTConfiguration.ofContext(
-                        "This was the result of a previous translation. You can draw on that for translation examples and context of the translation.",
+                        "Print a result of a previous translation of parts of the text. You can draw on that for translation examples and context of the translation.",
                         alreadyTranslatedText));
             }
 

@@ -227,8 +227,22 @@ public class GPTConfiguration {
         if (other.contexts != null) {
             contextInfos.addAll(other.contexts);
         }
-        contextInfos = contextInfos.isEmpty() ? null : contextInfos;
+        contextInfos = contextInfos.isEmpty() ? null : Collections.unmodifiableList(contextInfos);
         return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos);
+    }
+
+    /**
+     * Additional context information to provide to the AI. Not actual instructions, just background information.
+     */
+    public List<GPTContextInfo> getContexts() {
+        return contexts;
+    }
+
+    /**
+     * Returns a copy with the contexts replaced.
+     */
+    public GPTConfiguration replaceContexts(List<GPTContextInfo> newContexts) {
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, newContexts);
     }
 
     /**
@@ -258,8 +272,8 @@ public class GPTConfiguration {
     }
 
     @Nonnull
-    public static GPTConfiguration ofContext(@Nonnull String title, @Nonnull String text) {
-        return ofContexts(Collections.singletonList(new GPTContextInfo(title, text)));
+    public static GPTConfiguration ofContext(@Nonnull String usermsg, @Nonnull String assistantmsg) {
+        return ofContexts(Collections.singletonList(new GPTContextInfo(usermsg, assistantmsg)));
     }
 
     @Override
@@ -332,32 +346,31 @@ public class GPTConfiguration {
 
 
     /**
-     * Something that gives background information to the AI that isn't actually an instruction, like informative texts, RAG results, whatnot.
-     * Contains a title and a text.
+     * Gives the conversation a history - additional assistant - user message pair.
      */
     public static class GPTContextInfo {
 
-        private final String title;
-        private final String text;
+        private final String userMsg;
+        private final String assistantMsg;
 
-        public GPTContextInfo(String title, String text) {
-            this.title = title;
-            this.text = text;
+        public GPTContextInfo(String title, String assistantMsg) {
+            this.userMsg = title;
+            this.assistantMsg = assistantMsg;
         }
 
         public String getTitle() {
-            return title;
+            return userMsg;
         }
 
         public String getText() {
-            return text;
+            return assistantMsg;
         }
 
         @Override
         public String toString() {
             return "GPTContextInfo{" +
-                    "title='" + title + '\'' +
-                    ", text='" + text + '\'' +
+                    "userMsg='" + userMsg + '\'' +
+                    ", assistantMsg='" + assistantMsg + '\'' +
                     '}';
         }
 
