@@ -8,6 +8,6 @@ Print the original text you have to translate exactly without any comments.
 ---------- assistant ----------
 ${sourcephrase}
 ---------- user ----------
-Print the original text translated into ${targetlanguage}.
+Translate the original text you just printed into ${targetlanguage}.
 
 ${addition}

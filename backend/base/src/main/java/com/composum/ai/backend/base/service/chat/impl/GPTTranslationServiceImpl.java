@@ -37,7 +37,6 @@ import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
@@ -133,12 +132,12 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     /**
      * Start of separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%` .
      */
-    protected static final String MULTITRANSLATION_SEPARATOR_START = "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ";
+    public static final String MULTITRANSLATION_SEPARATOR_START = "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ";
 
     /**
      * End of separator like `573472 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%` .
      */
-    protected static final String MULTITRANSLATION_SEPARATOR_END = " %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+    public static final String MULTITRANSLATION_SEPARATOR_END = " %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
 
     /**
      * Regexp matching separator like `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 573472 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%` (group "id" matches the number).
@@ -147,7 +146,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
      */
     protected static final Pattern MULTITRANSLATION_SEPARATOR_PATTERN = Pattern.compile("(?<!%)%{20,40} (?<id>\\d{6}) %{20,40}(?!%)");
 
-    protected static final String LASTID = "424242";
+    public static final String LASTID = "424242";
 
     protected static final Pattern PATTERN_HAS_LETTER = Pattern.compile("\\p{L}");
 
@@ -262,7 +261,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
 
         String response = singleTranslation(joinedtexts, null, targetLanguage, configuration);
         String responseProblems;
-        while((responseProblems = GPTResponseCheck.collectResponseProblems(translationChecks, joinedtexts, response)) != null) {
+        while ((responseProblems = GPTResponseCheck.collectResponseProblems(translationChecks, joinedtexts, response)) != null) {
             if (permittedRetries.decrementAndGet() <= 0) {
                 LOG.error("Too many retries with response problems for fragmented translation, to {} found problems {} text {}", targetLanguage, responseProblems, texts);
                 throw new GPTException("Too many retries for fragmented translation, response problems: " + responseProblems);
@@ -345,10 +344,13 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         parameters.put("addition", addition);
         List<GPTChatMessage> messages = template.getMessages(parameters);
         if (configuration.getContexts() != null && !configuration.getContexts().isEmpty()) {
+            int start = messages.get(0).getRole() == GPTMessageRole.SYSTEM ? 1 : 0;
             for (int i = configuration.getContexts().size() - 1; i >= 0; i--) {
                 GPTConfiguration.GPTContextInfo context = configuration.getContexts().get(i);
                 GPTChatMessage contextMessage = new GPTChatMessage(GPTMessageRole.USER, context.getTitle());
-                messages.add(0, contextMessage);
+                messages.add(start, contextMessage);
+                contextMessage = new GPTChatMessage(GPTMessageRole.ASSISTANT, context.getText());
+                messages.add(start + 1, contextMessage);
             }
         }
         request.addMessages(messages);

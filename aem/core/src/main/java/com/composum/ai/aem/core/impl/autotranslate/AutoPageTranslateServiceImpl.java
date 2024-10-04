@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
+import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -168,8 +171,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     .collect(Collectors.joining("\n"));
             if (autoTranslateConfigService.includeExistingTranslationsInRetranslation() && StringUtils.isNotBlank(alreadyTranslatedText)) {
                 configuration = configuration.merge(GPTConfiguration.ofContext(
-                        "Print a result of a previous translation of parts of the text. You can draw on that for translation examples and context of the translation.",
-                        alreadyTranslatedText));
+                        "Retrieve the result of a previous translation of parts of the text. You don't need to translate this - this is just contextual information and you can draw on that for translation examples and context of the translation that is done later.",
+                        // we have to follow the final format or that is confusing for the AI
+                        MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END +
+                                alreadyTranslatedText +
+                                MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END
+                ));
             }
 
             List<String> translatedValues =
