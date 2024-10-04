@@ -3,16 +3,18 @@
 This is an automatically generated overview.
 
 <a name="slingca.AutoTranslateCaConfig"></a>
-## Composum AI Automatic Translation Configuration (aem-core)
+## Composum AI Automatic Translation Configuration (core)
 
 Configures rollout details for automatic translation.
 
-| id                       | label                           | type    | default value | description                                                                                      |
-|--------------------------|---------------------------------|---------|---------------|--------------------------------------------------------------------------------------------------|
-| additionalInstructions    | Additional Instructions          | String  |               | Additional instructions for the automatic translation.                                           |
-| preferHighIntelligenceModel | Prefer High Intelligence Model  | boolean |               | If set, the high intelligence model will be used for translation.                                 |
-| preferStandardModel       | Prefer Standard Model            | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'. |
-| rules                     | Rules                           |         |               | Rules that give additional instructions for translation if certain words or phrases are present in the page. |
+| id                                          | label                                      | type    | default value | description                                                                                                           |
+|---------------------------------------------|--------------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------------------------------|
+| additionalInstructions                      | Additional Instructions                    | String  | N/A           | Additional instructions for the automatic translation.                                                                |
+| preferHighIntelligenceModel                 | Prefer High Intelligence Model             | boolean | N/A           | If set, the high intelligence model will be used for translation.                                                    |
+| preferStandardModel                         | Prefer Standard Model                      | boolean | N/A           | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.               |
+| rules                                       | Rules that give additional instructions    | AutoTranslateRuleConfig[] | N/A           | Rules that give additional instructions for translation if certain words or phrases are present in the page.        |
+| includeFullPageInRetranslation             | Include Full Page during Retranslation     | boolean[] | N/A           | If true, we do not only provide changed texts to the AI during re-translating a page with some changes, but give the entire page to provide better context. This overrides the default from OSGI configuration. |
+| includeExistingTranslationsInRetranslation  | Include Existing Translations in Retranslation | boolean[] | true          | If true, when retranslating a page with some changes we provide the existing translations of that page to the AI as well as additional context with examples. This overrides the default from OSGI configuration. |
 
 <a name="slingca.AutoTranslateRuleConfig"></a>
 ### AutoTranslateRuleConfig (aem-core)
