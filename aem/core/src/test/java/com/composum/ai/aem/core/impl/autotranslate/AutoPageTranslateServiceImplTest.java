@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 
 import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.compileContentPattern;
+import static junit.framework.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -210,5 +211,25 @@ public class AutoPageTranslateServiceImplTest {
         assertArrayEquals(new boolean[]{false, true, true, true, true, true, true, true, false}, includeIndizes);
     }
 
+    @Test
+    public void testConfigurationOrOverride() {
+        AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl();
+
+        // Test when override is null
+        assertTrue(service.configurationOrOverride(true, null));
+        assertFalse(service.configurationOrOverride(false, null));
+
+        // Test when override is empty
+        assertTrue(service.configurationOrOverride(true, new boolean[]{}));
+        assertFalse(service.configurationOrOverride(false, new boolean[]{}));
+
+        // Test when override has one element
+        assertTrue(service.configurationOrOverride(false, new boolean[]{true}));
+        assertFalse(service.configurationOrOverride(true, new boolean[]{false}));
+
+        // Test when override has multiple elements: we take the first.
+        assertTrue(service.configurationOrOverride(false, new boolean[]{true, false}));
+        assertFalse(service.configurationOrOverride(true, new boolean[]{false, true}));
+    }
 
 }

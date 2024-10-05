@@ -237,8 +237,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
      * If configured, we also insert texts that are already translated since they might guide the translation process.
      */
     protected List<PropertyToTranslate> reducePropertiesToTranslate(List<PropertyToTranslate> propertiesToTranslate, AutoTranslateCaConfig autoTranslateCaConfig) {
-        boolean includeFullPageInRetranslation = autoTranslateConfigService.includeFullPageInRetranslation()
-                || trueTristateCaConfig(autoTranslateCaConfig.includeFullPageInRetranslation());
+        boolean includeFullPageInRetranslation = configurationOrOverride(
+                autoTranslateConfigService.includeFullPageInRetranslation(),
+                autoTranslateCaConfig.includeFullPageInRetranslation());
         boolean[] includeIndizes = new boolean[propertiesToTranslate.size()];
         for (int i = 0; i < propertiesToTranslate.size(); i++) {
             includeIndizes[i] = includeFullPageInRetranslation || !propertiesToTranslate.get(i).isAlreadyCorrectlyTranslated;
@@ -284,8 +285,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             List<PropertyToTranslate> propertiesToTranslate,
             AutoTranslateCaConfig autoTranslateCaConfig, GPTConfiguration configuration) {
         boolean includeExistingTranslationsInRetranslation =
-                autoTranslateConfigService.includeExistingTranslationsInRetranslation() ||
-                        trueTristateCaConfig(autoTranslateCaConfig.includeExistingTranslationsInRetranslation());
+                        configurationOrOverride(autoTranslateConfigService.includeExistingTranslationsInRetranslation(),
+                                autoTranslateCaConfig.includeExistingTranslationsInRetranslation());
 
         String alreadyTranslatedText = propertiesToTranslate.stream()
                 .filter(p -> p.isAlreadyCorrectlyTranslated)
@@ -305,10 +306,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     }
 
     /**
-     * Is counted as true if there is a true value in the array.
+     * Allows a boolean configuration to be overridden with an optional value from the context-aware configuration. If the override array has several values we just take the first one.
      */
-    protected boolean trueTristateCaConfig(boolean[] value) {
-        return value != null && Arrays.asList(value).contains(true);
+    protected boolean configurationOrOverride(boolean defaultvalue, boolean[] override) {
+        if (override != null && override.length > 0) {
+            return override[0];
+        }
+        return defaultvalue;
     }
 
     /**
