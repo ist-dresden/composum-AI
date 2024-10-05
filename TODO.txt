@@ -1,10 +1,12 @@
 # List of minor Todos
 
-!! FIX DICTATION kurzer klick
+https://wcm.io/caconfig/editor/usage.html translation config drop down
+
 !! Empty prompt text
-!! http://localhost:5502/editor.html/content/gfps/com/en/about-us/going-forward.html "Explore the world..." RTE
+!! http://localhost:5502/editor.html/content/xxx/com/en/about-us/going-forward.html "Explore the world..." RTE
 
 The content creation dialog should know about the current text even if the page is the source!!!!
+
 Why are the teasers in
 https://author-p43852-e197429.adobeaemcloud.com/editor.html/content/gfps/com/en/products-solutions/systems/primofit.html
 not included into the excerpt.
