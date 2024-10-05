@@ -224,17 +224,18 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             throw new GPTException("Too many retries for fragmented translation");
         }
 
+        int textlength = texts.stream().mapToInt(String::length).sum();
         try {
             return fragmentedTranslation(texts, targetLanguage, configuration, permittedRetries, translationChecks);
         } catch (GPTException.GPTRetryableResponseErrorException e) {
             // is hopefully rare - otherwise we likely have to rethink this.
-            LOG.info("Splitting translation because of retryable error: {}", e.toString());
-            LOG.info("GPTRetryableResponseErrorException occurred for {} texts with length {}", texts.size(),
-                    texts.stream().collect(Collectors.summarizingInt(String::length)));
+            LOG.info("Splitting translation because of retryable error at {} texts with length {}: {}", texts.size(), textlength, e.toString());
             // that did cost something, so retry permits are decremented. We split anyway, since that might make things easier for the GPT service.
             permittedRetries.decrementAndGet();
         } catch (GPTException.GPTContextLengthExceededException e) {
             // everything is fine - that doesn't cost anything. Just split
+            LOG.info("Splitting translation because of context length exceeded {} at {} texts length {}",
+                    e.getMessage(), texts.size(), textlength);
         }
 
         // The loss of context is a problem, but we go for graceful degradation here.
