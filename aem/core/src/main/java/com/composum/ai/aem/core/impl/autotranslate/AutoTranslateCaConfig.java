@@ -61,14 +61,4 @@ public @interface AutoTranslateCaConfig {
             })
     String includeExistingTranslationsInRetranslation();
 
-
-    @Property(label = "Dropdown Param", description = "Parameter with dropdown list.", property = {
-            "widgetType=dropdown",
-            "dropdownOptions=["
-                    + "{'value':'','description':'First option'},"
-                    + "{'value':'true','description':'Second option'},"
-                    + "{'value':'false','description':'Third option'}"
-                    + "]"
-    })
-    String dropdownParam();
 }
