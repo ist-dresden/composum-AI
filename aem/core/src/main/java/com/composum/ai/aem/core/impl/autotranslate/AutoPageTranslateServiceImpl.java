@@ -299,7 +299,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         if (includeExistingTranslationsInRetranslation && StringUtils.isNotBlank(alreadyTranslatedText)) {
             configuration = configuration.merge(GPTConfiguration.ofContext(
-                    "Retrieve the result of a previous translation of parts of the text. You don't need to translate this - this is just contextual information and you can draw on that for translation examples and context of the translation that is done later.",
+                    "Retrieve the result of a previous translation of parts of a previous version of the text. " +
+                            "You don't need to translate this - this is just contextual information and " +
+                            "you can draw on that for translation examples and context of the translation that is done later.",
                     // we have to follow the final format or that is confusing for the AI
                     MULTITRANSLATION_SEPARATOR_START + LASTID + MULTITRANSLATION_SEPARATOR_END +
                             alreadyTranslatedText +

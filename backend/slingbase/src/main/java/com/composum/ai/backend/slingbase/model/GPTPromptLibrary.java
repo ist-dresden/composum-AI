@@ -18,12 +18,17 @@ public @interface GPTPromptLibrary {
 
     @AttributeDefinition(name = "Content Creation Prompts Path",
             description = "Path to the content creation prompts. Either a JSON file, or a page.")
-    @Property(label = "Content Creation Prompts Path", description = "Path to the content creation prompts. Either a JSON file, or a page.")
+    @Property(label = "Content Creation Prompts Path",
+            description = "Path to the content creation prompts. Either a JSON file, or a page.",
+            property = {"widgetType=pathbrowser"}
+    )
     String contentCreationPromptsPath();
 
     @AttributeDefinition(name = "Side Panel Prompts Path",
             description = "Path to the side panel prompts. Either a JSON file, or a page.")
-    @Property(label = "Side Panel Prompts Path", description = "Path to the side panel prompts. Either a JSON file, or a page.")
+    @Property(label = "Side Panel Prompts Path",
+            description = "Path to the side panel prompts. Either a JSON file, or a page.",
+            property = {"widgetType=pathbrowser"})
     String sidePanelPromptsPath();
 
 }
