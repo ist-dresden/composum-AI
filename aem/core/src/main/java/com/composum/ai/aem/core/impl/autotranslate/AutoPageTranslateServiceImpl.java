@@ -239,7 +239,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected List<PropertyToTranslate> reducePropertiesToTranslate(List<PropertyToTranslate> propertiesToTranslate, AutoTranslateCaConfig autoTranslateCaConfig) {
         boolean includeFullPageInRetranslation = configurationOrOverride(
                 autoTranslateConfigService.includeFullPageInRetranslation(),
-                autoTranslateCaConfig.includeFullPageInRetranslation());
+                autoTranslateCaConfig.includeFullPageInRetranslation(),
+                !propertiesToTranslate.isEmpty() ? propertiesToTranslate.get(0).targetResource.getPath() : null
+        );
         boolean[] includeIndizes = new boolean[propertiesToTranslate.size()];
         for (int i = 0; i < propertiesToTranslate.size(); i++) {
             includeIndizes[i] = includeFullPageInRetranslation || !propertiesToTranslate.get(i).isAlreadyCorrectlyTranslated;
@@ -285,8 +287,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             List<PropertyToTranslate> propertiesToTranslate,
             AutoTranslateCaConfig autoTranslateCaConfig, GPTConfiguration configuration) {
         boolean includeExistingTranslationsInRetranslation =
-                        configurationOrOverride(autoTranslateConfigService.includeExistingTranslationsInRetranslation(),
-                                autoTranslateCaConfig.includeExistingTranslationsInRetranslation());
+                configurationOrOverride(autoTranslateConfigService.includeExistingTranslationsInRetranslation(),
+                        autoTranslateCaConfig.includeExistingTranslationsInRetranslation(),
+                        !propertiesToTranslate.isEmpty() ? propertiesToTranslate.get(0).targetResource.getPath() : null
+                );
 
         String alreadyTranslatedText = propertiesToTranslate.stream()
                 .filter(p -> p.isAlreadyCorrectlyTranslated)
@@ -308,9 +312,15 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     /**
      * Allows a boolean configuration to be overridden with an optional value from the context-aware configuration. If the override array has several values we just take the first one.
      */
-    protected boolean configurationOrOverride(boolean defaultvalue, boolean[] override) {
-        if (override != null && override.length > 0) {
-            return override[0];
+    protected boolean configurationOrOverride(boolean defaultvalue, String override, String path) {
+        if (override != null && !override.trim().isEmpty()) {
+            if ("TRUE".equalsIgnoreCase(override.trim())) {
+                return true;
+            } else if ("FALSE".equalsIgnoreCase(override.trim())) {
+                return false;
+            } else {
+                LOG.error("Invalid value for boolean configuration {} for path {}", override, path);
+            }
         }
         return defaultvalue;
     }

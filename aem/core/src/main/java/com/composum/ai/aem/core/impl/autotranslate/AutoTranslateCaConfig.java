@@ -29,18 +29,38 @@ public @interface AutoTranslateCaConfig {
             description = "If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.")
     boolean preferStandardModel();
 
+    // String values "true" and "false" are used for boolean properties since we have three states: true, false, and unset.
     @Property(label = "Include Full Page during Retranslation", order = 5,
             description = "If true we do not only provide changed texts to the AI during re-translating a page with some changes," +
                     "but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely" +
-                    "improves the result. This overrides the default from OSGI configuration.")
-    boolean[] includeFullPageInRetranslation();
+                    "improves the result. This overrides the default from OSGI configuration.",
+            property = {
+                    "widgetType=dropdown",
+                    "dropdownOptions=["
+                            + "{'value':'','description':'Default from global OSGI configuration'},"
+                            + "{'value':'true','description':'Always include the full page text during retranslation to provide context'},"
+                            + "{'value':'false','description':'Only include changed texts during retranslation (faster but probably less quality)'}"
+                            + "]"
+            }
+    )
+    String includeFullPageInRetranslation();
 
+    // String values "true" and "false" are used for boolean properties since we have three states: true, false, and unset.
     @Property(label = "Include Existing Translations in Retranslation", order = 6,
             description = "If true, when retranslating a page with some changes we provide" +
                     "the existing translations of that page to the AI as well as additional context with examples. " +
                     "That is a bit slower and a bit more expensive, but likely improves the result." +
-                    "This overrides the default from OSGI configuration.")
-    boolean[] includeExistingTranslationsInRetranslation() default true;
+                    "This overrides the default from OSGI configuration.",
+            property = {
+                    "widgetType=dropdown",
+                    "dropdownOptions=["
+                            + "{'value':'','description':'Default from global OSGI configuration'},"
+                            + "{'value':'true','description':'During retranslation give the current translated text in the target page as context'},"
+                            + "{'value':'false','description':'Do not give the current translated text as context (faster but probably less quality)'}"
+                            + "]"
+            })
+    String includeExistingTranslationsInRetranslation();
+
 
     @Property(label = "Dropdown Param", description = "Parameter with dropdown list.", property = {
             "widgetType=dropdown",

@@ -216,20 +216,24 @@ public class AutoPageTranslateServiceImplTest {
         AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl();
 
         // Test when override is null
-        assertTrue(service.configurationOrOverride(true, null));
-        assertFalse(service.configurationOrOverride(false, null));
+        assertTrue(service.configurationOrOverride(true, null, null));
+        assertFalse(service.configurationOrOverride(false, null, null));
 
         // Test when override is empty
-        assertTrue(service.configurationOrOverride(true, new boolean[]{}));
-        assertFalse(service.configurationOrOverride(false, new boolean[]{}));
+        assertTrue(service.configurationOrOverride(true, "", null));
+        assertFalse(service.configurationOrOverride(false, "", null));
 
         // Test when override has one element
-        assertTrue(service.configurationOrOverride(false, new boolean[]{true}));
-        assertFalse(service.configurationOrOverride(true, new boolean[]{false}));
+        assertTrue(service.configurationOrOverride(false, "true", null));
+        assertFalse(service.configurationOrOverride(true, "false", null));
 
-        // Test when override has multiple elements: we take the first.
-        assertTrue(service.configurationOrOverride(false, new boolean[]{true, false}));
-        assertFalse(service.configurationOrOverride(true, new boolean[]{false, true}));
+        assertTrue(service.configurationOrOverride(false, " tRuE ", null));
+        assertFalse(service.configurationOrOverride(true, " FalsE ", null));
+
+        // We take the default on completely broken overrides
+        assertTrue(service.configurationOrOverride(true, "what???", null));
+        assertFalse(service.configurationOrOverride(false, "what???", null));
+
     }
 
 }
