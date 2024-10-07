@@ -1,10 +1,13 @@
+---
+AIGenVersion(1.1)
+---
 Print a markdown file that contains a subsection for the Apache Sling CA-configuration in the java file.
 The subsection should be named like the name of the @Configuration label and the module directory name in parentheses.
-(The module directory name is the name of the directory containing the src/main/java.)
+(The module directory name is the name of the directory containing the src/main/java together with the parent directory if there is one, e.g. aem/core.)
 The subsection should contain a description of the @Configuration
 and then have a table that lists all attributes and has the following columns, according to the method and @AttributeDefinition:
-- id
-- label
-- type
-- default value
-- description
+- id : the method name of the configuration attribute
+- label : the exact value of the @AttributeDefinition attribute "label"
+- type : the short name (simple type) of the Java type of the configuration attribute
+- default value : if there is a default value, e.g. "true" for "boolean foo() default true;" . If there is no default value, leave the field empty.
+- description : the exact value of the @AttributeDefinition attribute "description"

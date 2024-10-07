@@ -1,11 +1,13 @@
-@AIGenVersion(1.1)
+---
+AIGenVersion(1.1)
+---
 Print a markdown file that contains a subsection for the OSGI configuration in the java file.
 The subsection should be named like the name of the @ObjectClassDefinition and the moduledirectory name in parentheses.
-(The module directory name is the name of the directory containing the src/main/java.)
+(The module directory name is the name of the directory containing the src/main/java together with the parent directory if there is one, e.g. aem/core.)
 The subsection should contain the description of the @ObjectClassDefinition
 and then have a table that lists all attributes and has the following columns, according to the method and @AttributeDefinition:
-- id (method name of the @AttributeDefinition)
-- name
+- id : method name of the @AttributeDefinition
+- name : the exact value of the @AttributeDefinition attribute "name"
 - type (prefer using exactly the type given in the Java configuration class - often the simple type)
-- default value
-- description
+- default value : if there is a default value, e.g. "true" for "boolean foo() default true;" . If there is no default value, leave the field empty.
+- description : the exact value of the @AttributeDefinition attribute "description"

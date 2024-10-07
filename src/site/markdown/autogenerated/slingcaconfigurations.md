@@ -3,28 +3,29 @@
 This is an automatically generated overview.
 
 <a name="slingca.AutoTranslateCaConfig"></a>
-## Composum AI Automatic Translation Configuration (core)
+## Composum AI Automatic Translation Configuration (aem/core)
 
-Configures rollout details for automatic translation.
+This configuration defines the settings for automatic translation in the Composum AI module. It allows users to specify additional instructions, rules for translation, and preferences for translation models, among other settings.
 
-| id                                          | label                                      | type    | default value | description                                                                                                           |
-|---------------------------------------------|--------------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------------------------------|
-| additionalInstructions                      | Additional Instructions                    | String  | N/A           | Additional instructions for the automatic translation.                                                                |
-| preferHighIntelligenceModel                 | Prefer High Intelligence Model             | boolean | N/A           | If set, the high intelligence model will be used for translation.                                                    |
-| preferStandardModel                         | Prefer Standard Model                      | boolean | N/A           | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.               |
-| rules                                       | Rules that give additional instructions    | AutoTranslateRuleConfig[] | N/A           | Rules that give additional instructions for translation if certain words or phrases are present in the page.        |
-| includeFullPageInRetranslation             | Include Full Page during Retranslation     | boolean[] | N/A           | If true, we do not only provide changed texts to the AI during re-translating a page with some changes, but give the entire page to provide better context. This overrides the default from OSGI configuration. |
-| includeExistingTranslationsInRetranslation  | Include Existing Translations in Retranslation | boolean[] | true          | If true, when retranslating a page with some changes we provide the existing translations of that page to the AI as well as additional context with examples. This overrides the default from OSGI configuration. |
+| id                                         | label                                          | type    | default value | description                                                                                                                                                                                                 |
+|--------------------------------------------|------------------------------------------------|---------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| additionalInstructions                     | Additional Instructions                        | String  |               | Additional instructions for the automatic translation.                                                                                                                                                     |
+| rules                                      | Rules for additional Instructions              | AutoTranslateRuleConfig[] |               | Rules that give additional instructions for translation if certain words or phrases are present in the page.                                                                                             |
+| preferHighIntelligenceModel                | Prefer High Intelligence Model                 | boolean |               | If set, the high intelligence model will be used for translation.                                                                                                                                         |
+| preferStandardModel                        | Prefer Standard Model                          | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.                                                                                                    |
+| includeFullPageInRetranslation            | Include Full Page during Retranslation        | String  |               | If true we do not only provide changed texts to the AI during re-translating a page with some changes, but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration. |
+| includeExistingTranslationsInRetranslation | Include Existing Translations in Retranslation | String  |               | If true, when retranslating a page with some changes we provide the existing translations of that page to the AI as well as additional context with examples. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration. |
+| dropdownParam                               | Dropdown Param                                 | String  |               | Parameter with dropdown list.                                                                                                                                                                             |
 
 <a name="slingca.AutoTranslateRuleConfig"></a>
-### AutoTranslateRuleConfig (aem-core)
+## AutoTranslateRuleConfig (aem/core)
 
-A rule to be added to the Composum AI Automatic Translation Configuration with translation instructions for pages matching the rule.
+The `AutoTranslateRuleConfig` interface defines a rule to be added to the Composum AI Automatic Translation Configuration, specifying translation instructions for pages that match the defined rules.
 
-| id                     | label                  | type   | default value | description                                                                                                                                                                                                                     |
-|-----------------------|-----------------------|--------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| pathRegex             | Path Regex            | String |               | A regular expression matching the absolute path to the page. E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match if the content pattern condition is met.                     |
-| contentPattern        | Content Pattern       | String |               | A word or phrase that must be present in the content of the page for the rule to match. E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. If empty every page will match if the path condition is met. |
+| id                     | label                | type   | default value | description                                                                                                                                                                                                                      |
+|-----------------------|----------------------|--------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| pathRegex             | Path Regex           | String |               | A regular expression matching the absolute path to the page. E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match if the content pattern condition is met.                     |
+| contentPattern        | Content Pattern      | String |               | A word or phrase that must be present in the content of the page for the rule to match. E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. Spaces will also match any whitespace. If empty every page will match if the path condition is met. |
 | additionalInstructions | Additional Instructions | String |               | Additional instructions for the automatic translation in case this rule matches.                                                                                                                                               |
 
 <a name="slingca.GPTPermissionConfiguration"></a>
