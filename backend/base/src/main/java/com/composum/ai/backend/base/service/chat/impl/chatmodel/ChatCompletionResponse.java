@@ -5,26 +5,51 @@ import java.util.List;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Represents the response from the OpenAI chat completion API, containing details
+ * about the generated choices, token usage, and metadata like the model used and creation time.
+ */
 public class ChatCompletionResponse {
 
+    /**
+     * The unique identifier for this chat completion response.
+     */
     @SerializedName("id")
     private String id;
 
+    /**
+     * The type of object returned, typically 'chat.completion'.
+     */
     @SerializedName("object")
     private String object;
 
+    /**
+     * The timestamp (in epoch seconds) when this response was created.
+     */
     @SerializedName("created")
     private long created;
 
+    /**
+     * The model used for this chat completion, e.g., 'gpt-4'.
+     */
     @SerializedName("model")
     private String model;
 
+    /**
+     * An optional fingerprint of the system that generated this response.
+     */
     @SerializedName("system_fingerprint")
     private String systemFingerprint;
 
+    /**
+     * The list of choices the model generated, each with a message and finish reason.
+     */
     @SerializedName("choices")
     private List<ChatCompletionChoice> choices;
 
+    /**
+     * Token usage information for this completion, including total, prompt, and completion tokens.
+     */
     @SerializedName("usage")
     private ChatCompletionUsage usage;
 
