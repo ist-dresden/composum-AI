@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class ChatCompletionRequest {
 
@@ -27,6 +28,9 @@ public class ChatCompletionRequest {
 
     @SerializedName("seed")
     private Integer seed;
+
+    @SerializedName("tools")
+    private List<ChatTool> tools;
 
     // Getters and setters
     public String getModel() {
@@ -75,6 +79,14 @@ public class ChatCompletionRequest {
 
     public void setResponseFormat(ResponseFormat responseFormat) {
         this.responseFormat = responseFormat;
+    }
+
+    public List<ChatTool> getTools() {
+        return tools;
+    }
+
+    public void setTools(List<ChatTool> tools) {
+        this.tools = tools;
     }
 
     public Integer getSeed() {
