@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
 public class ChatCompletionMessage {
 
     /**
-     * The role of the speaker for this message, such as 'user', 'assistant', or 'system'.
+     * The role of the speaker for this message, such as 'user', 'assistant', 'system', or 'tool'.
      */
     @SerializedName("role")
     private ChatCompletionRequest.Role role;
@@ -25,6 +25,13 @@ public class ChatCompletionMessage {
     @SerializedName("content")
     @JsonAdapter(ChatCompletionMessagePart.ChatCompletionMessagePartListDeSerializer.class)
     private List<ChatCompletionMessagePart> content;
+
+    /**
+     * The ID of the tool call that this message is responding to.
+     * Only applicable when the role is 'tool'.
+     */
+    @SerializedName("tool_call_id")
+    private String toolCallId;
 
     public static ChatCompletionMessage make(GPTChatMessage message) {
         ChatCompletionMessagePart part;
@@ -47,6 +54,14 @@ public class ChatCompletionMessage {
 
     public void setRole(ChatCompletionRequest.Role role) {
         this.role = role;
+    }
+
+    public String getToolCallId() {
+        return toolCallId;
+    }
+
+    public void setToolCallId(String toolCallId) {
+        this.toolCallId = toolCallId;
     }
 
     public List<ChatCompletionMessagePart> getContent() {
