@@ -41,6 +41,16 @@ public class GPTConfiguration {
         CHAT
     }
 
+//    /** Controls which (if any) tool is called by the model. */
+//    public enum ToolChoice {
+//        /** Do not call a tool, just output a message. */
+//        NONE,
+//        /** Model can pick between generating a message and calling a tool. */
+//        AUTO,
+//        /** Forces calling one or more tools. */
+//        REQUIRED
+//    }
+
     private final String apiKey;
 
     private final String organizationId;
@@ -60,6 +70,8 @@ public class GPTConfiguration {
     private final Integer seed;
 
     private final List<GPTContextInfo> contexts;
+
+    private final List<GPTTool> tools;
 
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
@@ -91,6 +103,10 @@ public class GPTConfiguration {
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contexts, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
@@ -101,6 +117,7 @@ public class GPTConfiguration {
         this.temperature = temperature;
         this.seed = seed;
         this.contexts = contexts;
+        this.tools = tools;
     }
 
     /**
@@ -177,6 +194,13 @@ public class GPTConfiguration {
     }
 
     /**
+     * A list of tools the Model could use.
+     */
+    public List<GPTTool> getTools() {
+        return tools;
+    }
+
+    /**
      * Creates a configuration that joins the values.
      *
      * @throws IllegalArgumentException if values conflict - that's checked for apiKey and organizationId and answerType.
@@ -228,7 +252,15 @@ public class GPTConfiguration {
             contextInfos.addAll(other.contexts);
         }
         contextInfos = contextInfos.isEmpty() ? null : Collections.unmodifiableList(contextInfos);
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos);
+        List<GPTTool> tools = new ArrayList<>();
+        if (this.tools != null) {
+            tools.addAll(this.tools);
+        }
+        if (other.tools != null) {
+            tools.addAll(other.tools);
+        }
+        tools = tools.isEmpty() ? null : Collections.unmodifiableList(tools);
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos, tools);
     }
 
     /**
@@ -274,6 +306,11 @@ public class GPTConfiguration {
     @Nonnull
     public static GPTConfiguration ofContext(@Nonnull String usermsg, @Nonnull String assistantmsg) {
         return ofContexts(Collections.singletonList(new GPTContextInfo(usermsg, assistantmsg)));
+    }
+
+    @Nonnull
+    public static GPTConfiguration ofTools(@Nullable List<GPTTool> tools) {
+        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, null, tools);
     }
 
     @Override

@@ -1,27 +1,16 @@
-package com.composum.ai.backend.slingbase.experimential;
-
-import java.util.Locale;
-
-import org.apache.sling.api.resource.Resource;
-
-import com.composum.ai.backend.base.service.chat.GPTTool;
+package com.composum.ai.backend.base.service.chat;
 
 /**
  * An action the AI can perform - likely from the sidebar chat.
  *
  * @see "https://platform.openai.com/docs/guides/function-calling"
  */
-public interface AITool {
+public interface GPTTool {
 
     /**
-     * Human readable name.
+     * The name of the tool - must be exactly the name given in {@link #getToolDeclaration()}.
      */
-    String getName(Locale locale);
-
-    /**
-     * Human readable description.
-     */
-    String getDescription(Locale locale);
+    String getName();
 
     /**
      * The description to use for the OpenAI tool call. Will be inserted into the OpenAI tools array. E.g.:
@@ -52,17 +41,8 @@ public interface AITool {
     String getToolDeclaration();
 
     /**
-     * Whether the tool is enabled for the given resource.
-     */
-    boolean isAllowedFor(Resource resource);
-
-    /**
      * Executes the tool call and returns the result to present to the AI.
-     * Must only be called if {@link #isAllowedFor(Resource)} returned true.
      */
-    String execute(String arguments, Resource resource);
-
-    /** The form useable by {@link com.composum.ai.backend.base.service.chat.GPTChatCompletionService}.*/
-    GPTTool makeGPTTool(Resource resource);
+    public String execute(String arguments);
 
 }
