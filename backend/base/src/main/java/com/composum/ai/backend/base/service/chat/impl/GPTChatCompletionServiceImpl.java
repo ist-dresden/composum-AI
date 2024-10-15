@@ -75,11 +75,14 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatFunctionDetails;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
@@ -618,9 +621,29 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             externalRequest.setMaxTokens(maxTokens);
         }
         externalRequest.setStream(Boolean.TRUE);
+        externalRequest.setTools(convertTools(request.getConfiguration()));
         String jsonRequest = gson.toJson(externalRequest);
         checkTokenCount(jsonRequest);
         return jsonRequest;
+    }
+
+    private List<ChatTool> convertTools(GPTConfiguration configuration) {
+        if (configuration == null || configuration.getTools() == null || configuration.getTools().isEmpty()) {
+            return null;
+        }
+        List<ChatTool> result = new ArrayList<>();
+        for (GPTTool tool : configuration.getTools()) {
+            ChatTool toolDescr = new ChatTool();
+            ChatFunctionDetails details = new ChatFunctionDetails();
+            details.setName(tool.getName());
+            details.setStrict(true);
+            Map declaration = gson.fromJson(tool.getToolDeclaration(), Map.class);
+            details.setParameters(declaration.get("description"));
+            details.setParameters(((Map)declaration.get("function")).get("parameters"));
+            toolDescr.setFunction(details);
+            result.add(toolDescr);
+        }
+        return result;
     }
 
     protected void checkEnabled() {

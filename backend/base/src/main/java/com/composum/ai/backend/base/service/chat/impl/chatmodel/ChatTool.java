@@ -12,7 +12,7 @@ public class ChatTool {
      * The type of the tool, currently fixed as "function".
      */
     @SerializedName("type")
-    private String type;  // Always "function"
+    private String type = "function";  // currently Always "function"
 
     /**
      * The details of the function, such as its name, description, and parameters.
