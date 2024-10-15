@@ -16,7 +16,7 @@ public class ChatCompletionFunctionCallDetails {
     /**
      * A JSON for the arguments the function is called with.
      */
-    @SerializedName("parameters")
+    @SerializedName("arguments")
     private String arguments;
 
     public String getName() {

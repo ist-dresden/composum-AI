@@ -17,7 +17,13 @@ public enum GPTFinishReason {
     /**
      * Model decided to call a function.
      */
+    @Deprecated
     FUNCTION_CALL,
+
+    /**
+     * Model decided to call one or more tools.
+     */
+    TOOL_CALLS,
 
     /**
      * Omitted content due to a flag from our content filters.

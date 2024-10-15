@@ -1,7 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.sort;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -78,11 +77,11 @@ import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -439,6 +438,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     protected void handleStreamingEvent(GPTCompletionCallback callback, long id, String line) {
         if (line.startsWith("data:")) {
             line = line.substring(MAXTRIES);
+            System.out.println(line);
             try {
                 if (" [DONE]".equals(line)) {
                     LOG.debug("Response {} from GPT received DONE", id);

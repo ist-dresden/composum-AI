@@ -32,7 +32,7 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
 
     private void run() throws InterruptedException {
         GPTChatRequest request = new GPTChatRequest();
-        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hi'.");
+        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hi' and the string 'ho'.");
         request.setConfiguration(GPTConfiguration.ofTools(Arrays.asList(wobbler)));
         chatCompletionService.streamingChatCompletion(request, this);
         System.out.println("Call returned.");
@@ -123,3 +123,8 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
 // {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"logprobs":null,"finish_reason":null}]}
 // {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
 // [DONE]
+
+// or two calls:
+//  {"id":"chatcmpl-AIgs1gFG3stX6MiLD2jQkeam50HJQ","object":"chat.completion.chunk","created":1729018061,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_g44GU4kWpf8Q8T3pCmB54GWa","type":"function","function":{"name":"wobbler","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+// ... and then ...
+//  {"id":"chatcmpl-AIgs1gFG3stX6MiLD2jQkeam50HJQ","object":"chat.completion.chunk","created":1729018061,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"o\"}"}}]},"logprobs":null,"finish_reason":null}]}

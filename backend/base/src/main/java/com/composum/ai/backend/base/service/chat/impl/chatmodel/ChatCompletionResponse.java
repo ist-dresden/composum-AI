@@ -135,6 +135,10 @@ public class ChatCompletionResponse {
                     return GPTFinishReason.LENGTH;
                 case CONTENT_FILTER:
                     return GPTFinishReason.CONTENT_FILTER;
+                case TOOL_CALLS:
+                    return GPTFinishReason.TOOL_CALLS;
+                case FUNCTION_CALL:
+                    return GPTFinishReason.FUNCTION_CALL;
                 default:
                     throw new IllegalArgumentException("Unknown finish reason: " + finishReason);
             }

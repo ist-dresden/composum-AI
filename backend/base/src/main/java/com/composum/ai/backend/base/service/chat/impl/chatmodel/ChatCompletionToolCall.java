@@ -24,7 +24,7 @@ public class ChatCompletionToolCall {
      * The function being called by the model, including its name and arguments.
      */
     @SerializedName("function")
-    private ChatCompletionFunctionDetails function;
+    private ChatCompletionFunctionCallDetails function;
 
     // Getters and setters
 
@@ -44,11 +44,11 @@ public class ChatCompletionToolCall {
         this.type = type;
     }
 
-    public ChatCompletionFunctionDetails getFunction() {
+    public ChatCompletionFunctionCallDetails getFunction() {
         return function;
     }
 
-    public void setFunction(ChatCompletionFunctionDetails function) {
+    public void setFunction(ChatCompletionFunctionCallDetails function) {
         this.function = function;
     }
 }
