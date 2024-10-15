@@ -35,6 +35,11 @@ public interface GPTCompletionCallback {
     default void setRequest(String json) {
     }
 
+    /** Notifies that the request is completely finished / closed, nothing more will arrive. */
+    default void close() {
+        // empty
+    }
+
     /**
      * A simple collector that just takes note of things.
      */

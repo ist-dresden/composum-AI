@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Represents the details of a function used as a tool in the chat completion request.
  * Includes the function's name, description, parameters, and an optional strict flag.
  */
-public class ChatFunctionDetails {
+public class ChatCompletionFunctionDetails {
 
     /**
      * The name of the function to be called. This must be unique and can only contain a-z, A-Z, 0-9, underscores, and dashes.

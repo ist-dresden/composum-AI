@@ -32,7 +32,7 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
 
     private void run() throws InterruptedException {
         GPTChatRequest request = new GPTChatRequest();
-        request.addMessage(GPTMessageRole.USER, "Make 2 haiku about the weather and then wobble them.");
+        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hi'.");
         request.setConfiguration(GPTConfiguration.ofTools(Arrays.asList(wobbler)));
         chatCompletionService.streamingChatCompletion(request, this);
         System.out.println("Call returned.");
@@ -112,3 +112,14 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
     };
 
 }
+// sequence of data for a tool call:
+//  {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_ZkuSWztTvaOxQeT6TFITm3sa","type":"function","function":{"name":"wobbler","arguments":""}}],"refusal":null},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\""}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"tow"}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"ob"}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"ble"}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\":\""}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"hi"}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"logprobs":null,"finish_reason":null}]}
+// {"id":"chatcmpl-AIXBVjvIrBwLMcdUfqBsCEVwteQuK","object":"chat.completion.chunk","created":1728980829,"model":"gpt-4o-mini-2024-07-18","system_fingerprint":"fp_e2bde53e6e","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+// [DONE]

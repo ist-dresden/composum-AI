@@ -1,6 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.sort;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -81,7 +82,7 @@ import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMe
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatFunctionDetails;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -441,6 +442,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             try {
                 if (" [DONE]".equals(line)) {
                     LOG.debug("Response {} from GPT received DONE", id);
+                    callback.close();
                     return;
                 }
                 ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
@@ -455,6 +457,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 if (content != null && !content.isEmpty()) {
                     LOG.trace("Response {} from GPT: {}", id, content);
                     callback.onNext(content);
+                }
+                if (choice.getFinishReason() != null) {
+                    System.out.println("Response {} from GPT finished with reason {}" + id + choice.getFinishReason());
                 }
                 GPTFinishReason finishReason = ChatCompletionResponse.FinishReason.toGPTFinishReason(choice.getFinishReason());
                 if (finishReason != null) {
@@ -634,7 +639,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         List<ChatTool> result = new ArrayList<>();
         for (GPTTool tool : configuration.getTools()) {
             ChatTool toolDescr = new ChatTool();
-            ChatFunctionDetails details = new ChatFunctionDetails();
+            ChatCompletionFunctionDetails details = new ChatCompletionFunctionDetails();
             details.setName(tool.getName());
             details.setStrict(true);
             Map declaration = gson.fromJson(tool.getToolDeclaration(), Map.class);

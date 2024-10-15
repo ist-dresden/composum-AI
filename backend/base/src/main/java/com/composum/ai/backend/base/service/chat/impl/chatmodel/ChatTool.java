@@ -18,7 +18,7 @@ public class ChatTool {
      * The details of the function, such as its name, description, and parameters.
      */
     @SerializedName("function")
-    private ChatFunctionDetails function;  // Function details object
+    private ChatCompletionFunctionDetails function;  // Function details object
 
     // Getters and setters
 
@@ -30,11 +30,11 @@ public class ChatTool {
         this.type = type;
     }
 
-    public ChatFunctionDetails getFunction() {
+    public ChatCompletionFunctionDetails getFunction() {
         return function;
     }
 
-    public void setFunction(ChatFunctionDetails function) {
+    public void setFunction(ChatCompletionFunctionDetails function) {
         this.function = function;
     }
 }

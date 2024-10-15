@@ -116,7 +116,13 @@ public class ChatCompletionResponse {
         @SerializedName("length")
         LENGTH,
         @SerializedName("content_filter")
-        CONTENT_FILTER;
+        CONTENT_FILTER,
+        @SerializedName("tool_calls")
+        TOOL_CALLS,
+        @Deprecated
+        @SerializedName("function_call")
+        FUNCTION_CALL,
+        ;
 
         public static GPTFinishReason toGPTFinishReason(FinishReason finishReason) {
             if (finishReason == null) {
