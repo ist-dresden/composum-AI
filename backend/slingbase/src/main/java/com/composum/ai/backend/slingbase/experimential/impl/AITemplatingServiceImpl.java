@@ -70,7 +70,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      * Matches a text with PROMPTFIELD start and determines the id if there is one given. Either it's
      * <code>PROMPTFIELD: ...</code> or <code>PROMPTFIELD#ID: ...</code>.
      */
-    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(?<prefix>(<\\w+>\\s*)*)PROMPTFIELD(?<id>#\\w+)?:\\s*");
+    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(?<prefix>(</?\\w+>\\s*)*)PROMPTFIELD(?<id>#\\w+)?:\\s*");
 
     /* A prefix for keys that says this is not a prompt but a text that can be used to analyze the flow of the page. */
     protected static final String PREFIX_INFORMATIONALLY = "informationally#";
@@ -96,7 +96,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             "Do NEVER EVER repeat the prompt!\n" +
             "Write your responses so that they could appear as they are in a text, without any comments or discussion.";
 
-    protected static final String PREFIX_PROMPT = "Create a text for a web page that is based on the retrieved information according to the following instructions which are separated into several parts. The separators like \"%%%%%%%% ID %%%%%%%%\" should be printed as they are, to structure both the output and the instructions.\n\n";
+    protected static final String PREFIX_PROMPT = "Create a text for a web page that is based on the retrieved information according to the following instructions which are separated into several parts. The separators like \"%%%%%%%% (some ID to repeat) %%%%%%%%\" should be printed as they are, to structure both the output and the instructions.\n\n";
 
     protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("(?m)^\\s*%{6,10}\\s*(?<id>\\S+)\\s*%{6,10} *$");
 
