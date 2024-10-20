@@ -29,7 +29,7 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="wknd/components/teaser"
                         jcr:title="Question"
-                        jcr:description="Please answer the following question based on the given text:&lt;br>"
+                        jcr:description="Please answer the following question based on the given text: "
                 />
                 <teaser_3
                         jcr:primaryType="nt:unstructured"
@@ -144,6 +144,12 @@
                         sling:resourceType="wknd/components/teaser"
                         jcr:title="Keyword Density"
                         jcr:description="Identify the most frequently used words or phrases in the text, excluding common function words."
+                />
+                <teaser_22
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Page Recreation Prompts"
+                        jcr:description="Provide prompts for each section that describe the structure of the current page, including its tone, style, format, and text length. Ensure the prompts are specific enough to recreate the structure for a different topic, making the new page look consistent with the current one. Avoid generic comments; include all necessary details within the individual prompts themselves."
                 />
             </container>
         </root>
