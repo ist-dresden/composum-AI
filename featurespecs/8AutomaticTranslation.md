@@ -361,6 +361,7 @@ The REST interface needs the following operations. (URL prefix is /apps/composum
     - Returns: list of links to the translation run including basic metadata (status), sorted by recency
     - HTML: form for start translation + table with 2 columns translation run status (RUNNING, DONE) incl. title with
       metadata + link
+    - Parameter 'advanced' un-hides somewhat dangerous features like rollback and breaking inheritance
 - Start translation process (POST /apps/composum-ai/components/autotranslate/list.create.html)
     - Parameters: path of the page to translate, recursive flag. (The language would be determined from the path.)
     - Returns: link to a translation run (including an id)

@@ -22,6 +22,11 @@ public class AutoTranslateListModel {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateListModel.class);
 
+    /**
+     * Parameter that allows advanced features.
+     */
+    public static final String PARAM_ADVANCED = "advanced";
+
     @OSGiService
     private AutoTranslateService autoTranslateService;
 
@@ -102,6 +107,13 @@ public class AutoTranslateListModel {
             LOG.error("rollback failed for " + path, e);
             return "CAUTION: rollback failed for " + path + ": " + e.getMessage();
         }
+    }
+
+    /**
+     * If the parameter {@value #PARAM_ADVANCED} is given this returns true to allow advanced (dangerous) features.
+     */
+    public boolean isAdvanced() {
+        return request != null && request.getParameter(PARAM_ADVANCED) != null;
     }
 
 }
