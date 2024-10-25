@@ -27,7 +27,7 @@
                                 </coral-alert>
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                     <span class="coral-Form-field foundation-layout-util-breakword">
-                                        <strong>Status:</strong> ${model.status}
+                                        <strong>Status:</strong> ${model.statusString}
                                     </span>
                                 </span>
                                 <span class="foundation-field-readonly coral-Form-fieldwrapper">
@@ -96,6 +96,7 @@
                                         </tr>
                                         </tbody>
                                     </table>
+                                    <input type="hidden" id="pending" value="true" data-sly-test="${model.inProgress}">
                                 </div>
                                 <p>
                                     <a href="../run.cancel.html/${model.id}"
@@ -126,5 +127,13 @@
     </div>
 </div>
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script>
+    // as long as #pending is set, refresh the page every 20 seconds
+    if (document.getElementById('pending')) {
+        setTimeout(function () {
+            location.reload();
+        }, 10000);
+    }
+</script>
 </body>
 </html>

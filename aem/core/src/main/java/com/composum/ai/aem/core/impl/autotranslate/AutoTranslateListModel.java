@@ -3,6 +3,8 @@ package com.composum.ai.aem.core.impl.autotranslate;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
@@ -41,8 +43,14 @@ public class AutoTranslateListModel {
                 || autoTranslateConfigService == null || !autoTranslateConfigService.isPocUiEnabled();
     }
 
+    @Nonnull
     public List<AutoTranslateService.TranslationRun> getTranslationRuns() {
         return autoTranslateService != null ? autoTranslateService.getTranslationRuns() : Collections.emptyList();
+    }
+
+    public boolean inProgress() {
+        List<AutoTranslateService.TranslationRun> runs = getTranslationRuns();
+        return runs.stream().filter(run -> run.isInProgress()).findAny().isPresent();
     }
 
     public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
