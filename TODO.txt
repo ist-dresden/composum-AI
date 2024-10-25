@@ -1,7 +1,14 @@
 # List of minor Todos
 
+?? Default Translation Configuration in AEM?
+
 https://wcm.io/caconfig/editor/usage.html translation config drop down
 
+Generated with ... in conf pages
+http://localhost:4502/editor.html/content/dam/wknd/en/magazine/arctic-surfing/aloha-spirits-in-northern-norway doesnt add page text or component text!!!
+
+- default icon for ai.composum site
+!!! Dictation in Chat repeat in history bar.
 !! Empty prompt text
 !! http://localhost:5502/editor.html/content/xxx/com/en/about-us/going-forward.html "Explore the world..." RTE
 PDF and markdown as possible datatypes for the content creation dialog
@@ -12,6 +19,8 @@ The content creation dialog should know about the current text even if the page 
 Why are the teasers in
 https://author-p43852-e197429.adobeaemcloud.com/editor.html/content/gfps/com/en/products-solutions/systems/primofit.html
 not included into the excerpt.
+
+? Add history in content creation dialog, current component, last text, ...
 
 ----------------
 
