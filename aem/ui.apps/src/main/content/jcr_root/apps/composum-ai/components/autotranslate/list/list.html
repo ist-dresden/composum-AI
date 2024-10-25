@@ -31,13 +31,16 @@
                                                 using ChatGPT,
                                                 as well as change found paths to a copy with the appropriate language.
                                                 Full documentation is
-                                                <a href="https://ai.composum.com/aem-variant/automaticTranslationPoc.html">available
+                                                <a href="https://ai.composum.com/aem-variant/automaticTranslation.html">available
                                                     on the project page</a>.
                                                 Please be sure to understand this documentation.
+                                                This does not trigger a rollout, only the translation.
                                                 </span>
                                         </span>
                                         <div class="coral-Form-fieldwrapper">
-                                            <label class="coral-Form-fieldlabel" for="path">Path *: path of the page (with or without .html) for which translation should be triggered.</label>
+                                            <label class="coral-Form-fieldlabel" for="path">Path *: path of the page
+                                                (with or without .html) for which translation should be
+                                                triggered.</label>
                                             <input class="coral-Form-field _coral-Textfield" type="text" name="path"
                                                    required="true" is="coral-textfield" id="path" value=""
                                                    placeholder="Enter the path">
@@ -99,6 +102,11 @@
                                         </tbody>
                                     </table>
                                 </section>
+                                <hr>
+                                <section>
+                                    Drag this bookmarklet to your bookmark bar to easily open this UI from any page:
+                                    <a id="bookmarklet">Translation Tester</a>
+                                </section>
                             </div>
                         </div>
                     </sly>
@@ -149,6 +157,23 @@
             localStorage.removeItem('composum-ai-translation-experimental-ui-data');
             $('#maxdepth').val('2');
         });
+
+        const path = new URLSearchParams(window.location.search).get('path');
+        if (path) {
+            $('#path').val(path);
+        }
+
+        // e.g. /editor.html/content/gfps/com/cac.html
+        // set url to /apps/composum-ai/components/autotranslate/list.html?path=/content/gfps/com/cac
+        function replaceUrlWithPath() {
+            const path = window.location.pathname.match(/\/content[^?]*[?]|\/content[^.]*/)[0];
+            const url = window.location.protocol + '//' + window.location.host +
+                '/apps/composum-ai/components/autotranslate/list.html?path=' + path;
+            window.open(url, '_blank');
+        }
+
+        const bookmarklet = 'javascript:' + replaceUrlWithPath.toString() + 'replaceUrlWithPath();';
+        $('#bookmarklet').attr('href', bookmarklet);
     });
 </script>
 </body>
