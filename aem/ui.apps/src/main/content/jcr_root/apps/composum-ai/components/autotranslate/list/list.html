@@ -37,7 +37,7 @@
                                                 </span>
                                         </span>
                                         <div class="coral-Form-fieldwrapper">
-                                            <label class="coral-Form-fieldlabel" for="path">Path *</label>
+                                            <label class="coral-Form-fieldlabel" for="path">Path *: path of the page (with or without .html) for which translation should be triggered.</label>
                                             <input class="coral-Form-field _coral-Textfield" type="text" name="path"
                                                    required="true" is="coral-textfield" id="path" value=""
                                                    placeholder="Enter the path">
@@ -51,9 +51,10 @@
                                         </div>
                                         <!-- MaxDepth -->
                                         <div class="coral-Form-fieldwrapper">
-                                            <label class="coral-Form-fieldlabel" for="maxdepth">MaxDepth</label>
+                                            <label class="coral-Form-fieldlabel" for="maxdepth">MaxDepth: optional
+                                                maximum depth for recursion</label>
                                             <input class="coral-Form-field _coral-Textfield" type="text" name="maxdepth"
-                                                   is="coral-textfield" id="maxdepth" value=""
+                                                   is="coral-textfield" id="maxdepth" value="2"
                                                    placeholder="Optional maximum depth for recursion">
                                         </div>
                                         <!-- a text area with additional instructions. -->
@@ -139,11 +140,14 @@
         });
 
         // reset form clears all forms *and* saved data
-        $('#reset').click(function () {
-            $('form').each(function () {
-                $(this)[0].reset();
+        $('#reset').click(function (event) {
+            event.preventDefault();
+            $(document).find('input, textarea, select').each(function () {
+                const field = $(this);
+                field.val('');
             });
             localStorage.removeItem('composum-ai-translation-experimental-ui-data');
+            $('#maxdepth').val('2');
         });
     });
 </script>
