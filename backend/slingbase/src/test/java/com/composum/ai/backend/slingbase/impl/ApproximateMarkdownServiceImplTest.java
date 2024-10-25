@@ -185,10 +185,10 @@ public class ApproximateMarkdownServiceImplTest {
         // in method setup we make sure the default is returned by config
         when(config.urlSourceWhitelist()).thenReturn(new String[]{".*"});
         service.activate(config);
-        service.getMarkdown(new URI("http://example.com"));
+        // service.getMarkdown(new URI("http://example.com")); // doesn't work without internet connection
         for (String url : new String[]
                 {"http://localhost/", "https://localhost/", "http://1.2.3.4/", "http://[::1]/", "http://1.2.3.4/:8080", "http://[::1]/:8080"}) {
-            ec.checkThrows(IllegalArgumentException.class, () -> service.getMarkdown(new URI("http://localhost/")));
+            ec.checkThrows(IllegalArgumentException.class, () -> service.getMarkdown(new URI(url)));
         }
     }
 
