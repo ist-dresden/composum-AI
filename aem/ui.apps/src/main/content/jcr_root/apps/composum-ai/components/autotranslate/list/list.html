@@ -18,6 +18,7 @@
                             <div class="coral-FixedColumn-column">
                                 <form class="coral-Form coral-Form--vertical foundation-form"
                                       action="list.create.html" method="GET">
+                                    <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
                                                 class="coral-Form-fieldset-legend">Translation Process Debugging UI</h2>
@@ -70,12 +71,13 @@
                                                             id="translateWhenChanged">
                                                 <label for="translateWhenChanged">Re-translate values that have
                                                     been changed in the blueprint of the live copy after the last
-                                                    translation run. That also happens on changed additional instructions.
+                                                    translation run. That also happens on changed additional
+                                                    instructions.
                                                 </label>
                                             </coral-checkbox>
                                         </div>
                                         <!-- Break inheritance on translation -->
-                                        <div class="coral-Form-fieldwrapper" data-sly-test="${model.advanced}">
+                                        <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="breakInheritance" id="breakInheritance">
                                                 <label for="breakInheritance">Break inheritance of component / property
                                                     on translation</label>
@@ -103,6 +105,9 @@
                                         </div>
                                         <button type="submit" class="coral-Button coral-Button--primary">
                                             Start Translation Process
+                                        </button>
+                                        <button class="coral-Button coral-Button--primary" id="reset">
+                                            Reset Form
                                         </button>
                                     </section>
                                 </form>
@@ -134,7 +139,8 @@
                                 <hr>
                                 <form class="coral-Form coral-Form--vertical foundation-form"
                                       action="list.rollback.html"
-                                      method="GET" data-sly-test="${model.advanced}">
+                                      method="GET">
+                                    <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
                                                 class="coral-Form-fieldset-legend">Rollback Translation</h2>
@@ -164,5 +170,43 @@
     </div>
 </div>
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script>
+    $(document).ready(function () {
+        $.getJSON('/libs/granite/csrf/token.json', function (data) {
+            $('#cq_csrf_token').val(data.token);
+        });
+
+        const formData = JSON.parse(localStorage.getItem('composum-ai-translation-experimental-ui-data')) || {};
+        // save all data to local storage on form submit
+        $('form').submit(function (event) {
+            event.preventDefault();
+            const form = $(this);
+            const formData = form.serializeArray().reduce((obj, item) => {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+            localStorage.setItem('composum-ai-translation-experimental-ui-data', JSON.stringify(formData));
+            form[0].submit();
+        });
+
+        // restore all form data on page load
+        $('form').each(function () {
+            const form = $(this);
+            const formData = JSON.parse(localStorage.getItem('composum-ai-translation-experimental-ui-data')) || {};
+            form.find('input, textarea, select').each(function () {
+                const field = $(this);
+                field.val(formData[field.attr('name')] || '');
+            });
+        });
+
+        // reset form clears all forms *and* saved data
+        $('#reset').click(function () {
+            $('form').each(function () {
+                $(this)[0].reset();
+            });
+            localStorage.removeItem('composum-ai-translation-experimental-ui-data');
+        });
+    });
+</script>
 </body>
 </html>

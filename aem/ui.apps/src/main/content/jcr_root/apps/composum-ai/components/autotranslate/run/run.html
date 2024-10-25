@@ -18,6 +18,7 @@
                         <section class="coral-Form-fieldset"><h2
                                     class="coral-Form-fieldset-legend">Translation run details for ${model.rootPath}</h2>
                             <div class="coral-Form coral-Form--vertical foundation-form">
+                                <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
                                 <input type="hidden" name="_charset_" value="utf-8">
                                 <coral-alert variant="error" data-sly-test="${!model}">
                                     <coral-alert-header>EXPIRED</coral-alert-header>
@@ -126,5 +127,12 @@
     </div>
 </div>
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script>
+    $(document).ready(function() {
+        $.getJSON('/libs/granite/csrf/token.json', function (data) {
+            $('#cq_csrf_token').val(data.token);
+        });
+    });
+</script>
 </body>
 </html>
