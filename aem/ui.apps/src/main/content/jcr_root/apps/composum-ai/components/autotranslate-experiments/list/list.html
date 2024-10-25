@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Translation Process Debugging UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+    <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
+        <div class="foundation-layout-panel-body">
+            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
+                <div class="cq-dialog-content-page">
+                    <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel">
+                        <div class="coral-FixedColumn">
+                            <div class="coral-FixedColumn-column">
+                                <form class="coral-Form coral-Form--vertical foundation-form"
+                                      action="list.create.html" method="GET">
+                                    <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
+                                    <input type="hidden" name="_charset_" value="utf-8">
+                                    <section class="coral-Form-fieldset"><h2
+                                                class="coral-Form-fieldset-legend">Translation Process Debugging UI</h2>
+                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <coral-alert variant="error" data-sly-test="${model.disabled}">
+                                                <coral-alert-header>NOT CONFIGURED</coral-alert-header>
+                                                <coral-alert-content>The translation service is currently not enabled in the
+                                                    OSGI configuration and thus unavailable - please consult the
+                                                    documentation for further information.
+                                                </coral-alert-content>
+                                            </coral-alert>
+                                            <span class="coral-Form-field foundation-layout-util-breakword">
+                                                With this form an automatic translation of a page or page tree can be done.
+                                                It assumes the given path is a live copy of the original language
+                                                (to be easily updateable from the blueprint)
+                                                and will translate all properties heuristically determined to be text
+                                                using ChatGPT,
+                                                as well as change found paths to a copy with the appropriate language.
+                                                Translation is disabled until enabled in OSGI configuration;
+                                                full documentation is
+                                                <a href="https://ai.composum.com/aem-variant/automaticTranslationPoc.html">available
+                                                    on the project page</a>.
+                                                Please be sure to understand this documentation - this is currently in
+                                                an experimental stage, though it might work for you nicely, anyway.
+                                                </span>
+                                        </span>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="path">Path *</label>
+                                            <input class="coral-Form-field _coral-Textfield" type="text" name="path"
+                                                   required="true" is="coral-textfield" id="path" value=""
+                                                   placeholder="Enter the path">
+                                        </div>
+                                        <!-- Recursive -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="recursive">
+                                                <label for="recursiveCoral">Recursive - also translate all
+                                                    subpages</label>
+                                            </coral-checkbox>
+                                        </div>
+                                        <!-- MaxDepth -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="maxdepth">MaxDepth</label>
+                                            <input class="coral-Form-field _coral-Textfield" type="text" name="maxdepth"
+                                                   is="coral-textfield" id="maxdepth" value=""
+                                                   placeholder="Optional maximum depth for recursion">
+                                        </div>
+                                        <!-- Re-translate changed values -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="translateWhenChanged"
+                                                            id="translateWhenChanged">
+                                                <label for="translateWhenChanged">Re-translate values that have
+                                                    been changed in the blueprint of the live copy after the last
+                                                    translation run. That also happens on changed additional
+                                                    instructions.
+                                                </label>
+                                            </coral-checkbox>
+                                        </div>
+                                        <!-- Break inheritance on translation -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="breakInheritance" id="breakInheritance">
+                                                <label for="breakInheritance">Break inheritance of component / property
+                                                    on translation</label>
+                                            </coral-checkbox>
+                                        </div>
+                                        <!-- a text area with additional system instructions. -->
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="additionalInstructions">Optionally,
+                                                additional instructions:</label>
+                                            <textarea is="coral-textarea" class="coral-Form-field _coral-Textfield"
+                                                      placeholder="Enter any additional instructions describing intended style, tone, language variants, etc."
+                                                      name="additionalInstructions" value="" rows="5"
+                                                      labelledby="label-vertical-textarea-1"></textarea>
+                                        </div>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="selectmodel">Model</label>
+                                            <coral-select class="coral-Form-field _coral-Dropdown"
+                                                          name="translationmodel"
+                                                          placeholder="" variant="default">
+                                                <coral-select-item value="default" selected="">default
+                                                </coral-select-item>
+                                                <coral-select-item value="standard">Standard</coral-select-item>
+                                                <coral-select-item value="highintelligence">High</coral-select-item>
+                                            </coral-select>
+                                        </div>
+                                        <button type="submit" class="coral-Button coral-Button--primary">
+                                            Start Translation Process
+                                        </button>
+                                        <button class="coral-Button coral-Button--primary" id="reset">
+                                            Reset Form
+                                        </button>
+                                    </section>
+                                </form>
+                                <hr>
+                                <section class="coral-Form-fieldset"><h2
+                                            class="coral-Form-fieldset-legend">Triggered translations</h2>
+                                    <span class="foundation-layout-util-breakword">
+                                        This table lists all translation processes that are currently running or have been
+                                        completed, last run first. Refresh page to update stati.
+                                    </span>
+                                    <!-- Table with translation runs -->
+                                    <table is="coral-table">
+                                        <thead is="coral-table-head" sticky>
+                                        <tr is="coral-table-row">
+                                            <th is="coral-table-headercell">Status</th>
+                                            <th is="coral-table-headercell">Translation root path</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody is="coral-table-body" data-sly-list="${model.translationRuns}">
+                                        <tr is="coral-table-row">
+                                            <td is="coral-table-cell">${item.status}</td>
+                                            <td is="coral-table-cell">
+                                                <a href="run.html/${item.id}">${item.rootPath}</a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </section>
+                                <hr>
+                                <form class="coral-Form coral-Form--vertical foundation-form"
+                                      action="list.rollback.html"
+                                      method="GET">
+                                    <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
+                                    <input type="hidden" name="_charset_" value="utf-8">
+                                    <section class="coral-Form-fieldset"><h2
+                                                class="coral-Form-fieldset-legend">Rollback Translation</h2>
+                                        <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <span class="coral-Form-field foundation-layout-util-breakword">
+                                                For quick testing only - this will roll back the given page tree
+                                                to the state before the translation process.
+                                                </span>
+                                        </span>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="path">Path *</label>
+                                            <input class="coral-Form-field _coral-Textfield" type="text" name="path"
+                                                   required="true" is="coral-textfield" id="path" value=""
+                                                   placeholder="Enter the path to be rolled back">
+                                        </div>
+                                        <button type="submit" class="coral-Button coral-Button--warning">
+                                            Rollback Translation Results
+                                        </button>
+                                    </section>
+                                </form>
+                            </div>
+                        </div>
+                    </sly>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script>
+    $(document).ready(function () {
+        $.getJSON('/libs/granite/csrf/token.json', function (data) {
+            $('#cq_csrf_token').val(data.token);
+        });
+
+        const formData = JSON.parse(localStorage.getItem('composum-ai-translation-experimental-ui-data')) || {};
+        // save all data to local storage on form submit
+        $('form').submit(function (event) {
+            event.preventDefault();
+            const form = $(this);
+            const formData = form.serializeArray().reduce((obj, item) => {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+            localStorage.setItem('composum-ai-translation-experimental-ui-data', JSON.stringify(formData));
+            form[0].submit();
+        });
+
+        // restore all form data on page load
+        $('form').each(function () {
+            const form = $(this);
+            const formData = JSON.parse(localStorage.getItem('composum-ai-translation-experimental-ui-data')) || {};
+            form.find('input, textarea, select').each(function () {
+                const field = $(this);
+                field.val(formData[field.attr('name')] || '');
+            });
+        });
+
+        // reset form clears all forms *and* saved data
+        $('#reset').click(function () {
+            $('form').each(function () {
+                $(this)[0].reset();
+            });
+            localStorage.removeItem('composum-ai-translation-experimental-ui-data');
+        });
+    });
+</script>
+</body>
+</html>
