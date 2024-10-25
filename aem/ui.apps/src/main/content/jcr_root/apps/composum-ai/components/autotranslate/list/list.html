@@ -18,7 +18,6 @@
                             <div class="coral-FixedColumn-column">
                                 <form class="coral-Form coral-Form--vertical foundation-form"
                                       action="list.create.html" method="GET">
-                                    <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
                                                 class="coral-Form-fieldset-legend">Translation Process Debugging UI</h2>
@@ -118,13 +117,8 @@
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <script>
     $(document).ready(function () {
-        $.getJSON('/libs/granite/csrf/token.json', function (data) {
-            $('#cq_csrf_token').val(data.token);
-        });
-
         const localStorageKey = 'composum-ai-translation-experimental-ui-data';
 
-        const formData = JSON.parse(localStorage.getItem(localStorageKey)) || {};
         // save all data to local storage on form submit
         $('form').submit(function (event) {
             event.preventDefault();
@@ -154,14 +148,12 @@
                 const field = $(this);
                 field.val('');
             });
-            localStorage.removeItem('composum-ai-translation-experimental-ui-data');
+            localStorage.removeItem(localStorageKey);
             $('#maxdepth').val('2');
         });
 
         const path = new URLSearchParams(window.location.search).get('path');
-        if (path) {
-            $('#path').val(path);
-        }
+        if (path) $('#path').val(path);
 
         // e.g. /editor.html/content/gfps/com/cac.html
         // set url to /apps/composum-ai/components/autotranslate/list.html?path=/content/gfps/com/cac
