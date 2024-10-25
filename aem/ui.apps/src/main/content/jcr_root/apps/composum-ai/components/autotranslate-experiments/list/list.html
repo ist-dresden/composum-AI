@@ -159,6 +159,11 @@
                                         </button>
                                     </section>
                                 </form>
+                                <hr>
+                                <section>
+                                    Drag this bookmarklet to your bookmark bar to easily open this UI from any page:
+                                    <a id="bookmarklet">Translation Experiments</a>
+                                </section>
                             </div>
                         </div>
                     </sly>
@@ -203,6 +208,21 @@
             localStorage.removeItem(localStorageKey);
             $('#maxdepth').val('2');
         });
+
+        const path = new URLSearchParams(window.location.search).get('path');
+        if (path) $('#path').val(path);
+
+        // e.g. /editor.html/content/gfps/com/cac.html
+        // set url to /apps/composum-ai/components/autotranslate-experiments/list.html?path=/content/gfps/com/cac
+        function replaceUrlWithPath() {
+            const path = window.location.pathname.match(/\/content[^?]*[?]|\/content[^.]*/)[0];
+            const url = window.location.protocol + '//' + window.location.host +
+                '/apps/composum-ai/components/autotranslate-experiments/list.html?path=' + path;
+            window.open(url, '_blank');
+        }
+
+        const bookmarklet = 'javascript:' + replaceUrlWithPath.toString() + 'replaceUrlWithPath();';
+        $('#bookmarklet').attr('href', bookmarklet);
     });
 </script>
 </body>

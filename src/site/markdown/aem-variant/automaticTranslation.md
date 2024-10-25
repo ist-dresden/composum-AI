@@ -156,8 +156,8 @@ through this rollout. This has to be made sure by other means in the workflow, e
 
 ## Usage of the Debugging UI
 
-For quick experimentation and evaluation, we provide a very simple debugging style UI. The entry point for the
-translation is the URL in the author server
+For quick experimentation and evaluation of additional instructions, we provide a very simple debugging style UI. The 
+entry point for the translation is the URL in the author server
 [/apps/composum-ai/components/autotranslate/list.html](http://localhost:4502/apps/composum-ai/components/autotranslate/list.html)
 It allows entering a path for a page or content / experience fragment or whole site and starting a translation process
 for either that page only, or for that page and it's subpages.
@@ -167,9 +167,11 @@ take a couple of minutes - a list of triggered translations is provided, providi
 actual pages that were translated and the status / statistics of the translation. The detail view also provides a
 button to cancel and undo the translation.
 
-The list view also provides a form to quickly roll back the translation for a subtree for quick experimentation.
+If enabled in OSGI, there is also an experimental UI at
+[/apps/composum-ai/components/autotranslate-experiments/list.html](http://localhost:4502/apps/composum-ai/components/autotranslate-experiments/list.html)
+that also provides a form to quickly roll back the translation for a subtree for quick experimentation.
 This will also reenable inheritance of all properties and resources, and reset the
-translated texts to the state before the automatic translation.
+translated texts to the state before the automatic translation. That's not safe on production of course.
 
 ## Installation / Configuration
 

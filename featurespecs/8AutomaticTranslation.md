@@ -145,7 +145,6 @@ Parameters for the translation process are:
 
 - the path of the page to translate
 - a `recursive` flag whether to translate all pages recursively or only the named page or resource
-- a parameter `changed` flag that triggers retranslation if the original text has changed.
 
 ## Triggering the translation as a rollout action
 
@@ -355,7 +354,10 @@ https://experienceleague.adobe.com/en/docs/experience-manager-65/content/impleme
 
 ### REST interface for the UI
 
-The REST interface needs the following operations. (URL prefix is /apps/composum-ai/components/autotranslate/list)
+The REST interface needs the following operations. (URL prefix is /apps/composum-ai/components/autotranslate/list) 
+There is a full UI at /apps/composum-ai/components/autotranslate-experiments/list.html that provides all of this but 
+is only enabled if configured in OSGI, and a reduced UI at /apps/composum-ai/components/autotranslate/list.html that 
+offers only operations that don't do much damage - especially rollback is disabled.  
 
 - List of translation processes (GET /apps/composum-ai/components/autotranslate/list.html)
     - Returns: list of links to the translation run including basic metadata (status), sorted by recency
