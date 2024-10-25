@@ -46,9 +46,6 @@ public class AutoTranslateListModel {
     }
 
     public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
-        if (isDisabled()) {
-            throw new IllegalStateException("AutoTranslateService is not available");
-        }
         if (run == null) {
             String path = request.getParameter("path");
             if (path == null || path.isEmpty()) {
@@ -59,6 +56,9 @@ public class AutoTranslateListModel {
             boolean changed = request.getParameter("translateWhenChanged") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean breakInheritance = request.getParameter("breakInheritance") != null;
+            if (isDisabled() && breakInheritance) {
+                throw new IllegalStateException("Refusing to do breakInheritance on disabled experiments.");
+            }
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");
             if ("standard".equals(translationmodel)) {
@@ -85,7 +85,7 @@ public class AutoTranslateListModel {
         String path = request.getParameter("path");
         try {
             if (isDisabled()) {
-                throw new IllegalStateException("AutoTranslateService is not available");
+                throw new IllegalStateException("Rollback only allowed in experimental mode.");
             }
             if (path == null || path.isEmpty()) {
                 throw new IllegalArgumentException("path parameter is required");
