@@ -113,9 +113,8 @@
                                     </a>
                                 </p>
                                 <div class="coral-Form-fieldwrapper" data-sly-test="${model.messages.toString}">
-                                    <label class="coral-Form-fieldlabel"
-                                           for="additionalInstructions">Messages</label>
-                                    <p>${model.messages.toString @ context='html'}</p>
+                                    <label class="coral-Form-fieldlabel">Messages</label>
+                                    <pre>${model.messages.toString @ context='html'}</pre>
                                 </div>
                             </div>
 

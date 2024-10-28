@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.SelectorUtils;
+import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
 import com.composum.ai.backend.base.service.chat.GPTTranslationService;
@@ -166,8 +167,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                                 .map(propertyToTranslate -> propertyToTranslate.propertyName).collect(Collectors.toSet()));
                 LOG.info("Translating {} properties in {} using additional instructions", countPropertiesToTranslate, resource.getPath(), additionalInstructions);
                 if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
-                    throw new RuntimeException("Here are the additional instructions for " + resource.getPath() + " for debugging (aborting translation):\n" +
-                            additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, ""));
+                    throw new GPTException.GPTUserNotificationException(
+                            "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):\n\n" +
+                            additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
                 }
 
                 configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);

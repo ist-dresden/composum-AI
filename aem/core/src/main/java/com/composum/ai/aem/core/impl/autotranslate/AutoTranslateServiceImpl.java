@@ -25,6 +25,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.GPTException;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -237,6 +238,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                             page.stats = stats;
                             page.status = stats.hasChanges() ? "done" : "unchanged";
                         }
+                    } catch (GPTException.GPTUserNotificationException e) {
+                        page.status = "cancelled - user notification";
+                        this.messages.append(e.getMessage());
+                        LOG.info("User notification during translation of " + page.pagePath + ": " + e.getMessage());
+                        hasErrors = true; // not quite true but we don't want an 'OK, translation done'
                     } catch (Exception e) {
                         page.status = "error";
                         this.messages.append("Error translating ").append(page.pagePath).append(": ").append(e).append("\n");

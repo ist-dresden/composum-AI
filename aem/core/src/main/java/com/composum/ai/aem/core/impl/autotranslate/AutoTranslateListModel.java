@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -63,6 +65,13 @@ public class AutoTranslateListModel {
             boolean recursive = request.getParameter("recursive") != null;
             boolean changed = request.getParameter("translateWhenChanged") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
+            boolean debugaddinstructions = request.getParameter("debugaddinstructions") != null;
+            if (debugaddinstructions) {
+                additionalInstructions = StringUtils.trim(
+                        StringUtils.defaultString(additionalInstructions) + "\n\n" +
+                                MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS
+                );
+            }
             boolean breakInheritance = request.getParameter("breakInheritance") != null;
             if (isDisabled() && breakInheritance) {
                 throw new IllegalStateException("Refusing to do breakInheritance on disabled experiments.");

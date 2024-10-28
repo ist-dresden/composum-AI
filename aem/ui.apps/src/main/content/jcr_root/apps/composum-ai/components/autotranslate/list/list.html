@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Translation Process Debugging UI</title>
+    <title>Translation Testing UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
     <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
@@ -20,7 +20,7 @@
                                       action="list.create.html" method="GET">
                                     <input type="hidden" name="_charset_" value="utf-8">
                                     <section class="coral-Form-fieldset"><h2
-                                                class="coral-Form-fieldset-legend">Translation Process Debugging UI</h2>
+                                                class="coral-Form-fieldset-legend">Translation Testing UI</h2>
                                         <span class="foundation-field-readonly coral-Form-fieldwrapper">
                                             <span class="coral-Form-field foundation-layout-util-breakword">
                                                 With this form an automatic translation of a page or page tree can be done.
@@ -67,6 +67,11 @@
                                                       placeholder="Enter any additional instructions describing intended style, tone, language variants, etc."
                                                       name="additionalInstructions" value="" rows="5"
                                                       labelledby="label-vertical-textarea-1"></textarea>
+                                        </div>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="debugaddinstructions">
+                                                <label for="debugaddinstructions">Instead of translating collect additional instructions for verification</label>
+                                            </coral-checkbox>
                                         </div>
                                         <button type="submit" class="coral-Button coral-Button--primary">
                                             Start Translation Process
