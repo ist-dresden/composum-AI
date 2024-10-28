@@ -23,7 +23,13 @@ public enum GPTMessageRole {
      * The assistant messages help store prior responses. It can also serve as an example of desired behavior.
      */
     @SerializedName("assistant")
-    ASSISTANT("assistant");
+    ASSISTANT("assistant"),
+
+    /**
+     * A result of a tool call the assistant made.
+     */
+    @SerializedName("tool")
+    TOOL("tool");
 
     private final String externalRepresentation;
 

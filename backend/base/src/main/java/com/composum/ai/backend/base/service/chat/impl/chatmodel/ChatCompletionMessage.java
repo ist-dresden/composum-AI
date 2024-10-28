@@ -44,6 +44,7 @@ public class ChatCompletionMessage {
         ChatCompletionMessage result = new ChatCompletionMessage();
         result.setRole(role);
         result.setContent(Collections.singletonList(part));
+        result.setToolCallId(message.getToolCallId());
         return result;
     }
 
