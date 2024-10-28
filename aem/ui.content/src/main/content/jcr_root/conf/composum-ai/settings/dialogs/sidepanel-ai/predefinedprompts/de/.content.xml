@@ -124,6 +124,11 @@
                         sling:resourceType="wknd/components/teaser"
                         jcr:title="Schlüsselwortdichte"
                         jcr:description="Identifiziere die am häufigsten verwendeten Wörter oder Phrasen im Text, ausgenommen allgemeine Funktionswörter."/>
+                <teaser_22
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="wknd/components/teaser"
+                        jcr:title="Seitenerstellungs-Prompts"
+                        jcr:description="Gib für jede Sektion Prompts an, die den Aufbau der aktuellen Seite beschreiben, einschließlich Ton, Stil, Format und Textlänge. Die Prompts sollten spezifisch genug sein, um die Struktur für ein anderes Thema nachzubilden, sodass die neue Seite konsistent mit der aktuellen aussieht. Vermeide allgemeine Kommentare; alle notwendigen Details sollten in den einzelnen Prompts selbst enthalten sein."/>
             </container>
         </root>
     </jcr:content>

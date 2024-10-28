@@ -58,4 +58,14 @@ public class GPTException extends RuntimeException {
         }
     }
 
+    /**
+     * A special exception if the user should be notified about something instead of completing the task.
+     * This is used to transport information in cases where a special return value is not feasible.
+     */
+    public static class GPTUserNotificationException extends GPTException {
+        public GPTUserNotificationException(String message) {
+            super(message);
+        }
+    }
+
 }

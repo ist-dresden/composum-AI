@@ -603,7 +603,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().highIntelligenceNeededIsSet();
         externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
-        externalRequest.setTemperature(request.getConfiguration() != null ? request.getConfiguration().getTemperature() : temperature);
+        externalRequest.setTemperature(request.getConfiguration() != null && request.getConfiguration().getTemperature() != null ?
+                request.getConfiguration().getTemperature() : temperature);
         externalRequest.setSeed(request.getConfiguration() != null ? request.getConfiguration().getSeed() : seed);
         if (request.getConfiguration() != null && request.getConfiguration().getAnswerType() == GPTConfiguration.AnswerType.JSON) {
             externalRequest.setResponseFormat(ChatCompletionRequest.JSON);

@@ -25,6 +25,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.GPTException;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -135,7 +136,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                 .map(r -> new TranslationPageImpl(r.getPath()))
                 .collect(Collectors.toList());
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
-        run.status = "queued";
+        run.status = TranslationStatus.QUEUED;
         run.user = resourceResolver.getUserID();
         stateService.getTranslationRuns().add(run);
         run.future = getThreadPool().submit(() -> run.execute(processResolver));
@@ -188,7 +189,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         public void cancel() {
             if (future != null) {
                 future.cancel(true);
-                status = "cancelling";
+                status = TranslationStatus.CANCELLING;
             }
         }
 
@@ -207,7 +208,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
          */
         public void execute(ResourceResolver callResourceResolver) {
             try {
-                status = "running";
+                status = TranslationStatus.RUNNING;
                 if (System.currentTimeMillis() < waituntil) {
                     // delay a little since that is used during creating a livecopy, and that should be finished.
                     Thread.sleep(waituntil - System.currentTimeMillis());
@@ -222,7 +223,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         interrupted = true;
                     }
                     if (interrupted) {
-                        status = "cancelled";
+                        status = TranslationStatus.CANCELLED;
                         page.status = "cancelled";
                         continue;
                     }
@@ -237,6 +238,11 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                             page.stats = stats;
                             page.status = stats.hasChanges() ? "done" : "unchanged";
                         }
+                    } catch (GPTException.GPTUserNotificationException e) {
+                        page.status = "cancelled - user notification";
+                        this.messages.append(e.getMessage());
+                        LOG.info("User notification during translation of " + page.pagePath + ": " + e.getMessage());
+                        hasErrors = true; // not quite true but we don't want an 'OK, translation done'
                     } catch (Exception e) {
                         page.status = "error";
                         this.messages.append("Error translating ").append(page.pagePath).append(": ").append(e).append("\n");
@@ -244,19 +250,19 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         hasErrors = true;
                     }
                 }
-                status = hasErrors ? "doneWithErrors" : interrupted ? "cancelled" : "done";
+                status = hasErrors ? TranslationStatus.DONE_WITH_ERRORS : interrupted ? TranslationStatus.CANCELLED : TranslationStatus.FINISHED;
             } catch (InterruptedException e) {
                 LOG.error("Interruption during " + this, e);
                 Thread.currentThread().interrupt();
-                status = "interrupted";
+                status = TranslationStatus.INTERRUPTED;
             } catch (Exception e) {
                 LOG.error("Error during " + this, e);
-                status = "error";
+                status = TranslationStatus.ERROR;
                 messages.append("Error: ").append(e).append("\n");
             } finally {
                 stopTime = new Date().toString();
                 if (status == null) {
-                    status = "finished";
+                    status = TranslationStatus.FINISHED;
                 }
                 future = null;
                 callResourceResolver.close();

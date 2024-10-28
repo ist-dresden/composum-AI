@@ -140,7 +140,7 @@
                     jcr:primaryType="cpp:Element"
                     sling:resourceType="composum/prototype/aem-wcm-core-replacement/components/text"
                     title="Question"
-                    text="Please answer the following question based on the given text:&lt;br>">
+                    text="Please answer the following question based on the given text: ">
                 <i18n
                         jcr:primaryType="nt:unstructured">
                     <de

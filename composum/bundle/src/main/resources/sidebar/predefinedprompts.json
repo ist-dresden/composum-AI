@@ -19,5 +19,6 @@
   "Relevance Evaluation": "Evaluate whether the content of the text is relevant to the following topic or purpose:\n",
   "Fact Check": "Identify any factual claims in the text and indicate whether they are generally considered accurate, inaccurate, or uncertain.",
   "Proofread": "Please check the text for any spelling, grammar, or punctuation errors, typos, incorrect  sentence structure and incorrect / inappropriate word usage, run-on sentences, incorrect subject-verb agreement, missing or repeated words. In each problem report, print a the part of the sentence where the problem occurs and how that part of the sentence would be improved. Sort the reported problems by severity.",
-  "Keyword Density": "Identify the most frequently used words or phrases in the text, excluding common function words."
+  "Keyword Density": "Identify the most frequently used words or phrases in the text, excluding common function words.",
+  "Page Recreation Prompts": "Provide prompts for each section that describe the structure of the current page, including its tone, style, format, and text length. Ensure the prompts are specific enough to recreate the structure for a different topic, making the new page look consistent with the current one. Avoid generic comments; include all necessary details within the individual Fprompts themselves."
 }

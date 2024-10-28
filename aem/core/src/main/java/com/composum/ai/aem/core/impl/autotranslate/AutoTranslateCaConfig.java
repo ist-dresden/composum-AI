@@ -10,11 +10,7 @@ import org.apache.sling.caconfig.annotation.Property;
 public @interface AutoTranslateCaConfig {
 
     @Property(label = "Additional Instructions", order = 1,
-            description = "Additional instructions for the automatic translation.",
-            property = {
-                    "widgetType=textarea",
-                    "textareaRows=8"
-            })
+            description = "Additional instructions for the automatic translation.")
     String additionalInstructions();
 
     @Property(label = "Rules for additional Instructions", order = 2,

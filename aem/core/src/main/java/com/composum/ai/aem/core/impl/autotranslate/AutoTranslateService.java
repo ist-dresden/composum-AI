@@ -112,9 +112,13 @@ public interface AutoTranslateService {
         }
     }
 
+    enum TranslationStatus {
+        QUEUED, CANCELLING, RUNNING, CANCELLED, DONE_WITH_ERRORS, INTERRUPTED, ERROR, FINISHED;
+    }
+
     abstract class TranslationRun {
         public String id;
-        public String status;
+        public TranslationStatus status;
         public String startTime;
         public String stopTime;
         public String user;
@@ -126,6 +130,15 @@ public interface AutoTranslateService {
         public abstract void cancel();
 
         public abstract void rollback(@Nonnull ResourceResolver resourceResolver) throws PersistenceException, WCMException;
+
+        @Nonnull
+        public String statusString() {
+            return status != null ? status.name().toLowerCase() : "";
+        }
+
+        public boolean isInProgress() {
+            return status == TranslationStatus.QUEUED || status == TranslationStatus.RUNNING || status == TranslationStatus.CANCELLING;
+        }
 
 
         @Override

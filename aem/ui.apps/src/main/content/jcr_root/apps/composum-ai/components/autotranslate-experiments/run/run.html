@@ -18,6 +18,7 @@
                         <section class="coral-Form-fieldset"><h2
                                     class="coral-Form-fieldset-legend">Translation run details for ${model.rootPath}</h2>
                             <div class="coral-Form coral-Form--vertical foundation-form">
+                                <input type="hidden" name="_charset_" value="utf-8">
                                 <coral-alert variant="error" data-sly-test="${!model}">
                                     <coral-alert-header>EXPIRED</coral-alert-header>
                                     <coral-alert-content>
@@ -102,6 +103,10 @@
                                        class="coral-Button coral-Button--warning">
                                         Cancel Translation Process
                                     </a>
+                                    <a href="../run.rollback.html/${model.id}"
+                                       class="coral-Button coral-Button--warning">
+                                        Rollback Translation Process
+                                    </a>
                                     <a href="../list.html"
                                        class="coral-Button coral-Button--primary">
                                         Back to translation start page.
@@ -112,6 +117,7 @@
                                     <pre>${model.messages.toString @ context='html'}</pre>
                                 </div>
                             </div>
+
                         </section>
                     </sly>
                 </div>

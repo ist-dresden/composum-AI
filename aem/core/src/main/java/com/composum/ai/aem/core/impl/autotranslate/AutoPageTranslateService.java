@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 
 import org.apache.sling.api.resource.PersistenceException;
@@ -11,6 +14,8 @@ import com.day.cq.wcm.api.WCMException;
  * Actual logic for translating a livecopy.
  */
 public interface AutoPageTranslateService {
+
+    Map<String, LocalDateTime> getRunningTranslations();
 
     /**
      * Implements the actual translation for one page or asset.

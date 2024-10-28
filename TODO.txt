@@ -4,6 +4,8 @@ https://wcm.io/caconfig/editor/usage.html translation config drop down
 
 !! Empty prompt text
 !! http://localhost:5502/editor.html/content/xxx/com/en/about-us/going-forward.html "Explore the world..." RTE
+PDF and markdown as possible datatypes for the content creation dialog
+https://www.stoerr.net/outgoing/adaptto-speedwalking.txt als URL - Format geht verloren!!!!
 
 The content creation dialog should know about the current text even if the page is the source!!!!
 
