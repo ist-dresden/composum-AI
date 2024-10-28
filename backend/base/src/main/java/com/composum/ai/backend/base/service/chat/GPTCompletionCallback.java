@@ -1,7 +1,13 @@
 package com.composum.ai.backend.base.service.chat;
 
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
 
 /**
  * For a streaming mode this is given as parameter for the method call and receives the streamed data; the method returns only when the response is complete.
@@ -35,9 +41,61 @@ public interface GPTCompletionCallback {
     default void setRequest(String json) {
     }
 
-    /** Notifies that the request is completely finished / closed, nothing more will arrive. */
+    /**
+     * Notifies that the request is completely finished / closed, nothing more will arrive.
+     */
     default void close() {
         // empty
+    }
+
+    /**
+     * Called when a tool call is made.
+     */
+    default void toolDelta(List<ChatCompletionToolCall> toolCalls) {
+        // empty
+    }
+
+
+    /**
+     * Forwards all methods to a delegate.
+     */
+    public static class GPTCompletionCallbackWrapper {
+
+        @Nonnull
+        protected GPTCompletionCallback delegate;
+
+        public GPTCompletionCallbackWrapper(@Nonnull GPTCompletionCallback delegate) {
+            this.delegate = delegate;
+        }
+
+        public void onFinish(GPTFinishReason finishReason) {
+            delegate.onFinish(finishReason);
+        }
+
+        public void onNext(String chars) {
+            delegate.onNext(chars);
+        }
+
+        public void onError(Throwable throwable) {
+            delegate.onError(throwable);
+        }
+
+        public void setLoggingId(String loggingId) {
+            delegate.setLoggingId(loggingId);
+        }
+
+        public void setRequest(String json) {
+            delegate.setRequest(json);
+        }
+
+        public void close() {
+            delegate.close();
+        }
+
+        public void toolDelta(List<ChatCompletionToolCall> toolCalls) {
+            delegate.toolDelta(toolCalls);
+        }
+
     }
 
     /**
@@ -50,6 +108,7 @@ public interface GPTCompletionCallback {
         private StringBuilder buffer = new StringBuilder();
         private Throwable throwable;
         private GPTFinishReason finishReason;
+        private List<ChatCompletionToolCall> toolCalls;
 
         @Override
         public void onFinish(GPTFinishReason finishReason) {
@@ -83,6 +142,16 @@ public interface GPTCompletionCallback {
         public Throwable getError() {
             return throwable;
         }
+
+        @Override
+        public void toolDelta(List<ChatCompletionToolCall> toolCalls) {
+            this.toolCalls = ChatCompletionToolCall.mergeDelta(this.toolCalls, toolCalls);
+        }
+
+        public List<ChatCompletionToolCall> getToolCalls() {
+            return toolCalls;
+        }
+
     }
 
 }

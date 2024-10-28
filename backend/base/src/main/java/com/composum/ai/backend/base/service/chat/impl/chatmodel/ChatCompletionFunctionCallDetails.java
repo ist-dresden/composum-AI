@@ -1,5 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
+import javax.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -33,6 +35,20 @@ public class ChatCompletionFunctionCallDetails {
 
     public void setArguments(String arguments) {
         this.arguments = arguments;
+    }
+
+    public void mergeDelta(@Nullable ChatCompletionFunctionCallDetails function) {
+        if (function == null) {
+            return;
+        }
+        if (name == null) {
+            name = function.name;
+        }
+        if (arguments == null) {
+            arguments = function.arguments;
+        } else if (function.arguments != null) {
+            arguments = arguments + function.arguments;
+        }
     }
 
 }

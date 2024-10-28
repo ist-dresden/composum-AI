@@ -1,5 +1,10 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -13,6 +18,12 @@ public class ChatCompletionToolCall {
      */
     @SerializedName("id")
     private String id;
+
+    /**
+     * The index of the tool call in the list of tool calls.
+     */
+    @SerializedName("index")
+    private int index;
 
     /**
      * The type of the tool, currently only "function" is supported.
@@ -36,6 +47,14 @@ public class ChatCompletionToolCall {
         this.id = id;
     }
 
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public String getType() {
         return type;
     }
@@ -50,5 +69,59 @@ public class ChatCompletionToolCall {
 
     public void setFunction(ChatCompletionFunctionCallDetails function) {
         this.function = function;
+    }
+
+    @Nullable
+    public static List<ChatCompletionToolCall> mergeDelta(@Nullable List<ChatCompletionToolCall> calls1,
+                                                          @Nullable List<ChatCompletionToolCall> calls2) {
+        if (calls1 == null || calls1.isEmpty()) {
+            return calls2;
+        }
+        if (calls2 == null || calls2.isEmpty()) {
+            return calls1;
+        }
+        int maxIndex = Math.max(
+                calls1.stream().mapToInt(ChatCompletionToolCall::getIndex).max().orElse(0),
+                calls2.stream().mapToInt(ChatCompletionToolCall::getIndex).max().orElse(0)
+        );
+        List<ChatCompletionToolCall> calls = new ArrayList<>(maxIndex + 1);
+        for (int i = 0; i <= maxIndex; i++) {
+            calls.add(null);
+        }
+        for (ChatCompletionToolCall call : calls1) {
+            if (call != null) {
+                calls.set(call.getIndex(), call);
+            }
+        }
+        for (ChatCompletionToolCall call : calls2) {
+            if (call != null) {
+                if (calls.get(call.getIndex()) != null) {
+                    calls.get(call.getIndex()).mergeDelta(call);
+                } else {
+                    calls.set(call.getIndex(), call);
+                }
+            }
+        }
+        return calls;
+    }
+
+    public void mergeDelta(@Nullable ChatCompletionToolCall other) {
+        if (other == null) {
+            return;
+        }
+        if (index != other.index) {
+            throw new IllegalArgumentException("Cannot merge tool calls with different indices");
+        }
+        if (id == null) {
+            id = other.id;
+        }
+        if (type == null) {
+            type = other.type;
+        }
+        if (function == null) {
+            function = other.function;
+        } else {
+            function.mergeDelta(other.function);
+        }
     }
 }

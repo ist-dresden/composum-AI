@@ -458,6 +458,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     LOG.trace("Response {} from GPT: {}", id, content);
                     callback.onNext(content);
                 }
+                if (choice.getDelta().getToolCalls() != null) {
+                    callback.toolDelta(choice.getDelta().getToolCalls());
+                }
                 if (choice.getFinishReason() != null) {
                     System.out.println("Response {} from GPT finished with reason {}" + id + choice.getFinishReason());
                 }
