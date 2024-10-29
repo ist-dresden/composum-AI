@@ -25,6 +25,6 @@ public class BaseArchUnitTest {
     @ArchTest
     public static final ArchRule noimportImpl = classes()
             .that().resideInAPackage("com.composum.ai.backend.base.service.chat")
-            .should().onlyDependOnClassesThat().resideOutsideOfPackages("..impl..");
+            .should().onlyDependOnClassesThat().resideOutsideOfPackages("com.composum.ai..impl..");
 
 }

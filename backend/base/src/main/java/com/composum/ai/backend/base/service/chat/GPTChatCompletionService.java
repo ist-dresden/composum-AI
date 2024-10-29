@@ -6,7 +6,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.composum.ai.backend.base.service.GPTException;
-import com.composum.ai.backend.base.service.chat.impl.GPTChatMessagesTemplate;
 
 /**
  * Raw abstraction of the ChatGPT chat interface, with only the details that are needed.

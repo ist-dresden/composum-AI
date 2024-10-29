@@ -1,4 +1,4 @@
-package com.composum.ai.backend.base.service.chat.impl;
+package com.composum.ai.backend.base.service.chat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
-import com.composum.ai.backend.base.service.chat.GPTChatMessage;
-import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 
 /**
  * A template for chat messages, with placeholders.
