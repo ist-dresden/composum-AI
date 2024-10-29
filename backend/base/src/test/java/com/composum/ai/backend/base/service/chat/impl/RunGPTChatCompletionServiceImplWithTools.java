@@ -25,20 +25,40 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
     public static void main(String[] args) throws Exception {
         RunGPTChatCompletionServiceImplWithTools instance = new RunGPTChatCompletionServiceImplWithTools();
         instance.setup();
-        instance.run();
+        instance.runWithoutAutomaticCall();
         instance.teardown();
-        System.out.println("Done.");
+        System.out.println("######################### Done without automatic call #########################");
+
+        instance = new RunGPTChatCompletionServiceImplWithTools();
+        instance.setup();
+        instance.runWithAutomaticCall();
+        instance.teardown();
+        System.out.println("######################### Done. ######################### ");
     }
 
-    private void run() throws InterruptedException {
-        GPTChatRequest request = new GPTChatRequest();
-        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hi' and the string 'ho'.");
-        request.setConfiguration(GPTConfiguration.ofTools(Arrays.asList(wobbler)));
+    private void runWithoutAutomaticCall() throws InterruptedException {
+        GPTChatRequest request = makeRequest();
         chatCompletionService.streamingChatCompletion(request, this);
         System.out.println("Call returned.");
         while (!isFinished) Thread.sleep(1000);
         System.out.println("Complete response:");
         System.out.println(buffer);
+    }
+
+    private void runWithAutomaticCall() throws InterruptedException {
+        GPTChatRequest request = makeRequest();
+        chatCompletionService.streamingChatCompletionWithToolCalls(request, this);
+        System.out.println("Call returned.");
+        while (!isFinished) Thread.sleep(1000);
+        System.out.println("Complete response:");
+        System.out.println(buffer);
+    }
+
+    private GPTChatRequest makeRequest() {
+        GPTChatRequest request = new GPTChatRequest();
+        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hi' and the string 'ho'.");
+        request.setConfiguration(GPTConfiguration.ofTools(Arrays.asList(wobbler)));
+        return request;
     }
 
     @Override

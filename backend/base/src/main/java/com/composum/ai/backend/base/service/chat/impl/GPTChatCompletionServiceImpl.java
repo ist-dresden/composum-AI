@@ -77,6 +77,7 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
@@ -427,6 +428,26 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             LOG.error("Error while call {} to GPT", id, e);
             throw new GPTException("Error while calling GPT", e);
         }
+    }
+
+    @Override
+    public void streamingChatCompletionWithToolCalls(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback)
+            throws GPTException {
+        List<GPTToolCall> JatoolCalls = null;
+        boolean haveToolCalls;
+        GPTCompletionCallback callbackWrapper = new GPTCompletionCallback.GPTCompletionCallbackWrapper(callback) {
+            @Override
+            public void toolDelta(List<GPTToolCall> toolCalls) {
+                toolCalls = GPTToolCall.mergeDelta(toolCalls, toolCalls);
+            }
+
+            @Override
+            public void onFinish(GPTFinishReason finishReason) {
+                if (GPTFinishReason.TOOL_CALLS == finishReason) {
+                    haveToolCalls = true;
+                }
+            }
+        };
     }
 
     /**

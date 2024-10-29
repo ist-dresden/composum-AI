@@ -59,7 +59,7 @@ public interface GPTCompletionCallback {
     /**
      * Forwards all methods to a delegate.
      */
-    public static class GPTCompletionCallbackWrapper {
+    public static class GPTCompletionCallbackWrapper implements GPTCompletionCallback {
 
         @Nonnull
         protected GPTCompletionCallback delegate;

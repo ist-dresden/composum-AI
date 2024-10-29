@@ -30,6 +30,13 @@ public interface GPTChatCompletionService {
     void streamingChatCompletion(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException;
 
     /**
+     * Give some messages and receive the streaming response via callback, to reduce waiting time.
+     * This implementation also performs tool calls if tools are given in {@link GPTChatRequest#getConfiguration()}.
+     * It possibly waits if a rate limit is reached, but otherwise returns immediately after scheduling an asynchronous call.
+     */
+    void streamingChatCompletionWithToolCalls(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback) throws GPTException;
+
+    /**
      * Retrieves a (usually cached) chat template with that name. Mostly for backend internal use.
      * The templates are retrieved from the bundle resources at "chattemplates/", and are cached.
      *
