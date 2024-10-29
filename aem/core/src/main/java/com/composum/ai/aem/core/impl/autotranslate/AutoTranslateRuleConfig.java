@@ -10,7 +10,7 @@ import org.apache.sling.caconfig.annotation.Property;
 public @interface AutoTranslateRuleConfig {
 
     @Property(label = "Path Regex", order = 1,
-            description = "A regular expression matching the absolute path to the page. " +
+            description = "A regular expression matching the absolute path to the page, incl. jcr:content. " +
                     "E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match" +
                     "if the content pattern condition is met.")
     String pathRegex();
@@ -29,5 +29,13 @@ public @interface AutoTranslateRuleConfig {
                     "textareaRows=5"
             })
     String additionalInstructions();
+
+    @Property(label = "Optional Comment", order = 4,
+            description = "An optional comment for the rule, for documentation purposes (not used by the translation).",
+            property = {
+                    "widgetType=textarea",
+                    "textareaRows=2"
+            })
+    String comment();
 
 }
