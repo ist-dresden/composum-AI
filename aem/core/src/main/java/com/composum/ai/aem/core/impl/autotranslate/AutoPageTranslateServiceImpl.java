@@ -364,9 +364,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         Pattern pattern = Pattern.compile("href=\"" +
                 Pattern.quote(blueprintPath) + "(/[^\"]*)\"");
         String result = pattern.matcher(translatedValue).replaceAll("href=\"" + livecopyPath + "$1\"");
-        if (translatedValue.contains("href")) { // FIXME(hps,24/10/03) no checkin
-            LOG.trace("Remapping paths from {} to {} in {}", blueprintPath, livecopyPath, translatedValue);
-        }
         return result;
     }
 
@@ -580,10 +577,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
-
-            if (StringUtils.contains(targetWrapper.getOriginalCopy(), "href")) { // FIXME(hps,24/10/03) no checkin
-                LOG.trace("Skipping {} in {} because it contains href", key, resource.getPath());
-            }
 
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.

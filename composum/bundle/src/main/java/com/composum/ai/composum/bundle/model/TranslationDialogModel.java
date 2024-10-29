@@ -119,7 +119,7 @@ public class TranslationDialogModel extends AbstractModel {
         Objects.requireNonNull(propertyI18nPath);
         PropertyEditHandle<String> handle = new PropertyEditHandle(String.class);
         handle.setProperty(propertyName, propertyI18nPath, true);
-        // FIXME(hps,04.05.23) how to determine that?
+        // TODO(hps,04.05.23) how to determine that?
         handle.setMultiValue(false);
         handle.initialize(context, this.resource);
         // propertyEditHandle: resource e.g. /content/ist/software/home/test/jcr:content/main/text , propertyName = propertyPath = title

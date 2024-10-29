@@ -166,7 +166,6 @@ http://localhost:4502/bin/browser.html/libs/core/wcm/components/text/v2/text
 Test on wcm editors, too!
 
 http://experience-aem.blogspot.com/2016/07/aem-62-touch-ui-rich-text-editor-inplace-editing-open-in-fullscreen-editing-start-event.html
-editing-start is triggered but I have trouble to catch it. TODO FIXME CONTINUE THIS
 
 ### icon
 
