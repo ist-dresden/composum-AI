@@ -34,6 +34,7 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
  * The messages can contain placeholders like ${name}, which are replaced by the values in the map given to getMessages.
  * If a placeholder is missing, we throw an error, as this is a misusage of the template.
  */
+// FIXME(hps,24/10/29) move this out of the impl package to make dependencies more sane
 public class GPTChatMessagesTemplate {
     static final Logger LOG = LoggerFactory.getLogger(GPTChatMessagesTemplate.class);
 
