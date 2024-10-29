@@ -76,12 +76,14 @@ import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -459,7 +461,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     callback.onNext(content);
                 }
                 if (choice.getDelta().getToolCalls() != null) {
-                    callback.toolDelta(choice.getDelta().getToolCalls());
+                    callback.toolDelta(ChatCompletionToolCall.toGptToolCallList(choice.getDelta().getToolCalls()));
                 }
                 if (choice.getFinishReason() != null) {
                     System.out.println("Response {} from GPT finished with reason {}" + id + choice.getFinishReason());

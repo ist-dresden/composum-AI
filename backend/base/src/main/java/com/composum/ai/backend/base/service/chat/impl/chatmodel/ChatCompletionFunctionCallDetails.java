@@ -1,7 +1,9 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.composum.ai.backend.base.service.chat.GPTFunctionCallDetails;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -49,6 +51,11 @@ public class ChatCompletionFunctionCallDetails {
         } else if (function.arguments != null) {
             arguments = arguments + function.arguments;
         }
+    }
+
+    @Nonnull
+    public GPTFunctionCallDetails toGptFuctionCallDetails() {
+        return new GPTFunctionCallDetails(name, arguments);
     }
 
 }

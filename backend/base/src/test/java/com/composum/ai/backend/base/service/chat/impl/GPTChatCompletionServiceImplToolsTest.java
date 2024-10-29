@@ -17,6 +17,7 @@ import org.osgi.framework.BundleContext;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
 
 /**
@@ -60,7 +61,7 @@ public class GPTChatCompletionServiceImplToolsTest {
             service.handleStreamingEvent(callback, 123, "data: " + line);
         }
         assertEquals(GPTFinishReason.TOOL_CALLS, callback.getFinishReason());
-        List<ChatCompletionToolCall> calls = callback.getToolCalls();
+        List<GPTToolCall> calls = callback.getToolCalls();
         assertEquals(2, calls.size());
         assertEquals("call_bZrlWEFQ7jbTybVQYHg0hDSn", calls.get(0).getId());
         assertEquals("wobbler", calls.get(0).getFunction().getName());

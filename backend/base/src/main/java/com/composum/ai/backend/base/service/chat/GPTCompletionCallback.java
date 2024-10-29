@@ -51,7 +51,7 @@ public interface GPTCompletionCallback {
     /**
      * Called when a tool call is made.
      */
-    default void toolDelta(List<ChatCompletionToolCall> toolCalls) {
+    default void toolDelta(List<GPTToolCall> toolCalls) {
         // empty
     }
 
@@ -92,7 +92,7 @@ public interface GPTCompletionCallback {
             delegate.close();
         }
 
-        public void toolDelta(List<ChatCompletionToolCall> toolCalls) {
+        public void toolDelta(List<GPTToolCall> toolCalls) {
             delegate.toolDelta(toolCalls);
         }
 
@@ -108,7 +108,7 @@ public interface GPTCompletionCallback {
         private StringBuilder buffer = new StringBuilder();
         private Throwable throwable;
         private GPTFinishReason finishReason;
-        private List<ChatCompletionToolCall> toolCalls;
+        private List<GPTToolCall> toolCalls;
 
         @Override
         public void onFinish(GPTFinishReason finishReason) {
@@ -144,11 +144,11 @@ public interface GPTCompletionCallback {
         }
 
         @Override
-        public void toolDelta(List<ChatCompletionToolCall> toolCalls) {
-            this.toolCalls = ChatCompletionToolCall.mergeDelta(this.toolCalls, toolCalls);
+        public void toolDelta(List<GPTToolCall> toolCalls) {
+            this.toolCalls = GPTToolCall.mergeDelta(this.toolCalls, toolCalls);
         }
 
-        public List<ChatCompletionToolCall> getToolCalls() {
+        public List<GPTToolCall> getToolCalls() {
             return toolCalls;
         }
 

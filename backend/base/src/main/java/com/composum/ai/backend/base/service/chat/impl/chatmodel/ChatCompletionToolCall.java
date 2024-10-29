@@ -3,8 +3,10 @@ package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -124,4 +126,31 @@ public class ChatCompletionToolCall {
             function.mergeDelta(other.function);
         }
     }
+
+    @Nonnull
+    public GPTToolCall toGptToolCall() {
+        return new GPTToolCall(id, type, function != null ? function.toGptFuctionCallDetails() : null);
+    }
+
+    /**
+     * Turns the list into a {@link GPTToolCall} list observing the {@link #getIndex()}.
+     */
+    @Nullable
+    public static List<GPTToolCall> toGptToolCallList(List<ChatCompletionToolCall> list) {
+        if (list == null) {
+            return null;
+        }
+        List<GPTToolCall> res = new ArrayList<>();
+        int maxIndex = list.stream().mapToInt(ChatCompletionToolCall::getIndex).max().orElse(0);
+        for (int i = 0; i <= maxIndex; ++i) {
+            res.add(null);
+        }
+        for (ChatCompletionToolCall chatCompletionToolCall : list) {
+            if (chatCompletionToolCall != null) {
+                res.set(chatCompletionToolCall.index, chatCompletionToolCall.toGptToolCall());
+            }
+        }
+        return res;
+    }
+
 }
