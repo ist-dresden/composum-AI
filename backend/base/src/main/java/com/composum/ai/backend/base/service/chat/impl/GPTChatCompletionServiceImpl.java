@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -76,6 +77,7 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
@@ -433,21 +435,51 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     @Override
     public void streamingChatCompletionWithToolCalls(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback)
             throws GPTException {
-        List<GPTToolCall> JatoolCalls = null;
-        boolean haveToolCalls;
         GPTCompletionCallback callbackWrapper = new GPTCompletionCallback.GPTCompletionCallbackWrapper(callback) {
+            List<GPTToolCall> collectedToolcalls = null;
+
             @Override
             public void toolDelta(List<GPTToolCall> toolCalls) {
-                toolCalls = GPTToolCall.mergeDelta(toolCalls, toolCalls);
+                collectedToolcalls = GPTToolCall.mergeDelta(collectedToolcalls, toolCalls);
             }
 
             @Override
             public void onFinish(GPTFinishReason finishReason) {
                 if (GPTFinishReason.TOOL_CALLS == finishReason) {
-                    haveToolCalls = true;
+                    LOG.info("Executing tool calls");
+                    LOG.debug("Tool calls: {}", collectedToolcalls);
+                    GPTChatRequest requestWithToolCalls = request.copy();
+                    GPTChatMessage assistantRequestsToolcallsMessage =
+                            new GPTChatMessage(GPTMessageRole.ASSISTANT, null, null, null, collectedToolcalls);
+                    requestWithToolCalls.addMessage(assistantRequestsToolcallsMessage);
+                    for (GPTToolCall toolCall : collectedToolcalls) {
+                        Optional<GPTTool> toolOption = request.getConfiguration().getTools().stream()
+                                .filter(tool -> tool.getName().equals(toolCall.getFunction().getName()))
+                                .findAny();
+                        if (!toolOption.isPresent()) { // should be impossible
+                            LOG.error("Bug: Tool {} not found in configuration", toolCall.getFunction().getName());
+                            GPTException error = new GPTException("Bug: Tool " + toolCall.getFunction().getName() + " not found in configuration");
+                            this.onError(error);
+                            throw error;
+                        }
+                        GPTTool tool = toolOption.get();
+                        String toolresult = tool.execute(toolCall.getFunction().getArguments());
+                        if (null == toolresult) {
+                            toolresult = "";
+                        }
+                        LOG.debug("Tool {} with arguments {} returned {}", toolCall.getFunction().getName(),
+                                toolCall.getFunction().getArguments(),
+                                toolresult.substring(0, Math.min(100, toolresult.length())) + "...");
+                        GPTChatMessage toolResponseMessage = new GPTChatMessage(GPTMessageRole.TOOL, toolresult, null, toolCall.getId(), null);
+                        requestWithToolCalls.addMessage(toolResponseMessage);
+                    }
+                    streamingChatCompletionWithToolCalls(requestWithToolCalls, callback);
+                } else {
+                    super.onFinish(finishReason);
                 }
             }
         };
+        streamingChatCompletion(request, callbackWrapper);
     }
 
     /**
@@ -485,7 +517,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     callback.toolDelta(ChatCompletionToolCall.toGptToolCallList(choice.getDelta().getToolCalls()));
                 }
                 if (choice.getFinishReason() != null) {
-                    System.out.println("Response {} from GPT finished with reason {}" + id + choice.getFinishReason());
+                    LOG.trace("Response {} from GPT finished with reason {}", id, choice.getFinishReason());
                 }
                 GPTFinishReason finishReason = ChatCompletionResponse.FinishReason.toGPTFinishReason(choice.getFinishReason());
                 if (finishReason != null) {
@@ -670,7 +702,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             details.setStrict(true);
             Map declaration = gson.fromJson(tool.getToolDeclaration(), Map.class);
             details.setParameters(declaration.get("description"));
-            details.setParameters(((Map)declaration.get("function")).get("parameters"));
+            details.setParameters(((Map) declaration.get("function")).get("parameters"));
             toolDescr.setFunction(details);
             result.add(toolDescr);
         }

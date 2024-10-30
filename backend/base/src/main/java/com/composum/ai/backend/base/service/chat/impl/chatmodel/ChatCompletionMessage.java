@@ -33,6 +33,10 @@ public class ChatCompletionMessage {
     @SerializedName("tool_call_id")
     private String toolCallId;
 
+    /** List of tool calls that should be executed. */
+    @SerializedName("tool_calls")
+    private List<ChatCompletionToolCall> toolCalls;
+
     public static ChatCompletionMessage make(GPTChatMessage message) {
         ChatCompletionMessagePart part;
         if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
@@ -45,6 +49,7 @@ public class ChatCompletionMessage {
         result.setRole(role);
         result.setContent(Collections.singletonList(part));
         result.setToolCallId(message.getToolCallId());
+        result.setToolCalls(ChatCompletionToolCall.make(message.getToolCalls()));
         return result;
     }
 
@@ -73,8 +78,18 @@ public class ChatCompletionMessage {
         this.content = content;
     }
 
+    public List<ChatCompletionToolCall> getToolCalls() {
+        return toolCalls;
+    }
+
+    public void setToolCalls(List<ChatCompletionToolCall> toolCalls) {
+        this.toolCalls = toolCalls;
+    }
+
     public boolean isEmpty(Void ignoreJustPreventSerialization) {
-        return content == null || content.isEmpty() ||
+        boolean contentIsEmpty = content == null || content.isEmpty() ||
                 !content.stream().anyMatch(m -> !m.isEmpty(null));
+        return contentIsEmpty && (toolCallId == null || toolCallId.isEmpty()) &&
+                (toolCalls == null || toolCalls.isEmpty());
     }
 }

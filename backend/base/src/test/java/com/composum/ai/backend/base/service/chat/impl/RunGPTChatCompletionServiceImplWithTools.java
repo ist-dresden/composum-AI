@@ -1,6 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
@@ -9,6 +10,7 @@ import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -21,13 +23,17 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
     StringBuilder buffer = new StringBuilder();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private boolean isFinished;
+    List<GPTToolCall> toolCalls;
 
     public static void main(String[] args) throws Exception {
-        RunGPTChatCompletionServiceImplWithTools instance = new RunGPTChatCompletionServiceImplWithTools();
-        instance.setup();
-        instance.runWithoutAutomaticCall();
-        instance.teardown();
-        System.out.println("######################### Done without automatic call #########################");
+        RunGPTChatCompletionServiceImplWithTools instance;
+        if (0 == 1) {
+            instance = new RunGPTChatCompletionServiceImplWithTools();
+            instance.setup();
+            instance.runWithoutAutomaticCall();
+            instance.teardown();
+            System.out.println("######################### Done without automatic call #########################");
+        }
 
         instance = new RunGPTChatCompletionServiceImplWithTools();
         instance.setup();
@@ -43,6 +49,8 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
         while (!isFinished) Thread.sleep(1000);
         System.out.println("Complete response:");
         System.out.println(buffer);
+        System.out.println("Tool calls:");
+        System.out.println(gson.toJson(toolCalls));
     }
 
     private void runWithAutomaticCall() throws InterruptedException {
@@ -56,7 +64,7 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
 
     private GPTChatRequest makeRequest() {
         GPTChatRequest request = new GPTChatRequest();
-        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hi' and the string 'ho'.");
+        request.addMessage(GPTMessageRole.USER, "Wobble the string 'hihihi' and the string 'houhou'.");
         request.setConfiguration(GPTConfiguration.ofTools(Arrays.asList(wobbler)));
         return request;
     }
@@ -83,6 +91,11 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
     public void onError(Throwable throwable) {
         throwable.printStackTrace(System.err);
         isFinished = true;
+    }
+
+    @Override
+    public void toolDelta(List<GPTToolCall> toolCalls) {
+        this.toolCalls = GPTToolCall.mergeDelta(this.toolCalls, toolCalls);
     }
 
     protected GPTTool wobbler = new GPTTool() {

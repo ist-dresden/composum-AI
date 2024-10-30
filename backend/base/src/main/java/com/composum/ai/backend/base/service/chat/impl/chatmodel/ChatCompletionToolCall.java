@@ -153,4 +153,21 @@ public class ChatCompletionToolCall {
         return res;
     }
 
+    public static List<ChatCompletionToolCall> make(List<GPTToolCall> toolCalls) {
+        if (toolCalls == null) {
+            return null;
+        }
+        List<ChatCompletionToolCall> res = new ArrayList<>(toolCalls.size());
+        for (int i = 0; i < toolCalls.size(); i++) {
+            GPTToolCall toolCall = toolCalls.get(i);
+            ChatCompletionToolCall call = new ChatCompletionToolCall();
+            call.setId(toolCall.getId());
+            call.setIndex(i);
+            call.setType(toolCall.getType());
+            call.setFunction(ChatCompletionFunctionCallDetails.make(toolCall.getFunction()));
+            res.add(call);
+        }
+        return res;
+    }
+
 }

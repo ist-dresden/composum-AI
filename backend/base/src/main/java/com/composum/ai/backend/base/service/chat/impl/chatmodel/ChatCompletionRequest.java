@@ -130,7 +130,9 @@ public class ChatCompletionRequest {
         @SerializedName("assistant")
         ASSISTANT,
         @SerializedName("system")
-        SYSTEM;
+        SYSTEM,
+        @SerializedName("tool")
+        TOOL;
 
         public static Role make(GPTMessageRole role) {
             switch (role) {
@@ -140,6 +142,8 @@ public class ChatCompletionRequest {
                     return SYSTEM;
                 case ASSISTANT:
                     return ASSISTANT;
+                case TOOL:
+                    return TOOL;
                 default:
                     throw new IllegalArgumentException("Unknown role " + role);
             }

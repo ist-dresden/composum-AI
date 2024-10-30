@@ -37,12 +37,33 @@ public class GPTChatRequest {
     }
 
     /**
+     * Returns a copy; the messages list is shallowly copied, but configuration is the same object.
+     */
+    public GPTChatRequest copy() {
+        GPTChatRequest result = new GPTChatRequest();
+        result.messages.addAll(messages);
+        result.maxTokens = maxTokens;
+        result.configuration = configuration;
+        return result;
+    }
+
+    /**
      * Builder style adding of messages.
      *
      * @return this
      */
     public GPTChatRequest addMessage(GPTMessageRole role, String content) {
         messages.add(new GPTChatMessage(role, content));
+        return this;
+    }
+
+    /**
+     * Builder style adding of messages.
+     *
+     * @return this
+     */
+    public GPTChatRequest addMessage(GPTChatMessage message) {
+        messages.add(message);
         return this;
     }
 
@@ -169,4 +190,5 @@ public class GPTChatRequest {
     public int hashCode() {
         return Objects.hash(getMessages(), getMaxTokens(), getConfiguration());
     }
+
 }

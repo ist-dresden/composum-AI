@@ -58,4 +58,14 @@ public class ChatCompletionFunctionCallDetails {
         return new GPTFunctionCallDetails(name, arguments);
     }
 
+    public static ChatCompletionFunctionCallDetails make(GPTFunctionCallDetails function) {
+        if (function == null) {
+            return null;
+        }
+        ChatCompletionFunctionCallDetails result = new ChatCompletionFunctionCallDetails();
+        result.setName(function.getName());
+        result.setArguments(function.getArguments());
+        return result;
+    }
+
 }
