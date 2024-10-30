@@ -126,7 +126,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Override
     public void executePromptStreaming(@Nonnull String prompt, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException {
         GPTChatRequest request = makeExecutePromptRequest(prompt, additionalParameters);
-        chatCompletionService.streamingChatCompletion(request, callback);
+        chatCompletionService.streamingChatCompletionWithToolCalls(request, callback);
     }
 
     @Nonnull
@@ -165,7 +165,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Override
     public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException {
         GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, additionalParameters);
-        chatCompletionService.streamingChatCompletion(request, callback);
+        chatCompletionService.streamingChatCompletionWithToolCalls(request, callback);
     }
 
 }

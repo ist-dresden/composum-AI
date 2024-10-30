@@ -435,6 +435,10 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     @Override
     public void streamingChatCompletionWithToolCalls(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback)
             throws GPTException {
+        if (request.getConfiguration() == null || request.getConfiguration().getTools() == null || request.getConfiguration().getTools().isEmpty()) {
+            streamingChatCompletion(request, callback);
+            return;
+        }
         GPTCompletionCallback callbackWrapper = new GPTCompletionCallback.GPTCompletionCallbackWrapper(callback) {
             List<GPTToolCall> collectedToolcalls = null;
 
@@ -701,8 +705,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             details.setName(tool.getName());
             details.setStrict(true);
             Map declaration = gson.fromJson(tool.getToolDeclaration(), Map.class);
-            details.setParameters(declaration.get("description"));
-            details.setParameters(((Map) declaration.get("function")).get("parameters"));
+            Map function = (Map) declaration.get("function");
+            details.setParameters(function.get("parameters"));
+            details.setDescription((String) function.get("description"));
             toolDescr.setFunction(details);
             result.add(toolDescr);
         }

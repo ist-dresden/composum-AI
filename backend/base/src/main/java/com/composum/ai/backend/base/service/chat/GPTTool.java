@@ -1,5 +1,8 @@
 package com.composum.ai.backend.base.service.chat;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * An action the AI can perform - likely from the sidebar chat.
  *
@@ -10,6 +13,7 @@ public interface GPTTool {
     /**
      * The name of the tool - must be exactly the name given in {@link #getToolDeclaration()}.
      */
+    @Nonnull
     String getName();
 
     /**
@@ -38,11 +42,15 @@ public interface GPTTool {
      *
      * @see "https://platform.openai.com/docs/api-reference/chat/create"
      */
+    @Nonnull
     String getToolDeclaration();
 
     /**
      * Executes the tool call and returns the result to present to the AI.
+     *
+     * @param arguments The arguments to the tool call, as JSON that matches the schema given in {@link #getToolDeclaration()}.
      */
-    public String execute(String arguments);
+    @Nonnull
+    public String execute(@Nullable String arguments);
 
 }

@@ -2,6 +2,11 @@ package com.composum.ai.backend.slingbase.experimential;
 
 import java.util.Locale;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
 import com.composum.ai.backend.base.service.chat.GPTTool;
@@ -16,12 +21,20 @@ public interface AITool {
     /**
      * Human readable name.
      */
-    String getName(Locale locale);
+    @Nonnull
+    String getName(@Nullable Locale locale);
 
     /**
      * Human readable description.
      */
-    String getDescription(Locale locale);
+    @Nonnull
+    String getDescription(@Nullable Locale locale);
+
+    /**
+     * Name for the purpose of calling - must match {@link #getToolDeclaration()}.
+     */
+    @Nonnull
+    String getToolName();
 
     /**
      * The description to use for the OpenAI tool call. Will be inserted into the OpenAI tools array. E.g.:
@@ -49,20 +62,47 @@ public interface AITool {
      *
      * @see "https://platform.openai.com/docs/api-reference/chat/create"
      */
+    @Nonnull
     String getToolDeclaration();
 
     /**
      * Whether the tool is enabled for the given resource.
      */
-    boolean isAllowedFor(Resource resource);
+    boolean isAllowedFor(@Nonnull Resource resource);
 
     /**
      * Executes the tool call and returns the result to present to the AI.
      * Must only be called if {@link #isAllowedFor(Resource)} returned true.
      */
-    String execute(String arguments, Resource resource);
+    @Nonnull
+    String execute(@Nullable String arguments, @Nonnull Resource resource,
+                   @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response);
 
-    /** The form useable by {@link com.composum.ai.backend.base.service.chat.GPTChatCompletionService}.*/
-    GPTTool makeGPTTool(Resource resource);
+    /**
+     * The form useable by {@link com.composum.ai.backend.base.service.chat.GPTChatCompletionService}.
+     */
+    @Nullable
+    default GPTTool makeGPTTool(@Nonnull Resource resource,
+                       @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (!isAllowedFor(resource)) {
+            return null;
+        }
+        return new GPTTool() {
+            @Override
+            public @Nonnull String getName() {
+                return AITool.this.getToolName();
+            }
+
+            @Override
+            public @Nonnull String getToolDeclaration() {
+                return AITool.this.getToolDeclaration();
+            }
+
+            @Override
+            public @Nonnull String execute(@Nullable String arguments) {
+                return AITool.this.execute(arguments, resource, request, response);
+            }
+        };
+    }
 
 }
