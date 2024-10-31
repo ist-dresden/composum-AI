@@ -23,8 +23,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.experimential.AITool;
+import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
 import com.google.gson.Gson;
 
 @Component(service = AITool.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
@@ -77,7 +79,8 @@ public class GetPageMarkdownAITool implements AITool {
 
     @Override
     public boolean isAllowedFor(@Nonnull Resource resource) {
-        return true;
+        return config != null && config.allowedPathsRegex() != null &&
+                config.allowedPathsRegex().matches(resource.getPath());
     }
 
     /**
@@ -85,8 +88,10 @@ public class GetPageMarkdownAITool implements AITool {
      */
     @Override
     public @Nonnull String execute(@Nullable String arguments, @Nonnull Resource resource,
-                                   @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+                                   @Nullable GPTCompletionCallback.GPTToolExecutionContext context) {
         try {
+            SlingHttpServletRequest request = ((SlingGPTExecutionContext) context).getRequest();
+            SlingHttpServletResponse response = ((SlingGPTExecutionContext) context).getResponse();
             Map parsedArguments = gson.fromJson(arguments, Map.class);
             String path = (String) parsedArguments.get("path");
             if (path == null || path.isEmpty()) {

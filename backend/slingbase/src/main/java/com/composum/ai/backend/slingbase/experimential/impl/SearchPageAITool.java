@@ -24,8 +24,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.slingbase.RAGService;
 import com.composum.ai.backend.slingbase.experimential.AITool;
+import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
 import com.google.gson.Gson;
 
 @Component(service = AITool.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
@@ -86,19 +88,23 @@ public class SearchPageAITool implements AITool {
      */
     @Override
     public @Nonnull String execute(@Nullable String arguments, @Nonnull Resource resource,
-                                   @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+                                   @Nullable GPTCompletionCallback.GPTToolExecutionContext context) {
         try {
+            SlingHttpServletRequest request = ((SlingGPTExecutionContext) context).getRequest();
+            SlingHttpServletResponse response = ((SlingGPTExecutionContext) context).getResponse();
             Map parsedArguments = gson.fromJson(arguments, Map.class);
             String query = (String) parsedArguments.get("query");
             if (query == null || query.isEmpty()) {
                 return "Missing query parameter";
             }
-            ResourceResolver resolver = resource.getResourceResolver();
+            ResourceResolver resolver = request.getResourceResolver();
             Resource rootResource = resolver.getResource(config.rootPath());
             List<String> paths = ragService.searchRelated(rootResource, query, 20);
             List<Resource> resources = paths.stream().map(resolver::getResource).collect(Collectors.toList());
             List<Resource> ordered = ragService.orderByEmbedding(query, resources, request, response, rootResource);
-            List<String> result = ordered.stream().map(Resource::getPath).collect(Collectors.toList());
+            List<String> result = ordered.stream().map(Resource::getPath)
+                    .map(path -> path.replaceAll("/jcr:content$", ""))
+                    .collect(Collectors.toList());
             LOG.debug("Search page AI tool found for '{}' : {}", query, result);
             return gson.toJson(result);
         } catch (Exception e) {

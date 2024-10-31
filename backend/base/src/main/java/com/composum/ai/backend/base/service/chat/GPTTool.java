@@ -51,6 +51,6 @@ public interface GPTTool {
      * @param arguments The arguments to the tool call, as JSON that matches the schema given in {@link #getToolDeclaration()}.
      */
     @Nonnull
-    public String execute(@Nullable String arguments);
+    public String execute(@Nullable String arguments, @Nullable GPTCompletionCallback.GPTToolExecutionContext context);
 
 }

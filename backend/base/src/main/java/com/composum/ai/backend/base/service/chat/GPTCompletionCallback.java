@@ -7,8 +7,6 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
-
 /**
  * For a streaming mode this is given as parameter for the method call and receives the streamed data; the method returns only when the response is complete.
  */
@@ -36,6 +34,13 @@ public interface GPTCompletionCallback {
     void setLoggingId(String loggingId);
 
     /**
+     * For tool calls: set the context to execute actions in.
+     */
+    default GPTToolExecutionContext getToolExecutionContext() {
+        return null;
+    }
+
+    /**
      * For debugging - the request that was sent to ChatGPT as JSON.
      */
     default void setRequest(String json) {
@@ -55,6 +60,12 @@ public interface GPTCompletionCallback {
         // empty
     }
 
+    /**
+     * For tool calls: context to execute actions in.
+     */
+    public interface GPTToolExecutionContext {
+        // empty here - has to be specifiec in other layers
+    }
 
     /**
      * Forwards all methods to a delegate.
@@ -94,6 +105,10 @@ public interface GPTCompletionCallback {
 
         public void toolDelta(List<GPTToolCall> toolCalls) {
             delegate.toolDelta(toolCalls);
+        }
+
+        public GPTToolExecutionContext getToolExecutionContext() {
+            return delegate.getToolExecutionContext();
         }
 
     }
@@ -150,6 +165,11 @@ public interface GPTCompletionCallback {
 
         public List<GPTToolCall> getToolCalls() {
             return toolCalls;
+        }
+
+        @Override
+        public GPTToolExecutionContext getToolExecutionContext() {
+            return null;
         }
 
     }

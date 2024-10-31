@@ -82,6 +82,11 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
     }
 
     @Override
+    public GPTToolExecutionContext getToolExecutionContext() {
+        return null;
+    }
+
+    @Override
     public void onNext(String item) {
         buffer.append(item);
         System.out.print(item);
@@ -128,7 +133,7 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
         }
 
         @Override
-        public String execute(String arguments) {
+        public String execute(String arguments, GPTToolExecutionContext context) {
             Map parsedArguments = gson.fromJson(arguments, Map.class);
             String towobble = (String) parsedArguments.get("towobble");
             StringBuilder result = new StringBuilder();

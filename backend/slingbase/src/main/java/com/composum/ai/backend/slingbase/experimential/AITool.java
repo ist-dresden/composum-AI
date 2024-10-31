@@ -9,6 +9,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback.GPTToolExecutionContext;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 
 /**
@@ -76,7 +78,7 @@ public interface AITool {
      */
     @Nonnull
     String execute(@Nullable String arguments, @Nonnull Resource resource,
-                   @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response);
+                   @Nullable GPTCompletionCallback.GPTToolExecutionContext context);
 
     /**
      * The form useable by {@link com.composum.ai.backend.base.service.chat.GPTChatCompletionService}.
@@ -99,8 +101,8 @@ public interface AITool {
             }
 
             @Override
-            public @Nonnull String execute(@Nullable String arguments) {
-                return AITool.this.execute(arguments, resource, request, response);
+            public @Nonnull String execute(@Nullable String arguments, @Nullable GPTToolExecutionContext context) {
+                return AITool.this.execute(arguments, resource, context);
             }
         };
     }

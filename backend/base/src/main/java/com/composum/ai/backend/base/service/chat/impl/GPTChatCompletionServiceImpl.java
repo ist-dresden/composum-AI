@@ -467,7 +467,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                             throw error;
                         }
                         GPTTool tool = toolOption.get();
-                        String toolresult = tool.execute(toolCall.getFunction().getArguments());
+                        String toolresult = tool.execute(toolCall.getFunction().getArguments(), getToolExecutionContext());
                         if (null == toolresult) {
                             toolresult = "";
                         }

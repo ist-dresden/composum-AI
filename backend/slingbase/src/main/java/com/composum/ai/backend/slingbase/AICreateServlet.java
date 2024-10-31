@@ -46,6 +46,7 @@ import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.slingbase.experimential.AITool;
+import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -207,6 +208,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         if (stream == null) {
             response.sendError(HttpServletResponse.SC_GONE, "Stream " + streamId + " not found (anymore?)");
         } else {
+            stream.setContext(new SlingGPTExecutionContext(request, response));
             response.setCharacterEncoding("UTF-8");
             response.setContentType("text/event-stream");
             response.setHeader("Cache-Control", "no-cache");
