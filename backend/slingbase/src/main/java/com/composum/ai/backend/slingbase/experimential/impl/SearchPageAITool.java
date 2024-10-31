@@ -61,8 +61,7 @@ public class SearchPageAITool implements AITool {
                 "  \"type\": \"function\",\n" +
                 "  \"function\": {\n" +
                 "    \"name\": \"search_page\",\n" +
-                "    \"description\": \"Search for titles and JCR paths for pages that best match the given query. " +
-                "Never add a protocol / host / port to JCR paths (/content/...)!\",\n" +
+                "    \"description\": \"Search for titles and JCR paths for pages that best match the given query.\",\n" +
                 "    \"parameters\": {\n" +
                 "      \"type\": \"object\",\n" +
                 "      \"properties\": {\n" +
@@ -115,7 +114,7 @@ public class SearchPageAITool implements AITool {
 
             // collect titles (properties "jcr:title" / "title") of resource and make itemized list of markdown links
             StringBuilder result = new StringBuilder("Here are the JCR paths for the " + config.resultCount() +
-                    " pages best matching the query. Never add a protocol / host / port to JCR paths (/content/...)!\n\n");
+                    " pages best matching the query.\n\n");
             for (String path : resultPaths) {
                 Resource res = resolver.getResource(path);
                 if (res != null) {
@@ -125,7 +124,7 @@ public class SearchPageAITool implements AITool {
                     if (title == null || title.startsWith("/")) {
                         result.append("- ").append(path).append("\n");
                     } else {
-                        result.append("- [").append(title).append("](").append(path).append(")\n");
+                        result.append("- ").append(title).append(": ").append(path).append("\n");
                     }
                 } else {
                     result.append("- ").append(path).append("\n");
