@@ -35,7 +35,7 @@ import com.google.gson.Gson;
 public class SearchPageAITool implements AITool {
     private static final Logger LOG = LoggerFactory.getLogger(SearchPageAITool.class);
     private Config config;
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     @Reference
     private RAGService ragService;
@@ -61,7 +61,8 @@ public class SearchPageAITool implements AITool {
                 "  \"type\": \"function\",\n" +
                 "  \"function\": {\n" +
                 "    \"name\": \"search_page\",\n" +
-                "    \"description\": \"Search for a page that best matches the given query\",\n" +
+                "    \"description\": \"Search for titles and JCR paths for pages that best match the given query. " +
+                "Never add a protocol / host / port to JCR paths (/content/...)!\",\n" +
                 "    \"parameters\": {\n" +
                 "      \"type\": \"object\",\n" +
                 "      \"properties\": {\n" +
@@ -98,22 +99,45 @@ public class SearchPageAITool implements AITool {
                 return "Missing query parameter";
             }
             ResourceResolver resolver = request.getResourceResolver();
-            Resource rootResource = resolver.getResource(config.rootPath());
-            List<String> paths = ragService.searchRelated(rootResource, query, 20);
+            // go up to site resource starting from resource
+            Resource rootResource = resolver.getResource(resource.getPath()); // original resource resolver is already closed.
+            while (rootResource != null && rootResource.getPath().split("/").length > config.siteLevel() + 1) {
+                rootResource = rootResource.getParent();
+            }
+
+            List<String> paths = ragService.searchRelated(rootResource, query, config.resultCount());
             List<Resource> resources = paths.stream().map(resolver::getResource).collect(Collectors.toList());
             List<Resource> ordered = ragService.orderByEmbedding(query, resources, request, response, rootResource);
-            List<String> result = ordered.stream().map(Resource::getPath)
+            List<String> resultPaths = ordered.stream().map(Resource::getPath)
                     .map(path -> path.replaceAll("/jcr:content$", ""))
                     .collect(Collectors.toList());
-            LOG.debug("Search page AI tool found for '{}' : {}", query, result);
-            return gson.toJson(result);
+            LOG.debug("Search page AI tool found for '{}' : {}", query, resultPaths);
+
+            // collect titles (properties "jcr:title" / "title") of resource and make itemized list of markdown links
+            StringBuilder result = new StringBuilder("Here are the JCR paths for the " + config.resultCount() +
+                    " pages best matching the query. Never add a protocol / host / port to JCR paths (/content/...)!\n\n");
+            for (String path : resultPaths) {
+                Resource res = resolver.getResource(path);
+                if (res != null) {
+                    res = res.getChild("jcr:content") != null ? res.getChild("jcr:content") : res;
+                    String title = res.getValueMap().get("jcr:title",
+                            res.getValueMap().get("title", String.class));
+                    if (title == null || title.startsWith("/")) {
+                        result.append("- ").append(path).append("\n");
+                    } else {
+                        result.append("- [").append(title).append("](").append(path).append(")\n");
+                    }
+                } else {
+                    result.append("- ").append(path).append("\n");
+                }
+            }
+            return result.toString();
         } catch (Exception e) {
             LOG.error("Error in search page AI tool", e);
             return "Error in search page AI tool: " + e;
         }
     }
 
-    // activate and deactivate methods
     @Activate
     @Modified
     protected void activate(Config config) {
@@ -125,12 +149,16 @@ public class SearchPageAITool implements AITool {
         this.config = null;
     }
 
-    @ObjectClassDefinition(name = "Composum AI Tool Search Pageq",
-            description = "Provides the AI with a tool to search for page paths. Needs a lucene index for all pages.")
+    @ObjectClassDefinition(name = "Composum AI Tool Search Pages",
+            description = "Provides the AI with a tool to search for page paths. Needs a lucene index for all pages." +
+                    "If there is no configuration the tool is not active.")
     public @interface Config {
 
-        @AttributeDefinition(name = "Root path", description = "The root path to search for pages. Default is /content.")
-        String rootPath() default "/content";
+        @AttributeDefinition(name = "Result count", description = "The number of results to return. Default is 20.")
+        int resultCount() default 20;
+
+        @AttributeDefinition(name = "Site level", description = "The number of path segments a site has, used to identify the site root. Default is 2, for sites like /content/my-site.")
+        int siteLevel() default 2;
 
     }
 }

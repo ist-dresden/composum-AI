@@ -306,7 +306,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
             }
         }
 
-        List<GPTTool> tools = collectTools(request.getResource(), request, response);
+        List<GPTTool> tools = collectTools(request.getResourceResolver().getResource(configBasePath), request, response);
         if (tools != null && !tools.isEmpty()) {
             mergedConfig = GPTConfiguration.ofTools(tools).merge(mergedConfig);
         }

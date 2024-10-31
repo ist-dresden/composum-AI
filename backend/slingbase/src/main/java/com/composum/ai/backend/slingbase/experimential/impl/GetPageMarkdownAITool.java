@@ -124,11 +124,12 @@ public class GetPageMarkdownAITool implements AITool {
     }
 
     @ObjectClassDefinition(name = "Composum AI Tool Get Page Markdown",
-            description = "Provides the AI with a tool to search for page paths. Needs a lucene index for all pages.")
+            description = "Provides the AI with a tool to search for page paths. Needs a lucene index for all pages." +
+                    "If there is no configuration, the tool is not active.")
     public @interface Config {
 
         @AttributeDefinition(name = "Allowed paths regex",
-                description = "A regex to match the paths that this tool is allowed to be used on.")
+                description = "A regex to match the paths that this tool is allowed to be used on. Default: /content/.*")
         String allowedPathsRegex() default "/content/.*";
 
     }
