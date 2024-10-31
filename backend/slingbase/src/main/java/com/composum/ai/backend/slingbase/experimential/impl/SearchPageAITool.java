@@ -110,11 +110,11 @@ public class SearchPageAITool implements AITool {
             List<String> resultPaths = ordered.stream().map(Resource::getPath)
                     .map(path -> path.replaceAll("/jcr:content$", ""))
                     .collect(Collectors.toList());
-            LOG.debug("Search page AI tool found for '{}' : {}", query, resultPaths);
+            LOG.debug("Search page AI tool found for '{}' at {} : {}", query, rootResource.getPath(), resultPaths);
 
             // collect titles (properties "jcr:title" / "title") of resource and make itemized list of markdown links
-            StringBuilder result = new StringBuilder("Here are the JCR paths for the " + config.resultCount() +
-                    " pages best matching the query.\n\n");
+            StringBuilder result = new StringBuilder("Here are the AEM JCR paths for the " + config.resultCount() +
+                    " pages best matching the query. They should be printed as root-relative URLs but can be turned into full URLs by adding them as a suffix after http://localhost:4502/ , but do not print that information. DO NOT change the returned links into full URLs - print them as root-relative URLs starting with /content! They will automatically be translated into full URLs later.\n\n");
             for (String path : resultPaths) {
                 Resource res = resolver.getResource(path);
                 if (res != null) {
@@ -124,7 +124,7 @@ public class SearchPageAITool implements AITool {
                     if (title == null || title.startsWith("/")) {
                         result.append("- ").append(path).append("\n");
                     } else {
-                        result.append("- ").append(title).append(": ").append(path).append("\n");
+                        result.append("- [").append(title).append("](").append(path).append(")\n");
                     }
                 } else {
                     result.append("- ").append(path).append("\n");

@@ -321,15 +321,21 @@ class SidePanelDialog {
     addLinksToResponse() {
         const lastResponse = this.$promptContainer.find('.composum-ai-response:last');
         try {
-            lastResponse.html(lastResponse.html().replace(/(https?:\/\/[^\s<]+|\/content\/[\w\-\/]+(?:\.html)?)/g, function (match) {
+            lastResponse.html(lastResponse.html().replace(/(https?:\/\/[^\s<]+|\/?content\/[\w\-\/]+(?:\.html)?)/g, function (match) {
+                if (match.startsWith('http://localhost:4502')) {
+                    match = match.replace('^http://localhost:4502', '');
+                }
                 if (match.startsWith('http://') || match.startsWith('https://')) {
                     // Handle full URLs
                     return '<a href="' + match + '" target="_blank">' + match + '</a>';
-                } else if (match.startsWith('/content/')) {
+                } else if (match.startsWith('/content/') || match.startsWith('content/')) {
                     // Handle AEM content paths
                     const editorPathMatch = location.pathname.match(/\/[^.]*\.[^/]*/);
                     const editorPath = editorPathMatch ? editorPathMatch[0] : '';
-                    const cleanedMatch = match.replace(/\/jcr:content$/, '').replace(/\.html$/, '');
+                    var cleanedMatch = match.replace(/\/jcr:content$/, '').replace(/\.html$/, '');
+                    if (cleanedMatch.startsWith('content')) {
+                        cleanedMatch = '/' + cleanedMatch;
+                     }
                     return '<a href="' + editorPath + cleanedMatch + '.html" target="_blank">' + match + '</a>';
                 } else {
                     return match;
