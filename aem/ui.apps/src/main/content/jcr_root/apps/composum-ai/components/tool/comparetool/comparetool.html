@@ -9,11 +9,13 @@
             margin: 0;
             height: 100vh;
         }
+
         .iframe-container {
             width: 50%;
             display: flex;
             flex-direction: column;
         }
+
         .url-field {
             width: 100%;
             box-sizing: border-box;
@@ -21,6 +23,7 @@
             font-size: 16px;
             border: 1px solid #ccc;
         }
+
         iframe {
             width: 100%;
             height: calc(100% - 40px); /* Adjust based on input field height */
@@ -29,98 +32,112 @@
     </style>
 </head>
 <body>
-    <div class="iframe-container">
-        <input class="url-field" type="text" placeholder="Enter URL for left iframe">
-        <iframe id="leftIframe" src="page1.html"></iframe>
-    </div>
-    <div class="iframe-container">
-        <input class="url-field" type="text" placeholder="Enter URL for right iframe">
-        <iframe id="rightIframe" src="page2.html"></iframe>
-    </div>
-    <script>
-        // Get references to the iframes and URL input fields
-        const leftIframe = document.getElementById('leftIframe');
-        const rightIframe = document.getElementById('rightIframe');
-        const leftField = document.querySelectorAll('.url-field')[0];
-        const rightField = document.querySelectorAll('.url-field')[1];
+<div class="iframe-container">
+    <input class="url-field" type="text" placeholder="Enter URL for left iframe"
+           title="Enter the URL to load in the left iframe.">
+    <iframe id="leftIframe" src="" title="Left iframe for comparison."></iframe>
+</div>
+<div class="iframe-container">
+    <input class="url-field" type="text" placeholder="Enter URL for right iframe"
+           title="Enter the URL to load in the right iframe.">
+    <iframe id="rightIframe" src="" title="Right iframe for comparison."></iframe>
+</div>
+<script>
+    // Get references to the iframes and URL input fields
+    const leftIframe = document.getElementById('leftIframe');
+    const rightIframe = document.getElementById('rightIframe');
+    const leftField = document.querySelectorAll('.url-field')[0];
+    const rightField = document.querySelectorAll('.url-field')[1];
 
-        // Flags to track iframes' load status
-        let leftLoaded = false;
-        let rightLoaded = false;
+    // Flags to track iframes' load status
+    let leftLoaded = false;
+    let rightLoaded = false;
 
-        // Flags to prevent infinite scroll loops
-        let isLeftScrolling = false;
-        let isRightScrolling = false;
+    // Flags to prevent infinite scroll loops
+    let isLeftScrolling = false;
+    let isRightScrolling = false;
 
-        // Event listeners for URL input fields
-        leftField.addEventListener('change', function() {
-            leftLoaded = false;
-            leftIframe.src = this.value;
-        });
+    // Event listeners for URL input fields
+    leftField.addEventListener('change', function () {
+        leftLoaded = false;
+        leftIframe.src = this.value;
+    });
 
-        rightField.addEventListener('change', function() {
-            rightLoaded = false;
-            rightIframe.src = this.value;
-        });
+    rightField.addEventListener('change', function () {
+        rightLoaded = false;
+        rightIframe.src = this.value;
+    });
 
-        // Load event listeners for iframes
-        leftIframe.addEventListener('load', function() {
-            leftLoaded = true;
-            if (leftLoaded && rightLoaded) {
-                syncScroll();
-            }
-        });
+    // Function to parse URL parameters
+    function getParameterByName(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
 
-        rightIframe.addEventListener('load', function() {
-            rightLoaded = true;
-            if (leftLoaded && rightLoaded) {
-                syncScroll();
-            }
-        });
+    // Load the initial URLs if available in the parameters
+    const initialUrl1 = getParameterByName('url1');
+    const initialUrl2 = getParameterByName('url2');
+    if (initialUrl1) leftIframe.src = initialUrl1;
+    if (initialUrl2) rightIframe.src = initialUrl2;
 
-        // Function to synchronize scrolling
-        function syncScroll() {
-            if (leftIframe.contentWindow && rightIframe.contentWindow) {
-                const leftWindow = leftIframe.contentWindow;
-                const rightWindow = rightIframe.contentWindow;
-
-                // Remove existing event listeners to prevent multiple bindings
-                leftWindow.removeEventListener('scroll', onLeftScroll);
-                rightWindow.removeEventListener('scroll', onRightScroll);
-
-                // Add new scroll event listeners
-                leftWindow.addEventListener('scroll', onLeftScroll);
-                rightWindow.addEventListener('scroll', onRightScroll);
-            }
+    // Load event listeners for iframes
+    leftIframe.addEventListener('load', function () {
+        leftLoaded = true;
+        if (leftLoaded && rightLoaded) {
+            syncScroll();
         }
+    });
 
-        // Scroll event handler for left iframe
-        function onLeftScroll() {
-            if (isLeftScrolling) {
-                isLeftScrolling = false;
-                return;
-            }
-            isRightScrolling = true;
+    rightIframe.addEventListener('load', function () {
+        rightLoaded = true;
+        if (leftLoaded && rightLoaded) {
+            syncScroll();
+        }
+    });
+
+    // Function to synchronize scrolling
+    function syncScroll() {
+        if (leftIframe.contentWindow && rightIframe.contentWindow) {
             const leftWindow = leftIframe.contentWindow;
             const rightWindow = rightIframe.contentWindow;
 
-            const scrollPercent = leftWindow.scrollY / (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight);
-            rightWindow.scrollTo(0, scrollPercent * (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight));
-        }
+            // Remove existing event listeners to prevent multiple bindings
+            leftWindow.removeEventListener('scroll', onLeftScroll);
+            rightWindow.removeEventListener('scroll', onRightScroll);
 
-        // Scroll event handler for right iframe
-        function onRightScroll() {
-            if (isRightScrolling) {
-                isRightScrolling = false;
-                return;
-            }
-            isLeftScrolling = true;
-            const leftWindow = leftIframe.contentWindow;
-            const rightWindow = rightIframe.contentWindow;
-
-            const scrollPercent = rightWindow.scrollY / (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight);
-            leftWindow.scrollTo(0, scrollPercent * (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight));
+            // Add new scroll event listeners
+            leftWindow.addEventListener('scroll', onLeftScroll);
+            rightWindow.addEventListener('scroll', onRightScroll);
         }
-    </script>
+    }
+
+    // Scroll event handler for left iframe
+    function onLeftScroll() {
+        if (isLeftScrolling) {
+            isLeftScrolling = false;
+            return;
+        }
+        isRightScrolling = true;
+        const leftWindow = leftIframe.contentWindow;
+        const rightWindow = rightIframe.contentWindow;
+
+        const scrollPercent = leftWindow.scrollY / (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight);
+        rightWindow.scrollTo(0, scrollPercent * (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight));
+    }
+
+    // Scroll event handler for right iframe
+    function onRightScroll() {
+        if (isRightScrolling) {
+            isRightScrolling = false;
+            return;
+        }
+        isLeftScrolling = true;
+        const leftWindow = leftIframe.contentWindow;
+        const rightWindow = rightIframe.contentWindow;
+
+        const scrollPercent = rightWindow.scrollY / (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight);
+        leftWindow.scrollTo(0, scrollPercent * (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight));
+    }
+</script>
 </body>
 </html>
