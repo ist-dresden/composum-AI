@@ -131,7 +131,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         TranslationRunImpl run = new TranslationRunImpl();
         run.id = "" + Math.abs(System.nanoTime());
         run.rootPath = path;
-        run.translationParameters = translationParameters;
+        run.translationParameters = translationParameters.clone();
+        run.translationParameters.autoSave = true; // otherwise it'll be just rolled back
         run.translatedPages = resources.stream()
                 .map(r -> new TranslationPageImpl(r.getPath()))
                 .collect(Collectors.toList());
