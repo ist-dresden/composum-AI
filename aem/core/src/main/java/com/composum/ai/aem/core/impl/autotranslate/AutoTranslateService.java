@@ -159,6 +159,8 @@ public interface AutoTranslateService {
                 Pattern.compile("\\.(png|jpg|jpeg|gif|svg|mp3|mov|mp4)(/|$)", Pattern.CASE_INSENSITIVE);
 
         public String pagePath;
+        public String translateCopyPagePath;
+
         public String status;
         public AutoPageTranslateService.Stats stats;
 
@@ -172,6 +174,17 @@ public interface AutoTranslateService {
                 return "/editor.html" + pagePath + ".html";
             }
         }
+
+        /** If a translate copy is present, this would open a diff view. */
+        public String diffToCopyUrl() {
+            if (startsWith(pagePath, "/content/dam") || translateCopyPagePath == null) {
+                return null;
+            } else {
+                return "/mnt/overlay/wcm/core/content/sites/diffresources.html" + pagePath +
+                        "?item=" + translateCopyPagePath + "&sideBySide";
+            }
+        }
+
     }
 
 }

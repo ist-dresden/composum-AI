@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.startsWith;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -134,7 +136,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         run.translationParameters = translationParameters.clone();
         run.translationParameters.autoSave = true; // otherwise it'll be just rolled back
         run.translatedPages = resources.stream()
-                .map(r -> new TranslationPageImpl(r.getPath()))
+                .map(r -> new TranslationPageImpl(r))
                 .collect(Collectors.toList());
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
         run.status = TranslationStatus.QUEUED;
@@ -274,11 +276,15 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     public static class TranslationPageImpl extends TranslationPage {
         String resourcePath;
 
-        public TranslationPageImpl(String resourcePath) {
-            this.resourcePath = resourcePath;
+        public TranslationPageImpl(Resource resource) {
+            this.resourcePath = resource.getPath();
             pagePath = ResourceUtil.getParent(resourcePath); // remove jcr:content
             this.status = "queued";
+            Resource translateCopyResource = resource.getParent().getParent()
+                    .getChild(resource.getParent().getName() + AutoTranslateListModel.SUFFIX_TRANSLATECOPY);
+            translateCopyPagePath = translateCopyResource != null ? translateCopyResource.getPath() : null;
         }
+
     }
 
 }
