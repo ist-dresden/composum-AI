@@ -12,6 +12,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
@@ -19,7 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class AutoTranslateListModel {
@@ -34,6 +38,9 @@ public class AutoTranslateListModel {
 
     @OSGiService
     private AutoTranslateConfigService autoTranslateConfigService;
+
+    @OSGiService
+    private LiveRelationshipManager liveRelationshipManager;
 
     @Self
     private SlingHttpServletRequest request;
@@ -55,7 +62,7 @@ public class AutoTranslateListModel {
         return runs.stream().filter(run -> run.isInProgress()).findAny().isPresent();
     }
 
-    public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException {
+    public AutoTranslateService.TranslationRun createRun() throws LoginException, PersistenceException, WCMException {
         if (run == null) {
             String path = request.getParameter("path");
             if (path == null || path.isEmpty()) {
@@ -64,6 +71,7 @@ public class AutoTranslateListModel {
             path = path.replaceAll("_jcr_content", "jcr:content").replaceAll("\\.html$", "").trim();
             boolean recursive = request.getParameter("recursive") != null;
             boolean changed = request.getParameter("translateWhenChanged") != null;
+            boolean copyOriginalPage = request.getParameter("copyOriginalPage") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean debugaddinstructions = request.getParameter("debugaddinstructions") != null;
             if (debugaddinstructions) {
@@ -93,9 +101,45 @@ public class AutoTranslateListModel {
             parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
             parms.breakInheritance = breakInheritance;
+            if (copyOriginalPage) {
+                copyOriginalPage(request, path);
+            }
             run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms);
         }
         return run;
+    }
+
+    /**
+     * If parameter copyOriginalPage is set, we create a copy of the original page with this suffix
+     * before doing the translation.
+     */
+    public static final String SUFFIX_TRANSLATECOPY = "_aitranslate_bak";
+
+    /**
+     * Make a copy of the original page for comparison purposes.
+     */
+    protected void copyOriginalPage(SlingHttpServletRequest request, String path) throws WCMException, PersistenceException {
+        ResourceResolver resolver = request.getResourceResolver();
+        PageManager pageManager = resolver.adaptTo(PageManager.class);
+        Page originalPage = pageManager.getContainingPage(path);
+        path = originalPage.getPath();
+        if (originalPage != null) {
+            String newPath = path + SUFFIX_TRANSLATECOPY;
+            if (resolver.getResource(newPath) != null) {
+                resolver.delete(resolver.getResource(newPath));
+            }
+            Page copy = pageManager.copy(originalPage, newPath, null, true, true, false);
+            if (copy != null) {
+                liveRelationshipManager.endRelationship(copy.getContentResource(), false);
+                LOG.info("Created copy of {} at {}", originalPage.getPath(), newPath);
+                resolver.commit();
+            } else {
+                LOG.error("Failed to create copy of {} at {}", originalPage.getPath(), newPath);
+                throw new IllegalArgumentException("Failed to create copy of " + originalPage.getPageTitle() + " at " + newPath);
+            }
+        } else {
+            throw new IllegalArgumentException("No page exists at " + path);
+        }
     }
 
     public String rollback() throws WCMException, PersistenceException {

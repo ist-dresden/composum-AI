@@ -87,6 +87,11 @@
                                                 <label for="debugaddinstructions">Instead of translating collect additional instructions for verification</label>
                                             </coral-checkbox>
                                         </div>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="copyOriginalPage">
+                                                <label for="debugaddinstructions">Make a _aitranslate_bak copy of the page before triggering the translation. (Caution: overwrites previous copy, if there is one.)</label>
+                                            </coral-checkbox>
+                                        </div>
                                         <!-- a text area with additional system instructions. -->
                                         <div class="coral-Form-fieldwrapper">
                                             <label class="coral-Form-fieldlabel" for="additionalInstructions">Optionally,
@@ -180,8 +185,9 @@
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <script>
     $(document).ready(function () {
-        // save all data to local storage on form submit
         const localStorageKey = 'composum-ai-translation-experimental-ui-data';
+
+        // save all data to local storage on form submit
         $('form').submit(function (event) {
             event.preventDefault();
             const form = $(this);
@@ -189,6 +195,10 @@
                 obj[item.name] = item.value;
                 return obj;
             }, {});
+            form.find('input[type="checkbox"]').each(function () {
+                const field = $(this);
+                formData[field.attr('name')] = field.prop('checked');
+            });
             localStorage.setItem(localStorageKey, JSON.stringify(formData));
             form[0].submit();
         });
@@ -201,6 +211,10 @@
                 const field = $(this);
                 field.val(formData[field.attr('name')] || '');
             });
+            form.find('input[type="checkbox"]').each(function () {
+                const field = $(this);
+                field.prop('checked', formData[field.attr('name')] || false);
+            });
         });
 
         // reset form clears all forms *and* saved data
@@ -209,6 +223,10 @@
             $(document).find('input, textarea, select').each(function () {
                 const field = $(this);
                 field.val('');
+            });
+            $(document).find('input[type="checkbox"]').each(function () {
+                const field = $(this);
+                field.prop('checked', false);
             });
             localStorage.removeItem(localStorageKey);
             $('#maxdepth').val('2');
