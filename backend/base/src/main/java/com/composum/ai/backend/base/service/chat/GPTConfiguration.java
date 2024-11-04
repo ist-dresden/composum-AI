@@ -313,6 +313,10 @@ public class GPTConfiguration {
         return new GPTConfiguration(null, null, null, null, null, null, null, null, null, null, tools);
     }
 
+    public static GPTConfiguration ofTemperature(Double temperature) {
+        return new GPTConfiguration(null, null, null, null, null, null, null, temperature);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("GPTConfiguration{");
@@ -354,6 +358,8 @@ public class GPTConfiguration {
     public static final GPTConfiguration JSON = new GPTConfiguration(null, null, AnswerType.JSON);
     public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, null, null, Mode.CHAT);
     public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, null, null, Mode.GENERATE);
+    public static final GPTConfiguration NULLCFG = new GPTConfiguration(null, null, null);
+
     /**
      * Requests slower and more expensive "high intelligence" model - use sparingly.
      */

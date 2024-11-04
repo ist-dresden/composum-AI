@@ -131,8 +131,22 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             if (translationParameters.rules != null) {
                 allRules.addAll(translationParameters.rules);
             }
+
             if (autoTranslateCaConfig.rules() != null) {
                 allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+            }
+            if (autoTranslateCaConfig.temperature() != null && !autoTranslateCaConfig.temperature().trim().isEmpty()) {
+                try {
+                    double temperature = Double.parseDouble(autoTranslateCaConfig.temperature());
+                    configuration = GPTConfiguration.ofTemperature(temperature).merge(configuration);
+                } catch (NumberFormatException e) {
+                    LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
+                }
+            }
+            if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
+                configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
+            } else if (autoTranslateCaConfig.preferStandardModel()) {
+                configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
             }
 
             // collect translation rules that apply

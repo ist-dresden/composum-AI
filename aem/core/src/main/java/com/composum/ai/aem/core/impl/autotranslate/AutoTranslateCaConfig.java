@@ -65,4 +65,8 @@ public @interface AutoTranslateCaConfig {
             })
     String comment();
 
+    @Property(label = "Temperature", order = 8,
+            description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0")
+    String temperature();
+
 }
