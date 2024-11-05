@@ -139,7 +139,21 @@ public class GPTTranslationServiceImplTest extends TestCase {
         assertEquals("", fakeTranslation(""));
         String faked = fakeTranslation("This is a test <code>and some Code</code>");
         assertEquals("this is a test <code>and some code</code>", faked.toLowerCase());
+        assertFalse("this is a test <code>and some code</code>".equals(faked)); // different case
         System.out.println(faked); // random case; that's a bit hard to test
+    }
+
+    /**
+     * Fake translation should not break the structure for translating multiple texts.
+     */
+    @Test
+    public void testFakeTranslationKeepsStructure() {
+        String result = "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 357056 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
+                "12 34 56\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 566470 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
+                "999 99 99 +-*/.\n" +
+                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 424242 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%";
+        assertEquals(result, fakeTranslation(result));
     }
 
     @Test
@@ -153,14 +167,20 @@ public class GPTTranslationServiceImplTest extends TestCase {
 
     @Test
     public void testFakedFragmentedTranslation() {
-        GPTTranslationServiceImpl service = new GPTTranslationServiceImpl();
+        GPTChatCompletionService completionService = mock(GPTChatCompletionService.class);
+        when(completionService.getTemplate(TEMPLATE_SINGLETRANSLATION)).thenReturn(
+                new GPTChatMessagesTemplate(GPTChatCompletionServiceImpl.class.getClassLoader(), TEMPLATE_SINGLETRANSLATION)
+        );
+        GPTTranslationServiceImpl service = new GPTTranslationServiceImpl() {{
+            this.chatCompletionService = completionService;
+        }};
         GPTTranslationServiceImpl.Config config = mock(GPTTranslationServiceImpl.Config.class);
         when(config.fakeTranslation()).thenReturn(true);
         service.activate(config);
-        assertTrue(service.fragmentedTranslation(null, null, null).isEmpty());
-        assertTrue(service.fragmentedTranslation(asList(), null, null).isEmpty());
-        assertEquals(Arrays.asList("", "\n", "holla", "").toString(), service.fragmentedTranslation(asList("", "\n", "holla", ""), null, null).toString().toLowerCase());
-        assertEquals(Arrays.asList("holla", "\nmiau ho ho ").toString(), service.fragmentedTranslation(asList("holla", "\nmiau ho Ho "), null, null).toString().toLowerCase());
+        assertTrue(service.fragmentedTranslation(null, "de", null).isEmpty());
+        assertTrue(service.fragmentedTranslation(asList(), "de", null).isEmpty());
+        assertEquals(Arrays.asList("", "\n", "holla", "").toString(), service.fragmentedTranslation(asList("", "\n", "holla", ""), "de", null).toString().toLowerCase());
+        assertEquals(Arrays.asList("holla", "\nmiau ho ho ").toString(), service.fragmentedTranslation(asList("holla", "\nmiau ho Ho "), "de", null).toString().toLowerCase());
 
         assertEquals(null, service.singleTranslation(null, null, "de", null));
         assertEquals("", service.singleTranslation("", null, "de", null));
