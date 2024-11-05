@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ValueMap;
 
-class AITranslatePropertyWrapper {
+public class AITranslatePropertyWrapper {
 
     /**
      * PageContent only property: saves the additional instructions the page was translated with.
@@ -61,6 +61,12 @@ class AITranslatePropertyWrapper {
      * Will be overwritten if another retranslation is done. Also keep original and translated values - as additional suffix.
      */
     public static final String AI_MANUAL_CHANGE_SUFFIX = "_manualChange";
+
+    /**
+     * Attribute that is set on jcr:content of a page when the translation of a page failed, to make it easy to find such pages. Not set by {@link AITranslatePropertyWrapper}, but since all property names are defined here...
+     * Is set to the time at which the error occurred, to make it easy to find in the logs.
+     */
+    public static final String AI_TRANSLATION_ERRORMARKER = "ai_translationError";
 
     private final ModifiableValueMap targetValueMap;
     private final String propertyName;

@@ -1,8 +1,10 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -236,10 +239,21 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         resourceResolver.revert();
                         resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        if (resource != null) {
-                            AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
-                            page.stats = stats;
-                            page.status = stats.hasChanges() ? "done" : "unchanged";
+                        try {
+                            if (resource != null) {
+                                AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
+                                page.stats = stats;
+                                page.status = stats.hasChanges() ? "done" : "unchanged";
+                            }
+                        } catch (GPTException.GPTUserNotificationException e) {
+                            throw e;
+                        } catch (Exception e) {
+                            resourceResolver.revert();
+                            resourceResolver.refresh();
+                            // mark translation as failed.
+                            resource.adaptTo(ModifiableValueMap.class).put(AI_TRANSLATION_ERRORMARKER, Calendar.getInstance());
+                            resourceResolver.commit();
+                            throw e;
                         }
                     } catch (GPTException.GPTUserNotificationException e) {
                         page.status = "cancelled - user notification";

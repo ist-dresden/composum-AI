@@ -30,7 +30,7 @@ public @interface AutoTranslateRuleConfig {
             })
     String additionalInstructions();
 
-    @Property(label = "Optional Comment", order = 4,
+    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 4,
             description = "An optional comment for the rule, for documentation purposes (not used by the translation).",
             property = {
                     "widgetType=textarea",

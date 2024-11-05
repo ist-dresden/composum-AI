@@ -57,7 +57,7 @@ public @interface AutoTranslateCaConfig {
             })
     String includeExistingTranslationsInRetranslation();
 
-    @Property(label = "Optional Comment", order = 7,
+    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 7,
             description = "An optional comment about the configuration, for documentation purposes (not used by the translation).",
             property = {
                     "widgetType=textarea",

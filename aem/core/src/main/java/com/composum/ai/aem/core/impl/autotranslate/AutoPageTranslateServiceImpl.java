@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
@@ -403,6 +404,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
                     liveRelationship, targetWrapper.allGeneralKeys(), false);
         }
+        valueMap.put(AI_TRANSLATION_ERRORMARKER, Boolean.FALSE); // reset error marker if there was one.
     }
 
     /**
@@ -628,6 +630,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             propertyToTranslate.propertyName = key;
             propertyToTranslate.isAlreadyCorrectlyTranslated = isAlreadyCorrectlyTranslated;
             propertiesToTranslate.add(propertyToTranslate);
+
+            if (targetWrapper.getOriginal().contains("THROWUPRIGHTNOW49e43jwsdsg")) {
+                throw new IllegalStateException("THROWUPRIGHTNOW49e43jwsdsg requested for " + sourceResource.getPath());
+            }
         }
         for (Resource child : resource.getChildren()) {
             if (!PATTERN_IGNORED_SUBNODE_NAMES.matcher(child.getName()).matches()) {
