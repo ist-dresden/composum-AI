@@ -2,4 +2,4 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
           xmlns:jcr="http://www.jcp.org/jcr/1.0"
           jcr:primaryType="sling:Folder"
-          sling:resourceType="composum-ai/components/autotranslate/list"/>
+          sling:resourceType="composum-ai/components/autotranslate-experiments/list"/>
