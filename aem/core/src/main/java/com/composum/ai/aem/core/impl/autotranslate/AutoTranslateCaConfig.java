@@ -9,8 +9,8 @@ import org.apache.sling.caconfig.annotation.Property;
 // is also added to Sling-ContextAware-Configuration-Classes bnd header in pom.xml
 public @interface AutoTranslateCaConfig {
 
-    @Property(label = "Additional Instructions", order = 1,
-            description = "Additional instructions for the automatic translation.")
+    @Property(label = "Additional Instructions (Deprecated)", order = 1,
+            description = "Additional instructions for the automatic translation. Deprecated, please use 'Rules for additional Instructions' instead - if you do not give a path regex nor a content pattern the instructions will be used everywhere.")
     String additionalInstructions();
 
     @Property(label = "Rules for additional Instructions", order = 2,
