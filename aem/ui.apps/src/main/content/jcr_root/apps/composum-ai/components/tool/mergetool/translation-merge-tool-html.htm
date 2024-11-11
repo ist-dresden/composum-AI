@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Merge Tool Mockup (no functionality yet)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .btn-copy {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.875rem;
+            width: 2.5rem;
+        }
+        .component-path {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        .table td {
+            vertical-align: top;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .table {
+            table-layout: fixed;
+        }
+        .table td {
+            word-wrap: break-word;
+        }
+        .btn-column {
+            width: 50px;
+        }
+        .translation-textarea {
+            height: 100%;
+            min-height: 100px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <h1 class="mb-4">Translation Merge Tool</h1>
+        
+        <div class="mb-4">
+            <a href="#source" class="btn btn-outline-primary me-2">
+                Source Page <i class="fas fa-external-link-alt ms-1"></i>
+            </a>
+            <a href="#target" class="btn btn-outline-primary">
+                Target Page <i class="fas fa-external-link-alt ms-1"></i>
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Current Source Text</th>
+                        <th>Current AI Translation</th>
+                        <th class="btn-column"></th>
+                        <th>New Translation</th>
+                        <th class="btn-column"></th>
+                        <th>Current Target Text</th>
+                    </tr>
+                </thead>
+                <tbody id="translationTableBody">
+                    <!-- Table content will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample translation data
+        const translations = [
+            {
+                id: 1,
+                sourceText: "Welcome to our company",
+                aiTranslation: "Willkommen in unserem Unternehmen",
+                targetText: "Willkommen bei unserer Firma",
+                componentPath: "/content/home/header/title",
+                newTranslation: ""
+            },
+            {
+                id: 2,
+                sourceText: "We provide innovative solutions for modern businesses. Our team of experts works tirelessly to ensure your success in the digital age.",
+                aiTranslation: "Wir bieten innovative Lösungen für moderne Unternehmen. Unser Expertenteam arbeitet unermüdlich daran, Ihren Erfolg im digitalen Zeitalter sicherzustellen.",
+                targetText: "Wir bieten innovative Lösungen für moderne Firmen. Unser Team von Experten arbeitet kontinuierlich an Ihrem Erfolg im digitalen Zeitalter.",
+                componentPath: "/content/home/main/description",
+                newTranslation: ""
+            }
+        ];
+
+        function createTableRow(translation, index) {
+            return `
+                <tr>
+                    <td>
+                        <div>${translation.sourceText}</div>
+                        <div class="component-path mt-1">${translation.componentPath}</div>
+                    </td>
+                    <td>${translation.aiTranslation}</td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-copy" 
+                                    onclick="handleCopyText(${index}, 'ai')" 
+                                    title="Copy AI translation">
+                                &gt;
+                            </button>
+                            <button class="btn btn-primary btn-copy" 
+                                    onclick="handleAppendText(${index}, 'ai')" 
+                                    title="Append AI translation">
+                                &gt;&gt;
+                            </button>
+                        </div>
+                    </td>
+                    <td>
+                        <textarea class="form-control translation-textarea" 
+                                 id="newTranslation${index}" rows="5"
+                                 oninput="handleInputChange(${index}, this.value)">${translation.newTranslation}</textarea>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-copy" 
+                                    onclick="handleCopyText(${index}, 'target')" 
+                                    title="Copy current target text">
+                                &lt;
+                            </button>
+                            <button class="btn btn-primary btn-copy" 
+                                    onclick="handleAppendText(${index}, 'target')" 
+                                    title="Append current target text">
+                                &lt;&lt;
+                            </button>
+                        </div>
+                    </td>
+                    <td>${translation.targetText}</td>
+                </tr>
+            `;
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('translationTableBody');
+            tableBody.innerHTML = translations.map((t, i) => createTableRow(t, i)).join('');
+        }
+
+        function handleCopyText(index, source) {
+            const text = source === 'ai' ? translations[index].aiTranslation : translations[index].targetText;
+            translations[index].newTranslation = text;
+            document.getElementById(`newTranslation${index}`).value = text;
+        }
+
+        function handleAppendText(index, source) {
+            const text = source === 'ai' ? translations[index].aiTranslation : translations[index].targetText;
+            const currentText = translations[index].newTranslation;
+            const newText = currentText ? `${currentText} ${text}` : text;
+            translations[index].newTranslation = newText;
+            document.getElementById(`newTranslation${index}`).value = newText;
+        }
+
+        function handleInputChange(index, value) {
+            translations[index].newTranslation = value;
+        }
+
+        // Initialize the table
+        document.addEventListener('DOMContentLoaded', renderTable);
+    </script>
+</body>
+</html>
