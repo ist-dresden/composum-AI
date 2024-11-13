@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +34,8 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,9 @@ import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
+import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.slingbase.experimential.AITool;
+import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -130,9 +136,24 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     @Reference
     protected AIConfigurationService configurationService;
 
+    protected List<AITool> tools = Collections.synchronizedList(new ArrayList<>());
+
     protected BundleContext bundleContext;
 
     protected Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
+    @Reference(service = AITool.class, policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addTool(@NotNull final AITool tool) {
+        LOG.info("addTool: {}", tool.getToolName());
+        tools.add(tool);
+    }
+
+    protected void removeTool(@NotNull final AITool tool) {
+        LOG.info("removeTool: {}", tool.getToolName());
+        tools.remove(tool);
+    }
+
 
     @Activate
     public void activate(final BundleContext bundleContext) {
@@ -187,6 +208,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         if (stream == null) {
             response.sendError(HttpServletResponse.SC_GONE, "Stream " + streamId + " not found (anymore?)");
         } else {
+            stream.setContext(new SlingGPTExecutionContext(request, response));
             response.setCharacterEncoding("UTF-8");
             response.setContentType("text/event-stream");
             response.setHeader("Cache-Control", "no-cache");
@@ -259,6 +281,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         if ("undefined".equals(inputImagePath) || "null".equals(inputImagePath) || StringUtils.isBlank(inputImagePath)) {
             inputImagePath = null;
         }
+
         GPTConfiguration config = configurationService.getGPTConfiguration(request.getResourceResolver(), configBasePath);
         String chat = request.getParameter(PARAMETER_CHAT);
         if (Stream.of(sourcePath, sourceText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
@@ -268,6 +291,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                     " given, only one of them is allowed");
             return;
         }
+
         boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
         GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
         Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
@@ -281,6 +305,12 @@ public class AICreateServlet extends SlingAllMethodsServlet {
                 textLength = matcher.group(2);
             }
         }
+
+        List<GPTTool> tools = collectTools(request.getResourceResolver().getResource(configBasePath), request, response);
+        if (tools != null && !tools.isEmpty()) {
+            mergedConfig = GPTConfiguration.ofTools(tools).merge(mergedConfig);
+        }
+
         GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response, mergedConfig);
 
         String fullPrompt = prompt;
@@ -349,6 +379,21 @@ public class AICreateServlet extends SlingAllMethodsServlet {
             }
         }
         return additionalParameters;
+    }
+
+    @Nullable
+    protected List<GPTTool> collectTools(@Nonnull Resource resource,
+                                         @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
+        if (tools == null || tools.isEmpty()) {
+            return null;
+        }
+        List<GPTTool> tools = new ArrayList<>();
+        for (AITool tool : this.tools) {
+            if (tool.isAllowedFor(resource)) {
+                tools.add(tool.makeGPTTool(resource, request, response));
+            }
+        }
+        return tools;
     }
 
 }

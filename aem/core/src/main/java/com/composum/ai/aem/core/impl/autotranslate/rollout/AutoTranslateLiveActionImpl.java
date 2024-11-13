@@ -1,10 +1,16 @@
 package com.composum.ai.aem.core.impl.autotranslate.rollout;
 
 
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
+
+import java.util.Calendar;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveAction;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.commons.BaseAction;
@@ -58,7 +65,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
     }
 
     @Override
-    protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave) {
+    protected void doExecute(Resource source, Resource target, LiveRelationship liveRelationship, boolean autoSave) throws WCMException {
         String id = (Math.abs(Math.random()) + "").substring(2, 8);
         LOG.info(">>>{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
@@ -80,12 +87,27 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             } else {
                 autoPageTranslateService.translateLiveCopy(target, parms);
             }
-//        } catch (PersistenceException | RuntimeException | LoginException e) {
-//            throw new WCMException("Error translating " + source.getPath() + "\n" + e, e);
-        } catch (Exception e) { // rather log exception for now since a demo is coming...
+       } catch (Exception e) {
+            // Throwing an exception here will abort a whole recursive rollout, which is a problem.
+            // So we rather mark failures (which should be infrequent) so that they are easy to find.
             LOG.error("Error translating " + source.getPath(), e);
+            markAsError(target);
         } finally {
             LOG.info("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
+        }
+    }
+
+    /** Make it easy to find pages with errors by marking page with AI_TRANSLATION_ERRORMARKER. */
+    protected static void markAsError(Resource target) {
+        Calendar date = Calendar.getInstance();
+        try (ResourceResolver nestedResolver = target.getResourceResolver().clone(null)) {
+            // use a copy of the resolver since that somehow doesn't work with the original resolver
+            Resource targetNested = nestedResolver.getResource(target.getPath());
+            targetNested.adaptTo(ModifiableValueMap.class).put(AI_TRANSLATION_ERRORMARKER, date);
+            nestedResolver.commit();
+            target.getResourceResolver().refresh();
+        } catch (Exception e) {
+            LOG.warn("Error marking " + target.getPath() + " as error", e);
         }
     }
 

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
@@ -125,7 +126,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Override
     public void executePromptStreaming(@Nonnull String prompt, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException {
         GPTChatRequest request = makeExecutePromptRequest(prompt, additionalParameters);
-        chatCompletionService.streamingChatCompletion(request, callback);
+        chatCompletionService.streamingChatCompletionWithToolCalls(request, callback);
     }
 
     @Nonnull
@@ -164,7 +165,7 @@ public class GPTContentCreationServiceImpl implements GPTContentCreationService 
     @Override
     public void executePromptOnTextStreaming(@Nonnull String prompt, @Nonnull String text, @Nullable GPTChatRequest additionalParameters, @Nonnull GPTCompletionCallback callback) throws GPTException {
         GPTChatRequest request = makeExecuteOnTextRequest(prompt, text, additionalParameters);
-        chatCompletionService.streamingChatCompletion(request, callback);
+        chatCompletionService.streamingChatCompletionWithToolCalls(request, callback);
     }
 
 }

@@ -1,18 +1,20 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
@@ -143,7 +145,7 @@ public class GPTChatCompletionServiceImplTest {
                 "\"model\":\"gpt-3.5-turbo-0613\"," +
                 "\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hi\"},\"finish_reason\":null}]}";
         service.handleStreamingEvent(callback, 123, dataline);
-        Mockito.verify(callback).onNext("Hi");
+        verify(callback).onNext("Hi");
     }
 
     @Test
@@ -155,7 +157,35 @@ public class GPTChatCompletionServiceImplTest {
                 "\"somethingunknown\":28," +
                 "\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hi\"},\"finish_reason\":null}]}";
         service.handleStreamingEvent(callback, 123, dataline);
-        Mockito.verify(callback).onNext("Hi");
+        verify(callback).onNext("Hi");
+    }
+
+
+    /**
+     * Streaming test from real example.
+     */
+    @Test
+    public void testWholeStream() {
+        String[] lines = ("" +
+                "{\"id\":\"chatcmpl-ANLyWhiTkkyRHtRTJcwxGzUTNxiG6\",\"object\":\"chat.completion.chunk\",\"created\":1730129380,\"model\":\"gpt-4o-mini-2024-07-18\",\"system_fingerprint\":\"fp_f59a81427f\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null},\"logprobs\":null,\"finish_reason\":null}]}\n" +
+                "{\"id\":\"chatcmpl-ANLyWhiTkkyRHtRTJcwxGzUTNxiG6\",\"object\":\"chat.completion.chunk\",\"created\":1730129380,\"model\":\"gpt-4o-mini-2024-07-18\",\"system_fingerprint\":\"fp_f59a81427f\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hello\"},\"logprobs\":null,\"finish_reason\":null}]}\n" +
+                "{\"id\":\"chatcmpl-ANLyWhiTkkyRHtRTJcwxGzUTNxiG6\",\"object\":\"chat.completion.chunk\",\"created\":1730129380,\"model\":\"gpt-4o-mini-2024-07-18\",\"system_fingerprint\":\"fp_f59a81427f\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"!\"},\"logprobs\":null,\"finish_reason\":null}]}\n" +
+                "{\"id\":\"chatcmpl-ANLyWhiTkkyRHtRTJcwxGzUTNxiG6\",\"object\":\"chat.completion.chunk\",\"created\":1730129380,\"model\":\"gpt-4o-mini-2024-07-18\",\"system_fingerprint\":\"fp_f59a81427f\",\"choices\":[{\"index\":0,\"delta\":{},\"logprobs\":null,\"finish_reason\":\"stop\"}]}\n" +
+                "[DONE]"
+        ).split("\n");
+        GPTCompletionCallback callback = mock(GPTCompletionCallback.class);
+        StringBuffer result = new StringBuffer();
+        doAnswer(invocation -> {
+            String arg = invocation.getArgument(0);
+            result.append(arg);
+            return null;
+        }).when(callback).onNext(anyString());
+        for (String line : lines) {
+            service.handleStreamingEvent(callback, 123, "data: " + line);
+        }
+        assertEquals("Hello!", result.toString());
+        verify(callback).onFinish(GPTFinishReason.STOP);
+        verify(callback).close();
     }
 
 }

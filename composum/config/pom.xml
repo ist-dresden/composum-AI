@@ -74,16 +74,6 @@
                                 </include>
                             </includes>
                         </filter>
-
-                        <filter>
-                            <!-- Cleanup obsolete path. FIXME: remove in version 0.5.x -->
-                            <root>/libs/composum/ai/install</root>
-                            <includes>
-                                <include>
-                                    .*/com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.*
-                                </include>
-                            </includes>
-                        </filter>
                     </filters>
 
                 </configuration>

@@ -12,7 +12,8 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * A text part or image part of a chat completion message.
+ * Represents a part of a chat completion message, which may be a text or an image URL.
+ * This allows messages to include multiple types of content.
  * <pre><code>
  *          {
  *           "type": "text",
@@ -29,23 +30,39 @@ import com.google.gson.annotations.SerializedName;
  */
 public class ChatCompletionMessagePart {
 
-    public enum Type {
-        @SerializedName("text")
-        TEXT,
-        @SerializedName("image_url")
-        IMAGE_URL
-    }
-
+    /**
+     * The type of this message part, either 'text' or 'image_url'.
+     */
     @SerializedName("type")
     private Type type;
-
+    /**
+     * The text content of this message part, used when the type is 'text'.
+     */
     @SerializedName("text")
     private String text;
-
+    /**
+     * The image URL content of this message part, used when the type is 'image_url'.
+     */
     @SerializedName("image_url")
     private ChatCompletionMessageUrlPart imageUrl;
 
+    public static ChatCompletionMessagePart text(String text) {
+        ChatCompletionMessagePart part = new ChatCompletionMessagePart();
+        part.setType(Type.TEXT);
+        part.setText(text);
+        return part;
+    }
+
     // Getters and setters
+
+    public static ChatCompletionMessagePart imageUrl(String imageUrl) {
+        ChatCompletionMessagePart part = new ChatCompletionMessagePart();
+        part.setType(Type.IMAGE_URL);
+        ChatCompletionMessageUrlPart urlpart = new ChatCompletionMessageUrlPart();
+        urlpart.setUrl(imageUrl);
+        part.setImageUrl(urlpart);
+        return part;
+    }
 
     public Type getType() {
         return type;
@@ -76,20 +93,18 @@ public class ChatCompletionMessagePart {
                 (imageUrl == null || imageUrl.getUrl() == null || imageUrl.getUrl().isEmpty());
     }
 
-    public static ChatCompletionMessagePart text(String text) {
-        ChatCompletionMessagePart part = new ChatCompletionMessagePart();
-        part.setType(Type.TEXT);
-        part.setText(text);
-        return part;
+    public enum Type {
+        @SerializedName("text")
+        TEXT,
+        @SerializedName("image_url")
+        IMAGE_URL
     }
 
-    public static ChatCompletionMessagePart imageUrl(String imageUrl) {
-        ChatCompletionMessagePart part = new ChatCompletionMessagePart();
-        part.setType(Type.IMAGE_URL);
-        ChatCompletionMessageUrlPart urlpart = new ChatCompletionMessageUrlPart();
-        urlpart.setUrl(imageUrl);
-        part.setImageUrl(urlpart);
-        return part;
+    public enum ImageDetail {
+        @SerializedName("low")
+        LOW,
+        @SerializedName("high")
+        HIGH
     }
 
     /**
@@ -122,14 +137,6 @@ public class ChatCompletionMessagePart {
         }
 
     }
-
-    public enum ImageDetail {
-        @SerializedName("low")
-        LOW,
-        @SerializedName("high")
-        HIGH
-    }
-
 
     public static class ChatCompletionMessagePartListDeSerializer implements JsonDeserializer<List<ChatCompletionMessagePart>>,
             JsonSerializer<List<ChatCompletionMessagePart>> {

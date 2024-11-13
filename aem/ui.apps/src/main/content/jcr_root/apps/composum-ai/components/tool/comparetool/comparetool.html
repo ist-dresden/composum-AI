@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compare Tool</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+
+        .iframe-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .url-field {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100% - 40px); /* Adjust based on input field height */
+            border: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js" integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+<div class="iframe-container">
+    <input class="url-field" type="text" placeholder="Enter URL for left iframe"
+           title="Enter the URL to load in the left iframe.">
+    <iframe id="leftIframe" src="" title="Left iframe for comparison."></iframe>
+</div>
+<div class="iframe-container">
+    <input class="url-field" type="text" placeholder="Enter URL for right iframe"
+           title="Enter the URL to load in the right iframe.">
+    <iframe id="rightIframe" src="" title="Right iframe for comparison."></iframe>
+</div>
+<script>
+    // Get references to the iframes and URL input fields
+    const leftIframe = document.getElementById('leftIframe');
+    const rightIframe = document.getElementById('rightIframe');
+    const leftField = document.querySelectorAll('.url-field')[0];
+    const rightField = document.querySelectorAll('.url-field')[1];
+
+    // Flags to track iframes' load status
+    let leftLoaded = false;
+    let rightLoaded = false;
+
+    // Flags to prevent infinite scroll loops
+    let isLeftScrolling = false;
+    let isRightScrolling = false;
+
+    // Event listeners for URL input fields
+    leftField.addEventListener('change', function () {
+        leftLoaded = false;
+        try {
+            const url = new URL(this.value);
+            leftIframe.src = DOMPurify.sanitize(url.href);
+        } catch (e) {
+            console.error('Invalid URL:', this.value);
+        }
+    });
+
+    rightField.addEventListener('change', function () {
+        rightLoaded = false;
+        try {
+            const url = new URL(this.value);
+            rightIframe.src = DOMPurify.sanitize(url.href);
+        } catch (e) {
+            console.error('Invalid URL:', this.value);
+        }
+    });
+
+    // Function to parse URL parameters
+    function getParameterByName(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+
+    // Load the initial URLs if available in the parameters
+    const initialUrl1 = getParameterByName('url1');
+    const initialUrl2 = getParameterByName('url2');
+    if (initialUrl1) {
+        leftIframe.src = DOMPurify.sanitize(initialUrl1);
+        leftField.value = initialUrl1;
+    }
+    if (initialUrl2) {
+        rightIframe.src = DOMPurify.sanitize(initialUrl2);
+        rightField.value = initialUrl2;
+    }
+
+    // Load event listeners for iframes
+    leftIframe.addEventListener('load', function () {
+        leftLoaded = true;
+        if (leftLoaded && rightLoaded) {
+            syncScroll();
+        }
+    });
+
+    rightIframe.addEventListener('load', function () {
+        rightLoaded = true;
+        if (leftLoaded && rightLoaded) {
+            syncScroll();
+        }
+    });
+
+    // Function to synchronize scrolling
+    function syncScroll() {
+        if (leftIframe.contentWindow && rightIframe.contentWindow) {
+            const leftWindow = leftIframe.contentWindow;
+            const rightWindow = rightIframe.contentWindow;
+
+            // Remove existing event listeners to prevent multiple bindings
+            leftWindow.removeEventListener('scroll', onLeftScroll);
+            rightWindow.removeEventListener('scroll', onRightScroll);
+
+            // Add new scroll event listeners
+            leftWindow.addEventListener('scroll', onLeftScroll);
+            rightWindow.addEventListener('scroll', onRightScroll);
+        }
+    }
+
+    // Scroll event handler for left iframe
+    function onLeftScroll() {
+        if (isLeftScrolling) {
+            isLeftScrolling = false;
+            return;
+        }
+        isRightScrolling = true;
+        const leftWindow = leftIframe.contentWindow;
+        const rightWindow = rightIframe.contentWindow;
+
+        const scrollPercent = leftWindow.scrollY / (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight);
+        rightWindow.scrollTo(0, scrollPercent * (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight));
+    }
+
+    // Scroll event handler for right iframe
+    function onRightScroll() {
+        if (isRightScrolling) {
+            isRightScrolling = false;
+            return;
+        }
+        isLeftScrolling = true;
+        const leftWindow = leftIframe.contentWindow;
+        const rightWindow = rightIframe.contentWindow;
+
+        const scrollPercent = rightWindow.scrollY / (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight);
+        leftWindow.scrollTo(0, scrollPercent * (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight));
+    }
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package com.composum.ai.backend.base.service.chat.impl;
+package com.composum.ai.backend.base.service.chat;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.impl.SimpleLogger;
 
 import com.composum.ai.backend.base.service.GPTException;
-import com.composum.ai.backend.base.service.chat.GPTChatMessage;
-import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 
 public class GPTChatMessagesTemplateTest {
 

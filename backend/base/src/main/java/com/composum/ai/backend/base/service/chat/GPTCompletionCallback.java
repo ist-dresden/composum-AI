@@ -1,5 +1,9 @@
 package com.composum.ai.backend.base.service.chat;
 
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +34,83 @@ public interface GPTCompletionCallback {
     void setLoggingId(String loggingId);
 
     /**
+     * For tool calls: set the context to execute actions in.
+     */
+    default GPTToolExecutionContext getToolExecutionContext() {
+        return null;
+    }
+
+    /**
      * For debugging - the request that was sent to ChatGPT as JSON.
      */
     default void setRequest(String json) {
+    }
+
+    /**
+     * Notifies that the request is completely finished / closed, nothing more will arrive.
+     */
+    default void close() {
+        // empty
+    }
+
+    /**
+     * Called when a tool call is made.
+     */
+    default void toolDelta(List<GPTToolCall> toolCalls) {
+        // empty
+    }
+
+    /**
+     * For tool calls: context to execute actions in.
+     */
+    public interface GPTToolExecutionContext {
+        // empty here - has to be specifiec in other layers
+    }
+
+    /**
+     * Forwards all methods to a delegate.
+     */
+    public static class GPTCompletionCallbackWrapper implements GPTCompletionCallback {
+
+        @Nonnull
+        protected GPTCompletionCallback delegate;
+
+        public GPTCompletionCallbackWrapper(@Nonnull GPTCompletionCallback delegate) {
+            this.delegate = delegate;
+        }
+
+        public void onFinish(GPTFinishReason finishReason) {
+            delegate.onFinish(finishReason);
+        }
+
+        public void onNext(String chars) {
+            delegate.onNext(chars);
+        }
+
+        public void onError(Throwable throwable) {
+            delegate.onError(throwable);
+        }
+
+        public void setLoggingId(String loggingId) {
+            delegate.setLoggingId(loggingId);
+        }
+
+        public void setRequest(String json) {
+            delegate.setRequest(json);
+        }
+
+        public void close() {
+            delegate.close();
+        }
+
+        public void toolDelta(List<GPTToolCall> toolCalls) {
+            delegate.toolDelta(toolCalls);
+        }
+
+        public GPTToolExecutionContext getToolExecutionContext() {
+            return delegate.getToolExecutionContext();
+        }
+
     }
 
     /**
@@ -45,6 +123,7 @@ public interface GPTCompletionCallback {
         private StringBuilder buffer = new StringBuilder();
         private Throwable throwable;
         private GPTFinishReason finishReason;
+        private List<GPTToolCall> toolCalls;
 
         @Override
         public void onFinish(GPTFinishReason finishReason) {
@@ -78,6 +157,21 @@ public interface GPTCompletionCallback {
         public Throwable getError() {
             return throwable;
         }
+
+        @Override
+        public void toolDelta(List<GPTToolCall> toolCalls) {
+            this.toolCalls = GPTToolCall.mergeDelta(this.toolCalls, toolCalls);
+        }
+
+        public List<GPTToolCall> getToolCalls() {
+            return toolCalls;
+        }
+
+        @Override
+        public GPTToolExecutionContext getToolExecutionContext() {
+            return null;
+        }
+
     }
 
 }

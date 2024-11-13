@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -71,15 +72,22 @@ import com.composum.ai.backend.base.impl.RateLimiter;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
+import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
@@ -424,6 +432,60 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
     }
 
+    @Override
+    public void streamingChatCompletionWithToolCalls(@Nonnull GPTChatRequest request, @Nonnull GPTCompletionCallback callback)
+            throws GPTException {
+        if (request.getConfiguration() == null || request.getConfiguration().getTools() == null || request.getConfiguration().getTools().isEmpty()) {
+            streamingChatCompletion(request, callback);
+            return;
+        }
+        GPTCompletionCallback callbackWrapper = new GPTCompletionCallback.GPTCompletionCallbackWrapper(callback) {
+            List<GPTToolCall> collectedToolcalls = null;
+
+            @Override
+            public void toolDelta(List<GPTToolCall> toolCalls) {
+                collectedToolcalls = GPTToolCall.mergeDelta(collectedToolcalls, toolCalls);
+            }
+
+            @Override
+            public void onFinish(GPTFinishReason finishReason) {
+                if (GPTFinishReason.TOOL_CALLS == finishReason) {
+                    LOG.info("Executing tool calls");
+                    LOG.debug("Tool calls: {}", collectedToolcalls);
+                    GPTChatRequest requestWithToolCalls = request.copy();
+                    GPTChatMessage assistantRequestsToolcallsMessage =
+                            new GPTChatMessage(GPTMessageRole.ASSISTANT, null, null, null, collectedToolcalls);
+                    requestWithToolCalls.addMessage(assistantRequestsToolcallsMessage);
+                    for (GPTToolCall toolCall : collectedToolcalls) {
+                        Optional<GPTTool> toolOption = request.getConfiguration().getTools().stream()
+                                .filter(tool -> tool.getName().equals(toolCall.getFunction().getName()))
+                                .findAny();
+                        if (!toolOption.isPresent()) { // should be impossible
+                            LOG.error("Bug: Tool {} not found in configuration", toolCall.getFunction().getName());
+                            GPTException error = new GPTException("Bug: Tool " + toolCall.getFunction().getName() + " not found in configuration");
+                            this.onError(error);
+                            throw error;
+                        }
+                        GPTTool tool = toolOption.get();
+                        String toolresult = tool.execute(toolCall.getFunction().getArguments(), getToolExecutionContext());
+                        if (null == toolresult) {
+                            toolresult = "";
+                        }
+                        LOG.debug("Tool {} with arguments {} returned {}", toolCall.getFunction().getName(),
+                                toolCall.getFunction().getArguments(),
+                                toolresult.substring(0, Math.min(100, toolresult.length())) + "...");
+                        GPTChatMessage toolResponseMessage = new GPTChatMessage(GPTMessageRole.TOOL, toolresult, null, toolCall.getId(), null);
+                        requestWithToolCalls.addMessage(toolResponseMessage);
+                    }
+                    streamingChatCompletionWithToolCalls(requestWithToolCalls, callback);
+                } else {
+                    super.onFinish(finishReason);
+                }
+            }
+        };
+        streamingChatCompletion(request, callbackWrapper);
+    }
+
     /**
      * Handle a single line of the streaming response.
      * <ul>
@@ -435,9 +497,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     protected void handleStreamingEvent(GPTCompletionCallback callback, long id, String line) {
         if (line.startsWith("data:")) {
             line = line.substring(MAXTRIES);
+            System.out.println(line);
             try {
                 if (" [DONE]".equals(line)) {
                     LOG.debug("Response {} from GPT received DONE", id);
+                    callback.close();
                     return;
                 }
                 ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
@@ -452,6 +516,12 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 if (content != null && !content.isEmpty()) {
                     LOG.trace("Response {} from GPT: {}", id, content);
                     callback.onNext(content);
+                }
+                if (choice.getDelta().getToolCalls() != null) {
+                    callback.toolDelta(ChatCompletionToolCall.toGptToolCallList(choice.getDelta().getToolCalls()));
+                }
+                if (choice.getFinishReason() != null) {
+                    LOG.trace("Response {} from GPT finished with reason {}", id, choice.getFinishReason());
                 }
                 GPTFinishReason finishReason = ChatCompletionResponse.FinishReason.toGPTFinishReason(choice.getFinishReason());
                 if (finishReason != null) {
@@ -618,9 +688,30 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             externalRequest.setMaxTokens(maxTokens);
         }
         externalRequest.setStream(Boolean.TRUE);
+        externalRequest.setTools(convertTools(request.getConfiguration()));
         String jsonRequest = gson.toJson(externalRequest);
         checkTokenCount(jsonRequest);
         return jsonRequest;
+    }
+
+    private List<ChatTool> convertTools(GPTConfiguration configuration) {
+        if (configuration == null || configuration.getTools() == null || configuration.getTools().isEmpty()) {
+            return null;
+        }
+        List<ChatTool> result = new ArrayList<>();
+        for (GPTTool tool : configuration.getTools()) {
+            ChatTool toolDescr = new ChatTool();
+            ChatCompletionFunctionDetails details = new ChatCompletionFunctionDetails();
+            details.setName(tool.getName());
+            details.setStrict(true);
+            Map declaration = gson.fromJson(tool.getToolDeclaration(), Map.class);
+            Map function = (Map) declaration.get("function");
+            details.setParameters(function.get("parameters"));
+            details.setDescription((String) function.get("description"));
+            toolDescr.setFunction(details);
+            result.add(toolDescr);
+        }
+        return result;
     }
 
     protected void checkEnabled() {

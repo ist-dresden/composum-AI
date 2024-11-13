@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
@@ -131,8 +132,22 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             if (translationParameters.rules != null) {
                 allRules.addAll(translationParameters.rules);
             }
+
             if (autoTranslateCaConfig.rules() != null) {
                 allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+            }
+            if (autoTranslateCaConfig.temperature() != null && !autoTranslateCaConfig.temperature().trim().isEmpty()) {
+                try {
+                    double temperature = Double.parseDouble(autoTranslateCaConfig.temperature());
+                    configuration = GPTConfiguration.ofTemperature(temperature).merge(configuration);
+                } catch (NumberFormatException e) {
+                    LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
+                }
+            }
+            if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
+                configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
+            } else if (autoTranslateCaConfig.preferStandardModel()) {
+                configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
             }
 
             // collect translation rules that apply
@@ -364,9 +379,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         Pattern pattern = Pattern.compile("href=\"" +
                 Pattern.quote(blueprintPath) + "(/[^\"]*)\"");
         String result = pattern.matcher(translatedValue).replaceAll("href=\"" + livecopyPath + "$1\"");
-        if (translatedValue.contains("href")) { // FIXME(hps,24/10/03) no checkin
-            LOG.trace("Remapping paths from {} to {} in {}", blueprintPath, livecopyPath, translatedValue);
-        }
         return result;
     }
 
@@ -392,6 +404,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
                     liveRelationship, targetWrapper.allGeneralKeys(), false);
         }
+        valueMap.put(AI_TRANSLATION_ERRORMARKER, Boolean.FALSE); // reset error marker if there was one.
     }
 
     /**
@@ -581,10 +594,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
 
-            if (StringUtils.contains(targetWrapper.getOriginalCopy(), "href")) { // FIXME(hps,24/10/03) no checkin
-                LOG.trace("Skipping {} in {} because it contains href", key, resource.getPath());
-            }
-
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.
             boolean isCancelled = isCancelled(resource, key, relationship);
@@ -621,6 +630,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             propertyToTranslate.propertyName = key;
             propertyToTranslate.isAlreadyCorrectlyTranslated = isAlreadyCorrectlyTranslated;
             propertiesToTranslate.add(propertyToTranslate);
+
+            if (targetWrapper.getOriginal().contains("THROWUPRIGHTNOW49e43jwsdsg")) {
+                throw new IllegalStateException("THROWUPRIGHTNOW49e43jwsdsg requested for " + sourceResource.getPath());
+            }
         }
         for (Resource child : resource.getChildren()) {
             if (!PATTERN_IGNORED_SUBNODE_NAMES.matcher(child.getName()).matches()) {

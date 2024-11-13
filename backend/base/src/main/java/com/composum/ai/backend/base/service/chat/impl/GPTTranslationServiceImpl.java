@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
 import com.composum.ai.backend.base.service.chat.GPTChatRequest;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
@@ -82,26 +83,29 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
             String text = m.group(2);
             String after = m.group(3);
             String response;
+
+            if (text == null || text.trim().isEmpty() || targetLanguage == null || targetLanguage.trim().isEmpty()) {
+                return "";
+            }
+
+            GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
+            String cacheKey = cacheKey(request);
+            String cachedResponse = getCachedResponse(cacheKey);
+            if (cachedResponse != null) {
+                LOG.debug("Returning cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cachedResponse);
+                return cachedResponse;
+            }
+
             if (config.fakeTranslation()) {
+                LOG.debug("Faking response to request {}", request);
                 response = fakeTranslation(text);
             } else {
-
-                if (text == null || text.trim().isEmpty() || targetLanguage == null || targetLanguage.trim().isEmpty()) {
-                    return "";
-                }
-
-                GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
-                String cacheKey = cacheKey(request);
-                String cachedResponse = getCachedResponse(cacheKey);
-                if (cachedResponse != null) {
-                    LOG.debug("Returning cached result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, cachedResponse);
-                    return cachedResponse;
-                }
                 response = chatCompletionService.getSingleChatCompletion(request);
-                response = response != null ? response.trim() : "";
-                LOG.trace("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
-                cacheResponse(cacheKey, request, response);
             }
+
+            response = response != null ? response.trim() : "";
+            LOG.trace("Returning result: {} -> {} - {} -> {}", sourceLanguage, targetLanguage, text, response);
+            cacheResponse(cacheKey, request, response);
 
             return before + response + after;
         } else {
@@ -118,13 +122,16 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 targetLanguage == null || targetLanguage.trim().isEmpty()) {
             throw new IllegalArgumentException("Empty text or languages");
         }
+
+        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
+
         if (config.fakeTranslation()) {
+            LOG.debug("Faking response to request {}", request);
             callback.onNext(fakeTranslation(text));
             callback.onFinish(GPTFinishReason.STOP);
             return;
         }
 
-        GPTChatRequest request = makeRequest(text, sourceLanguage, targetLanguage, configuration);
         // we don't do caching here since that'd be complicated and this is only for interactive use, not bulk use, anyway.
         chatCompletionService.streamingChatCompletion(request, callback);
     }
@@ -175,12 +182,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        List<String> translatedRealTexts;
-        if (config.fakeTranslation()) {
-            translatedRealTexts = realTexts.stream().map(GPTTranslationServiceImpl::fakeTranslation).collect(Collectors.toList());
-        } else {
-            translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(10), translationChecks);
-        }
+        List<String> translatedRealTexts = fragmentedTranslationDivideAndConquer(realTexts, targetLanguage, configuration, new AtomicInteger(10), translationChecks);
 
         Map<String, String> translatedRealTextsMap = new LinkedHashMap<>();
         for (int i = 0; i < realTexts.size(); i++) {
@@ -239,7 +241,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         }
 
         // The loss of context is a problem, but we go for graceful degradation here.
-        GPTConfiguration cleanedConfiguration = configuration.replaceContexts(null);
+        GPTConfiguration cleanedConfiguration = configuration != null ? configuration.replaceContexts(null) : configuration;
 
         int half = texts.size() / 2;
         List<String> firstHalf = texts.subList(0, half);

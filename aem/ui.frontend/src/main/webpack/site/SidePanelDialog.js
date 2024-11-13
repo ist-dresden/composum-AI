@@ -300,6 +300,7 @@ class SidePanelDialog {
 
     doneCallback(text, event) {
         if (this.debug) console.log("SidePanelDialog doneCallback", arguments);
+        this.addLinksToResponse();
         this.ensurePromptCount(this.$promptContainer.find('.composum-ai-response').length + 1);
         this.$promptContainer.find('.composum-ai-prompt:last').focus();
         console.log("SidePanelDialog doneCallback", arguments);
@@ -314,6 +315,35 @@ class SidePanelDialog {
         }
         this.setLoading(false);
         this.history.maybeSaveToHistory();
+    }
+
+    /** There might be content paths or URLs created by tools in the response. We turn them into clickable anchors. */
+    addLinksToResponse() {
+        const lastResponse = this.$promptContainer.find('.composum-ai-response:last');
+        try {
+            lastResponse.html(lastResponse.html().replace(/(https?:\/\/[^\s<]+|\/?content\/[\w\-\/]+(?:\.html)?)/g, function (match) {
+                if (match.startsWith('http://localhost:4502')) {
+                    match = match.replace('^http://localhost:4502', '');
+                }
+                if (match.startsWith('http://') || match.startsWith('https://')) {
+                    // Handle full URLs
+                    return '<a href="' + match + '" target="_blank">' + match + '</a>';
+                } else if (match.startsWith('/content/') || match.startsWith('content/')) {
+                    // Handle AEM content paths
+                    const editorPathMatch = location.pathname.match(/\/[^.]*\.[^/]*/);
+                    const editorPath = editorPathMatch ? editorPathMatch[0] : '';
+                    var cleanedMatch = match.replace(/\/jcr:content$/, '').replace(/\.html$/, '');
+                    if (cleanedMatch.startsWith('content')) {
+                        cleanedMatch = '/' + cleanedMatch;
+                     }
+                    return '<a href="' + editorPath + cleanedMatch + '.html" target="_blank">' + match + '</a>';
+                } else {
+                    return match;
+                }
+            }));
+        } catch (e) {
+            console.error("addLinksToResponse error for ", lastResponse.html(), e);
+        }
     }
 
     errorCallback(data) {

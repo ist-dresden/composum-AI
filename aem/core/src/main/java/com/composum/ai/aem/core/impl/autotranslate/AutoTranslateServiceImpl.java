@@ -1,6 +1,10 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -131,9 +136,10 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         TranslationRunImpl run = new TranslationRunImpl();
         run.id = "" + Math.abs(System.nanoTime());
         run.rootPath = path;
-        run.translationParameters = translationParameters;
+        run.translationParameters = translationParameters.clone();
+        run.translationParameters.autoSave = true; // otherwise it'll be just rolled back
         run.translatedPages = resources.stream()
-                .map(r -> new TranslationPageImpl(r.getPath()))
+                .map(r -> new TranslationPageImpl(r))
                 .collect(Collectors.toList());
         run.waituntil = System.currentTimeMillis() + 1000; // when triggered during live copy creation.
         run.status = TranslationStatus.QUEUED;
@@ -144,7 +150,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     protected List<Resource> collectPages(Resource root, int maxDepth) {
-        if (maxDepth < 0) {
+        if (maxDepth < 0 || root.getName().endsWith(AutoTranslateListModel.SUFFIX_TRANSLATECOPY)) {
             return Collections.emptyList();
         }
         if (root.getPath().contains("/jcr:content")) {
@@ -233,10 +239,21 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         resourceResolver.revert();
                         resourceResolver.refresh();
                         Resource resource = resourceResolver.getResource(page.resourcePath);
-                        if (resource != null) {
-                            AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
-                            page.stats = stats;
-                            page.status = stats.hasChanges() ? "done" : "unchanged";
+                        try {
+                            if (resource != null) {
+                                AutoPageTranslateService.Stats stats = pageTranslateService.translateLiveCopy(resource, translationParameters);
+                                page.stats = stats;
+                                page.status = stats.hasChanges() ? "done" : "unchanged";
+                            }
+                        } catch (GPTException.GPTUserNotificationException e) {
+                            throw e;
+                        } catch (Exception e) {
+                            resourceResolver.revert();
+                            resourceResolver.refresh();
+                            // mark translation as failed.
+                            resource.adaptTo(ModifiableValueMap.class).put(AI_TRANSLATION_ERRORMARKER, Calendar.getInstance());
+                            resourceResolver.commit();
+                            throw e;
                         }
                     } catch (GPTException.GPTUserNotificationException e) {
                         page.status = "cancelled - user notification";
@@ -273,11 +290,15 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     public static class TranslationPageImpl extends TranslationPage {
         String resourcePath;
 
-        public TranslationPageImpl(String resourcePath) {
-            this.resourcePath = resourcePath;
+        public TranslationPageImpl(Resource resource) {
+            this.resourcePath = resource.getPath();
             pagePath = ResourceUtil.getParent(resourcePath); // remove jcr:content
             this.status = "queued";
+            Resource translateCopyResource = resource.getParent().getParent()
+                    .getChild(resource.getParent().getName() + AutoTranslateListModel.SUFFIX_TRANSLATECOPY);
+            translateCopyPagePath = translateCopyResource != null ? translateCopyResource.getPath() : null;
         }
+
     }
 
 }

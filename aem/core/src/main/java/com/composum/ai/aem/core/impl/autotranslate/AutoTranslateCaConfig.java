@@ -9,8 +9,8 @@ import org.apache.sling.caconfig.annotation.Property;
 // is also added to Sling-ContextAware-Configuration-Classes bnd header in pom.xml
 public @interface AutoTranslateCaConfig {
 
-    @Property(label = "Additional Instructions", order = 1,
-            description = "Additional instructions for the automatic translation.")
+    @Property(label = "Additional Instructions (Deprecated)", order = 1,
+            description = "Additional instructions for the automatic translation. Deprecated, please use 'Rules for additional Instructions' instead - if you do not give a path regex nor a content pattern the instructions will be used everywhere.")
     String additionalInstructions();
 
     @Property(label = "Rules for additional Instructions", order = 2,
@@ -56,5 +56,17 @@ public @interface AutoTranslateCaConfig {
                             + "]"
             })
     String includeExistingTranslationsInRetranslation();
+
+    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 7,
+            description = "An optional comment about the configuration, for documentation purposes (not used by the translation).",
+            property = {
+                    "widgetType=textarea",
+                    "textareaRows=2"
+            })
+    String comment();
+
+    @Property(label = "Temperature", order = 8,
+            description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0")
+    String temperature();
 
 }

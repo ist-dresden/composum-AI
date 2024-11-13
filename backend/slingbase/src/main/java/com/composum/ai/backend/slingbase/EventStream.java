@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -48,6 +49,8 @@ public class EventStream implements GPTCompletionCallback {
     private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 250);
+
+    private SlingGPTExecutionContext context;
 
     public void setId(String id) {
         this.id = id;
@@ -163,4 +166,14 @@ public class EventStream implements GPTCompletionCallback {
         queue.add("");
         queue.add(QUEUEEND);
     }
+
+    public void setContext(SlingGPTExecutionContext context) {
+        this.context = context;
+    }
+
+    @Override
+    public SlingGPTExecutionContext getToolExecutionContext() {
+        return context;
+    }
+
 }
