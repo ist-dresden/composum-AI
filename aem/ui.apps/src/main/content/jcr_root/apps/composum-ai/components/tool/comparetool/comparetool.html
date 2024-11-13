@@ -30,6 +30,7 @@
             border: none;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"></script>
 </head>
 <body>
 <div class="iframe-container">
@@ -62,7 +63,7 @@
         leftLoaded = false;
         try {
             const url = new URL(this.value);
-            leftIframe.src = url.href;
+            leftIframe.src = DOMPurify.sanitize(url.href);
         } catch (e) {
             console.error('Invalid URL:', this.value);
         }
@@ -72,7 +73,7 @@
         rightLoaded = false;
         try {
             const url = new URL(this.value);
-            rightIframe.src = url.href;
+            rightIframe.src = DOMPurify.sanitize(url.href);
         } catch (e) {
             console.error('Invalid URL:', this.value);
         }
@@ -88,11 +89,11 @@
     const initialUrl1 = getParameterByName('url1');
     const initialUrl2 = getParameterByName('url2');
     if (initialUrl1) {
-        leftIframe.src = initialUrl1;
+        leftIframe.src = DOMPurify.sanitize(initialUrl1);
         leftField.value = initialUrl1;
     }
     if (initialUrl2) {
-        rightIframe.src = initialUrl2;
+        rightIframe.src = DOMPurify.sanitize(initialUrl2);
         rightField.value = initialUrl2;
     }
 
