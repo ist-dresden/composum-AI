@@ -23,6 +23,7 @@ import com.adobe.granite.workflow.exec.WorkflowProcess;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
 import com.day.cq.wcm.api.WCMException;
 import com.google.gson.Gson;
@@ -146,7 +147,8 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
             while (childIterator.hasNext()) {
                 Resource child = childIterator.next();
                 // skip jcr:content node since that has been translated already
-                if (!child.getPath().contains("/jcr:content")) {
+                if (!child.getPath().contains("/jcr:content") &&
+                        !child.getName().endsWith(AutoTranslateListModel.SUFFIX_TRANSLATECOPY)) {
                     translate(child, parms, depth + 1);
                 }
             }

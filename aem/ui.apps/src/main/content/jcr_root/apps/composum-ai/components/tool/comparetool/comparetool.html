@@ -77,8 +77,14 @@
     // Load the initial URLs if available in the parameters
     const initialUrl1 = getParameterByName('url1');
     const initialUrl2 = getParameterByName('url2');
-    if (initialUrl1) leftIframe.src = initialUrl1;
-    if (initialUrl2) rightIframe.src = initialUrl2;
+    if (initialUrl1) {
+        leftIframe.src = initialUrl1;
+        leftField.value = initialUrl1;
+    }
+    if (initialUrl2) {
+        rightIframe.src = initialUrl2;
+        rightField.value = initialUrl2;
+    }
 
     // Load event listeners for iframes
     leftIframe.addEventListener('load', function () {

@@ -150,7 +150,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
     }
 
     protected List<Resource> collectPages(Resource root, int maxDepth) {
-        if (maxDepth < 0) {
+        if (maxDepth < 0 || root.getName().endsWith(AutoTranslateListModel.SUFFIX_TRANSLATECOPY)) {
             return Collections.emptyList();
         }
         if (root.getPath().contains("/jcr:content")) {

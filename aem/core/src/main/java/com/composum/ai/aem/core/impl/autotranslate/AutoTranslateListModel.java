@@ -130,7 +130,8 @@ public class AutoTranslateListModel {
             }
             Page copy = pageManager.copy(originalPage, newPath, null, true, true, false);
             if (copy != null) {
-                liveRelationshipManager.endRelationship(copy.getContentResource(), false);
+                liveRelationshipManager.endRelationship(copy.getContentResource(), true);
+                liveRelationshipManager.detach(copy.getContentResource(), true); // end doesn't seem to work
                 LOG.info("Created copy of {} at {}", originalPage.getPath(), newPath);
                 resolver.commit();
             } else {
