@@ -1,0 +1,9 @@
+/* AIGenVersion(7389f8a6, osgiconfigurations.prompt-1.1, GetPageMarkdownAITool.java-27f9775d) */
+
+# Composum AI Tool Get Page Markdown (backend/slingbase)
+
+Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+
+| id                     | name                     | type   | default value | description                                                                 |
+|-----------------------|--------------------------|--------|---------------|-----------------------------------------------------------------------------|
+| allowedPathsRegex     | Allowed paths regex      | String | /content/.*   | A regex to match the paths that this tool is allowed to be used on. Default: /content/.* |

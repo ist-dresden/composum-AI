@@ -96,7 +96,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | 110 | Denied Page Templates | String[] |  | Regular expressions for denied page templates. Takes precedence over allowed page templates. |
 
 <a name="osgi.GPTPromptLibrary"></a>
-## Composum AI Prompt Library Configuration (slingbase)
+# Composum AI Prompt Library Configuration (backend/slingbase)
 
 Location for the prompt library for Composum AI. There can be multiple configurations, and the allowed services are aggregated.
 There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
@@ -112,13 +112,22 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 
 Configuration for the basic Composum AI Translation Service
 
-| id                | name                                               | type    | default value | description                                                                                                                                                                                                                       |
-|-------------------|----------------------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| disabled          | Disable the translation service                    | boolean | false         | Disable the translation service                                                                                                                                                                                                  |
-| fakeTranslation    | Fake translation                                   | boolean | false         | For quick and inexpensive testing, when you just want to check that the translation does something for e.g. a bulk of texts, you can enable this. The "translation" then just turns the text iNtO tHiS cApItAlIsAtIoN. Easy to spot, but probably doesn't destroy the content completely. |
-| diskCache         | Disk cache                                        | String  |               | Path to a directory where to cache the translations. If empty, no caching is done. If the path is relative, it is relative to the current working directory. If the path is absolute, it is used as is.                          |
-| temperature       | temperature                                       | String  |               | The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.                                                      |
-| seed              | seed                                              | String  |               | If specified, OpenAI will make a best effort to sample deterministically, such that repeated requests with the same seed and parameters should return the same result.                                                             |
+| id                | name                                                                 | type    | default value | description                                                                                                                                                                                                                       |
+|-------------------|----------------------------------------------------------------------|---------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| disabled          | Disable the translation service                                      | boolean | false         |  |
+| fakeTranslation    | Fake translation                                                     | boolean | false         | For quick and inexpensive testing, when you just want to check that the translation does something for e.g. a bulk of texts, you can enable this. The "translation" then just turns the text iNtO tHiS cApItAlIsAtIoN. Easy to spot, but probably doesn't destroy the content completely. |
+| diskCache         | Disk cache                                                          | String  |               | Path to a directory where to cache the translations. If empty, no caching is done. If the path is relative, it is relative to the current working directory. If the path is absolute, it is used as is.                          |
+| temperature       | temperature                                                         | String  |               | The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.                                                      |
+| seed              | seed                                                                | String  |               | If specified, OpenAI will make a best effort to sample deterministically, such that repeated requests with the same seed and parameters should return the same result.                                                             |
+
+<a name="osgi.GetPageMarkdownAITool"></a>
+# Composum AI Tool Get Page Markdown (backend/slingbase)
+
+Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+
+| id                     | name                     | type   | default value | description                                                                 |
+|-----------------------|--------------------------|--------|---------------|-----------------------------------------------------------------------------|
+| allowedPathsRegex     | Allowed paths regex      | String | /content/.*   | A regex to match the paths that this tool is allowed to be used on. Default: /content/.* |
 
 <a name="osgi.HtmlToApproximateMarkdownServicePlugin"></a>
 ## Composum AI Html To Approximate Markdown Service Plugin (slingbase)
@@ -140,6 +149,16 @@ CAUTION: the page content must be independent of the user, or you might leak one
 |----|------|------|---------------|-------------|
 | disabled | Disable | boolean | false | Disable the service |
 | cacheRootPath | Cache Root Path | String | | The JCR root path where the markdown is stored. If not set, no caching is done. Suggestion: /var/composum/ai-markdown-cache. To set this up you'll need to create this path in the repository, add a service user for this bundle's name (composum-ai-integration-backend-slingbase) and make the path writeable for this user. |
+
+<a name="osgi.SearchPageAITool"></a>
+## Composum AI Tool Search Pages (backend/slingbase)
+
+Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration the tool is not active.
+
+| id          | name          | type | default value | description                                                                                     |
+|-------------|---------------|------|---------------|-------------------------------------------------------------------------------------------------|
+| resultCount | Result count  | int  | 20            | The number of results to return. Default is 20.                                               |
+| siteLevel   | Site level    | int  | 2             | The number of path segments a site has, used to identify the site root. Default is 2, for sites like /content/my-site. |
 
 <a name="osgi.SlingCaConfigPluginImpl"></a>
 ### Composum AI SlingCaConfig Plugin (slingbase)

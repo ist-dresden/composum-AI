@@ -1,0 +1,10 @@
+/* AIGenVersion(2d42c59f, osgiconfigurations.prompt-1.1, SearchPageAITool.java-1cf68776) */
+
+## Composum AI Tool Search Pages (backend/slingbase)
+
+Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration the tool is not active.
+
+| id          | name          | type | default value | description                                                                                     |
+|-------------|---------------|------|---------------|-------------------------------------------------------------------------------------------------|
+| resultCount | Result count  | int  | 20            | The number of results to return. Default is 20.                                               |
+| siteLevel   | Site level    | int  | 2             | The number of path segments a site has, used to identify the site root. Default is 2, for sites like /content/my-site. |

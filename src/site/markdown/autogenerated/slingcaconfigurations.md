@@ -15,6 +15,8 @@ Configures rollout details for automatic translation.
 | preferStandardModel                        | Prefer Standard Model                          | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.               |
 | includeFullPageInRetranslation            | Include Full Page during Retranslation        | String  |               | If true we do not only provide changed texts to the AI during re-translating a page with some changes, but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration. |
 | includeExistingTranslationsInRetranslation | Include Existing Translations in Retranslation | String  |               | If true, when retranslating a page with some changes we provide the existing translations of that page to the AI as well as additional context with examples. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration. |
+| comment                                     | Optional Comment (for documentation, not used by AI) | String  |               | An optional comment about the configuration, for documentation purposes (not used by the translation).                                                                                                                                              |
+| temperature                                 | Temperature                                       | String  |               | Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0.                                                                                                                                  |
 
 <a name="slingca.AutoTranslateRuleConfig"></a>
 ## AutoTranslateRuleConfig (aem/core)
@@ -26,6 +28,7 @@ A rule to be added to the Composum AI Automatic Translation Configuration with t
 | pathRegex             | Path Regex          | String |               | A regular expression matching the absolute path to the page. E.g. .*/home/products/.* will match all pages under .../home/products/. If empty every page will match if the content pattern condition is met.                     |
 | contentPattern        | Content Pattern     | String |               | A word or phrase that must be present in the content of the page for the rule to match. E.g. 'Product' will match all pages that contain the word 'Product', case-insensitive. Spaces will also match any whitespace. If empty every page will match if the path condition is met. |
 | additionalInstructions | Additional Instructions | String |               | Additional instructions for the automatic translation in case this rule matches.                                                                                                                                                 |
+| comment               | Optional Comment (for documentation, not used by AI) | String |               | An optional comment for the rule, for documentation purposes (not used by the translation).                                                                                                                                                                                                                                                                     |
 
 <a name="slingca.GPTPermissionConfiguration"></a>
 ## Composum AI Permission Configuration (slingbase)
@@ -49,7 +52,7 @@ If configured, Sling Context Aware Configuration takes precedence over OSGI conf
 | deniedPageTemplates | Denied Page Templates  | String[] | -             | Regular expressions for denied page templates. Takes precedence over allowed page templates.                      |
 
 <a name="slingca.GPTPromptLibrary"></a>
-### Composum AI Prompt Library Configuration (slingbase)
+## Composum AI Prompt Library Configuration (backend/slingbase)
 
 Location for the prompt library for Composum AI. There can be multiple configurations, and the allowed services are aggregated.
 There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.

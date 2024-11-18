@@ -1,4 +1,4 @@
-/* AIGenVersion(6c888b8d, slingcaconfigurations.prompt-1.1, AutoTranslateCaConfig.java-65cc1b66) */
+/* AIGenVersion(159dd8c8, slingcaconfigurations.prompt-1.1, AutoTranslateCaConfig.java-57e32528) */
 
 ## Composum AI Automatic Translation Configuration (aem/core)
 
@@ -12,3 +12,5 @@ Configures rollout details for automatic translation.
 | preferStandardModel                        | Prefer Standard Model                          | boolean |               | If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.               |
 | includeFullPageInRetranslation            | Include Full Page during Retranslation        | String  |               | If true we do not only provide changed texts to the AI during re-translating a page with some changes, but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration. |
 | includeExistingTranslationsInRetranslation | Include Existing Translations in Retranslation | String  |               | If true, when retranslating a page with some changes we provide the existing translations of that page to the AI as well as additional context with examples. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration. |
+| comment                                     | Optional Comment (for documentation, not used by AI) | String  |               | An optional comment about the configuration, for documentation purposes (not used by the translation).                                                                                                                                              |
+| temperature                                 | Temperature                                       | String  |               | Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0.                                                                                                                                  |

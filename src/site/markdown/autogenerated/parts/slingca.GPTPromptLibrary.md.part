@@ -1,6 +1,6 @@
-/* AIGenVersion(72f699ba, slingcaconfigurations.prompt-1.1, GPTPromptLibrary.java-52793081) */
+/* AIGenVersion(533c73bb, slingcaconfigurations.prompt-1.1, GPTPromptLibrary.java-0fdec9fc) */
 
-### Composum AI Prompt Library Configuration (slingbase)
+## Composum AI Prompt Library Configuration (backend/slingbase)
 
 Location for the prompt library for Composum AI. There can be multiple configurations, and the allowed services are aggregated.
 There is a fallback configuration that is used if no other configuration is found, and a factory for multiple configurations which override the fallback configuration if present.
