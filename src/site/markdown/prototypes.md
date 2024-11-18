@@ -47,3 +47,15 @@ Since it'll likely take some work to get the prompts right, that will likely onl
 number of very similar pages to create about different topics / products etc.
 
 For more details see the [AI Page Templating](aiPageTemplating.md).
+
+## Tools for the AI
+
+OpenAI provides [function calling](https://platform.openai.com/docs/guides/function-calling) so that the AI can trigger
+operations on it's own. There is an interface 
+[AITool](https://github.com/ist-dresden/composum-AI/blob/develop/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/AITool.java)
+that can be implemented by OSGI services to provide such operations. There are two basic services
+[SearchPageAITool](https://github.com/ist-dresden/composum-AI/blob/develop/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/impl/SearchPageAITool.java)
+that can search for pages if there is a lucene index for page content defined, and a
+[GetPageMarkdownAITool](https://github.com/ist-dresden/composum-AI/blob/develop/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/impl/GetPageMarkdownAITool.java)
+with which the AI can read the markdown of a page given it's path. Of course you are invited to get creative and create
+your own tools!
