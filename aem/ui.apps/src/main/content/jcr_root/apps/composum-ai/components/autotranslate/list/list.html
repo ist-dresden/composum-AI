@@ -134,7 +134,7 @@
             event.preventDefault();
             const form = $(this);
             const formData = form.serializeArray().reduce((obj, item) => {
-                obj[item.name] = item.value;
+                obj[item.name] = item.value?.trim();
                 return obj;
             }, {});
             form.find('input[type="checkbox"]').each(function () {
@@ -156,6 +156,10 @@
             form.find('input[type="checkbox"]').each(function () {
                 const field = $(this);
                 field.prop('checked', formData[field.attr('name')] || false);
+                // reset checkboxes "recursive" and "debugaddinstructions" and copy to false
+                if (field.attr('name') === 'recursive' || field.attr('name') === 'debugaddinstructions' || field.attr('name') === 'copyOriginalPage') {
+                    field.prop('checked', false);
+                }
             });
         });
 
