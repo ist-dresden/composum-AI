@@ -145,6 +145,15 @@
             form[0].submit();
         });
 
+        // reset 'recursive' if 'copyOriginalPage' is checked or debugaddinstructions is checked
+        $('coral-checkbox[name="copyOriginalPage"], coral-checkbox[name="debugaddinstructions"]').on('change', function () {
+            const copyOriginalPage = $('coral-checkbox[name="copyOriginalPage"]').prop('checked');
+            const debugaddinstructions = $('coral-checkbox[name="debugaddinstructions"]').prop('checked');
+            if (copyOriginalPage || debugaddinstructions) {
+                $('coral-checkbox[name="recursive"]').prop('checked', false);
+            }
+        });
+
         // restore all form data on page load
         $('form').each(function () {
             const form = $(this);

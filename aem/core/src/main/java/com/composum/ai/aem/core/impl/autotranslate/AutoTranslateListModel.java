@@ -101,7 +101,7 @@ public class AutoTranslateListModel {
             parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
             parms.breakInheritance = breakInheritance;
-            if (copyOriginalPage) {
+            if (copyOriginalPage && !debugaddinstructions) {
                 copyOriginalPage(request, path);
             }
             run = autoTranslateService.startTranslation(request.getResourceResolver(), path, parms);
