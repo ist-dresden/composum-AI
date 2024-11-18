@@ -1,7 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -257,7 +256,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         }
                     } catch (GPTException.GPTUserNotificationException e) {
                         page.status = "cancelled - user notification";
-                        this.messages.append(e.getMessage());
+                        this.messages.append(e.getMessage()).append("\n\n");
                         LOG.info("User notification during translation of " + page.pagePath + ": " + e.getMessage());
                         hasErrors = true; // not quite true but we don't want an 'OK, translation done'
                     } catch (Exception e) {
