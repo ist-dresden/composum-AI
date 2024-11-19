@@ -1,4 +1,4 @@
 com.composum.ai.aem.core.impl
+com.composum.ai.aem.core.impl.autotranslate.workflow
 com.composum.ai.aem.core.impl.autotranslate
 com.composum.ai.aem.core.impl.autotranslate.rollout
-com.composum.ai.aem.core.impl.autotranslate.workflow
