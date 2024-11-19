@@ -59,3 +59,11 @@ that can search for pages if there is a lucene index for page content defined, a
 [GetPageMarkdownAITool](https://github.com/ist-dresden/composum-AI/blob/develop/backend/slingbase/src/main/java/com/composum/ai/backend/slingbase/experimential/impl/GetPageMarkdownAITool.java)
 with which the AI can read the markdown of a page given it's path. Of course you are invited to get creative and create
 your own tools!
+
+## AI Translation: compare with original
+
+There is a simple tool that lets you compare the translation of a page with the original by showing it side by side.
+It has the URL /apps/composum-ai/components/tool/comparetool.html and either parameters url1 and url2 for
+relative URLs to display side by side or parameter / suffix path that will display that page on the right side
+with the live copy source at the left side. There is a bookmarklet at the bottom that can be dragged into the
+bookmarks bar that will display this tool from the editor etc.

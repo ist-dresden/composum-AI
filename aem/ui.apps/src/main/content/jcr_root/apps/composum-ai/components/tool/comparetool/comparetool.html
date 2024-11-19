@@ -8,12 +8,18 @@
             display: flex;
             margin: 0;
             height: 100vh;
+            flex-direction: column;
+        }
+
+        .iframe-wrapper {
+            display: flex;
+            width: 100%;
+            height: calc(100% - 24px);
+            flex-direction: row;
         }
 
         .iframe-container {
             width: 50%;
-            display: flex;
-            flex-direction: column;
         }
 
         .url-field {
@@ -26,23 +32,40 @@
 
         iframe {
             width: 100%;
-            height: calc(100% - 40px); /* Adjust based on input field height */
+            height: calc(100% - 32px);
             border: none;
         }
+
+        p {
+            margin: 0;
+            padding-top: 8px;
+            height: 24px;
+            text-align: center;
+            font-size: 16px;
+            color: grey;
+        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js" integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js"
+            integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body data-url1="${model.url1}" data-url2="${model.url2}">
-<div class="iframe-container">
-    <input class="url-field" type="text" placeholder="Enter URL for left iframe"
-           title="Enter the URL to load in the left iframe.">
-    <iframe id="leftIframe" src="" title="Left iframe for comparison."></iframe>
+<div class="iframe-wrapper">
+    <div class="iframe-container">
+        <input class="url-field" type="text" placeholder="Enter URL for left iframe"
+               title="Enter the URL to load in the left iframe.">
+        <iframe id="leftIframe" src="" title="Left iframe for comparison."></iframe>
+    </div>
+    <div class="iframe-container">
+        <input class="url-field" type="text" placeholder="Enter URL for right iframe"
+               title="Enter the URL to load in the right iframe.">
+        <iframe id="rightIframe" src="" title="Right iframe for comparison."></iframe>
+    </div>
 </div>
-<div class="iframe-container">
-    <input class="url-field" type="text" placeholder="Enter URL for right iframe"
-           title="Enter the URL to load in the right iframe.">
-    <iframe id="rightIframe" src="" title="Right iframe for comparison."></iframe>
-</div>
+<p>
+    Drag this bookmarklet to your bookmark bar to easily open this UI with the path from any page or editor:
+    <a id="bookmarklet">Translation Compare Tool</a>
+</p>
 <script>
     // Get references to the iframes and URL input fields
     const leftIframe = document.getElementById('leftIframe');
@@ -155,6 +178,18 @@
         const scrollPercent = rightWindow.scrollY / (rightWindow.document.documentElement.scrollHeight - rightWindow.innerHeight);
         leftWindow.scrollTo(0, scrollPercent * (leftWindow.document.documentElement.scrollHeight - leftWindow.innerHeight));
     }
+
+    // e.g. /editor.html/content/gfps/com/cac.html
+    // set url to /apps/composum-ai/components/tool/comparetool.html/content/gfps/com/cac
+    function replaceUrlWithPath() {
+        const path = window.location.pathname.match(/\/content[^?]*[?]|\/content[^.]*/)[0];
+        const url = window.location.protocol + '//' + window.location.host +
+            '/apps/composum-ai/components/tool/comparetool.html' + path;
+        window.open(url, '_blank');
+    }
+
+    const bookmarklet = 'javascript:' + replaceUrlWithPath.toString() + 'replaceUrlWithPath();';
+    document.getElementById('bookmarklet').setAttribute('href', bookmarklet);
 </script>
 </body>
 </html>
