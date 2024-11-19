@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.CompareModel">
 <head>
     <meta charset="UTF-8">
     <title>Compare Tool</title>
@@ -32,7 +32,7 @@
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js" integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
-<body>
+<body data-url1="${model.url1}" data-url2="${model.url2}">
 <div class="iframe-container">
     <input class="url-field" type="text" placeholder="Enter URL for left iframe"
            title="Enter the URL to load in the left iframe.">
@@ -85,9 +85,9 @@
         return url.searchParams.get(name);
     }
 
-    // Load the initial URLs if available in the parameters
-    const initialUrl1 = getParameterByName('url1');
-    const initialUrl2 = getParameterByName('url2');
+    // Load the initial URLs if available in the parameters or in the data-url* attributes on the body
+    var initialUrl1 = getParameterByName('url1') || document.body.getAttribute('data-url1');
+    var initialUrl2 = getParameterByName('url2') || document.body.getAttribute('data-url2');
     if (initialUrl1) {
         leftIframe.src = DOMPurify.sanitize(initialUrl1);
         leftField.value = initialUrl1;
