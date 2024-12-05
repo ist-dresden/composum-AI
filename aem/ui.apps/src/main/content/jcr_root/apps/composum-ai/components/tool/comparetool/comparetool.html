@@ -84,22 +84,12 @@
     // Event listeners for URL input fields
     leftField.addEventListener('change', function () {
         leftLoaded = false;
-        try {
-            const url = new URL(this.value);
-            leftIframe.src = DOMPurify.sanitize(url.href);
-        } catch (e) {
-            console.error('Invalid URL:', this.value);
-        }
+        leftIframe.src = DOMPurify.sanitize(url.href);
     });
 
     rightField.addEventListener('change', function () {
         rightLoaded = false;
-        try {
-            const url = new URL(this.value);
-            rightIframe.src = DOMPurify.sanitize(url.href);
-        } catch (e) {
-            console.error('Invalid URL:', this.value);
-        }
+        rightIframe.src = DOMPurify.sanitize(this.value);
     });
 
     // Function to parse URL parameters
