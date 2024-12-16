@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipException;
 
+import javax.annotation.Nonnull;
+
 import org.apache.sling.api.resource.Resource;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
@@ -32,8 +34,23 @@ public class TranslationRuleExtractor {
 
     private static final Logger LOG = LoggerFactory.getLogger(TranslationRuleExtractor.class);
 
-    public Map<String, String> extractRules(Resource resource, int sheetIndexBase1, int startRowBase1,
-                                            String keyColumnStr, String valueColumnStr) throws IOException {
+    /**
+     * Extracts translation rules from a spreadsheet.
+     *
+     * @param resource        the resource containing the spreadsheet (either a file resource or an AEM asset)
+     * @param sheetIndexBase1 the index of the sheet in the XLS file containing the translation table. The first sheet is number 1.
+     *                        Ignored for CSV files.
+     * @param startRowBase1   the row in the sheet where the translation table starts. The first row is 1, following Excel conventions.
+     * @param keyColumnStr    the column in the sheet containing the keys (terms to be translated).
+     *                        The first column is A (following Excel conventions) or 1.
+     * @param valueColumnStr  the column in the sheet containing the values (translations).
+     *                        The first column is A (following Excel conventions) or 1.
+     * @return a map of key-value pairs
+     * @throws IOException if the file cannot be read, in particular it'll be a {@link ZipException} if it's not a valid xlsx file, e.g.
+     */
+    @Nonnull
+    public Map<String, String> extractRules(@Nonnull Resource resource, int sheetIndexBase1, int startRowBase1,
+                                            @Nonnull String keyColumnStr, @Nonnull String valueColumnStr) throws IOException {
         if (resource == null) {
             throw new IllegalArgumentException("Could not find resource.");
         }
@@ -43,8 +60,8 @@ public class TranslationRuleExtractor {
         if (startRowBase1 < 1) {
             throw new IllegalArgumentException("Start row must be at least 1.");
         }
-        int keyColumn = keyColumnStr.toUpperCase().charAt(0) - 'A';
-        int valueColumn = valueColumnStr.toUpperCase().charAt(0) - 'A';
+        int keyColumn = parseColumnName(keyColumnStr);
+        int valueColumn = parseColumnName(valueColumnStr);
         if (resource.getPath().contains(".csv")) {
             return extractRulesFromCsv(resource, sheetIndexBase1 - 1, startRowBase1 - 1, keyColumn, valueColumn);
         } else {
@@ -125,4 +142,26 @@ public class TranslationRuleExtractor {
                 .map(Rendition::getStream)
                 .orElseThrow(NoSuchElementException::new);
     }
+
+    protected int parseColumnName(String columnName) {
+        if (columnName == null || columnName.isEmpty()) {
+            throw new IllegalArgumentException("Empty column name");
+        }
+        if (columnName.matches("\\d+")) {
+            return Integer.parseInt(columnName) - 1;
+        }
+        int column = 0;
+        for (int i = 0; i < columnName.length(); i++) {
+            char c = columnName.charAt(i);
+            if (c >= 'A' && c <= 'Z') {
+                column = column * 26 + c - 'A' + 1;
+            } else if (c >= 'a' && c <= 'z') {
+                column = column * 26 + c - 'a' + 1;
+            } else {
+                throw new IllegalArgumentException("Invalid column name: " + columnName);
+            }
+        }
+        return column - 1;
+    }
+
 }

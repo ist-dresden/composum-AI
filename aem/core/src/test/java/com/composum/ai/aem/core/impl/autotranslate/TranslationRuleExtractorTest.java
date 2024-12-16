@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -55,6 +56,32 @@ public class TranslationRuleExtractorTest extends TestCase {
             }
         };
         return extractor;
+    }
+
+
+    @Test
+    public void testParseColumnName() {
+        TranslationRuleExtractor extractor = new TranslationRuleExtractor();
+        // Test valid column names
+        assertEquals(0, extractor.parseColumnName("A"));
+        assertEquals(1, extractor.parseColumnName("B"));
+        assertEquals(25, extractor.parseColumnName("Z"));
+        assertEquals(26, extractor.parseColumnName("AA"));
+        assertEquals(27, extractor.parseColumnName("AB"));
+        assertEquals(701, extractor.parseColumnName("ZZ"));
+        assertEquals(702, extractor.parseColumnName("AAA"));
+
+        // Test valid numeric column names
+        assertEquals(0, extractor.parseColumnName("1"));
+        assertEquals(1, extractor.parseColumnName("2"));
+        assertEquals(25, extractor.parseColumnName("26"));
+
+        // Test invalid column names
+        assertThrows(IllegalArgumentException.class, () -> extractor.parseColumnName(""));
+        assertThrows(IllegalArgumentException.class, () -> extractor.parseColumnName(null));
+        assertThrows(IllegalArgumentException.class, () -> extractor.parseColumnName("1A"));
+        assertThrows(IllegalArgumentException.class, () -> extractor.parseColumnName("A1"));
+        assertThrows(IllegalArgumentException.class, () -> extractor.parseColumnName("!"));
     }
 
 }
