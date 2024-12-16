@@ -7,6 +7,9 @@ import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServi
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +74,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*|sling:members");
 
     public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS";
+
+    protected final String DEFAULT_TRANSLATION_RULE_PATTERN = "Translate '{0}' to '{1}'.";
 
     @Reference
     protected GPTTranslationService translationService;
@@ -259,10 +264,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
         }
 
-        // collect translation rules that apply
+        allRules.addAll(collectTranslationTables(autoTranslateCaConfig, resource));
+
+        // filter translation rules that apply
         List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
         collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
-        String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
+        String translationRules = collectApplicableTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
         if (translationRules != null) {
             additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
         }
@@ -667,7 +674,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return false;
     }
 
-    protected String collectTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
+    protected String collectApplicableTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
         if (rules == null) {
             return null;
         }
@@ -704,6 +711,48 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             LOG.error("Error in pattern syntax for rule {} applicable to path {}", rule, path, e);
             return false;
         }
+    }
+
+    protected List<AutoTranslateRuleConfig> collectTranslationTables(
+            AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull Resource resource) {
+        List<AutoTranslateRuleConfig> rules = new ArrayList<>();
+        MessageFormat messageFormat = new MessageFormat(
+                autoTranslateCaConfig.translationTableRuleText() != null
+                        && !autoTranslateCaConfig.translationTableRuleText().trim().isEmpty() ?
+                        autoTranslateCaConfig.translationTableRuleText() :
+                        DEFAULT_TRANSLATION_RULE_PATTERN);
+        if (autoTranslateCaConfig != null && autoTranslateCaConfig.translationTables() != null) {
+            for (AutoTranslateTranslationTableConfig tableConfig : autoTranslateCaConfig.translationTables()) {
+                if (tableConfig.path() == null || tableConfig.path().isEmpty()) {
+                    continue;
+                }
+                Map<String, String> rawRules;
+                try {
+                    rawRules = getRawRules(tableConfig, resource);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Could not read translation table " + tableConfig.path() +
+                            " configured at " + resource.getPath() + " because of " + e, e);
+                }
+                for (Map.Entry<String, String> entry : rawRules.entrySet()) {
+                    String instructions = messageFormat.format(new Object[]{entry.getKey(), entry.getValue()});
+                    AutoTranslateRuleConfig rule = new AutoTranslateRuleConfigContentRule(entry.getKey(), instructions);
+                    rules.add(rule);
+                }
+            }
+        }
+        return rules;
+    }
+
+    protected Map<String, String> getRawRules(AutoTranslateTranslationTableConfig tableConfig, Resource resource) throws IOException {
+        Resource tableResource = resource.getResourceResolver().getResource(tableConfig.path());
+        if (tableResource == null) {
+            throw new IllegalArgumentException("Translation table not found: " + tableConfig.path() +
+                    " configured at " + resource.getPath());
+        }
+        Map<String, String> rules = new TranslationRuleExtractor().extractRules(tableResource,
+                tableConfig.sheetIndex(), tableConfig.startRow(), tableConfig.keyColumn(), tableConfig.valueColumn());
+        LOG.debug("Extracted rules from {} : {}", tableResource.getPath(), rules);
+        return rules;
     }
 
     /**
@@ -773,6 +822,53 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 sb.append(" (already translated)");
             }
             return sb.toString();
+        }
+    }
+
+
+    /**
+     * Simple implementation of this for content translation rules.
+     */
+    protected static class AutoTranslateRuleConfigContentRule implements AutoTranslateRuleConfig {
+        private String contentPattern;
+        private String additionalInstructions;
+
+        public AutoTranslateRuleConfigContentRule(String contentPattern, String additionalInstructions) {
+            this.contentPattern = contentPattern;
+            this.additionalInstructions = additionalInstructions;
+        }
+
+        @Override
+        public String pathRegex() {
+            return null;
+        }
+
+        @Override
+        public String contentPattern() {
+            return contentPattern;
+        }
+
+        @Override
+        public String additionalInstructions() {
+            return additionalInstructions;
+        }
+
+        @Override
+        public String comment() {
+            return null;
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return AutoTranslateRuleConfig.class;
+        }
+
+        @Override
+        public String toString() {
+            return "AutoTranslateRuleConfigContentRule{" +
+                    "contentPattern='" + contentPattern + '\'' +
+                    ", additionalInstructions='" + additionalInstructions + '\'' +
+                    '}';
         }
     }
 

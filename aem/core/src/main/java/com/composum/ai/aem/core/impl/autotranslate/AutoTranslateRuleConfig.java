@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import java.lang.annotation.Annotation;
+
 import org.apache.sling.caconfig.annotation.Property;
 
 /**
