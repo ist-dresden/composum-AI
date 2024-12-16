@@ -120,44 +120,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 return stats;
             }
 
-            GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
             ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
             AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-
-            String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
-            if (StringUtils.isNotBlank(autoTranslateCaConfig.additionalInstructions())) {
-                additionalInstructions = additionalInstructions + "\n\n" + autoTranslateCaConfig.additionalInstructions().trim();
-            }
-            List<AutoTranslateRuleConfig> allRules = new ArrayList<>();
-            if (translationParameters.rules != null) {
-                allRules.addAll(translationParameters.rules);
-            }
-
-            if (autoTranslateCaConfig.rules() != null) {
-                allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
-            }
-            if (autoTranslateCaConfig.temperature() != null && !autoTranslateCaConfig.temperature().trim().isEmpty()) {
-                try {
-                    double temperature = Double.parseDouble(autoTranslateCaConfig.temperature());
-                    configuration = GPTConfiguration.ofTemperature(temperature).merge(configuration);
-                } catch (NumberFormatException e) {
-                    LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
-                }
-            }
-            if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
-                configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
-            } else if (autoTranslateCaConfig.preferStandardModel()) {
-                configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
-            }
-
-            // collect translation rules that apply
-            List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
-            collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
-            String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
-            if (translationRules != null) {
-                additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
-            }
-            additionalInstructions = StringUtils.trimToNull(additionalInstructions);
+            GPTConfiguration configuration = determineConfiguration(resource, autoTranslateCaConfig, translationParameters, stats);
+            String additionalInstructions = configuration.getAdditionalInstructions();
 
             String previousAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
             boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, previousAdditionalInstructions);
@@ -165,7 +131,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             if (additionalInstructionsChanged) {
                 LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
             }
-            configuration = GPTConfiguration.ofAdditionalInstructions(additionalInstructions).merge(configuration);
 
             List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
             boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
@@ -184,7 +149,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
                     throw new GPTException.GPTUserNotificationException(
                             "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):\n\n" +
-                            additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
+                                    additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
                 }
 
                 configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);
@@ -262,6 +227,47 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         } finally {
             runningTranslations.remove(resource.getPath());
         }
+    }
+
+    protected GPTConfiguration determineConfiguration(@Nonnull Resource resource, AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull AutoTranslateService.TranslationParameters translationParameters, Stats stats) throws WCMException {
+        GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
+
+        if (autoTranslateCaConfig.temperature() != null && !autoTranslateCaConfig.temperature().trim().isEmpty()) {
+            try {
+                double temperature = Double.parseDouble(autoTranslateCaConfig.temperature());
+                configuration = GPTConfiguration.ofTemperature(temperature).merge(configuration);
+            } catch (NumberFormatException e) {
+                LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
+            }
+        }
+        if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
+            configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
+        } else if (autoTranslateCaConfig.preferStandardModel()) {
+            configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
+        }
+
+        String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
+        if (StringUtils.isNotBlank(autoTranslateCaConfig.additionalInstructions())) {
+            additionalInstructions = additionalInstructions + "\n\n" + autoTranslateCaConfig.additionalInstructions().trim();
+        }
+        List<AutoTranslateRuleConfig> allRules = new ArrayList<>();
+        if (translationParameters.rules != null) {
+            allRules.addAll(translationParameters.rules);
+        }
+
+        if (autoTranslateCaConfig.rules() != null) {
+            allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+        }
+
+        // collect translation rules that apply
+        List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
+        collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
+        String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
+        if (translationRules != null) {
+            additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
+        }
+        additionalInstructions = StringUtils.trimToNull(additionalInstructions);
+        return GPTConfiguration.ofAdditionalInstructions(additionalInstructions).merge(configuration);
     }
 
     /**
