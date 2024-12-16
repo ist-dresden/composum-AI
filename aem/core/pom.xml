@@ -172,5 +172,11 @@ Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotran
             <version>1.4.4</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.dhatim/fastexcel-reader -->
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel-reader</artifactId>
+            <version>0.18.4</version>
+        </dependency>
     </dependencies>
 </project>

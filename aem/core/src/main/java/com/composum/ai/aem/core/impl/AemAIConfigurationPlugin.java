@@ -99,7 +99,7 @@ public class AemAIConfigurationPlugin implements AIConfigurationPlugin {
                     .filter(StringUtils::isNotBlank)
                     .findFirst()
                     .orElse(null);
-            if (StringUtils.isNoneBlank(title, text)) {
+            if (StringUtils.isNotBlank(title) && StringUtils.isNotBlank(text)) {
                 prompts.put(text, title);
             }
         }
