@@ -84,7 +84,7 @@
     // Event listeners for URL input fields
     leftField.addEventListener('change', function () {
         leftLoaded = false;
-        leftIframe.src = DOMPurify.sanitize(url.href);
+        leftIframe.src = DOMPurify.sanitize(this.value);
     });
 
     rightField.addEventListener('change', function () {
