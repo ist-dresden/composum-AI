@@ -716,11 +716,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected List<AutoTranslateRuleConfig> collectTranslationTables(
             AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull Resource resource) {
         List<AutoTranslateRuleConfig> rules = new ArrayList<>();
-        MessageFormat messageFormat = new MessageFormat(
-                autoTranslateCaConfig.translationTableRuleText() != null
+        String translationInstructionTemplate = autoTranslateCaConfig.translationTableRuleText() != null
                         && !autoTranslateCaConfig.translationTableRuleText().trim().isEmpty() ?
                         autoTranslateCaConfig.translationTableRuleText() :
-                        DEFAULT_TRANSLATION_RULE_PATTERN);
+                        DEFAULT_TRANSLATION_RULE_PATTERN;
         if (autoTranslateCaConfig != null && autoTranslateCaConfig.translationTables() != null) {
             for (AutoTranslateTranslationTableConfig tableConfig : autoTranslateCaConfig.translationTables()) {
                 if (tableConfig.path() == null || tableConfig.path().isEmpty()) {
@@ -734,7 +733,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                             " configured at " + resource.getPath() + " because of " + e, e);
                 }
                 for (Map.Entry<String, String> entry : rawRules.entrySet()) {
-                    String instructions = messageFormat.format(new Object[]{entry.getKey(), entry.getValue()});
+                    // we don't use MessageFormat because of complexities around ' : single quotes would have to be doubled.
+                    String instructions = translationInstructionTemplate
+                            .replace("{0}", entry.getKey())
+                            .replace("{1}", entry.getValue());
                     AutoTranslateRuleConfig rule = new AutoTranslateRuleConfigContentRule(entry.getKey(), instructions);
                     rules.add(rule);
                 }
@@ -865,9 +867,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
         @Override
         public String toString() {
-            return "AutoTranslateRuleConfigContentRule{" +
-                    "contentPattern='" + contentPattern + '\'' +
-                    ", additionalInstructions='" + additionalInstructions + '\'' +
+            return "TranslationRule{" +
+                    "contentPattern=\"" + contentPattern + '"' +
+                    ", additionalInstructions=\"" + additionalInstructions + '"' +
                     '}';
         }
     }

@@ -33,7 +33,7 @@ public @interface AutoTranslateTranslationTableConfig {
                     "The first column is A (following Excel conventions) or 1.")
     String valueColumn();
 
-    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 4,
+    @Property(label = "Optional Notes (for your documentation, not used by the application)", order = 6,
             description = "An optional comment for the rule, for documentation purposes (not used by the translation).",
             property = {
                     "widgetType=textarea",

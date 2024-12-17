@@ -18,7 +18,7 @@ public @interface AutoTranslateCaConfig {
     AutoTranslateRuleConfig[] rules() default {};
 
     @Property(label = "Translation Tables", order = 3,
-            description = "Translation tables for the automatic translation - XLS or CSV files of terms and their translations.")
+            description = "Translation tables for the automatic translation - XLS or CSV files of terms and their translations. This is an alternative to translation rules if there are many 'Translate X to Y' rules.")
     AutoTranslateTranslationTableConfig[] translationTables() default {};
 
     @Property(label = "Prefer High Intelligence Model", order = 10,
@@ -61,7 +61,7 @@ public @interface AutoTranslateCaConfig {
             })
     String includeExistingTranslationsInRetranslation();
 
-    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 100,
+    @Property(label = "Optional Notes (for your documentation, not used by the application)", order = 100,
             description = "An optional comment about the configuration, for documentation purposes (not used by the translation).",
             property = {
                     "widgetType=textarea",
@@ -76,7 +76,7 @@ public @interface AutoTranslateCaConfig {
     @Property(label = "TranslationTableRuleText", order = 50,
             description = "Optional pattern to create translation rules from translation tables. " +
                     "{0} is the word in the source language, {1} the word in the target language. " +
-                    "If not given we use a default.")
+                    "If not given we use a default: ")
     // FIXME(hps,24/12/16) include the default.
     String translationTableRuleText();
 

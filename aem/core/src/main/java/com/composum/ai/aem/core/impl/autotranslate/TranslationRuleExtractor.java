@@ -7,15 +7,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 import java.util.zip.ZipException;
 
 import javax.annotation.Nonnull;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.sling.api.resource.Resource;
-import org.dhatim.fastexcel.reader.ReadableWorkbook;
-import org.dhatim.fastexcel.reader.Row;
-import org.dhatim.fastexcel.reader.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,34 +77,32 @@ public class TranslationRuleExtractor {
      * @throws IOException if the file cannot be read, in particular it'll be a {@link ZipException} if it's not a valid xlsx file, e.g.
      *                     an .xls or .ods or other file.
      */
-    protected Map<String, String> extractRulesFromXlsx(Resource resource, int sheetIndex, int startRow,
-                                                       int keyColumn, int valueColumn) throws IOException {
+    public Map<String, String> extractRulesFromXlsx(Resource xlsResource, int sheetIndex, int startRow, int keyColumn, int valueColumn) throws IOException {
         Map<String, String> rules = new LinkedHashMap<>();
-        try (InputStream inputStream = getAssetInputStream(resource);
-             ReadableWorkbook workbook = new ReadableWorkbook(inputStream)) {
-            Optional<Sheet> sheetOpt = workbook.getSheet(sheetIndex);
-            if (sheetOpt.isPresent()) {
-                Sheet sheet = sheetOpt.get();
-                try (Stream<Row> rows = sheet.openStream()) {
-                    rows.forEach(row -> {
-                        if (row.getRowNum() <= startRow) { // getRowNum() starts with 1
-                            return;
-                        }
-                        String key = row.getCellAsString(keyColumn).orElse(null);
-                        String value = row.getCellAsString(valueColumn).orElse(null);
-                        if (key != null && !key.isEmpty() && value != null && !value.isEmpty()) {
-                            rules.put(key, value);
-                        }
-                    });
-                }
-            } else {
-                throw new IllegalArgumentException("Sheet at index " + sheetIndex + " not found in " + resource.getPath());
+        try (InputStream inputStream = getAssetInputStream(xlsResource)) {
+            Workbook workbook = WorkbookFactory.create(inputStream);
+            Sheet sheet = workbook.getSheetAt(sheetIndex);
+            if (sheet == null) {
+                throw new IllegalArgumentException("Sheet at index " + sheetIndex + " not found in " + xlsResource.getPath());
             }
+            for (int i = startRow; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row != null) {
+                    Cell keyCell = row.getCell(keyColumn);
+                    String key = keyCell != null ? keyCell.getStringCellValue() : null;
+                    Cell valueCell = row.getCell(valueColumn);
+                    String value = valueCell != null ? valueCell.getStringCellValue() : null;
+                    if (key != null && !key.isEmpty() && value != null && !value.isEmpty()) {
+                        rules.put(key, value);
+                    }
+                }
+            }
+
         }
+        LOG.info("Extracted {} rules from {}", rules.size(), xlsResource.getPath());
         if (rules.isEmpty()) {
-            throw new IllegalArgumentException("No rules found in " + resource.getPath());
+            throw new IllegalArgumentException("No rules found in " + xlsResource.getPath());
         }
-        LOG.info("Extracted {} rules from {}", rules.size(), resource.getPath());
         return rules;
     }
 
