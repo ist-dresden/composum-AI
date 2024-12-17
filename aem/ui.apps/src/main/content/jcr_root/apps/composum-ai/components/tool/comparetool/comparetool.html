@@ -36,13 +36,20 @@
             border: none;
         }
 
-        p {
+        div.footer {
             margin: 0;
-            padding-top: 8px;
-            height: 24px;
-            text-align: center;
+            padding: 6px 4px 4px 4px;
             font-size: 16px;
             color: grey;
+            height: 20px;
+        }
+
+        label.alignleft {
+            float: left;
+        }
+
+        span.alignright {
+            float: right;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js"
@@ -62,16 +69,23 @@
         <iframe id="rightIframe" src="" title="Right iframe for comparison."></iframe>
     </div>
 </div>
-<p>
+<div class="footer">
+    <label class="alignleft">
+        <input type="checkbox" id="syncScroll" checked>
+        Synchronize scrolling
+    </label>
+    <span class="alignright">
     Drag this bookmarklet to your bookmark bar to easily open this UI with the path from any page or editor:
     <a id="bookmarklet">Translation Compare Tool</a>
-</p>
+    </span>
+</div>
 <script>
     // Get references to the iframes and URL input fields
     const leftIframe = document.getElementById('leftIframe');
     const rightIframe = document.getElementById('rightIframe');
     const leftField = document.querySelectorAll('.url-field')[0];
     const rightField = document.querySelectorAll('.url-field')[1];
+    const syncScrollCheckbox = document.getElementById('syncScroll');
 
     // Flags to track iframes' load status
     let leftLoaded = false;
@@ -113,21 +127,20 @@
     // Load event listeners for iframes
     leftIframe.addEventListener('load', function () {
         leftLoaded = true;
-        if (leftLoaded && rightLoaded) {
-            syncScroll();
-        }
+        syncScroll();
     });
 
     rightIframe.addEventListener('load', function () {
         rightLoaded = true;
-        if (leftLoaded && rightLoaded) {
-            syncScroll();
-        }
+        syncScroll();
     });
+
+    // when syncScrollCheckbox is checked, synchronize scrolling
+    syncScrollCheckbox.addEventListener('change', syncScroll);
 
     // Function to synchronize scrolling
     function syncScroll() {
-        if (leftIframe.contentWindow && rightIframe.contentWindow) {
+        if (syncScrollCheckbox.checked && leftLoaded && rightLoaded && leftIframe.contentWindow && rightIframe.contentWindow) {
             const leftWindow = leftIframe.contentWindow;
             const rightWindow = rightIframe.contentWindow;
 
@@ -143,6 +156,9 @@
 
     // Scroll event handler for left iframe
     function onLeftScroll() {
+        if (!syncScrollCheckbox.checked) {
+            return;
+        }
         if (isLeftScrolling) {
             isLeftScrolling = false;
             return;
@@ -157,6 +173,9 @@
 
     // Scroll event handler for right iframe
     function onRightScroll() {
+        if (!syncScrollCheckbox.checked) {
+            return;
+        }
         if (isRightScrolling) {
             isRightScrolling = false;
             return;
