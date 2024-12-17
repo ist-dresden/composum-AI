@@ -259,8 +259,8 @@ public class AutoPageTranslateServiceImplTest {
         when(config.translationTables()).thenReturn(new AutoTranslateTranslationTableConfig[]{tableConfig});
         List<AutoTranslateRuleConfig> rules = service.collectTranslationTables(config, resource);
         assertEquals(2, rules.size());
-        assertEquals("TranslationRule{contentPattern=\"apple\", additionalInstructions=\"Translate 'apple' to 'Apfel'.\"}\n" +
-                        "TranslationRule{contentPattern=\"egg\", additionalInstructions=\"Translate 'egg' to 'Ei'.\"}",
+        assertEquals("TranslationRule{contentPattern=\"apple\", additionalInstructions=\"Translate 'apple' as 'Apfel'.\"}\n" +
+                        "TranslationRule{contentPattern=\"egg\", additionalInstructions=\"Translate 'egg' as 'Ei'.\"}",
                 rules.stream().map(Objects::toString).collect(Collectors.joining("\n")));
     }
 

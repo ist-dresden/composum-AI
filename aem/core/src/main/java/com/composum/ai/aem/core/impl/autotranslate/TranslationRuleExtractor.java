@@ -127,12 +127,16 @@ public class TranslationRuleExtractor {
                     String key = row[keyColumn];
                     String value = row[valueColumn];
                     if (key != null && !key.isEmpty() && value != null && !value.isEmpty()) {
-                        rules.put(key, value);
+                        rules.put(normalize(key), normalize(value));
                     }
                 }
             }
             return rules;
         }
+    }
+
+    protected String normalize(String s) {
+        return s.trim().replace("\\s+", " ");
     }
 
     protected InputStream getAssetInputStream(Resource xlsResource) throws NoSuchElementException {

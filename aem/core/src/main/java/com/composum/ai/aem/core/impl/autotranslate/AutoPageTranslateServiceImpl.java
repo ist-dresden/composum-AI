@@ -75,7 +75,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS";
 
-    protected final String DEFAULT_TRANSLATION_RULE_PATTERN = "Translate '{0}' to '{1}'.";
+    protected final String DEFAULT_TRANSLATION_RULE_PATTERN = "Translate '{0}' as '{1}'.";
 
     @Reference
     protected GPTTranslationService translationService;
