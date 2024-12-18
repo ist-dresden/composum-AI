@@ -39,7 +39,7 @@
           <ul class="breadcrumb">
         <li id="publishDate">$i18n.getString( "site-renderer", $locale, "template.lastpublished" ): $dateValue<span class="divider">|</span>
 </li>
-          <li id="projectVersion">$i18n.getString( "site-renderer", $locale, "template.version" ): 2.0.2<span class="divider">|</span></li>
+          <li id="projectVersion">$i18n.getString( "site-renderer", $locale, "template.version" ): 2.1.0<span class="divider">|</span></li>
       <li class=""><a href="../index.html" title="Composum AI Site">Composum AI Site</a><span class="divider">/</span></li>
     <li class="active ">Sling Context Aware Configurations</li>
       <li class="pull-right"><span class="divider">|</span>
@@ -110,10 +110,10 @@
 <th>description</th></tr></thead><tbody>
 <tr class="b">
 <td>additionalInstructions</td>
-<td>Additional Instructions</td>
+<td>Additional Instructions (Deprecated)</td>
 <td>String</td>
 <td> </td>
-<td>Additional instructions for the automatic translation.</td></tr>
+<td>Additional instructions for the automatic translation. Deprecated, please use &#x2018;Rules for additional Instructions&#x2019; instead - if you do not give a path regex nor a content pattern the instructions will be used everywhere.</td></tr>
 <tr class="a">
 <td>rules</td>
 <td>Rules for additional Instructions</td>
@@ -121,41 +121,53 @@
 <td> </td>
 <td>Rules that give additional instructions for translation if certain words or phrases are present in the page.</td></tr>
 <tr class="b">
+<td>translationTables</td>
+<td>Translation Tables</td>
+<td>AutoTranslateTranslationTableConfig[]</td>
+<td> </td>
+<td>Translation tables for the automatic translation - XLS or CSV files of terms and their translations. This is an alternative to translation rules if there are many &#x2018;Translate X as Y&#x2019; rules.</td></tr>
+<tr class="a">
 <td>preferHighIntelligenceModel</td>
 <td>Prefer High Intelligence Model</td>
 <td>boolean</td>
 <td> </td>
 <td>If set, the high intelligence model will be used for translation.</td></tr>
-<tr class="a">
+<tr class="b">
 <td>preferStandardModel</td>
 <td>Prefer Standard Model</td>
 <td>boolean</td>
 <td> </td>
 <td>If set, the standard model will be used for translation. Opposite of &#x2018;Prefer High Intelligence Model&#x2019;.</td></tr>
-<tr class="b">
+<tr class="a">
 <td>includeFullPageInRetranslation</td>
 <td>Include Full Page during Retranslation</td>
 <td>String</td>
 <td> </td>
 <td>If true we do not only provide changed texts to the AI during re-translating a page with some changes, but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration.</td></tr>
-<tr class="a">
+<tr class="b">
 <td>includeExistingTranslationsInRetranslation</td>
 <td>Include Existing Translations in Retranslation</td>
 <td>String</td>
 <td> </td>
 <td>If true, when retranslating a page with some changes we provide the existing translations of that page to the AI as well as additional context with examples. That is a bit slower and a bit more expensive, but likely improves the result. This overrides the default from OSGI configuration.</td></tr>
-<tr class="b">
+<tr class="a">
 <td>comment</td>
-<td>Optional Comment (for documentation, not used by AI)</td>
+<td>Optional Notes (for your documentation, not used by the application)</td>
 <td>String</td>
 <td> </td>
 <td>An optional comment about the configuration, for documentation purposes (not used by the translation).</td></tr>
-<tr class="a">
+<tr class="b">
 <td>temperature</td>
 <td>Temperature</td>
 <td>String</td>
 <td> </td>
-<td>Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0.</td></tr></tbody>
+<td>Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0</td></tr>
+<tr class="a">
+<td>translationTableRuleText</td>
+<td>Translation Table Rule Text</td>
+<td>String</td>
+<td> </td>
+<td>Optional pattern to create translation rules from translation tables. {0} is the word in the source language, {1} the word in the target language. If not given we use a default: Translate &#x2018;{0}&#x2019; as &#x2018;{1}&#x2019;.</td></tr></tbody>
 </table>
 
 <p></p></section><section><a id="AutoTranslateRuleConfig_.28aem.2Fcore.29"></a>
@@ -174,7 +186,7 @@
 <td>Path Regex</td>
 <td>String</td>
 <td> </td>
-<td>A regular expression matching the absolute path to the page. E.g. .<em>/home/products/.</em> will match all pages under &#x2026;/home/products/. If empty every page will match if the content pattern condition is met.</td></tr>
+<td>A regular expression matching the absolute path to the page, incl. jcr:content. E.g. .<em>/home/products/.</em> will match all pages under &#x2026;/home/products/. If empty every page will match if the content pattern condition is met.</td></tr>
 <tr class="a">
 <td>contentPattern</td>
 <td>Content Pattern</td>
@@ -189,7 +201,56 @@
 <td>Additional instructions for the automatic translation in case this rule matches.</td></tr>
 <tr class="a">
 <td>comment</td>
-<td>Optional Comment (for documentation, not used by AI)</td>
+<td>Optional Notes (for your documentation, not used by the application)</td>
+<td>String</td>
+<td> </td>
+<td>An optional comment for the rule, for documentation purposes (not used by the translation).</td></tr></tbody>
+</table>
+
+<p></p></section><section><a id="AutoTranslateTranslationTableConfig_.28aem.2Fcore.29"></a>
+<h2>AutoTranslateTranslationTableConfig (aem/core)</h2>
+<p>Configures a translation table for the automatic translation - an XLS or CSV file of terms and their translations. Properties include the path to the file resource or DAM asset, sheet index, start row, key column, and value column.</p>
+<table class="table table-striped">
+<thead>
+<tr class="a">
+<th>id</th>
+<th>label</th>
+<th>type</th>
+<th>default value</th>
+<th>description</th></tr></thead><tbody>
+<tr class="b">
+<td>path</td>
+<td>Path to XLS or CSV File</td>
+<td>String</td>
+<td> </td>
+<td>The JCR path to the XLS or CSV file containing the translation table. Can be either a file resource or an AEM asset.</td></tr>
+<tr class="a">
+<td>sheetIndex</td>
+<td>Sheet Index</td>
+<td>int</td>
+<td> </td>
+<td>The index of the sheet in the XLS file containing the translation table. The first sheet is 1. Ignored for CSV files.</td></tr>
+<tr class="b">
+<td>startRow</td>
+<td>Start Row</td>
+<td>int</td>
+<td> </td>
+<td>The row in the sheet where the translation table starts. The first row is 1, following Excel conventions.</td></tr>
+<tr class="a">
+<td>keyColumn</td>
+<td>Key Column</td>
+<td>String</td>
+<td> </td>
+<td>The column in the sheet containing the keys (terms to be translated). The first column is A (following Excel conventions) or 1.</td></tr>
+<tr class="b">
+<td>valueColumn</td>
+<td>Value Column</td>
+<td>String</td>
+<td> </td>
+<td>The column in the sheet containing the values (translations). The first column is A (following Excel conventions) or 1.</td></tr>
+<tr class="a">
+<td>comment</td>
+<td>Optional Notes (for your documentation, not used by the application)</td>
 <td>String</td>
 <td> </td>
 <td>An optional comment for the rule, for documentation purposes (not used by the translation).</td></tr></tbody>

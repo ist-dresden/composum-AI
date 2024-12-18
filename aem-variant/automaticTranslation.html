@@ -39,7 +39,7 @@
           <ul class="breadcrumb">
         <li id="publishDate">$i18n.getString( "site-renderer", $locale, "template.lastpublished" ): $dateValue<span class="divider">|</span>
 </li>
-          <li id="projectVersion">$i18n.getString( "site-renderer", $locale, "template.version" ): 2.0.2<span class="divider">|</span></li>
+          <li id="projectVersion">$i18n.getString( "site-renderer", $locale, "template.version" ): 2.1.0<span class="divider">|</span></li>
       <li class=""><a href="../index.html" title="Composum AI Site">Composum AI Site</a><span class="divider">/</span></li>
     <li class="active ">Rethinking automatic translation in AEM with LLMs</li>
       <li class="pull-right"><span class="divider">|</span>
@@ -270,7 +270,11 @@ that defines additional instructions with conditions when these are to be used. 
 <li>the additional instructions to be added when both patterns match or no pattern is given.</li>
 </ul>
 <p>A common use case would be to give specific translations for certain words. That'd be done by adding a rule with the
-translated word / phrase as content pattern and &#x201c;Translate XXX as YYY&#x201d; as additional instruction.</p></section></section><section><a id="Notes_about_the_implementation"></a>
+translated word / phrase as content pattern and &#x201c;Translate XXX as YYY&#x201d; as additional instruction.
+However, if you have many rules of this type you might also use translation tables with glossaries for that. You can
+upload a spreadsheet (CSV or Excel file) with the word to translate in one column and the suggested translation in
+another column. The AI will then be given instructions accordingly for all words that actually appear in the page
+that is being translated.</p></section></section><section><a id="Notes_about_the_implementation"></a>
 <h2>Notes about the implementation</h2>
 <ul>
 
