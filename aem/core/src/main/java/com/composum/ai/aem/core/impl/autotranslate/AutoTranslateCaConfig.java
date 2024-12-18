@@ -17,16 +17,20 @@ public @interface AutoTranslateCaConfig {
             description = "Rules that give additional instructions for translation if certain words or phrases are present in the page.")
     AutoTranslateRuleConfig[] rules() default {};
 
-    @Property(label = "Prefer High Intelligence Model", order = 3,
+    @Property(label = "Translation Tables", order = 3,
+            description = "Translation tables for the automatic translation - XLS or CSV files of terms and their translations. This is an alternative to translation rules if there are many 'Translate X as Y' rules.")
+    AutoTranslateTranslationTableConfig[] translationTables() default {};
+
+    @Property(label = "Prefer High Intelligence Model", order = 10,
             description = "If set, the high intelligence model will be used for translation.")
     boolean preferHighIntelligenceModel();
 
-    @Property(label = "Prefer Standard Model", order = 4,
+    @Property(label = "Prefer Standard Model", order = 20,
             description = "If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.")
     boolean preferStandardModel();
 
     // String values "true" and "false" are used for boolean properties since we have three states: true, false, and unset.
-    @Property(label = "Include Full Page during Retranslation", order = 5,
+    @Property(label = "Include Full Page during Retranslation", order = 30,
             description = "If true we do not only provide changed texts to the AI during re-translating a page with some changes," +
                     "but give the entire page to provide better context. That is a bit slower and a bit more expensive, but likely" +
                     "improves the result. This overrides the default from OSGI configuration.",
@@ -42,7 +46,7 @@ public @interface AutoTranslateCaConfig {
     String includeFullPageInRetranslation();
 
     // String values "true" and "false" are used for boolean properties since we have three states: true, false, and unset.
-    @Property(label = "Include Existing Translations in Retranslation", order = 6,
+    @Property(label = "Include Existing Translations in Retranslation", order = 40,
             description = "If true, when retranslating a page with some changes we provide" +
                     "the existing translations of that page to the AI as well as additional context with examples. " +
                     "That is a bit slower and a bit more expensive, but likely improves the result." +
@@ -57,7 +61,7 @@ public @interface AutoTranslateCaConfig {
             })
     String includeExistingTranslationsInRetranslation();
 
-    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 0,
+    @Property(label = "Optional Notes (for your documentation, not used by the application)", order = 100,
             description = "An optional comment about the configuration, for documentation purposes (not used by the translation).",
             property = {
                     "widgetType=textarea",
@@ -65,8 +69,15 @@ public @interface AutoTranslateCaConfig {
             })
     String comment();
 
-    @Property(label = "Temperature", order = 8,
+    @Property(label = "Temperature", order = 25,
             description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0")
     String temperature();
+
+    @Property(label = "TranslationTableRuleText", order = 50,
+            description = "Optional pattern to create translation rules from translation tables. " +
+                    "{0} is the word in the source language, {1} the word in the target language. " +
+                    "If not given we use a default: ")
+    // FIXME(hps,24/12/16) include the default.
+    String translationTableRuleText();
 
 }

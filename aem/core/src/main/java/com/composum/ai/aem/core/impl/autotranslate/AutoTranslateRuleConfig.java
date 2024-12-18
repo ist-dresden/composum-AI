@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import java.lang.annotation.Annotation;
+
 import org.apache.sling.caconfig.annotation.Property;
 
 /**
@@ -30,7 +32,7 @@ public @interface AutoTranslateRuleConfig {
             })
     String additionalInstructions();
 
-    @Property(label = "Optional Comment (for documentation, not used by AI)", order = 4,
+    @Property(label = "Optional Notes (for your documentation, not used by the application)", order = 4,
             description = "An optional comment for the rule, for documentation purposes (not used by the translation).",
             property = {
                     "widgetType=textarea",

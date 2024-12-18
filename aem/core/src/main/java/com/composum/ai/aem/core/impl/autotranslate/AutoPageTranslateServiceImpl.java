@@ -7,6 +7,9 @@ import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServi
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +75,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS";
 
+    protected final String DEFAULT_TRANSLATION_RULE_PATTERN = "Translate '{0}' as '{1}'.";
+
     @Reference
     protected GPTTranslationService translationService;
 
@@ -120,44 +125,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 return stats;
             }
 
-            GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
             ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
             AutoTranslateCaConfig autoTranslateCaConfig = confBuilder.as(AutoTranslateCaConfig.class);
-
-            String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
-            if (StringUtils.isNotBlank(autoTranslateCaConfig.additionalInstructions())) {
-                additionalInstructions = additionalInstructions + "\n\n" + autoTranslateCaConfig.additionalInstructions().trim();
-            }
-            List<AutoTranslateRuleConfig> allRules = new ArrayList<>();
-            if (translationParameters.rules != null) {
-                allRules.addAll(translationParameters.rules);
-            }
-
-            if (autoTranslateCaConfig.rules() != null) {
-                allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
-            }
-            if (autoTranslateCaConfig.temperature() != null && !autoTranslateCaConfig.temperature().trim().isEmpty()) {
-                try {
-                    double temperature = Double.parseDouble(autoTranslateCaConfig.temperature());
-                    configuration = GPTConfiguration.ofTemperature(temperature).merge(configuration);
-                } catch (NumberFormatException e) {
-                    LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
-                }
-            }
-            if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
-                configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
-            } else if (autoTranslateCaConfig.preferStandardModel()) {
-                configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
-            }
-
-            // collect translation rules that apply
-            List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
-            collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
-            String translationRules = collectTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
-            if (translationRules != null) {
-                additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
-            }
-            additionalInstructions = StringUtils.trimToNull(additionalInstructions);
+            GPTConfiguration configuration = determineConfiguration(resource, autoTranslateCaConfig, translationParameters, stats);
+            String additionalInstructions = configuration.getAdditionalInstructions();
 
             String previousAdditionalInstructions = resource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS, String.class);
             boolean additionalInstructionsChanged = !StringUtils.equals(additionalInstructions, previousAdditionalInstructions);
@@ -165,7 +136,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             if (additionalInstructionsChanged) {
                 LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
             }
-            configuration = GPTConfiguration.ofAdditionalInstructions(additionalInstructions).merge(configuration);
 
             List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
             boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
@@ -184,7 +154,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
                     throw new GPTException.GPTUserNotificationException(
                             "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):\n\n" +
-                            additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
+                                    additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
                 }
 
                 configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);
@@ -262,6 +232,49 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         } finally {
             runningTranslations.remove(resource.getPath());
         }
+    }
+
+    protected GPTConfiguration determineConfiguration(@Nonnull Resource resource, AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull AutoTranslateService.TranslationParameters translationParameters, Stats stats) throws WCMException {
+        GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
+
+        if (autoTranslateCaConfig.temperature() != null && !autoTranslateCaConfig.temperature().trim().isEmpty()) {
+            try {
+                double temperature = Double.parseDouble(autoTranslateCaConfig.temperature());
+                configuration = GPTConfiguration.ofTemperature(temperature).merge(configuration);
+            } catch (NumberFormatException e) {
+                LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
+            }
+        }
+        if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
+            configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
+        } else if (autoTranslateCaConfig.preferStandardModel()) {
+            configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
+        }
+
+        String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
+        if (StringUtils.isNotBlank(autoTranslateCaConfig.additionalInstructions())) {
+            additionalInstructions = additionalInstructions + "\n\n" + autoTranslateCaConfig.additionalInstructions().trim();
+        }
+        List<AutoTranslateRuleConfig> allRules = new ArrayList<>();
+        if (translationParameters.rules != null) {
+            allRules.addAll(translationParameters.rules);
+        }
+
+        if (autoTranslateCaConfig.rules() != null) {
+            allRules.addAll(Arrays.asList(autoTranslateCaConfig.rules()));
+        }
+
+        allRules.addAll(collectTranslationTables(autoTranslateCaConfig, resource));
+
+        // filter translation rules that apply
+        List<PropertyToTranslate> allTranslateableProperties = new ArrayList<>();
+        collectPropertiesToTranslate(resource, allTranslateableProperties, stats, translationParameters, true);
+        String translationRules = collectApplicableTranslationRules(resource.getPath(), allTranslateableProperties, allRules);
+        if (translationRules != null) {
+            additionalInstructions = additionalInstructions + "\n\n" + translationRules.trim();
+        }
+        additionalInstructions = StringUtils.trimToNull(additionalInstructions);
+        return GPTConfiguration.ofAdditionalInstructions(additionalInstructions).merge(configuration);
     }
 
     /**
@@ -661,7 +674,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return false;
     }
 
-    protected String collectTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
+    protected String collectApplicableTranslationRules(String path, List<PropertyToTranslate> allTranslateableProperties, @Nullable List<AutoTranslateRuleConfig> rules) {
         if (rules == null) {
             return null;
         }
@@ -698,6 +711,50 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             LOG.error("Error in pattern syntax for rule {} applicable to path {}", rule, path, e);
             return false;
         }
+    }
+
+    protected List<AutoTranslateRuleConfig> collectTranslationTables(
+            AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull Resource resource) {
+        List<AutoTranslateRuleConfig> rules = new ArrayList<>();
+        String translationInstructionTemplate = autoTranslateCaConfig.translationTableRuleText() != null
+                        && !autoTranslateCaConfig.translationTableRuleText().trim().isEmpty() ?
+                        autoTranslateCaConfig.translationTableRuleText() :
+                        DEFAULT_TRANSLATION_RULE_PATTERN;
+        if (autoTranslateCaConfig != null && autoTranslateCaConfig.translationTables() != null) {
+            for (AutoTranslateTranslationTableConfig tableConfig : autoTranslateCaConfig.translationTables()) {
+                if (tableConfig.path() == null || tableConfig.path().isEmpty()) {
+                    continue;
+                }
+                Map<String, String> rawRules;
+                try {
+                    rawRules = getRawRules(tableConfig, resource);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Could not read translation table " + tableConfig.path() +
+                            " configured at " + resource.getPath() + " because of " + e, e);
+                }
+                for (Map.Entry<String, String> entry : rawRules.entrySet()) {
+                    // we don't use MessageFormat because of complexities around ' : single quotes would have to be doubled.
+                    String instructions = translationInstructionTemplate
+                            .replace("{0}", entry.getKey())
+                            .replace("{1}", entry.getValue());
+                    AutoTranslateRuleConfig rule = new AutoTranslateRuleConfigContentRule(entry.getKey(), instructions);
+                    rules.add(rule);
+                }
+            }
+        }
+        return rules;
+    }
+
+    protected Map<String, String> getRawRules(AutoTranslateTranslationTableConfig tableConfig, Resource resource) throws IOException {
+        Resource tableResource = resource.getResourceResolver().getResource(tableConfig.path());
+        if (tableResource == null) {
+            throw new IllegalArgumentException("Translation table not found: " + tableConfig.path() +
+                    " configured at " + resource.getPath());
+        }
+        Map<String, String> rules = new TranslationRuleExtractor().extractRules(tableResource,
+                tableConfig.sheetIndex(), tableConfig.startRow(), tableConfig.keyColumn(), tableConfig.valueColumn());
+        LOG.debug("Extracted rules from {} : {}", tableResource.getPath(), rules);
+        return rules;
     }
 
     /**
@@ -767,6 +824,53 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 sb.append(" (already translated)");
             }
             return sb.toString();
+        }
+    }
+
+
+    /**
+     * Simple implementation of this for content translation rules.
+     */
+    protected static class AutoTranslateRuleConfigContentRule implements AutoTranslateRuleConfig {
+        private String contentPattern;
+        private String additionalInstructions;
+
+        public AutoTranslateRuleConfigContentRule(String contentPattern, String additionalInstructions) {
+            this.contentPattern = contentPattern;
+            this.additionalInstructions = additionalInstructions;
+        }
+
+        @Override
+        public String pathRegex() {
+            return null;
+        }
+
+        @Override
+        public String contentPattern() {
+            return contentPattern;
+        }
+
+        @Override
+        public String additionalInstructions() {
+            return additionalInstructions;
+        }
+
+        @Override
+        public String comment() {
+            return null;
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return AutoTranslateRuleConfig.class;
+        }
+
+        @Override
+        public String toString() {
+            return "TranslationRule{" +
+                    "contentPattern=\"" + contentPattern + '"' +
+                    ", additionalInstructions=\"" + additionalInstructions + '"' +
+                    '}';
         }
     }
 
