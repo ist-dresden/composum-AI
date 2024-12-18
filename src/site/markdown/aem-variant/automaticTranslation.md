@@ -200,6 +200,10 @@ that defines additional instructions with conditions when these are to be used. 
 
 A common use case would be to give specific translations for certain words. That'd be done by adding a rule with the 
 translated word / phrase as content pattern and "Translate XXX as YYY" as additional instruction.
+However, if you have many rules of this type you might also use translation tables with glossaries for that. You can 
+upload a spreadsheet (CSV or Excel file) with the word to translate in one column and the suggested translation in 
+another column. The AI will then be given instructions accordingly for all words that actually appear in the page 
+that is being translated.
 
 ## Notes about the implementation
 

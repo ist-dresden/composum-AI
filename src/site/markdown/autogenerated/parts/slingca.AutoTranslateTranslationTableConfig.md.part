@@ -1,0 +1,14 @@
+/* AIGenVersion(257679f8, slingcaconfigurations.prompt-1.1, AutoTranslateTranslationTableConfig.java-6099ee17) */
+
+## AutoTranslateTranslationTableConfig (aem/core)
+
+Configures a translation table for the automatic translation - an XLS or CSV file of terms and their translations. Properties include the path to the file resource or DAM asset, sheet index, start row, key column, and value column.
+
+| id              | label                                      | type   | default value | description                                                                                                                                                       |
+|-----------------|--------------------------------------------|--------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| path            | Path to XLS or CSV File                   | String |               | The JCR path to the XLS or CSV file containing the translation table. Can be either a file resource or an AEM asset.                                           |
+| sheetIndex      | Sheet Index                               | int    |               | The index of the sheet in the XLS file containing the translation table. The first sheet is 1. Ignored for CSV files.                                          |
+| startRow        | Start Row                                 | int    |               | The row in the sheet where the translation table starts. The first row is 1, following Excel conventions.                                                       |
+| keyColumn       | Key Column                                | String |               | The column in the sheet containing the keys (terms to be translated). The first column is A (following Excel conventions) or 1.                               |
+| valueColumn     | Value Column                              | String |               | The column in the sheet containing the values (translations). The first column is A (following Excel conventions) or 1.                                        |
+| comment         | Optional Notes (for your documentation, not used by the application) | String |               | An optional comment for the rule, for documentation purposes (not used by the translation).                                                                      |

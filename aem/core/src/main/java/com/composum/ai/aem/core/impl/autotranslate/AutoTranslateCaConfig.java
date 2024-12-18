@@ -73,11 +73,10 @@ public @interface AutoTranslateCaConfig {
             description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0")
     String temperature();
 
-    @Property(label = "TranslationTableRuleText", order = 50,
+    @Property(label = "Translation Table Rule Text", order = 50,
             description = "Optional pattern to create translation rules from translation tables. " +
                     "{0} is the word in the source language, {1} the word in the target language. " +
-                    "If not given we use a default: ")
-    // FIXME(hps,24/12/16) include the default.
+                    "If not given we use a default: Translate '{0}' as '{1}'.")
     String translationTableRuleText();
 
 }
