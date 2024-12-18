@@ -18,7 +18,7 @@ public @interface AutoTranslateCaConfig {
     AutoTranslateRuleConfig[] rules() default {};
 
     @Property(label = "Translation Tables", order = 3,
-            description = "Translation tables for the automatic translation - XLS or CSV files of terms and their translations. This is an alternative to translation rules if there are many 'Translate X to Y' rules.")
+            description = "Translation tables for the automatic translation - XLS or CSV files of terms and their translations. This is an alternative to translation rules if there are many 'Translate X as Y' rules.")
     AutoTranslateTranslationTableConfig[] translationTables() default {};
 
     @Property(label = "Prefer High Intelligence Model", order = 10,

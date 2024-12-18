@@ -13,11 +13,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -246,22 +244,21 @@ public class AutoPageTranslateServiceImplTest {
     public void testRulesTable() {
         AutoPageTranslateServiceImpl service = new AutoPageTranslateServiceImpl() {
             @Override
-            protected Map<String, String> getRawRules(AutoTranslateTranslationTableConfig tableConfig, Resource tableResource) throws IOException {
-                Map<String, String> rules = new LinkedHashMap<String, String>();
+            protected Map<String, String> getRawRules(AutoTranslateTranslationTableConfig tableConfig, Resource tableResource) {
+                Map<String, String> rules = new LinkedHashMap<>();
                 rules.put("apple", "Apfel");
                 rules.put("egg", "Ei");
                 return rules;
             }
         };
-        when(config.translationTableRuleText()).thenReturn("Translate '{0}' to '{1}'.");
+        when(config.translationTableRuleText()).thenReturn("Translate '{0}' as '{1}'.");
         AutoTranslateTranslationTableConfig tableConfig = mock(AutoTranslateTranslationTableConfig.class);
         when(tableConfig.path()).thenReturn("/some/path.xlsx");
         when(config.translationTables()).thenReturn(new AutoTranslateTranslationTableConfig[]{tableConfig});
         List<AutoTranslateRuleConfig> rules = service.collectTranslationTables(config, resource);
         assertEquals(2, rules.size());
-        assertEquals("TranslationRule{contentPattern=\"apple\", additionalInstructions=\"Translate 'apple' as 'Apfel'.\"}\n" +
-                        "TranslationRule{contentPattern=\"egg\", additionalInstructions=\"Translate 'egg' as 'Ei'.\"}",
-                rules.stream().map(Objects::toString).collect(Collectors.joining("\n")));
+        assertEquals("TranslationRule{contentPattern=\"apple\", additionalInstructions=\"Translate 'apple' as 'Apfel'.\"}", rules.get(0).toString());
+        assertEquals("TranslationRule{contentPattern=\"egg\", additionalInstructions=\"Translate 'egg' as 'Ei'.\"}", rules.get(1).toString());
     }
 
 }
