@@ -9,7 +9,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -183,9 +182,16 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     LOG.trace("Setting {} in {} to {}", propertyName, propertyToTranslate.targetResource.getPath(), translatedValue);
                     ModifiableValueMap valueMap = requireNonNull(resourceToTranslate.adaptTo(ModifiableValueMap.class));
                     AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(propertyToTranslate.sourceResource.getValueMap(), valueMap, propertyName);
-                    targetWrapper.setOriginalCopy(originalValue);
-                    targetWrapper.setTranslatedCopy(translatedValue);
-                    targetWrapper.setCurrentValue(translatedValue);
+                    if (!propertyToTranslate.isCancelled) {
+                        targetWrapper.setOriginalCopy(originalValue);
+                        targetWrapper.setTranslatedCopy(translatedValue);
+                        targetWrapper.setCurrentValue(translatedValue);
+                        targetWrapper.setNewOriginalCopy(null);
+                        targetWrapper.setNewTranslatedCopy(null);
+                    } else { // is cancelled - we just save the data for merging
+                        targetWrapper.setNewOriginalCopy(originalValue);
+                        targetWrapper.setNewTranslatedCopy(translatedValue);
+                    }
 
                     LiveRelationship liveRelationship = relationships.get(propertyToTranslate.targetResource.getPath());
                     if (liveRelationship == null) {
@@ -603,15 +609,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             stats.translateableProperties++;
             AITranslatePropertyWrapper targetWrapper = new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key);
 
-            // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
-            // or if we have a current translation.
             boolean isCancelled = isCancelled(resource, key, relationship);
-            if (isCancelled) {
-                continue; // don't touch cancelled properties
-            }
-
             boolean isAlreadyCorrectlyTranslated = false;
-            if (targetWrapper.isOriginalAsWhenLastTranslating() && !force) {
+            if (targetWrapper.isOriginalAsWhenLastTranslating() && !force && !isCancelled) {
                 // shortcut: we have a recent translation already
                 targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
                 changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
@@ -628,10 +628,10 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             propertyToTranslate.targetResource = resource;
             propertyToTranslate.propertyName = key;
             propertyToTranslate.isAlreadyCorrectlyTranslated = isAlreadyCorrectlyTranslated;
+            propertyToTranslate.isCancelled = isCancelled;
             propertiesToTranslate.add(propertyToTranslate);
-
-            if (targetWrapper.getOriginal().contains("THROWUPRIGHTNOW49e43jwsdsg")) {
-                throw new IllegalStateException("THROWUPRIGHTNOW49e43jwsdsg requested for " + sourceResource.getPath());
+            if (isCancelled) {
+                LOG.debug("Skipping translation for {} in {} because it is cancelled", key, resource.getPath());
             }
         }
         for (Resource child : resource.getChildren()) {
@@ -703,9 +703,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull Resource resource) {
         List<AutoTranslateRuleConfig> rules = new ArrayList<>();
         String translationInstructionTemplate = autoTranslateCaConfig.translationTableRuleText() != null
-                        && !autoTranslateCaConfig.translationTableRuleText().trim().isEmpty() ?
-                        autoTranslateCaConfig.translationTableRuleText() :
-                        DEFAULT_TRANSLATION_RULE_PATTERN;
+                && !autoTranslateCaConfig.translationTableRuleText().trim().isEmpty() ?
+                autoTranslateCaConfig.translationTableRuleText() :
+                DEFAULT_TRANSLATION_RULE_PATTERN;
         if (autoTranslateCaConfig != null && autoTranslateCaConfig.translationTables() != null) {
             for (AutoTranslateTranslationTableConfig tableConfig : autoTranslateCaConfig.translationTables()) {
                 if (tableConfig.path() == null || tableConfig.path().isEmpty()) {
@@ -787,6 +787,12 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
          * still has a correct translation and should not be modified.
          */
         protected boolean isAlreadyCorrectlyTranslated;
+
+        /**
+         * Whether the inheritance is cancelled for that property. If it is it won't be changed, but might be used
+         * as context for the translation and the properties for the merge tool are set.
+         */
+        protected boolean isCancelled;
 
         public String getSourceValue() {
             return sourceResource.getValueMap().get(propertyName, String.class);
