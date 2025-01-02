@@ -590,4 +590,4 @@ class ContentCreationDialog {
 
 export {ContentCreationDialog};
 
-console.log("ContentCreationDialog.js loaded", ContentCreationDialog);
+// console.log("ContentCreationDialog.js loaded", ContentCreationDialog);

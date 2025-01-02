@@ -122,4 +122,4 @@ class AICreate {
 
 export {AICreate};
 
-console.log("AICreate.js loaded", AICreate);
+// console.log("AICreate.js loaded", AICreate);

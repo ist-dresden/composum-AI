@@ -365,4 +365,4 @@ try {
     console.log('BUG: registerdialogs.js initialization error', e);
 }
 
-console.log("registerdialogs.js loaded");
+// console.log("registerdialogs.js loaded");
