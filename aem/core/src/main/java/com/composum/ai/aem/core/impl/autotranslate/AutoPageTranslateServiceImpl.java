@@ -188,7 +188,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         targetWrapper.setCurrentValue(translatedValue);
                         targetWrapper.setNewOriginalCopy(null);
                         targetWrapper.setNewTranslatedCopy(null);
-                    } else { // is cancelled - we just save the data for merging
+                    } else if (!StringUtils.equals(targetWrapper.getOriginalCopy(), originalValue)) {
+                        // is cancelled - we just save the data for merging
                         targetWrapper.setNewOriginalCopy(originalValue);
                         targetWrapper.setNewTranslatedCopy(translatedValue);
                     }

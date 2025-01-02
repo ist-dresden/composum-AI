@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Translation Merge UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+    <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
+        <div class="foundation-layout-panel-body">
+            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
+                <div class="cq-dialog-content-page">
+                    <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
+                        <section class="coral-Form-fieldset"><h2
+                                    class="coral-Form-fieldset-legend">Translation Merge UI</h2>
+                            <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <span class="coral-Form-field foundation-layout-util-breakword">
+                                                <sly>${model.helloWorld}</sly>
+                                            </span>
+                                        </span>
+                        </section>
+                        <hr>
+                        <section class="coral-Form-fieldset"><h2
+                                    class="coral-Form-fieldset-legend">Triggered translations</h2>
+                            <span class="foundation-layout-util-breakword">
+                                        Table table
+                                    </span>
+                            <!-- Table with translation runs -->
+                            <table is="coral-table">
+                                <thead is="coral-table-head" sticky>
+                                <tr is="coral-table-row">
+                                    <th is="coral-table-headercell">Status</th>
+                                    <th is="coral-table-headercell">Translation root path</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </section>
+                    </sly>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script>
+    $(document).ready(function () {
+        console.log("TODO impl merge");
+    });
+</script>
+</body>
+</html>
