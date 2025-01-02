@@ -33,7 +33,7 @@ import com.google.gson.JsonSyntaxException;
 /**
  * Autotranslate workflow. This triggers a automatic translation of a live copy from it's blueprint. As process
  * arguments a JSON can be given that configures the translation process - a serialization of {@link TranslationParameters},
- * e.g. {"autoSave":false,"breakInheritance":false,"recursive":false} .
+ * e.g. {"autoSave":false,"recursive":false} .
  * @deprecated rather use {@link TriggerRolloutWorkflowProcess}
  */
 @Component(service = WorkflowProcess.class,

@@ -71,7 +71,6 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
         parms.recursive = false;
         parms.autoSave = autoSave;
-        parms.breakInheritance = false;
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
             // that works only for the root page. For the rest we use this hack to determine whether the user is waiting or this is an asynchronous rollout.

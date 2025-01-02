@@ -53,11 +53,6 @@ public interface AutoTranslateService {
         public String additionalInstructions;
 
         /**
-         * If true, we break the inheritance of the component / the property on translation.
-         */
-        public boolean breakInheritance;
-
-        /**
          * If true the changes are saved ({@link ResourceResolver#commit()}) after each page.
          */
         public boolean autoSave = true;
@@ -88,7 +83,6 @@ public interface AutoTranslateService {
             return "TranslationParameters{" +
                     "recursive=" + recursive +
                     ", maxDepth=" + maxDepth +
-                    ", breakInheritance=" + breakInheritance +
                     ", autoSave=" + autoSave +
                     ", userId='" + userId + '\'' +
                     ", preferHighIntelligenceModel=" + preferHighIntelligenceModel +

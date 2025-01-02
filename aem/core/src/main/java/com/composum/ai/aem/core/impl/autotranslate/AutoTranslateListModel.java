@@ -79,10 +79,6 @@ public class AutoTranslateListModel {
                                 MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS
                 );
             }
-            boolean breakInheritance = request.getParameter("breakInheritance") != null;
-            if (isDisabled() && breakInheritance) {
-                throw new IllegalStateException("Refusing to do breakInheritance on disabled experiments.");
-            }
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");
             if ("standard".equals(translationmodel)) {
@@ -98,7 +94,6 @@ public class AutoTranslateListModel {
             }
             parms.recursive = recursive;
             parms.additionalInstructions = additionalInstructions;
-            parms.breakInheritance = breakInheritance;
             if (copyOriginalPage && !debugaddinstructions) {
                 copyOriginalPage(request, path);
             }

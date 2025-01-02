@@ -199,10 +199,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                     markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters, configuration);
                     stats.translatedProperties++;
                     changed = true;
-
-                    if (translationParameters.breakInheritance) {
-                        cancelInheritance(resource, resourceToTranslate, propertyToTranslate);
-                    }
                 }
             }
 
