@@ -40,7 +40,8 @@ public class AITranslatePropertyWrapper {
     public static final String AI_PREFIX = "ai_";
 
     /**
-     * Prefix for property names changed to language copies
+     * Prefix for property names changed to language copies. This is set if a property is a path
+     * and the path has a (translated) language copy in the desired target language.
      */
     public static final String LC_PREFIX = "lc_";
 
