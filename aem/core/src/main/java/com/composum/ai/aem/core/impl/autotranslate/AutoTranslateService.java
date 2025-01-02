@@ -48,10 +48,6 @@ public interface AutoTranslateService {
         public Integer maxDepth;
 
         /**
-         * Also re-translate properties where the original was changed.
-         */
-        public boolean translateWhenChanged;
-        /**
          * Optionally, additional instructions to add to the system prompt.
          */
         public String additionalInstructions;
@@ -92,7 +88,6 @@ public interface AutoTranslateService {
             return "TranslationParameters{" +
                     "recursive=" + recursive +
                     ", maxDepth=" + maxDepth +
-                    ", translateWhenChanged=" + translateWhenChanged +
                     ", breakInheritance=" + breakInheritance +
                     ", autoSave=" + autoSave +
                     ", userId='" + userId + '\'' +

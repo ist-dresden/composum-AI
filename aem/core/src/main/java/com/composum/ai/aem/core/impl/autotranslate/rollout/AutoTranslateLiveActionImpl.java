@@ -72,7 +72,6 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
         parms.recursive = false;
         parms.autoSave = autoSave;
         parms.breakInheritance = false;
-        // parms.translateWhenChanged probably only makes sense when differential translation is integrated.
         try {
             boolean duringLiveCopyCreation = liveRelationship.getStatus() == null || liveRelationship.getStatus().getLastRolledOut() == null;
             // that works only for the root page. For the rest we use this hack to determine whether the user is waiting or this is an asynchronous rollout.

@@ -610,7 +610,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             // we will translate except if the property is cancelled and we don't want to touch cancelled properties,
             // or if we have a current translation.
             boolean isCancelled = isCancelled(resource, key, relationship);
-            if (isCancelled && !translationParameters.translateWhenChanged) {
+            if (isCancelled) {
                 continue; // don't touch cancelled properties
             }
 
@@ -620,16 +620,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 targetWrapper.setCurrentValue(targetWrapper.getTranslatedCopy());
                 changed = changed || !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getOriginalCopy());
                 isAlreadyCorrectlyTranslated = true;
-            }
-
-            if (isCancelled && targetWrapper.hasSavedTranslation() && translationParameters.translateWhenChanged
-                    && !StringUtils.equals(targetWrapper.getTranslatedCopy(), targetWrapper.getCurrentValue())
-                    && !StringUtils.equals(targetWrapper.getOriginal(), targetWrapper.getCurrentValue())) {
-                // = translateWhenChanged override; save manual change. We also exclude the phase during rollout
-                // where the property is reset to the original value and we have to restore the translation.
-                LOG.info("Re-translating {} in {} despite manual change", key, resource.getPath());
-                targetWrapper.saveManualChange();
-                stats.modifiedButRetranslatedProperties++;
             }
 
             if (targetWrapper.hasSavedTranslation()) {

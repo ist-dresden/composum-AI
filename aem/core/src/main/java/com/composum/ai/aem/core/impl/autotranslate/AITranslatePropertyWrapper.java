@@ -58,12 +58,6 @@ public class AITranslatePropertyWrapper {
     public static final String AI_TRANSLATED_SUFFIX = "_translated";
 
     /**
-     * Suffix for a property name where a manual change is saved when a retranslation is done despite a manual modification.
-     * Will be overwritten if another retranslation is done. Also keep original and translated values - as additional suffix.
-     */
-    public static final String AI_MANUAL_CHANGE_SUFFIX = "_manualChange";
-
-    /**
      * Attribute that is set on jcr:content of a page when the translation of a page failed, to make it easy to find such pages. Not set by {@link AITranslatePropertyWrapper}, but since all property names are defined here...
      * Is set to the time at which the error occurred, to make it easy to find in the logs.
      */
@@ -144,15 +138,6 @@ public class AITranslatePropertyWrapper {
         setValue(PROPERTY_AI_TRANSLATED_MODEL, value);
     }
 
-    /**
-     * Currently not actually used, but save for differential retranslation.
-     */
-    public void saveManualChange() {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_MANUAL_CHANGE_SUFFIX), getCurrentValue());
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_MANUAL_CHANGE_SUFFIX + AI_ORIGINAL_SUFFIX), getOriginalCopy());
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_MANUAL_CHANGE_SUFFIX + AI_TRANSLATED_SUFFIX), getTranslatedCopy());
-    }
-
     public boolean hasSavedTranslation() {
         return isNotBlank(getOriginalCopy()) && isNotBlank(getTranslatedCopy());
     }
@@ -175,9 +160,6 @@ public class AITranslatePropertyWrapper {
         return new String[]{
                 AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
                 AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_MANUAL_CHANGE_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_MANUAL_CHANGE_SUFFIX + AI_ORIGINAL_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_MANUAL_CHANGE_SUFFIX + AI_TRANSLATED_SUFFIX)
         };
     }
 

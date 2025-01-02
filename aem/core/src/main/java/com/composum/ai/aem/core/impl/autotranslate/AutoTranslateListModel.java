@@ -70,7 +70,6 @@ public class AutoTranslateListModel {
             }
             path = path.replaceAll("_jcr_content", "jcr:content").replaceAll("\\.html$", "").trim();
             boolean recursive = request.getParameter("recursive") != null;
-            boolean changed = request.getParameter("translateWhenChanged") != null;
             boolean copyOriginalPage = request.getParameter("copyOriginalPage") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean debugaddinstructions = request.getParameter("debugaddinstructions") != null;
@@ -98,7 +97,6 @@ public class AutoTranslateListModel {
                 parms.maxDepth = Integer.parseInt(maxdepth);
             }
             parms.recursive = recursive;
-            parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
             parms.breakInheritance = breakInheritance;
             if (copyOriginalPage && !debugaddinstructions) {
