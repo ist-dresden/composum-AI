@@ -46,16 +46,28 @@ public class AITranslatePropertyWrapper {
     public static final String LC_PREFIX = "lc_";
 
     /**
-     * Suffix for the property name of a property that saves the original value of the property, to track when it
-     * has to be re-translated.
+     * Suffix for the property name of a property that saves the original value of the property
+     * as it has been used to create a translation, to track when it has to be re-translated.
      */
     public static final String AI_ORIGINAL_SUFFIX = "_original";
 
     /**
      * Suffix for the property name of a property that saves the translated value of the property, to track whether
-     * it has been manually changed after automatic translation.
+     * it has been manually changed after automatic translation and as used as translation when the
+     * translation source is still the same as saved in {@link #AI_ORIGINAL_SUFFIX}.
      */
     public static final String AI_TRANSLATED_SUFFIX = "_translated";
+
+    /**
+     * Suffix for the property name of an inheritance cancelled property that saves the original value of the property
+     * as it is currently in the translation source, as an indicator what needs to be merged.
+     */
+    public static final String AI_NEW_ORIGINAL_SUFFIX = "_new_original";
+
+    /**
+     * Suffix for the property name of an inheritance cancelled property that saves the
+     */
+    public static final String AI_NEW_TRANSLATED_SUFFIX = "_new_translated";
 
     /**
      * Attribute that is set on jcr:content of a page when the translation of a page failed, to make it easy to find such pages. Not set by {@link AITranslatePropertyWrapper}, but since all property names are defined here...
@@ -86,20 +98,60 @@ public class AITranslatePropertyWrapper {
         setValue(propertyName, value);
     }
 
+    /**
+     * @see #AI_ORIGINAL_SUFFIX
+     */
     public String getOriginalCopy() {
         return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), String.class);
     }
 
+    /**
+     * @see #AI_ORIGINAL_SUFFIX
+     */
     public void setOriginalCopy(String value) {
         setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), value);
     }
 
+    /**
+     * @see #AI_TRANSLATED_SUFFIX
+     */
     public String getTranslatedCopy() {
         return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), String.class);
     }
 
+    /**
+     * @see #AI_TRANSLATED_SUFFIX
+     */
     public void setTranslatedCopy(String value) {
         setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), value);
+    }
+
+    /**
+     * @see #AI_NEW_ORIGINAL_SUFFIX
+     */
+    public String getNewOriginalCopy() {
+        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX), String.class);
+    }
+
+    /**
+     * @see #AI_NEW_ORIGINAL_SUFFIX
+     */
+    public void setNewOriginalCopy(String value) {
+        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX), value);
+    }
+
+    /**
+     * @see #AI_NEW_TRANSLATED_SUFFIX
+     */
+    public String getNewTranslatedCopy() {
+        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), String.class);
+    }
+
+    /**
+     * @see #AI_NEW_TRANSLATED_SUFFIX
+     */
+    public void setNewTranslatedCopy(String value) {
+        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), value);
     }
 
     private void setValue(String key, String value) {
@@ -110,30 +162,55 @@ public class AITranslatePropertyWrapper {
         }
     }
 
+    /**
+     * @see #LC_PREFIX
+     * @see #AI_ORIGINAL_SUFFIX
+     */
     public String getLcOriginal() {
         return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), String.class);
     }
 
+    /**
+     * @see #LC_PREFIX
+     * @see #AI_ORIGINAL_SUFFIX
+     */
     public void setLcOriginal(String value) {
         setValue(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), value);
     }
 
+    /**
+     * @see #LC_PREFIX
+     * @see #AI_TRANSLATED_SUFFIX
+     */
     public String getLcTranslated() {
         return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), String.class);
     }
 
+    /**
+     * @see #LC_PREFIX
+     * @see #AI_TRANSLATED_SUFFIX
+     */
     public void setLcTranslated(String value) {
         setValue(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), value);
     }
 
+    /**
+     * @see #PROPERTY_AI_TRANSLATED_BY
+     */
     public void setAiTranslatedBy(String value) {
         setValue(PROPERTY_AI_TRANSLATED_BY, value);
     }
 
+    /**
+     * @see #PROPERTY_AI_TRANSLATED_DATE
+     */
     public void setAiTranslatedDate(Calendar value) {
         setValue(PROPERTY_AI_TRANSLATED_DATE, value != null ? value.toInstant().toString() : null);
     }
 
+    /**
+     * @see #PROPERTY_AI_TRANSLATED_MODEL
+     */
     public void setAiTranslatedModel(String value) {
         setValue(PROPERTY_AI_TRANSLATED_MODEL, value);
     }
@@ -144,6 +221,15 @@ public class AITranslatePropertyWrapper {
 
     public boolean isOriginalAsWhenLastTranslating() {
         return StringUtils.equals(getOriginal(), getOriginalCopy());
+    }
+
+    /**
+     * A merge is needed if the property is inheritance cancelled and this is true: there is a new original and a new translated copy.
+     */
+    public boolean isMergeNeeded() {
+        return StringUtils.isNotBlank(getNewOriginalCopy()) && StringUtils.isNotBlank(getNewTranslatedCopy())
+                && StringUtils.isNotBlank(getOriginal()) && StringUtils.isNotBlank(getTranslatedCopy())
+                && !StringUtils.equals(getNewOriginalCopy(), getOriginalCopy());
     }
 
     public String[] allLcKeys() {
@@ -160,6 +246,8 @@ public class AITranslatePropertyWrapper {
         return new String[]{
                 AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
                 AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX),
+                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX),
+                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX),
         };
     }
 
