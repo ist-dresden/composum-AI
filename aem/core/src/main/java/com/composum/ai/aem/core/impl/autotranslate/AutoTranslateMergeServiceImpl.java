@@ -30,9 +30,9 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     private LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public List<AutoTranslateProperty> getProperties(Resource resource) {
+    public List<AutoTranslateProperty> getProperties(Resource pageResource) {
         List<AutoTranslateProperty> list = new ArrayList<>();
-        descendantsStream(resource).forEach(res -> {
+        descendantsStream(pageResource).forEach(res -> {
             ModifiableValueMap properties = res.adaptTo(ModifiableValueMap.class);
             try {
                 LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(res, false);
@@ -41,10 +41,10 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                     Resource sourceResource = res.getResourceResolver().getResource(sourcePath);
                     if (sourceResource != null) {
                         for (String key : properties.keySet()) {
-                            if (key.startsWith(AITranslatePropertyWrapper.AI_PREFIX) &&
-                                    key.endsWith(AITranslatePropertyWrapper.AI_NEW_TRANSLATED_SUFFIX)) {
-                                String propertyName = key.substring(AITranslatePropertyWrapper.AI_PREFIX.length(),
-                                        key.length() - AITranslatePropertyWrapper.AI_NEW_TRANSLATED_SUFFIX.length());
+                            String propertyName = AITranslatePropertyWrapper.decodePropertyName(
+                                    AITranslatePropertyWrapper.AI_PREFIX, key,
+                                    AITranslatePropertyWrapper.AI_NEW_TRANSLATED_SUFFIX, res);
+                            if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
                                 if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy()) && StringUtils.isNotBlank(wrapper.getNewTranslatedCopy())) {

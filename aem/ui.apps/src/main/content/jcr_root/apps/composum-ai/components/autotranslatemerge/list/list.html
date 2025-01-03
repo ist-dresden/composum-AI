@@ -14,28 +14,34 @@
             <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
                 <div class="cq-dialog-content-page">
                     <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
-                        <section class="coral-Form-fieldset"><h2
-                                    class="coral-Form-fieldset-legend">Translation Merge UI</h2>
-                            <span class="foundation-field-readonly coral-Form-fieldwrapper">
-                                            <span class="coral-Form-field foundation-layout-util-breakword">
-                                                Blablabla
-                                            </span>
-                                        </span>
+                        <section class="coral-Form-fieldset">
+                            <h2 class="coral-Form-fieldset-legend">Translation Merge UI</h2>
                         </section>
                         <hr>
-                        <section class="coral-Form-fieldset"><h2
-                                    class="coral-Form-fieldset-legend">Triggered translations</h2>
-                            <span class="foundation-layout-util-breakword">
-                                        Table table ${model.properties}
-                                    </span>
-                            <!-- Table with translation runs -->
+                        <section class="coral-Form-fieldset">
+                            <h2 class="coral-Form-fieldset-legend">Triggered Translations</h2>
                             <table is="coral-table">
                                 <thead is="coral-table-head" sticky>
                                 <tr is="coral-table-row">
-                                    <th is="coral-table-headercell">Status</th>
-                                    <th is="coral-table-headercell">Translation root path</th>
+                                    <th is="coral-table-headercell">Original Copy</th>
+                                    <th is="coral-table-headercell">New Original Copy</th>
+                                    <th is="coral-table-headercell">New Translated Copy</th>
+                                    <th is="coral-table-headercell">Current Value</th>
                                 </tr>
                                 </thead>
+                                <tbody is="coral-table-body">
+                                <sly data-sly-list.property="${model.properties}">
+                                    <tr is="coral-table-row">
+                                        <td is="coral-table-cell" colspan="4">${property.path} ${property.wrapper.propertyName}</td>
+                                    </tr>
+                                    <tr is="coral-table-row">
+                                        <td is="coral-table-cell">${property.wrapper.originalCopy @ context='html'}</td>
+                                        <td is="coral-table-cell">${property.wrapper.newOriginalCopy @ context='html'}</td>
+                                        <td is="coral-table-cell">${property.wrapper.newTranslatedCopy @ context='html'}</td>
+                                        <td is="coral-table-cell">${property.wrapper.currentValue @ context='html'}</td>
+                                    </tr>
+                                </sly>
+                                </tbody>
                             </table>
                         </section>
                     </sly>
@@ -47,7 +53,7 @@
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <script>
     $(document).ready(function () {
-        console.log("TODO impl merge");
+        console.log("Translation Merge Table Loaded");
     });
 </script>
 </body>

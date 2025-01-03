@@ -763,14 +763,6 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         return Pattern.compile(contentMatch.replaceAll("\\s+", "\\\\s+"), Pattern.CASE_INSENSITIVE);
     }
 
-    /**
-     * Searches for properties
-     */
-
-    protected static String encodePropertyName(String prefix, String propertyName, String suffix) {
-        return prefix + propertyName.replace(":", "_") + suffix;
-    }
-
     protected static class PropertyToTranslate {
         /**
          * The resource where we take the translation source from. Can be the {@link #targetResource} but

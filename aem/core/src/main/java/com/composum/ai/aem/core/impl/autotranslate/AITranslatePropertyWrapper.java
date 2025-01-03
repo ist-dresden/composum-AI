@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static com.day.cq.commons.jcr.JcrConstants.JCR_DESCRIPTION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
@@ -7,11 +8,19 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AITranslatePropertyWrapper {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AITranslatePropertyWrapper.class);
 
     /**
      * PageContent only property: saves the additional instructions the page was translated with.
@@ -102,56 +111,56 @@ public class AITranslatePropertyWrapper {
      * @see #AI_ORIGINAL_SUFFIX
      */
     public String getOriginalCopy() {
-        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), String.class);
+        return targetValueMap.get(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), String.class);
     }
 
     /**
      * @see #AI_ORIGINAL_SUFFIX
      */
     public void setOriginalCopy(String value) {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), value);
+        setValue(encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), value);
     }
 
     /**
      * @see #AI_TRANSLATED_SUFFIX
      */
     public String getTranslatedCopy() {
-        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), String.class);
+        return targetValueMap.get(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), String.class);
     }
 
     /**
      * @see #AI_TRANSLATED_SUFFIX
      */
     public void setTranslatedCopy(String value) {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), value);
+        setValue(encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), value);
     }
 
     /**
      * @see #AI_NEW_ORIGINAL_SUFFIX
      */
     public String getNewOriginalCopy() {
-        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX), String.class);
+        return targetValueMap.get(encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX), String.class);
     }
 
     /**
      * @see #AI_NEW_ORIGINAL_SUFFIX
      */
     public void setNewOriginalCopy(String value) {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX), value);
+        setValue(encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX), value);
     }
 
     /**
      * @see #AI_NEW_TRANSLATED_SUFFIX
      */
     public String getNewTranslatedCopy() {
-        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), String.class);
+        return targetValueMap.get(encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), String.class);
     }
 
     /**
      * @see #AI_NEW_TRANSLATED_SUFFIX
      */
     public void setNewTranslatedCopy(String value) {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), value);
+        setValue(encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), value);
     }
 
     private void setValue(String key, String value) {
@@ -167,7 +176,7 @@ public class AITranslatePropertyWrapper {
      * @see #AI_ORIGINAL_SUFFIX
      */
     public String getLcOriginal() {
-        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), String.class);
+        return targetValueMap.get(encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), String.class);
     }
 
     /**
@@ -175,7 +184,7 @@ public class AITranslatePropertyWrapper {
      * @see #AI_ORIGINAL_SUFFIX
      */
     public void setLcOriginal(String value) {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), value);
+        setValue(encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX), value);
     }
 
     /**
@@ -183,7 +192,7 @@ public class AITranslatePropertyWrapper {
      * @see #AI_TRANSLATED_SUFFIX
      */
     public String getLcTranslated() {
-        return targetValueMap.get(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), String.class);
+        return targetValueMap.get(encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), String.class);
     }
 
     /**
@@ -191,7 +200,7 @@ public class AITranslatePropertyWrapper {
      * @see #AI_TRANSLATED_SUFFIX
      */
     public void setLcTranslated(String value) {
-        setValue(AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), value);
+        setValue(encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX), value);
     }
 
     /**
@@ -210,6 +219,23 @@ public class AITranslatePropertyWrapper {
 
     public String getPropertyName() {
         return propertyName;
+    }
+
+    /**
+     * Tries to guess whether the property is richtext. We have to be somewhat heuristic here since that's not
+     * easily determined. If the property name is "text" and the attribute "textIsRich" is present we use that,
+     * if it's "jcr:description" and there is no "text" attribute the same approach is used. Otherwise we check
+     * whether the first character is "<" and the last is ">", as this always seems to be the case for richtext properties.
+     * "textIsRich" is read out as Boolean, and if it's not present we use the heuristical check.
+     */
+    public boolean isRichText() {
+        Boolean textIsRich = targetValueMap.get("textIsRich", Boolean.class);
+        if (textIsRich != null) {
+            if ("text".equals(propertyName) || (JCR_DESCRIPTION.equals(propertyName) && targetValueMap.get("text") == null)) {
+                return textIsRich;
+            }
+        }
+        return getCurrentValue() != null && getCurrentValue().startsWith("<") && getCurrentValue().endsWith(">");
     }
 
     /**
@@ -238,8 +264,8 @@ public class AITranslatePropertyWrapper {
 
     public String[] allLcKeys() {
         return new String[]{
-                AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX)
+                encodePropertyName(LC_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
+                encodePropertyName(LC_PREFIX, propertyName, AI_TRANSLATED_SUFFIX)
         };
     }
 
@@ -248,10 +274,10 @@ public class AITranslatePropertyWrapper {
             throw new IllegalArgumentException("Property name must not start with " + AI_PREFIX + " or " + LC_PREFIX + ": " + propertyName);
         }
         return new String[]{
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX),
-                AutoPageTranslateServiceImpl.encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX),
+                encodePropertyName(AI_PREFIX, propertyName, AI_ORIGINAL_SUFFIX),
+                encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX),
+                encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX),
+                encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX),
         };
     }
 
@@ -272,6 +298,39 @@ public class AITranslatePropertyWrapper {
      */
     protected static boolean isAiTranslateProperty(String name) {
         return name.startsWith(AI_PREFIX) || name.startsWith(LC_PREFIX);
+    }
+
+
+    /**
+     * Searches for properties
+     */
+
+    public static String encodePropertyName(String prefix, String propertyName, String suffix) {
+        return prefix + propertyName.replace(":", "_") + suffix;
+    }
+
+    /**
+     * Inverts {@link #encodePropertyName(String, String, String)} by replacing _ with : if the property isn't present.
+     * This assumes there was only one : in the original property name.
+     *
+     * @return the property name or null if that doesn't seem like an encoded property name.
+     */
+    @Nullable
+    public static String decodePropertyName(@Nonnull String prefix, @Nonnull String encodedPropertyName,
+                                            @Nonnull String suffix, @Nonnull Resource resource) {
+        if (!encodedPropertyName.startsWith(prefix) || !encodedPropertyName.endsWith(suffix)) {
+            return null;
+        }
+        String propertyName = encodedPropertyName.substring(prefix.length(), encodedPropertyName.length() - suffix.length());
+        if (resource.getValueMap().containsKey(propertyName)) {
+            return propertyName;
+        }
+        propertyName = propertyName.replaceFirst("_", ":");
+        if (resource.getValueMap().containsKey(propertyName)) {
+            return propertyName;
+        }
+        LOG.info("Strange: encoded property {} not found in resource {}", encodedPropertyName, resource.getPath());
+        return null;
     }
 
 }
