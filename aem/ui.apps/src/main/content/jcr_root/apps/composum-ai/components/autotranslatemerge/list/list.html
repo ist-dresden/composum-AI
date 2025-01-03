@@ -33,27 +33,14 @@
         .rte-toolbar {
             background-color: #f9f9f9;
             border: 1px solid #ccc;
-            padding: 4px;
+            height: 28px;
             display: flex;
-            gap: 4px;
             margin-bottom: 4px;
-        }
-
-        .rte-btn {
-            background: #fff;
-            border: 1px solid #ccc;
-            padding: 4px 8px;
-            cursor: pointer;
-        }
-
-        .rte-btn:hover {
-            background: #eee;
         }
 
         .rte-editor {
             border: 1px solid #ccc;
             padding: 8px;
-            min-height: 50px;
             overflow-y: auto;
             resize: vertical;
         }
@@ -92,17 +79,32 @@
                                             colspan="4">${property.path} ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <tr is="coral-table-row">
-                                        <td is="coral-table-cell" class="previoussrc">${property.originalCopyInsertionsMarked @ context='html'}</td>
-                                        <td is="coral-table-cell" class="newsrc">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
-                                        <td is="coral-table-cell" class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
-                                        <td is="coral-table-cell" class="newtrans">${property.wrapper.newTranslatedCopy @ context='html'}</td>
+                                        <td is="coral-table-cell"
+                                            class="previoussrc">${property.originalCopyInsertionsMarked @ context='html'}</td>
+                                        <td is="coral-table-cell"
+                                            class="newsrc">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
+                                        <td is="coral-table-cell"
+                                            class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
+                                        <td is="coral-table-cell"
+                                            class="newtrans">${property.wrapper.newTranslatedCopy @ context='html'}</td>
                                         <td is="coral-table-cell">
                                             <div class="rte-container">
                                                 <div class="rte-toolbar">
-                                                    <button class="rte-btn" data-command="bold">B</button>
-                                                    <button class="rte-btn" data-command="italic">I</button>
-                                                    <button class="rte-btn" data-command="underline">U</button>
-                                                    <button class="rte-btn" data-command="insertUnorderedList">?</button>
+                                                    <button class="rte-btn" is="coral-button" variant="minimal"
+                                                            title="Bold" icon="textBold"
+                                                            data-command="bold"></button>
+                                                    <button is="coral-button" variant="minimal" title="Italic"
+                                                            icon="textItalic"
+                                                            data-command="italic"></button>
+                                                    <button is="coral-button" variant="minimal" title="Underline"
+                                                            icon="textUnderline"
+                                                            data-command="underline"></button>
+                                                    <button is="coral-button" variant="minimal" title="Bullet List"
+                                                            icon="textBulleted"
+                                                            data-command="insertUnorderedList"></button>
+                                                    <button is="coral-button" variant="minimal" title="Numbered List"
+                                                            icon="textNumbered"
+                                                            data-command="insertOrderedList"></button>
                                                 </div>
                                                 <div class="rte-editor" contenteditable="true">
                                                     ${property.wrapper.currentValue @ context='html'}
@@ -138,11 +140,11 @@
                 }
             });
 
-            editor.addEventListener("blur", function () {
+            /* editor.addEventListener("blur", function () {
                 const updatedContent = editor.innerHTML;
                 console.log("Updated content:", updatedContent);
                 // Save the content (custom implementation needed)
-            });
+            }); */
         });
     });
 </script>
