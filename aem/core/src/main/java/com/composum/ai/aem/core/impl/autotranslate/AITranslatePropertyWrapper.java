@@ -208,6 +208,10 @@ public class AITranslatePropertyWrapper {
         setValue(PROPERTY_AI_TRANSLATED_DATE, value != null ? value.toInstant().toString() : null);
     }
 
+    public String getPropertyName() {
+        return propertyName;
+    }
+
     /**
      * @see #PROPERTY_AI_TRANSLATED_MODEL
      */

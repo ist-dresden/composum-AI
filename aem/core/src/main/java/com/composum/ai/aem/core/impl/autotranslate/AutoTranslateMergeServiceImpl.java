@@ -30,8 +30,8 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     private LiveRelationshipManager liveRelationshipManager;
 
     @Override
-    public List<AITranslatePropertyWrapper> getProperties(Resource resource) {
-        List<AITranslatePropertyWrapper> list = new ArrayList<>();
+    public List<AutoTranslateProperty> getProperties(Resource resource) {
+        List<AutoTranslateProperty> list = new ArrayList<>();
         descendantsStream(resource).forEach(res -> {
             ModifiableValueMap properties = res.adaptTo(ModifiableValueMap.class);
             try {
@@ -48,7 +48,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
                                 if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy()) && StringUtils.isNotBlank(wrapper.getNewTranslatedCopy())) {
-                                    list.add(wrapper);
+                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper));
                                 } else {
                                     LOG.warn("Property {} has empty original or translated copy", propertyName);
                                 }
@@ -72,5 +72,4 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 Stream.of(resource),
                 children.stream().flatMap(this::descendantsStream));
     }
-
 }

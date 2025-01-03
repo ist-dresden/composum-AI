@@ -27,12 +27,11 @@ public class AutoTranslateMergeModel {
     @OSGiService
     private AutoTranslateMergeService autoTranslateMergeService;
 
-
     public boolean isDisabled() {
         return autoTranslateService == null || !autoTranslateService.isEnabled();
     }
 
-    public List<AITranslatePropertyWrapper> getProperties() {
+    public List<AutoTranslateMergeService.AutoTranslateProperty> getProperties() {
         Resource resource = getPageResource();
         return autoTranslateMergeService.getProperties(resource);
     }
@@ -46,7 +45,7 @@ public class AutoTranslateMergeModel {
 
         RequestPathInfo requestPathInfo = request.getRequestPathInfo();
         String suffix = requestPathInfo.getSuffix();
-        if (suffix != null) {
+        if (suffix != null && !isDisabled()) {
             return pageManager.getContainingPage(suffix).getContentResource();
         }
         return null;
