@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
     <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+    <style>
+        del, del * {
+            background-color: #FFC0C0;
+            text-decoration: line-through;
+        }
+
+        span.ins, span.ins * {
+            background-color: #C0FFC0;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
 <div class="foundation-layout-panel">
@@ -25,6 +36,7 @@
                                 <tr is="coral-table-row">
                                     <th is="coral-table-headercell">Original Copy</th>
                                     <th is="coral-table-headercell">New Original Copy</th>
+                                    <th is="coral-table-headercell">Original Diffs</th>
                                     <th is="coral-table-headercell">New Translated Copy</th>
                                     <th is="coral-table-headercell">Current Value</th>
                                 </tr>
@@ -32,11 +44,13 @@
                                 <tbody is="coral-table-body">
                                 <sly data-sly-list.property="${model.properties}">
                                     <tr is="coral-table-row">
-                                        <td is="coral-table-cell" colspan="4">${property.path} ${property.wrapper.propertyName}</td>
+                                        <td is="coral-table-cell"
+                                            colspan="4">${property.path} ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <tr is="coral-table-row">
-                                        <td is="coral-table-cell">${property.wrapper.originalCopy @ context='html'}</td>
-                                        <td is="coral-table-cell">${property.wrapper.newOriginalCopy @ context='html'}</td>
+                                        <td is="coral-table-cell">${property.originalCopyInsertionsMarked @ context='html'}</td>
+                                        <td is="coral-table-cell">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
+                                        <td is="coral-table-cell">${property.originalCopyDiffsHTML @ context='html'}</td>
                                         <td is="coral-table-cell">${property.wrapper.newTranslatedCopy @ context='html'}</td>
                                         <td is="coral-table-cell">${property.wrapper.currentValue @ context='html'}</td>
                                     </tr>
@@ -51,6 +65,9 @@
     </div>
 </div>
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js"
+        integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     $(document).ready(function () {
         console.log("Translation Merge Table Loaded");

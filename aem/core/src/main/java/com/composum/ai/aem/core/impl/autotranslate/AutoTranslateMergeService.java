@@ -1,5 +1,6 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -29,6 +30,78 @@ public interface AutoTranslateMergeService {
 
         public AITranslatePropertyWrapper getWrapper() {
             return wrapper;
+        }
+
+        public String getOriginalCopyDiffsHTML() {
+            String original = wrapper.getOriginalCopy();
+            String newOriginal = wrapper.getNewOriginalCopy();
+            DiffMatchPatch dmp = new DiffMatchPatch();
+            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(original, newOriginal);
+            dmp.diff_cleanupSemanticLossless(diffs);
+
+            StringBuilder htmlBuf = new StringBuilder();
+            for (DiffMatchPatch.Diff aDiff : diffs) {
+                String text = aDiff.text;
+                switch (aDiff.operation) {
+                    case INSERT: // strangely the html context in HTL seems to swallow ins, so we use span.ins instead
+                        htmlBuf.append("<span class=\"ins\">").append(text).append("</span>");
+                        break;
+                    case DELETE:
+                        htmlBuf.append("<del>").append(text).append("</del>");
+                        break;
+                    case EQUAL:
+                        htmlBuf.append(text);
+                        break;
+                }
+            }
+            String html = htmlBuf.toString();
+            return html;
+        }
+
+        public String getOriginalCopyInsertionsMarked() {
+            String src = wrapper.getOriginalCopy();
+            String dst = wrapper.getNewOriginalCopy();
+            DiffMatchPatch dmp = new DiffMatchPatch();
+            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
+            dmp.diff_cleanupSemanticLossless(diffs);
+
+            StringBuilder htmlBuf = new StringBuilder();
+            for (DiffMatchPatch.Diff aDiff : diffs) {
+                String text = aDiff.text;
+                switch (aDiff.operation) {
+                    case INSERT: // strangely the html context in HTL seems to swallow ins, so we use span.ins instead
+                        htmlBuf.append("<span class=\"ins\">").append(text).append("</span>");
+                        break;
+                    case EQUAL:
+                        htmlBuf.append(text);
+                        break;
+                }
+            }
+            String html = htmlBuf.toString();
+            return html;
+        }
+
+        public String getNewOriginalCopyInsertionsMarked() {
+            String src = wrapper.getNewOriginalCopy();
+            String dst = wrapper.getOriginalCopy();
+            DiffMatchPatch dmp = new DiffMatchPatch();
+            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
+            dmp.diff_cleanupSemanticLossless(diffs);
+
+            StringBuilder htmlBuf = new StringBuilder();
+            for (DiffMatchPatch.Diff aDiff : diffs) {
+                String text = aDiff.text;
+                switch (aDiff.operation) {
+                    case INSERT:
+                        htmlBuf.append("<span class=\"ins\">").append(text).append("</span>");
+                        break;
+                    case EQUAL:
+                        htmlBuf.append(text);
+                        break;
+                }
+            }
+            String html = htmlBuf.toString();
+            return html;
         }
 
         @Override
