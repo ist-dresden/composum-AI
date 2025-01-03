@@ -16,6 +16,15 @@
             background-color: #C0FFC0;
             text-decoration: underline;
         }
+
+        td {
+            vertical-align: top;
+            width: 20%;
+        }
+
+        .previoussrc, .newsrc {
+            display: none;
+        }
     </style>
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
@@ -27,18 +36,21 @@
                     <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
                         <section class="coral-Form-fieldset">
                             <h2 class="coral-Form-fieldset-legend">Translation Merge UI</h2>
+                            <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                <span class="coral-Form-field foundation-layout-util-breakword">
+                                    Explain explain explain
+                                    </span>
+                            </span>
                         </section>
-                        <hr>
                         <section class="coral-Form-fieldset">
-                            <h2 class="coral-Form-fieldset-legend">Triggered Translations</h2>
                             <table is="coral-table">
                                 <thead is="coral-table-head" sticky>
                                 <tr is="coral-table-row">
-                                    <th is="coral-table-headercell">Original Copy</th>
-                                    <th is="coral-table-headercell">New Original Copy</th>
-                                    <th is="coral-table-headercell">Original Diffs</th>
-                                    <th is="coral-table-headercell">New Translated Copy</th>
-                                    <th is="coral-table-headercell">Current Value</th>
+                                    <th is="coral-table-headercell" class="previoussrc">Previously translated text</th>
+                                    <th is="coral-table-headercell" class="newsrc">New text</th>
+                                    <th is="coral-table-headercell" class="srcdiffs">Original Diffs</th>
+                                    <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
+                                    <th is="coral-table-headercell" class="current">Current Text on Page</th>
                                 </tr>
                                 </thead>
                                 <tbody is="coral-table-body">
@@ -48,11 +60,11 @@
                                             colspan="4">${property.path} ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <tr is="coral-table-row">
-                                        <td is="coral-table-cell">${property.originalCopyInsertionsMarked @ context='html'}</td>
-                                        <td is="coral-table-cell">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
-                                        <td is="coral-table-cell">${property.originalCopyDiffsHTML @ context='html'}</td>
-                                        <td is="coral-table-cell">${property.wrapper.newTranslatedCopy @ context='html'}</td>
-                                        <td is="coral-table-cell">${property.wrapper.currentValue @ context='html'}</td>
+                                        <td is="coral-table-cell" class="previoussrc">${property.originalCopyInsertionsMarked @ context='html'}</td>
+                                        <td is="coral-table-cell" class="newsrc">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
+                                        <td is="coral-table-cell" class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
+                                        <td is="coral-table-cell" class="newtrans">${property.wrapper.newTranslatedCopy @ context='html'}</td>
+                                        <td is="coral-table-cell" class="current">${property.wrapper.currentValue @ context='html'}</td>
                                     </tr>
                                 </sly>
                                 </tbody>
@@ -69,7 +81,7 @@
         integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function() {
         console.log("Translation Merge Table Loaded");
     });
 </script>
