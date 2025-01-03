@@ -5,7 +5,6 @@
     <title>Translation Merge UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
-    <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
     <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
     <style>
         del, del * {
@@ -27,9 +26,33 @@
             display: none;
         }
 
-        .rte-editor {
+        .rte-container {
+            position: relative;
+        }
+
+        .rte-toolbar {
+            background-color: #f9f9f9;
             border: 1px solid #ccc;
             padding: 4px;
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .rte-btn {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .rte-btn:hover {
+            background: #eee;
+        }
+
+        .rte-editor {
+            border: 1px solid #ccc;
+            padding: 8px;
             min-height: 50px;
             overflow-y: auto;
             resize: vertical;
@@ -73,10 +96,17 @@
                                         <td is="coral-table-cell" class="newsrc">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
                                         <td is="coral-table-cell" class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
                                         <td is="coral-table-cell" class="newtrans">${property.wrapper.newTranslatedCopy @ context='html'}</td>
-                                        <td is="coral-table-cell" class="current">${property.wrapper.currentValue @ context='html'}</td>
                                         <td is="coral-table-cell">
-                                            <div class="rte-editor" contenteditable="true">
-                                                ${property.wrapper.currentValue @ context='html'}
+                                            <div class="rte-container">
+                                                <div class="rte-toolbar">
+                                                    <button class="rte-btn" data-command="bold">B</button>
+                                                    <button class="rte-btn" data-command="italic">I</button>
+                                                    <button class="rte-btn" data-command="underline">U</button>
+                                                    <button class="rte-btn" data-command="insertUnorderedList">?</button>
+                                                </div>
+                                                <div class="rte-editor" contenteditable="true">
+                                                    ${property.wrapper.currentValue @ context='html'}
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -91,33 +121,27 @@
     </div>
 </div>
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js"
-        integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core'}"></sly>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const rteEditors = document.querySelectorAll('.rte-editor');
+        const rteContainers = document.querySelectorAll(".rte-container");
 
-        rteEditors.forEach(editor => {
-            new Coral.TextEditor(editor, {
-                toolbar: {
-                    items: [
-                        'bold', 'italic', 'underline', 'strikethrough',
-                        '|',
-                        'unorderedlist', 'orderedlist',
-                        '|',
-                        'justifyleft', 'justifycenter', 'justifyright',
-                        '|',
-                        'link', 'unlink'
-                    ]
+        rteContainers.forEach(container => {
+            const editor = container.querySelector(".rte-editor");
+            const toolbar = container.querySelector(".rte-toolbar");
+
+            toolbar.addEventListener("click", event => {
+                const command = event.target.dataset.command;
+                if (command) {
+                    document.execCommand(command, false, null);
+                    editor.focus(); // Refocus the editor after the action
                 }
             });
 
-            editor.addEventListener('blur', function () {
+            editor.addEventListener("blur", function () {
                 const updatedContent = editor.innerHTML;
-                console.log("Updated content: ", updatedContent);
-                // Save the content (implementation depends on backend setup)
+                console.log("Updated content:", updatedContent);
+                // Save the content (custom implementation needed)
             });
         });
     });
