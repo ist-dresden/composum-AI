@@ -6,45 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
     <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
-    <style>
-        del, del * {
-            background-color: #FFC0C0;
-            text-decoration: line-through;
-        }
-
-        span.ins, span.ins * {
-            background-color: #C0FFC0;
-            text-decoration: underline;
-        }
-
-        td {
-            vertical-align: top;
-            width: 20%;
-        }
-
-        .previoussrc, .newsrc {
-            display: none;
-        }
-
-        .rte-container {
-            position: relative;
-        }
-
-        .rte-toolbar {
-            background-color: #f9f9f9;
-            border: 1px solid #ccc;
-            height: 28px;
-            display: flex;
-            margin-bottom: 4px;
-        }
-
-        .rte-editor {
-            border: 1px solid #ccc;
-            padding: 8px;
-            overflow-y: auto;
-            resize: vertical;
-        }
-    </style>
+    <link rel="stylesheet" href="${resource.path @ context='uri'}/list.css">
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
 <div class="foundation-layout-panel">
@@ -55,10 +17,8 @@
                     <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
                         <section class="coral-Form-fieldset">
                             <h2 class="coral-Form-fieldset-legend">Translation Merge UI</h2>
-                            <span class="foundation-field-readonly coral-Form-fieldwrapper">
-                                <span class="coral-Form-field foundation-layout-util-breakword">
+                            <span class="coral-Form-field foundation-layout-util-breakword">
                                     Explain explain explain
-                                    </span>
                             </span>
                         </section>
                         <section class="coral-Form-fieldset">
@@ -124,29 +84,6 @@
 </div>
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core'}"></sly>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const rteContainers = document.querySelectorAll(".rte-container");
-
-        rteContainers.forEach(container => {
-            const editor = container.querySelector(".rte-editor");
-            const toolbar = container.querySelector(".rte-toolbar");
-
-            toolbar.addEventListener("click", event => {
-                const command = event.target.dataset.command;
-                if (command) {
-                    document.execCommand(command, false, null);
-                    editor.focus(); // Refocus the editor after the action
-                }
-            });
-
-            /* editor.addEventListener("blur", function () {
-                const updatedContent = editor.innerHTML;
-                console.log("Updated content:", updatedContent);
-                // Save the content (custom implementation needed)
-            }); */
-        });
-    });
-</script>
+<script src="${resource.path @ context='uri'}/list.js"></script>
 </body>
 </html>

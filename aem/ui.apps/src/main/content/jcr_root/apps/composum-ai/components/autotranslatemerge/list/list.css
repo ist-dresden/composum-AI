@@ -1,0 +1,37 @@
+del, del * {
+    background-color: #FFC0C0;
+    text-decoration: line-through;
+}
+
+span.ins, span.ins * {
+    background-color: #C0FFC0;
+    text-decoration: underline;
+}
+
+td {
+    vertical-align: top;
+    width: 20%;
+}
+
+.previoussrc, .newsrc {
+    display: none;
+}
+
+.rte-container {
+    position: relative;
+}
+
+.rte-toolbar {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    height: 28px;
+    display: flex;
+    margin-bottom: 4px;
+}
+
+.rte-editor {
+    border: 1px solid #ccc;
+    padding: 8px;
+    overflow-y: auto;
+    resize: vertical;
+}
