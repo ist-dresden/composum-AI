@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
     <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+    <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
     <style>
         del, del * {
             background-color: #FFC0C0;
@@ -24,6 +25,14 @@
 
         .previoussrc, .newsrc {
             display: none;
+        }
+
+        .rte-editor {
+            border: 1px solid #ccc;
+            padding: 4px;
+            min-height: 50px;
+            overflow-y: auto;
+            resize: vertical;
         }
     </style>
 </head>
@@ -65,6 +74,11 @@
                                         <td is="coral-table-cell" class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
                                         <td is="coral-table-cell" class="newtrans">${property.wrapper.newTranslatedCopy @ context='html'}</td>
                                         <td is="coral-table-cell" class="current">${property.wrapper.currentValue @ context='html'}</td>
+                                        <td is="coral-table-cell">
+                                            <div class="rte-editor" contenteditable="true">
+                                                ${property.wrapper.currentValue @ context='html'}
+                                            </div>
+                                        </td>
                                     </tr>
                                 </sly>
                                 </tbody>
@@ -80,9 +94,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.0/purify.min.js"
         integrity="sha512-AFNgsjnDsfr0u42G9O1u+r+XewdzK7zUIgenHJ4ZbklTMzFgHZ81xmtNSkbDt/SARHrTwfCP1Vec9T7fr7WrMA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core'}"></sly>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        console.log("Translation Merge Table Loaded");
+    document.addEventListener("DOMContentLoaded", function () {
+        const rteEditors = document.querySelectorAll('.rte-editor');
+
+        rteEditors.forEach(editor => {
+            new Coral.TextEditor(editor, {
+                toolbar: {
+                    items: [
+                        'bold', 'italic', 'underline', 'strikethrough',
+                        '|',
+                        'unorderedlist', 'orderedlist',
+                        '|',
+                        'justifyleft', 'justifycenter', 'justifyright',
+                        '|',
+                        'link', 'unlink'
+                    ]
+                }
+            });
+
+            editor.addEventListener('blur', function () {
+                const updatedContent = editor.innerHTML;
+                console.log("Updated content: ", updatedContent);
+                // Save the content (implementation depends on backend setup)
+            });
+        });
     });
 </script>
 </body>
