@@ -42,9 +42,9 @@ class AITranslateMergeRow {
             this.mergeButton = this.row.querySelector(".intelligent-merge");
 
             this.resetButton = this.row.querySelector(".reset-editor");
-            const saveButton = this.editorContainer.querySelector(".save-editor");
+            this.saveButton = this.row.querySelector(".save-editor");
 
-            new AITranslatorMergeRTE(this.editorContainer, saveButton);
+            new AITranslatorMergeRTE(this.editorContainer, this.saveButton);
 
             this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
             this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
@@ -71,20 +71,56 @@ class AITranslateMergeRow {
     }
 
     intelligentMerge() {
-        console.log("TODO IMPLEMENT Intelligent merge");
-        this.saveButton.disabled = false;
+        const data = {
+            path: this.row.dataset.path,
+            propertyName: this.row.dataset.propertyname,
+            originalSource: this.row.dataset.os,
+            newSource: this.row.dataset.ns,
+            newTranslation: this.row.dataset.nt,
+            currentText: this.editor.innerHTML
+        };
+
+        Granite.csrf.refreshToken().then(token => {
+            fetch(URL_MERGE_SERVLET + "?operation=merge", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': token
+                },
+                body: JSON.stringify({
+                    operation: 'merge',
+                    ...data
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then(errMsg => {
+                        throw new Error("Merge failed: " + errMsg);
+                    });
+                }
+            })
+            .then(mergedText => {
+                this.editor.innerHTML = mergedText;
+                this.saveButton.disabled = false;
+                console.log("Merge successful");
+            })
+            .catch(error => {
+                console.error("Error in intelligentMerge", error);
+            });
+        });
     }
 
     saveEditor() {
         Granite.csrf.refreshToken().then(token => {
-            fetch(URL_MERGE_SERVLET, {
+            fetch(URL_MERGE_SERVLET + "?operation=save", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'CSRF-Token': token
                 },
                 body: new URLSearchParams({
-                    operation: 'save',
                     path: this.row.dataset.path,
                     propertyName: this.row.dataset.propertyname,
                     body: this.editor.innerHTML

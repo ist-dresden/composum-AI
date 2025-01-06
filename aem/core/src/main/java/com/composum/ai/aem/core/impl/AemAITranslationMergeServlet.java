@@ -64,7 +64,8 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         // For now, just return the current text as the merged result
         String mergedText = mergeRequest.currentText + " TODO MERGE";
 
-        response.setContentType("plain/text");
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().println(mergedText);
     }
 
