@@ -35,10 +35,11 @@
                                 </thead>
                                 <tbody is="coral-table-body" class="propertiestable">
                                 <sly data-sly-list.property="${model.properties}">
-                                    <tr is="coral-table-row">
-                                        <td is="coral-table-cell" colspan="4">${property.path} ${property.wrapper.propertyName}</td>
+                                    <tr is="coral-table-row" class="row-separator">
+                                        <td is="coral-table-cell" class="row-separator"
+                                            colspan="5">${property.path} ${property.wrapper.propertyName}</td>
                                     </tr>
-                                    <tr is="coral-table-row"
+                                    <tr is="coral-table-row" class="property-row"
                                         data-os="${property.originalCopyInsertionsMarked}"
                                         data-ot="${property.wrapper.newTranslatedCopy}"
                                         data-ns="${property.newOriginalCopyInsertionsMarked}"
@@ -53,14 +54,20 @@
                                             class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
                                         <td is="coral-table-cell"
                                             class="newtrans">
-                                            ${property.wrapper.newTranslatedCopy @ context='html'}
+                                            <div class="newtrans-text">${property.wrapper.newTranslatedCopy @ context='html'}</div>
                                             <div class="row-actions">
-                                                <button is="coral-button" variant="secondary" class="copy-to-editor">Copy to Editor</button>
-                                                <button is="coral-button" variant="secondary" class="append-to-editor">Append to Editor</button>
-                                                <button is="coral-button" variant="secondary" class="intelligent-merge">Intelligent Merge</button>
+                                                <button is="coral-button" variant="secondary"
+                                                        class="copy-to-editor">Copy to Editor
+                                                </button>
+                                                <button is="coral-button" variant="secondary"
+                                                        class="append-to-editor">Append to Editor
+                                                </button>
+                                                <button is="coral-button" variant="secondary"
+                                                        class="intelligent-merge">Intelligent Merge
+                                                </button>
                                             </div>
                                         </td>
-                                        <td is="coral-table-cell">
+                                        <td is="coral-table-cell" class="editor">
                                             <div class="rte-container">
                                                 <div class="rte-toolbar">
                                                     <button class="rte-btn" is="coral-button" variant="minimal"
@@ -84,8 +91,12 @@
                                                 </div>
                                             </div>
                                             <div class="editor-actions">
-                                                <button is="coral-button" variant="secondary" class="reset-editor">Reset</button>
-                                                <button is="coral-button" variant="secondary" class="save-editor" disabled>Save</button>
+                                                <button is="coral-button" variant="secondary" class="reset-editor">
+                                                    Reset
+                                                </button>
+                                                <button is="coral-button" variant="secondary" class="save-editor"
+                                                        disabled>Save
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
