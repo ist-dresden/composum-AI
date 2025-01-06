@@ -32,7 +32,7 @@
                                     <th is="coral-table-headercell" class="current">Current Text on Page</th>
                                 </tr>
                                 </thead>
-                                <tbody is="coral-table-body">
+                                <tbody is="coral-table-body" class="propertiestable">
                                 <sly data-sly-list.property="${model.properties}">
                                     <tr is="coral-table-row">
                                         <td is="coral-table-cell"
@@ -46,7 +46,14 @@
                                         <td is="coral-table-cell"
                                             class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
                                         <td is="coral-table-cell"
-                                            class="newtrans">${property.wrapper.newTranslatedCopy @ context='html'}</td>
+                                            class="newtrans">
+                                            ${property.wrapper.newTranslatedCopy @ context='html'}
+                                            <div class="row-actions">
+                                                <button is="coral-button" variant="primary" class="copy-to-editor">Copy to Editor</button>
+                                                <button is="coral-button" variant="primary" class="append-to-editor">Append to Editor</button>
+                                                <button is="coral-button" variant="primary" class="intelligent-merge">Intelligent Merge</button>
+                                            </div>
+                                        </td>
                                         <td is="coral-table-cell">
                                             <div class="rte-container">
                                                 <div class="rte-toolbar">
@@ -69,6 +76,10 @@
                                                 <div class="rte-editor" contenteditable="true">
                                                     ${property.wrapper.currentValue @ context='html'}
                                                 </div>
+                                                <div class="editor-actions">
+                                                    <button is="coral-button" variant="secondary" class="reset-editor">Reset</button>
+                                                    <button is="coral-button" variant="primary" class="save-editor" disabled>Save</button>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -87,3 +98,5 @@
 <script src="${resource.path @ context='uri'}/list.js"></script>
 </body>
 </html>
+
+<!-- AIGenVersion(691163c8, list.html.prompt-3b29852a, 8.2AutomaticTranslationMergeTool.md-4fe76a18) -->
