@@ -20,12 +20,8 @@ class AITranslateMergeTool {
     /** Initializes table event listeners for handling row-specific actions. */
     initTableEventListeners() {
         const tableBody = document.querySelector(".propertiestable");
-        tableBody.addEventListener("click", (event) => {
-            const target = event.target;
-            if (target.matches(".copy-to-editor, .append-to-editor, .intelligent-merge")) {
-                const row = target.closest("coral-table-row");
-                new AITranslateMergeRow(row, target, this);
-            }
+        document.querySelectorAll("tbody tr").forEach(row => {
+            new AITranslateMergeRow(row, this);
         });
     }
 
@@ -39,89 +35,72 @@ class AITranslateMergeTool {
 
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
 class AITranslateMergeRow {
-    constructor(row, target, tool) {
+    constructor(row, tool) {
         this.row = row;
-        this.target = target;
         this.tool = tool;
-        this.handleAction();
-    }
+        this.editorContainer = row.querySelector(".rte-container");
+        if (this.editorContainer) {
+            this.editor = this.editorContainer.querySelector(".rte-editor");
+            this.saveButton = this.row.querySelector(".save-editor");
 
-    /** Determines and executes the action based on the button clicked. */
-    handleAction() {
-        const newTransCell = this.row.querySelector(".newtrans");
-        const editorContainer = this.row.querySelector(".rte-container");
-        const editor = editorContainer.querySelector(".rte-editor");
-        const newText = newTransCell.textContent.trim();
-        const saveButton = this.row.querySelector(".save-editor");
+            this.copyButton = this.row.querySelector(".copy-to-editor");
+            this.appendButton = this.row.querySelector(".append-to-editor");
+            this.mergeButton = this.row.querySelector(".intelligent-merge");
 
-        if (this.target.classList.contains("copy-to-editor")) {
-            this.copyToEditor(editor, newText, saveButton);
-        } else if (this.target.classList.contains("append-to-editor")) {
-            this.appendToEditor(editor, newText, saveButton);
-        } else if (this.target.classList.contains("intelligent-merge")) {
-            this.intelligentMerge(editor, newText, saveButton);
+            this.resetButton = this.row.querySelector(".reset-editor");
+
+            new AITranslatorMergeRTE(this.editorContainer, this.editorContainer.querySelector(".save-editor"));
+
+            this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
+            this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
+            this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+
+            this.resetButton.addEventListener("click", this.resetEditor.bind(this));
         }
     }
 
-    /** Copies new text to the editor, overwriting existing content. */
-    copyToEditor(editor, newText, saveButton) {
-        editor.innerHTML = newText;
-        editor.setAttribute('data-original-content', newText);
-        saveButton.disabled = true;
+    copyToEditor() {
+        this.editor.innerHTML = this.row.dataset.nt;
+        this.saveButton.disabled = false;
     }
 
-    /** Appends new text to the existing content in the editor. */
-    appendToEditor(editor, newText, saveButton) {
-        editor.innerHTML += newText;
-        saveButton.disabled = false;
+    appendToEditor() {
+        this.editor.innerHTML += this.row.dataset.nt;
+        this.saveButton.disabled = false;
     }
 
-    /** Merges new text with existing content using intelligent merge logic. */
-    intelligentMerge(editor, newText, saveButton) {
-        const mergedText = this.tool.intelligentMerge(editor.innerHTML, newText);
-        editor.innerHTML = mergedText;
-        editor.setAttribute('data-original-content', mergedText);
-        saveButton.disabled = false;
+    resetEditor() {
+        this.editor.innerHTML = this.row.dataset.e;
+        this.saveButton.disabled = true;
+    }
+
+    intelligentMerge() {
+        console.log("TODO IMPLEMENT Intelligent merge");
+        this.saveButton.disabled = false;
     }
 }
 
 /** Manages the rich text editor functionalities, including toolbar actions and save/reset operations. */
 class AITranslatorMergeRTE {
-
-    constructor(container) {
+    constructor(container, saveButton) {
         this.editor = container.querySelector(".rte-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
-        this.resetButton = container.querySelector(".reset-editor");
-        this.saveButton = container.querySelector(".save-editor");
+        this.saveButton = saveButton;
 
-        this.toolbar.addEventListener("click", (event) => {
-            const command = event.target.dataset.command;
-            if (command) {
-                document.execCommand(command, false, null);
-                this.editor.focus(); // Refocus the editor after the action
-            }
-        });
+        this.toolbar.addEventListener("click", this.handleToolbarClick.bind(this));
+        this.editor.addEventListener("input", this.handleEditorInput.bind(this));
+    }
 
-        this.resetButton.addEventListener("click", () => {
-            const originalContent = this.editor.getAttribute('data-original-content');
-            if (originalContent !== null) {
-                this.editor.innerHTML = originalContent;
-                this.saveButton.disabled = true;
-            }
-        });
+    handleToolbarClick(event) {
+        const command = event.target.dataset.command;
+        if (command) {
+            document.execCommand(command, false, null);
+            this.editor.focus(); // Refocus the editor after the action
+        }
+    }
 
-        this.editor.addEventListener("input", () => {
-            const currentContent = this.editor.innerHTML;
-            const originalContent = this.editor.getAttribute('data-original-content');
-            this.saveButton.disabled = (currentContent === originalContent);
-        });
-
-        this.saveButton.addEventListener("click", () => {
-            const updatedContent = this.editor.innerHTML;
-            // Implement save functionality here
-            this.editor.setAttribute('data-original-content', updatedContent);
-            this.saveButton.disabled = true;
-        });
+    handleEditorInput() {
+        this.saveButton.disabled = false;
     }
 }
 
