@@ -16,17 +16,18 @@
                 <div class="cq-dialog-content-page">
                     <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
                         <section class="coral-Form-fieldset">
-                            <h2 class="coral-Form-fieldset-legend">Translation Merge UI</h2>
+                            <h2 class="coral-Form-fieldset-legend">Translation Merge Tool</h2>
                             <span class="coral-Form-field foundation-layout-util-breakword">
-                                    Explain explain explain
+                                Instructions: Review and edit translations for modified properties below.<br>
+                                Only rows with source modifications are displayed.
                             </span>
                         </section>
                         <section class="coral-Form-fieldset">
                             <table is="coral-table">
                                 <thead is="coral-table-head" sticky>
                                 <tr is="coral-table-row">
-                                    <th is="coral-table-headercell" class="previoussrc">Previously translated text</th>
-                                    <th is="coral-table-headercell" class="newsrc">New text</th>
+                                    <th is="coral-table-headercell" class="previoussrc">Previously Translated Text</th>
+                                    <th is="coral-table-headercell" class="newsrc">New Text</th>
                                     <th is="coral-table-headercell" class="srcdiffs">Original Diffs</th>
                                     <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
                                     <th is="coral-table-headercell" class="current">Current Text on Page</th>
@@ -49,9 +50,9 @@
                                             class="newtrans">
                                             ${property.wrapper.newTranslatedCopy @ context='html'}
                                             <div class="row-actions">
-                                                <button is="coral-button" variant="primary" class="copy-to-editor">Copy to Editor</button>
-                                                <button is="coral-button" variant="primary" class="append-to-editor">Append to Editor</button>
-                                                <button is="coral-button" variant="primary" class="intelligent-merge">Intelligent Merge</button>
+                                                <button is="coral-button" variant="secondary" class="copy-to-editor">Copy to Editor</button>
+                                                <button is="coral-button" variant="secondary" class="append-to-editor">Append to Editor</button>
+                                                <button is="coral-button" variant="secondary" class="intelligent-merge">Intelligent Merge</button>
                                             </div>
                                         </td>
                                         <td is="coral-table-cell">
@@ -78,7 +79,7 @@
                                                 </div>
                                                 <div class="editor-actions">
                                                     <button is="coral-button" variant="secondary" class="reset-editor">Reset</button>
-                                                    <button is="coral-button" variant="primary" class="save-editor" disabled>Save</button>
+                                                    <button is="coral-button" variant="secondary" class="save-editor" disabled>Save</button>
                                                 </div>
                                             </div>
                                         </td>
@@ -86,6 +87,9 @@
                                 </sly>
                                 </tbody>
                             </table>
+                        </section>
+                        <section class="coral-Form-fieldset">
+                            <button is="coral-button" variant="primary" class="toggle-diffs">Toggle Diffs</button>
                         </section>
                     </sly>
                 </div>
