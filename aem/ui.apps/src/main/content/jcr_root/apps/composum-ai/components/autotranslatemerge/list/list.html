@@ -36,10 +36,15 @@
                                 <tbody is="coral-table-body" class="propertiestable">
                                 <sly data-sly-list.property="${model.properties}">
                                     <tr is="coral-table-row">
-                                        <td is="coral-table-cell"
-                                            colspan="4">${property.path} ${property.wrapper.propertyName}</td>
+                                        <td is="coral-table-cell" colspan="4">${property.path} ${property.wrapper.propertyName}</td>
                                     </tr>
-                                    <tr is="coral-table-row">
+                                    <tr is="coral-table-row"
+                                        data-os="${property.originalCopyInsertionsMarked}"
+                                        data-ot="${property.wrapper.newTranslatedCopy}"
+                                        data-ns="${property.newOriginalCopyInsertionsMarked}"
+                                        data-nt="${property.wrapper.newTranslatedCopy}"
+                                        data-sd="${property.originalCopyDiffsHTML}"
+                                        data-e="${property.wrapper.currentValue}">
                                         <td is="coral-table-cell"
                                             class="previoussrc">${property.originalCopyInsertionsMarked @ context='html'}</td>
                                         <td is="coral-table-cell"
@@ -103,4 +108,4 @@
 </body>
 </html>
 
-<!-- AIGenVersion(691163c8, list.html.prompt-3b29852a, 8.2AutomaticTranslationMergeTool.md-4fe76a18) -->
+<!-- AIGenVersion(62d682fb, list.html.prompt-3b29852a, 8.2AutomaticTranslationMergeTool.md-4eae22e4) -->

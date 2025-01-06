@@ -1,4 +1,6 @@
-/* AIGenVersion(1464fab9, list.css.prompt-43a79bdd, 8.2AutomaticTranslationMergeTool.md-4fe76a18, list.html-691163c8) */
+/* AIGenVersion(7de093a5, list.css.prompt-43a79bdd, 8.2AutomaticTranslationMergeTool.md-4eae22e4, list.html-62d682fb) */
+
+/*  */
 
 del, del * {
     background-color: #FFC0C0;
@@ -27,7 +29,6 @@ td {
     background-color: #f9f9f9;
     border: 1px solid #ccc;
     height: 28px;
-    display: flex;
     margin-bottom: 4px;
 }
 
@@ -36,4 +37,8 @@ td {
     padding: 8px;
     overflow-y: auto;
     resize: vertical;
+}
+
+.row-actions, .editor-actions {
+    text-align: left;
 }
