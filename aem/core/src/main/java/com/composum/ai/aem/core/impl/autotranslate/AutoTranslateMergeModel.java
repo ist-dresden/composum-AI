@@ -61,4 +61,9 @@ public class AutoTranslateMergeModel {
         }
         return pageResource;
     }
+
+    public String getPagePath() {
+        return getPageResource() != null ? getPageResource().getParent().getPath() : null;
+    }
+
 }

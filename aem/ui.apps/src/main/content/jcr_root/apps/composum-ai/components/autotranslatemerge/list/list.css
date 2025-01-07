@@ -66,3 +66,7 @@ body.hide-currenttext .currenttext {
     padding: 0.625rem;
     margin: 0px;
 }
+
+.bottombar a {
+    padding-right: 14px;
+}

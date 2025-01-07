@@ -40,7 +40,8 @@
                                 <sly data-sly-list.property="${model.properties}">
                                     <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                         <td is="coral-table-cell" class="row-separator"
-                                            colspan="6">${property.pathInPage} &nbsp; &nbsp; ${property.wrapper.propertyName}</td>
+                                            colspan="6">${property.pathInPage} &nbsp;
+                                            &nbsp; ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <tr is="coral-table-row" class="property-row"
                                         data-path="${property.path}"
@@ -101,13 +102,18 @@
                                                     Reset
                                                 </button>
                                                 <button is="coral-button" variant="secondary" class="save-editor"
-                                                        disabled>Save
+                                                        disabled>
+                                                    Save and set as merged
                                                 </button>
-                                                <a href="#" data-backwardid="${propertyList.index}" data-sly-test="${!propertyList.first}">
-                                                    <button is="coral-button" size="S" variant="minimal" icon="arrowUp" class="move-up" title="Up"></button>
+                                                <a href="#" data-backwardid="${propertyList.index}"
+                                                   data-sly-test="${!propertyList.first}">
+                                                    <button is="coral-button" size="S" variant="minimal" icon="arrowUp"
+                                                            class="move-up" title="Up"></button>
                                                 </a>
-                                                <a href="#" data-forwardid="${propertyList.index}" data-sly-test="${!propertyList.last}">
-                                                    <button is="coral-button" size="S" variant="minimal" icon="arrowDown" class="move-down" title="Down"></button>
+                                                <a href="#" data-forwardid="${propertyList.index}"
+                                                   data-sly-test="${!propertyList.last}">
+                                                    <button is="coral-button" size="S" variant="minimal"
+                                                            icon="arrowDown" class="move-down" title="Down"></button>
                                                 </a>
                                             </div>
                                         </td>
@@ -120,11 +126,32 @@
                             </table>
                         </section>
                         <section class="coral-Form-fieldset bottombar coral--light">
-                            <button is="coral-button" variant="secondary" class="toggle-diffs">Toggle Diff Column</button>
-                            <button is="coral-button" variant="secondary" class="toggle-current">Toggle Current Text Column</button>
-                            <button is="coral-button" variant="secondary" class="toggle-current">Open in Editor</button>
-                            <button is="coral-button" variant="secondary" class="toggle-current">Open as Preview</button>
-                            <button is="coral-button" variant="secondary" class="toggle-current">Open in Compare Blueprint Tool</button>
+                            <a>
+                                <button is="coral-button" variant="secondary" class="toggle-diffs">
+                                    Toggle Diff Column
+                                </button>
+                            </a>
+                            <a>
+                                <button is="coral-button" variant="secondary" class="toggle-current">
+                                    Toggle Current Text Column
+                                </button>
+                            </a>
+                            <a href="/editor.html${model.pagePath}.html" target="_blank">
+                                <button is="coral-button" variant="secondary" class="toggle-current">
+                                    Open in Editor
+                                </button>
+                            </a>
+                            <a href="${model.pagePath}.html?wcmmode=preview" target="_blank">
+                                <button is="coral-button" variant="secondary" class="toggle-current">
+                                    Open as Preview
+                                </button>
+                            </a>
+                            <a href="/apps/composum-ai/components/tool/comparetool.html${model.pagePath}"
+                               target="_blank">
+                                <button is="coral-button" variant="secondary" class="toggle-current">
+                                    Open in Compare Blueprint Tool
+                                </button>
+                            </a>
                         </section>
                     </sly>
                 </div>
