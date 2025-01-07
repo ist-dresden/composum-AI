@@ -18,11 +18,13 @@
                         <section class="coral-Form-fieldset">
                             <h2 class="coral-Form-fieldset-legend">Translation Merge Tool</h2>
                             <span class="coral-Form-field foundation-layout-util-breakword">
-                                Instructions: Review and edit translations for modified properties below.<br>
-                                Only rows with source modifications are displayed.
+                                Instructions: you can review and edit translations for modified properties below.
+                                Only component properties where the inheritance has been cancelled and where
+                                the blueprint was modified after cancelling inheritance or the last merging are displayed
+                                - until they are marked as merged.
                             </span>
                         </section>
-                        <section class="coral-Form-fieldset">
+                        <section class="coral-Form-fieldset propertytable">
                             <table is="coral-table" class="show-diffs">
                                 <thead is="coral-table-head" sticky>
                                 <tr is="coral-table-row">
@@ -37,7 +39,7 @@
                                 <sly data-sly-list.property="${model.properties}">
                                     <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                         <td is="coral-table-cell" class="row-separator"
-                                            colspan="5">${property.path} ${property.wrapper.propertyName}</td>
+                                            colspan="5">${property.pathInPage} &nbsp; &nbsp; ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <tr is="coral-table-row" class="property-row"
                                         data-path="${property.path}"
@@ -113,8 +115,12 @@
                                 </tbody>
                             </table>
                         </section>
-                        <section class="coral-Form-fieldset">
-                            <button is="coral-button" variant="primary" class="toggle-diffs">Toggle Diffs</button>
+                        <section class="coral-Form-fieldset bottombar coral--light">
+                            <button is="coral-button" variant="secondary" class="toggle-diffs">Toggle Diff Column</button>
+                            <button is="coral-button" variant="secondary" class="toggle-current">Toggle Current Text Column</button>
+                            <button is="coral-button" variant="secondary" class="toggle-current">Open in Editor</button>
+                            <button is="coral-button" variant="secondary" class="toggle-current">Open as Preview</button>
+                            <button is="coral-button" variant="secondary" class="toggle-current">Open in Compare Blueprint Tool</button>
                         </section>
                     </sly>
                 </div>

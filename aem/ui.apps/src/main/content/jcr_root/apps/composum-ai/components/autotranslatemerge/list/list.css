@@ -47,3 +47,14 @@ tr.property-row td {
     padding-top: 1em;
     padding-bottom: 1em;
 }
+
+.propertytable, .bottombar {
+    margin-bottom: 0.625rem;
+}
+
+.bottombar {
+    position: sticky;
+    bottom: 0;
+    padding: 0.625rem;
+    margin: 0px;
+}

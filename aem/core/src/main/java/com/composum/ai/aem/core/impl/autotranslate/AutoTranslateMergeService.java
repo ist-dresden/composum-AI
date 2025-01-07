@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.sling.api.resource.Resource;
 
@@ -139,6 +140,11 @@ public interface AutoTranslateMergeService {
             }
             String html = htmlBuf.toString();
             return html;
+        }
+
+        /** Returns the path to the resource within the page - that is, after the jcr:content node. */
+        public String getPathInPage() {
+            return StringUtils.substringAfter(getPath(), "/jcr:content/");
         }
 
         @Override

@@ -22,4 +22,4 @@ ${addition}
 ---------- assistant ----------
 ${newTranslation}
 ---------- user ----------
-Analyze the differences between the original source text (text OS) and the new source text (text NS). Then, modify the reference translation (text OT) using elements from text NT to reflect those differences. Output the adjusted translation accordingly.
+Analyze the differences between the original source text (text OS) and the new source text (text NS). Then, modify the reference translation (text OT) using elements from text NT to reflect those differences. Print the adjusted translation accordingly. Print just the translation, without any comments.
