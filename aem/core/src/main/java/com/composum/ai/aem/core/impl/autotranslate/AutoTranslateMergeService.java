@@ -38,13 +38,14 @@ public interface AutoTranslateMergeService {
 
     /*
      * Try an intelligent merge: combine the original source, the new source, the new translation and the current text into a new text trying to keep the spirit of the translation.
+     * @param language the language of the translation.
      * @param resource the resource to merge the text for.
      * @param originalSource the original source text.
      * @param newSource the new source text.
      * @param newTranslation the new translation text.
      * @param currentText the current text.
      */
-    String intelligentMerge(@Nonnull Resource resource, @Nonnull String originalSource,
+    String intelligentMerge(String language, @Nonnull Resource resource, @Nonnull String originalSource,
                             @Nonnull String newSource, @Nonnull String newTranslation,
                             @Nonnull String currentText);
 

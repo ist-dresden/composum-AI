@@ -101,7 +101,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         LOG.info("Merging text for path: {}, propertyName: {}, OS: {}, NS: {}, NT: {}, C: {}",
                 mergeRequest.path, mergeRequest.propertyName, mergeRequest.originalSource, mergeRequest.newSource, mergeRequest.newTranslation, mergeRequest.currentText);
 
-        String mergedText = mergeService.intelligentMerge(
+        String mergedText = mergeService.intelligentMerge(mergeRequest.language,
                 resource, mergeRequest.originalSource, mergeRequest.newSource, mergeRequest.newTranslation, mergeRequest.currentText);
 
         response.setContentType("text/html");
@@ -116,6 +116,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         String newSource;
         String newTranslation;
         String currentText;
+        String language;
 
 
         @Override
@@ -138,6 +139,9 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
             }
             if (currentText != null) {
                 builder.append("currentText", currentText);
+            }
+            if (language != null) {
+                builder.append("targetLanguage", language);
             }
             return builder.toString();
         }

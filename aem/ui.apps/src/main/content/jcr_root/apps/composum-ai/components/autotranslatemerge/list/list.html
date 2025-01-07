@@ -42,9 +42,10 @@
                                     <tr is="coral-table-row" class="property-row"
                                         data-path="${property.path}"
                                         data-propertyname="${property.wrapper.propertyName}"
-                                        data-os="${property.originalCopyInsertionsMarked}"
-                                        data-ot="${property.wrapper.newTranslatedCopy}"
-                                        data-ns="${property.newOriginalCopyInsertionsMarked}"
+                                        data-language="${model.pageLanguage}"
+                                        data-os="${property.wrapper.originalCopy}"
+                                        data-ot="${property.wrapper.translatedCopy}"
+                                        data-ns="${property.wrapper.newOriginalCopy}"
                                         data-nt="${property.wrapper.newTranslatedCopy}"
                                         data-sd="${property.originalCopyDiffsHTML}"
                                         data-e="${property.wrapper.currentValue}">

@@ -1,6 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.List;
+import java.util.Locale;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -11,6 +13,7 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.day.cq.wcm.api.PageManager;
 
 @Model(adaptables = SlingHttpServletRequest.class)
@@ -27,27 +30,35 @@ public class AutoTranslateMergeModel {
     @OSGiService
     private AutoTranslateMergeService autoTranslateMergeService;
 
+    private transient Resource pageResource;
+
     public boolean isDisabled() {
         return autoTranslateService == null || !autoTranslateService.isEnabled();
     }
 
     public List<AutoTranslateMergeService.AutoTranslateProperty> getProperties() {
-        Resource resource = getPageResource();
-        return autoTranslateMergeService.getProperties(resource);
+        return autoTranslateMergeService.getProperties(getPageResource());
+    }
+
+    public String getPageLanguage() {
+        String language = SelectorUtils.findLanguage(getPageResource());
+        return language != null ? SelectorUtils.getLanguageName(language, Locale.ENGLISH) : null;
     }
 
     /**
      * Finds the content resource for the page that is in the request suffix.
      */
     protected Resource getPageResource() {
-        ResourceResolver resolver = request.getResourceResolver();
-        PageManager pageManager = resolver.adaptTo(PageManager.class);
+        if (pageResource == null && !isDisabled()) {
+            ResourceResolver resolver = request.getResourceResolver();
+            PageManager pageManager = resolver.adaptTo(PageManager.class);
 
-        RequestPathInfo requestPathInfo = request.getRequestPathInfo();
-        String suffix = requestPathInfo.getSuffix();
-        if (suffix != null && !isDisabled()) {
-            return pageManager.getContainingPage(suffix).getContentResource();
+            RequestPathInfo requestPathInfo = request.getRequestPathInfo();
+            String suffix = requestPathInfo.getSuffix();
+            if (suffix != null) {
+                pageResource = pageManager.getContainingPage(suffix).getContentResource();
+            }
         }
-        return null;
+        return pageResource;
     }
 }

@@ -1,21 +1,29 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
-import org.apache.commons.collections4.IterableUtils;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
@@ -29,8 +37,19 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoTranslateMergeServiceImpl.class);
 
+    /**
+     * Name of template for merging translations.
+     */
+    private static final String TEMPLATE_AITRANSLATIONMERGE = "translationmerge";
+
     @Reference
     private LiveRelationshipManager liveRelationshipManager;
+
+    @Reference
+    private GPTChatCompletionService chatCompletionService;
+
+    @Reference
+    protected AIConfigurationService configurationService;
 
     @Override
     public List<AutoTranslateProperty> getProperties(Resource pageResource) {
@@ -88,11 +107,29 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     }
 
     @Override
-    public String intelligentMerge(@Nonnull Resource resource, @Nonnull String originalSource,
-                                @Nonnull String newSource, @Nonnull String newTranslation,
-                                @Nonnull String currentText) {
+    public String intelligentMerge(String language, @Nonnull Resource resource, @Nonnull String originalSource,
+                                   @Nonnull String newSource, @Nonnull String newTranslation,
+                                   @Nonnull String currentText) {
+        GPTChatMessagesTemplate template = chatCompletionService.getTemplate(TEMPLATE_AITRANSLATIONMERGE);
+        GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
 
-        String result = "";
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("targetlanguage", language);
+        parameters.put("originalSource", originalSource);
+        parameters.put("currentText", currentText);
+        parameters.put("newSource", newSource);
+        parameters.put("newTranslation", newTranslation);
+        parameters.put("addition", ""); // perhaps use translation instructions later, but those are implicitly in the new translation
+        List<GPTChatMessage> messages = template.getMessages(parameters);
+
+        GPTChatRequest request = new GPTChatRequest(messages);
+        request.setConfiguration(config);
+        int maxTokens = 3 * Math.max(chatCompletionService.countTokens(currentText), chatCompletionService.countTokens(newTranslation)) + 100;
+        if (maxTokens < 4096) { // setting more than that could lead to trouble with weaker models
+            request.setMaxTokens(maxTokens);
+        }
+        String result = chatCompletionService.getSingleChatCompletion(request);
+        LOG.debug("Merging {} \n->\n {}", messages, result);
         return result;
     }
 

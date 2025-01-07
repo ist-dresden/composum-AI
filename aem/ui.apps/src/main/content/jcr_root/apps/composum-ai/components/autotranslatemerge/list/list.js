@@ -90,7 +90,8 @@ class AITranslateMergeRow {
             originalSource: this.row.dataset.os,
             newSource: this.row.dataset.ns,
             newTranslation: this.row.dataset.nt,
-            currentText: this.editor.innerHTML
+            currentText: this.editor.innerHTML,
+            language: this.row.dataset.language
         };
 
         Granite.csrf.refreshToken().then(token => {
