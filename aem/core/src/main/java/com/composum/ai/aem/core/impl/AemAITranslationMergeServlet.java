@@ -1,6 +1,8 @@
 package com.composum.ai.aem.core.impl;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.Servlet;
 
@@ -26,6 +28,12 @@ import com.google.gson.Gson;
 
 /**
  * Servlet with functionality for the AI Translation Merge tool.
+ * The operations are distinguished by parameter 'operation'. There are:
+ * <ul>
+ *     <li>save: save a translation</li>
+ *     <li>check: check if a resource has unmerged translations</li>
+ *     <li>merge: merge translations</li>
+ * </ul>
  */
 @Component(service = Servlet.class,
         property = {
@@ -47,11 +55,32 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         String operation = request.getParameter("operation");
         if ("save".equals(operation)) {
             handleSave(request, response);
+        } else if ("check".equals(operation)) {
+            handleCheck(request, response);
         } else if ("merge".equals(operation)) {
             handleMerge(request, response);
         } else {
             response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Invalid operation");
         }
+    }
+
+    protected void handleCheck(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+        String path = request.getParameter("path");
+        if (StringUtils.isBlank(path)) {
+            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing parameter path");
+            return;
+        }
+        ResourceResolver resolver = request.getResourceResolver();
+        Resource resource = resolver.getResource(path);
+        if (resource == null) {
+            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + path);
+            return;
+        }
+        List<AutoTranslateMergeService.AutoTranslateProperty> props = mergeService.getProperties(resource);
+        boolean hasUnmerged = props != null && !props.isEmpty();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().println(gson.toJson(Collections.singletonMap("mergeable", hasUnmerged)));
     }
 
     protected void handleSave(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
@@ -67,7 +96,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         ResourceResolver resolver = request.getResourceResolver();
         Resource resource = resolver.getResource(path);
         if (resource == null) {
-            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found");
+            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + path);
             return;
         }
 
@@ -78,7 +107,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
             response.setStatus(SlingHttpServletResponse.SC_NO_CONTENT);
         } catch (PersistenceException | WCMException | IllegalArgumentException e) {
             LOG.error("Error saving property", e);
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving property");
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving property " + propertyName + " on resource " + path);
         }
     }
 
@@ -94,7 +123,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         ResourceResolver resolver = request.getResourceResolver();
         Resource resource = resolver.getResource(mergeRequest.path);
         if (resource == null) {
-            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found");
+            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + mergeRequest.path);
             return;
         }
 
