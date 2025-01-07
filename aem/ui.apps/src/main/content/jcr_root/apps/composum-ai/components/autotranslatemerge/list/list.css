@@ -14,11 +14,19 @@ tr.row-separator td.row-separator {
 
 tr.property-row td {
     vertical-align: top;
-    width: 20%;
+    width: 15%;
 }
 
-.previoussrc, .newsrc {
+body.show-diffs .previoussrc, body.show-diffs .newsrc {
     display: none;
+}
+
+body.hide-diffs .srcdiffs {
+    display: none;
+}
+
+body.hide-currenttext .currenttext {
+    display:none;
 }
 
 .rte-container {

@@ -1,4 +1,4 @@
-const URL_MERGE_SERVLET='/bin/cpm/ai/aitranslationmerge';
+const URL_MERGE_SERVLET = '/bin/cpm/ai/aitranslationmerge';
 
 /** Handles the general script functionality for the Translation Merge Tool. */
 class AITranslateMergeTool {
@@ -7,6 +7,7 @@ class AITranslateMergeTool {
             this.initRTEEditors();
             this.initTableEventListeners();
             this.initNavButtons();
+            this.initFooterButtons();
         });
     }
 
@@ -38,6 +39,20 @@ class AITranslateMergeTool {
         });
     }
 
+    initFooterButtons() {
+        document.querySelector('.toggle-diffs').addEventListener('click', this.toggleDiffs.bind(this));
+        document.querySelector('.toggle-current').addEventListener('click', this.toggleCurrent.bind(this));
+    }
+
+    toggleDiffs() {
+        document.body.classList.toggle('show-diffs');
+        document.body.classList.toggle('hide-diffs');
+    }
+
+    toggleCurrent() {
+        document.body.classList.toggle('hide-currenttext');
+    }
+
 }
 
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
@@ -60,7 +75,7 @@ class AITranslateMergeRow {
             new AITranslatorMergeRTE(this.editorContainer, this.saveButton);
 
             this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
-            this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
+            if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
             this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
 
             this.resetButton.addEventListener("click", this.resetEditor.bind(this));
@@ -106,23 +121,23 @@ class AITranslateMergeRow {
                     ...data
                 })
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.text();
-                } else {
-                    return response.text().then(errMsg => {
-                        throw new Error("Merge failed: " + errMsg);
-                    });
-                }
-            })
-            .then(mergedText => {
-                this.editor.innerHTML = mergedText;
-                this.saveButton.disabled = false;
-                console.log("Merge successful");
-            })
-            .catch(error => {
-                console.error("Error in intelligentMerge", error);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        return response.text().then(errMsg => {
+                            throw new Error("Merge failed: " + errMsg);
+                        });
+                    }
+                })
+                .then(mergedText => {
+                    this.editor.innerHTML = mergedText;
+                    this.saveButton.disabled = false;
+                    console.log("Merge successful");
+                })
+                .catch(error => {
+                    console.error("Error in intelligentMerge", error);
+                });
         });
     }
 

@@ -8,7 +8,7 @@
     <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
     <link rel="stylesheet" href="${resource.path @ context='uri'}/list.css">
 </head>
-<body class="coral--light foundation-layout-util-maximized-alt">
+<body class="coral--light foundation-layout-util-maximized-alt show-diffs hide-currenttext">
 <div class="foundation-layout-panel">
     <div class="foundation-layout-panel-bodywrapper spectrum-ready">
         <div class="foundation-layout-panel-body">
@@ -25,21 +25,22 @@
                             </span>
                         </section>
                         <section class="coral-Form-fieldset propertytable">
-                            <table is="coral-table" class="show-diffs">
+                            <table is="coral-table">
                                 <thead is="coral-table-head" sticky>
                                 <tr is="coral-table-row">
                                     <th is="coral-table-headercell" class="previoussrc">Previously Translated Text</th>
                                     <th is="coral-table-headercell" class="newsrc">New Text</th>
                                     <th is="coral-table-headercell" class="srcdiffs">Original Diffs</th>
                                     <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
-                                    <th is="coral-table-headercell" class="current">Current Text on Page</th>
+                                    <th is="coral-table-headercell" class="editor">Edit Current Text</th>
+                                    <th is="coral-table-headercell" class="currenttext">Current Text on Page</th>
                                 </tr>
                                 </thead>
                                 <tbody is="coral-table-body" class="propertiestable">
                                 <sly data-sly-list.property="${model.properties}">
                                     <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                         <td is="coral-table-cell" class="row-separator"
-                                            colspan="5">${property.pathInPage} &nbsp; &nbsp; ${property.wrapper.propertyName}</td>
+                                            colspan="6">${property.pathInPage} &nbsp; &nbsp; ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <tr is="coral-table-row" class="property-row"
                                         data-path="${property.path}"
@@ -64,11 +65,11 @@
                                                 <button is="coral-button" variant="secondary"
                                                         class="copy-to-editor">Copy to Editor
                                                 </button>
-                                                <button is="coral-button" variant="secondary"
+                                                <!-- <button is="coral-button" variant="secondary"
                                                         class="append-to-editor">Append to Editor
-                                                </button>
+                                                </button> -->
                                                 <button is="coral-button" variant="secondary"
-                                                        class="intelligent-merge">Intelligent Merge
+                                                        class="intelligent-merge">AI Merge
                                                 </button>
                                             </div>
                                         </td>
@@ -109,6 +110,9 @@
                                                     <button is="coral-button" size="S" variant="minimal" icon="arrowDown" class="move-down" title="Down"></button>
                                                 </a>
                                             </div>
+                                        </td>
+                                        <td is="coral-table-cell" class="currenttext">
+                                            <div class="current-text">${property.wrapper.currentValue @ context='html'}</div>
                                         </td>
                                     </tr>
                                 </sly>
