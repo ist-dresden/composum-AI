@@ -80,7 +80,7 @@ public class GetPageMarkdownAITool implements AITool {
     @Override
     public boolean isAllowedFor(@Nonnull Resource resource) {
         return config != null && config.allowedPathsRegex() != null &&
-                config.allowedPathsRegex().matches(resource.getPath());
+                resource.getPath().matches(config.allowedPathsRegex());
     }
 
     /**
@@ -97,7 +97,7 @@ public class GetPageMarkdownAITool implements AITool {
             if (path == null || path.isEmpty()) {
                 return "Missing path parameter";
             }
-            if (!config.allowedPathsRegex().matches(path)) {
+            if (!path.matches(config.allowedPathsRegex())) {
                 return "Path not allowed";
             }
             ResourceResolver resolver = resource.getResourceResolver();
