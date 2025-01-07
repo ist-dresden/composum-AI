@@ -35,7 +35,7 @@
                                 </thead>
                                 <tbody is="coral-table-body" class="propertiestable">
                                 <sly data-sly-list.property="${model.properties}">
-                                    <tr is="coral-table-row" class="row-separator">
+                                    <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                         <td is="coral-table-cell" class="row-separator"
                                             colspan="5">${property.path} ${property.wrapper.propertyName}</td>
                                     </tr>
@@ -99,6 +99,12 @@
                                                 <button is="coral-button" variant="secondary" class="save-editor"
                                                         disabled>Save
                                                 </button>
+                                                <a href="#" data-backwardid="${propertyList.index}" data-sly-test="${!propertyList.first}">
+                                                    <button is="coral-button" size="S" variant="minimal" icon="arrowUp" class="move-up" title="Up"></button>
+                                                </a>
+                                                <a href="#" data-forwardid="${propertyList.index}" data-sly-test="${!propertyList.last}">
+                                                    <button is="coral-button" size="S" variant="minimal" icon="arrowDown" class="move-down" title="Down"></button>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

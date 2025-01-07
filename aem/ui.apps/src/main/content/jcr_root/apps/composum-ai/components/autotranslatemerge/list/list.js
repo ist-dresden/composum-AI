@@ -6,6 +6,7 @@ class AITranslateMergeTool {
         document.addEventListener("DOMContentLoaded", () => {
             this.initRTEEditors();
             this.initTableEventListeners();
+            this.initNavButtons();
         });
     }
 
@@ -22,6 +23,18 @@ class AITranslateMergeTool {
         const tableBody = document.querySelector(".propertiestable");
         document.querySelectorAll("tbody tr").forEach(row => {
             new AITranslateMergeRow(row, this);
+        });
+    }
+
+    /** For anchors with data-forwardid or data-backwardid set the href to #(id+1) / #(id-1). */
+    initNavButtons() {
+        document.querySelectorAll('[data-forwardid]').forEach(button => {
+            const id = parseInt(button.dataset.forwardid);
+            button.href = `#row-${id + 1}`;
+        });
+        document.querySelectorAll('[data-backwardid]').forEach(button => {
+            const id = parseInt(button.dataset.backwardid);
+            button.href = `#row-${id - 1}`;
         });
     }
 
