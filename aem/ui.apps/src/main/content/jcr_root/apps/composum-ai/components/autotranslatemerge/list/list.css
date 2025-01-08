@@ -99,3 +99,11 @@ textarea {
 .show-currenttext .toggle-current {
     background-color: lightgray;
 }
+
+.coral--light ._coral-Table-cell.diffscolor {
+    background-color: #fffff0;
+}
+
+.coral--light ._coral-Table-cell.currenttext {
+    background-color: #f0ffff;
+}

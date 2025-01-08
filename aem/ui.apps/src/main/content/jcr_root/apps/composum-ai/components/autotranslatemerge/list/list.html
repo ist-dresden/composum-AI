@@ -55,18 +55,18 @@
                                         data-sd="${property.originalCopyDiffsHTML}"
                                         data-e="${property.wrapper.currentValue}"
                                         data-isrich="${property.wrapper.isRichText}">
-                                        <td is="coral-table-cell" class="previoussrc">
+                                        <td is="coral-table-cell" class="previoussrc diffscolor">
                                             <p data-sly-unwrap="${property.wrapper.isRichText}">
                                                 ${property.originalCopyInsertionsMarked @ context='html'}
                                             </p>
                                         </td>
-                                        <td is="coral-table-cell" class="newsrc">
+                                        <td is="coral-table-cell" class="newsrc diffscolor">
                                             <p data-sly-unwrap="${property.wrapper.isRichText}">
                                                 ${property.newOriginalCopyInsertionsMarked @ context='html'}
                                             </p>
                                         </td>
                                         <td is="coral-table-cell"
-                                            class="srcdiffs">
+                                            class="srcdiffs diffscolor">
                                             <p data-sly-unwrap="${property.wrapper.isRichText}">
                                             ${property.originalCopyDiffsHTML @ context='html'}</td>
                                         </p>
