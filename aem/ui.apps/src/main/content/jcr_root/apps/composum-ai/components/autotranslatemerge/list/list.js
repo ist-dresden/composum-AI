@@ -8,6 +8,7 @@ class AITranslateMergeTool {
             this.initTableEventListeners();
             this.initNavButtons();
             this.initFooterButtons();
+            document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
         });
     }
 
@@ -22,8 +23,10 @@ class AITranslateMergeTool {
     /** Initializes table event listeners for handling row-specific actions. */
     initTableEventListeners() {
         const tableBody = document.querySelector(".propertiestable");
-        document.querySelectorAll("tbody tr").forEach(row => {
-            new AITranslateMergeRow(row, this);
+        document.querySelectorAll("tbody tr.datarow").forEach(row => {
+            const id = row.dataset.id;
+            const actionrow = document.getElementById("actionrow-" + id);
+            new AITranslateMergeRow(row, actionrow, this);
         });
     }
 
@@ -70,8 +73,9 @@ class AITranslateMergeTool {
 
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
 class AITranslateMergeRow {
-    constructor(row, tool) {
+    constructor(row, actionrow, tool) {
         this.row = row;
+        this.actionrow = actionrow;
         this.tool = tool;
         this.editorContainer = row.querySelector(".rte-container");
         if (this.editorContainer) {
@@ -80,25 +84,22 @@ class AITranslateMergeRow {
             this.editorContainer = row.querySelector(".text-container");
             this.editor = this.editorContainer?.querySelector(".text-editor");
         }
-        if (this.editorContainer) { // otherwise it's a th or separator row
-            this.saveButton = this.row.querySelector(".save-editor");
 
-            this.copyButton = this.row.querySelector(".copy-to-editor");
-            this.appendButton = this.row.querySelector(".append-to-editor");
-            this.mergeButton = this.row.querySelector(".intelligent-merge");
+        this.copyButton = this.actionrow.querySelector(".copy-to-editor");
+        this.appendButton = this.actionrow.querySelector(".append-to-editor");
+        this.mergeButton = this.actionrow.querySelector(".intelligent-merge");
 
-            this.resetButton = this.row.querySelector(".reset-editor");
-            this.saveButton = this.row.querySelector(".save-editor");
+        this.resetButton = this.actionrow.querySelector(".reset-editor");
+        this.saveButton = this.actionrow.querySelector(".save-editor");
 
-            new AITranslatorMergeRTE(this.editorContainer, this.saveButton);
+        new AITranslatorMergeRTE(this.editorContainer, this.saveButton);
 
-            this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
-            if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
-            this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+        this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
+        if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
+        this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
 
-            this.resetButton.addEventListener("click", this.resetEditor.bind(this));
-            this.saveButton.addEventListener("click", this.saveEditor.bind(this));
-        }
+        this.resetButton.addEventListener("click", this.resetEditor.bind(this));
+        this.saveButton.addEventListener("click", this.saveEditor.bind(this));
     }
 
     copyToEditor() {

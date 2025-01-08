@@ -83,6 +83,7 @@
                                         data-nt="${property.wrapper.newTranslatedCopy}"
                                         data-sd="${property.originalCopyDiffsHTML}"
                                         data-e="${property.wrapper.currentValue}"
+                                        data-id="${propertyList.index}"
                                         data-isrich="${property.wrapper.isRichText}">
                                         <td is="coral-table-cell" class="previoussrc diffscolor">
                                             <p data-sly-unwrap="${property.wrapper.isRichText}">
@@ -165,7 +166,9 @@
                                         </td>
                                     </tr>
                                     <!-- Action buttons TR -->
-                                    <tr is="coral-table-row" class="property-row actionrow" data-fordatarow="datarow-${propertyList.index}">
+                                    <tr is="coral-table-row" class="property-row actionrow" id="actionrow-${propertyList.index}">
+                                        <td is="coral-table-cell" class="previoussrc diffscolor">
+                                        </td>
                                         <td is="coral-table-cell" class="newsrc diffscolor">
                                         </td>
                                         <td is="coral-table-cell" class="srcdiffs diffscolor"></td>
