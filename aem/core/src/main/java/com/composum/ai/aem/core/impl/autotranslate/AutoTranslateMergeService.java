@@ -2,6 +2,8 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -88,10 +90,10 @@ public interface AutoTranslateMergeService {
                 String text = aDiff.text;
                 switch (aDiff.operation) {
                     case INSERT: // strangely the html context in HTL seems to swallow ins, so we use span.ins instead
-                        htmlBuf.append("<span class=\"ins\">").append(text).append("</span>");
+                        htmlBuf.append(wrapExcludingHTMLTags(text, "<span class=\"ins\">", "</span>"));
                         break;
                     case DELETE:
-                        htmlBuf.append("<del>").append(text).append("</del>");
+                        htmlBuf.append(wrapExcludingHTMLTags(text, "<del>", "</del>"));
                         break;
                     case EQUAL:
                         htmlBuf.append(text);
@@ -103,8 +105,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getOriginalCopyInsertionsMarked() {
-            String src = wrapper.getOriginalCopy();
-            String dst = wrapper.getNewOriginalCopy();
+            String src = wrapper.getNewOriginalCopy();
+            String dst = wrapper.getOriginalCopy();
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -114,7 +116,7 @@ public interface AutoTranslateMergeService {
                 String text = aDiff.text;
                 switch (aDiff.operation) {
                     case INSERT: // strangely the html context in HTL seems to swallow ins, so we use span.ins instead
-                        htmlBuf.append("<span class=\"ins\">").append(text).append("</span>");
+                        htmlBuf.append(wrapExcludingHTMLTags(text, "<del>", "</del>"));
                         break;
                     case EQUAL:
                         htmlBuf.append(text);
@@ -126,8 +128,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getNewOriginalCopyInsertionsMarked() {
-            String src = wrapper.getNewOriginalCopy();
-            String dst = wrapper.getOriginalCopy();
+            String src = wrapper.getOriginalCopy();
+            String dst = wrapper.getNewOriginalCopy();
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -148,7 +150,44 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        /** Returns the path to the resource within the page - that is, after the jcr:content node. */
+        /** Matches an opening or closing HTML tag. */
+        protected static final Pattern HTML_TAG_PATTERN = Pattern.compile("\\s*</?[a-zA-Z][^>]*/?>\\s*");
+
+        /**
+         * We wrap the text into wrapstart and wrapstop. If there is an opening or closing HTML tag we do not wrap that but only the texts in between.
+         */
+        protected static String wrapExcludingHTMLTags(@Nonnull String text, @Nonnull String wrapstart, @Nonnull String wrapstop) {
+            if (StringUtils.isBlank(text)) {
+                return text;
+            }
+            StringBuffer wrapped = new StringBuffer();
+            Matcher matcher = HTML_TAG_PATTERN.matcher(text);
+            int lastEnd = 0;
+
+            while (matcher.find()) {
+                // Append the text before the current HTML tag, wrapped
+                if (matcher.start() > lastEnd) {
+                    String content = text.substring(lastEnd, matcher.start());
+                    wrapped.append(wrapstart).append(content).append(wrapstop);
+                }
+
+                // Append the HTML tag as is
+                wrapped.append(matcher.group());
+                lastEnd = matcher.end();
+            }
+
+            // Append any remaining text after the last HTML tag, wrapped
+            if (lastEnd < text.length()) {
+                String content = text.substring(lastEnd);
+                wrapped.append(wrapstart).append(content).append(wrapstop);
+            }
+
+            return wrapped.toString();
+        }
+
+        /**
+         * Returns the path to the resource within the page - that is, after the jcr:content node.
+         */
         public String getPathInPage() {
             return StringUtils.substringAfter(getPath(), "/jcr:content/");
         }

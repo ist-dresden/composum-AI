@@ -50,6 +50,7 @@ class AITranslateMergeTool {
     }
 
     toggleCurrent() {
+        document.body.classList.toggle('show-currenttext');
         document.body.classList.toggle('hide-currenttext');
     }
 

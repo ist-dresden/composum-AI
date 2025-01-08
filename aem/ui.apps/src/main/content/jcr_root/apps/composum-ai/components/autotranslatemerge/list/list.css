@@ -91,3 +91,11 @@ textarea {
     width: 100%;
     margin-top: 1em;
 }
+
+.show-diffs .toggle-diffs {
+    background-color: lightgray;
+}
+
+.show-currenttext .toggle-current {
+    background-color: lightgray;
+}
