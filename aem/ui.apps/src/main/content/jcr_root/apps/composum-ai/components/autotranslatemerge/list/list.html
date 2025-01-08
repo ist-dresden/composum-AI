@@ -29,11 +29,29 @@
                                 <thead is="coral-table-head" sticky>
                                 <tr is="coral-table-row">
                                     <th is="coral-table-headercell" class="previoussrc">Previously Translated Text</th>
+                                    <coral-tooltip placement="top" target=".previoussrc">
+                                        <span slot="content">The text that was previously translated.</span>
+                                    </coral-tooltip>
                                     <th is="coral-table-headercell" class="newsrc">New Text</th>
+                                    <coral-tooltip placement="top" target=".newsrc">
+                                        <span slot="content">The new source text.</span>
+                                    </coral-tooltip>
                                     <th is="coral-table-headercell" class="srcdiffs">Original Diffs</th>
+                                    <coral-tooltip placement="top" target=".srcdiffs">
+                                        <span slot="content">Differences between the original and new source text.</span>
+                                    </coral-tooltip>
                                     <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
+                                    <coral-tooltip placement="top" target=".newtrans">
+                                        <span slot="content">The AI translation of the new source text.</span>
+                                    </coral-tooltip>
                                     <th is="coral-table-headercell" class="editor">Edit Current Text</th>
+                                    <coral-tooltip placement="top" target=".editor">
+                                        <span slot="content">Edit the current text on the page.</span>
+                                    </coral-tooltip>
                                     <th is="coral-table-headercell" class="currenttext">Current Text on Page</th>
+                                    <coral-tooltip placement="top" target=".currenttext">
+                                        <span slot="content">The current text displayed on the page.</span>
+                                    </coral-tooltip>
                                 </tr>
                                 </thead>
                                 <tbody is="coral-table-body" class="propertiestable">
@@ -84,6 +102,9 @@
                                                 <button is="coral-button" variant="secondary"
                                                         class="copy-to-editor">Copy to Editor
                                                 </button>
+                                                <coral-tooltip placement="right" target=".copy-to-editor">
+                                                    <span slot="content">Copy the new translation to the editor.</span>
+                                                </coral-tooltip>
                                                 <!-- <button is="coral-button" variant="secondary"
                                                         class="append-to-editor">Append to Editor
                                                 </button> -->
@@ -103,45 +124,75 @@
                                                     <button class="rte-btn" is="coral-button" variant="minimal"
                                                             title="Bold" icon="textBold"
                                                             data-command="bold"></button>
+                                                    <coral-tooltip placement="top" target=".rte-btn[title='Bold']">
+                                                        <span slot="content">Make the text bold.</span>
+                                                    </coral-tooltip>
                                                     <button is="coral-button" variant="minimal" title="Italic"
                                                             icon="textItalic"
                                                             data-command="italic"></button>
+                                                    <coral-tooltip placement="top" target=".rte-btn[title='Italic']">
+                                                        <span slot="content">Make the text italic.</span>
+                                                    </coral-tooltip>
                                                     <button is="coral-button" variant="minimal" title="Underline"
                                                             icon="textUnderline"
                                                             data-command="underline"></button>
+                                                    <coral-tooltip placement="top" target=".rte-btn[title='Underline']">
+                                                        <span slot="content">Underline the text.</span>
+                                                    </coral-tooltip>
                                                     <button is="coral-button" variant="minimal" title="Bullet List"
                                                             icon="textBulleted"
                                                             data-command="insertUnorderedList"></button>
+                                                    <coral-tooltip placement="top"
+                                                                   target=".rte-btn[title='Bullet List']">
+                                                        <span slot="content">Create a bullet list.</span>
+                                                    </coral-tooltip>
                                                     <button is="coral-button" variant="minimal" title="Numbered List"
                                                             icon="textNumbered"
                                                             data-command="insertOrderedList"></button>
+                                                    <coral-tooltip placement="top"
+                                                                   target=".rte-btn[title='Numbered List']">
+                                                        <span slot="content">Create a numbered list.</span>
+                                                    </coral-tooltip>
                                                 </div>
                                                 <div class="rte-editor" contenteditable="true">
                                                     ${property.wrapper.currentValue @ context='html'}
                                                 </div>
                                             </div>
                                             <div class="text-container" data-sly-test="${!isrichtext}">
-                                                <textarea class="text-editor" rows="3" data-sly-text="${property.wrapper.currentValue}"></textarea>
+                                                <textarea class="text-editor" rows="3"
+                                                          data-sly-text="${property.wrapper.currentValue}"></textarea>
                                             </div>
                                             <div class="editor-actions">
                                                 <button is="coral-button" variant="secondary" class="reset-editor">
                                                     Reset
                                                 </button>
+                                                <coral-tooltip placement="right" target=".reset-editor">
+                                                    <span slot="content">Reset the editor to the current value on the page.</span>
+                                                </coral-tooltip>
                                                 <button is="coral-button" variant="secondary" class="save-editor"
                                                         disabled>
                                                     Save and Finish
                                                     <coral-wait size="S" class="spinner"></coral-wait>
                                                 </button>
+                                                <coral-tooltip placement="right" target=".save-editor">
+                                                    <span slot="content">Save the changes made in the editor.</span>
+                                                </coral-tooltip>
                                                 <a href="#" data-backwardid="${propertyList.index}"
                                                    data-sly-test="${!propertyList.first}">
                                                     <button is="coral-button" size="S" variant="minimal" icon="arrowUp"
                                                             class="move-up" title="Up"></button>
                                                 </a>
+                                                <coral-tooltip placement="top" target=".move-up">
+                                                    <span slot="content">Move up.</span>
+                                                </coral-tooltip>
                                                 <a href="#" data-forwardid="${propertyList.index}"
                                                    data-sly-test="${!propertyList.last}">
                                                     <button is="coral-button" size="S" variant="minimal"
                                                             icon="arrowDown" class="move-down" title="Down"></button>
                                                 </a>
+                                                <coral-tooltip placement="top" target=".move-down">
+                                                    <span slot="content">Move down.</span>
+                                                </coral-tooltip>
                                             </div>
                                         </td>
                                         <td is="coral-table-cell" class="currenttext">
@@ -166,27 +217,42 @@
                                 <button is="coral-button" variant="secondary" class="toggle-diffs">
                                     Toggle Diff Column
                                 </button>
+                                <coral-tooltip placement="top" target=".toggle-diffs">
+                                    <span slot="content">Toggle the visibility of the diff column.</span>
+                                </coral-tooltip>
                             </a>
                             <a>
                                 <button is="coral-button" variant="secondary" class="toggle-current">
                                     Toggle Current Text Column
                                 </button>
+                                <coral-tooltip placement="top" target=".toggle-current">
+                                    <span slot="content">Toggle the visibility of the current text column.</span>
+                                </coral-tooltip>
                             </a>
                             <a href="/editor.html${model.pagePath}.html" target="_blank">
                                 <button is="coral-button" variant="secondary">
                                     Open in Editor
                                 </button>
+                                <coral-tooltip placement="top" target=".open-in-editor">
+                                    <span slot="content">Open the page in the editor.</span>
+                                </coral-tooltip>
                             </a>
                             <a href="${model.pagePath}.html?wcmmode=preview" target="_blank">
                                 <button is="coral-button" variant="secondary">
                                     Open as Preview
                                 </button>
+                                <coral-tooltip placement="top" target=".open-as-preview">
+                                    <span slot="content">Open the page in preview mode.</span>
+                                </coral-tooltip>
                             </a>
                             <a href="/apps/composum-ai/components/tool/comparetool.html${model.pagePath}"
                                target="_blank">
                                 <button is="coral-button" variant="secondary">
                                     Open in Compare Blueprint Tool
                                 </button>
+                                <coral-tooltip placement="top" target=".open-in-compare">
+                                    <span slot="content">Open the page in the compare blueprint tool.</span>
+                                </coral-tooltip>
                             </a>
                         </section>
                     </sly>
@@ -199,6 +265,3 @@
 <sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core'}"></sly>
 <script src="${resource.path @ context='uri'}/list.js"></script>
 </body>
-</html>
-
-<!-- AIGenVersion(62d682fb, list.html.prompt-3b29852a, 8.2AutomaticTranslationMergeTool.md-4eae22e4) -->
