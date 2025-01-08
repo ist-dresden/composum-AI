@@ -53,6 +53,18 @@ class AITranslateMergeTool {
         document.body.classList.toggle('hide-currenttext');
     }
 
+    /** If message is null the error field is hidden. */
+    showError(message) {
+        const errormessage = document.querySelector('.errormessage');
+        const alertcontent = errormessage.querySelector('.alertcontent');
+        if (message) {
+            alertcontent.textContent = message;
+            errormessage.hidden = false;
+        } else {
+            errormessage.hidden = true;
+        }
+    }
+
 }
 
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
@@ -137,9 +149,11 @@ class AITranslateMergeRow {
                     this.editor.innerHTML = mergedText;
                     this.saveButton.disabled = false;
                     console.log("Merge successful");
+                    this.tool.showError(null);
                 })
                 .catch(error => {
                     console.error("Error in intelligentMerge", error);
+                    this.tool.showError(errMsg);
                 }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');
@@ -177,6 +191,7 @@ class AITranslateMergeRow {
                 })
                 .catch(error => {
                     console.error("Error in saveEditor", error);
+                    this.tool.showError(errMsg);
                 }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');
