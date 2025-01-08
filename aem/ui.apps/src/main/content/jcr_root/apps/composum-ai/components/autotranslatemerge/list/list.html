@@ -52,7 +52,8 @@
                                         data-ns="${property.wrapper.newOriginalCopy}"
                                         data-nt="${property.wrapper.newTranslatedCopy}"
                                         data-sd="${property.originalCopyDiffsHTML}"
-                                        data-e="${property.wrapper.currentValue}">
+                                        data-e="${property.wrapper.currentValue}"
+                                        data-isrich="${property.wrapper.isRichText}">
                                         <td is="coral-table-cell"
                                             class="previoussrc">${property.originalCopyInsertionsMarked @ context='html'}</td>
                                         <td is="coral-table-cell"
@@ -71,6 +72,7 @@
                                                 </button> -->
                                                 <button is="coral-button" variant="secondary"
                                                         class="intelligent-merge">AI Merge
+                                                    <coral-wait size="S" hidden></coral-wait>
                                                 </button>
                                             </div>
                                         </td>
@@ -104,6 +106,7 @@
                                                 <button is="coral-button" variant="secondary" class="save-editor"
                                                         disabled>
                                                     Save and set as merged
+                                                    <coral-wait size="S" hidden></coral-wait>
                                                 </button>
                                                 <a href="#" data-backwardid="${propertyList.index}"
                                                    data-sly-test="${!propertyList.first}">
