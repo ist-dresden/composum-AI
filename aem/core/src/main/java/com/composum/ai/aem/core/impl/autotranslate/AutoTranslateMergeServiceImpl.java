@@ -13,6 +13,7 @@ import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
                                 if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy()) && StringUtils.isNotBlank(wrapper.getNewTranslatedCopy())) {
-                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper));
+                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentTitle(res)));
                                 } else {
                                     LOG.warn("Property {} has empty original or translated copy", propertyName);
                                 }
@@ -143,5 +144,20 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 children.stream().flatMap(this::descendantsStream));
     }
 
+    protected String getComponentTitle(Resource resource) {
+        String resourceType = null;
+        ResourceResolver resolver = resource.getResourceResolver();
+        while (resourceType == null && resource != null) {
+            resourceType = resource.getValueMap().get("sling:resourceType", String.class);
+            resource = resource.getParent();
+        }
+        if (resourceType != null) {
+            Resource componentResource = resolver.getResource(resourceType);
+            if (componentResource != null) {
+                return componentResource.getValueMap().get("jcr:title", String.class);
+            }
+        }
+        return null;
+    }
 
 }

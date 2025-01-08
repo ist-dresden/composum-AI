@@ -108,8 +108,11 @@ class AITranslateMergeRow {
             currentText: this.editor.innerHTML,
             language: this.row.dataset.language
         };
+        const btn = this.mergeButton;
 
         Granite.csrf.refreshToken().then(token => {
+            btn.disabled = true;
+            btn.classList.add('activespinner');
             fetch(URL_MERGE_SERVLET + "?operation=merge", {
                 method: 'POST',
                 headers: {
@@ -137,12 +140,19 @@ class AITranslateMergeRow {
                 })
                 .catch(error => {
                     console.error("Error in intelligentMerge", error);
-                });
+                }).finally(() => {
+                btn.disabled = false;
+                btn.classList.remove('activespinner');
+            });
         });
     }
 
     saveEditor() {
+        const btn = this.saveButton;
+        const row = this.row;
         Granite.csrf.refreshToken().then(token => {
+            btn.disabled = true;
+            btn.classList.add('activespinner');
             fetch(URL_MERGE_SERVLET + "?operation=save", {
                 method: 'POST',
                 headers: {
@@ -158,7 +168,7 @@ class AITranslateMergeRow {
                 .then(response => {
                     if (response.ok) {
                         console.log("Save successful");
-                        this.saveButton.disabled = true;
+                        row.classList.add("merged");
                     } else {
                         return response.text().then(errMsg => {
                             throw new Error("Save failed: " + errMsg);
@@ -167,7 +177,10 @@ class AITranslateMergeRow {
                 })
                 .catch(error => {
                     console.error("Error in saveEditor", error);
-                });
+                }).finally(() => {
+                btn.disabled = false;
+                btn.classList.remove('activespinner');
+            });
         });
     }
 }

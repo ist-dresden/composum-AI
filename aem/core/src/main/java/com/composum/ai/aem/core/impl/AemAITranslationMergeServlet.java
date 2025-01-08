@@ -102,9 +102,8 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
 
         try {
             mergeService.saveTranslation(resource, propertyName, body, true);
-            response.setStatus(SlingHttpServletResponse.SC_NO_CONTENT);
             resolver.commit();
-            response.setStatus(SlingHttpServletResponse.SC_NO_CONTENT);
+            response.setStatus(SlingHttpServletResponse.SC_OK);
         } catch (PersistenceException | WCMException | IllegalArgumentException e) {
             LOG.error("Error saving property", e);
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving property " + propertyName + " on resource " + path);

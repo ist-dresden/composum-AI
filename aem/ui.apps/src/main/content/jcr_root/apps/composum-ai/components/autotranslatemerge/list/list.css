@@ -70,3 +70,19 @@ body.hide-currenttext .currenttext {
 .bottombar a {
     padding-right: 14px;
 }
+
+.merged td {
+    background-color: #e6ffe6 !important;
+    opacity: 40%;
+}
+
+.spinner {
+    display: none;
+}
+
+.activespinner .spinner {
+    display: inline-block;
+    position: relative;
+    top: 3px;
+    left: 1px;
+}

@@ -56,14 +56,20 @@ public interface AutoTranslateMergeService {
     class AutoTranslateProperty {
         private final String path;
         private final AITranslatePropertyWrapper wrapper;
+        private final String componentTitle;
 
-        public AutoTranslateProperty(String path, AITranslatePropertyWrapper wrapper) {
+        public AutoTranslateProperty(String path, AITranslatePropertyWrapper wrapper, String componentTitle) {
             this.path = path;
             this.wrapper = wrapper;
+            this.componentTitle = componentTitle;
         }
 
         public String getPath() {
             return path;
+        }
+
+        public String getComponentTitle() {
+            return componentTitle;
         }
 
         public AITranslatePropertyWrapper getWrapper() {

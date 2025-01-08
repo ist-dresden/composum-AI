@@ -22,7 +22,7 @@ class AutoTranslatePropertyTest {
         sourceMap = new ModifiableValueMapDecorator(new HashMap<>());
         targetMap = new ModifiableValueMapDecorator(new HashMap<>());
         wrapper = new AITranslatePropertyWrapper(sourceMap, targetMap, "exampleProperty");
-        property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", wrapper);
+        property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", wrapper, "component");
     }
 
     @Test
