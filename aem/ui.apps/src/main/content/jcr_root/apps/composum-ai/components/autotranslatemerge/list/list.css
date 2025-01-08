@@ -47,15 +47,6 @@ body.hide-currenttext .currenttext {
     resize: vertical;
 }
 
-.row-actions, .editor-actions {
-    text-align: left;
-}
-
-.editor-actions {
-    padding-top: 1em;
-    padding-bottom: 1em;
-}
-
 .propertytable, .bottombar {
     margin-bottom: 0.625rem;
 }
@@ -106,4 +97,8 @@ textarea {
 
 .coral--light ._coral-Table-cell.currenttext {
     background-color: #f0ffff;
+}
+
+.actionrow td {
+    border-top-width: 0px !important;
 }

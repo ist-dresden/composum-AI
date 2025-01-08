@@ -59,10 +59,21 @@
                                     <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                         <td is="coral-table-cell" class="row-separator"
                                             colspan="6">
+                                            <!-- <a href="#" data-backwardid="${propertyList.index}"
+                                               data-sly-test="${!propertyList.first}">
+                                                <button is="coral-button" size="S" variant="minimal" icon="arrowUp"
+                                                        class="move-up" title="Up"></button>
+                                            </a>
+                                            <a href="#" data-forwardid="${propertyList.index}"
+                                               data-sly-test="${!propertyList.last}">
+                                                <button is="coral-button" size="S" variant="minimal"
+                                                        icon="arrowDown" class="move-down" title="Down"></button>
+                                            </a> -->
                                             ${property.componentTitle} ${property.pathInPage}
                                             ${property.wrapper.propertyName}</td>
                                     </tr>
-                                    <tr is="coral-table-row" class="property-row"
+                                    <!-- Data row -->
+                                    <tr is="coral-table-row" class="property-row datarow" id="datarow-${propertyList.index}"
                                         data-path="${property.path}"
                                         data-propertyname="${property.wrapper.propertyName}"
                                         data-language="${model.pageLanguage}"
@@ -97,24 +108,6 @@
                                                 <sly data-sly-test="${!isrichtext}">
                                                     <p>${property.wrapper.newTranslatedCopy @ context='text'}</p>
                                                 </sly>
-                                            </div>
-                                            <div class="row-actions">
-                                                <button is="coral-button" variant="secondary"
-                                                        class="copy-to-editor">Copy to Editor
-                                                </button>
-                                                <coral-tooltip placement="right" target=".copy-to-editor">
-                                                    <span slot="content">Copy the new translation to the editor.</span>
-                                                </coral-tooltip>
-                                                <!-- <button is="coral-button" variant="secondary"
-                                                        class="append-to-editor">Append to Editor
-                                                </button> -->
-                                                <button is="coral-button" variant="secondary"
-                                                        class="intelligent-merge">AI Merge
-                                                    <coral-wait size="S" class="spinner"></coral-wait>
-                                                </button>
-                                                <coral-tooltip placement="right" target=".intelligent-merge">
-                                                    <span slot="content">Intelligent merge will try to merge the new text with the current text in the editor, trying to prefer the current text but incorporating changes in the new text.</span>
-                                                </coral-tooltip>
                                             </div>
                                         </td>
                                         <td is="coral-table-cell" class="editor">
@@ -162,6 +155,41 @@
                                                 <textarea class="text-editor" rows="3"
                                                           data-sly-text="${property.wrapper.currentValue}"></textarea>
                                             </div>
+                                        </td>
+                                        <td is="coral-table-cell" class="currenttext">
+                                            <div class="current-text">
+                                                <p data-sly-unwrap="${property.wrapper.isRichText}">
+                                                    ${property.wrapper.currentValue @ context='html'}
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Action buttons TR -->
+                                    <tr is="coral-table-row" class="property-row actionrow" data-fordatarow="datarow-${propertyList.index}">
+                                        <td is="coral-table-cell" class="newsrc diffscolor">
+                                        </td>
+                                        <td is="coral-table-cell" class="srcdiffs diffscolor"></td>
+                                        <td is="coral-table-cell" class="newtrans">
+                                            <div class="row-actions">
+                                                <button is="coral-button" variant="secondary"
+                                                        class="copy-to-editor">Copy to Editor
+                                                </button>
+                                                <coral-tooltip placement="right" target=".copy-to-editor">
+                                                    <span slot="content">Copy the new translation to the editor.</span>
+                                                </coral-tooltip>
+                                                <!-- <button is="coral-button" variant="secondary"
+                                                        class="append-to-editor">Append to Editor
+                                                </button> -->
+                                                <button is="coral-button" variant="secondary"
+                                                        class="intelligent-merge">AI Merge
+                                                    <coral-wait size="S" class="spinner"></coral-wait>
+                                                </button>
+                                                <coral-tooltip placement="right" target=".intelligent-merge">
+                                                    <span slot="content">Intelligent merge will try to merge the new text with the current text in the editor, trying to prefer the current text but incorporating changes in the new text.</span>
+                                                </coral-tooltip>
+                                            </div>
+                                        </td>
+                                        <td is="coral-table-cell" class="editor">
                                             <div class="editor-actions">
                                                 <button is="coral-button" variant="secondary" class="reset-editor">
                                                     Reset
@@ -177,30 +205,9 @@
                                                 <coral-tooltip placement="right" target=".save-editor">
                                                     <span slot="content">Save the changes made in the editor.</span>
                                                 </coral-tooltip>
-                                                <a href="#" data-backwardid="${propertyList.index}"
-                                                   data-sly-test="${!propertyList.first}">
-                                                    <button is="coral-button" size="S" variant="minimal" icon="arrowUp"
-                                                            class="move-up" title="Up"></button>
-                                                </a>
-                                                <coral-tooltip placement="top" target=".move-up">
-                                                    <span slot="content">Move up.</span>
-                                                </coral-tooltip>
-                                                <a href="#" data-forwardid="${propertyList.index}"
-                                                   data-sly-test="${!propertyList.last}">
-                                                    <button is="coral-button" size="S" variant="minimal"
-                                                            icon="arrowDown" class="move-down" title="Down"></button>
-                                                </a>
-                                                <coral-tooltip placement="top" target=".move-down">
-                                                    <span slot="content">Move down.</span>
-                                                </coral-tooltip>
                                             </div>
                                         </td>
                                         <td is="coral-table-cell" class="currenttext">
-                                            <div class="current-text">
-                                                <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                                    ${property.wrapper.currentValue @ context='html'}
-                                                </p>
-                                            </div>
                                         </td>
                                     </tr>
                                 </sly>
