@@ -513,7 +513,7 @@ public class AIServlet extends AbstractServiceServlet {
             }
             boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
 
-            int maxtokens = 1000; // some arbitrary default
+            int maxtokens = 4095; // some arbitrary default
             if (isNotBlank(textLength)) {
                 Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*(.*)").matcher(textLength);
                 if (matcher.matches()) {

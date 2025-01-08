@@ -317,6 +317,10 @@ public class GPTConfiguration {
         return new GPTConfiguration(null, null, null, null, null, null, null, temperature);
     }
 
+    public static GPTConfiguration ofHighIntelligenceNeeded(Boolean highIntelligenceNeeded) {
+        return new GPTConfiguration(null, null, null, null, null, highIntelligenceNeeded);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("GPTConfiguration{");
