@@ -55,15 +55,31 @@
                                         data-sd="${property.originalCopyDiffsHTML}"
                                         data-e="${property.wrapper.currentValue}"
                                         data-isrich="${property.wrapper.isRichText}">
+                                        <td is="coral-table-cell" class="previoussrc">
+                                            <p data-sly-unwrap="${property.wrapper.isRichText}">
+                                                ${property.originalCopyInsertionsMarked @ context='html'}
+                                            </p>
+                                        </td>
+                                        <td is="coral-table-cell" class="newsrc">
+                                            <p data-sly-unwrap="${property.wrapper.isRichText}">
+                                                ${property.newOriginalCopyInsertionsMarked @ context='html'}
+                                            </p>
+                                        </td>
                                         <td is="coral-table-cell"
-                                            class="previoussrc">${property.originalCopyInsertionsMarked @ context='html'}</td>
-                                        <td is="coral-table-cell"
-                                            class="newsrc">${property.newOriginalCopyInsertionsMarked @ context='html'}</td>
-                                        <td is="coral-table-cell"
-                                            class="srcdiffs">${property.originalCopyDiffsHTML @ context='html'}</td>
+                                            class="srcdiffs">
+                                            <p data-sly-unwrap="${property.wrapper.isRichText}">
+                                            ${property.originalCopyDiffsHTML @ context='html'}</td>
+                                        </p>
                                         <td is="coral-table-cell"
                                             class="newtrans">
-                                            <div class="newtrans-text">${property.wrapper.newTranslatedCopy @ context='html'}</div>
+                                            <div class="newtrans-text">
+                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                    ${property.wrapper.newTranslatedCopy @ context='html'}
+                                                </sly>
+                                                <sly data-sly-test="${!isrichtext}">
+                                                    <p>${property.wrapper.newTranslatedCopy @ context='text'}</p>
+                                                </sly>
+                                            </div>
                                             <div class="row-actions">
                                                 <button is="coral-button" variant="secondary"
                                                         class="copy-to-editor">Copy to Editor
@@ -81,7 +97,8 @@
                                             </div>
                                         </td>
                                         <td is="coral-table-cell" class="editor">
-                                            <div class="rte-container">
+                                            <div class="rte-container"
+                                                 data-sly-test.isrichtext="${property.wrapper.isRichText}">
                                                 <div class="rte-toolbar">
                                                     <button class="rte-btn" is="coral-button" variant="minimal"
                                                             title="Bold" icon="textBold"
@@ -103,13 +120,16 @@
                                                     ${property.wrapper.currentValue @ context='html'}
                                                 </div>
                                             </div>
+                                            <div class="text-container" data-sly-test="${!isrichtext}">
+                                                <textarea class="text-editor" rows="3" data-sly-text="${property.wrapper.currentValue}"></textarea>
+                                            </div>
                                             <div class="editor-actions">
                                                 <button is="coral-button" variant="secondary" class="reset-editor">
                                                     Reset
                                                 </button>
                                                 <button is="coral-button" variant="secondary" class="save-editor"
                                                         disabled>
-                                                    Save and set as merged
+                                                    Save and Finish
                                                     <coral-wait size="S" class="spinner"></coral-wait>
                                                 </button>
                                                 <a href="#" data-backwardid="${propertyList.index}"
@@ -125,7 +145,11 @@
                                             </div>
                                         </td>
                                         <td is="coral-table-cell" class="currenttext">
-                                            <div class="current-text">${property.wrapper.currentValue @ context='html'}</div>
+                                            <div class="current-text">
+                                                <p data-sly-unwrap="${property.wrapper.isRichText}">
+                                                    ${property.wrapper.currentValue @ context='html'}
+                                                </p>
+                                            </div>
                                         </td>
                                     </tr>
                                 </sly>
@@ -135,7 +159,7 @@
                         <section class="coral-Form-fieldset bottombar coral--light">
                             <p class="errormessage" hidden>
                                 <coral-alert variant="error">
-                                  <coral-alert-content class="alertcontent"></coral-alert-content>
+                                    <coral-alert-content class="alertcontent"></coral-alert-content>
                                 </coral-alert>
                             </p>
                             <a>

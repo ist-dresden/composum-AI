@@ -86,3 +86,8 @@ body.hide-currenttext .currenttext {
     top: 3px;
     left: 1px;
 }
+
+textarea {
+    width: 100%;
+    margin-top: 1em;
+}

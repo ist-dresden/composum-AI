@@ -75,6 +75,11 @@ class AITranslateMergeRow {
         this.editorContainer = row.querySelector(".rte-container");
         if (this.editorContainer) {
             this.editor = this.editorContainer.querySelector(".rte-editor");
+        } else {
+            this.editorContainer = row.querySelector(".text-container");
+            this.editor = this.editorContainer?.querySelector(".text-editor");
+        }
+        if (this.editorContainer) { // otherwise it's a th or separator row
             this.saveButton = this.row.querySelector(".save-editor");
 
             this.copyButton = this.row.querySelector(".copy-to-editor");
@@ -203,11 +208,11 @@ class AITranslateMergeRow {
 /** Manages the rich text editor functionalities, including toolbar actions and save/reset operations. */
 class AITranslatorMergeRTE {
     constructor(container, saveButton) {
-        this.editor = container.querySelector(".rte-editor");
+        this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
         this.saveButton = saveButton;
 
-        this.toolbar.addEventListener("click", this.handleToolbarClick.bind(this));
+        this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
         this.editor.addEventListener("keyup", this.handleEditorInput.bind(this));
     }
 
