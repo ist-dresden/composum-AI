@@ -1,6 +1,7 @@
 package com.composum.ai.backend.slingbase.experimential.impl;
 
 import static org.apache.commons.lang3.StringUtils.removeStart;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 import java.util.Locale;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class ModifyPageWriteTool implements AITool {
                 "  \"type\": \"function\",\n" +
                 "  \"function\": {\n" +
                 "    \"name\": \"modify_page_write\",\n" +
-                "    \"description\": \"Write properties to the current page, including path to the component, property name, and value. Can only write properties that already exist - use operation modify_page_read to determine the current structure of the page before using this. Only use this tool if the user explicitly requested to modify the page!\",\n" +
+                "    \"description\": \"Writes properties to the current page, including path to the component, property name, and value. Can only write properties that already exist as determined by modify_page_read - use operation modify_page_read to determine the current structure of the page before using this. Always use well formed HTML richtext values for properties that contained HTML richtext when reading. Only use this tool if the user explicitly requested to modify the page! \",\n" +
                 "    \"parameters\": {\n" +
                 "      \"type\": \"object\",\n" +
                 "      \"properties\": {\n" +
@@ -129,17 +130,25 @@ public class ModifyPageWriteTool implements AITool {
 
                 for (Map.Entry<String, String> entry : component.properties.entrySet()) {
                     // do not permit attributes that don't exist or are not texts
-                    Object value = valueMap.get(entry.getKey());
+                    String key = entry.getKey();
+                    Object value = valueMap.get(key);
                     if (value == null) {
-                        return "Property not found: " + entry.getKey() + " in " + componentPath;
+                        return "Property not found: " + key + " in " + componentPath;
                     }
                     if (!(value instanceof String)) {
-                        return "Property is not a text: " + entry.getKey() + " in " + componentPath;
+                        return "Property is not a text: " + key + " in " + componentPath;
                     }
-                    if (!ModifyPageReadTool.PATTERN_TWO_SEPARATE_WHITESPACE.matcher(entry.getValue()).find()) {
-                        return "Property does not seem a text: " + entry.getKey() + " in " + componentPath;
+                    String newValue = entry.getValue();
+                    if (!ModifyPageReadTool.PATTERN_TWO_SEPARATE_WHITESPACE.matcher(newValue).find()) {
+                        return "Property does not seem a text: " + key + " in " + componentPath;
                     }
-                    valueMap.put(entry.getKey(), entry.getValue());
+                    if (startsWith((String) value, "<") && !startsWith(newValue, "<")) {
+                        return "Property is HTML richtext, but the new value is not HTML richtext: use richtext for property: " + key + " in " + componentPath;
+                    }
+                    if (!startsWith((String) value, "<") && startsWith(newValue, "<")) {
+                        return "Property is not HTML richtext, but the new value is HTML richtext: use plain text for property: " + key + " in " + componentPath;
+                    }
+                    valueMap.put(key, newValue);
                 }
             }
 
@@ -147,7 +156,7 @@ public class ModifyPageWriteTool implements AITool {
             return "Properties updated successfully. Notify the user that he / she needs to reload the page to see the changes.";
         } catch (Exception e) {
             LOG.error("Error in modify page write tool", e);
-            return "Error in modify page write tool: " + e;
+            return "CAUTION: Notify the user about a failure or retry once if you can fix the problem. No properties were changed at all in this request because the following error in modifying page write tool: " + e;
         }
     }
 
