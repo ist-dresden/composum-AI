@@ -1,18 +1,18 @@
 # Rethinking automatic translation in AEM with LLMs
 
->  In AEM's embrace,\
->  Composum AI weaves tongues,\
->  Seamless, swift, it blends.\
+> In AEM's embrace,\
+> Composum AI weaves tongues,\
+> Seamless, swift, it blends.\
 > -- ChatGPT
 
 ## General idea
 
 Translating a site is often a rather large effort. Since modern LLM can both speak many languages and integrate
-advanced reasoning capabilities, they can be a big help in translating a site - possibly to the point that 
-translating a site can amount to an automatic process where the editor only has to check the results and only 
+advanced reasoning capabilities, they can be a big help in translating a site - possibly to the point that
+translating a site can amount to an automatic process where the editor only has to check the results and only
 occasionally make minor changes.
 
-We integrated a implementation into the Composum AI that can translate individual pages or entire sites 
+We integrated a implementation into the Composum AI that can translate individual pages or entire sites
 quickly.
 It is very promising: a test translating the [WKND site](https://wknd.site/us/en.html) from English into German took
 only about 10 minutes (with GPT-3.5, though),
@@ -76,9 +76,9 @@ translates all texts into the language configured for the rollout target during 
 There are currently three ways to trigger the translation (see below):
 
 - an additional rollout configuration that transparently translates the rolled out page during rollout
-- a workflow process that can trigger a rollout with these rollout configurations for translating a page or page 
+- a workflow process that can trigger a rollout with these rollout configurations for translating a page or page
   tree from its blueprint
-- for experimentation: a mini UI that can be used to translate pages / page trees and roll back the translations. That 
+- for experimentation: a mini UI that can be used to translate pages / page trees and roll back the translations. That
   can be used to easily try out the results, but is not intended for production use.
 
 Please notice that this only works of the page to translate is a live copy of the original.
@@ -124,39 +124,40 @@ The translation will be automatically done on rollout under the following condit
   and then (only after that!) the "Composum AI Autotranslate" rollout configuration.
 
 Then the pages will be transparently be translated on each rollout. Please notice that this changes the semantics of
-the inheritance somewhat: if a component inherits from the blueprint that means that the texts of the component are 
-the AI translated texts of the blueprint, and if inheritance is cancelled the texts are manually changed. 
+the inheritance somewhat: if a component inherits from the blueprint that means that the texts of the component are
+the AI translated texts of the blueprint, and if inheritance is cancelled the texts are manually changed.
 
-Caution: When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a single 
-page will do the job and trigger the rollout configuration. However, as of 07/24, when a rollout is triggered 
-for a page including all subpages in AEMaaCS, only those subpages are rolled out again whose blueprint is changed, 
+Caution: When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a
+single
+page will do the job and trigger the rollout configuration. However, as of 07/24, when a rollout is triggered
+for a page including all subpages in AEMaaCS, only those subpages are rolled out again whose blueprint is changed,
 so this might not lead to the desired result. For this case a workflow process is provided (see below).
 
 ## Triggering translation with the workflows
 
-The com.composum.ai.aem.core.impl.autotranslate.workflow.TriggerRolloutWorkflowProcess can be used in a workflow to 
-trigger a rollout to a given page and all subpages from their blueprints. That is, if the corresponding workflow is 
-triggered on a automatically translated page, it will check this page and all it's subpages whether they are live 
-copies and, if so, trigger a rollout from the blueprint to this page. It can be used in a workflow by adding a 
-workflow process step "Composum AI Rollout To Here" with arguments `{"recursive":false}` or `{"recursive":true}`, 
-depending on whether subpages should be rolled out. 
-Suggested title for the process step: "Composum AI Rollout Tree To Here Recursively" (if recursive=true) and 
-description: "Translates the page that is given as payload from it's blueprint. 
+The com.composum.ai.aem.core.impl.autotranslate.workflow.TriggerRolloutWorkflowProcess can be used in a workflow to
+trigger a rollout to a given page and all subpages from their blueprints. That is, if the corresponding workflow is
+triggered on a automatically translated page, it will check this page and all it's subpages whether they are live
+copies and, if so, trigger a rollout from the blueprint to this page. It can be used in a workflow by adding a
+workflow process step "Composum AI Rollout To Here" with arguments `{"recursive":false}` or `{"recursive":true}`,
+depending on whether subpages should be rolled out.
+Suggested title for the process step: "Composum AI Rollout Tree To Here Recursively" (if recursive=true) and
+description: "Translates the page that is given as payload from it's blueprint.
 The page has to be a live copy of the page it's translated from. Configured as recursive: rolls out tree of pages."
 
-There is also a deprecated action com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess 
-that can be used to trigger a translation of the page from a workflow. It requires that the page is set up as a live 
-copy of the primary language. This is deprecated in favor of triggering a rollout, if needed by 
+There is also a deprecated action com.composum.ai.aem.core.impl.autotranslate.workflow.AutoTranslateWorkflowProcess
+that can be used to trigger a translation of the page from a workflow. It requires that the page is set up as a live
+copy of the primary language. This is deprecated in favor of triggering a rollout, if needed by
 TriggerRolloutWorkflowProcess.
 
-Caveat: a workflow process step is called with a workflow service user, likely workflow-process-service . Thus, we 
-cannot easily make sure that the workflow initiator has the rights to perform this action and modify the page 
-through this rollout. This has to be made sure by other means in the workflow, e.g. by 
+Caveat: a workflow process step is called with a workflow service user, likely workflow-process-service . Thus, we
+cannot easily make sure that the workflow initiator has the rights to perform this action and modify the page
+through this rollout. This has to be made sure by other means in the workflow, e.g. by
 [applying ACL for the specific workflow model to /var/workflow/models.](https://experienceleague.adobe.com/en/docs/experience-manager-65/content/sites/administering/operations/workflows-managing)
 
 ## Usage of the Testing UI
 
-For quick experimentation and evaluation of additional instructions, we provide a very simple testing UI. The 
+For quick experimentation and evaluation of additional instructions, we provide a very simple testing UI. The
 entry point for the translation is the URL in the author server
 [/apps/composum-ai/components/autotranslate/list.html](http://localhost:4502/apps/composum-ai/components/autotranslate/list.html)
 It allows entering a path for a page or content / experience fragment or whole site and starting a translation process
@@ -191,19 +192,34 @@ that can be used to add additional instructions how to translate the pages in th
 
 ### Translation rules
 
-Since there can be different additional instructions for each page, there is the concept of a "translation rule" 
+Since there can be different additional instructions for each page, there is the concept of a "translation rule"
 that defines additional instructions with conditions when these are to be used. Such a rule has:
 
 - an optional path pattern that has to match the path of the page
 - an optional content pattern that has to appear in the content of the page
 - the additional instructions to be added when both patterns match or no pattern is given.
 
-A common use case would be to give specific translations for certain words. That'd be done by adding a rule with the 
+A common use case would be to give specific translations for certain words. That'd be done by adding a rule with the
 translated word / phrase as content pattern and "Translate XXX as YYY" as additional instruction.
-However, if you have many rules of this type you might also use translation tables with glossaries for that. You can 
-upload a spreadsheet (CSV or Excel file) with the word to translate in one column and the suggested translation in 
-another column. The AI will then be given instructions accordingly for all words that actually appear in the page 
+However, if you have many rules of this type you might also use translation tables with glossaries for that. You can
+upload a spreadsheet (CSV or Excel file) with the word to translate in one column and the suggested translation in
+another column. The AI will then be given instructions accordingly for all words that actually appear in the page
 that is being translated.
+
+### Additional tools
+
+For comparing the blueprint and the translated live copy there is a tool
+`/apps/composum-ai/components/tool/comparetool.html/{pagepath}`
+that finds the blueprint of the page with the given path and displays that blueprint and this page side by side,
+with joined scrolling.
+
+`/apps/composum-ai/components/autotranslatemerge/list.html/{pagepath}` starts a tool that displays the texts of
+components where the inheritance was cancelled for manual modification, so that the translations are not automatically
+updated, but for which there are changes in the source page that have been noted during rollout. 
+You can review and edit translations for modified properties in the tool.
+Only component properties where the inheritance has been cancelled and where
+the blueprint was modified after cancelling inheritance or the last merging are displayed
+- until they are saved and marked as merged.
 
 ## Notes about the implementation
 
@@ -218,26 +234,23 @@ that is being translated.
   currently be done with the "Composum AI Autotranslate Configuration".
 - At the moment the translator can only be switched off or on, but cannot be restricted to certain users or content
   areas.
-- The [standard AEM translation process](https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html) 
-  uses language copies. Besides the discussed advantages of live copies, integrating into that process is a bit 
-  difficult. The machine translation process in translation connectors is heavily geared towards translating 
-  individual texts independently from the translated page. Ultimately this amounts to implementing the method
-  [TranslationService.translateArray](https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html#translateArray-java.lang.String:A-java.lang.String-java.lang.String-com.adobe.granite.translation.api.TranslationConstants.ContentType-java.lang.String-)
-  in the connector, which doesn't get any information about the translated page. Thus, most of the discussed
-  advantages
-  of LLM based translations cannot be materialized. It might be possible to use the process for human translations, 
-  but that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be
-  simpler for the editors in practice.
+
+The [standard AEM translation process](https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html)
+uses language copies. Besides the discussed advantages of live copies, integrating into that process is a bit
+difficult. The machine translation process in translation connectors is heavily geared towards translating
+individual texts independently from the translated page. Ultimately this amounts to implementing the method
+[TranslationService.translateArray](https://developer.adobe.com/experience-manager/reference-materials/6-5/javadoc/com/adobe/granite/translation/api/TranslationService.html#translateArray-java.lang.String:A-java.lang.String-java.lang.String-com.adobe.granite.translation.api.TranslationConstants.ContentType-java.lang.String-)
+in the connector, which doesn't get any information about the translated page. Thus, most of the discussed
+advantages
+of LLM based translations cannot be materialized. It might be possible to use the process for human translations,
+but that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be
+simpler for the editors in practice.
 
 For more details you can look at the
 [specification](https://github.com/ist-dresden/composum-AI/blob/84b07ece77536f7db0034a7bb8b41ddf324b06a5/featurespecs/8AutomaticTranslation.md)
 .
 
-## Possible extensions
-
-<a id="difftranslation"></a>
-
-### Differential re-translation
+### Differential re-translation (used in the AI Translation Merge Tool)
 
 An interesting possibility where the reasoning capabilities of LLM could ease the translators work is the case where
 an automatical translation was done and an editor made manual changes to that translation. If in such a case the
@@ -255,8 +268,8 @@ lost. When employing an LLM, it'd be possible to give it:
 
 If you like playing around with that -
 [here is a small demonstration app](https://aigenpipeline.stoerr.net/differentialReTranslation/differentialReTranslation.html)
-for the idea. (It needs an OpenAI API key to work, but you can look at some English to German examples even without 
-that.) 
+for the idea. (It needs an OpenAI API key to work, but you can look at some English to German examples even without
+that.)
 
 > Language models weave,\
 > Context and tone they perceive,\
