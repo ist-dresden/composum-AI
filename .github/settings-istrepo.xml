@@ -56,7 +56,7 @@
         <profile>
             <id>develop</id>
             <properties>
-                <deploy.package>true</deploy.package>
+                <deploy.package>false</deploy.package>
                 <sling.scheme>https</sling.scheme>
                 <sling.secure>true</sling.secure>
                 <sling.host>test.composum.com</sling.host>
