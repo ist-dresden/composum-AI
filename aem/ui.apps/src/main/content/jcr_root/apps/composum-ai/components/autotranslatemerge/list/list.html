@@ -16,7 +16,7 @@
                 <div class="cq-dialog-content-page">
                     <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
                         <section class="coral-Form-fieldset">
-                            <h2 class="coral-Form-fieldset-legend">Translation Merge Tool</h2>
+                            <h2 class="coral-Form-fieldset-legend">Translation Merge Tool <a href="/editor.html${model.pagePath}.html">${model.pagePath}</a></h2>
                             <span class="coral-Form-field foundation-layout-util-breakword">
                                 This tool displays the texts of components where the inheritance was cancelled for manual modification, so that the translations are not automatically updated, and for which there are changes in the source page that have been noted during rollout. You can review and edit translations for modified properties below.
                                 Only component properties where the inheritance has been cancelled and where
@@ -69,7 +69,7 @@
                                                 <button is="coral-button" size="S" variant="minimal"
                                                         icon="arrowDown" class="move-down" title="Down"></button>
                                             </a> -->
-                                            ${property.componentTitle} ${property.pathInPage}
+                                            ${property.componentTitle} | ${property.pathInPage} |
                                             ${property.wrapper.propertyName}</td>
                                     </tr>
                                     <!-- Data row -->
