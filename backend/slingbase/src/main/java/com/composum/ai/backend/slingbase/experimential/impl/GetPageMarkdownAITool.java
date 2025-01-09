@@ -100,7 +100,7 @@ public class GetPageMarkdownAITool implements AITool {
             if (!path.matches(config.allowedPathsRegex())) {
                 return "Path not allowed";
             }
-            ResourceResolver resolver = resource.getResourceResolver();
+            ResourceResolver resolver = request.getResourceResolver();
             Resource pathResource = resolver.getResource(path);
             String markdown = markdownService.approximateMarkdown(pathResource, request, response);
             LOG.debug("Markdown of {} : {}", path, StringUtils.abbreviate(markdown, 80));
