@@ -295,8 +295,11 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
         GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
         Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
+        if (mergedConfig.highIntelligenceNeededIsUnset()) {
+            mergedConfig = GPTConfiguration.ofHighIntelligenceNeeded(true).merge(mergedConfig);
+        }
 
-        int maxtokens = maxTokensParam != null ? maxTokensParam : 1000; // some arbitrary default.
+        int maxtokens = maxTokensParam != null ? maxTokensParam : 4095; // some arbitrary default.
         // Synchronize with cutoff in GPTChatCompletionServiceImpl as it's used in the sidebar!
         if (isNotBlank(textLength)) {
             Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*+(.*)").matcher(textLength);

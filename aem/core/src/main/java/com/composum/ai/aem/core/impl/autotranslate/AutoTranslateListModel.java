@@ -70,7 +70,6 @@ public class AutoTranslateListModel {
             }
             path = path.replaceAll("_jcr_content", "jcr:content").replaceAll("\\.html$", "").trim();
             boolean recursive = request.getParameter("recursive") != null;
-            boolean changed = request.getParameter("translateWhenChanged") != null;
             boolean copyOriginalPage = request.getParameter("copyOriginalPage") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean debugaddinstructions = request.getParameter("debugaddinstructions") != null;
@@ -79,10 +78,6 @@ public class AutoTranslateListModel {
                         StringUtils.defaultString(additionalInstructions) + "\n\n" +
                                 MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS
                 );
-            }
-            boolean breakInheritance = request.getParameter("breakInheritance") != null;
-            if (isDisabled() && breakInheritance) {
-                throw new IllegalStateException("Refusing to do breakInheritance on disabled experiments.");
             }
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");
@@ -98,9 +93,7 @@ public class AutoTranslateListModel {
                 parms.maxDepth = Integer.parseInt(maxdepth);
             }
             parms.recursive = recursive;
-            parms.translateWhenChanged = changed;
             parms.additionalInstructions = additionalInstructions;
-            parms.breakInheritance = breakInheritance;
             if (copyOriginalPage && !debugaddinstructions) {
                 copyOriginalPage(request, path);
             }

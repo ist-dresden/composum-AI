@@ -39,7 +39,7 @@ import com.google.gson.JsonSyntaxException;
  * This is conservative in that it only rolls out (again) pages that already have been rolled out, and where the source still exists. It does not delete old pages or create new pages, even when recursive.
  * <p>As process
  * arguments a JSON can be given that configures the translation process - a serialization of {@link TriggerRolloutParameters},
- * e.g. {"autoSave":false,"breakInheritance":false,"translateWhenChanged":true,"recursive":false} .</p>
+ * e.g. {"autoSave":false,"recursive":false} .</p>
  */
 @Component(service = WorkflowProcess.class,
         property = {"process.label=Composum AI Rollout To Here",

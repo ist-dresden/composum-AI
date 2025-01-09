@@ -1,0 +1,104 @@
+del, del * {
+    background-color: #FFC0C0;
+    text-decoration: line-through;
+}
+
+span.ins, span.ins * {
+    background-color: #C0FFC0;
+    text-decoration: underline;
+}
+
+tr.row-separator td.row-separator {
+    background-color: lightgray;
+}
+
+tr.property-row td {
+    vertical-align: top;
+    width: 15%;
+}
+
+body.show-diffs .previoussrc, body.show-diffs .newsrc {
+    display: none;
+}
+
+body.hide-diffs .srcdiffs {
+    display: none;
+}
+
+body.hide-currenttext .currenttext {
+    display:none;
+}
+
+.rte-container {
+    position: relative;
+}
+
+.rte-toolbar {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    height: 28px;
+    margin-bottom: 4px;
+}
+
+.rte-editor {
+    border: 1px solid #ccc;
+    padding: 8px;
+    overflow-y: auto;
+    resize: vertical;
+}
+
+.propertytable, .bottombar {
+    margin-bottom: 0.625rem;
+}
+
+.bottombar {
+    position: sticky;
+    bottom: 0;
+    padding: 0.625rem;
+    margin: 0px;
+}
+
+.bottombar a {
+    padding-right: 14px;
+}
+
+.merged td {
+    background-color: #e6ffe6 !important;
+    opacity: 40%;
+}
+
+.spinner {
+    display: none;
+}
+
+.activespinner .spinner {
+    display: inline-block;
+    position: relative;
+    top: 3px;
+    left: 1px;
+}
+
+textarea {
+    width: 100%;
+    margin-top: 1em;
+}
+
+.show-diffs .toggle-diffs {
+    background-color: lightgray;
+}
+
+.show-currenttext .toggle-current {
+    background-color: lightgray;
+}
+
+.coral--light ._coral-Table-cell.diffscolor {
+    background-color: #fffff0;
+}
+
+.coral--light ._coral-Table-cell.currenttext {
+    background-color: #f0ffff;
+}
+
+.actionrow td {
+    border-top-width: 0px !important;
+}
