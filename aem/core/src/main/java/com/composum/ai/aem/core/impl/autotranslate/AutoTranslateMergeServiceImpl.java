@@ -71,7 +71,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
                                 if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy()) && StringUtils.isNotBlank(wrapper.getNewTranslatedCopy())) {
-                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentTitle(res)));
+                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentName(res), getComponentTitle(res)));
                                 } else {
                                     LOG.warn("Property {} has empty original or translated copy", propertyName);
                                 }
@@ -144,7 +144,10 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 children.stream().flatMap(this::descendantsStream));
     }
 
-    protected String getComponentTitle(Resource resource) {
+    /**
+     * Determines the jcr:title of the current component, as found by sling:resourceType
+     */
+    protected String getComponentName(Resource resource) {
         String resourceType = null;
         ResourceResolver resolver = resource.getResourceResolver();
         while (resourceType == null && resource != null) {
@@ -156,6 +159,32 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             if (componentResource != null) {
                 return componentResource.getValueMap().get("jcr:title", String.class);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Determines the jcr:title , title or text of the component by searching upwards for such a property.
+     */
+    protected String getComponentTitle(@Nonnull Resource resource) {
+        while (resource != null && resource.getValueMap().get("sling:resourceType") == null) {
+            resource = resource.getParent();
+        }
+        if (resource != null) {
+            String title = resource.getValueMap().get("jcr:title", String.class);
+            if (title == null) {
+                title = resource.getValueMap().get("title", String.class);
+            }
+            if (title == null) {
+                title = resource.getValueMap().get("text", String.class);
+            }
+            if (title == null) {
+                title = resource.getValueMap().get("jcr:description", String.class);
+            }
+            if (title != null) { // remove HTML tags
+                title = title.replaceAll("</?[a-zA-Z][^>]*/?>", "");
+            }
+            return title;
         }
         return null;
     }
