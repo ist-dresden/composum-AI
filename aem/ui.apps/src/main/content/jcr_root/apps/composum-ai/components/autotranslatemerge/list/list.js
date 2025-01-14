@@ -4,19 +4,10 @@ const URL_MERGE_SERVLET = '/bin/cpm/ai/aitranslationmerge';
 class AITranslateMergeTool {
     constructor() {
         document.addEventListener("DOMContentLoaded", () => {
-            this.initRTEEditors();
             this.initTableEventListeners();
             this.initNavButtons();
             this.initFooterButtons();
             document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
-        });
-    }
-
-    /** Initializes Rich Text Editors by instantiating AITranslatorMergeRTE for each editor container. */
-    initRTEEditors() {
-        const rteContainers = document.querySelectorAll(".rte-container");
-        rteContainers.forEach(container => {
-            new AITranslatorMergeRTE(container);
         });
     }
 

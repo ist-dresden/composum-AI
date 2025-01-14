@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +51,16 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
     @Reference
     private AutoTranslateMergeService mergeService;
 
+    /**
+     * Handles POST requests to the servlet.
+     *
+     * @param request  the Sling HTTP servlet request
+     * @param response the Sling HTTP servlet response
+     * @throws IOException if an I/O error occurs
+     * @see AemAITranslationMergeServlet#handleSave(SlingHttpServletRequest, SlingHttpServletResponse)
+     * @see AemAITranslationMergeServlet#handleCheck(SlingHttpServletRequest, SlingHttpServletResponse)
+     * @see AemAITranslationMergeServlet#handleMerge(SlingHttpServletRequest, SlingHttpServletResponse)
+     */
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String operation = request.getParameter("operation");
@@ -64,7 +75,17 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         }
     }
 
-    protected void handleCheck(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+    /**
+     * Handles the 'check' operation to verify if a resource has unmerged translations.
+     *
+     * Request parameters:
+     * - `path`: the path of the resource to check for unmerged translations (required).
+     *
+     * @param request  the Sling HTTP servlet request
+     * @param response the Sling HTTP servlet response
+     * @throws IOException if an I/O error occurs
+     */
+    protected void handleCheck(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws IOException {
         String path = request.getParameter("path");
         if (StringUtils.isBlank(path)) {
             response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing parameter path");
@@ -83,7 +104,19 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         response.getWriter().println(gson.toJson(Collections.singletonMap("mergeable", hasUnmerged)));
     }
 
-    protected void handleSave(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+    /**
+     * Handles the 'save' operation to save a translation.
+     *
+     * Request parameters:
+     * - `path`: the path of the resource to save the translation to (required).
+     * - `propertyName`: the name of the property to save the translation to (required).
+     * - `body`: the translation text to save (required).
+     *
+     * @param request  the Sling HTTP servlet request
+     * @param response the Sling HTTP servlet response
+     * @throws IOException if an I/O error occurs
+     */
+    protected void handleSave(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws IOException {
         String path = request.getParameter("path");
         String propertyName = request.getParameter("propertyName");
         String body = request.getParameter("body");
@@ -110,6 +143,22 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         }
     }
 
+    /**
+     * Handles the 'merge' operation to merge translations.
+     *
+     * Request parameters:
+     * - `path`: the path of the resource to merge the translation for (required).
+     * - `propertyName`: the name of the property to merge the translation for (required).
+     * - `originalSource`: the original source text (required).
+     * - `newSource`: the new source text (required).
+     * - `newTranslation`: the new translation text (required).
+     * - `currentText`: the current text of the component (required).
+     * - `language`: the language of the translation (optional).
+     *
+     * @param request  the Sling HTTP servlet request
+     * @param response the Sling HTTP servlet response
+     * @throws IOException if an I/O error occurs
+     */
     protected void handleMerge(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         MergeRequest mergeRequest = gson.fromJson(request.getReader(), MergeRequest.class);
         // if mergeRequest or any of it's properties are null, complain

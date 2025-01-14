@@ -145,7 +145,7 @@ public interface AutoTranslateMergeService {
                 String text = aDiff.text;
                 switch (aDiff.operation) {
                     case INSERT:
-                        htmlBuf.append("<span class=\"ins\">").append(text).append("</span>");
+                        htmlBuf.append(wrapExcludingHTMLTags(text, "<span class=\"ins\">", "</span>"));
                         break;
                     case EQUAL:
                         htmlBuf.append(text);
@@ -156,14 +156,21 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        /** Matches an opening or closing HTML tag. */
-        protected static final Pattern HTML_TAG_PATTERN = Pattern.compile("\\s*</?[a-zA-Z][^>]*/?>\\s*");
+        /**
+         * Matches an opening or closing HTML tag.
+         */
+        protected static final Pattern HTML_TAG_PATTERN = Pattern.compile("(\\s|\\u00A0|&nbsp;)*</?[a-zA-Z][^>]*/?>(\\s|\\u00A0|&nbsp;)*");
+
+        /**
+         * Several kinds of whitespace in HTML.
+         */
+        protected static final Pattern HTML_WHITESPACE_PATTERN = Pattern.compile("(\\s|\\u00A0|&nbsp;)+");
 
         /**
          * We wrap the text into wrapstart and wrapstop. If there is an opening or closing HTML tag we do not wrap that but only the texts in between.
          */
         protected static String wrapExcludingHTMLTags(@Nonnull String text, @Nonnull String wrapstart, @Nonnull String wrapstop) {
-            if (StringUtils.isBlank(text)) {
+            if (StringUtils.isBlank(text) || HTML_WHITESPACE_PATTERN.matcher(text).matches()) {
                 return text;
             }
             StringBuffer wrapped = new StringBuffer();
