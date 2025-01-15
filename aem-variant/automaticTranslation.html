@@ -39,7 +39,7 @@
           <ul class="breadcrumb">
         <li id="publishDate">$i18n.getString( "site-renderer", $locale, "template.lastpublished" ): $dateValue<span class="divider">|</span>
 </li>
-          <li id="projectVersion">$i18n.getString( "site-renderer", $locale, "template.version" ): 2.1.0<span class="divider">|</span></li>
+          <li id="projectVersion">$i18n.getString( "site-renderer", $locale, "template.version" ): 2.2.1<span class="divider">|</span></li>
       <li class=""><a href="../index.html" title="Composum AI Site">Composum AI Site</a><span class="divider">/</span></li>
     <li class="active ">Rethinking automatic translation in AEM with LLMs</li>
       <li class="pull-right"><span class="divider">|</span>
@@ -211,7 +211,8 @@ and then (only after that!) the &#x201c;Composum AI Autotranslate&#x201d; rollou
 <p>Then the pages will be transparently be translated on each rollout. Please notice that this changes the semantics of
 the inheritance somewhat: if a component inherits from the blueprint that means that the texts of the component are
 the AI translated texts of the blueprint, and if inheritance is cancelled the texts are manually changed.</p>
-<p>Caution: When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a single
+<p>Caution: When a re-translation has to be triggered e.g. because of a change in additional instructions, a rollout of a
+single
 page will do the job and trigger the rollout configuration. However, as of 07/24, when a rollout is triggered
 for a page including all subpages in AEMaaCS, only those subpages are rolled out again whose blueprint is changed,
 so this might not lead to the desired result. For this case a workflow process is provided (see below).</p></section><section><a id="Triggering_translation_with_the_workflows"></a>
@@ -274,7 +275,22 @@ translated word / phrase as content pattern and &#x201c;Translate XXX as YYY&#x2
 However, if you have many rules of this type you might also use translation tables with glossaries for that. You can
 upload a spreadsheet (CSV or Excel file) with the word to translate in one column and the suggested translation in
 another column. The AI will then be given instructions accordingly for all words that actually appear in the page
-that is being translated.</p></section></section><section><a id="Notes_about_the_implementation"></a>
+that is being translated.</p></section><section><a id="Additional_tools"></a>
+<h3>Additional tools</h3>
+<p>For comparing the blueprint and the translated live copy there is a tool
+<code>/apps/composum-ai/components/tool/comparetool.html/{pagepath}</code>
+that finds the blueprint of the page with the given path and displays that blueprint and this page side by side,
+with joined scrolling.</p>
+<p><code>/apps/composum-ai/components/autotranslatemerge/list.html/{pagepath}</code> starts a tool that displays the texts of
+components where the inheritance was cancelled for manual modification, so that the translations are not automatically
+updated, but for which there are changes in the source page that have been noted during rollout.
+You can review and edit translations for modified properties in the tool.
+Only component properties where the inheritance has been cancelled and where
+the blueprint was modified after cancelling inheritance or the last merging are displayed</p>
+<ul>
+
+<li>until they are saved and marked as merged.</li>
+</ul></section></section><section><a id="Notes_about_the_implementation"></a>
 <h2>Notes about the implementation</h2>
 <ul>
 
@@ -289,7 +305,8 @@ productive usage a configuration for positive and negative exceptions would like
 currently be done with the &#x201c;Composum AI Autotranslate Configuration&#x201d;.</li>
 <li>At the moment the translator can only be switched off or on, but cannot be restricted to certain users or content
 areas.</li>
-<li>The <a href="https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html" class="externalLink">standard AEM translation process</a>
+</ul>
+<p>The <a href="https://experienceleague.adobe.com/docs/experience-manager-learn/sites/multi-site-management/updating-language-copy.html" class="externalLink">standard AEM translation process</a>
 uses language copies. Besides the discussed advantages of live copies, integrating into that process is a bit
 difficult. The machine translation process in translation connectors is heavily geared towards translating
 individual texts independently from the translated page. Ultimately this amounts to implementing the method
@@ -298,14 +315,11 @@ in the connector, which doesn't get any information about the translated page. T
 advantages
 of LLM based translations cannot be materialized. It might be possible to use the process for human translations,
 but that seems somewhat difficult, and augmenting the live copy process with transparent translation might prove to be
-simpler for the editors in practice.</li>
-</ul>
+simpler for the editors in practice.</p>
 <p>For more details you can look at the
 <a href="https://github.com/ist-dresden/composum-AI/blob/84b07ece77536f7db0034a7bb8b41ddf324b06a5/featurespecs/8AutomaticTranslation.md" class="externalLink">specification</a>
-.</p></section><section><a id="Possible_extensions"></a>
-<h2>Possible extensions</h2>
-<p><a id="difftranslation"></a></p><section><a id="Differential_re-translation"></a>
-<h3>Differential re-translation</h3>
+.</p><section><a id="Differential_re-translation_.28used_in_the_AI_Translation_Merge_Tool.29"></a>
+<h3>Differential re-translation (used in the AI Translation Merge Tool)</h3>
 <p>An interesting possibility where the reasoning capabilities of LLM could ease the translators work is the case where
 an automatical translation was done and an editor made manual changes to that translation. If in such a case the
 master language the text is changed and a simple automatical translation would be re-run, then the manual changes would
