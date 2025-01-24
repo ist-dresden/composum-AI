@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.collections4.IterableUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -67,15 +66,11 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                         for (String key : properties.keySet()) {
                             String propertyName = AITranslatePropertyWrapper.decodePropertyName(
                                     AITranslatePropertyWrapper.AI_PREFIX, key,
-                                    AITranslatePropertyWrapper.AI_NEW_TRANSLATED_SUFFIX, res);
+                                    AITranslatePropertyWrapper.AI_ORIGINAL_SUFFIX, res);
                             if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
-                                if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy()) && StringUtils.isNotBlank(wrapper.getNewTranslatedCopy())) {
-                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentName(res), getComponentTitle(res)));
-                                } else {
-                                    LOG.warn("Property {} has empty original or translated copy", propertyName);
-                                }
+                                list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentName(res), getComponentTitle(res)));
                             }
                         }
                     }
