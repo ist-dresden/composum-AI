@@ -40,6 +40,10 @@ body.hide-currenttext .currenttext {
     margin-bottom: 4px;
 }
 
+.rte-container .rte-toolbar button {
+    margin-left: 0px;
+}
+
 .rte-editor {
     border: 1px solid #ccc;
     padding: 8px;
