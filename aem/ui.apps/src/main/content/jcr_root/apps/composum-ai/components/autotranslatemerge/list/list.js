@@ -69,12 +69,7 @@ class AITranslateMergeRow {
         this.actionrow = actionrow;
         this.tool = tool;
         this.editorContainer = row.querySelector(".rte-container");
-        if (this.editorContainer) {
-            this.editor = this.editorContainer.querySelector(".rte-editor");
-        } else {
-            this.editorContainer = row.querySelector(".text-container");
-            this.editor = this.editorContainer?.querySelector(".text-editor");
-        }
+        this.editor = this.editorContainer?.querySelector(".rte-editor") || this.editorContainer?.querySelector(".text-editor");
 
         this.copyButton = this.actionrow.querySelector(".copy-to-editor");
         this.appendButton = this.actionrow.querySelector(".append-to-editor");
@@ -134,25 +129,25 @@ class AITranslateMergeRow {
                     ...data
                 })
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error("Merge failed: " + errMsg);
-                        });
-                    }
-                })
-                .then(mergedText => {
-                    this.editor.innerHTML = mergedText;
-                    this.saveButton.disabled = false;
-                    console.log("Merge successful");
-                    this.tool.showError(null);
-                })
-                .catch(error => {
-                    console.error("Error in intelligentMerge", error);
-                    this.tool.showError(errMsg);
-                }).finally(() => {
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then(errMsg => {
+                        throw new Error("Merge failed: " + errMsg);
+                    });
+                }
+            })
+            .then(mergedText => {
+                this.editor.innerHTML = mergedText;
+                this.saveButton.disabled = false;
+                console.log("Merge successful");
+                this.tool.showError(null);
+            })
+            .catch(error => {
+                console.error("Error in intelligentMerge", error);
+                this.tool.showError(error.message);
+            }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');
             });
@@ -177,20 +172,20 @@ class AITranslateMergeRow {
                     body: this.editor.innerHTML
                 })
             })
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Save successful");
-                        row.classList.add("merged");
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error("Save failed: " + errMsg);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error("Error in saveEditor", error);
-                    this.tool.showError(errMsg);
-                }).finally(() => {
+            .then(response => {
+                if (response.ok) {
+                    console.log("Save successful");
+                    row.classList.add("merged");
+                } else {
+                    return response.text().then(errMsg => {
+                        throw new Error("Save failed: " + errMsg);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error in saveEditor", error);
+                this.tool.showError(error.message);
+            }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');
             });
@@ -198,7 +193,7 @@ class AITranslateMergeRow {
     }
 }
 
-/** Manages the rich text editor functionalities, including toolbar actions and save/reset operations. */
+/** Manages the rich text editor functionalities, including toolbar actions and link management. */
 class AITranslatorMergeRTE {
     constructor(container, saveButton) {
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
@@ -207,6 +202,8 @@ class AITranslatorMergeRTE {
 
         this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
         this.editor.addEventListener("keyup", this.handleEditorInput.bind(this));
+
+        this.initLinkHandlers();
     }
 
     handleToolbarClick(event) {
@@ -219,6 +216,66 @@ class AITranslatorMergeRTE {
 
     handleEditorInput() {
         this.saveButton.disabled = false;
+    }
+
+    initLinkHandlers() {
+        const editLinkButton = this.toolbar.querySelector('.edit-link-btn');
+        const removeLinkButton = this.toolbar.querySelector('.remove-link-btn');
+
+        editLinkButton.addEventListener("click", () => {
+            const anchor = this.getSelectedAnchor();
+            this.editLink(anchor);
+        });
+
+        removeLinkButton.addEventListener("click", () => {
+            const anchor = this.getSelectedAnchor();
+            if (anchor) {
+                this.removeLink(anchor);
+                this.saveButton.disabled = false;
+            } else {
+                alert("No link is currently selected.");
+            }
+        });
+    }
+
+    getSelectedAnchor() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return null;
+        let element = selection.getRangeAt(0).startContainer;
+        while (element && element.nodeType === Node.TEXT_NODE) {
+            element = element.parentElement;
+        }
+        if (element && element.tagName.toLowerCase() === 'a') {
+            return element;
+        }
+        return null;
+    }
+
+    editLink(anchor) {
+        let currentHref = anchor ? anchor.getAttribute('href') : '';
+        let newHref = prompt("Enter the URL", currentHref);
+        if (newHref !== null) {
+            if (!anchor) {
+                const range = window.getSelection().getRangeAt(0);
+                anchor = document.createElement('a');
+                anchor.href = newHref;
+                anchor.textContent = range.toString();
+                range.deleteContents();
+                range.insertNode(anchor);
+            } else {
+                anchor.href = newHref;
+            }
+            this.saveButton.disabled = false;
+        }
+    }
+
+    removeLink(anchor) {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(anchor);
+        anchor.replaceWith(...anchor.childNodes);
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 }
 
