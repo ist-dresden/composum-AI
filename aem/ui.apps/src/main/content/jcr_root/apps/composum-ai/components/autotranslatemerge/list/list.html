@@ -285,8 +285,8 @@
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core'}"></sly>
 <script src="${resource.path @ context='uri'}/list.js"></script>
-<div id="edit-link-modal" class="hidden">
-    <div class="modal-content">
+<div id="edit-link-modal" class="modal-backdrop hidden">
+    <div class="modal-content wide">
         <h3>Edit Link</h3>
         <label>Text</label>
         <input type="text" id="edit-anchor-text">
@@ -308,8 +308,10 @@
 
         <input type="hidden" id="edit-anchor-rel">
 
-        <button id="save-link-btn">Save</button>
-        <button id="cancel-link-btn">Cancel</button>
+        <div class="modal-actions">
+            <button id="save-link-btn">Save</button>
+            <button id="cancel-link-btn">Cancel</button>
+        </div>
     </div>
 </div>
 </body>
