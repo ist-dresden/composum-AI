@@ -285,4 +285,23 @@
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core'}"></sly>
 <script src="${resource.path @ context='uri'}/list.js"></script>
+<div id="edit-link-modal" class="hidden">
+    <div class="modal-content">
+        <h3>Edit Link</h3>
+        <label>Anchor Text</label>
+        <input type="text" id="edit-anchor-text">
+
+        <label>Href</label>
+        <input type="text" id="edit-anchor-href">
+
+        <label>Title</label>
+        <input type="text" id="edit-anchor-title">
+
+        <label>Rel</label>
+        <input type="text" id="edit-anchor-rel">
+
+        <button id="save-link-btn">Save</button>
+        <button id="cancel-link-btn">Cancel</button>
+    </div>
+</div>
 </body>

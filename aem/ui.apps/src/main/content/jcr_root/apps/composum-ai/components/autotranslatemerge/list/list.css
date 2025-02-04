@@ -44,6 +44,37 @@ body.hide-currenttext .currenttext {
     margin-left: 0px;
 }
 
+#edit-link-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    z-index: 1000;
+}
+
+#edit-link-modal.hidden {
+    display: none;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 10px;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.modal-content button {
+    margin-top: 10px;
+    padding: 5px 10px;
+}
+
 .rte-editor {
     border: 1px solid #ccc;
     padding: 8px;
