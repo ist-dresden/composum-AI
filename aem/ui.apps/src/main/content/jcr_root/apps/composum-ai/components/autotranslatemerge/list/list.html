@@ -288,17 +288,25 @@
 <div id="edit-link-modal" class="hidden">
     <div class="modal-content">
         <h3>Edit Link</h3>
-        <label>Anchor Text</label>
+        <label>Text</label>
         <input type="text" id="edit-anchor-text">
 
-        <label>Href</label>
+        <label>Link</label>
         <input type="text" id="edit-anchor-href">
 
-        <label>Title</label>
+        <label>Alternative text</label>
         <input type="text" id="edit-anchor-title">
 
-        <label>Rel</label>
-        <input type="text" id="edit-anchor-rel">
+        <label>Target</label>
+        <select id="edit-anchor-target">
+            <option value=""></option>
+            <option value="_self">Same tab</option>
+            <option value="_blank">New tab</option>
+            <option value="_parent">Parent frame</option>
+            <option value="_top">Top frame</option>
+        </select>
+
+        <input type="hidden" id="edit-anchor-rel">
 
         <button id="save-link-btn">Save</button>
         <button id="cancel-link-btn">Cancel</button>

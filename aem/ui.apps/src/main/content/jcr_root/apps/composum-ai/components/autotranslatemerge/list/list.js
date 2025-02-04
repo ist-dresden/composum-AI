@@ -206,6 +206,7 @@ class AITranslatorMergeRTE {
         this.inputHref = this.modal.querySelector("#edit-anchor-href");
         this.inputTitle = this.modal.querySelector("#edit-anchor-title");
         this.inputRel = this.modal.querySelector("#edit-anchor-rel");
+        this.inputTarget = this.modal.querySelector("#edit-anchor-target"); // select
         this.saveLinkBtn = this.modal.querySelector("#save-link-btn");
         this.cancelLinkBtn = this.modal.querySelector("#cancel-link-btn");
 
@@ -267,12 +268,14 @@ class AITranslatorMergeRTE {
             this.inputHref.value = anchor.getAttribute('href') || '';
             this.inputTitle.value = anchor.getAttribute('title') || '';
             this.inputRel.value = anchor.getAttribute('rel') || '';
+            this.inputTarget.value = anchor.getAttribute('target') || '';
         } else {
             // Clear fields if no anchor is selected.
             this.inputAnchorText.value = '';
             this.inputHref.value = '';
             this.inputTitle.value = '';
             this.inputRel.value = '';
+            this.inputTarget.value = '';
 
             // if selection is within this.editor, save it
             const selection = window.getSelection();
@@ -299,50 +302,52 @@ class AITranslatorMergeRTE {
     }
 
     saveLink(anchor) {
-        const newAnchorText = this.inputAnchorText.value;
-        const newHref = this.inputHref.value;
-        const newTitle = this.inputTitle.value;
-        const newRel = this.inputRel.value;
-
         // Mark the editor as changed.
         this.saveButton.disabled = false;
         this.hideModal();
 
-        debugger;
-
-        // Create new link if no anchor is provided.
         if (!anchor) {
             if (this.savedRange) {
                 const range = this.savedRange;
                 const newAnchor = document.createElement('a');
-                newAnchor.href = newHref;
-                newAnchor.textContent = newAnchorText || range.toString();
-                if (newTitle) newAnchor.setAttribute('title', newTitle);
-                if (newRel) newAnchor.setAttribute('rel', newRel);
+                this.updateAnchor(newAnchor);
                 range.deleteContents();
                 range.insertNode(newAnchor);
 
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(range);
-            } else { // insert anchor at cursor position
-
-
+            } else {
+                console.error("Bug: No anchor or saved range to insert link into.");
             }
         } else {
-            // Update existing anchor attributes.
-            anchor.textContent = newAnchorText;
-            anchor.href = newHref;
-            if (newTitle) {
-                anchor.setAttribute('title', newTitle);
-            } else {
-                anchor.removeAttribute('title');
-            }
-            if (newRel) {
-                anchor.setAttribute('rel', newRel);
-            } else {
-                anchor.removeAttribute('rel');
-            }
+            this.updateAnchor(anchor);
+        }
+    }
+
+    updateAnchor(anchor) {
+        const newAnchorText = this.inputAnchorText.value;
+        const newHref = this.inputHref.value;
+        const newTitle = this.inputTitle.value;
+        const newRel = this.inputRel.value;
+        const newTarget = this.inputTarget.value;
+
+        anchor.href = newHref;
+        anchor.textContent = newAnchorText;
+        if (newTitle) {
+            anchor.setAttribute('title', newTitle);
+        } else {
+            anchor.removeAttribute('title');
+        }
+        if (newRel) {
+            anchor.setAttribute('rel', newRel);
+        } else {
+            anchor.removeAttribute('rel');
+        }
+        if (newTarget) {
+            anchor.setAttribute('target', newTarget);
+        } else {
+            anchor.removeAttribute('target');
         }
     }
 
