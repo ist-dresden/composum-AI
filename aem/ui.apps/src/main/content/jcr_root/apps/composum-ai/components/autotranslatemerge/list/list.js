@@ -48,7 +48,7 @@ class AITranslateMergeTool {
         document.body.classList.toggle('hide-currenttext');
     }
 
-    /** If message is null the error field is hidden. */
+    /** If the message is null, the error field is hidden. */
     showError(message) {
         const errormessage = document.querySelector('.errormessage');
         const alertcontent = errormessage.querySelector('.alertcontent');
@@ -59,7 +59,6 @@ class AITranslateMergeTool {
             errormessage.hidden = true;
         }
     }
-
 }
 
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
@@ -199,6 +198,16 @@ class AITranslatorMergeRTE {
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
         this.saveButton = saveButton;
+        this.editLinkBtn = container.querySelector(".edit-link-btn");
+
+        // Modal elements
+        this.modal = document.getElementById("edit-link-modal");
+        this.inputAnchorText = this.modal.querySelector("#edit-anchor-text");
+        this.inputHref = this.modal.querySelector("#edit-anchor-href");
+        this.inputTitle = this.modal.querySelector("#edit-anchor-title");
+        this.inputRel = this.modal.querySelector("#edit-anchor-rel");
+        this.saveLinkBtn = this.modal.querySelector("#save-link-btn");
+        this.cancelLinkBtn = this.modal.querySelector("#cancel-link-btn");
 
         this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
         this.editor.addEventListener("keyup", this.handleEditorInput.bind(this));
@@ -252,20 +261,88 @@ class AITranslatorMergeRTE {
     }
 
     editLink(anchor) {
-        let currentHref = anchor ? anchor.getAttribute('href') : '';
-        let newHref = prompt("Enter the URL", currentHref);
-        if (newHref !== null) {
-            if (!anchor) {
-                const range = window.getSelection().getRangeAt(0);
-                anchor = document.createElement('a');
-                anchor.href = newHref;
-                anchor.textContent = range.toString();
-                range.deleteContents();
-                range.insertNode(anchor);
-            } else {
-                anchor.href = newHref;
+        // Pre-fill inputs with current anchor values if the anchor exists.
+        if (anchor) {
+            this.inputAnchorText.value = anchor.textContent;
+            this.inputHref.value = anchor.getAttribute('href') || '';
+            this.inputTitle.value = anchor.getAttribute('title') || '';
+            this.inputRel.value = anchor.getAttribute('rel') || '';
+        } else {
+            // Clear fields if no anchor is selected.
+            this.inputAnchorText.value = '';
+            this.inputHref.value = '';
+            this.inputTitle.value = '';
+            this.inputRel.value = '';
+
+            // if selection is within this.editor, save it
+            const selection = window.getSelection();
+            if (selection.rangeCount) {
+                if (selection.baseNode.parentElement.closest('.rte-editor') === this.editor) {
+                    this.savedRange = selection.getRangeAt(0);
+                    this.inputAnchorText.value = this.savedRange.toString();
+                } else {
+                    this.savedRange = null;
+                }
             }
-            this.saveButton.disabled = false;
+        }
+
+        // Add event listeners for the modal buttons
+        this.saveLinkBtn.onclick = () => this.saveLink(anchor);
+        this.cancelLinkBtn.onclick = () => this.hideModal();
+
+        // Finally, show the modal.
+        this.modal.classList.remove("hidden");
+    }
+
+    hideModal() {
+        this.modal.classList.add("hidden");
+    }
+
+    saveLink(anchor) {
+        const newAnchorText = this.inputAnchorText.value;
+        const newHref = this.inputHref.value;
+        const newTitle = this.inputTitle.value;
+        const newRel = this.inputRel.value;
+
+        // Mark the editor as changed.
+        this.saveButton.disabled = false;
+        this.hideModal();
+
+        debugger;
+
+        // Create new link if no anchor is provided.
+        if (!anchor) {
+            if (this.savedRange) {
+                const range = this.savedRange;
+                const newAnchor = document.createElement('a');
+                newAnchor.href = newHref;
+                newAnchor.textContent = newAnchorText || range.toString();
+                if (newTitle) newAnchor.setAttribute('title', newTitle);
+                if (newRel) newAnchor.setAttribute('rel', newRel);
+                range.deleteContents();
+                range.insertNode(newAnchor);
+
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else { // insert anchor at cursor position
+
+
+            }
+        } else {
+            // Update existing anchor attributes.
+            anchor.textContent = newAnchorText;
+            anchor.href = newHref;
+            if (newTitle) {
+                anchor.setAttribute('title', newTitle);
+            } else {
+                anchor.removeAttribute('title');
+            }
+            if (newRel) {
+                anchor.setAttribute('rel', newRel);
+            } else {
+                anchor.removeAttribute('rel');
+            }
         }
     }
 
