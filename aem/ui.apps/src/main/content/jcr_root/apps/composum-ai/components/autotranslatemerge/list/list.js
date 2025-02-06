@@ -48,7 +48,7 @@ class AITranslateMergeTool {
         document.body.classList.toggle('hide-currenttext');
     }
 
-    /** If message is null the error field is hidden. */
+    /** If the message is null, the error field is hidden. */
     showError(message) {
         const errormessage = document.querySelector('.errormessage');
         const alertcontent = errormessage.querySelector('.alertcontent');
@@ -59,7 +59,6 @@ class AITranslateMergeTool {
             errormessage.hidden = true;
         }
     }
-
 }
 
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
@@ -69,12 +68,7 @@ class AITranslateMergeRow {
         this.actionrow = actionrow;
         this.tool = tool;
         this.editorContainer = row.querySelector(".rte-container");
-        if (this.editorContainer) {
-            this.editor = this.editorContainer.querySelector(".rte-editor");
-        } else {
-            this.editorContainer = row.querySelector(".text-container");
-            this.editor = this.editorContainer?.querySelector(".text-editor");
-        }
+        this.editor = this.editorContainer?.querySelector(".rte-editor") || this.editorContainer?.querySelector(".text-editor");
 
         this.copyButton = this.actionrow.querySelector(".copy-to-editor");
         this.appendButton = this.actionrow.querySelector(".append-to-editor");
@@ -134,25 +128,25 @@ class AITranslateMergeRow {
                     ...data
                 })
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error("Merge failed: " + errMsg);
-                        });
-                    }
-                })
-                .then(mergedText => {
-                    this.editor.innerHTML = mergedText;
-                    this.saveButton.disabled = false;
-                    console.log("Merge successful");
-                    this.tool.showError(null);
-                })
-                .catch(error => {
-                    console.error("Error in intelligentMerge", error);
-                    this.tool.showError(errMsg);
-                }).finally(() => {
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then(errMsg => {
+                        throw new Error("Merge failed: " + errMsg);
+                    });
+                }
+            })
+            .then(mergedText => {
+                this.editor.innerHTML = mergedText;
+                this.saveButton.disabled = false;
+                console.log("Merge successful");
+                this.tool.showError(null);
+            })
+            .catch(error => {
+                console.error("Error in intelligentMerge", error);
+                this.tool.showError(error.message);
+            }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');
             });
@@ -177,20 +171,20 @@ class AITranslateMergeRow {
                     body: this.editor.innerHTML
                 })
             })
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Save successful");
-                        row.classList.add("merged");
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error("Save failed: " + errMsg);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error("Error in saveEditor", error);
-                    this.tool.showError(errMsg);
-                }).finally(() => {
+            .then(response => {
+                if (response.ok) {
+                    console.log("Save successful");
+                    row.classList.add("merged");
+                } else {
+                    return response.text().then(errMsg => {
+                        throw new Error("Save failed: " + errMsg);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error in saveEditor", error);
+                this.tool.showError(error.message);
+            }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');
             });
@@ -198,15 +192,28 @@ class AITranslateMergeRow {
     }
 }
 
-/** Manages the rich text editor functionalities, including toolbar actions and save/reset operations. */
+/** Manages the rich text editor functionalities, including toolbar actions and link management. */
 class AITranslatorMergeRTE {
     constructor(container, saveButton) {
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
         this.saveButton = saveButton;
+        this.editLinkBtn = container.querySelector(".edit-link-btn");
+
+        // Modal elements
+        this.modal = document.getElementById("edit-link-modal");
+        this.inputAnchorText = this.modal.querySelector("#edit-anchor-text");
+        this.inputHref = this.modal.querySelector("#edit-anchor-href");
+        this.inputTitle = this.modal.querySelector("#edit-anchor-title");
+        this.inputRel = this.modal.querySelector("#edit-anchor-rel");
+        this.inputTarget = this.modal.querySelector("#edit-anchor-target"); // select
+        this.saveLinkBtn = this.modal.querySelector("#save-link-btn");
+        this.cancelLinkBtn = this.modal.querySelector("#cancel-link-btn");
 
         this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
         this.editor.addEventListener("keyup", this.handleEditorInput.bind(this));
+
+        this.initLinkHandlers();
     }
 
     handleToolbarClick(event) {
@@ -219,6 +226,138 @@ class AITranslatorMergeRTE {
 
     handleEditorInput() {
         this.saveButton.disabled = false;
+    }
+
+    initLinkHandlers() {
+        const editLinkButton = this.toolbar.querySelector('.edit-link-btn');
+        const removeLinkButton = this.toolbar.querySelector('.remove-link-btn');
+
+        editLinkButton.addEventListener("click", () => {
+            const anchor = this.getSelectedAnchor();
+            this.editLink(anchor);
+        });
+
+        removeLinkButton.addEventListener("click", () => {
+            const anchor = this.getSelectedAnchor();
+            if (anchor) {
+                this.removeLink(anchor);
+                this.saveButton.disabled = false;
+            } else {
+                alert("No link is currently selected.");
+            }
+        });
+    }
+
+    getSelectedAnchor() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return null;
+        let element = selection.getRangeAt(0).startContainer;
+        while (element && element.nodeType === Node.TEXT_NODE) {
+            element = element.parentElement;
+        }
+        if (element && element.tagName.toLowerCase() === 'a') {
+            return element;
+        }
+        return null;
+    }
+
+    editLink(anchor) {
+        // Pre-fill inputs with current anchor values if the anchor exists.
+        if (anchor) {
+            this.inputAnchorText.value = anchor.textContent;
+            this.inputHref.value = anchor.getAttribute('href') || '';
+            this.inputTitle.value = anchor.getAttribute('title') || '';
+            this.inputRel.value = anchor.getAttribute('rel') || '';
+            this.inputTarget.value = anchor.getAttribute('target') || '';
+        } else {
+            // Clear fields if no anchor is selected.
+            this.inputAnchorText.value = '';
+            this.inputHref.value = '';
+            this.inputTitle.value = '';
+            this.inputRel.value = '';
+            this.inputTarget.value = '';
+
+            // if selection is within this.editor, save it
+            const selection = window.getSelection();
+            if (selection.rangeCount) {
+                if (selection.baseNode.parentElement.closest('.rte-editor') === this.editor) {
+                    this.savedRange = selection.getRangeAt(0);
+                    this.inputAnchorText.value = this.savedRange.toString();
+                } else {
+                    this.savedRange = null;
+                }
+            }
+        }
+
+        // Add event listeners for the modal buttons
+        this.saveLinkBtn.onclick = () => this.saveLink(anchor);
+        this.cancelLinkBtn.onclick = () => this.hideModal();
+
+        // Finally, show the modal.
+        this.modal.classList.remove("hidden");
+    }
+
+    hideModal() {
+        this.modal.classList.add("hidden");
+    }
+
+    saveLink(anchor) {
+        // Mark the editor as changed.
+        this.saveButton.disabled = false;
+        this.hideModal();
+
+        if (!anchor) {
+            if (this.savedRange) {
+                const range = this.savedRange;
+                const newAnchor = document.createElement('a');
+                this.updateAnchor(newAnchor);
+                range.deleteContents();
+                range.insertNode(newAnchor);
+
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else {
+                console.error("Bug: No anchor or saved range to insert link into.");
+            }
+        } else {
+            this.updateAnchor(anchor);
+        }
+    }
+
+    updateAnchor(anchor) {
+        const newAnchorText = this.inputAnchorText.value;
+        const newHref = this.inputHref.value;
+        const newTitle = this.inputTitle.value;
+        const newRel = this.inputRel.value;
+        const newTarget = this.inputTarget.value;
+
+        anchor.href = newHref;
+        anchor.textContent = newAnchorText;
+        if (newTitle) {
+            anchor.setAttribute('title', newTitle);
+        } else {
+            anchor.removeAttribute('title');
+        }
+        if (newRel) {
+            anchor.setAttribute('rel', newRel);
+        } else {
+            anchor.removeAttribute('rel');
+        }
+        if (newTarget) {
+            anchor.setAttribute('target', newTarget);
+        } else {
+            anchor.removeAttribute('target');
+        }
+    }
+
+    removeLink(anchor) {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(anchor);
+        anchor.replaceWith(...anchor.childNodes);
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 }
 

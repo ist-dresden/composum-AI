@@ -40,6 +40,64 @@ body.hide-currenttext .currenttext {
     margin-bottom: 4px;
 }
 
+.rte-container .rte-toolbar button {
+    margin-left: 0px;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: block;
+    z-index: 999;
+}
+
+.modal-content {
+    width: 600px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4); /* Enhanced shadow for depth */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.modal-backdrop.hidden {
+    display: none;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 10px;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+.modal-content select {
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.modal-content button {
+    margin-top: 10px;
+    padding: 5px 10px;
+}
+
+.modal-content .modal-actions {
+    margin-top: 20px;
+}
+
 .rte-editor {
     border: 1px solid #ccc;
     padding: 8px;

@@ -9,8 +9,8 @@ import org.apache.sling.caconfig.annotation.Property;
 public @interface AutoTranslateTranslationTableConfig {
 
     @Property(label = "Path to XLS or CSV File", order = 1,
-            description = "The JCR path to the XLS or CSV file containing the translation table. " +
-                    "Can be either a file resource or an AEM asset.")
+            description = "The full JCR path to the XLS or CSV file containing the translation table. " +
+                    "Can be either a file resource or an AEM asset. E.g.: /content/dam/yourapplication/aitranslation/endedict.xls")
     String path();
 
     @Property(label = "Sheet Index", order = 2,
