@@ -67,8 +67,8 @@ class AITranslateMergeRow {
         this.row = row;
         this.actionrow = actionrow;
         this.tool = tool;
-        this.editorContainer = row.querySelector(".rte-container");
-        this.editor = this.editorContainer?.querySelector(".rte-editor") || this.editorContainer?.querySelector(".text-editor");
+        this.rteContainer = row.querySelector(".rte-container");
+        this.editor = this.rteContainer?.querySelector(".rte-editor") || row.querySelector(".text-editor");
 
         this.copyButton = this.actionrow.querySelector(".copy-to-editor");
         this.appendButton = this.actionrow.querySelector(".append-to-editor");
@@ -77,7 +77,9 @@ class AITranslateMergeRow {
         this.resetButton = this.actionrow.querySelector(".reset-editor");
         this.saveButton = this.actionrow.querySelector(".save-editor");
 
-        new AITranslatorMergeRTE(this.editorContainer, this.saveButton);
+        if (this.rteContainer) {
+            new AITranslatorMergeRTE(this.rteContainer, this.saveButton);
+        }
 
         this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
         if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
@@ -89,17 +91,14 @@ class AITranslateMergeRow {
 
     copyToEditor() {
         this.editor.innerHTML = this.row.dataset.nt;
-        this.saveButton.disabled = false;
     }
 
     appendToEditor() {
         this.editor.innerHTML += this.row.dataset.nt;
-        this.saveButton.disabled = false;
     }
 
     resetEditor() {
         this.editor.innerHTML = this.row.dataset.e;
-        this.saveButton.disabled = true;
     }
 
     intelligentMerge() {
@@ -139,7 +138,6 @@ class AITranslateMergeRow {
             })
             .then(mergedText => {
                 this.editor.innerHTML = mergedText;
-                this.saveButton.disabled = false;
                 console.log("Merge successful");
                 this.tool.showError(null);
             })
@@ -168,7 +166,7 @@ class AITranslateMergeRow {
                 body: new URLSearchParams({
                     path: this.row.dataset.path,
                     propertyName: this.row.dataset.propertyname,
-                    body: this.editor.innerHTML
+                    body: this.editor.value || this.editor.innerHTML
                 })
             })
             .then(response => {
@@ -198,7 +196,6 @@ class AITranslatorMergeRTE {
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
         this.saveButton = saveButton;
-        this.editLinkBtn = container.querySelector(".edit-link-btn");
 
         // Modal elements
         this.modal = document.getElementById("edit-link-modal");
@@ -211,7 +208,6 @@ class AITranslatorMergeRTE {
         this.cancelLinkBtn = this.modal.querySelector("#cancel-link-btn");
 
         this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
-        this.editor.addEventListener("keyup", this.handleEditorInput.bind(this));
 
         this.initLinkHandlers();
     }
@@ -222,10 +218,6 @@ class AITranslatorMergeRTE {
             document.execCommand(command, false, null);
             this.editor.focus(); // Refocus the editor after the action
         }
-    }
-
-    handleEditorInput() {
-        this.saveButton.disabled = false;
     }
 
     initLinkHandlers() {
@@ -241,7 +233,6 @@ class AITranslatorMergeRTE {
             const anchor = this.getSelectedAnchor();
             if (anchor) {
                 this.removeLink(anchor);
-                this.saveButton.disabled = false;
             } else {
                 alert("No link is currently selected.");
             }
@@ -303,7 +294,6 @@ class AITranslatorMergeRTE {
 
     saveLink(anchor) {
         // Mark the editor as changed.
-        this.saveButton.disabled = false;
         this.hideModal();
 
         if (!anchor) {
