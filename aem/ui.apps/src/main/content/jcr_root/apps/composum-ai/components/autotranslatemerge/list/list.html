@@ -16,8 +16,9 @@
                 <div class="cq-dialog-content-page">
                     <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
                         <section class="coral-Form-fieldset">
-                            <h2 class="coral-Form-fieldset-legend">Translation Merge Tool for page <a
-                                        href="/editor.html${model.pagePath}.html">${model.pagePath}</a></h2>
+                            <h2 class="coral-Form-fieldset-legend">Translation Merge Tool for page <a target="_blank"
+                                                                                                      href="/editor.html${model.pagePath}.html">${model.pagePath}</a>
+                            </h2>
                             <span class="coral-Form-field foundation-layout-util-breakword">
                                 This tool displays the texts of components where the inheritance was cancelled for manual modification, so that the translations are not automatically updated, and for which there are changes in the source page that have been noted during rollout. You can review and edit translations for modified properties below.
                                 Only component properties where the inheritance has been cancelled and where
@@ -73,7 +74,8 @@
                                             ${property.componentName} | ${property.pathInPage} |
                                             ${property.wrapper.propertyName}
                                             <sly data-sly-test="${property.componentTitle}">
-                                                | ${property.componentTitle}</sly>
+                                                | ${property.componentTitle}
+                                            </sly>
                                         </td>
                                     </tr>
                                     <!-- Data row -->
@@ -103,7 +105,7 @@
                                         <td is="coral-table-cell"
                                             class="srcdiffs diffscolor">
                                             <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            ${property.originalCopyDiffsHTML @ context='html'}</td>
+                                                ${property.originalCopyDiffsHTML @ context='html'}</td>
                                         </p>
                                         <td is="coral-table-cell"
                                             class="newtrans">
@@ -288,17 +290,22 @@
     <div class="modal-content wide">
         <h3>Edit Link</h3>
         <label>Text</label>
-        <input type="text" id="edit-anchor-text">
+        <input type="text" id="edit-anchor-text" class="_coral-Textfield">
 
-        <label>Link</label>
-        <input type="text" id="edit-anchor-href">
+        <label>Path / Link</label>
+        <div class="path-link-wrapper">
+            <input type="text" id="edit-anchor-href" class="_coral-Textfield">
+            <span class="coral-InputGroup-button">
+                <button is="coral-button" icon="FolderOpenOutline" iconsize="S" size="M" variant="default"
+                        class="choose-path-button"></button>
+            </span>
+        </div>
 
         <label>Alternative text</label>
-        <input type="text" id="edit-anchor-title">
+        <input type="text" id="edit-anchor-title" class="_coral-Textfield">
 
-        <label>Target</label>
         <select id="edit-anchor-target">
-            <option value=""></option>
+            <option value="">Target</option>
             <option value="_self">Same tab</option>
             <option value="_blank">New tab</option>
             <option value="_parent">Parent frame</option>
@@ -308,8 +315,8 @@
         <input type="hidden" id="edit-anchor-rel">
 
         <div class="modal-actions">
-            <button id="save-link-btn">Save</button>
-            <button id="cancel-link-btn">Cancel</button>
+            <button is="coral-button" variant="primary" id="save-link-btn">Save</button>
+            <button is="coral-button" variant="secondary" id="cancel-link-btn">Cancel</button>
         </div>
     </div>
 </div>

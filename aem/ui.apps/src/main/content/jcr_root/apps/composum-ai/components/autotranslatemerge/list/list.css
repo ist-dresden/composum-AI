@@ -90,12 +90,25 @@ body.hide-currenttext .currenttext {
 }
 
 .modal-content button {
-    margin-top: 10px;
+    margin-top: 5px;
     padding: 5px 10px;
 }
 
 .modal-content .modal-actions {
     margin-top: 20px;
+}
+
+.modal-content .path-link-wrapper {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+}
+
+.coral--light .modal-content .path-link-wrapper button {
+    border-width: 1px;
+    border-color: #e1e1e1;
+    border-left-color: transparent;
+    border-radius: 4px;
 }
 
 .rte-editor {
