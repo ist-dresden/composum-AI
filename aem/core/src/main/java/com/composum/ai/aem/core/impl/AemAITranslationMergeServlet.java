@@ -3,9 +3,11 @@ package com.composum.ai.aem.core.impl;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -62,7 +64,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
      * @see AemAITranslationMergeServlet#handleMerge(SlingHttpServletRequest, SlingHttpServletResponse)
      */
     @Override
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         String operation = request.getParameter("operation");
         if ("save".equals(operation)) {
             handleSave(request, response);
@@ -116,7 +118,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
      * @param response the Sling HTTP servlet response
      * @throws IOException if an I/O error occurs
      */
-    protected void handleSave(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws IOException {
+    protected void handleSave(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws IOException, ServletException {
         String path = request.getParameter("path");
         String propertyName = request.getParameter("propertyName");
         String body = request.getParameter("body");
@@ -134,12 +136,15 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         }
 
         try {
-            mergeService.saveTranslation(resource, propertyName, body, true);
+            Map<String, String> result = mergeService.saveTranslation(resource, propertyName, body, true);
             resolver.commit();
-            response.setStatus(SlingHttpServletResponse.SC_OK);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().println(gson.toJson(result));
         } catch (PersistenceException | WCMException | IllegalArgumentException e) {
-            LOG.error("Error saving property", e);
+            LOG.error("Error saving property {} on {}", propertyName, path, e);
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving property " + propertyName + " on resource " + path);
+            throw new ServletException(e);
         }
     }
 
