@@ -154,6 +154,7 @@ class AITranslateMergeRow {
     saveEditor() {
         const btn = this.saveButton;
         const row = this.row;
+        this.tool.showError();
         Granite.csrf.refreshToken().then(token => {
             btn.disabled = true;
             btn.classList.add('activespinner');
@@ -171,17 +172,27 @@ class AITranslateMergeRow {
             })
             .then(response => {
                 if (response.ok) {
-                    console.log("Save successful");
-                    row.classList.add("merged");
+                    return response.text();
                 } else {
                     return response.text().then(errMsg => {
-                        throw new Error("Save failed: " + errMsg);
+                        throw new Error(errMsg);
                     });
+                }
+            })
+            .then(responseText => {
+                if (!responseText || !responseText.trim()) {
+                    throw new Error();
+                }
+                let result = JSON.parse(responseText);
+                if (!result.saved) {
+                    throw new Error(); // no error message to speak of
+                } else {
+                    row.classList.add("merged");
                 }
             })
             .catch(error => {
                 console.error("Error in saveEditor", error);
-                this.tool.showError(error.message);
+                this.tool.showError("Save failed. " + error?.message);
             }).finally(() => {
                 btn.disabled = false;
                 btn.classList.remove('activespinner');

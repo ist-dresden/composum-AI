@@ -79,7 +79,7 @@ public class SearchPageAITool implements AITool {
     }
 
     @Override
-    public boolean isAllowedFor(@Nonnull Resource resource) {
+    public boolean isAllowedFor(@Nullable Resource resource) {
         return true;
     }
 

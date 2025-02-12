@@ -84,8 +84,8 @@ public class ModifyPageWriteTool implements AITool {
     }
 
     @Override
-    public boolean isAllowedFor(@Nonnull Resource resource) {
-        return config != null && config.allowedPathsRegex() != null &&
+    public boolean isAllowedFor(@Nullable Resource resource) {
+        return config != null && config.allowedPathsRegex() != null && resource != null &&
                 resource.getPath().matches(config.allowedPathsRegex());
     }
 

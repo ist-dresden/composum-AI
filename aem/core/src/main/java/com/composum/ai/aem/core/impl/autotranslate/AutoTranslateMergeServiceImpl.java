@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     }
 
     @Override
-    public void saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName, @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException {
+    public Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName, @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException {
         ModifiableValueMap properties = Objects.requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
         if (relationship != null) {
@@ -97,14 +98,16 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             wrapper.setCurrentValue(content);
             if (markAsMerged) {
                 if (wrapper.getNewOriginalCopy() == null || wrapper.getNewTranslatedCopy() == null) {
-                    throw new IllegalArgumentException("Bug / already merged? Property " + propertyName + " on resource " + resource.getPath() + " has no original or translated copy");
+                    LOG.warn("Already merged? Property {} on resource {} has no original or translated copy", propertyName, resource.getPath());
+                    wrapper.setOriginalCopy(wrapper.getNewOriginalCopy());
+                    wrapper.setTranslatedCopy(wrapper.getNewTranslatedCopy());
                 }
-                wrapper.setOriginalCopy(wrapper.getNewOriginalCopy());
-                wrapper.setTranslatedCopy(wrapper.getNewTranslatedCopy());
                 wrapper.setNewOriginalCopy(null); // that's the "needs merge" marker
                 wrapper.setNewTranslatedCopy(null);
             }
+            return Collections.singletonMap("saved", wrapper.getCurrentValue());
         }
+        return Collections.emptyMap();
     }
 
     @Override
