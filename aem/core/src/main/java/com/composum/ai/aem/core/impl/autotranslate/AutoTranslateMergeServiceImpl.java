@@ -97,10 +97,10 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             wrapper.setCurrentValue(content);
             if (markAsMerged) {
                 if (wrapper.getNewOriginalCopy() == null || wrapper.getNewTranslatedCopy() == null) {
-                    throw new IllegalArgumentException("Bug / already merged? Property " + propertyName + " on resource " + resource.getPath() + " has no original or translated copy");
+                    LOG.warn("Already merged? Property {} on resource {} has no original or translated copy", propertyName, resource.getPath());
+                    wrapper.setOriginalCopy(wrapper.getNewOriginalCopy());
+                    wrapper.setTranslatedCopy(wrapper.getNewTranslatedCopy());
                 }
-                wrapper.setOriginalCopy(wrapper.getNewOriginalCopy());
-                wrapper.setTranslatedCopy(wrapper.getNewTranslatedCopy());
                 wrapper.setNewOriginalCopy(null); // that's the "needs merge" marker
                 wrapper.setNewTranslatedCopy(null);
             }
