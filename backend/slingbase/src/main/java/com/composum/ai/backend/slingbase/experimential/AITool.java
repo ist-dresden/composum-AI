@@ -70,7 +70,7 @@ public interface AITool {
     /**
      * Whether the tool is enabled for the given resource.
      */
-    boolean isAllowedFor(@Nonnull Resource resource);
+    boolean isAllowedFor(@Nullable Resource resource);
 
     /**
      * Executes the tool call and returns the result to present to the AI.

@@ -385,7 +385,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     }
 
     @Nullable
-    protected List<GPTTool> collectTools(@Nonnull Resource resource,
+    protected List<GPTTool> collectTools(@Nullable Resource resource,
                                          @Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) {
         if (tools == null || tools.isEmpty()) {
             return null;
