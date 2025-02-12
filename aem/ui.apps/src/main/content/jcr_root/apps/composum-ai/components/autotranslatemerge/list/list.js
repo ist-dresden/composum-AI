@@ -1,4 +1,5 @@
 const URL_MERGE_SERVLET = '/bin/cpm/ai/aitranslationmerge';
+const PATH_CHOOSER_URL = '/mnt/overlay/cq/gui/content/linkpathfield/picker.html';
 
 /** Handles the general script functionality for the Translation Merge Tool. */
 class AITranslateMergeTool {
@@ -78,7 +79,7 @@ class AITranslateMergeRow {
         this.saveButton = this.actionrow.querySelector(".save-editor");
 
         if (this.rteContainer) {
-            new AITranslatorMergeRTE(this.rteContainer, this.saveButton);
+            new AITranslatorMergeRTE(this.rteContainer);
         }
 
         this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
@@ -203,10 +204,9 @@ class AITranslateMergeRow {
 
 /** Manages the rich text editor functionalities, including toolbar actions and link management. */
 class AITranslatorMergeRTE {
-    constructor(container, saveButton) {
+    constructor(container) {
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
-        this.saveButton = saveButton;
 
         // Modal elements
         this.modal = document.getElementById("edit-link-modal");
@@ -217,6 +217,7 @@ class AITranslatorMergeRTE {
         this.inputTarget = this.modal.querySelector("#edit-anchor-target"); // select
         this.saveLinkBtn = this.modal.querySelector("#save-link-btn");
         this.cancelLinkBtn = this.modal.querySelector("#cancel-link-btn");
+        this.choosePathBtn = this.modal.querySelector("#choose-path-btn");
 
         this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
 
@@ -248,6 +249,9 @@ class AITranslatorMergeRTE {
                 alert("No link is currently selected.");
             }
         });
+
+        debugger;
+        this.choosePathBtn.addEventListener("click", this.choosePath.bind(this));
     }
 
     getSelectedAnchor() {
@@ -359,6 +363,27 @@ class AITranslatorMergeRTE {
         anchor.replaceWith(...anchor.childNodes);
         sel.removeAllRanges();
         sel.addRange(range);
+    }
+
+    /** Loads PATH_CHOOSER_URL and inserts that into #path-chooser-content and removes class hidden from #path-chooser-modal */
+    choosePath() {
+        console.log("Choose path");
+        const pathChooserContent = document.getElementById('path-chooser-content');
+        pathChooserContent.innerHTML = '';
+        fetch(PATH_CHOOSER_URL)
+            .then(response => response.text())
+            .then(html => pathChooserContent.innerHTML = html)
+            .then(() => this.openDialog())
+            .catch(error => console.error("Error in choosePath", error));
+    }
+
+    openDialog(pathChooserModal) {
+        if (this.pathDialog) {
+            this.pathDialog.remove();
+        }
+        const coraldialog = document.querySelector('#path-chooser-content coral-dialog');
+        this.pathDialog = coraldialog;
+        coraldialog.show();
     }
 }
 
