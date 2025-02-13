@@ -5,7 +5,7 @@
     <title>Translation Merge UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
-    <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
+    <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core,cq.authoring.dialog'}"></sly>
     <link rel="stylesheet" href="${resource.path @ context='uri'}/list.css">
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt show-diffs hide-currenttext">
@@ -323,4 +323,6 @@
 
 <div id="path-chooser-content">
 </div>
+
+<sly data-sly-call="${clientLib.js @ categories='cq.authoring.editor.core,cq.authoring.dialog'}"></sly>
 </body>
