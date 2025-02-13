@@ -318,7 +318,7 @@ class AITranslateLinkEditModal {
         this.choosePathBtn = this.modal.querySelector("#choose-path-btn");
 
         this.pathChooser = new AITranslationPathChooser();
-        this.choosePathBtn.addEventListener("click", this.pathChooser.choosePath.bind(this));
+        this.choosePathBtn.addEventListener("click", () => this.pathChooser.choosePath(this.inputHref));
 
         this.saveLinkBtn.onclick = this.saveLink.bind(this);
         this.cancelLinkBtn.onclick = this.hideModal.bind(this);
@@ -389,24 +389,49 @@ class AITranslateLinkEditModal {
 class AITranslationPathChooser {
 
     /** Loads PATH_CHOOSER_URL and inserts that into #path-chooser-content and removes class hidden from #path-chooser-modal */
-    choosePath() {
-        console.log("Choose path");
+    choosePath(pathInput, path) {
+        this.removeDialog();
+        this.pathInput = pathInput;
+        const pathValue = path || this.pathInput.value;
+        const url = pathValue && pathValue.startsWith('/') ? PATH_CHOOSER_URL + pathValue : PATH_CHOOSER_URL;
         const pathChooserContent = document.getElementById('path-chooser-content');
         pathChooserContent.innerHTML = '';
-        fetch(PATH_CHOOSER_URL)
+        fetch(url)
             .then(response => response.text())
             .then(html => pathChooserContent.innerHTML = html)
-            .then(() => this.openDialog())
+            .then(() => this.openDialog(pathChooserContent))
             .catch(error => console.error("Error in choosePath", error));
     }
 
-    openDialog() {
+    openDialog(pathChooserContent) {
+        this.removeDialog();
+        this.pathDialog = pathChooserContent.querySelector('#path-chooser-content coral-dialog');
+        this.pathDialog.show();
+        this.pathDialog.on('coral-overlay:close', () => this.pathDialog.remove());
+        this.pathDialog.on('click', '.granite-pickerdialog-submit', this.onSelect.bind(this));
+        this.pathDialog.on('click', 'coral-columnview-item.is-selectable', this.selectItem.bind(this));
+    }
+
+    removeDialog() {
         if (this.pathDialog) {
             this.pathDialog.remove();
+            this.pathDialog = null;
         }
-        const coraldialog = document.querySelector('#path-chooser-content coral-dialog');
-        this.pathDialog = coraldialog;
-        coraldialog.show();
+    }
+
+    onSelect() {
+        const path = this.pathDialog.querySelector('coral-checkbox[checked]')?.parentNode?.dataset?.foundationCollectionItemId;
+        this.pathDialog.remove();
+        if (path) {
+            this.pathInput.value = path;
+        }
+    }
+
+    selectItem(event) {
+        const path = event.target.dataset.foundationCollectionItemId;
+        if (path) {
+            this.choosePath(this.pathInput, path);
+        }
     }
 
 }
