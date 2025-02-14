@@ -359,7 +359,7 @@ class AITranslateLinkEditModal {
         const newRel = this.inputRel.value;
         const newTarget = this.inputTarget.value;
 
-        if (newHref && newHref.startsWith('/content/') && !newHref.startsWith('/content/dam') && !newHref.contains('.html')) {
+        if (newHref && newHref.startsWith('/content/') && !newHref.startsWith('/content/dam') && !newHref.includes('.html')) {
             newHref += '.html';
         }
         anchor.href = newHref;
@@ -406,7 +406,7 @@ class AITranslationPathChooser {
     async openDialog(pathInput, path) {
         this.removeDialog();
         this.pathInput = pathInput;
-        const pathValue = path || this.pathInput.value;
+        const pathValue = path || this.pathInput.value || document.body.dataset?.pagePath;
         await this.loadPath(null);
         this.dialogSetup();
         if (pathValue) { // load all prefixes of pathValue
