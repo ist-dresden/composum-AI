@@ -285,7 +285,10 @@ class AITranslatorMergeRTE {
 
                 const sel = window.getSelection();
                 sel.removeAllRanges();
-                sel.addRange(range);
+                // set selection to the new anchor
+                const newRange = document.createRange();
+                newRange.selectNodeContents(newAnchor);
+                sel.addRange(newRange);
             } else {
                 console.error("Bug: No anchor or saved range to insert link into.");
             }
@@ -400,14 +403,14 @@ class AITranslationPathChooser {
         await this.loadPath(null);
         this.dialogSetup();
         if (pathValue) { // load all prefixes of pathValue
-            const pathSplitted = pathValue.split('/');
+            const pathSplitted = pathValue.split('/').slice(1);
             let currentPath = '';
             for (let i = 0; i < pathSplitted.length; i++) {
                 currentPath += '/' + pathSplitted[i];
                 await this.loadPath(currentPath);
-                this.mergeDialogs();
-                this.selectPath(currentPath);
+                this.mergeDialogs(currentPath);
             }
+            this.selectPath(pathValue);
         }
     }
 
@@ -441,22 +444,22 @@ class AITranslationPathChooser {
 
     onSelect() {
         const path = this.pathDialog.querySelector('coral-checkbox[checked]')?.parentNode?.dataset?.foundationCollectionItemId;
-        this.pathDialog.remove();
         if (path) {
             this.pathInput.value = path;
         }
+        this.removeDialog();
     }
 
     async selectItem(event) {
         const path = event?.target?.dataset?.foundationCollectionItemId;
         if (path) {
             await this.loadPath(path);
-            this.mergeDialogs();
+            this.mergeDialogs(path);
         }
     }
 
     /** Moves elements (new columns etc.) from this.pathChooserContent to this.pathDialog . */
-    mergeDialogs() {
+    mergeDialogs(parentPath) {
         if (!this.pathDialog || !this.pathChooserContent) return;
         // move element .granite-pickerdialog-titlebar
         const titlebar = this.pathChooserContent.querySelector('.granite-pickerdialog-titlebar');
@@ -493,6 +496,10 @@ class AITranslationPathChooser {
             inline: 'end'
         });
         this.pathChooserContent.innerHTML = '';
+        const parent = this.pathDialog.querySelector(`coral-columnview-item[data-foundation-collection-item-id="${parentPath}"]`);
+        if (parent) {
+            parent.active = true;
+        }
     }
 
     /** Finds the coral-columnview-item by the data-foundation-collection-item-id and checks that and scrolls it into view. */
@@ -500,7 +507,7 @@ class AITranslationPathChooser {
         if (path) {
             const item = this.pathDialog.querySelector(`coral-columnview-item[data-foundation-collection-item-id="${path}"]`);
             if (item) {
-                item.checked = true;
+                item.selected = true;
                 item.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'end'});
             }
         }

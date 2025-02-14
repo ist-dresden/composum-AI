@@ -173,3 +173,8 @@ textarea {
 .actionrow td {
     border-top-width: 0px !important;
 }
+
+/* That creates a Javascript error -> we disable this for now. */
+.granite-pickerdialog .granite-pickerdialog-titlebar {
+    display: none;
+}
