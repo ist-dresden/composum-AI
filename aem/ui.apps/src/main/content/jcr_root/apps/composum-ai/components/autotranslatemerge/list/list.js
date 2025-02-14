@@ -318,7 +318,7 @@ class AITranslateLinkEditModal {
         this.choosePathBtn = this.modal.querySelector("#choose-path-btn");
 
         this.pathChooser = new AITranslationPathChooser();
-        this.choosePathBtn.addEventListener("click", () => this.pathChooser.choosePath(this.inputHref));
+        this.choosePathBtn.addEventListener("click", () => this.pathChooser.openDialog(this.inputHref));
 
         this.saveLinkBtn.onclick = this.saveLink.bind(this);
         this.cancelLinkBtn.onclick = this.hideModal.bind(this);
@@ -388,24 +388,30 @@ class AITranslateLinkEditModal {
 
 class AITranslationPathChooser {
 
+    constructor() {
+        this.pathChooserContent = document.getElementById('path-chooser-content');
+    }
+
     /** Loads PATH_CHOOSER_URL and inserts that into #path-chooser-content and removes class hidden from #path-chooser-modal */
-    choosePath(pathInput, path) {
+    openDialog(pathInput, path) {
         this.removeDialog();
         this.pathInput = pathInput;
         const pathValue = path || this.pathInput.value;
-        const url = pathValue && pathValue.startsWith('/') ? PATH_CHOOSER_URL + pathValue : PATH_CHOOSER_URL;
-        const pathChooserContent = document.getElementById('path-chooser-content');
-        pathChooserContent.innerHTML = '';
+        this.loadPath(pathValue, this.dialogSetup.bind(this));
+    }
+
+    loadPath(path, callback) {
+        const url = path && path.startsWith('/') ? PATH_CHOOSER_URL + path : PATH_CHOOSER_URL;
+        this.pathChooserContent.innerHTML = '';
         fetch(url)
             .then(response => response.text())
-            .then(html => pathChooserContent.innerHTML = html)
-            .then(() => this.openDialog(pathChooserContent))
+            .then(html => this.pathChooserContent.innerHTML = html)
+            .then(() => callback())
             .catch(error => console.error("Error in choosePath", error));
     }
 
-    openDialog(pathChooserContent) {
-        this.removeDialog();
-        this.pathDialog = pathChooserContent.querySelector('#path-chooser-content coral-dialog');
+    dialogSetup() {
+        this.pathDialog = this.pathChooserContent.querySelector('coral-dialog');
         this.pathDialog.show();
         this.pathDialog.on('coral-overlay:close', () => this.pathDialog.remove());
         this.pathDialog.on('click', '.granite-pickerdialog-submit', this.onSelect.bind(this));
@@ -430,7 +436,7 @@ class AITranslationPathChooser {
     selectItem(event) {
         const path = event.target.dataset.foundationCollectionItemId;
         if (path) {
-            this.choosePath(this.pathInput, path);
+            this.openDialog(this.pathInput, path);
         }
     }
 
