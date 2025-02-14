@@ -113,8 +113,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getOriginalCopyInsertionsMarked() {
-            String src = wrapper.getNewOriginalCopy();
-            String dst = wrapper.getOriginalCopy();
+            String src = normalizeForDiff(wrapper.getNewOriginalCopy());
+            String dst = normalizeForDiff(wrapper.getOriginalCopy());
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -136,8 +136,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getNewOriginalCopyInsertionsMarked() {
-            String src = wrapper.getOriginalCopy();
-            String dst = wrapper.getNewOriginalCopy();
+            String src = normalizeForDiff(wrapper.getOriginalCopy());
+            String dst = normalizeForDiff(wrapper.getNewOriginalCopy());
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -156,6 +156,11 @@ public interface AutoTranslateMergeService {
             }
             String html = htmlBuf.toString();
             return html;
+        }
+
+        /** Remove stuff that makes trouble with diffs. Currently rel="noopener noreferrer" */
+        protected String normalizeForDiff(String text) {
+            return text != null ? text.replaceAll(" rel=\"noopener noreferrer\"", " ").trim() : "";
         }
 
         /**
