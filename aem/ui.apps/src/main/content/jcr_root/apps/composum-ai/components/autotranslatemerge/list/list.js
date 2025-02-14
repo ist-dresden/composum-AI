@@ -436,7 +436,40 @@ class AITranslationPathChooser {
     selectItem(event) {
         const path = event.target.dataset.foundationCollectionItemId;
         if (path) {
-            this.openDialog(this.pathInput, path);
+            this.loadPath(path, this.mergeDialogs.bind(this))
+        }
+    }
+
+    /** Moves elements (new columns etc.) from this.pathChooserContent to this.pathDialog . */
+    mergeDialogs() {
+        // move element .granite-pickerdialog-titlebar
+        const titlebar = this.pathChooserContent.querySelector('.granite-pickerdialog-titlebar');
+        const dialogTitlebar = this.pathDialog.querySelector('.granite-pickerdialog-titlebar');
+        if (titlebar && dialogTitlebar) {
+            dialogTitlebar.replaceWith(titlebar);
+        }
+        // find within the coral-columnview the columnview-column that has no coral-wait in it and overwrite / put that
+        // into the coral-columnview in this.pathDialog
+        const columnview = this.pathChooserContent.querySelector('coral-columnview');
+        const dialogColumnview = this.pathDialog.querySelector('coral-columnview');
+        // merge the children of columnview and dialogColumnView into dialogColumnview. Each child of columnview
+        // is checked whether it has a coral-wait element somewhere, and if not the corresponding child in dialogColumview
+        // is replaced, or it is added there.
+        const columnviewChildren = Array.from(columnview.childNodes);
+        const dialogColumnviewChildren = Array.from(dialogColumnview.childNodes);
+        for (let i = 0; i < columnviewChildren.length; i++) {
+            const child = columnviewChildren[i];
+            if (child.querySelector('coral-columnview-column-content coral-wait')) {
+                continue;
+            }
+            if (i < dialogColumnviewChildren.length) {
+                dialogColumnviewChildren[i].replaceWith(child);
+            } else {
+                dialogColumnview.appendChild(child);
+            }
+        }
+        while (dialogColumnview.childNodes.length > columnviewChildren.length) {
+            dialogColumnview.childNodes[dialogColumnviewChildren.length - 1].remove();
         }
     }
 
