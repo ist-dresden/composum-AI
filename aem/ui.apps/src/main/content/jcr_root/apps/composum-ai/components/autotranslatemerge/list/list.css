@@ -44,6 +44,15 @@ body.hide-currenttext .currenttext {
     margin-left: 0px;
 }
 
+.row-actions, .editor-actions {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.row-actions button, .editor-actions button {
+    margin-left: 1em;
+}
+
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -86,7 +95,7 @@ body.hide-currenttext .currenttext {
 
 .modal-content select {
     padding: 5px;
-    margin-top: 5px;
+    margin-top: 1em;
 }
 
 .modal-content button {
@@ -95,7 +104,8 @@ body.hide-currenttext .currenttext {
 }
 
 .modal-content .modal-actions {
-    margin-top: 20px;
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
 
 .modal-content .path-link-wrapper {

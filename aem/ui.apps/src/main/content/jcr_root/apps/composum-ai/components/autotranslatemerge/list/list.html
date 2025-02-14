@@ -8,7 +8,7 @@
     <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
     <link rel="stylesheet" href="${resource.path @ context='uri'}/list.css">
 </head>
-<body class="coral--light foundation-layout-util-maximized-alt show-diffs hide-currenttext">
+<body class="coral--light coral-Body foundation-layout-util-maximized-alt show-diffs hide-currenttext">
 <div class="foundation-layout-panel">
     <div class="foundation-layout-panel-bodywrapper spectrum-ready">
         <div class="foundation-layout-panel-body">
@@ -187,6 +187,14 @@
                                         <td is="coral-table-cell" class="newtrans">
                                             <div class="row-actions">
                                                 <button is="coral-button" variant="secondary"
+                                                        class="intelligent-merge">AI Merge
+                                                    <coral-wait size="S" class="spinner"></coral-wait>
+                                                </button>
+                                                <coral-tooltip placement="right" target=".intelligent-merge">
+                                                    <span slot="content">
+                                                        This takes the current text, inspects the differences between the previously translated source text and the new source text and incorporates the corresponding changes from the new text translation. Thus this tries to keep manual changes that have been done to the current text of the component as much as possible.</span>
+                                                </coral-tooltip>
+                                                <button is="coral-button" variant="secondary"
                                                         class="copy-to-editor">Copy to Editor
                                                 </button>
                                                 <coral-tooltip placement="right" target=".copy-to-editor">
@@ -195,30 +203,22 @@
                                                 <!-- <button is="coral-button" variant="secondary"
                                                         class="append-to-editor">Append to Editor
                                                 </button> -->
-                                                <button is="coral-button" variant="secondary"
-                                                        class="intelligent-merge">AI Merge
-                                                    <coral-wait size="S" class="spinner"></coral-wait>
-                                                </button>
-                                                <coral-tooltip placement="right" target=".intelligent-merge">
-                                                    <span slot="content">
-                                                        This takes the current text, inspects the differences between the previously translated source text and the new source text and incorporates the corresponding changes from the new text translation. Thus this tries to keep manual changes that have been done to the current text of the component as much as possible.</span>
-                                                </coral-tooltip>
                                             </div>
                                         </td>
                                         <td is="coral-table-cell" class="editor">
                                             <div class="editor-actions">
-                                                <button is="coral-button" variant="secondary" class="reset-editor">
-                                                    Reset
-                                                </button>
-                                                <coral-tooltip placement="right" target=".reset-editor">
-                                                    <span slot="content">Resets the editor to the current text on the page.</span>
-                                                </coral-tooltip>
-                                                <button is="coral-button" variant="secondary" class="save-editor">
+                                                <button is="coral-button" variant="primary" class="save-editor">
                                                     Save and Finish
                                                     <coral-wait size="S" class="spinner"></coral-wait>
                                                 </button>
                                                 <coral-tooltip placement="right" target=".save-editor">
                                                     <span slot="content">Save the changes made in the editor and marks this text as merged - that is it will not be shown again in this tool until there are further changes to the source text rolled out.</span>
+                                                </coral-tooltip>
+                                                <button is="coral-button" variant="secondary" class="reset-editor">
+                                                    Reset
+                                                </button>
+                                                <coral-tooltip placement="right" target=".reset-editor">
+                                                    <span slot="content">Resets the editor to the current text on the page.</span>
                                                 </coral-tooltip>
                                             </div>
                                         </td>
@@ -304,7 +304,7 @@
         <label>Alternative text</label>
         <input type="text" id="edit-anchor-title" class="_coral-Textfield">
 
-        <select id="edit-anchor-target">
+        <select id="edit-anchor-target" class="_coral-FieldButton _coral-ActionButton">
             <option value="">Target</option>
             <option value="_self">Same tab</option>
             <option value="_blank">New tab</option>
@@ -315,8 +315,8 @@
         <input type="hidden" id="edit-anchor-rel">
 
         <div class="modal-actions">
-            <button is="coral-button" variant="primary" id="save-link-btn">Save</button>
             <button is="coral-button" variant="secondary" id="cancel-link-btn">Cancel</button>
+            <button is="coral-button" variant="primary" id="save-link-btn">Save</button>
         </div>
     </div>
 </div>
