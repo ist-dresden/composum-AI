@@ -333,7 +333,11 @@ class AITranslateLinkEditModal {
         // Pre-fill inputs with current anchor values if the anchor exists.
         if (anchor) {
             this.inputAnchorText.value = anchor.textContent;
-            this.inputHref.value = anchor.getAttribute('href') || '';
+            var href = anchor.getAttribute('href') || '';
+            if (href.startsWith('/content/') && !href.startsWith('/content/dam/') && href.endsWith('.html')) {
+                href = href.substring(0, href.length - 5);
+            }
+            this.inputHref.value = href;
             this.inputTitle.value = anchor.getAttribute('title') || '';
             this.inputRel.value = anchor.getAttribute('rel') || '';
             this.inputTarget.value = anchor.getAttribute('target') || '';
@@ -350,11 +354,14 @@ class AITranslateLinkEditModal {
 
     updateAnchor(anchor) {
         const newAnchorText = this.inputAnchorText.value;
-        const newHref = this.inputHref.value;
+        var newHref = this.inputHref.value;
         const newTitle = this.inputTitle.value;
         const newRel = this.inputRel.value;
         const newTarget = this.inputTarget.value;
 
+        if (newHref && newHref.startsWith('/content/') && !newHref.startsWith('/content/dam') && !newHref.contains('.html')) {
+            newHref += '.html';
+        }
         anchor.href = newHref;
         anchor.textContent = newAnchorText;
         if (newTitle) {

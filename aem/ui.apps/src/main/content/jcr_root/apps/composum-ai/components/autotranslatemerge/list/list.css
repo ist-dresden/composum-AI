@@ -42,6 +42,8 @@ body.hide-currenttext .currenttext {
 
 .rte-container .rte-toolbar button {
     margin-left: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .row-actions, .editor-actions {
