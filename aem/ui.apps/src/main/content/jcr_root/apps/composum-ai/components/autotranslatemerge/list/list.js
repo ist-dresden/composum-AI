@@ -397,9 +397,22 @@ class AITranslationPathChooser {
         this.removeDialog();
         this.pathInput = pathInput;
         const pathValue = path || this.pathInput.value;
-        this.loadPath(pathValue, this.dialogSetup.bind(this));
+        this.loadPath(null, this.dialogSetup.bind(this));
+        if (pathValue) { // load all prefixes of pathValue
+            const pathSplitted = pathValue.split('/');
+            let currentPath = '';
+            for (let i = 0; i < pathSplitted.length; i++) {
+                currentPath += '/' + pathSplitted[i];
+                this.loadPath(currentPath, () => {
+                    this.mergeDialogs();
+                    this.selectPath(currentPath);
+                });
+            }
+        }
     }
 
+    /** Loads the column corresponding to the last element of the path. The callback is called when the
+     * dialog is loaded into this.pathChooserContent. */
     loadPath(path, callback) {
         const url = path && path.startsWith('/') ? PATH_CHOOSER_URL + path : PATH_CHOOSER_URL;
         this.pathChooserContent.innerHTML = '';
@@ -434,14 +447,17 @@ class AITranslationPathChooser {
     }
 
     selectItem(event) {
-        const path = event.target.dataset.foundationCollectionItemId;
+        const path = event?.target?.dataset?.foundationCollectionItemId;
         if (path) {
-            this.loadPath(path, this.mergeDialogs.bind(this))
+            this.loadPath(path, () => {
+                this.mergeDialogs();
+            });
         }
     }
 
     /** Moves elements (new columns etc.) from this.pathChooserContent to this.pathDialog . */
     mergeDialogs() {
+        if (!this.pathDialog || this.pathChooserContent) return;
         // move element .granite-pickerdialog-titlebar
         const titlebar = this.pathChooserContent.querySelector('.granite-pickerdialog-titlebar');
         const dialogTitlebar = this.pathDialog.querySelector('.granite-pickerdialog-titlebar');
@@ -469,7 +485,19 @@ class AITranslationPathChooser {
             }
         }
         while (dialogColumnview.childNodes.length > columnviewChildren.length) {
-            dialogColumnview.childNodes[dialogColumnviewChildren.length - 1].remove();
+            dialogColumnview.childNodes[dialogColumnview.childNodes.length - 1].remove();
+        }
+        dialogColumnview.childNodes[dialogColumnview.childNodes.length - 1].scrollIntoView({behavior: 'smooth', block: 'center', inline: 'end'});
+    }
+
+    /** Finds the coral-columnview-item by the data-foundation-collection-item-id and checks that and scrolls it into view. */
+    selectPath(path) {
+        if (path) {
+            const item = this.pathDialog.querySelector(`coral-columnview-item[data-foundation-collection-item-id="${path}"]`);
+            if (item) {
+                item.checked = true;
+                item.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'end'});
+            }
         }
     }
 
