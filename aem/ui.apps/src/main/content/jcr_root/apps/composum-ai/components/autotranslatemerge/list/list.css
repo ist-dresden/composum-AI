@@ -42,6 +42,17 @@ body.hide-currenttext .currenttext {
 
 .rte-container .rte-toolbar button {
     margin-left: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.row-actions, .editor-actions {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.row-actions button, .editor-actions button {
+    margin-left: 1em;
 }
 
 .modal-backdrop {
@@ -52,7 +63,7 @@ body.hide-currenttext .currenttext {
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     display: block;
-    z-index: 999;
+    z-index: 1;
 }
 
 .modal-content {
@@ -65,7 +76,7 @@ body.hide-currenttext .currenttext {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1000;
+    z-index: 2;
 }
 
 .modal-backdrop.hidden {
@@ -86,16 +97,30 @@ body.hide-currenttext .currenttext {
 
 .modal-content select {
     padding: 5px;
-    margin-top: 5px;
+    margin-top: 1em;
 }
 
 .modal-content button {
-    margin-top: 10px;
+    margin-top: 5px;
     padding: 5px 10px;
 }
 
 .modal-content .modal-actions {
-    margin-top: 20px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.modal-content .path-link-wrapper {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+}
+
+.coral--light .modal-content .path-link-wrapper button {
+    border-width: 1px;
+    border-color: #e1e1e1;
+    border-left-color: transparent;
+    border-radius: 4px;
 }
 
 .rte-editor {
@@ -159,4 +184,9 @@ textarea {
 
 .actionrow td {
     border-top-width: 0px !important;
+}
+
+/* That creates a Javascript error -> we disable this for now. */
+.granite-pickerdialog .granite-pickerdialog-titlebar {
+    display: none;
 }
