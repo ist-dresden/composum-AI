@@ -42,17 +42,6 @@ public class RAGServiceImplTest {
         context.resourceResolver().commit();
     }
 
-    // @Before
-    // That doesn't work. :-( Keep it for now because there might just be some dependencies needed
-    public void setUp() throws PersistenceException {
-        context.load().json("/lucene/contentLuceneIndex-onlytests.json", "/oak:index/contentTextLucene");
-        context.resourceResolver().commit();
-        assertThat(context.resourceResolver().getResource("/oak:index/contentTextLucene"), notNullValue());
-        assertThat(context.resourceResolver().getResource("/oak:index/contentTextLucene/aggregates"), notNullValue());
-        context.resourceResolver().getResource("/oak:index/contentTextLucene").adaptTo(ModifiableValueMap.class).put("reindex", true);
-        context.resourceResolver().commit();
-    }
-
     @Test
     @Ignore("CONTAINS doesn't seem to work here.")
     public void returnsAPathWhenQueryIsSuccessful() throws Exception {

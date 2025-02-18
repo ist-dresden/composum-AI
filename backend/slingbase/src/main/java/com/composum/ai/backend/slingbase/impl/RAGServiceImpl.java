@@ -106,13 +106,12 @@ public class RAGServiceImpl implements RAGService {
         ResourceResolver resolver = root.getResourceResolver();
         final Session session = Objects.requireNonNull(resolver.adaptTo(Session.class));
         final QueryManager queryManager = session.getWorkspace().getQueryManager();
-        String statement = "SELECT [jcr:path], [jcr:score] FROM [nt:base] AS content WHERE " +
-                "ISDESCENDANTNODE(content, '" + root.getPath() + "') " +
-                "AND NAME(content) = 'jcr:content' " +
-                "AND CONTAINS(content.*, $queryText) " +
+        String statement = "SELECT [jcr:path], [jcr:score] FROM [cq:Page] AS page WHERE " +
+                "ISDESCENDANTNODE(page, '" + root.getPath() + "') " +
+                "AND CONTAINS(page.*, $queryText) " +
                 "ORDER BY [jcr:score] DESC";
         // equivalent Composum Nodes query template for testing
-        // SELECT [jcr:path], [jcr:score] FROM [nt:base] AS content WHERE ISDESCENDANTNODE(content, '${root_path.path}')  AND NAME(content) = 'jcr:content' AND CONTAINS(content.*, '${text.3}') ORDER BY [jcr:score] DESC
+        // SELECT [jcr:path], [jcr:score] FROM [cq:Page] AS page WHERE ISDESCENDANTNODE(page, '${root_path.path}') AND CONTAINS(page.*, '${text.3}') ORDER BY [jcr:score] DESC
         Query query = queryManager.createQuery(statement, Query.JCR_SQL2);
         query.bindValue("queryText", session.getValueFactory().createValue(querytext));
         query.setLimit(restOfLimit);
@@ -123,7 +122,7 @@ public class RAGServiceImpl implements RAGService {
                 return result;
             }
             Row row = rowIterator.nextRow();
-            String path = row.getValue("jcr:path").getString();
+            String path = row.getValue("jcr:path").getString() + "/jcr:content";
             LOG.trace("Found path {} with score {}", path, row.getValue("jcr:score").getDouble());
             if (!result.contains(path)) {
                 result.add(path);
