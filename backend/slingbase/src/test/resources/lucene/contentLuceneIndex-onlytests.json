@@ -1,98 +1,117 @@
 {
   "async": "async",
+  "compatVersion": "2",
+  "evaluatePathRestrictions": true,
   "includePropertyTypes": [
-    "String",
-    "Binary"
+    "String"
   ],
-  "jcr:primaryType": "oak:QueryIndexDefinition",
+  "includedPaths": [
+    "/content"
+  ],
+  "jcr:primaryType": "{Name}oak:QueryIndexDefinition",
+  "queryPaths": [
+    "/content"
+  ],
   "reindex": false,
   "reindexCount": 1,
+  "seed": -4625657190311571567,
   "type": "lucene",
   "aggregates": {
-    "jcr:primaryType": "nt:unstructured",
-    "nt:unstructured": {
-      "jcr:primaryType": "nt:unstructured",
+    "jcr:primaryType": "{Name}nt:unstructured",
+    "cq:PageContent": {
+      "jcr:primaryType": "{Name}nt:unstructured",
       "include0": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*"
       },
       "include1": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*"
       },
       "include2": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*"
       },
       "include3": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*"
       },
       "include4": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*/*"
       },
       "include5": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*/*/*"
       },
       "include6": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*/*/*/*"
       },
       "include7": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*/*/*/*/*"
       },
       "include8": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*/*/*/*/*/*"
       },
       "include9": {
-        "jcr:primaryType": "nt:unstructured",
+        "jcr:primaryType": "{Name}nt:unstructured",
         "path": "*/*/*/*/*/*/*/*/*/*"
       }
     }
   },
   "indexRules": {
-    "jcr:primaryType": "nt:unstructured",
+    "jcr:primaryType": "{Name}nt:unstructured",
     "nt:base": {
       "includePropertyTypes": [
-        "String",
-        "Binary"
+        "String"
       ],
-      "jcr:primaryType": "nt:unstructured",
+      "jcr:primaryType": "{Name}nt:unstructured",
       "properties": {
-        "jcr:primaryType": "nt:unstructured",
-        "sling:alias": {
-          "index": false,
-          "jcr:primaryType": "nt:unstructured",
-          "name": "sling:alias"
+        "jcr:primaryType": "{Name}nt:unstructured",
+        "cqLastModified": {
+          "jcr:primaryType": "{Name}nt:unstructured",
+          "name": "jcr:content/cq:lastModified",
+          "ordered": true,
+          "propertyIndex": true,
+          "type": "Date"
         },
-        "jcr:lastmodifiedby": {
+        "excludeAiProperties": {
           "index": false,
-          "jcr:primaryType": "nt:unstructured",
-          "name": "jcr:lastmodifiedby"
+          "isRegexp": true,
+          "jcr:primaryType": "{Name}nt:unstructured",
+          "name": "^(ai|lc)_.*"
         },
-        "sling:resourcetype": {
-          "index": false,
-          "jcr:primaryType": "nt:unstructured",
-          "name": "sling:resourcetype"
+        "jcr:title": {
+          "analyzed": true,
+          "index": true,
+          "jcr:primaryType": "{Name}nt:unstructured",
+          "name": "jcr:title",
+          "nodeScopeIndex": true,
+          "propertyIndex": false,
+          "useInExcerpt": true
         },
-        "jcr:createdby": {
-          "index": false,
-          "jcr:primaryType": "nt:unstructured",
-          "name": "jcr:createdby"
+        "jcr:description": {
+          "analyzed": true,
+          "index": true,
+          "jcr:primaryType": "{Name}nt:unstructured",
+          "name": "jcr:description",
+          "nodeScopeIndex": true,
+          "propertyIndex": false,
+          "useInExcerpt": true
         },
-        "sling:vanitypath": {
+        "excludeAEMProperties": {
           "index": false,
-          "jcr:primaryType": "nt:unstructured",
-          "name": "sling:vanitypath"
+          "isRegexp": true,
+          "jcr:primaryType": "{Name}nt:unstructured",
+          "name": "^(jcr:|sling:|cq:)_.*"
         },
         "prop0": {
           "analyzed": true,
           "isRegexp": true,
-          "jcr:primaryType": "nt:unstructured",
+          "jcr:primaryType": "{Name}nt:unstructured",
           "name": "^[^\\/]*$",
           "nodeScopeIndex": true,
           "propertyIndex": false,
