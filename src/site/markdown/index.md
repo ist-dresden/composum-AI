@@ -1,3 +1,8 @@
+---
+title: Composum AI – Enhancing Content Management with AI
+description: Artificial intelligence for the editor in Composum Pages CMS and Adobe AEM : content creation and analysis, translation, suggestions, ...
+---
+
 <!-- https://github.blog/2008-12-19-github-ribbons/ -->
 <a href="https://github.com/ist-dresden/composum-AI" style="position: absolute; top: 0px; right: 0px;">
   <img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_gray_6d6d6d.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1"></img>

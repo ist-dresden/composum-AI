@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site xmlns="http://maven.apache.org/SITE/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd"
-         name="Composum AI">
+      name="Composum AI">
     <!-- https://maven.apache.org/doxia/doxia-sitetools/doxia-site-model/site.html -->
 
     <!-- <bannerLeft>
@@ -14,16 +14,10 @@
         <!-- Meta Tags Generated via https://www.opengraph.xyz -->
         <head>
             <![CDATA[
-            <meta property="og:url" content="https://ai.composum.com">
             <meta property="og:type" content="website">
-            <meta property="og:title" content="Composum AI – Enhancing Content Management with AI">
-            <meta property="og:description" content="Artificial intelligence for the editor in Composum Pages CMS and Adobe AEM : content creation and analysis, translation, suggestions, ...">
             <meta property="og:image" content="https://ai.composum.com/image/ComposumAILogo.jpg">
             <meta name="twitter:card" content="summary_large_image">
             <meta property="twitter:domain" content="ai.composum.com">
-            <meta property="twitter:url" content="https://ai.composum.com">
-            <meta name="twitter:title" content="Composum AI – Enhancing Content Management with AI">
-            <meta name="twitter:description" content="Artificial intelligence for the editor in Composum Pages CMS and Adobe AEM : content creation and analysis, translation, suggestions, ...">
             <meta name="twitter:image" content="https://ai.composum.com/image/ComposumAILogo.jpg">
             ]]>
         </head>
