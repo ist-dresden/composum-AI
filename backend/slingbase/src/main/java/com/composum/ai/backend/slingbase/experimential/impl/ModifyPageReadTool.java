@@ -6,7 +6,6 @@ import static org.apache.commons.lang3.StringUtils.removeStart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -14,7 +13,6 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Activate;
@@ -120,7 +118,7 @@ public class ModifyPageReadTool implements AITool {
     }
 
     private void collectProperties(String removePrefix, Resource resource, PageProperties pageProperties) {
-        ComponentProperties component = new ComponentProperties();
+        ComponentDescription component = new ComponentDescription();
         component.componentPath = resource.getPath().substring(removePrefix.length());
         component.componentPath = defaultString(removeStart(component.componentPath, "/"), ".");
         component.slingResourceType = resource.getResourceType();
@@ -131,7 +129,7 @@ public class ModifyPageReadTool implements AITool {
         resource.getValueMap().forEach((key, value) -> {
             if (key.startsWith("ai_") || key.startsWith("lc_")) return;
             if (value instanceof String && PATTERN_TWO_SEPARATE_WHITESPACE.matcher((String) value).find()) {
-                component.properties.put(key, (String) value);
+                component.properties.add(new ComponentProperty(key, (String) value));
             }
         });
         if (!component.properties.isEmpty()) {
@@ -180,13 +178,23 @@ public class ModifyPageReadTool implements AITool {
     }
 
     protected static class PageProperties {
-        List<ComponentProperties> components = new ArrayList<>();
+        List<ComponentDescription> components = new ArrayList<>();
     }
 
-    protected static class ComponentProperties {
+    protected static class ComponentDescription {
         String componentPath;
         String slingResourceType;
         String componentTitle;
-        Map<String, String> properties = new java.util.HashMap<>();
+        List<ComponentProperty> properties = new ArrayList<>();
+    }
+
+    protected static class ComponentProperty {
+        String key;
+        String value;
+
+        public ComponentProperty(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 }

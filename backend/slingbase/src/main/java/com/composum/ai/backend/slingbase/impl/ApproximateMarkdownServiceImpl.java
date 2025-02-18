@@ -79,6 +79,11 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     protected final static Pattern IGNORED_VALUE_PATTERN = Pattern.compile("true|false|[0-9][0-9]?[0-9]?|/(conf|content|etc|apps|libs|var|preview|public|mnt)/.*|\\{Boolean\\}(true|false)|inherit|blank|target|h[0-9]|div|p");
 
     /**
+     * Pattern for several kinds of ignored keys.
+     */
+    protected final static Pattern IGNORED_ATTRIBUTE_PATTERN = Pattern.compile("^((cq:|sling:|ai_|lc_).*|fileReference|link|linkURL)$");
+
+    /**
      * We ignore nodes named i18n or renditions and nodes starting with rep:, dam:, cq:
      */
     protected final static Pattern IGNORED_NODE_NAMES = Pattern.compile("i18n|renditions|rep:.*|dam:.*|cq:.*");
@@ -87,10 +92,14 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
 
     protected final static Pattern VIDEO_PATTERN = Pattern.compile("\\.(mp4|mov)(/|$)", Pattern.CASE_INSENSITIVE);
 
-    /** We allow generating markdown for subpaths of /content, /public and /preview . */
+    /**
+     * We allow generating markdown for subpaths of /content, /public and /preview .
+     */
     public static final Pattern ADMISSIBLE_PATH_PATTERN = Pattern.compile("/(content|preview|public)/.*/.*");
 
-    /** If that occurs in a string it has several words. */
+    /**
+     * If that occurs in a string it has several words.
+     */
     public static final Pattern THREE_WHITESPACE_PATTERN = Pattern.compile("\\s\\S+\\s+\\S+\\s");
 
     /**
@@ -142,8 +151,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
             if (entry.getValue() instanceof String) {
                 String value = (String) entry.getValue();
-                if (!textAttributes.contains(entry.getKey()) && value.contains(" ") && THREE_WHITESPACE_PATTERN.matcher(value).find() &&
-                        !allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
+                if (!textAttributes.contains(entry.getKey()) && admissibleKey(entry.getKey())
+                        && value.contains(" ") && THREE_WHITESPACE_PATTERN.matcher(value).find()
+                        && !allowDenyCheck(entry.getKey(), labeledAttributePatternAllow, labeledAttributePatternDeny)) {
                     // check whether we forgot something
                     LOG.info("Ignoring text attribute {} in {}", entry.getKey(), resource.getPath());
                 }
@@ -337,6 +347,9 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
         }
         for (Map.Entry<String, Object> entry : resource.getValueMap().entrySet()) {
             if (labelledAttributeOrder.contains(entry.getKey()) || textAttributes.contains(entry.getKey())) {
+                continue; // already handled.
+            }
+            if (!admissibleKey(entry.getKey())) {
                 continue;
             }
             if (entry.getValue() instanceof String) {
@@ -365,6 +378,10 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
             return !IGNORED_VALUE_PATTERN.matcher(value).matches();
         }
         return false;
+    }
+
+    protected boolean admissibleKey(String key) {
+        return !IGNORED_ATTRIBUTE_PATTERN.matcher(key).matches();
     }
 
     @Activate

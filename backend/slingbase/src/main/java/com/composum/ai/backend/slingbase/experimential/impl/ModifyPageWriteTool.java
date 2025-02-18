@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -64,22 +63,49 @@ public class ModifyPageWriteTool implements AITool {
                 "      \"properties\": {\n" +
                 "        \"components\": {\n" +
                 "          \"type\": \"array\",\n" +
+                "          \"description\": \"List of components on the page\",\n" +
                 "          \"items\": {\n" +
                 "            \"type\": \"object\",\n" +
                 "            \"properties\": {\n" +
-                "              \"componentPath\": { \"type\": \"string\" },\n" +
-                "              \"properties\": { \"type\": \"object\" }\n" +
+                "              \"componentPath\": {\n" +
+                "                \"type\": \"string\"\n" +
+                "              },\n" +
+                "              \"properties\": {\n" +
+                "                \"type\": \"array\",\n" +
+                "                \"description\": \"List of properties for the component\",\n" +
+                "                \"items\": {\n" +
+                "                  \"type\": \"object\",\n" +
+                "                  \"properties\": {\n" +
+                "                    \"key\": {\n" +
+                "                      \"type\": \"string\"\n" +
+                "                    },\n" +
+                "                    \"value\": {\n" +
+                "                      \"type\": \"string\"\n" +
+                "                    }\n" +
+                "                  },\n" +
+                "                  \"required\": [\n" +
+                "                    \"key\",\n" +
+                "                    \"value\"\n" +
+                "                  ],\n" +
+                "                  \"additionalProperties\": false\n" +
+                "                }\n" +
+                "              }\n" +
                 "            },\n" +
-                "            \"required\": [\"componentPath\"],\n" +
+                "            \"required\": [\n" +
+                "              \"componentPath\",\n" +
+                "              \"properties\"\n" +
+                "            ],\n" +
                 "            \"additionalProperties\": false\n" +
                 "          }\n" +
                 "        }\n" +
                 "      },\n" +
-                "      \"required\": [\"components\"],\n" +
+                "      \"required\": [\n" +
+                "        \"components\"\n" +
+                "      ],\n" +
                 "      \"additionalProperties\": false\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"strict\": true\n" +
+                "    },\n" +
+                "    \"strict\": true\n" +
+                "  }\n" +
                 "}";
     }
 
@@ -116,7 +142,7 @@ public class ModifyPageWriteTool implements AITool {
                 return "Path does not contain jcr:content";
             }
 
-            for (ModifyPageReadTool.ComponentProperties component : pageProperties.components) {
+            for (ModifyPageReadTool.ComponentDescription component : pageProperties.components) {
                 String componentPath = removeStart(component.componentPath, "/");
                 Resource componentResource = contentResource.getChild(componentPath);
                 if (componentResource == null) {
@@ -128,9 +154,9 @@ public class ModifyPageWriteTool implements AITool {
                     return "Cannot modify properties of: " + componentPath;
                 }
 
-                for (Map.Entry<String, String> entry : component.properties.entrySet()) {
+                for (ModifyPageReadTool.ComponentProperty entry : component.properties) {
                     // do not permit attributes that don't exist or are not texts
-                    String key = entry.getKey();
+                    String key = entry.key;
                     Object value = valueMap.get(key);
                     if (value == null) {
                         return "Property not found: " + key + " in " + componentPath;
@@ -138,7 +164,7 @@ public class ModifyPageWriteTool implements AITool {
                     if (!(value instanceof String)) {
                         return "Property is not a text: " + key + " in " + componentPath;
                     }
-                    String newValue = entry.getValue();
+                    String newValue = entry.value;
                     if (!ModifyPageReadTool.PATTERN_TWO_SEPARATE_WHITESPACE.matcher(newValue).find()) {
                         return "Property does not seem a text: " + key + " in " + componentPath;
                     }
