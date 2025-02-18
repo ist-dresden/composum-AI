@@ -92,7 +92,7 @@ class SidePanelDialog {
                 return $(this).val();
             }).get(),
             responses: this.$promptContainer.find('.composum-ai-response').map(function () {
-                return $(this).text();
+                return $(this).html();
             }).get()
         };
     }
@@ -107,7 +107,7 @@ class SidePanelDialog {
                 $(element).val(status.prompts[index]);
             });
             this.$promptContainer.find('.composum-ai-response').each(function (index, element) {
-                $(element).text(status.responses[index]);
+                $(element).html(status.responses[index]);
             });
         } else {
             this.ensurePromptCount(1);
