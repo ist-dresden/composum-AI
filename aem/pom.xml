@@ -56,7 +56,6 @@
         <module>ui.apps.structure</module>
         <module>ui.config</module>
         <module>ui.content</module>
-        <module>tools</module>
     </modules>
     <properties>
         <aem.host>localhost</aem.host>

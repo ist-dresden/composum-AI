@@ -29,13 +29,6 @@ The mini applications are available at the following URLs (for a local installat
 - Composum: http://localhost:9090/libs/composum/pages/options/ai/prototype.html
 - AEM: http://localhost:4502/apps/composum-ai/prototype.html
 
-Precondition: there has to be a lucene fulltext index for the searched repository parts. That is already there in
-Composum Pages (/oak:index/lucene) but possibly has to be set up at AEM - e.g. like this:
-[`/oak:index/composumAIpageContentLucene`](https://github.com/ist-dresden/composum-AI/blob/develop/aem/tools/config.fulltextindex/src/main/content/jcr_root/_oak_index/composumAIpageContentLucene/.content.xml)
-or just deploy the package
-[composum-ai.config.fulltextindex](https://central.sonatype.com/artifact/com.composum.ai.aem.tools/composum-ai.config.fulltextindex)
-on the author instance, which contains an index.
-
 More discussion / ideas are in
 https://github.com/ist-dresden/composum-AI/blob/develop/featurespecs/9RAGvariants.md
 

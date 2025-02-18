@@ -67,7 +67,7 @@ public class SearchPageAITool implements AITool {
                 "      \"properties\": {\n" +
                 "        \"query\": {\n" +
                 "          \"type\": \"string\",\n" +
-                "          \"description\": \"The search query\"\n" +
+                "          \"description\": \"The search query in JCR SQL2 Full-Text Search Syntax (as used by CONTAINS).\"\n" +
                 "        }\n" +
                 "      },\n" +
                 "      \"required\": [\"query\"],\n" +
