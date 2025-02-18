@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:oak="http://jackrabbit.apache.org/oak/ns/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="oak:QueryIndexDefinition"
+          async="async"
+          includePropertyTypes="[String]"
+          includedPaths="[/content]"
+          queryPaths="[/content]"
+          evaluatePathRestrictions="{Boolean}true"
+          compatVersion="2"
+          type="lucene">
+    <aggregates jcr:primaryType="nt:unstructured">
+        <cq:PageContent jcr:primaryType="nt:unstructured">
+            <include0
+                    jcr:primaryType="nt:unstructured"
+                    path="*"/>
+            <include1
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*"/>
+            <include2
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*"/>
+            <include3
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*"/>
+            <include4
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*/*"/>
+            <include5
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*/*/*"/>
+            <include6
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*/*/*/*"/>
+            <include7
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*/*/*/*/*"/>
+            <include8
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*/*/*/*/*/*"/>
+            <include9
+                    jcr:primaryType="nt:unstructured"
+                    path="*/*/*/*/*/*/*/*/*/*"/>
+        </cq:PageContent>
+    </aggregates>
+    <indexRules jcr:primaryType="nt:unstructured">
+        <nt:base
+                jcr:primaryType="nt:unstructured"
+                includePropertyTypes="[String]">
+            <properties jcr:primaryType="nt:unstructured">
+                <cqLastModified
+                    jcr:primaryType="nt:unstructured"
+                    name="jcr:content/cq:lastModified"
+                    ordered="{Boolean}true"
+                    propertyIndex="{Boolean}true"
+                    type="Date"/>
+                <excludeAiProperties
+                        jcr:primaryType="nt:unstructured"
+                        index="{Boolean}false"
+                        isRegexp="{Boolean}true"
+                        name="^(ai|lc)_.*"/>
+                <jcr:title
+                        jcr:primaryType="nt:unstructured"
+                        index="{Boolean}true"
+                        name="jcr:title"
+                        analyzed="{Boolean}true"
+                        nodeScopeIndex="{Boolean}true"
+                        propertyIndex="{Boolean}false"
+                        useInExcerpt="{Boolean}true"/>
+                <jcr:description
+                        jcr:primaryType="nt:unstructured"
+                        index="{Boolean}true"
+                        name="jcr:description"
+                        analyzed="{Boolean}true"
+                        nodeScopeIndex="{Boolean}true"
+                        propertyIndex="{Boolean}false"
+                        useInExcerpt="{Boolean}true"/>
+                <excludeAEMProperties
+                        jcr:primaryType="nt:unstructured"
+                        index="{Boolean}false"
+                        isRegexp="{Boolean}true"
+                        name="^(jcr:|sling:|cq:)_.*"/>
+                <prop0
+                        jcr:primaryType="nt:unstructured"
+                        isRegexp="{Boolean}true"
+                        name="^[^\\/]*$"
+                        analyzed="{Boolean}true"
+                        nodeScopeIndex="{Boolean}true"
+                        propertyIndex="{Boolean}false"
+                        useInExcerpt="{Boolean}true"/>
+            </properties>
+        </nt:base>
+    </indexRules>
+</jcr:root>
