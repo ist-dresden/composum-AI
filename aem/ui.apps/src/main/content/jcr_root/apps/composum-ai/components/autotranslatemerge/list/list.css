@@ -13,12 +13,12 @@ tr.row-separator td.row-separator {
 }
 
 td.cancelcol, th.cancelcol {
+    vertical-align: top;
     text-align: center;
 }
 
 tr.property-row td {
     vertical-align: top;
-    /* width: 15%; */
 }
 
 body.show-diffs .previoussrc, body.show-diffs .newsrc {

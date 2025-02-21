@@ -30,7 +30,7 @@
                     <section class="coral-Form-fieldset propertytable">
                         <table is="coral-table">
                             <colgroup>
-                              <col is="coral-table-column" fixedwidth>
+                                <col is="coral-table-column" fixedwidth>
                             </colgroup>
                             <thead is="coral-table-head" sticky>
                             <tr is="coral-table-row" class="tablehead">
@@ -66,7 +66,17 @@
                             <tr is="coral-table-row" class="component-head" id="component-${pageComponentList.index}">
                                 <td class="coral-table-cell" class="cancelcol"
                                     rowspan="${pageComponent.calculatedComponentRowspan}">
-                                    <!-- Column for cancel button --></td>
+                                    <button class="cancelinheritance" is="coral-button" variant="minimal" size="M"
+                                            title="Cancel Inheritance" icon="link"></button>
+                                    <coral-tooltip placement="right" target=".cancelinheritance">
+                                        <span slot="content">Cancels the inheritance for the whole component.</span>
+                                    </coral-tooltip>
+                                    <button class="reenableinheritance" is="coral-button" variant="minimal"
+                                            title="Re-enable Inheritance" icon="linkOff"></button>
+                                    <coral-tooltip placement="right" target=".reenableinheritance">
+                                        <span slot="content">Re-enables the inheritance for the whole component.</span>
+                                    </coral-tooltip>
+                                </td>
                                 <td is="coral-table-cell" colspan="6">Component header</td>
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
