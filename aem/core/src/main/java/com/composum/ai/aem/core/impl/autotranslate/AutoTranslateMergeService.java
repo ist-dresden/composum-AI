@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.sling.api.resource.Resource;
 
 import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
 
 /**
  * Service for handling merge operations related to auto-translation.
@@ -64,13 +65,16 @@ public interface AutoTranslateMergeService {
         private final String componentName;
         private final String componentTitle;
         private final String componentPath;
+        private final boolean cancelled;
 
-        public AutoTranslateProperty(String path, String componentPath, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle) {
+        public AutoTranslateProperty(String path, String componentPath, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle, @Nonnull LiveRelationship relationship) {
             this.path = path;
             this.componentPath = componentPath;
             this.wrapper = wrapper;
             this.componentName = componentName;
             this.componentTitle = componentTitle;
+            this.cancelled = relationship.getStatus().isCancelled() ||
+                    relationship.getStatus().getCanceledProperties().contains(wrapper.getPropertyName());
         }
 
         public String getPath() {
@@ -91,6 +95,10 @@ public interface AutoTranslateMergeService {
 
         public AITranslatePropertyWrapper getWrapper() {
             return wrapper;
+        }
+
+        public boolean isCancelled() {
+            return cancelled;
         }
 
         public String getOriginalCopyDiffsHTML() {
