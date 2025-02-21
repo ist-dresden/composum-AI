@@ -77,7 +77,15 @@
                                         <span slot="content">Re-enables the inheritance for the whole component.</span>
                                     </coral-tooltip>
                                 </td>
-                                <td is="coral-table-cell" colspan="6">Component header</td>
+                                <td is="coral-table-cell" colspan="6">
+                                    <span class="componentName" data-sly-text="${pageComponent.componentName}"/>
+                                    <sly data-sly-test="${pageComponent.componentPathInPage}">
+                                        | <span class="componentPath" data-sly-text="${pageComponent.componentPathInPage}"/>
+                                    </sly>
+                                    <sly data-sly-test="${pageComponent.componentTitle}">
+                                        | ${pageComponent.componentTitle}
+                                    </sly>
+                                </td>
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
@@ -93,11 +101,7 @@
                                             <button is="coral-button" size="S" variant="minimal"
                                                     icon="arrowDown" class="move-down" title="Down"></button>
                                         </a> -->
-                                        ${property.componentName} | ${property.pathInPage} |
                                         ${property.wrapper.propertyName}
-                                        <sly data-sly-test="${property.componentTitle}">
-                                            | ${property.componentTitle}
-                                        </sly>
                                     </td>
                                 </tr>
                                 <!-- Data row -->
