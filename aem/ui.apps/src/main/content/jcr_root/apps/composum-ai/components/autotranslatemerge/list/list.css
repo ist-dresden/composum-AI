@@ -12,9 +12,13 @@ tr.row-separator td.row-separator {
     background-color: lightgray;
 }
 
+td.cancelcol, th.cancelcol {
+    text-align: center;
+}
+
 tr.property-row td {
     vertical-align: top;
-    width: 15%;
+    /* width: 15%; */
 }
 
 body.show-diffs .previoussrc, body.show-diffs .newsrc {
@@ -26,7 +30,7 @@ body.hide-diffs .srcdiffs {
 }
 
 body.hide-currenttext .currenttext {
-    display:none;
+    display: none;
 }
 
 .rte-container {

@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -106,6 +105,11 @@ public class AutoTranslateMergeModel {
 
         public List<AutoTranslateMergeService.AutoTranslateProperty> getCheckableProperties() {
             return properties;
+        }
+
+        /** Size of {@link #getCheckableProperties()} times 3 + 1 since HTL cannot calculate :-( */
+        public int getCalculatedComponentRowspan() {
+            return properties.size() * 3 + 1;
         }
 
     }

@@ -10,6 +10,7 @@
 </head>
 <body class="coral--light coral-Body foundation-layout-util-maximized-alt show-diffs hide-currenttext"
       data-page-path="${model.pagePath}">
+
 <div class="foundation-layout-panel">
     <div class="foundation-layout-panel-bodywrapper spectrum-ready">
         <div class="foundation-layout-panel-body">
@@ -28,8 +29,12 @@
                     </section>
                     <section class="coral-Form-fieldset propertytable">
                         <table is="coral-table">
+                            <colgroup>
+                              <col is="coral-table-column" fixedwidth>
+                            </colgroup>
                             <thead is="coral-table-head" sticky>
-                            <tr is="coral-table-row">
+                            <tr is="coral-table-row" class="tablehead">
+                                <th is="coral-table-headercell" class="cancelcol"><!-- Column for cancel button --></th>
                                 <th is="coral-table-headercell" class="previoussrc">Previously Translated Text</th>
                                 <coral-tooltip placement="top" target=".previoussrc">
                                     <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
@@ -56,7 +61,14 @@
                                 </coral-tooltip>
                             </tr>
                             </thead>
-                            <tbody is="coral-table-body" class="propertiestable" data-sly-list.pageComponent="${model.pageComponents}">
+                            <tbody is="coral-table-body" class="propertiestable"
+                                   data-sly-list.pageComponent="${model.pageComponents}">
+                            <tr is="coral-table-row" class="component-head" id="component-${pageComponentList.index}">
+                                <td class="coral-table-cell" class="cancelcol"
+                                    rowspan="${pageComponent.calculatedComponentRowspan}">
+                                    <!-- Column for cancel button --></td>
+                                <td is="coral-table-cell" colspan="6">Component header</td>
+                            </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                     <td is="coral-table-cell" class="row-separator"
@@ -105,7 +117,7 @@
                                     <td is="coral-table-cell"
                                         class="srcdiffs diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            ${property.originalCopyDiffsHTML @ context='html'}</td>
+                                        ${property.originalCopyDiffsHTML @ context='html'}</td>
                                     </p>
                                     <td is="coral-table-cell"
                                         class="newtrans">
