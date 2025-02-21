@@ -90,7 +90,7 @@ public interface AutoTranslateMergeService {
         }
 
         public String getComponentTitle() {
-            return StringUtils.abbreviate(StringUtils.defaultString(componentTitle), 40);
+            return StringUtils.abbreviate(StringUtils.defaultString(componentTitle), 120);
         }
 
         public AITranslatePropertyWrapper getWrapper() {
@@ -99,6 +99,10 @@ public interface AutoTranslateMergeService {
 
         public boolean isCancelled() {
             return cancelled;
+        }
+
+        public String cancelledClass() {
+            return isCancelled() ? "cancelled" : "uncancelled";
         }
 
         public String getOriginalCopyDiffsHTML() {

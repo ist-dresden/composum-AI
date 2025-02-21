@@ -26,6 +26,10 @@ td.cancelcol {
     border-top: 1px solid #e1e1e1;
 }
 
+.cancelled .onlyuncancelled, .uncancelled .onlycancelled  {
+    display: none;
+}
+
 tr.property-row td {
     vertical-align: top;
 }

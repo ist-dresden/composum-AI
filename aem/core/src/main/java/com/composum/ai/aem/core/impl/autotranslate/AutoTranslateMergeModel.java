@@ -118,6 +118,10 @@ public static class AutoTranslateComponent {
         return properties.get(0).isCancelled();
     }
 
+    public String cancelledClass() {
+        return properties.get(0).cancelledClass();
+    }
+
     /**
      * Size of {@link #getCheckableProperties()} times 3 + 1 since HTL cannot calculate :-(
      */
