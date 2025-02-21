@@ -71,7 +71,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                             if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
-                                list.add(new AutoTranslateProperty(res.getPath(), relationship.getTargetPath(), wrapper, getComponentName(res), getComponentTitle(res)));
+                                list.add(new AutoTranslateProperty(res.getPath(), getComponentResource(res).getPath(), wrapper,  getComponentName(res), getComponentTitle(res)));
                             }
                         }
                     }
@@ -143,20 +143,26 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 children.stream().flatMap(this::descendantsStream));
     }
 
+    @Nonnull
+    protected Resource getComponentResource(@Nonnull Resource resource) {
+        Resource componentResource = resource;
+        while (componentResource != null && componentResource.getValueMap().get("sling:resourceType") == null) {
+            componentResource = componentResource.getParent();
+        }
+        return componentResource != null ? componentResource : resource;
+    }
+
     /**
      * Determines the jcr:title of the current component, as found by sling:resourceType
      */
     protected String getComponentName(Resource resource) {
-        String resourceType = null;
         ResourceResolver resolver = resource.getResourceResolver();
-        while (resourceType == null && resource != null) {
-            resourceType = resource.getValueMap().get("sling:resourceType", String.class);
-            resource = resource.getParent();
-        }
+        Resource componentResource = getComponentResource(resource);
+        String resourceType = componentResource.getValueMap().get("sling:resourceType", String.class);
         if (resourceType != null) {
-            Resource componentResource = resolver.getResource(resourceType);
-            if (componentResource != null) {
-                return componentResource.getValueMap().get("jcr:title", String.class);
+            Resource componentTypeResource = resolver.getResource(resourceType);
+            if (componentTypeResource != null) {
+                return componentTypeResource.getValueMap().get("jcr:title", String.class);
             }
         }
         return null;
@@ -166,19 +172,17 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
      * Determines the jcr:title , title or text of the component by searching upwards for such a property.
      */
     protected String getComponentTitle(@Nonnull Resource resource) {
-        while (resource != null && resource.getValueMap().get("sling:resourceType") == null) {
-            resource = resource.getParent();
-        }
-        if (resource != null) {
-            String title = resource.getValueMap().get("jcr:title", String.class);
+        Resource componentResource = getComponentResource(resource);
+        if (componentResource != null) {
+            String title = componentResource.getValueMap().get("jcr:title", String.class);
             if (title == null) {
-                title = resource.getValueMap().get("title", String.class);
+                title = componentResource.getValueMap().get("title", String.class);
             }
             if (title == null) {
-                title = resource.getValueMap().get("text", String.class);
+                title = componentResource.getValueMap().get("text", String.class);
             }
             if (title == null) {
-                title = resource.getValueMap().get("jcr:description", String.class);
+                title = componentResource.getValueMap().get("jcr:description", String.class);
             }
             if (title != null) { // remove HTML tags
                 title = title.replaceAll("</?[a-zA-Z][^>]*/?>", "");

@@ -45,73 +45,86 @@ public class AutoTranslateMergeModel {
     }
 
     public List<AutoTranslateComponent> getPageComponents() {
+        ArrayList<AutoTranslateComponent> pageComponents = new ArrayList<>();
         Map<String, AutoTranslateComponent> components = new LinkedHashMap<>();
-        for (AutoTranslateMergeService.AutoTranslateProperty property : getProperties()) {
+        List<AutoTranslateMergeService.AutoTranslateProperty> properties = getProperties();
+        for (AutoTranslateMergeService.AutoTranslateProperty property : properties) {
             AutoTranslateComponent component = components.get(property.getComponentPath());
-            if (component == null) {
+            if (this.pageResource.getPath().equals(property.getComponentPath())) {
+                // all page properties are individually cancellable -> save them individually
                 component = new AutoTranslateComponent(property.getComponentPath());
-                components.put(component.getComponentPathInPage(), component);
+                pageComponents.add(component);
+            } else if (component == null) {
+                component = new AutoTranslateComponent(property.getComponentPath());
+                components.put(property.getComponentPath(), component);
+                pageComponents.add(component);
             }
             component.getCheckableProperties().add(property);
         }
-        return new ArrayList<>(components.values());
+        return pageComponents;
+}
+
+public String getPageLanguage() {
+    String language = SelectorUtils.findLanguage(getPageResource());
+    return language != null ? SelectorUtils.getLanguageName(language, Locale.ENGLISH) : null;
+}
+
+/**
+ * Finds the content resource for the page that is in the request suffix.
+ */
+protected Resource getPageResource() {
+    if (pageResource == null && !isDisabled()) {
+        ResourceResolver resolver = request.getResourceResolver();
+        PageManager pageManager = resolver.adaptTo(PageManager.class);
+
+        RequestPathInfo requestPathInfo = request.getRequestPathInfo();
+        String suffix = requestPathInfo.getSuffix();
+        if (suffix != null) {
+            pageResource = pageManager.getContainingPage(suffix).getContentResource();
+        }
+    }
+    return pageResource;
+}
+
+public String getPagePath() {
+    return getPageResource() != null ? getPageResource().getParent().getPath() : null;
+}
+
+public static class AutoTranslateComponent {
+    private final String componentPath;
+    private final List<AutoTranslateMergeService.AutoTranslateProperty> properties = new ArrayList<>();
+
+    public AutoTranslateComponent(String componentPath) {
+        this.componentPath = componentPath;
     }
 
-    public String getPageLanguage() {
-        String language = SelectorUtils.findLanguage(getPageResource());
-        return language != null ? SelectorUtils.getLanguageName(language, Locale.ENGLISH) : null;
+    public String getComponentName() {
+        return properties.isEmpty() ? null : properties.get(0).getComponentName();
+    }
+
+    public String getComponentTitle() {
+        return properties.isEmpty() ? null : properties.get(0).getComponentTitle();
+    }
+
+    public String getComponentPathInPage() {
+        return StringUtils.substringAfter(componentPath, "/jcr:content/");
+    }
+
+    public List<AutoTranslateMergeService.AutoTranslateProperty> getCheckableProperties() {
+        return properties;
     }
 
     /**
-     * Finds the content resource for the page that is in the request suffix.
+     * Size of {@link #getCheckableProperties()} times 3 + 1 since HTL cannot calculate :-(
      */
-    protected Resource getPageResource() {
-        if (pageResource == null && !isDisabled()) {
-            ResourceResolver resolver = request.getResourceResolver();
-            PageManager pageManager = resolver.adaptTo(PageManager.class);
-
-            RequestPathInfo requestPathInfo = request.getRequestPathInfo();
-            String suffix = requestPathInfo.getSuffix();
-            if (suffix != null) {
-                pageResource = pageManager.getContainingPage(suffix).getContentResource();
-            }
-        }
-        return pageResource;
+    public int getCalculatedComponentRowspan() {
+        return properties.size() * 3 + 1;
     }
 
-    public String getPagePath() {
-        return getPageResource() != null ? getPageResource().getParent().getPath() : null;
+    @Override
+    public String toString() {
+        return "AutoTranslateComponent(" + componentPath + ')';
     }
-
-    public static class AutoTranslateComponent {
-        private final String componentPath;
-        private final List<AutoTranslateMergeService.AutoTranslateProperty> properties = new ArrayList<>();
-
-        public AutoTranslateComponent(String componentPath) {
-            this.componentPath = componentPath;
-        }
-
-        public String getComponentName() {
-            return properties.isEmpty() ? null : properties.get(0).getComponentName();
-        }
-
-        public String getComponentTitle() {
-            return properties.isEmpty() ? null : properties.get(0).getComponentTitle();
-        }
-
-        public String getComponentPathInPage() {
-            return StringUtils.substringAfter(componentPath, "/jcr:content/");
-        }
-
-        public List<AutoTranslateMergeService.AutoTranslateProperty> getCheckableProperties() {
-            return properties;
-        }
-
-        /** Size of {@link #getCheckableProperties()} times 3 + 1 since HTL cannot calculate :-( */
-        public int getCalculatedComponentRowspan() {
-            return properties.size() * 3 + 1;
-        }
-
-    }
+}
 
 }

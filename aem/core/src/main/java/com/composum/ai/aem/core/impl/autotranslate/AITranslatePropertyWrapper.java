@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -333,4 +334,9 @@ public class AITranslatePropertyWrapper {
         return null;
     }
 
+
+    @Override
+    public String toString() {
+        return "AITranslatePropertyWrapper(" + propertyName + ')';
+    }
 }

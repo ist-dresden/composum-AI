@@ -15,6 +15,15 @@ tr.row-separator td.row-separator {
 td.cancelcol, th.cancelcol {
     vertical-align: top;
     text-align: center;
+    background-color: white;
+}
+
+td.cancelcol button {
+    margin-top: 9px;
+}
+
+td.cancelcol {
+    border-top: 1px solid #e1e1e1;
 }
 
 tr.property-row td {
