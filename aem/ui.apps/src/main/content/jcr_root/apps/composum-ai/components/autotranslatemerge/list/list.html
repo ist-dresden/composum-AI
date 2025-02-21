@@ -56,8 +56,8 @@
                                 </coral-tooltip>
                             </tr>
                             </thead>
-                            <tbody is="coral-table-body" class="propertiestable">
-                            <sly data-sly-list.property="${model.properties}">
+                            <tbody is="coral-table-body" class="propertiestable" data-sly-list.pageComponent="${model.pageComponents}">
+                            <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <tr is="coral-table-row" class="row-separator" id="row-${propertyList.index}">
                                     <td is="coral-table-cell" class="row-separator"
                                         colspan="6">

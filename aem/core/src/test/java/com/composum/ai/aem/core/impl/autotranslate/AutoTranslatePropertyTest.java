@@ -2,14 +2,12 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeService.AutoTranslateProperty.wrapExcludingHTMLTags;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class AutoTranslatePropertyTest {
 
@@ -23,7 +21,7 @@ class AutoTranslatePropertyTest {
         sourceMap = new ModifiableValueMapDecorator(new HashMap<>());
         targetMap = new ModifiableValueMapDecorator(new HashMap<>());
         wrapper = new AITranslatePropertyWrapper(sourceMap, targetMap, "exampleProperty");
-        property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", wrapper, "component", "component text");
+        property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", "/content/example", wrapper, "component", "component text");
     }
 
     @Test

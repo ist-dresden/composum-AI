@@ -27,6 +27,7 @@ public interface AutoTranslateMergeService {
      * @param resource the root resource to start property extraction from.
      * @return a list of AutoTranslateProperty instances with translation details.
      */
+    @Nonnull
     List<AutoTranslateProperty> getProperties(Resource resource);
 
     /**
@@ -62,9 +63,11 @@ public interface AutoTranslateMergeService {
         private final AITranslatePropertyWrapper wrapper;
         private final String componentName;
         private final String componentTitle;
+        private final String componentPath;
 
-        public AutoTranslateProperty(String path, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle) {
+        public AutoTranslateProperty(String path, String componentPath, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle) {
             this.path = path;
+            this.componentPath = componentPath;
             this.wrapper = wrapper;
             this.componentName = componentName;
             this.componentTitle = componentTitle;
@@ -76,6 +79,10 @@ public interface AutoTranslateMergeService {
 
         public String getComponentName() {
             return componentName;
+        }
+
+        public String getComponentPath() {
+            return componentPath;
         }
 
         public String getComponentTitle() {

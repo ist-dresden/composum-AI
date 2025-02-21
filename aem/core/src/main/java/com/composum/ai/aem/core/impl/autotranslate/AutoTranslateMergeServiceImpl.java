@@ -53,6 +53,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     protected AIConfigurationService configurationService;
 
     @Override
+    @Nonnull
     public List<AutoTranslateProperty> getProperties(Resource pageResource) {
         List<AutoTranslateProperty> list = new ArrayList<>();
         descendantsStream(pageResource).forEach(res -> {
@@ -70,7 +71,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                             if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
-                                list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentName(res), getComponentTitle(res)));
+                                list.add(new AutoTranslateProperty(res.getPath(), relationship.getTargetPath(), wrapper, getComponentName(res), getComponentTitle(res)));
                             }
                         }
                     }
