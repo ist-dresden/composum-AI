@@ -371,6 +371,8 @@ class AITranslateLinkEditModal {
         }
         if (newRel) {
             anchor.setAttribute('rel', newRel);
+        } if ('_blank' === newTarget) { // general guideline or new link
+            anchor.setAttribute('rel', 'noopener noreferrer');
         } else {
             anchor.removeAttribute('rel');
         }
