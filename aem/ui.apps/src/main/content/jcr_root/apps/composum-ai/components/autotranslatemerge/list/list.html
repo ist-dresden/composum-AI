@@ -61,7 +61,10 @@
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <tr is="coral-table-row" class="row-separator ${property.cancelledClass}" id="row-${propertyList.index}">
-                                    <th is="coral-table-headercell" class="previoussrc">Previously Translated Text</th>
+                                    <th is="coral-table-headercell" class="previoussrc">
+                                        <span class="propertyname">${property.wrapper.propertyName}</span>
+                                        Previously Translated Text
+                                    </th>
                                     <coral-tooltip placement="top" target=".previoussrc" hidden>
                                         <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
                                     </coral-tooltip>
@@ -69,7 +72,10 @@
                                     <coral-tooltip placement="top" target=".newsrc" hidden>
                                         <span slot="content">The new source text as it was during the last rollout.</span>
                                     </coral-tooltip>
-                                    <th is="coral-table-headercell" class="srcdiffs">Original Diffs</th>
+                                    <th is="coral-table-headercell" class="srcdiffs">
+                                        <span class="propertyname">${property.wrapper.propertyName}</span>
+                                        Original Diffs
+                                    </th>
                                     <coral-tooltip placement="top" target=".srcdiffs" hidden>
                                         <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
                                     </coral-tooltip>

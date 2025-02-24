@@ -26,6 +26,20 @@ td.cancelcol {
     border-top: 1px solid #e1e1e1;
 }
 
+.previoussrc, .srcdiffs { /* position reference for .propertyname */
+    position: relative;
+}
+
+.propertyname {
+    position: absolute;
+    display: inline-block;
+    transform: rotate(90deg);
+    left: -19px;
+    top: 40%;
+    transform-origin: left top;
+    text-transform: none;
+}
+
 .cancelled .onlyuncancelled, .uncancelled .onlycancelled  {
     display: none;
 }
