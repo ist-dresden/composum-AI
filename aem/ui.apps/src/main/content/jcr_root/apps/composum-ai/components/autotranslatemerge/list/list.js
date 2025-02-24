@@ -38,6 +38,12 @@ class AITranslateMergeTool {
     initFooterButtons() {
         document.querySelector('.toggle-diffs').addEventListener('click', this.toggleDiffs.bind(this));
         document.querySelector('.toggle-current').addEventListener('click', this.toggleCurrent.bind(this));
+        this.propertySelect = document.querySelector('#propertyfilter');
+        this.scopeSelect = document.querySelector('#scope');
+        this.propertySelect.value = new URLSearchParams(window.location.search).get('propertyfilter') || 'allstati';
+        this.scopeSelect.value = new URLSearchParams(window.location.search).get('scope') || 'unfinished';
+        this.propertySelect.addEventListener('change', this.adaptFilters.bind(this));
+        this.scopeSelect.addEventListener('change', this.adaptFilters.bind(this));
     }
 
     toggleDiffs() {
@@ -48,6 +54,16 @@ class AITranslateMergeTool {
     toggleCurrent() {
         document.body.classList.toggle('show-currenttext');
         document.body.classList.toggle('hide-currenttext');
+    }
+
+    /** Implements the selects for propertyfilter and scope by reloading the page with the according query parameters. */
+    adaptFilters() {
+        const propertyfilter = this.propertySelect.value;
+        const scope = this.scopeSelect.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('propertyfilter', propertyfilter);
+        url.searchParams.set('scope', scope);
+        window.location.href = url.href;
     }
 
     /** If the message is null, the error field is hidden. */
@@ -371,7 +387,8 @@ class AITranslateLinkEditModal {
         }
         if (newRel) {
             anchor.setAttribute('rel', newRel);
-        } if ('_blank' === newTarget) { // general guideline or new link
+        }
+        if ('_blank' === newTarget) { // general guideline or new link
             anchor.setAttribute('rel', 'noopener noreferrer');
         } else {
             anchor.removeAttribute('rel');

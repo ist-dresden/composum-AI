@@ -11,6 +11,9 @@
 <body class="coral--light coral-Body foundation-layout-util-maximized-alt show-diffs hide-currenttext"
       data-page-path="${model.pagePath}">
 
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script src="${resource.path @ context='uri'}/list.js"></script>
+
 <div class="foundation-layout-panel">
     <div class="foundation-layout-panel-bodywrapper spectrum-ready">
         <div class="foundation-layout-panel-body">
@@ -278,6 +281,21 @@
                                 <span slot="content">Toggle the visibility of the current text column, to compare the current status of the page.</span>
                             </coral-tooltip>
                         </a>
+                        <select id="propertyfilter" class="_coral-FieldButton _coral-ActionButton">
+                            <option value="allstati">All Properties</option>
+                            <option value="cancelled">Inheritance Cancelled</option>
+                            <option value="uncancelled">Inheritance Uncancelled</option>
+                        </select>
+                        <coral-tooltip placement="top" target="#propertyfilter">
+                            <span slot="content">Filter the properties by inheritance status.</span>
+                        </coral-tooltip>
+                        <select id="scope" class="_coral-FieldButton _coral-ActionButton">
+                            <option value="unfinished">Unfinished Properties</option>
+                            <option value="allprops">All Properties</option>
+                        </select>
+                        <coral-tooltip placement="top" target="#scope">
+                            <span slot="content">Filter the properties by their status in the translation process.</span>
+                        </coral-tooltip>
                         <a href="/editor.html${model.pagePath}.html" target="_blank">
                             <button is="coral-button" variant="secondary" class="open-in-editor">
                                 Open in Editor
@@ -347,8 +365,5 @@
 
 <div id="path-chooser-content">
 </div>
-
-<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content,cq.authoring.editor.core'}"></sly>
-<script src="${resource.path @ context='uri'}/list.js"></script>
 
 </body>

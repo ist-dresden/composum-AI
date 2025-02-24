@@ -176,8 +176,8 @@ body.hide-currenttext .currenttext {
     margin: 0px;
 }
 
-.bottombar a {
-    padding-right: 14px;
+.bottombar a, .bottombar select {
+    margin-right: 14px;
 }
 
 .merged td {
