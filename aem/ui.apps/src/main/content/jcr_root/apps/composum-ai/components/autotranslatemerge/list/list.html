@@ -35,15 +35,18 @@
                             </colgroup>
                             <tbody is="coral-table-body" class="propertiestable"
                                    data-sly-list.pageComponent="${model.pageComponents}">
-                            <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}" id="component-${pageComponentList.index}">
+                            <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
+                                id="component-${pageComponentList.index}">
                                 <td class="cancelcol"
                                     rowspan="${pageComponent.calculatedComponentRowspan}">
-                                    <button class="cancelinheritance onlycancelled" is="coral-button" variant="minimal" size="M"
+                                    <button class="cancelinheritance onlycancelled" is="coral-button" variant="minimal"
+                                            size="M"
                                             title="Cancel Inheritance" icon="linkOff"></button>
                                     <coral-tooltip placement="right" target=".cancelinheritance">
                                         <span slot="content">Cancels the inheritance for the whole component.</span>
                                     </coral-tooltip>
-                                    <button class="reenableinheritance onlyuncancelled" is="coral-button" variant="minimal"
+                                    <button class="reenableinheritance onlyuncancelled" is="coral-button"
+                                            variant="minimal"
                                             title="Re-enable Inheritance" icon="link"></button>
                                     <coral-tooltip placement="right" target=".reenableinheritance">
                                         <span slot="content">Re-enables the inheritance for the whole component.</span>
@@ -52,15 +55,24 @@
                                 <td is="coral-table-cell" colspan="6">
                                     <span class="componentName" data-sly-text="${pageComponent.componentName}"/>
                                     <sly data-sly-test="${pageComponent.componentPathInPage}">
-                                        | <span class="componentPath" data-sly-text="${pageComponent.componentPathInPage}"/>
+                                        | <span class="componentPath"
+                                                data-sly-text="${pageComponent.componentPathInPage}"/>
                                     </sly>
                                     <sly data-sly-test="${pageComponent.componentTitle}">
                                         | ${pageComponent.componentTitle}
                                     </sly>
+                                    <span class="linktocomponent right-aligned">
+                                        <a href="${pageComponent.linkToComponent}" target="_blank" rel="noopener noreferrer">
+                                            <coral-icon icon="linkOut" size="XS" class="linktocomponent"></coral-icon></a>
+                                        <coral-tooltip placement="left" target=".linktocomponent">
+                                            <span slot="content">Opens the page in the editor and scrolls to this component.</span>
+                                        </coral-tooltip>
+                                    </span>
                                 </td>
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
-                                <tr is="coral-table-row" class="row-separator ${property.cancelledClass}" id="row-${propertyList.index}">
+                                <tr is="coral-table-row" class="row-separator ${property.cancelledClass}"
+                                    id="row-${propertyList.index}">
                                     <th is="coral-table-headercell" class="previoussrc">
                                         <span class="propertyname">${property.wrapper.propertyName}</span>
                                         Previously Translated Text

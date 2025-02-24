@@ -40,7 +40,11 @@ td.cancelcol {
     text-transform: none;
 }
 
-.cancelled .onlyuncancelled, .uncancelled .onlycancelled  {
+.right-aligned {
+    float: right;
+}
+
+.cancelled .onlyuncancelled, .uncancelled .onlycancelled {
     display: none;
 }
 

@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,77 +65,86 @@ public class AutoTranslateMergeModel {
             component.getCheckableProperties().add(property);
         }
         return pageComponents;
-}
-
-public String getPageLanguage() {
-    String language = SelectorUtils.findLanguage(getPageResource());
-    return language != null ? SelectorUtils.getLanguageName(language, Locale.ENGLISH) : null;
-}
-
-/**
- * Finds the content resource for the page that is in the request suffix.
- */
-protected Resource getPageResource() {
-    if (pageResource == null && !isDisabled()) {
-        ResourceResolver resolver = request.getResourceResolver();
-        PageManager pageManager = resolver.adaptTo(PageManager.class);
-
-        RequestPathInfo requestPathInfo = request.getRequestPathInfo();
-        String suffix = requestPathInfo.getSuffix();
-        if (suffix != null) {
-            pageResource = pageManager.getContainingPage(suffix).getContentResource();
-        }
-    }
-    return pageResource;
-}
-
-public String getPagePath() {
-    return getPageResource() != null ? getPageResource().getParent().getPath() : null;
-}
-
-public static class AutoTranslateComponent {
-    private final String componentPath;
-    private final List<AutoTranslateMergeService.AutoTranslateProperty> properties = new ArrayList<>();
-
-    public AutoTranslateComponent(String componentPath) {
-        this.componentPath = componentPath;
     }
 
-    public String getComponentName() {
-        return properties.isEmpty() ? null : properties.get(0).getComponentName();
-    }
-
-    public String getComponentTitle() {
-        return properties.isEmpty() ? null : properties.get(0).getComponentTitle();
-    }
-
-    public String getComponentPathInPage() {
-        return StringUtils.substringAfter(componentPath, "/jcr:content/");
-    }
-
-    public List<AutoTranslateMergeService.AutoTranslateProperty> getCheckableProperties() {
-        return properties;
-    }
-
-    public boolean isCancelled() {
-        return properties.get(0).isCancelled();
-    }
-
-    public String cancelledClass() {
-        return properties.get(0).cancelledClass();
+    public String getPageLanguage() {
+        String language = SelectorUtils.findLanguage(getPageResource());
+        return language != null ? SelectorUtils.getLanguageName(language, Locale.ENGLISH) : null;
     }
 
     /**
-     * Size of {@link #getCheckableProperties()} times 3 + 1 since HTL cannot calculate :-(
+     * Finds the content resource for the page that is in the request suffix.
      */
-    public int getCalculatedComponentRowspan() {
-        return properties.size() * 3 + 1;
+    protected Resource getPageResource() {
+        if (pageResource == null && !isDisabled()) {
+            ResourceResolver resolver = request.getResourceResolver();
+            PageManager pageManager = resolver.adaptTo(PageManager.class);
+
+            RequestPathInfo requestPathInfo = request.getRequestPathInfo();
+            String suffix = requestPathInfo.getSuffix();
+            if (suffix != null) {
+                pageResource = pageManager.getContainingPage(suffix).getContentResource();
+            }
+        }
+        return pageResource;
     }
 
-    @Override
-    public String toString() {
-        return "AutoTranslateComponent(" + componentPath + ')';
+    public String getPagePath() {
+        return getPageResource() != null ? getPageResource().getParent().getPath() : null;
     }
-}
+
+    public static class AutoTranslateComponent {
+        private final String componentPath;
+        private final List<AutoTranslateMergeService.AutoTranslateProperty> properties = new ArrayList<>();
+
+        public AutoTranslateComponent(String componentPath) {
+            this.componentPath = componentPath;
+        }
+
+        public String getComponentName() {
+            return properties.isEmpty() ? null : properties.get(0).getComponentName();
+        }
+
+        public String getComponentTitle() {
+            return properties.isEmpty() ? null : properties.get(0).getComponentTitle();
+        }
+
+        public String getComponentPathInPage() {
+            return substringAfter(componentPath, "/jcr:content/");
+        }
+
+        public String getLinkToComponent() {
+            if (componentPath.endsWith("/jcr:content")) {
+                return "/mnt/overlay/wcm/core/content/sites/properties.html?item=" +
+                substringBefore(componentPath, "/jcr:content");
+            }
+            return "/editor.html" + substringBefore(componentPath, "/jcr:content") +
+                    ".html#scrolltocomponent-" + substringAfter(componentPath, "/jcr:content/");
+        }
+
+        public List<AutoTranslateMergeService.AutoTranslateProperty> getCheckableProperties() {
+            return properties;
+        }
+
+        public boolean isCancelled() {
+            return properties.get(0).isCancelled();
+        }
+
+        public String cancelledClass() {
+            return properties.get(0).cancelledClass();
+        }
+
+        /**
+         * Size of {@link #getCheckableProperties()} times 3 + 1 since HTL cannot calculate :-(
+         */
+        public int getCalculatedComponentRowspan() {
+            return properties.size() * 3 + 1;
+        }
+
+        @Override
+        public String toString() {
+            return "AutoTranslateComponent(" + componentPath + ')';
+        }
+    }
 
 }
