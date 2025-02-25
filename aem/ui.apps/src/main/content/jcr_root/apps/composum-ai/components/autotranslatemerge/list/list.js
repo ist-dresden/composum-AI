@@ -108,15 +108,15 @@ class AITranslateMergeRow {
     }
 
     copyToEditor() {
-        this.editor.innerHTML = this.row.dataset.nt;
+        this.editor.innerHTML = this.row.dataset.nt || '';
     }
 
     appendToEditor() {
-        this.editor.innerHTML += this.row.dataset.nt;
+        this.editor.innerHTML += this.row.dataset.nt || '';
     }
 
     resetEditor() {
-        this.editor.innerHTML = this.row.dataset.e;
+        this.editor.innerHTML = this.row.dataset.e || '';
     }
 
     intelligentMerge() {
