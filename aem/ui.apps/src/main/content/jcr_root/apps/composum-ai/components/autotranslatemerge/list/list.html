@@ -75,7 +75,7 @@
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <tr is="coral-table-row" class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
-                                    id="row-${propertyList.index}">
+                                    id="row-${pageComponentList.index}-${propertyList.index}">
                                     <th is="coral-table-headercell" class="previoussrc">
                                         <span class="propertyname">${property.wrapper.propertyName}</span>
                                         Previously Translated Text
@@ -109,7 +109,7 @@
                                 </tr>
                                 <!-- Data row -->
                                 <tr is="coral-table-row" class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
-                                    id="datarow-${propertyList.index}"
+                                    id="datarow-${pageComponentList.index}-${propertyList.index}"
                                     data-path="${property.path}"
                                     data-propertyname="${property.wrapper.propertyName}"
                                     data-language="${model.pageLanguage}"
@@ -119,7 +119,7 @@
                                     data-nt="${property.wrapper.newTranslatedCopy}"
                                     data-sd="${property.originalCopyDiffsHTML}"
                                     data-e="${property.wrapper.currentValue}"
-                                    data-id="${propertyList.index}"
+                                    data-id="${pageComponentList.index}-${propertyList.index}"
                                     data-isrich="${property.wrapper.isRichText}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
@@ -206,7 +206,7 @@
                                 </tr>
                                 <!-- Action buttons TR -->
                                 <tr is="coral-table-row" class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
-                                    id="actionrow-${propertyList.index}">
+                                    id="actionrow-${pageComponentList.index}-${propertyList.index}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                     </td>
                                     <td is="coral-table-cell" class="newsrc diffscolor">
