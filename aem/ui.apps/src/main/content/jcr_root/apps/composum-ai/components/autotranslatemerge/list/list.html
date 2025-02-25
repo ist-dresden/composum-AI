@@ -38,6 +38,9 @@
                             </colgroup>
                             <tbody is="coral-table-body" class="propertiestable"
                                    data-sly-list.pageComponent="${model.pageComponents}">
+
+<!-- Component start  -->
+
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
                                 id="component-${pageComponentList.index}">
                                 <td class="cancelcol"
@@ -74,6 +77,9 @@
                                 </td>
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
+
+<!-- Property start - title row  -->
+
                                 <tr is="coral-table-row" class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="row-${pageComponentList.index}-${propertyList.index}">
                                     <th is="coral-table-headercell" class="previoussrc">
@@ -107,7 +113,9 @@
                                         <span slot="content">The current text displayed on the page, for comparison purposes.</span>
                                     </coral-tooltip>
                                 </tr>
-                                <!-- Data row -->
+
+<!-- Property data row  -->
+
                                 <tr is="coral-table-row" class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="datarow-${pageComponentList.index}-${propertyList.index}"
                                     data-path="${property.path}"
@@ -204,7 +212,9 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <!-- Action buttons TR -->
+
+<!-- Action buttons  -->
+
                                 <tr is="coral-table-row" class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="actionrow-${pageComponentList.index}-${propertyList.index}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
@@ -253,6 +263,9 @@
                                     <td is="coral-table-cell" class="currenttext">
                                     </td>
                                 </tr>
+
+<!-- Property end, component end  -->
+
                             </sly>
                             </tbody>
                         </table>
