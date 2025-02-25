@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Translation Merge UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"></sly>
     <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
-    <link rel="stylesheet" href="${resource.path @ context='uri'}/list.css">
+    <link rel="stylesheet" href="${resource.path}/list.css">
 </head>
 <body class="coral--light coral-Body foundation-layout-util-maximized-alt show-diffs hide-currenttext"
       data-page-path="${model.pagePath}">
@@ -56,7 +56,7 @@
                                     </coral-tooltip>
                                 </td>
                                 <td is="coral-table-cell" colspan="6">
-                                    <span class="componentName" data-sly-text="${pageComponent.componentName}"/>
+                                    <span class="componentName" data-sly-text="${pageComponent.componentName}"></span>
                                     <sly data-sly-test="${pageComponent.componentPathInPage}">
                                         | <span class="componentPath"
                                                 data-sly-text="${pageComponent.componentPathInPage}"/>
@@ -74,7 +74,7 @@
                                 </td>
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
-                                <tr is="coral-table-row" class="row-separator ${property.cancelledClass}"
+                                <tr is="coral-table-row" class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="row-${propertyList.index}">
                                     <th is="coral-table-headercell" class="previoussrc">
                                         <span class="propertyname">${property.wrapper.propertyName}</span>
@@ -108,7 +108,7 @@
                                     </coral-tooltip>
                                 </tr>
                                 <!-- Data row -->
-                                <tr is="coral-table-row" class="property-row datarow ${property.cancelledClass}"
+                                <tr is="coral-table-row" class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="datarow-${propertyList.index}"
                                     data-path="${property.path}"
                                     data-propertyname="${property.wrapper.propertyName}"
@@ -135,7 +135,6 @@
                                         class="srcdiffs diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
                                         ${property.originalCopyDiffsHTML @ context='html'}</td>
-                                    </p>
                                     <td is="coral-table-cell"
                                         class="newtrans">
                                         <div class="newtrans-text">
@@ -143,7 +142,7 @@
                                                 ${property.wrapper.newTranslatedCopy @ context='html'}
                                             </sly>
                                             <sly data-sly-test="${!isrichtext}">
-                                                <p>${property.wrapper.newTranslatedCopy @ context='text'}</p>
+                                                <p>${property.wrapper.newTranslatedCopy}</p>
                                             </sly>
                                         </div>
                                     </td>
@@ -206,7 +205,7 @@
                                     </td>
                                 </tr>
                                 <!-- Action buttons TR -->
-                                <tr is="coral-table-row" class="property-row actionrow ${property.cancelledClass}"
+                                <tr is="coral-table-row" class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="actionrow-${propertyList.index}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                     </td>

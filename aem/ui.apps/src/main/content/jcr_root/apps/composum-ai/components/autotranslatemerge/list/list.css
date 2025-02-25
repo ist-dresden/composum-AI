@@ -180,7 +180,7 @@ body.hide-currenttext .currenttext {
     margin-right: 14px;
 }
 
-.merged td {
+.processed td {
     background-color: #e6ffe6 !important;
     opacity: 40%;
 }

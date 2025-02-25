@@ -103,12 +103,16 @@ public interface AutoTranslateMergeService {
             return cancelled;
         }
 
+        public String cancelledClass() {
+            return isCancelled() ? "cancelled" : "uncancelled";
+        }
+
         public boolean isProcessingNeeded() {
             return processingNeeded;
         }
 
-        public String cancelledClass() {
-            return isCancelled() ? "cancelled" : "uncancelled";
+        public String processingNeededClass() {
+            return isProcessingNeeded() ? "" : "processed";
         }
 
         public String getOriginalCopyDiffsHTML() {

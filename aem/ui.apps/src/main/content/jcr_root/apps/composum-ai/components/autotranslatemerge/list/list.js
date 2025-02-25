@@ -205,7 +205,7 @@ class AITranslateMergeRow {
                     if (!result.saved) {
                         throw new Error(); // no error message to speak of
                     } else {
-                        row.classList.add("merged");
+                        row.classList.add("processed");
                     }
                 })
                 .catch(error => {
