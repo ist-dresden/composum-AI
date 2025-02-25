@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -70,14 +69,35 @@ public class AITranslatePropertyWrapper {
 
     /**
      * Suffix for the property name of an inheritance cancelled property that saves the original value of the property
-     * as it is currently in the translation source, as an indicator what needs to be merged.
+     * as it is currently in the translation source during rollout, heping with the merge.
+     *
+     * @see #AI_NEW_TRANSLATED_SUFFIX
      */
     public static final String AI_NEW_ORIGINAL_SUFFIX = "_new_original";
 
     /**
-     * Suffix for the property name of an inheritance cancelled property that saves the
+     * Suffix for the property name of an inheritance cancelled property that saves the auto-translated value of the
+     * property during rollout - needs to be merged with the current value.
+     *
+     * @see #AI_NEW_ORIGINAL_SUFFIX
      */
     public static final String AI_NEW_TRANSLATED_SUFFIX = "_new_translated";
+
+    /**
+     * Suffix for the property name of a property with uncancelled inheritance that saves the source language for the
+     * value the user has last accepted in the AI merge tool.
+     *
+     * @see #AI_ACCEPTED_TRANSLATION_SUFFIX
+     */
+    public static final String AI_ACCEPTED_SOURCE_SUFFIX = "_accepted_source";
+
+    /**
+     * Suffix for the property name of a property with uncancelled inheritance that saves the (auto translated)
+     * property value when the user last accepted it in the AI merge tool.
+     *
+     * @see #AI_ACCEPTED_SOURCE_SUFFIX
+     */
+    public static final String AI_ACCEPTED_TRANSLATION_SUFFIX = "_accepted_translation";
 
     /**
      * Attribute that is set on jcr:content of a page when the translation of a page failed, to make it easy to find such pages. Not set by {@link AITranslatePropertyWrapper}, but since all property names are defined here...
@@ -162,6 +182,34 @@ public class AITranslatePropertyWrapper {
      */
     public void setNewTranslatedCopy(String value) {
         setValue(encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX), value);
+    }
+
+    /**
+     * @see #AI_ACCEPTED_SOURCE_SUFFIX
+     */
+    public String getAcceptedSource() {
+        return targetValueMap.get(encodePropertyName(AI_PREFIX, propertyName, AI_ACCEPTED_SOURCE_SUFFIX), String.class);
+    }
+
+    /**
+     * @see #AI_ACCEPTED_SOURCE_SUFFIX
+     */
+    public void setAcceptedSource(String value) {
+        setValue(encodePropertyName(AI_PREFIX, propertyName, AI_ACCEPTED_SOURCE_SUFFIX), value);
+    }
+
+    /**
+     * @see #AI_ACCEPTED_TRANSLATION_SUFFIX
+     */
+    public String getAcceptedTranslation() {
+        return targetValueMap.get(encodePropertyName(AI_PREFIX, propertyName, AI_ACCEPTED_TRANSLATION_SUFFIX), String.class);
+    }
+
+    /**
+     * @see #AI_ACCEPTED_TRANSLATION_SUFFIX
+     */
+    public void setAcceptedTranslation(String value) {
+        setValue(encodePropertyName(AI_PREFIX, propertyName, AI_ACCEPTED_TRANSLATION_SUFFIX), value);
     }
 
     private void setValue(String key, String value) {
@@ -279,6 +327,8 @@ public class AITranslatePropertyWrapper {
                 encodePropertyName(AI_PREFIX, propertyName, AI_TRANSLATED_SUFFIX),
                 encodePropertyName(AI_PREFIX, propertyName, AI_NEW_ORIGINAL_SUFFIX),
                 encodePropertyName(AI_PREFIX, propertyName, AI_NEW_TRANSLATED_SUFFIX),
+                encodePropertyName(AI_PREFIX, propertyName, AI_ACCEPTED_SOURCE_SUFFIX),
+                encodePropertyName(AI_PREFIX, propertyName, AI_ACCEPTED_TRANSLATION_SUFFIX)
         };
     }
 

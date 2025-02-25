@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +14,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -71,7 +75,17 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                             if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
-                                list.add(new AutoTranslateProperty(res.getPath(), getComponentResource(res).getPath(), wrapper,  getComponentName(res), getComponentTitle(res), relationship));
+                                boolean processingNeeded;
+                                if (relationship.getStatus().isCancelled() || relationship.getStatus().getCanceledProperties().contains(propertyName)) {
+                                    processingNeeded = isNotBlank(wrapper.getNewOriginalCopy()) &&
+                                            isNotBlank(wrapper.getNewTranslatedCopy());
+                                } else { // not cancelled - processing needed if the current value is not the accepted translation
+                                    processingNeeded = isBlank(wrapper.getAcceptedTranslation()) ||
+                                            !StringUtils.equals(wrapper.getAcceptedTranslation(), wrapper.getCurrentValue());
+                                }
+
+                                list.add(new AutoTranslateProperty(res.getPath(), getComponentResource(res).getPath(), wrapper,  getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
+
                             }
                         }
                     }

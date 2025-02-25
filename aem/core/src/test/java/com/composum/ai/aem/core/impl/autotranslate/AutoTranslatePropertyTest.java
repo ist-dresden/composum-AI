@@ -28,7 +28,7 @@ class AutoTranslatePropertyTest {
         wrapper = new AITranslatePropertyWrapper(sourceMap, targetMap, "exampleProperty");
         LiveRelationship relationship = mock(LiveRelationship.class);
         when(relationship.getStatus()).thenReturn(mock(LiveStatus.class));
-        property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", "/content/example", wrapper, "component", "component text", relationship);
+        property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", "/content/example", wrapper, "component", "component text", relationship, true);
     }
 
     @Test

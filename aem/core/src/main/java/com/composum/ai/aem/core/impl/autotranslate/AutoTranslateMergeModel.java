@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -39,12 +38,50 @@ public class AutoTranslateMergeModel {
 
     private transient Resource pageResource;
 
+    /**
+     * Parameter to show properties wrt. cancellation status.
+     */
+    protected static final String PARAM_PROPERTY_FILTER = "propertyfilter";
+
+    /**
+     * Parameter to show properties wrt. needed actions.
+     */
+    protected static final String PARAM_SCOPE = "scope";
+
+    protected PropertyFilter getPropertyFilter(SlingHttpServletRequest request) {
+        return PropertyFilter.fromValue(request.getParameter(PARAM_PROPERTY_FILTER));
+    }
+
+    protected Scope getScope(SlingHttpServletRequest request) {
+        return Scope.fromValue(request.getParameter(PARAM_SCOPE));
+    }
+
     public boolean isDisabled() {
         return autoTranslateService == null || !autoTranslateService.isEnabled();
     }
 
     public List<AutoTranslateMergeService.AutoTranslateProperty> getProperties() {
-        return autoTranslateMergeService.getProperties(getPageResource());
+        List<AutoTranslateMergeService.AutoTranslateProperty> properties = autoTranslateMergeService.getProperties(getPageResource());
+        PropertyFilter propertyFilter = getPropertyFilter(request);
+        Scope scope = getScope(request);
+        switch (propertyFilter) {
+            case INHERITANCE_CANCELLED:
+                properties.removeIf(property -> !property.isCancelled());
+                break;
+            case INHERITANCE_UNCANCELLED:
+                properties.removeIf(AutoTranslateMergeService.AutoTranslateProperty::isCancelled);
+                break;
+            case ALL_PROPERTIES:
+                break;
+        }
+        switch (scope) {
+            case UNFINISHED_PROPERTIES:
+                properties.removeIf(p -> !p.isProcessingNeeded());
+                break;
+            case ALL_PROPERTIES:
+                break;
+        }
+        return properties;
     }
 
     public List<AutoTranslateComponent> getPageComponents() {
@@ -116,7 +153,7 @@ public class AutoTranslateMergeModel {
         public String getLinkToComponent() {
             if (componentPath.endsWith("/jcr:content")) {
                 return "/mnt/overlay/wcm/core/content/sites/properties.html?item=" +
-                substringBefore(componentPath, "/jcr:content");
+                        substringBefore(componentPath, "/jcr:content");
             }
             return "/editor.html" + substringBefore(componentPath, "/jcr:content") +
                     ".html#scrolltocomponent-" + substringAfter(componentPath, "/jcr:content/");
@@ -144,6 +181,62 @@ public class AutoTranslateMergeModel {
         @Override
         public String toString() {
             return "AutoTranslateComponent(" + componentPath + ')';
+        }
+    }
+
+
+    public enum PropertyFilter {
+        ALL_PROPERTIES("allstati"),
+        INHERITANCE_CANCELLED("cancelled"),
+        INHERITANCE_UNCANCELLED("uncancelled");
+
+        private final String value;
+
+        PropertyFilter(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static PropertyFilter fromValue(String value) {
+            if (value == null) {
+                return INHERITANCE_CANCELLED;
+            }
+            for (PropertyFilter filter : values()) {
+                if (filter.value.equals(value)) {
+                    return filter;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Scope {
+        UNFINISHED_PROPERTIES("unfinished"),
+        ALL_PROPERTIES("allprops");
+
+        private final String value;
+
+        Scope(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static Scope fromValue(String value) {
+            if (value == null) {
+                return UNFINISHED_PROPERTIES;
+            }
+            for (Scope scope : values()) {
+                if (scope.value.equals(value)) {
+                    return scope;
+                }
+            }
+            return null;
         }
     }
 

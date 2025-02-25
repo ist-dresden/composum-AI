@@ -66,8 +66,9 @@ public interface AutoTranslateMergeService {
         private final String componentTitle;
         private final String componentPath;
         private final boolean cancelled;
+        private final boolean processingNeeded;
 
-        public AutoTranslateProperty(String path, String componentPath, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle, @Nonnull LiveRelationship relationship) {
+        public AutoTranslateProperty(String path, String componentPath, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle, @Nonnull LiveRelationship relationship, boolean processingNeeded) {
             this.path = path;
             this.componentPath = componentPath;
             this.wrapper = wrapper;
@@ -75,6 +76,7 @@ public interface AutoTranslateMergeService {
             this.componentTitle = componentTitle;
             this.cancelled = relationship.getStatus().isCancelled() ||
                     relationship.getStatus().getCanceledProperties().contains(wrapper.getPropertyName());
+            this.processingNeeded = processingNeeded;
         }
 
         public String getPath() {
@@ -99,6 +101,10 @@ public interface AutoTranslateMergeService {
 
         public boolean isCancelled() {
             return cancelled;
+        }
+
+        public boolean isProcessingNeeded() {
+            return processingNeeded;
         }
 
         public String cancelledClass() {
