@@ -1,0 +1,34 @@
+<div id="edit-link-modal" class="modal-backdrop hidden">
+    <div class="modal-content wide">
+        <h3>Edit Link</h3>
+        <label>Text</label>
+        <input type="text" id="edit-anchor-text" class="_coral-Textfield">
+
+        <label>Path / Link</label>
+        <div class="path-link-wrapper">
+            <input type="text" id="edit-anchor-href" class="_coral-Textfield">
+            <span class="coral-InputGroup-button">
+                <button is="coral-button" icon="FolderOpenOutline" iconsize="S" size="M" variant="default"
+                        id="choose-path-btn"></button>
+            </span>
+        </div>
+
+        <label>Alternative text</label>
+        <input type="text" id="edit-anchor-title" class="_coral-Textfield">
+
+        <select id="edit-anchor-target" class="_coral-FieldButton _coral-ActionButton">
+            <option value="">Target</option>
+            <option value="_self">Same tab</option>
+            <option value="_blank">New tab</option>
+            <option value="_parent">Parent frame</option>
+            <option value="_top">Top frame</option>
+        </select>
+
+        <input type="hidden" id="edit-anchor-rel">
+
+        <div class="modal-actions">
+            <button is="coral-button" variant="secondary" id="cancel-link-btn">Cancel</button>
+            <button is="coral-button" variant="primary" id="save-link-btn">Save</button>
+        </div>
+    </div>
+</div>
