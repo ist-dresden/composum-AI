@@ -39,7 +39,7 @@
                             <tbody is="coral-table-body" class="propertiestable"
                                    data-sly-list.pageComponent="${model.pageComponents}">
 
-<!-- Component start  -->
+                            <!-- Component start  -->
 
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
                                 id="component-${pageComponentList.index}">
@@ -68,8 +68,10 @@
                                         | ${pageComponent.componentTitle}
                                     </sly>
                                     <span class="linktocomponent right-aligned">
-                                        <a href="${pageComponent.linkToComponent}" target="_blank" rel="noopener noreferrer">
-                                            <coral-icon icon="linkOut" size="XS" class="linktocomponent"></coral-icon></a>
+                                        <a href="${pageComponent.linkToComponent}" target="_blank"
+                                           rel="noopener noreferrer">
+                                            <coral-icon icon="linkOut" size="XS"
+                                                        class="linktocomponent"></coral-icon></a>
                                         <coral-tooltip placement="left" target=".linktocomponent">
                                             <span slot="content">Opens the page in the editor and scrolls to this component.</span>
                                         </coral-tooltip>
@@ -77,46 +79,81 @@
                                 </td>
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
+                                <sly data-sly-test.cancelled="${pageComponent.cancelled}"></sly>
 
-<!-- Property start - title row  -->
+                                <!-- Property start - title row  -->
 
-                                <tr is="coral-table-row" class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
+                                <tr is="coral-table-row"
+                                    class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="row-${pageComponentList.index}-${propertyList.index}">
-                                    <th is="coral-table-headercell" class="previoussrc">
-                                        <span class="propertyname">${property.wrapper.propertyName}</span>
-                                        Previously Translated Text
-                                    </th>
-                                    <coral-tooltip placement="top" target=".previoussrc" hidden>
-                                        <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
-                                    </coral-tooltip>
-                                    <th is="coral-table-headercell" class="newsrc">New Source Text</th>
-                                    <coral-tooltip placement="top" target=".newsrc" hidden>
-                                        <span slot="content">The new source text as it was during the last rollout.</span>
-                                    </coral-tooltip>
-                                    <th is="coral-table-headercell" class="srcdiffs">
-                                        <span class="propertyname">${property.wrapper.propertyName}</span>
-                                        Original Diffs
-                                    </th>
-                                    <coral-tooltip placement="top" target=".srcdiffs" hidden>
-                                        <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
-                                    </coral-tooltip>
-                                    <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
-                                    <coral-tooltip placement="top" target=".newtrans" hidden>
-                                        <span slot="content">The AI translation of the new source text.</span>
-                                    </coral-tooltip>
-                                    <th is="coral-table-headercell" class="editor">Editor for Current Text</th>
-                                    <coral-tooltip placement="top" target=".editor" hidden>
-                                        <span slot="content">Edit the current text on the page and save it when done.</span>
-                                    </coral-tooltip>
-                                    <th is="coral-table-headercell" class="currenttext">Current Text on Page</th>
-                                    <coral-tooltip placement="top" target=".currenttext" hidden>
-                                        <span slot="content">The current text displayed on the page, for comparison purposes.</span>
-                                    </coral-tooltip>
+                                    <sly data-sly-test="${cancelled}">
+                                        <th is="coral-table-headercell" class="previoussrc">
+                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            Previously Translated Text
+                                        </th>
+                                        <coral-tooltip placement="top" target=".previoussrc" hidden>
+                                            <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newsrc">New Source Text</th>
+                                        <coral-tooltip placement="top" target=".newsrc" hidden>
+                                            <span slot="content">The new source text as it was during the last rollout.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="srcdiffs">
+                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            Original Diffs
+                                        </th>
+                                        <coral-tooltip placement="top" target=".srcdiffs" hidden>
+                                            <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
+                                        <coral-tooltip placement="top" target=".newtrans" hidden>
+                                            <span slot="content">The AI translation of the new source text.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="editor">Editor for Current Text</th>
+                                        <coral-tooltip placement="top" target=".editor" hidden>
+                                            <span slot="content">Edit the current text on the page and save it when done.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="currenttext">Current Text on Page</th>
+                                        <coral-tooltip placement="top" target=".currenttext" hidden>
+                                            <span slot="content">The current text displayed on the page, for comparison purposes.</span>
+                                        </coral-tooltip>
+                                    </sly>
+                                    <sly data-sly-test="${!cancelled}">
+                                        <th is="coral-table-headercell" class="previoussrc">
+                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            Last accepted original text
+                                        </th>
+                                        <coral-tooltip placement="top" target=".previoussrc" hidden>
+                                            <span slot="content">The original when the translation was accepted last time</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newsrc">Current original</th>
+                                        <coral-tooltip placement="top" target=".newsrc" hidden>
+                                            <span slot="content">The current original text.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="srcdiffs">
+                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            Diffs from last accepted original
+                                        </th>
+                                        <coral-tooltip placement="top" target=".srcdiffs" hidden>
+                                            <span slot="content">This shows the differences between the source text where the translation was last accepted
+                                                and the current source text.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newtrans">Last accepted translation</th>
+                                        <coral-tooltip placement="top" target=".newtrans" hidden>
+                                            <span slot="content">The AI translation of the original where the translation was last accepted.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="editor">The current text</th>
+                                        <coral-tooltip placement="top" target=".editor" hidden>
+                                            <span slot="content">The current text on the page - AI translation of the current original.</span>
+                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="currenttext"><!-- Deliberately empty - no meaning here. --></th>
+                                    </sly>
                                 </tr>
 
-<!-- Property data row  -->
+                                <!-- Property data row  -->
 
-                                <tr is="coral-table-row" class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
+                                <tr is="coral-table-row"
+                                    class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="datarow-${pageComponentList.index}-${propertyList.index}"
                                     data-path="${property.path}"
                                     data-propertyname="${property.wrapper.propertyName}"
@@ -125,87 +162,109 @@
                                     data-ot="${property.wrapper.translatedCopy}"
                                     data-ns="${property.wrapper.newOriginalCopy}"
                                     data-nt="${property.wrapper.newTranslatedCopy}"
-                                    data-sd="${property.originalCopyDiffsHTML}"
+                                    data-as="${property.wrapper.acceptedSource}"
+                                    data-at="${property.wrapper.acceptedTranslation}"
+                                    data-sd="${property.diffsHTML}"
                                     data-e="${property.wrapper.currentValue}"
                                     data-id="${pageComponentList.index}-${propertyList.index}"
                                     data-isrich="${property.wrapper.isRichText}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            ${property.originalCopyInsertionsMarked @ context='html'}
+                                            ${property.diffsSrcInsertionsMarked @ context='html'}
                                         </p>
                                     </td>
                                     <td is="coral-table-cell" class="newsrc diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            ${property.newOriginalCopyInsertionsMarked @ context='html'}
+                                            ${property.diffsDstInsertionsMarked @ context='html'}
                                         </p>
                                     </td>
                                     <td is="coral-table-cell"
                                         class="srcdiffs diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                        ${property.originalCopyDiffsHTML @ context='html'}</td>
+                                        ${property.diffsHTML @ context='html'}</td>
                                     <td is="coral-table-cell"
-                                        class="newtrans">
-                                        <div class="newtrans-text">
-                                            <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                                ${property.wrapper.newTranslatedCopy @ context='html'}
+                                        class="translation">
+                                        <div class="translation-text">
+                                            <sly data-sly-test="${cancelled}">
+                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                    ${property.wrapper.newTranslatedCopy @ context='html'}
+                                                </sly>
+                                                <sly data-sly-test="${!isrichtext}">
+                                                    <p>${property.wrapper.newTranslatedCopy}</p>
+                                                </sly>
                                             </sly>
-                                            <sly data-sly-test="${!isrichtext}">
-                                                <p>${property.wrapper.newTranslatedCopy}</p>
+                                            <sly data-sly-test="${!cancelled}">
+                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                    ${property.wrapper.acceptedTranslation @ context='html'}
+                                                </sly>
+                                                <sly data-sly-test="${!isrichtext}">
+                                                    <p>${property.wrapper.acceptedTranslation}</p>
+                                                </sly>
                                             </sly>
                                         </div>
                                     </td>
                                     <td is="coral-table-cell" class="editor">
-                                        <div class="rte-container"
-                                             data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                            <div class="rte-toolbar">
-                                                <button class="rte-btn" is="coral-button" variant="minimal"
-                                                        title="Bold" icon="textBold"
-                                                        data-command="bold"></button>
-                                                <!-- <coral-tooltip placement="top" target=".rte-btn[title='Bold']">
-                                                    <span slot="content">Make the text bold.</span>
-                                                </coral-tooltip> -->
-                                                <button is="coral-button" variant="minimal" title="Italic"
-                                                        icon="textItalic"
-                                                        data-command="italic"></button>
-                                                <!-- <coral-tooltip placement="top" target=".rte-btn[title='Italic']">
-                                                    <span slot="content">Make the text italic.</span>
-                                                </coral-tooltip> -->
-                                                <button is="coral-button" variant="minimal" title="Underline"
-                                                        icon="textUnderline"
-                                                        data-command="underline"></button>
-                                                <!-- <coral-tooltip placement="top" target=".rte-btn[title='Underline']">
-                                                    <span slot="content">Underline the text.</span>
-                                                </coral-tooltip> -->
-                                                <button is="coral-button" variant="minimal" title="Edit Link"
-                                                        icon="link" class="edit-link-btn"></button>
-                                                <button is="coral-button" variant="minimal" title="Remove Link"
-                                                        icon="unlink" class="remove-link-btn"></button>
-                                                <button is="coral-button" variant="minimal" title="Bullet List"
-                                                        icon="textBulleted"
-                                                        data-command="insertUnorderedList"></button>
-                                                <!-- <coral-tooltip placement="top"
-                                                               target=".rte-btn[title='Bullet List']">
-                                                    <span slot="content">Create a bullet list.</span>
-                                                </coral-tooltip> -->
-                                                <button is="coral-button" variant="minimal" title="Numbered List"
-                                                        icon="textNumbered"
-                                                        data-command="insertOrderedList"></button>
-                                                <!-- <coral-tooltip placement="top"
-                                                               target=".rte-btn[title='Numbered List']">
-                                                    <span slot="content">Create a numbered list.</span>
-                                                </coral-tooltip> -->
+                                        <sly data-sly-test="${cancelled}">
+                                            <div class="rte-container"
+                                                 data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                <div class="rte-toolbar">
+                                                    <button class="rte-btn" is="coral-button" variant="minimal"
+                                                            title="Bold" icon="textBold"
+                                                            data-command="bold"></button>
+                                                    <!-- <coral-tooltip placement="top" target=".rte-btn[title='Bold']">
+                                                        <span slot="content">Make the text bold.</span>
+                                                    </coral-tooltip> -->
+                                                    <button is="coral-button" variant="minimal" title="Italic"
+                                                            icon="textItalic"
+                                                            data-command="italic"></button>
+                                                    <!-- <coral-tooltip placement="top" target=".rte-btn[title='Italic']">
+                                                        <span slot="content">Make the text italic.</span>
+                                                    </coral-tooltip> -->
+                                                    <button is="coral-button" variant="minimal" title="Underline"
+                                                            icon="textUnderline"
+                                                            data-command="underline"></button>
+                                                    <!-- <coral-tooltip placement="top" target=".rte-btn[title='Underline']">
+                                                        <span slot="content">Underline the text.</span>
+                                                    </coral-tooltip> -->
+                                                    <button is="coral-button" variant="minimal" title="Edit Link"
+                                                            icon="link" class="edit-link-btn"></button>
+                                                    <button is="coral-button" variant="minimal" title="Remove Link"
+                                                            icon="unlink" class="remove-link-btn"></button>
+                                                    <button is="coral-button" variant="minimal" title="Bullet List"
+                                                            icon="textBulleted"
+                                                            data-command="insertUnorderedList"></button>
+                                                    <!-- <coral-tooltip placement="top"
+                                                                   target=".rte-btn[title='Bullet List']">
+                                                        <span slot="content">Create a bullet list.</span>
+                                                    </coral-tooltip> -->
+                                                    <button is="coral-button" variant="minimal" title="Numbered List"
+                                                            icon="textNumbered"
+                                                            data-command="insertOrderedList"></button>
+                                                    <!-- <coral-tooltip placement="top"
+                                                                   target=".rte-btn[title='Numbered List']">
+                                                        <span slot="content">Create a numbered list.</span>
+                                                    </coral-tooltip> -->
+                                                </div>
+                                                <div class="rte-editor" contenteditable="true">
+                                                    ${property.wrapper.currentValue @ context='html'}
+                                                </div>
                                             </div>
-                                            <div class="rte-editor" contenteditable="true">
-                                                ${property.wrapper.currentValue @ context='html'}
-                                            </div>
-                                        </div>
-                                        <div class="text-container" data-sly-test="${!isrichtext}">
+                                            <div class="text-container" data-sly-test="${!isrichtext}">
                                                 <textarea class="text-editor" rows="3"
                                                           data-sly-text="${property.wrapper.currentValue}"></textarea>
-                                        </div>
+                                            </div>
+                                        </sly>
+                                        <sly data-sly-test="${!cancelled}">
+                                            <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                ${property.wrapper.currentValue @ context='html'}
+                                            </sly>
+                                            <sly data-sly-test="${!isrichtext}">
+                                                <p>${property.wrapper.currentValue}</p>
+                                            </sly>
+                                        </sly>
                                     </td>
                                     <td is="coral-table-cell" class="currenttext">
-                                        <div class="current-text">
+                                        <div class="current-text" data-sly-test="${cancelled}">
                                             <p data-sly-unwrap="${property.wrapper.isRichText}">
                                                 ${property.wrapper.currentValue @ context='html'}
                                             </p>
@@ -213,9 +272,10 @@
                                     </td>
                                 </tr>
 
-<!-- Action buttons  -->
+                                <!-- Action buttons  -->
 
-                                <tr is="coral-table-row" class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
+                                <tr is="coral-table-row"
+                                    class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
                                     id="actionrow-${pageComponentList.index}-${propertyList.index}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                     </td>
@@ -223,7 +283,7 @@
                                     </td>
                                     <td is="coral-table-cell" class="srcdiffs diffscolor"></td>
                                     <td is="coral-table-cell" class="newtrans">
-                                        <div class="row-actions">
+                                        <div class="row-actions" data-sly-test="${cancelled}">
                                             <button is="coral-button" variant="secondary"
                                                     class="intelligent-merge onlycancelled">AI Merge
                                                 <coral-wait size="S" class="spinner"></coral-wait>
@@ -245,33 +305,45 @@
                                     </td>
                                     <td is="coral-table-cell" class="editor">
                                         <div class="editor-actions">
-                                            <button is="coral-button" variant="primary" class="save-editor">
-                                                Save and Finish
-                                                <coral-wait size="S" class="spinner"></coral-wait>
-                                            </button>
-                                            <coral-tooltip placement="right" target=".save-editor">
-                                                <span slot="content">Save the changes made in the editor and marks this text as merged - that is it will not be shown again in this tool until there are further changes to the source text rolled out.</span>
-                                            </coral-tooltip>
-                                            <button is="coral-button" variant="secondary" class="reset-editor">
-                                                Reset
-                                            </button>
-                                            <coral-tooltip placement="right" target=".reset-editor">
-                                                <span slot="content">Resets the editor to the current text on the page.</span>
-                                            </coral-tooltip>
+                                            <sly data-sly-test="${cancelled}">
+                                                <button is="coral-button" variant="primary" class="save-editor">
+                                                    Save and Finish
+                                                    <coral-wait size="S" class="spinner"></coral-wait>
+                                                </button>
+                                                <coral-tooltip placement="right" target=".save-editor">
+                                                    <span slot="content">Save the changes made in the editor and marks this text as merged - that is it will not be shown again in this tool until there are further changes to the source text rolled out.</span>
+                                                </coral-tooltip>
+                                                <button is="coral-button" variant="secondary" class="reset-editor">
+                                                    Reset
+                                                </button>
+                                                <coral-tooltip placement="right" target=".reset-editor">
+                                                    <span slot="content">Resets the editor to the current text on the page.</span>
+                                                </coral-tooltip>
+                                            </sly>
+                                            <sly data-sly-test="${!cancelled}">
+                                                <button is="coral-button" variant="secondary"
+                                                        class="accept-translation">
+                                                    Accept translation
+                                                </button>
+                                                <coral-tooltip placement="right" target=".accept-translation">
+                                                    <span slot="content">Saves that the translation was accepted as it is. Alternative: cancel component and then edit.</span>
+                                                </coral-tooltip>
+                                            </sly>
                                         </div>
                                     </td>
                                     <td is="coral-table-cell" class="currenttext">
                                     </td>
                                 </tr>
 
-<!-- Property end, component end  -->
+                                <!-- Property end, component end  -->
 
                             </sly>
                             </tbody>
                         </table>
                     </section>
 
-                    <sly data-sly-use.bottombar="${'bottombar-template.html'}" data-sly-call="${bottombar.bottombarTemplate @ model=model}"></sly>
+                    <sly data-sly-use.bottombar="${'bottombar-template.html'}"
+                         data-sly-call="${bottombar.bottombarTemplate @ model=model}"></sly>
                 </div>
             </div>
         </div>

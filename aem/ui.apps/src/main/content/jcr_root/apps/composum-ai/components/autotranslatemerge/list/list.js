@@ -99,12 +99,12 @@ class AITranslateMergeRow {
             new AITranslatorMergeRTE(this.rteContainer, tool);
         }
 
-        this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
+        if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
         if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
-        this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+        if (this.mergeButton) this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
 
-        this.resetButton.addEventListener("click", this.resetEditor.bind(this));
-        this.saveButton.addEventListener("click", this.saveEditor.bind(this));
+        if (this.resetButton) this.resetButton.addEventListener("click", this.resetEditor.bind(this));
+        if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
     }
 
     copyToEditor() {

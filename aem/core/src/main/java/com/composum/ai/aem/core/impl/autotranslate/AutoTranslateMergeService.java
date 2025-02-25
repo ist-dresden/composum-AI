@@ -115,11 +115,12 @@ public interface AutoTranslateMergeService {
             return isProcessingNeeded() ? "" : "processed";
         }
 
-        public String getOriginalCopyDiffsHTML() {
-            String original = wrapper.getOriginalCopy();
-            String newOriginal = wrapper.getNewOriginalCopy();
+        public String getDiffsHTML() {
+            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getOriginal());
+            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getAcceptedSource());
+
             DiffMatchPatch dmp = new DiffMatchPatch();
-            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(original, newOriginal);
+            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
 
             StringBuilder htmlBuf = new StringBuilder();
@@ -141,9 +142,10 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        public String getOriginalCopyInsertionsMarked() {
-            String src = normalizeForDiff(wrapper.getNewOriginalCopy());
-            String dst = normalizeForDiff(wrapper.getOriginalCopy());
+        public String getDiffsSrcInsertionsMarked() {
+            String src = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getAcceptedSource());
+            String dst = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getOriginal());
+
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -164,9 +166,10 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        public String getNewOriginalCopyInsertionsMarked() {
-            String src = normalizeForDiff(wrapper.getOriginalCopy());
-            String dst = normalizeForDiff(wrapper.getNewOriginalCopy());
+        public String getDiffsDstInsertionsMarked() {
+            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getOriginal());
+            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getAcceptedSource());
+
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);

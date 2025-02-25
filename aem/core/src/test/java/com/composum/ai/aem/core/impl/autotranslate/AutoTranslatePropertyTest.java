@@ -27,18 +27,20 @@ class AutoTranslatePropertyTest {
         targetMap = new ModifiableValueMapDecorator(new HashMap<>());
         wrapper = new AITranslatePropertyWrapper(sourceMap, targetMap, "exampleProperty");
         LiveRelationship relationship = mock(LiveRelationship.class);
-        when(relationship.getStatus()).thenReturn(mock(LiveStatus.class));
+        LiveStatus liveStatus = mock(LiveStatus.class);
+        when(relationship.getStatus()).thenReturn(liveStatus);
+        when(liveStatus.isCancelled()).thenReturn(true);
         property = new AutoTranslateMergeService.AutoTranslateProperty("/content/example", "/content/example", wrapper, "component", "component text", relationship, true);
     }
 
     @Test
-    void testGetOriginalCopyDiffsHTML() {
+    void testGetDiffsHTML() {
         wrapper.setOriginalCopy("Original text");
         wrapper.setNewOriginalCopy("New original text with additions");
 
-        assertEquals("<del>O</del><span class=\"ins\">New o</span>riginal text<span class=\"ins\"> with additions</span>", property.getOriginalCopyDiffsHTML());
-        assertEquals("<del>O</del>riginal text", property.getOriginalCopyInsertionsMarked());
-        assertEquals("<span class=\"ins\">New o</span>riginal text<span class=\"ins\"> with additions</span>", property.getNewOriginalCopyInsertionsMarked());
+        assertEquals("<del>O</del><span class=\"ins\">New o</span>riginal text<span class=\"ins\"> with additions</span>", property.getDiffsHTML());
+        assertEquals("<del>O</del>riginal text", property.getDiffsSrcInsertionsMarked());
+        assertEquals("<span class=\"ins\">New o</span>riginal text<span class=\"ins\"> with additions</span>", property.getDiffsDstInsertionsMarked());
     }
 
     @Test
@@ -46,7 +48,7 @@ class AutoTranslatePropertyTest {
         wrapper.setOriginalCopy("<b>o</b>riginal");
         wrapper.setNewOriginalCopy("The <b>o</b>rriginal");
 
-        String diffsHtml = property.getOriginalCopyDiffsHTML();
+        String diffsHtml = property.getDiffsHTML();
 
         assertEquals("<span class=\"ins\">The </span><b>o</b><span class=\"ins\">r</span>riginal", diffsHtml);
     }
