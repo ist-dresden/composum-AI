@@ -91,6 +91,10 @@ class AITranslateMergeRow {
         this.copyButton = this.actionrow.querySelector(".copy-to-editor");
         this.appendButton = this.actionrow.querySelector(".append-to-editor");
         this.mergeButton = this.actionrow.querySelector(".intelligent-merge");
+        this.acceptButton = this.actionrow.querySelector(".accept-translation");
+
+        this.cancelInheritanceButton = this.row.querySelector(".cancelinheritance");
+        this.reenableInheritanceButton = this.row.querySelector(".reenableinheritance");
 
         this.resetButton = this.actionrow.querySelector(".reset-editor");
         this.saveButton = this.actionrow.querySelector(".save-editor");
@@ -102,6 +106,9 @@ class AITranslateMergeRow {
         if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
         if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
         if (this.mergeButton) this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+        if (this.acceptButton) this.acceptButton.addEventListener("click", this.acceptTranslation.bind(this));
+        if (this.cancelInheritanceButton) this.cancelInheritanceButton.addEventListener("click", this.cancelInheritance.bind(this));
+        if (this.reenableInheritanceButton) this.reenableInheritanceButton.addEventListener("click", this.reenableInheritance.bind(this));
 
         if (this.resetButton) this.resetButton.addEventListener("click", this.resetEditor.bind(this));
         if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
@@ -119,74 +126,18 @@ class AITranslateMergeRow {
         this.editor.innerHTML = this.row.dataset.e || '';
     }
 
-    intelligentMerge() {
-        const data = {
-            path: this.row.dataset.path,
-            propertyName: this.row.dataset.propertyname,
-            originalSource: this.row.dataset.os,
-            newSource: this.row.dataset.ns,
-            newTranslation: this.row.dataset.nt,
-            currentText: this.editor.innerHTML,
-            language: this.row.dataset.language
-        };
-        const btn = this.mergeButton;
-
+    callOperation(button, operation, data, onSuccess) {
+        this.tool.showError(null);
         Granite.csrf.refreshToken().then(token => {
-            btn.disabled = true;
-            btn.classList.add('activespinner');
-            fetch(URL_MERGE_SERVLET + "?operation=merge", {
+            button.disabled = true;
+            button.classList.add('activespinner');
+            fetch(URL_MERGE_SERVLET + "?operation=" + operation, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'CSRF-Token': token
                 },
-                body: JSON.stringify({
-                    operation: 'merge',
-                    ...data
-                })
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error("Merge failed: " + errMsg);
-                        });
-                    }
-                })
-                .then(mergedText => {
-                    this.editor.innerHTML = mergedText;
-                    console.log("Merge successful");
-                    this.tool.showError(null);
-                })
-                .catch(error => {
-                    console.error("Error in intelligentMerge", error);
-                    this.tool.showError(error.message);
-                }).finally(() => {
-                btn.disabled = false;
-                btn.classList.remove('activespinner');
-            });
-        });
-    }
-
-    saveEditor() {
-        const btn = this.saveButton;
-        const row = this.row;
-        this.tool.showError();
-        Granite.csrf.refreshToken().then(token => {
-            btn.disabled = true;
-            btn.classList.add('activespinner');
-            fetch(URL_MERGE_SERVLET + "?operation=save", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'CSRF-Token': token
-                },
-                body: new URLSearchParams({
-                    path: this.row.dataset.path,
-                    propertyName: this.row.dataset.propertyname,
-                    body: this.editor.value || this.editor.innerHTML
-                })
+                body: JSON.stringify(data)
             })
                 .then(response => {
                     if (response.ok) {
@@ -198,24 +149,94 @@ class AITranslateMergeRow {
                     }
                 })
                 .then(responseText => {
-                    if (!responseText || !responseText.trim()) {
-                        throw new Error();
-                    }
-                    let result = JSON.parse(responseText);
-                    if (!result.saved) {
-                        throw new Error(); // no error message to speak of
-                    } else {
-                        row.classList.add("processed");
-                    }
+                    onSuccess(responseText);
+                    this.tool.showError(null);
                 })
                 .catch(error => {
-                    console.error("Error in saveEditor", error);
-                    this.tool.showError("Save failed. " + error?.message);
+                    console.error("Error in " + operation, error);
+                    this.tool.showError(error.message);
                 }).finally(() => {
-                btn.disabled = false;
-                btn.classList.remove('activespinner');
+                button.disabled = false;
+                button.classList.remove('activespinner');
             });
         });
+    }
+
+    intelligentMerge() {
+        const data = {
+            path: this.row.dataset.path,
+            propertyName: this.row.dataset.propertyname,
+            originalSource: this.row.dataset.os,
+            newSource: this.row.dataset.ns,
+            newTranslation: this.row.dataset.nt,
+            currentText: this.editor.innerHTML,
+            language: this.row.dataset.language
+        };
+        this.callOperation(this.mergeButton, 'merge', data, mergedText => {
+            this.editor.innerHTML = mergedText;
+            console.log("Merge successful");
+        });
+    }
+
+    saveEditor() {
+        const data = {
+            path: this.row.dataset.path,
+            propertyName: this.row.dataset.propertyname,
+            body: this.editor.value || this.editor.innerHTML
+        };
+        this.callOperation(this.saveButton, 'save', data, responseText => {
+            if (!responseText || !responseText.trim()) {
+                throw new Error();
+            }
+            let result = JSON.parse(responseText);
+            if (!result.saved) {
+                throw new Error(); // no error message to speak of
+            } else {
+                row.classList.add("processed");
+            }
+        });
+    }
+
+    /** Calls the merge servlet with operation acceptTranslation and path and propertyName as POST parameters. */
+    acceptTranslation() {
+        const data = {
+            path: this.row.dataset.path,
+            propertyName: this.row.dataset.propertyname
+        }
+        this.callOperation(this.acceptButton, 'acceptTranslation', data, responseText => {
+            if (!responseText || !responseText.trim()) {
+                throw new Error();
+            }
+            let result = JSON.parse(responseText);
+            if (!result.accepted) {
+                throw new Error(); // no error message to speak of
+            } else {
+                row.classList.add("processed");
+            }
+        });
+    }
+
+    /** Calls the merge servlet with operation cancelInheritance and path and propertyName as POST parameters. */
+    cancelInheritance() {
+        const data = cancelData();
+        this.callOperation(this.cancelInheritanceButton, 'cancelInheritance', data, responseText => {
+            alert("CANCELLED"); // XXX implement me
+        });
+    }
+
+    /** Calls the merge servlet with operation reenableInheritance and path and propertyName as POST parameters. */
+    reenableInheritance() {
+        const data = cancelData();
+        this.callOperation(this.reenableInheritanceButton, 'reenableInheritance', data, responseText => {
+            alert("REENABLED"); // XXX implement me
+        });
+    }
+
+    cancelData() {
+        return {
+            path: this.row.dataset.componentpath,
+            propertyName: this.row.dataset.propertyname
+        }
     }
 }
 
@@ -441,7 +462,7 @@ class AITranslationPathChooser {
     }
 
     /** Loads the column corresponding to the last element of the path. */
-    async loadPath(path, callback) {
+    async loadPath(path) {
         const url = path && path.startsWith('/') ? PATH_CHOOSER_URL + path : PATH_CHOOSER_URL;
         this.pathChooserContent.innerHTML = '';
         try {

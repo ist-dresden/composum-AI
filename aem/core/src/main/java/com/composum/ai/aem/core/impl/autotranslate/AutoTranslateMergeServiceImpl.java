@@ -84,7 +84,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                                             !StringUtils.equals(wrapper.getAcceptedTranslation(), wrapper.getCurrentValue());
                                 }
 
-                                list.add(new AutoTranslateProperty(res.getPath(), getComponentResource(res).getPath(), wrapper,  getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
+                                list.add(new AutoTranslateProperty(res.getPath(), getComponentResource(res).getPath(), wrapper, getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
 
                             }
                         }
@@ -118,6 +118,47 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             return Collections.singletonMap("saved", wrapper.getCurrentValue());
         }
         return Collections.emptyMap();
+    }
+
+    @Override
+    public void approveTranslation(Resource resource, String propertyName) throws WCMException {
+        ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        if (relationship != null) {
+            String sourcePath = relationship.getSourcePath();
+            Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
+            AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+            wrapper.setAcceptedSource(wrapper.getOriginalCopy());
+            wrapper.setAcceptedTranslation(wrapper.getCurrentValue());
+        }
+    }
+
+    @Override
+    public void changeInheritance(Resource resource, String propertyName, CancelOrReenable kind) throws WCMException {
+        ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        if (relationship != null) {
+            String sourcePath = relationship.getSourcePath();
+            Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
+            AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+            switch (kind) {
+                // also reset values that have no meaning anymore.
+                case CANCEL:
+                    if (StringUtils.isBlank(propertyName)) {
+                        liveRelationshipManager.cancelRelationship(resource.getResourceResolver(), relationship, true, true);
+                    } else {
+                        liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                    }
+                    break;
+                case REENABLE:
+                    if (StringUtils.isBlank(propertyName)) {
+                        liveRelationshipManager.reenableRelationship(resource.getResourceResolver(), relationship, true);
+                    } else {
+                        liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                    }
+                    break;
+            }
+        }
     }
 
     @Override

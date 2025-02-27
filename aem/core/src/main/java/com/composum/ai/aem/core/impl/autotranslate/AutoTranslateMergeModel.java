@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -48,6 +49,11 @@ public class AutoTranslateMergeModel {
      */
     protected static final String PARAM_SCOPE = "scope";
 
+    /**
+     * Parameter that limits output to just that component - for specific reloading.
+     */
+    protected static final String PARAM_COMPONENTPATH = "componentpath";
+
     protected PropertyFilter getPropertyFilter(SlingHttpServletRequest request) {
         return PropertyFilter.fromValue(request.getParameter(PARAM_PROPERTY_FILTER));
     }
@@ -80,6 +86,10 @@ public class AutoTranslateMergeModel {
                 break;
             case ALL_PROPERTIES:
                 break;
+        }
+        String componentPath = request.getParameter(PARAM_COMPONENTPATH);
+        if (StringUtils.isNotBlank(componentPath)) {
+            properties.removeIf(p -> !p.getComponentPath().equals(componentPath));
         }
         return properties;
     }
@@ -144,6 +154,20 @@ public class AutoTranslateMergeModel {
 
         public String getComponentTitle() {
             return properties.isEmpty() ? null : properties.get(0).getComponentTitle();
+        }
+
+        public String getComponentPath() {
+            return componentPath;
+        }
+
+        /**
+         * For pages properties are cancelled individually. If it's a page we return the property name here, else nothing.
+         */
+        public String getCancelPropertyName() {
+            if (componentPath.endsWith("/jcr:content")) {
+                return properties.get(0).getWrapper().getPropertyName();
+            }
+            return null;
         }
 
         public String getComponentPathInPage() {

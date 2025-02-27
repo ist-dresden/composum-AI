@@ -42,7 +42,9 @@
                             <!-- Component start  -->
 
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
-                                id="component-${pageComponentList.index}">
+                                id="component-${pageComponentList.index}"
+                                data-componentpath="${pageComponent.componentPath}"
+                                data-propertyname="${pageComponent.cancelPropertyName}">
                                 <td class="cancelcol"
                                     rowspan="${pageComponent.calculatedComponentRowspan}">
                                     <button class="cancelinheritance onlycancelled" is="coral-button" variant="minimal"
@@ -85,6 +87,7 @@
 
                                 <tr is="coral-table-row"
                                     class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
+                                    data-componentpath="${pageComponent.componentPath}"
                                     id="row-${pageComponentList.index}-${propertyList.index}">
                                     <sly data-sly-test="${cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
@@ -154,6 +157,7 @@
 
                                 <tr is="coral-table-row"
                                     class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
+                                    data-componentpath="${pageComponent.componentPath}"
                                     id="datarow-${pageComponentList.index}-${propertyList.index}"
                                     data-path="${property.path}"
                                     data-propertyname="${property.wrapper.propertyName}"
@@ -276,6 +280,7 @@
 
                                 <tr is="coral-table-row"
                                     class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
+                                    data-componentpath="${pageComponent.componentPath}"
                                     id="actionrow-${pageComponentList.index}-${propertyList.index}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                     </td>

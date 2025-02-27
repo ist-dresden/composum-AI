@@ -41,7 +41,7 @@ public interface AutoTranslateMergeService {
      * @return a map containing "saved" and the text saved in the resource, to verify that it went OK, otherwise empty.
      */
     Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName,
-                          @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException;
+                                        @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException;
 
     /*
      * Try an intelligent merge: combine the original source, the new source, the new translation and the current text into a new text trying to keep the spirit of the translation.
@@ -55,6 +55,29 @@ public interface AutoTranslateMergeService {
     String intelligentMerge(String language, @Nonnull Resource resource, @Nonnull String originalSource,
                             @Nonnull String newSource, @Nonnull String newTranslation,
                             @Nonnull String currentText);
+
+    /**
+     * Approves a translation for the specified property of the given resource, marking it as accepted.
+     *
+     * @param resource     the resource containing the property to approve
+     * @param propertyName the name of the property for which the translation is to be approved
+     */
+    void approveTranslation(Resource resource, String propertyName) throws WCMException;
+
+    /**
+     * Cancels a translation for the specified property of the given resource, marking it as cancelled.
+     *
+     * @param resource     the resource containing the property to cancel
+     * @param propertyName the name of the property for which the translation is to be cancelled
+     * @param kind         whether to cancel or reenable the property
+     */
+    void changeInheritance(Resource resource, String propertyName, CancelOrReenable kind) throws WCMException;
+
+
+    enum CancelOrReenable {
+        CANCEL,
+        REENABLE
+    }
 
     /**
      * Represents a translated property associated with a resource.
@@ -190,7 +213,9 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        /** Remove stuff that makes trouble with diffs. Currently rel="noopener noreferrer" */
+        /**
+         * Remove stuff that makes trouble with diffs. Currently rel="noopener noreferrer"
+         */
         protected String normalizeForDiff(String text) {
             return text != null ? text.replaceAll(" rel=\"noopener noreferrer\"", " ").trim() : "";
         }
