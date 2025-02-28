@@ -44,9 +44,10 @@
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
                                 id="component-${pageComponentList.index}"
                                 data-componentpath="${pageComponent.componentPath}"
-                                data-propertyname="${pageComponent.cancelPropertyName}">
+                                data-cancelpropertyname="${pageComponent.cancelPropertyName}">
                                 <td class="cancelcol" rowspan="${pageComponent.calculatedComponentRowspan}">
-                                    <button class="cancelinheritance onlyuncancelled" is="coral-button" variant="minimal"
+                                    <button class="cancelinheritance onlyuncancelled" is="coral-button"
+                                            variant="minimal"
                                             size="M"
                                             title="Cancel Inheritance" icon="link"></button>
                                     <coral-tooltip placement="right" target=".cancelinheritance">
@@ -62,7 +63,8 @@
                                 <td is="coral-table-cell" colspan="6">
                                     <span class="componentName" data-sly-text="${pageComponent.componentName}"></span>
                                     <sly data-sly-test="${pageComponent.componentPathInPage}">
-                                        | <span class="componentPath" data-sly-text="${pageComponent.componentPathInPage}"/>
+                                        | <span class="componentPath"
+                                                data-sly-text="${pageComponent.componentPathInPage}"/>
                                     </sly>
                                     <sly data-sly-test="${pageComponent.componentTitle}">
                                         | ${pageComponent.componentTitle}
@@ -86,6 +88,7 @@
                                 <tr is="coral-table-row"
                                     class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
                                     data-componentpath="${pageComponent.componentPath}"
+                                    data-cancelpropertyname="${pageComponent.cancelPropertyName}"
                                     id="row-${pageComponentList.index}-${propertyList.index}">
                                     <sly data-sly-test="${cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
@@ -147,7 +150,8 @@
                                         <coral-tooltip placement="top" target=".editor" hidden>
                                             <span slot="content">The current text on the page - AI translation of the current original.</span>
                                         </coral-tooltip>
-                                        <th is="coral-table-headercell" class="currenttext"><!-- Deliberately empty - no meaning here. --></th>
+                                        <th is="coral-table-headercell" class="currenttext">
+                                            <!-- Deliberately empty - no meaning here. --></th>
                                     </sly>
                                 </tr>
 
@@ -156,6 +160,7 @@
                                 <tr is="coral-table-row"
                                     class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
                                     data-componentpath="${pageComponent.componentPath}"
+                                    data-cancelpropertyname="${pageComponent.cancelPropertyName}"
                                     id="datarow-${pageComponentList.index}-${propertyList.index}"
                                     data-path="${property.path}"
                                     data-propertyname="${property.wrapper.propertyName}"
@@ -279,6 +284,7 @@
                                 <tr is="coral-table-row"
                                     class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
                                     data-componentpath="${pageComponent.componentPath}"
+                                    data-cancelpropertyname="${pageComponent.cancelPropertyName}"
                                     id="actionrow-${pageComponentList.index}-${propertyList.index}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                     </td>

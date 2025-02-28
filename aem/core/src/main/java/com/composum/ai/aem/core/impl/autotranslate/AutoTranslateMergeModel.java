@@ -54,6 +54,13 @@ public class AutoTranslateMergeModel {
      */
     protected static final String PARAM_COMPONENTPATH = "componentpath";
 
+    /**
+     * Parameter that limits output to just that property - for specific reloading.
+     *
+     * @see #PARAM_COMPONENTPATH
+     */
+    protected static final String PARAM_PROPERTYNAME = "propertyname";
+
     protected PropertyFilter getPropertyFilter(SlingHttpServletRequest request) {
         return PropertyFilter.fromValue(request.getParameter(PARAM_PROPERTY_FILTER));
     }
@@ -90,6 +97,10 @@ public class AutoTranslateMergeModel {
         String componentPath = request.getParameter(PARAM_COMPONENTPATH);
         if (StringUtils.isNotBlank(componentPath)) {
             properties.removeIf(p -> !p.getComponentPath().equals(componentPath));
+        }
+        String propertyname = request.getParameter(PARAM_PROPERTYNAME);
+        if (StringUtils.isNotBlank(propertyname)) {
+            properties.removeIf(p -> !p.getWrapper().getPropertyName().equals(propertyname));
         }
         return properties;
     }
