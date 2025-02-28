@@ -15,16 +15,20 @@ class AITranslateMergeTool {
     /** Initializes table event listeners for handling row-specific actions. */
     initTableEventListeners() {
         const tableBody = document.querySelector(".propertiestable");
-        document.querySelectorAll("tbody tr.datarow").forEach(row => {
-            const id = row.dataset.id;
-            const actionrow = document.getElementById("actionrow-" + id);
-            new AITranslateMergeRow(row, actionrow, this);
-        });
-        document.querySelectorAll("tbody tr.component-head").forEach(row => {
-            new AIComponentRow(this, row);
-        });
+        document.querySelectorAll("tbody tr.datarow").forEach(row => this.initDatarow(row));
+        document.querySelectorAll("tbody tr.component-head").forEach(row => this.initComponentHead(row));
         this.linkModal = new AITranslateLinkEditModal();
     }
+
+    initDatarow(row) {
+        const id = row.dataset.id;
+        const actionrow = document.getElementById("actionrow-" + id);
+        new AITranslateMergeRow(row, actionrow, this);
+    };
+
+    initComponentHead(row) {
+        new AIComponentRow(this, row);
+    };
 
     /** For anchors with data-forwardid or data-backwardid set the href to #(id+1) / #(id-1). */
     initNavButtons() {
@@ -118,12 +122,53 @@ class AITranslateMergeTool {
         });
     }
 
+    /**
+     * Reload the component: adds parameter componentpath and propertyname to the url, loads that,
+     * puts that into a temporary space and replaces the tr tags in the table with these from that temporary space.
+     * Annoyingly we cannot replace the whole document since the editors / text areas might have unsaved changes, and
+     * it is also possible that rows vanish because of the filters.
+     * Thus, we search for the existing component header, insert the new children before that, and remove it and the
+     * other children.
+     */
+    reloadComponent(componentpath, propertyname) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('componentpath', componentpath);
+        if (propertyname) url.searchParams.set('propertyname', propertyname);
+        console.log('reloadComponent', url.href);
+        const tableBody = document.querySelector(".propertytable tbody");
+        var selector = `tr[data-componentpath="${componentpath}"]`;
+        if (propertyname) {
+            selector += `[data-cancelpropertyname="${propertyname}"]`;
+        } else {
+            selector += ':not([data-cancelpropertyname]';
+        }
+        const trs = tableBody.querySelectorAll(selector);
+        fetch(url.href)
+            .then(response => response.text())
+            .then(html => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const replacementTableBody = tempDiv.querySelector(".propertytable tbody");
+                const firsttr = trs[0];
+                replacementTableBody.childNodes.forEach(tr => {
+                    tableBody.insertBefore(tr, firsttr);
+                });
+                trs.forEach(tr => tr.remove());
+            })
+            .catch(error => {
+                console.error("Error in reloadComponent", error);
+                this.showError(error.message);
+            });
+    }
+
 }
 
 /** Handles the cancel and reinstate inheritance operation. */
 class AIComponentRow {
     /** componentRow = first row displaying component */
     constructor(tool, componentHead) {
+        if (componentHead.initialized) return;
+        componentHead.initialized = true;
         this.tool = tool;
         this.componentHead = componentHead;
         this.cancelInheritanceButton = this.componentHead.querySelector(".cancelinheritance");
@@ -134,25 +179,30 @@ class AIComponentRow {
 
     /** Calls the merge servlet with operation cancelInheritance and path and propertyName as POST parameters. */
     cancelInheritance() {
-        const data = this.cancelData();
-        this.tool.callOperation(this.cancelInheritanceButton, 'cancelInheritance', data, responseText => {
-            alert("CANCELLED " + responseText); // XXX implement me
-        });
+        this.cancelOrReenable(this.cancelInheritanceButton, 'cancelInheritance');
     }
 
     /** Calls the merge servlet with operation reenableInheritance and path and propertyName as POST parameters. */
     reenableInheritance() {
-        const data = this.cancelData();
-        this.tool.callOperation(this.reenableInheritanceButton, 'reenableInheritance', data, responseText => {
-            alert("REENABLED " + responseText); // XXX implement me
-        });
+        this.cancelOrReenable(this.reenableInheritanceButton, 'reenableInheritance');
     }
 
-    cancelData() {
-        return {
+    cancelOrReenable(button, operation) {
+        const data = {
             path: this.componentHead.dataset.componentpath,
-            propertyName: this.componentHead.dataset.propertyname
-        }
+            propertyName: this.componentHead.dataset.cancelpropertyname
+        };
+        this.tool.callOperation(button, operation, data, responseText => {
+            if (!responseText || !responseText.trim()) {
+                throw new Error();
+            }
+            let result = JSON.parse(responseText);
+            if (!result.done) {
+                throw new Error(); // no error message to speak of
+            } else {
+                this.tool.reloadComponent(data.path, data.propertyName);
+            }
+        });
     }
 
 }
@@ -160,6 +210,8 @@ class AIComponentRow {
 /** Handles copy, append, save, and intelligent merge actions for each table row. */
 class AITranslateMergeRow {
     constructor(row, actionrow, tool) {
+        if (row.initialized) return;
+        row.initialized = true;
         this.row = row;
         this.actionrow = actionrow;
         this.tool = tool;
@@ -260,6 +312,8 @@ class AITranslateMergeRow {
 /** Manages the rich text editor functionalities, including toolbar actions and link management. */
 class AITranslatorMergeRTE {
     constructor(container, tool) {
+        if (container.initialized) return;
+        container.initialized = true;
         this.tool = tool;
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
