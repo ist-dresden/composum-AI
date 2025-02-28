@@ -12,10 +12,14 @@ tr.row-separator td.row-separator {
     background-color: lightgray;
 }
 
+.coral--light tr.component-head td {
+    background-color: lightgray;
+}
+
 td.cancelcol, th.cancelcol {
     vertical-align: top;
     text-align: center;
-    background-color: white;
+    background-color: lightgray;
 }
 
 td.cancelcol button {
