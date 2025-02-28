@@ -45,17 +45,16 @@
                                 id="component-${pageComponentList.index}"
                                 data-componentpath="${pageComponent.componentPath}"
                                 data-propertyname="${pageComponent.cancelPropertyName}">
-                                <td class="cancelcol"
-                                    rowspan="${pageComponent.calculatedComponentRowspan}">
-                                    <button class="cancelinheritance onlycancelled" is="coral-button" variant="minimal"
+                                <td class="cancelcol" rowspan="${pageComponent.calculatedComponentRowspan}">
+                                    <button class="cancelinheritance onlyuncancelled" is="coral-button" variant="minimal"
                                             size="M"
-                                            title="Cancel Inheritance" icon="linkOff"></button>
+                                            title="Cancel Inheritance" icon="link"></button>
                                     <coral-tooltip placement="right" target=".cancelinheritance">
                                         <span slot="content">Cancels the inheritance for the whole component.</span>
                                     </coral-tooltip>
-                                    <button class="reenableinheritance onlyuncancelled" is="coral-button"
+                                    <button class="reenableinheritance onlycancelled" is="coral-button"
                                             variant="minimal"
-                                            title="Re-enable Inheritance" icon="link"></button>
+                                            title="Re-enable Inheritance" icon="linkOff"></button>
                                     <coral-tooltip placement="right" target=".reenableinheritance">
                                         <span slot="content">Re-enables the inheritance for the whole component.</span>
                                     </coral-tooltip>
@@ -63,8 +62,7 @@
                                 <td is="coral-table-cell" colspan="6">
                                     <span class="componentName" data-sly-text="${pageComponent.componentName}"></span>
                                     <sly data-sly-test="${pageComponent.componentPathInPage}">
-                                        | <span class="componentPath"
-                                                data-sly-text="${pageComponent.componentPathInPage}"/>
+                                        | <span class="componentPath" data-sly-text="${pageComponent.componentPathInPage}"/>
                                     </sly>
                                     <sly data-sly-test="${pageComponent.componentTitle}">
                                         | ${pageComponent.componentTitle}

@@ -20,6 +20,9 @@ class AITranslateMergeTool {
             const actionrow = document.getElementById("actionrow-" + id);
             new AITranslateMergeRow(row, actionrow, this);
         });
+        document.querySelectorAll("tbody tr.component-head").forEach(row => {
+            new AIComponentRow(this, row);
+        });
         this.linkModal = new AITranslateLinkEditModal();
     }
 
@@ -77,57 +80,10 @@ class AITranslateMergeTool {
             errormessage.hidden = true;
         }
     }
-}
 
-/** Handles copy, append, save, and intelligent merge actions for each table row. */
-class AITranslateMergeRow {
-    constructor(row, actionrow, tool) {
-        this.row = row;
-        this.actionrow = actionrow;
-        this.tool = tool;
-        this.rteContainer = row.querySelector(".rte-container");
-        this.editor = this.rteContainer?.querySelector(".rte-editor") || row.querySelector(".text-editor");
-
-        this.copyButton = this.actionrow.querySelector(".copy-to-editor");
-        this.appendButton = this.actionrow.querySelector(".append-to-editor");
-        this.mergeButton = this.actionrow.querySelector(".intelligent-merge");
-        this.acceptButton = this.actionrow.querySelector(".accept-translation");
-
-        this.cancelInheritanceButton = this.row.querySelector(".cancelinheritance");
-        this.reenableInheritanceButton = this.row.querySelector(".reenableinheritance");
-
-        this.resetButton = this.actionrow.querySelector(".reset-editor");
-        this.saveButton = this.actionrow.querySelector(".save-editor");
-
-        if (this.rteContainer) {
-            new AITranslatorMergeRTE(this.rteContainer, tool);
-        }
-
-        if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
-        if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
-        if (this.mergeButton) this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
-        if (this.acceptButton) this.acceptButton.addEventListener("click", this.acceptTranslation.bind(this));
-        if (this.cancelInheritanceButton) this.cancelInheritanceButton.addEventListener("click", this.cancelInheritance.bind(this));
-        if (this.reenableInheritanceButton) this.reenableInheritanceButton.addEventListener("click", this.reenableInheritance.bind(this));
-
-        if (this.resetButton) this.resetButton.addEventListener("click", this.resetEditor.bind(this));
-        if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
-    }
-
-    copyToEditor() {
-        this.editor.innerHTML = this.row.dataset.nt || '';
-    }
-
-    appendToEditor() {
-        this.editor.innerHTML += this.row.dataset.nt || '';
-    }
-
-    resetEditor() {
-        this.editor.innerHTML = this.row.dataset.e || '';
-    }
-
+    /** Makes a call to the AutoTranslateMergeServiceImpl */
     callOperation(button, operation, data, onSuccess) {
-        this.tool.showError(null);
+        this.showError(null);
         Granite.csrf.refreshToken().then(token => {
             button.disabled = true;
             button.classList.add('activespinner');
@@ -150,16 +106,97 @@ class AITranslateMergeRow {
                 })
                 .then(responseText => {
                     onSuccess(responseText);
-                    this.tool.showError(null);
+                    this.showError(null);
                 })
                 .catch(error => {
                     console.error("Error in " + operation, error);
-                    this.tool.showError(error.message);
+                    this.showError(error.message);
                 }).finally(() => {
                 button.disabled = false;
                 button.classList.remove('activespinner');
             });
         });
+    }
+
+}
+
+/** Handles the cancel and reinstate inheritance operation. */
+class AIComponentRow {
+    /** componentRow = first row displaying component */
+    constructor(tool, componentHead) {
+        this.tool = tool;
+        this.componentHead = componentHead;
+        this.cancelInheritanceButton = this.componentHead.querySelector(".cancelinheritance");
+        this.reenableInheritanceButton = this.componentHead.querySelector(".reenableinheritance");
+        this.cancelInheritanceButton.addEventListener("click", this.cancelInheritance.bind(this));
+        this.reenableInheritanceButton.addEventListener("click", this.reenableInheritance.bind(this));
+    }
+
+    /** Calls the merge servlet with operation cancelInheritance and path and propertyName as POST parameters. */
+    cancelInheritance() {
+        const data = this.cancelData();
+        this.tool.callOperation(this.cancelInheritanceButton, 'cancelInheritance', data, responseText => {
+            alert("CANCELLED"); // XXX implement me
+        });
+    }
+
+    /** Calls the merge servlet with operation reenableInheritance and path and propertyName as POST parameters. */
+    reenableInheritance() {
+        const data = this.cancelData();
+        this.tool.callOperation(this.reenableInheritanceButton, 'reenableInheritance', data, responseText => {
+            alert("REENABLED"); // XXX implement me
+        });
+    }
+
+    cancelData() {
+        return {
+            path: this.componentHead.dataset.componentpath,
+            propertyName: this.componentHead.dataset.propertyname
+        }
+    }
+
+}
+
+/** Handles copy, append, save, and intelligent merge actions for each table row. */
+class AITranslateMergeRow {
+    constructor(row, actionrow, tool) {
+        this.row = row;
+        this.actionrow = actionrow;
+        this.tool = tool;
+        this.rteContainer = row.querySelector(".rte-container");
+        this.editor = this.rteContainer?.querySelector(".rte-editor") || row.querySelector(".text-editor");
+
+        this.copyButton = this.actionrow.querySelector(".copy-to-editor");
+        this.appendButton = this.actionrow.querySelector(".append-to-editor");
+        this.mergeButton = this.actionrow.querySelector(".intelligent-merge");
+        this.acceptButton = this.actionrow.querySelector(".accept-translation");
+
+        this.resetButton = this.actionrow.querySelector(".reset-editor");
+        this.saveButton = this.actionrow.querySelector(".save-editor");
+
+        if (this.rteContainer) {
+            new AITranslatorMergeRTE(this.rteContainer, tool);
+        }
+
+        if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
+        if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
+        if (this.mergeButton) this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+        if (this.acceptButton) this.acceptButton.addEventListener("click", this.acceptTranslation.bind(this));
+
+        if (this.resetButton) this.resetButton.addEventListener("click", this.resetEditor.bind(this));
+        if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
+    }
+
+    copyToEditor() {
+        this.editor.innerHTML = this.row.dataset.nt || '';
+    }
+
+    appendToEditor() {
+        this.editor.innerHTML += this.row.dataset.nt || '';
+    }
+
+    resetEditor() {
+        this.editor.innerHTML = this.row.dataset.e || '';
     }
 
     intelligentMerge() {
@@ -172,7 +209,7 @@ class AITranslateMergeRow {
             currentText: this.editor.innerHTML,
             language: this.row.dataset.language
         };
-        this.callOperation(this.mergeButton, 'merge', data, mergedText => {
+        this.tool.callOperation(this.mergeButton, 'merge', data, mergedText => {
             this.editor.innerHTML = mergedText;
             console.log("Merge successful");
         });
@@ -184,7 +221,7 @@ class AITranslateMergeRow {
             propertyName: this.row.dataset.propertyname,
             body: this.editor.value || this.editor.innerHTML
         };
-        this.callOperation(this.saveButton, 'save', data, responseText => {
+        this.tool.callOperation(this.saveButton, 'save', data, responseText => {
             if (!responseText || !responseText.trim()) {
                 throw new Error();
             }
@@ -204,7 +241,7 @@ class AITranslateMergeRow {
             path: this.row.dataset.path,
             propertyName: this.row.dataset.propertyname
         }
-        this.callOperation(this.acceptButton, 'acceptTranslation', data, responseText => {
+        this.tool.callOperation(this.acceptButton, 'acceptTranslation', data, responseText => {
             if (!responseText || !responseText.trim()) {
                 throw new Error();
             }
@@ -218,28 +255,6 @@ class AITranslateMergeRow {
         });
     }
 
-    /** Calls the merge servlet with operation cancelInheritance and path and propertyName as POST parameters. */
-    cancelInheritance() {
-        const data = cancelData();
-        this.callOperation(this.cancelInheritanceButton, 'cancelInheritance', data, responseText => {
-            alert("CANCELLED"); // XXX implement me
-        });
-    }
-
-    /** Calls the merge servlet with operation reenableInheritance and path and propertyName as POST parameters. */
-    reenableInheritance() {
-        const data = cancelData();
-        this.callOperation(this.reenableInheritanceButton, 'reenableInheritance', data, responseText => {
-            alert("REENABLED"); // XXX implement me
-        });
-    }
-
-    cancelData() {
-        return {
-            path: this.row.dataset.componentpath,
-            propertyName: this.row.dataset.propertyname
-        }
-    }
 }
 
 /** Manages the rich text editor functionalities, including toolbar actions and link management. */
