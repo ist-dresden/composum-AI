@@ -136,7 +136,7 @@ class AIComponentRow {
     cancelInheritance() {
         const data = this.cancelData();
         this.tool.callOperation(this.cancelInheritanceButton, 'cancelInheritance', data, responseText => {
-            alert("CANCELLED"); // XXX implement me
+            alert("CANCELLED " + responseText); // XXX implement me
         });
     }
 
@@ -144,7 +144,7 @@ class AIComponentRow {
     reenableInheritance() {
         const data = this.cancelData();
         this.tool.callOperation(this.reenableInheritanceButton, 'reenableInheritance', data, responseText => {
-            alert("REENABLED"); // XXX implement me
+            alert("REENABLED " + responseText); // XXX implement me
         });
     }
 
