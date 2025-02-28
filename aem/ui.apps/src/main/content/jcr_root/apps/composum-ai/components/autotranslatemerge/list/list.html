@@ -39,7 +39,7 @@
                             <tbody is="coral-table-body" class="propertiestable"
                                    data-sly-list.pageComponent="${model.pageComponents}">
 
-                            <!-- Component start  -->
+                            <!--/* Component start */-->
 
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
                                 id="component-${pageComponentList.index}"
@@ -83,7 +83,7 @@
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <sly data-sly-test.cancelled="${pageComponent.cancelled}"></sly>
 
-                                <!-- Property start - title row  -->
+                                <!--/* Property start - title row */-->
 
                                 <tr is="coral-table-row"
                                     class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
@@ -155,7 +155,7 @@
                                     </sly>
                                 </tr>
 
-                                <!-- Property data row  -->
+                                <!--/* Property data row */-->
 
                                 <tr is="coral-table-row"
                                     class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
@@ -279,7 +279,7 @@
                                     </td>
                                 </tr>
 
-                                <!-- Action buttons  -->
+                                <!--/* Action buttons */-->
 
                                 <tr is="coral-table-row"
                                     class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
@@ -344,7 +344,7 @@
                                     </td>
                                 </tr>
 
-                                <!-- Property end, component end  -->
+                                <!--/* Property end, component end */-->
 
                             </sly>
                             </tbody>
