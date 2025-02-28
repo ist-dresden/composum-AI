@@ -105,7 +105,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             resource = child;
         }
         Stats stats = new Stats();
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship == null) {
             throw new IllegalArgumentException("No live relationship for " + resource.getPath());
         }
@@ -196,7 +196,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
                     LiveRelationship liveRelationship = relationships.get(propertyToTranslate.targetResource.getPath());
                     if (liveRelationship == null) {
-                        liveRelationship = liveRelationshipManager.getLiveRelationship(propertyToTranslate.targetResource, false);
+                        liveRelationship = liveRelationshipManager.getLiveRelationship(propertyToTranslate.targetResource, true);
                         relationships.put(propertyToTranslate.targetResource.getPath(), liveRelationship);
                     }
 
@@ -211,7 +211,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
             if (additionalInstructionsChanged) {
                 ModifiableValueMap mvm = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-                LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, false);
+                LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, true);
                 liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
                         liveRelationship, new String[]{AITranslatePropertyWrapper.PROPERTY_AI_ADDINSTRUCTIONS}, false);
                 if (additionalInstructions == null) {
@@ -225,7 +225,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             boolean pathsChanged = migratePathsToLanguageCopy(resource, language, stats);
             changed = pathsChanged || changed;
             if (changed) {
-                markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, false), translationParameters, configuration);
+                markAsAiTranslated(resource, liveRelationshipManager.getLiveRelationship(resource, true), translationParameters, configuration);
             }
             if (translationParameters.autoSave) {
                 resource.getResourceResolver().commit();
@@ -457,7 +457,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                                 targetWrapper.setLcOriginal(value);
                             }
                             targetWrapper.setLcTranslated(languageCopy.getPath());
-                            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, false);
+                            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, true);
                             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
                                     liveRelationship, targetWrapper.allLcKeys(), false);
                             changed = true;
@@ -474,7 +474,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
     protected void cancelInheritance(Resource resource, Resource resourceToTranslate, PropertyToTranslate propertyToTranslate) throws WCMException {
         try {
-            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resourceToTranslate, false);
+            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resourceToTranslate, true);
             if (relationship == null) {
                 // a bit doubtful, but this way everything is revertable.
                 throw new IllegalArgumentException("No live relationship for translated path " + resourceToTranslate.getPath());
@@ -552,7 +552,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             if (reenable) {
                 if (relationship == null) { // on demand since expensive calculation
-                    relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+                    relationship = liveRelationshipManager.getLiveRelationship(resource, true);
                 }
                 reenableInheritance(resource, key, relationship);
             }
@@ -586,7 +586,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             @Nonnull Resource resource, @Nonnull List<PropertyToTranslate> propertiesToTranslate, @Nonnull Stats stats,
             @Nonnull AutoTranslateService.TranslationParameters translationParameters, boolean force) throws WCMException {
         boolean changed = false;
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship == null) {
             LOG.warn("No live relationship for {}", resource.getPath());
             return false;

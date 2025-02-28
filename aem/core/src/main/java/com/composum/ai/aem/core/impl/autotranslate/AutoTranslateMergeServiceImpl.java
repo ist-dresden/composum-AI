@@ -63,7 +63,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
         descendantsStream(pageResource).forEach(res -> {
             ModifiableValueMap properties = res.adaptTo(ModifiableValueMap.class);
             try {
-                LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(res, false);
+                LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(res, true);
                 if (relationship != null) {
                     String sourcePath = relationship.getSourcePath();
                     Resource sourceResource = res.getResourceResolver().getResource(sourcePath);
@@ -100,7 +100,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Override
     public Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName, @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException {
         ModifiableValueMap properties = Objects.requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship != null) {
             String sourcePath = relationship.getSourcePath();
             Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
@@ -123,7 +123,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Override
     public void approveTranslation(Resource resource, String propertyName) throws WCMException {
         ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship != null) {
             String sourcePath = relationship.getSourcePath();
             Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
@@ -136,7 +136,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Override
     public void changeInheritance(Resource resource, String propertyName, CancelOrReenable kind) throws WCMException {
         ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship != null) {
             String sourcePath = relationship.getSourcePath();
             Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);

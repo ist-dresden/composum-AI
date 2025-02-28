@@ -121,7 +121,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
         for (String path : pathsToRollout) {
             Resource contentResource = resourceResolver.getResource(path);
             if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
-                LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, false);
+                LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, true);
                 if (liveRelationship != null) {
                     Resource source = resource.getResourceResolver().getResource(liveRelationship.getSourcePath());
                     if (source != null) {
@@ -154,7 +154,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
     protected void performRolloutForPage(Resource contentResource, TriggerRolloutParameters parms)
             throws PersistenceException, WCMException {
         if (contentResource != null && contentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE).equals("cq:PageContent")) {
-            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, false);
+            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(contentResource, true);
             if (liveRelationship != null) {
                 Resource source = contentResource.getResourceResolver().getResource(liveRelationship.getSourcePath());
                 if (source != null) {
