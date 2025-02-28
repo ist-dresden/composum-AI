@@ -4,12 +4,14 @@ const PATH_CHOOSER_URL = '/mnt/overlay/cq/gui/content/linkpathfield/picker.html'
 /** Handles the general script functionality for the Translation Merge Tool. */
 class AITranslateMergeTool {
     constructor() {
-        document.addEventListener("DOMContentLoaded", () => {
-            this.initTableEventListeners();
-            this.initNavButtons();
-            this.initFooterButtons();
-            document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
-        });
+        document.addEventListener("DOMContentLoaded", () => this.init());
+    }
+
+    init() {
+        this.initTableEventListeners();
+        this.initNavButtons();
+        this.initFooterButtons();
+        document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
     }
 
     /** Initializes table event listeners for handling row-specific actions. */
@@ -143,17 +145,24 @@ class AITranslateMergeTool {
             selector += ':not([data-cancelpropertyname]';
         }
         const trs = tableBody.querySelectorAll(selector);
+        if (!trs.length) {
+            debugger;
+        }
         fetch(url.href)
             .then(response => response.text())
             .then(html => {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
-                const replacementTableBody = tempDiv.querySelector(".propertytable tbody");
+                const replacements = tempDiv.querySelectorAll(".propertytable tbody tr");
                 const firsttr = trs[0];
-                replacementTableBody.childNodes.forEach(tr => {
+                if (!firsttr) {
+                    debugger;
+                }
+                replacements.forEach(tr => {
                     tableBody.insertBefore(tr, firsttr);
                 });
                 trs.forEach(tr => tr.remove());
+                this.init();
             })
             .catch(error => {
                 console.error("Error in reloadComponent", error);
