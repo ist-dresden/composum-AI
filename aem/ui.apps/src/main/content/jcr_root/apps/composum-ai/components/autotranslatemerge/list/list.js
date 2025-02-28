@@ -192,7 +192,8 @@ class AITranslateMergeRow {
             if (!result.saved) {
                 throw new Error(); // no error message to speak of
             } else {
-                row.classList.add("processed");
+                this.row.classList.add("processed");
+                this.actionrow.classList.add("processed");
             }
         });
     }
@@ -211,7 +212,8 @@ class AITranslateMergeRow {
             if (!result.accepted) {
                 throw new Error(); // no error message to speak of
             } else {
-                row.classList.add("processed");
+                this.row.classList.add("processed");
+                this.actionrow.classList.add("processed");
             }
         });
     }
