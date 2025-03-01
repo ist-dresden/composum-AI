@@ -34,8 +34,14 @@ AIGenPromptEnd(foobar) -->
 <body>
     <div class="container">
         <h1>Create a page from a template with AI</h1>
-        <p>This single page application allows you to generate a complete text for a page by replacing prompts with AI-generated content. The page structure contains various components with prompts marked by special placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts. Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'. The application interacts with the AITemplatingServlet to process the page template.</p>
-        
+        <p>This single page application allows you to generate a complete text for a page by replacing prompts with
+            AI-generated content. The page structure contains various components with prompts marked by special
+            placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts.
+            Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'.
+            'PAGEPROMPT: ' means the rest of the prompt field are general instructions for the whole page.
+            More detailed instructions are <a href="https://ai.composum.com/aiPageTemplating.html">here</a>.
+        </p>
+
         <form id="templatingForm">
             <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
             <div class="form-group">
@@ -61,7 +67,7 @@ AIGenPromptEnd(foobar) -->
             <button type="submit" class="btn btn-primary" id="replacePromptsBtn">Replace Prompts</button>
             <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
         </form>
-        
+
         <div class="mt-4"><pre style="white-space: pre-wrap;" id="resultDiv"></pre></div>
     </div>
 
