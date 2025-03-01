@@ -69,11 +69,6 @@ AIGenPromptEnd(foobar) -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Load CSRF token
-            $.getJSON('/libs/granite/csrf/token.json', function(data) {
-                $('#cq_csrf_token').val(data.token);
-            });
-
             // Restore form data from localStorage
             var formData = JSON.parse(localStorage.getItem('composum-ai-prototype-templating')) || {};
             $('#resourcePath').val(formData.resourcePath || '');
@@ -88,23 +83,31 @@ AIGenPromptEnd(foobar) -->
                     resourcePath: $('#resourcePath').val(),
                     additionalPrompt: $('#additionalPrompt').val(),
                     additionalUrls: $('#additionalUrls').val(),
-                    backgroundInformation: $('#backgroundInformation').val(),
-                    ':cq_csrf_token': $('#cq_csrf_token').val()
+                    backgroundInformation: $('#backgroundInformation').val()
                 };
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
                 $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', true);
                 $('#resultDiv').text('Contacting the AI ...');
-                $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
-                    .done(function(data) {
-                        $('#resultDiv').text(JSON.stringify(data, null, 2));
-                    })
-                    .fail(function(jqXHR, textStatus, errorThrown) {
-                        $('#resultDiv').text('Error: ' + errorThrown);
-                    })
-                    .always(function() {
-                        $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
-                    });
+
+                // Fetch CSRF token before making the POST request
+                $.getJSON('/libs/granite/csrf/token.json', function(data) {
+                    formData[':cq_csrf_token'] = data.token;
+
+                    $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
+                        .done(function(data) {
+                            $('#resultDiv').text(JSON.stringify(data, null, 2));
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            $('#resultDiv').text('Error: ' + errorThrown);
+                        })
+                        .always(function() {
+                            $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
+                        });
+                }).fail(function() {
+                    $('#resultDiv').text('Error: Unable to fetch CSRF token.');
+                    $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
+                });
             });
         });
     </script>
