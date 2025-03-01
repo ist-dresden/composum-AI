@@ -47,10 +47,10 @@ public class AITemplatingServiceImplTest {
         ec.checkThat(texts.size(), is(4));
         ec.checkThat(texts.keySet(), allOf(hasItem("PROMPT#001"), hasItem("PROMPT#ID1"), hasItem("PROMPT#002"), hasItem("informationally#003")));
 
-        ec.checkThat(texts.get("PROMPT#001"), is("Print as plain text: single sentence invitation to check out the product"));
-        ec.checkThat(texts.get("PROMPT#ID1"), is("Print as plain text: name of the product"));
-        ec.checkThat(texts.get("PROMPT#002"), is("Print as rich text HTML: <p><strong>markdown list of key features</strong></p>"));
-        ec.checkThat(texts.get("informationally#003"), is("Print unchanged the quoted text without the quotes: ```Key Features```"));
+        ec.checkThat(texts.get("PROMPT#001"), is("As plain text: single sentence invitation to check out the product"));
+        ec.checkThat(texts.get("PROMPT#ID1"), is("As plain text: name of the product"));
+        ec.checkThat(texts.get("PROMPT#002"), is("As rich text HTML: <p><strong>markdown list of key features</strong></p>"));
+        ec.checkThat(texts.get("informationally#003"), is("Print unchanged the quoted text without the triple backtick quoting: ```Key Features```"));
 
         ec.checkThat(ids.size(), is(3));
         ec.checkThat(ids.get("PROMPT#001"), is(r1));
@@ -100,8 +100,8 @@ public class AITemplatingServiceImplTest {
     public void joinAndExtract() {
         Map<String, String> prompts = new LinkedHashMap<>();
         prompts.put("PROMPT#001", "something");
-        prompts.put("informationally#002", "Print as rich text HTML: <p><strong>markdown list of key features</strong></p>");
-        String joined = AITemplatingServiceImpl.joinText(prompts);
+        prompts.put("informationally#002", "As rich text HTML: <p><strong>markdown list of key features</strong></p>");
+        String joined = AITemplatingServiceImpl.joinText(prompts, null);
         Map<String, String> result = AITemplatingServiceImpl.extractParts(joined);
         ec.checkThat(result, is(prompts));
     }

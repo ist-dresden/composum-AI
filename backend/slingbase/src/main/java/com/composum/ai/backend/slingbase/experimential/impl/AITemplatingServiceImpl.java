@@ -70,7 +70,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      * Matches a text with PROMPTFIELD start and determines the id if there is one given. Either it's
      * <code>PROMPTFIELD: ...</code> or <code>PROMPTFIELD#ID: ...</code>.
      */
-    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(?<prefix>(</?\\w+>\\s*)*)PROMPTFIELD(?<id>#\\w+)?:\\s*");
+    protected static final Pattern PROMPTFIELD = Pattern.compile("^\\s*(?<prefix>(</?\\w+>\\s*)*)PROMPTFIELD(?<id>#\\w+)?:\\s*(<p>|&nbsp;)*\\s*");
 
     /* A prefix for keys that says this is not a prompt but a text that can be used to analyze the flow of the page. */
     protected static final String PREFIX_INFORMATIONALLY = "informationally#";
@@ -153,7 +153,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         collectPrompts(replacements, ids, texts);
         texts.put("END", THE_END_COMMAND); // check whether the page is complete
 
-        GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts, backgroundInformation);
+        GPTChatRequest request = makeRequest(resource, urls, pagePrompts, texts, backgroundInformation, additionalPrompt);
 
         Map<String, String> responses = null;
         boolean finished = false;
@@ -177,8 +177,11 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     }
 
 
-    protected static @NotNull String joinText(Map<String, String> prompts) {
+    protected static @NotNull String joinText(Map<String, String> prompts, String additionalPrompt) {
         StringBuilder prompt = new StringBuilder(PREFIX_PROMPT);
+        if (StringUtils.isNotBlank(additionalPrompt)) {
+            prompt.append("\n").append(additionalPrompt).append("\n");
+        }
         for (Map.Entry<String, String> entry : prompts.entrySet()) {
             prompt.append("%%%%%%%% ").append(entry.getKey()).append(" %%%%%%%%\n");
             prompt.append(entry.getValue().trim()).append("\n");
@@ -188,7 +191,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
     /**
      * Splits the response at the %%%%%%%% ID %%%%%%%% separators and puts the items into a map.
-     * Inverse of {@link #joinText(Map)}.
+     * Inverse of {@link #joinText(Map, String)}.
      */
     @Nonnull
     protected static Map<String, String> extractParts(String response) {
@@ -220,7 +223,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         }
     }
 
-    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts, String backgroundInformation) throws IOException, URISyntaxException {
+    protected @NotNull GPTChatRequest makeRequest(Resource resource, List<String> urls, List<String> pagePrompts, Map<String, String> prompts, String backgroundInformation, String additionalPrompt) throws IOException, URISyntaxException {
         GPTChatRequest request = new GPTChatRequest();
         GPTConfiguration config = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
         config = GPTConfiguration.HIGH_INTELLIGENCE.merge(config);
@@ -242,7 +245,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             request.addMessage(GPTMessageRole.USER, "Retrieve the background information for later prompts.");
             request.addMessage(GPTMessageRole.ASSISTANT, backgroundInformation.trim());
         }
-        request.addMessage(GPTMessageRole.USER, joinText(prompts));
+        request.addMessage(GPTMessageRole.USER, joinText(prompts, additionalPrompt));
         return request;
     }
 
@@ -268,7 +271,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                 String name = idmatch.group("id");
                 id = name != null ? "PROMPT" + name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
                 prompt = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
-                prompt = (isRichtext ? "Print as rich text HTML: " : "Print as plain text: ") + prompt;
+                prompt = (isRichtext ? "As rich text HTML: " : "As plain text: ") + prompt;
                 if (ids.containsKey(id)) {
                     LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);
                     throw new IllegalArgumentException("The resource contains a declaration for the key " + id + " twice.");
@@ -276,7 +279,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
                 ids.put(id, replacement);
             } else {
                 id = PREFIX_INFORMATIONALLY + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
-                prompt = "Print unchanged the quoted text without the quotes: ```" + replacement.text + "```";
+                prompt = "Print unchanged the quoted text without the triple backtick quoting: ```" + replacement.text + "```";
             }
             prompts.put(id, prompt);
         }
