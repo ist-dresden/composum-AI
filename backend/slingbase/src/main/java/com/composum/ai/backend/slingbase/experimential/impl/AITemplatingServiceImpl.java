@@ -177,11 +177,8 @@ public class AITemplatingServiceImpl implements AITemplatingService {
     }
 
 
-    protected static @NotNull String joinText(Map<String, String> prompts, String additionalPrompt) {
+    protected static @NotNull String joinText(Map<String, String> prompts) {
         StringBuilder prompt = new StringBuilder(PREFIX_PROMPT);
-        if (StringUtils.isNotBlank(additionalPrompt)) {
-            prompt.append("\n").append(additionalPrompt).append("\n");
-        }
         for (Map.Entry<String, String> entry : prompts.entrySet()) {
             prompt.append("%%%%%%%% ").append(entry.getKey()).append(" %%%%%%%%\n");
             prompt.append(entry.getValue().trim()).append("\n");
@@ -191,7 +188,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
 
     /**
      * Splits the response at the %%%%%%%% ID %%%%%%%% separators and puts the items into a map.
-     * Inverse of {@link #joinText(Map, String)}.
+     * Inverse of {@link #joinText(Map)}.
      */
     @Nonnull
     protected static Map<String, String> extractParts(String response) {
@@ -233,6 +230,9 @@ public class AITemplatingServiceImpl implements AITemplatingService {
         for (String pagePrompt : pagePrompts) {
             sysprompt.append("\n\n").append(pagePrompt);
         }
+        if (StringUtils.isNotBlank(additionalPrompt)) {
+            sysprompt.append("\n\n").append(additionalPrompt);
+        }
         request.addMessage(GPTMessageRole.SYSTEM, sysprompt.toString());
 
         for (String url : urls) {
@@ -245,7 +245,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             request.addMessage(GPTMessageRole.USER, "Retrieve the background information for later prompts.");
             request.addMessage(GPTMessageRole.ASSISTANT, backgroundInformation.trim());
         }
-        request.addMessage(GPTMessageRole.USER, joinText(prompts, additionalPrompt));
+        request.addMessage(GPTMessageRole.USER, joinText(prompts));
         return request;
     }
 

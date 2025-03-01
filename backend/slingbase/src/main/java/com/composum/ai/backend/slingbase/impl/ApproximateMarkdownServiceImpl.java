@@ -81,7 +81,7 @@ public class ApproximateMarkdownServiceImpl implements ApproximateMarkdownServic
     /**
      * Pattern for several kinds of ignored keys.
      */
-    protected final static Pattern IGNORED_ATTRIBUTE_PATTERN = Pattern.compile("^((cq:|sling:|ai_|lc_).*|fileReference|link|linkURL)$");
+    protected final static Pattern IGNORED_ATTRIBUTE_PATTERN = Pattern.compile("^((cq:|sling:|ai_|lc_).*|fileReference|link|linkURL|imageMap)$");
 
     /**
      * We ignore nodes named i18n or renditions and nodes starting with rep:, dam:, cq:
