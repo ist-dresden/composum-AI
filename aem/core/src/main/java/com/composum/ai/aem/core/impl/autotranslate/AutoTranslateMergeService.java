@@ -21,6 +21,9 @@ import com.day.cq.wcm.msm.api.LiveRelationship;
  */
 public interface AutoTranslateMergeService {
 
+    /** Checks whether there are any unmerged or unaccepted properties. */
+    boolean isProcessingNeeded(Resource resource);
+
     /**
      * Recursively finds all properties from the given resource and its children that have names starting with
      * {@link AITranslatePropertyWrapper#AI_NEW_TRANSLATED_SUFFIX} and creates the AI Translate Property Wrapper for each.

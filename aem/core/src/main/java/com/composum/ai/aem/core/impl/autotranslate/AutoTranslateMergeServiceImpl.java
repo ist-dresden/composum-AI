@@ -56,6 +56,15 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Reference
     protected AIConfigurationService configurationService;
 
+    public boolean isProcessingNeeded(Resource pageResource) {
+        if (pageResource == null) {
+            return false;
+        }
+        List<AutoTranslateProperty> props = getProperties(pageResource);
+        return props.stream().anyMatch(AutoTranslateProperty::isProcessingNeeded);
+    }
+
+
     @Override
     @Nonnull
     public List<AutoTranslateProperty> getProperties(Resource pageResource) {
