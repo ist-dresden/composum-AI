@@ -270,7 +270,7 @@ public class AITemplatingServiceImpl implements AITemplatingService {
             if (idmatch.find()) {
                 String name = idmatch.group("id");
                 id = name != null ? "PROMPT" + name : "PROMPT#" + String.valueOf(1000 + counter.incrementAndGet()).substring(1);
-                prompt = StringUtils.defaultString(idmatch.group("prefix")) + replacement.text.substring(idmatch.end());
+                prompt = /* StringUtils.defaultString(idmatch.group("prefix")) + */ replacement.text.substring(idmatch.end());
                 prompt = (isRichtext ? "As rich text HTML: " : "As plain text: ") + prompt;
                 if (ids.containsKey(id)) {
                     LOG.error("The resource contains a declaration for the key {} twice: one at {} and one at {}", id, ids.get(id), replacement);

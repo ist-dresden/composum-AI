@@ -49,7 +49,8 @@ public class AITemplatingServiceImplTest {
 
         ec.checkThat(texts.get("PROMPT#001"), is("As plain text: single sentence invitation to check out the product"));
         ec.checkThat(texts.get("PROMPT#ID1"), is("As plain text: name of the product"));
-        ec.checkThat(texts.get("PROMPT#002"), is("As rich text HTML: <p><strong>markdown list of key features</strong></p>"));
+        // we remove html tags at the start of the prompt as that seems ChatGPT to prevent recognizing these as prompts.
+        ec.checkThat(texts.get("PROMPT#002"), is("As rich text HTML: markdown list of key features</strong></p>"));
         ec.checkThat(texts.get("informationally#003"), is("Print unchanged the quoted text without the triple backtick quoting: ```Key Features```"));
 
         ec.checkThat(ids.size(), is(3));
