@@ -184,9 +184,9 @@ body.hide-currenttext .currenttext {
     margin-right: 14px;
 }
 
-.processed td {
-    background-color: #e6ffe6 !important;
-    opacity: 40%;
+.coral--light .processed td {
+    background-color: palegreen;
+    /* opacity: 40%; */
 }
 
 .spinner {
