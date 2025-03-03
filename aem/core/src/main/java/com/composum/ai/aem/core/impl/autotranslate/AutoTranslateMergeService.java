@@ -142,8 +142,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getDiffsHTML() {
-            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getOriginal());
-            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getAcceptedSource());
+            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getAcceptedSource());
+            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getOriginal());
 
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
@@ -169,8 +169,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getDiffsSrcInsertionsMarked() {
-            String src = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getAcceptedSource());
-            String dst = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getOriginal());
+            String src = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getOriginal());
+            String dst = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getAcceptedSource());
 
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
@@ -193,8 +193,8 @@ public interface AutoTranslateMergeService {
         }
 
         public String getDiffsDstInsertionsMarked() {
-            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getOriginal());
-            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getAcceptedSource());
+            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getAcceptedSource());
+            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getOriginal());
 
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
