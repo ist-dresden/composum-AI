@@ -56,6 +56,10 @@ tr.property-row td {
     vertical-align: top;
 }
 
+coral-tooltip {
+    text-transform: none;
+}
+
 body.show-diffs .previoussrc, body.show-diffs .newsrc {
     display: none;
 }

@@ -50,13 +50,13 @@
                                             variant="minimal"
                                             size="M"
                                             title="Cancel Inheritance" icon="link"></button>
-                                    <coral-tooltip placement="right" target=".cancelinheritance">
+                                    <coral-tooltip placement="right" target="_prev">
                                         <span slot="content">Cancels the inheritance for the whole component.</span>
                                     </coral-tooltip>
                                     <button class="reenableinheritance onlycancelled" is="coral-button"
                                             variant="minimal"
                                             title="Re-enable Inheritance" icon="linkOff"></button>
-                                    <coral-tooltip placement="right" target=".reenableinheritance">
+                                    <coral-tooltip placement="right" target="_prev">
                                         <span slot="content">Re-enables the inheritance for the whole component.</span>
                                     </coral-tooltip>
                                 </td>
@@ -74,7 +74,7 @@
                                            rel="noopener noreferrer">
                                             <coral-icon icon="linkOut" size="XS"
                                                         class="linktocomponent"></coral-icon></a>
-                                        <coral-tooltip placement="left" target=".linktocomponent">
+                                        <coral-tooltip placement="left" target="_prev">
                                             <span slot="content">Opens the page in the editor and scrolls to this component.</span>
                                         </coral-tooltip>
                                     </span>
@@ -93,63 +93,76 @@
                                     <sly data-sly-test="${cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
-                                            Previously Translated Text
+                                            <span>Previously Translated Text</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
+                                            </coral-tooltip>
                                         </th>
-                                        <coral-tooltip placement="top" target=".previoussrc" hidden>
-                                            <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="newsrc">New Source Text</th>
-                                        <coral-tooltip placement="top" target=".newsrc" hidden>
-                                            <span slot="content">The new source text as it was during the last rollout.</span>
-                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newsrc"><span>New Source Text</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The new source text as it was during the last rollout.</span>
+                                            </coral-tooltip>
+                                        </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
-                                            Original Diffs
+                                            <span>Original Diffs</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
+                                            </coral-tooltip>
                                         </th>
-                                        <coral-tooltip placement="top" target=".srcdiffs" hidden>
-                                            <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="newtrans">New Text Translation</th>
-                                        <coral-tooltip placement="top" target=".newtrans" hidden>
-                                            <span slot="content">The AI translation of the new source text.</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="editor">Editor for Current Text</th>
-                                        <coral-tooltip placement="top" target=".editor" hidden>
-                                            <span slot="content">Edit the current text on the page and save it when done.</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="currenttext">Current Text on Page</th>
-                                        <coral-tooltip placement="top" target=".currenttext" hidden>
-                                            <span slot="content">The current text displayed on the page, for comparison purposes.</span>
-                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newtrans">
+                                            <span>New Text Translation</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The AI translation of the new source text.</span>
+                                            </coral-tooltip>
+                                        </th>
+                                        <th is="coral-table-headercell" class="editor">
+                                            <span>Editor for Current Text</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">Edit the current text on the page and save it when done.</span>
+                                            </coral-tooltip>
+                                        </th>
+                                        <th is="coral-table-headercell" class="currenttext">
+                                            <span>Current Text on Page</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The current text displayed on the page, for comparison purposes.</span>
+                                            </coral-tooltip>
+                                        </th>
                                     </sly>
                                     <sly data-sly-test="${!cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
-                                            Last accepted original text
+                                            <span>Last accepted original text</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The original when the translation was accepted last time</span>
+                                            </coral-tooltip>
                                         </th>
-                                        <coral-tooltip placement="top" target=".previoussrc" hidden>
-                                            <span slot="content">The original when the translation was accepted last time</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="newsrc">Current original</th>
-                                        <coral-tooltip placement="top" target=".newsrc" hidden>
-                                            <span slot="content">The current original text.</span>
-                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newsrc">
+                                            <span>Current original</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The current original text.</span>
+                                            </coral-tooltip>
+                                        </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
-                                            Diffs from last accepted original
+                                            <span>Diffs from last accepted original</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">This shows the differences between the source text where the translation was last accepted
+                                                    and the current source text.</span>
+                                            </coral-tooltip>
                                         </th>
-                                        <coral-tooltip placement="top" target=".srcdiffs" hidden>
-                                            <span slot="content">This shows the differences between the source text where the translation was last accepted
-                                                and the current source text.</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="newtrans">Last accepted translation</th>
-                                        <coral-tooltip placement="top" target=".newtrans" hidden>
-                                            <span slot="content">The AI translation of the original where the translation was last accepted.</span>
-                                        </coral-tooltip>
-                                        <th is="coral-table-headercell" class="editor">The current text</th>
-                                        <coral-tooltip placement="top" target=".editor" hidden>
-                                            <span slot="content">The current text on the page - AI translation of the current original.</span>
-                                        </coral-tooltip>
+                                        <th is="coral-table-headercell" class="newtrans">
+                                            <span>Last accepted translation</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The AI translation of the original where the translation was last accepted.</span>
+                                            </coral-tooltip>
+                                        </th>
+                                        <th is="coral-table-headercell" class="editor">
+                                            <span>The current text</span>
+                                            <coral-tooltip placement="top" target="_prev">
+                                                <span slot="content">The current text on the page - AI translation of the current original.</span>
+                                            </coral-tooltip>
+                                        </th>
                                         <th is="coral-table-headercell" class="currenttext">
                                             <!-- Deliberately empty - no meaning here. --></th>
                                     </sly>
@@ -218,19 +231,19 @@
                                                     <button class="rte-btn" is="coral-button" variant="minimal"
                                                             title="Bold" icon="textBold"
                                                             data-command="bold"></button>
-                                                    <!-- <coral-tooltip placement="top" target=".rte-btn[title='Bold']">
+                                                    <!-- <coral-tooltip placement="top" target="_prev">
                                                         <span slot="content">Make the text bold.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Italic"
                                                             icon="textItalic"
                                                             data-command="italic"></button>
-                                                    <!-- <coral-tooltip placement="top" target=".rte-btn[title='Italic']">
+                                                    <!-- <coral-tooltip placement="top" target="_prev">
                                                         <span slot="content">Make the text italic.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Underline"
                                                             icon="textUnderline"
                                                             data-command="underline"></button>
-                                                    <!-- <coral-tooltip placement="top" target=".rte-btn[title='Underline']">
+                                                    <!-- <coral-tooltip placement="top" target="_prev">
                                                         <span slot="content">Underline the text.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Edit Link"
@@ -241,14 +254,14 @@
                                                             icon="textBulleted"
                                                             data-command="insertUnorderedList"></button>
                                                     <!-- <coral-tooltip placement="top"
-                                                                   target=".rte-btn[title='Bullet List']">
+                                                                   target="_prev">
                                                         <span slot="content">Create a bullet list.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Numbered List"
                                                             icon="textNumbered"
                                                             data-command="insertOrderedList"></button>
                                                     <!-- <coral-tooltip placement="top"
-                                                                   target=".rte-btn[title='Numbered List']">
+                                                                   target="_prev">
                                                         <span slot="content">Create a numbered list.</span>
                                                     </coral-tooltip> -->
                                                 </div>
@@ -297,14 +310,14 @@
                                                     class="intelligent-merge onlycancelled">AI Merge
                                                 <coral-wait size="S" class="spinner"></coral-wait>
                                             </button>
-                                            <coral-tooltip placement="right" target=".intelligent-merge">
+                                            <coral-tooltip placement="right" target="_prev">
                                                     <span slot="content">
                                                         This takes the current text, inspects the differences between the previously translated source text and the new source text and incorporates the corresponding changes from the new text translation. Thus this tries to keep manual changes that have been done to the current text of the component as much as possible.</span>
                                             </coral-tooltip>
                                             <button is="coral-button" variant="secondary"
                                                     class="copy-to-editor">Copy to Editor
                                             </button>
-                                            <coral-tooltip placement="right" target=".copy-to-editor">
+                                            <coral-tooltip placement="right" target="_prev">
                                                 <span slot="content">Copy the new translation as it is to the editor, replacing the editor content.</span>
                                             </coral-tooltip>
                                             <!-- <button is="coral-button" variant="secondary"
@@ -319,13 +332,13 @@
                                                     Save and Finish
                                                     <coral-wait size="S" class="spinner"></coral-wait>
                                                 </button>
-                                                <coral-tooltip placement="right" target=".save-editor">
+                                                <coral-tooltip placement="right" target="_prev">
                                                     <span slot="content">Save the changes made in the editor and marks this text as merged - that is it will not be shown again in this tool until there are further changes to the source text rolled out.</span>
                                                 </coral-tooltip>
                                                 <button is="coral-button" variant="secondary" class="reset-editor">
                                                     Reset
                                                 </button>
-                                                <coral-tooltip placement="right" target=".reset-editor">
+                                                <coral-tooltip placement="right" target="_prev">
                                                     <span slot="content">Resets the editor to the current text on the page.</span>
                                                 </coral-tooltip>
                                             </sly>
@@ -334,7 +347,7 @@
                                                         class="accept-translation">
                                                     Accept translation
                                                 </button>
-                                                <coral-tooltip placement="right" target=".accept-translation">
+                                                <coral-tooltip placement="right" target="_prev">
                                                     <span slot="content">Saves that the translation was accepted as it is. Alternative: cancel component and then edit.</span>
                                                 </coral-tooltip>
                                             </sly>
