@@ -134,6 +134,7 @@ class AITranslateMergeTool {
      */
     reloadComponent(componentpath, propertyname) {
         const url = new URL(window.location.href);
+        url.searchParams.set('propertyfilter', 'allstati'); // make sure it's visible
         url.searchParams.set('componentpath', componentpath);
         if (propertyname) url.searchParams.set('propertyname', propertyname);
         console.log('reloadComponent', url.href);
