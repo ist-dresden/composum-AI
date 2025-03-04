@@ -9,7 +9,6 @@ var retries;
  */
 // e.g. http://localhost:5502/editor.html/content/gfps/com/en/about-us/going-forward.html#scrolltocomponent-content/container_copy_52774894/item_1510732628
 function maybeScrollToComponent(event, args) {
-    console.log('maybeScrollToComponent', event.type, event.target, args);
     Coral.commons.ready(document, function () {
         if (waitingTimeout) {
             clearTimeout(waitingTimeout);
