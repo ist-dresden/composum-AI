@@ -94,37 +94,37 @@
                                         <th is="coral-table-headercell" class="previoussrc">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
                                             <span>Previously Translated Text</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="newsrc"><span>New Source Text</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The new source text as it was during the last rollout.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
                                             <span>Original Diffs</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="newtrans">
                                             <span>New Text Translation</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The AI translation of the new source text.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="editor">
                                             <span>Editor for Current Text</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">Edit the current text on the page and save it when done.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="currenttext">
                                             <span>Current Text on Page</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The current text displayed on the page, for comparison purposes.</span>
                                             </coral-tooltip>
                                         </th>
@@ -133,33 +133,33 @@
                                         <th is="coral-table-headercell" class="previoussrc">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
                                             <span>Last accepted original text</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The original when the translation was accepted last time</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="newsrc">
                                             <span>Current original</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The current original text.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
                                             <span>Diffs from last accepted original</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">This shows the differences between the source text where the translation was last accepted
                                                     and the current source text.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="newtrans">
                                             <span>Last accepted translation</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The AI translation of the original where the translation was last accepted.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="editor">
                                             <span>The current text</span>
-                                            <coral-tooltip placement="top" target="_prev">
+                                            <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The current text on the page - AI translation of the current original.</span>
                                             </coral-tooltip>
                                         </th>
@@ -231,19 +231,19 @@
                                                     <button class="rte-btn" is="coral-button" variant="minimal"
                                                             title="Bold" icon="textBold"
                                                             data-command="bold"></button>
-                                                    <!-- <coral-tooltip placement="top" target="_prev">
+                                                    <!-- <coral-tooltip placement="bottom" target="_prev">
                                                         <span slot="content">Make the text bold.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Italic"
                                                             icon="textItalic"
                                                             data-command="italic"></button>
-                                                    <!-- <coral-tooltip placement="top" target="_prev">
+                                                    <!-- <coral-tooltip placement="bottom" target="_prev">
                                                         <span slot="content">Make the text italic.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Underline"
                                                             icon="textUnderline"
                                                             data-command="underline"></button>
-                                                    <!-- <coral-tooltip placement="top" target="_prev">
+                                                    <!-- <coral-tooltip placement="bottom" target="_prev">
                                                         <span slot="content">Underline the text.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Edit Link"
@@ -253,14 +253,14 @@
                                                     <button is="coral-button" variant="minimal" title="Bullet List"
                                                             icon="textBulleted"
                                                             data-command="insertUnorderedList"></button>
-                                                    <!-- <coral-tooltip placement="top"
+                                                    <!-- <coral-tooltip placement="bottom"
                                                                    target="_prev">
                                                         <span slot="content">Create a bullet list.</span>
                                                     </coral-tooltip> -->
                                                     <button is="coral-button" variant="minimal" title="Numbered List"
                                                             icon="textNumbered"
                                                             data-command="insertOrderedList"></button>
-                                                    <!-- <coral-tooltip placement="top"
+                                                    <!-- <coral-tooltip placement="bottom"
                                                                    target="_prev">
                                                         <span slot="content">Create a numbered list.</span>
                                                     </coral-tooltip> -->
