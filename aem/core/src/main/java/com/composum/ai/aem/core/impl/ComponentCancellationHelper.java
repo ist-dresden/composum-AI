@@ -121,7 +121,7 @@ public class ComponentCancellationHelper {
             LOG.warn("Bug: source resource {} not found for {}", relationship.getSourcePath(), resource.getPath());
             return;
         }
-        if (isContainer(resource)) {
+        if (!isContainer(resource)) {
             for (Resource child : resource.getChildren()) {
                 adjustPropertiesReenableInheritance(liveRelationshipManager, child);
             }

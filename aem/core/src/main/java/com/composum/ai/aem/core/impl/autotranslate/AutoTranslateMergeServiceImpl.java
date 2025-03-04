@@ -159,7 +159,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 // also reset values that have no meaning anymore.
                 case CANCEL:
                     if (StringUtils.isBlank(propertyName)) {
-                        boolean deep = ComponentCancellationHelper.isContainer(componentResource);
+                        boolean deep = !ComponentCancellationHelper.isContainer(componentResource);
                         liveRelationshipManager.cancelRelationship(componentResource.getResourceResolver(), relationship, deep, true);
                     } else {
                         liveRelationshipManager.cancelPropertyRelationship(componentResource.getResourceResolver(), relationship, new String[]{propertyName}, true);
