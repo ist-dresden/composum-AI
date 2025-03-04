@@ -93,28 +93,42 @@
                                     <sly data-sly-test="${cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
-                                            <span>Previously Translated Text</span>
-                                            <coral-tooltip placement="bottom" target="_prev">
-                                                <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
-                                            </coral-tooltip>
+                                            <sly data-sly-test.hasNewCopy="${property.wrapper.newTranslatedCopy}"></sly>
+                                            <sly data-sly-test="${hasNewCopy}">
+                                                <span>Previously Translated Text</span>
+                                                <coral-tooltip placement="bottom" target="_prev">
+                                                    <span slot="content">The source text on which the translation currently shown in the current page was based.</span>
+                                                </coral-tooltip>
+                                            </sly>
                                         </th>
-                                        <th is="coral-table-headercell" class="newsrc"><span>New Source Text</span>
+                                        <th is="coral-table-headercell" class="newsrc">
+                                            <span>New Source Text</span>
                                             <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The new source text as it was during the last rollout.</span>
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
                                             <span class="propertyname">${property.wrapper.propertyName}</span>
-                                            <span>Original Diffs</span>
-                                            <coral-tooltip placement="bottom" target="_prev">
-                                                <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
-                                            </coral-tooltip>
+                                            <sly data-sly-test="${hasNewCopy}">
+                                                <span>Original Diffs</span>
+                                                <coral-tooltip placement="bottom" target="_prev">
+                                                    <span slot="content">This shows the differences between the source text on which the translation currently shown in the current page was based and the new source text as it was during the last rollout.</span>
+                                                </coral-tooltip>
+                                            </sly>
+                                            <sly data-sly-test="${!hasNewCopy}">
+                                                <span>New Source Text</span>
+                                                <coral-tooltip placement="bottom" target="_prev">
+                                                    <span slot="content">The new source text as it was during the last rollout.</span>
+                                                </coral-tooltip>
+                                            </sly>
                                         </th>
                                         <th is="coral-table-headercell" class="newtrans">
-                                            <span>New Text Translation</span>
-                                            <coral-tooltip placement="bottom" target="_prev">
-                                                <span slot="content">The AI translation of the new source text.</span>
-                                            </coral-tooltip>
+                                            <sly data-sly-test="${hasNewCopy}">
+                                                <span>New Text Translation</span>
+                                                <coral-tooltip placement="bottom" target="_prev">
+                                                    <span slot="content">The AI translation of the new source text.</span>
+                                                </coral-tooltip>
+                                            </sly>
                                         </th>
                                         <th is="coral-table-headercell" class="editor">
                                             <span>Editor for Current Text</span>
@@ -190,18 +204,33 @@
                                     data-isrich="${property.wrapper.isRichText}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            ${property.diffsSrcInsertionsMarked @ context='html'}
+                                            <sly data-sly-test="${hasNewCopy}">
+                                                ${property.diffsSrcInsertionsMarked @ context='html'}
+                                            </sly>
                                         </p>
                                     </td>
                                     <td is="coral-table-cell" class="newsrc diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            ${property.diffsDstInsertionsMarked @ context='html'}
+                                            <sly data-sly-test="${hasNewCopy}">
+                                                ${property.diffsDstInsertionsMarked @ context='html'}
+                                            </sly>
+                                            <sly data-sly-test="${!hasNewCopy}">
+                                                ${property.wrapper.originalCopy}
+                                            </sly>
+
                                         </p>
                                     </td>
                                     <td is="coral-table-cell"
                                         class="srcdiffs diffscolor">
                                         <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                        ${property.diffsHTML @ context='html'}</td>
+                                            <sly data-sly-test="${hasNewCopy}">
+                                                ${property.diffsHTML @ context='html'}
+                                            </sly>
+                                            <sly data-sly-test="${!hasNewCopy}">
+                                                ${property.wrapper.originalCopy}
+                                            </sly>
+                                        </p>
+                                    </td>
                                     <td is="coral-table-cell"
                                         class="translation">
                                         <div class="translation-text">
@@ -305,7 +334,7 @@
                                     </td>
                                     <td is="coral-table-cell" class="srcdiffs diffscolor"></td>
                                     <td is="coral-table-cell" class="newtrans">
-                                        <div class="row-actions" data-sly-test="${cancelled}">
+                                        <div class="row-actions" data-sly-test="${cancelled && hasNewCopy}">
                                             <button is="coral-button" variant="secondary"
                                                     class="intelligent-merge onlycancelled">AI Merge
                                                 <coral-wait size="S" class="spinner"></coral-wait>
