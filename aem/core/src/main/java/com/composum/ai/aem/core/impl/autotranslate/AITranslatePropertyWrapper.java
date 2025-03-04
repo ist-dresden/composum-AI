@@ -84,7 +84,7 @@ public class AITranslatePropertyWrapper {
     public static final String AI_NEW_TRANSLATED_SUFFIX = "_new_translated";
 
     /**
-     * Suffix for the property name of a property with uncancelled inheritance that saves the source language for the
+     * Suffix for the property name of a property with enabled inheritance that saves the source language for the
      * value the user has last accepted in the AI merge tool.
      *
      * @see #AI_ACCEPTED_TRANSLATION_SUFFIX
@@ -92,7 +92,7 @@ public class AITranslatePropertyWrapper {
     public static final String AI_ACCEPTED_SOURCE_SUFFIX = "_accepted_source";
 
     /**
-     * Suffix for the property name of a property with uncancelled inheritance that saves the (auto translated)
+     * Suffix for the property name of a property with enabled inheritance that saves the (auto translated)
      * property value when the user last accepted it in the AI merge tool.
      *
      * @see #AI_ACCEPTED_SOURCE_SUFFIX

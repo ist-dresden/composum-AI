@@ -130,7 +130,7 @@ public interface AutoTranslateMergeService {
         }
 
         public String cancelledClass() {
-            return isCancelled() ? "cancelled" : "uncancelled";
+            return isCancelled() ? "cancelled" : "inheritanceenabled";
         }
 
         public boolean isProcessingNeeded() {

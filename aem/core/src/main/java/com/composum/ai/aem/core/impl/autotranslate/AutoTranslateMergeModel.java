@@ -81,7 +81,7 @@ public class AutoTranslateMergeModel {
             case INHERITANCE_CANCELLED:
                 properties.removeIf(property -> !property.isCancelled());
                 break;
-            case INHERITANCE_UNCANCELLED:
+            case INHERITANCE_ENABLED:
                 properties.removeIf(AutoTranslateMergeService.AutoTranslateProperty::isCancelled);
                 break;
             case ALL_PROPERTIES:
@@ -223,7 +223,7 @@ public class AutoTranslateMergeModel {
     public enum PropertyFilter {
         ALL_PROPERTIES("allstati"),
         INHERITANCE_CANCELLED("cancelled"),
-        INHERITANCE_UNCANCELLED("uncancelled");
+        INHERITANCE_ENABLED("inheritanceenabled");
 
         private final String value;
 

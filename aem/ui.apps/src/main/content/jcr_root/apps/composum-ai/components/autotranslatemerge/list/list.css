@@ -48,7 +48,7 @@ td.cancelcol {
     float: right;
 }
 
-.cancelled .onlyuncancelled, .uncancelled .onlycancelled {
+.cancelled .onlyenabled, .inheritanceenabled .onlycancelled {
     display: none;
 }
 
