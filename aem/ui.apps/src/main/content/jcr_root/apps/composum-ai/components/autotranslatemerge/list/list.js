@@ -232,7 +232,7 @@ class AIComponentRow {
 
 }
 
-/** Handles copy, append, save, and intelligent merge actions for each table row. */
+/** Handles copy, save, and intelligent merge actions for each table row. */
 class AITranslateMergeRow {
     constructor(row, actionrow, tool) {
         if (row.initialized) return;
@@ -244,7 +244,6 @@ class AITranslateMergeRow {
         this.editor = this.rteContainer?.querySelector(".rte-editor") || row.querySelector(".text-editor");
 
         this.copyButton = this.actionrow.querySelector(".copy-to-editor");
-        this.appendButton = this.actionrow.querySelector(".append-to-editor");
         this.mergeButton = this.actionrow.querySelector(".intelligent-merge");
         this.acceptButton = this.actionrow.querySelector(".accept-translation");
 
@@ -256,7 +255,6 @@ class AITranslateMergeRow {
         }
 
         if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
-        if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
         if (this.mergeButton) this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
         if (this.acceptButton) this.acceptButton.addEventListener("click", this.acceptTranslation.bind(this));
 
@@ -264,16 +262,20 @@ class AITranslateMergeRow {
         if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
     }
 
-    copyToEditor() {
-        this.editor.innerHTML = this.row.dataset.nt || '';
+    setEditorValue(value) {
+        if (this.editor.tagName === 'TEXTAREA') {
+            this.editor.value = value;
+        } else {
+            this.editor.innerHTML = value;
+        }
     }
 
-    appendToEditor() {
-        this.editor.innerHTML += this.row.dataset.nt || '';
+    copyToEditor() {
+        this.setEditorValue(this.row.dataset.nt || '');
     }
 
     resetEditor() {
-        this.editor.innerHTML = this.row.dataset.e || '';
+        this.setEditorValue(this.row.dataset.e || '');
     }
 
     intelligentMerge() {
@@ -287,7 +289,7 @@ class AITranslateMergeRow {
             language: this.row.dataset.language
         };
         this.tool.callOperation(this.mergeButton, 'merge', data, mergedText => {
-            this.editor.innerHTML = mergedText;
+            this.setEditorValue(mergedText);
             console.log("Merge successful");
         });
     }
