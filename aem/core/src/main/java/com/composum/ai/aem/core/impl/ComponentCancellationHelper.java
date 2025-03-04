@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.collections4.IterableUtils;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -27,15 +26,25 @@ public class ComponentCancellationHelper {
      * Checks whether a resource has a sling:resourceType that is of type cq:Component.
      */
     public static boolean isComponent(@Nonnull Resource resource) {
-        return "cq:Component".equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class));
+        String resourceType = resource.getValueMap().get("sling:resourceType", String.class);
+        if (resourceType == null) {
+            return false;
+        }
+        ResourceResolver resolver = resource.getResourceResolver();
+        Resource resourceTypeResource = resolver.getResource(resourceType);
+        if (resourceTypeResource == null) {
+            LOG.warn("Bug: Resource type {} not found for {}", resourceType, resource.getPath());
+            return false;
+        }
+        return resource.getResourceResolver().isResourceType(resourceTypeResource, "cq:Component");
     }
 
     public static boolean isPageContent(@Nonnull Resource resource) {
-        return "cq:PageContent".equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class));
+        return resource.getResourceResolver().isResourceType(resource, "cq:PageContent");
     }
 
     public static boolean isPage(@Nonnull Resource resource) {
-        return "cq:Page".equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class));
+        return resource.getResourceResolver().isResourceType(resource, "cq:Page");
     }
 
     /**
@@ -66,10 +75,13 @@ public class ComponentCancellationHelper {
             return true; // this is a guess, but likely right.
         }
         String resourceType = resource.getValueMap().get("sling:resourceType", String.class);
+        if (resourceType == null) {
+            return false;
+        }
         ResourceResolver resolver = resource.getResourceResolver();
         Resource resourceTypeResource = resolver.getResource(resourceType);
         if (resourceTypeResource == null) { // should be impossible
-            LOG.warn("Bug: Resource type {} not found for ", resourceType, resource.getPath());
+            LOG.warn("Bug: Resource type {} not found for {}", resourceType, resource.getPath());
             return false;
         }
         Resource overrideResource = resolver.getResource("/mnt/override" + resourceTypeResource.getPath());
