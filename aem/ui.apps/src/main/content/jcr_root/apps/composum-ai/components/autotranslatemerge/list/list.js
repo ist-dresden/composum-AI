@@ -4,21 +4,32 @@ const PATH_CHOOSER_URL = '/mnt/overlay/cq/gui/content/linkpathfield/picker.html'
 /** Handles the general script functionality for the Translation Merge Tool. */
 class AITranslateMergeTool {
     constructor() {
-        document.addEventListener("DOMContentLoaded", () => this.init());
+        document.addEventListener("DOMContentLoaded", () => {
+            this.initFooterButtons();
+            this.reinitialize();
+        });
     }
 
-    init() {
+    reinitialize() {
+        console.log("init");
         this.initTableEventListeners();
         this.initNavButtons();
-        this.initFooterButtons();
         document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
     }
 
     /** Initializes table event listeners for handling row-specific actions. */
     initTableEventListeners() {
         const tableBody = document.querySelector(".propertiestable");
-        document.querySelectorAll("tbody tr.datarow").forEach(row => this.initDatarow(row));
-        document.querySelectorAll("tbody tr.component-head").forEach(row => this.initComponentHead(row));
+        tableBody.querySelectorAll("tr.datarow").forEach(row => {
+            if (row.initialized) return;
+            this.initDatarow(row);
+            row.initialized = true;
+        });
+        tableBody.querySelectorAll("tr.component-head").forEach(row => {
+            if (row.initialized) return;
+            this.initComponentHead(row)
+            row.initialized = true;
+        });
         this.linkModal = new AITranslateLinkEditModal();
     }
 
@@ -56,13 +67,17 @@ class AITranslateMergeTool {
     }
 
     toggleDiffs() {
+        console.log(">>toggleDiffs", document.body.classList);
         document.body.classList.toggle('show-diffs');
         document.body.classList.toggle('hide-diffs');
+        console.log("<<toggleDiffs", document.body.classList);
     }
 
     toggleCurrent() {
+        console.log(">>toggleCurrent", document.body.classList);
         document.body.classList.toggle('show-currenttext');
         document.body.classList.toggle('hide-currenttext');
+        console.log("<<toggleCurrent", document.body.classList);
     }
 
     /** Implements the selects for propertyfilter and scope by reloading the page with the according query parameters. */
@@ -163,7 +178,7 @@ class AITranslateMergeTool {
                     tableBody.insertBefore(tr, firsttr);
                 });
                 trs.forEach(tr => tr.remove());
-                this.init();
+                this.reinitialize();
             })
             .catch(error => {
                 console.error("Error in reloadComponent", error);
