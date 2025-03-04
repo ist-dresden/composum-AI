@@ -7,13 +7,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +110,8 @@ public class AITranslatePropertyWrapper {
     private final String propertyName;
     private final ValueMap sourceValueMap;
 
-    public AITranslatePropertyWrapper(ValueMap sourceValueMap, ModifiableValueMap targetValueMap, String propertyName) {
+    public AITranslatePropertyWrapper(@Nonnull ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap,
+                                      @Nonnull String propertyName) {
         this.targetValueMap = targetValueMap;
         this.propertyName = propertyName;
         this.sourceValueMap = sourceValueMap;
@@ -368,25 +370,46 @@ public class AITranslatePropertyWrapper {
      */
     @Nullable
     public static String decodePropertyName(@Nonnull String prefix, @Nonnull String encodedPropertyName,
-                                            @Nonnull String suffix, @Nonnull Resource resource) {
+                                            @Nonnull String suffix, @Nonnull ValueMap valueMap) {
         if (!encodedPropertyName.startsWith(prefix) || !encodedPropertyName.endsWith(suffix)) {
             return null;
         }
         String propertyName = encodedPropertyName.substring(prefix.length(), encodedPropertyName.length() - suffix.length());
-        if (resource.getValueMap().containsKey(propertyName)) {
+        if (valueMap.containsKey(propertyName)) {
             return propertyName;
         }
         propertyName = propertyName.replaceFirst("_", ":");
-        if (resource.getValueMap().containsKey(propertyName)) {
+        if (valueMap.containsKey(propertyName)) {
             return propertyName;
         }
-        LOG.info("Strange: encoded property {} not found in resource {}", encodedPropertyName, resource.getPath());
+        LOG.info("Strange: encoded property {} not found", encodedPropertyName);
         return null;
     }
 
+    @Nonnull
+    public List<AITranslatePropertyWrapper> allProps(@Nonnull ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap) {
+        return targetValueMap.keySet().stream()
+                .filter(key -> !isAiTranslateProperty(key))
+                .map(key -> decodePropertyName(AI_PREFIX, key, AI_ORIGINAL_SUFFIX, targetValueMap))
+                .filter(Objects::nonNull)
+                .map(key -> new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public String toString() {
         return "AITranslatePropertyWrapper(" + propertyName + ')';
+    }
+
+    /** If there is a new original and new translation saved, we have to overwrite the property with that if the
+     * inheritance is reenabled since that is newer than the original value - basically synchronization. */
+    public void adjustForReenableInheritance() {
+        if (StringUtils.isNotBlank(getNewOriginalCopy()) && StringUtils.isNotBlank(getNewTranslatedCopy())) {
+            setOriginalCopy(getNewOriginalCopy());
+            setTranslatedCopy(getNewTranslatedCopy());
+            setCurrentValue(getNewTranslatedCopy());
+            setNewOriginalCopy(null);
+            setNewTranslatedCopy(null);
+        }
     }
 }

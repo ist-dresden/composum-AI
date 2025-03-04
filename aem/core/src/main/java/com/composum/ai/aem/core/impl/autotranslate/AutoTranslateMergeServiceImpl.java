@@ -23,6 +23,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.ComponentCancellationHelper;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
@@ -80,7 +81,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                         for (String key : properties.keySet()) {
                             String propertyName = AITranslatePropertyWrapper.decodePropertyName(
                                     AITranslatePropertyWrapper.AI_PREFIX, key,
-                                    AITranslatePropertyWrapper.AI_ORIGINAL_SUFFIX, res);
+                                    AITranslatePropertyWrapper.AI_ORIGINAL_SUFFIX, res.getValueMap());
                             if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
@@ -144,26 +145,36 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
 
     @Override
     public void changeInheritance(Resource resource, String propertyName, CancelOrReenable kind) throws WCMException {
-        ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
+        Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
+        if (componentResource == null) {
+            LOG.warn("Bug: no component found for resource {}", resource.getPath());
+            return;
+        }
+        ModifiableValueMap properties = componentResource.adaptTo(ModifiableValueMap.class);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(componentResource, true);
         if (relationship != null) {
             String sourcePath = relationship.getSourcePath();
-            Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
-            AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+            Resource sourceResource = componentResource.getResourceResolver().getResource(sourcePath);
             switch (kind) {
                 // also reset values that have no meaning anymore.
                 case CANCEL:
                     if (StringUtils.isBlank(propertyName)) {
-                        liveRelationshipManager.cancelRelationship(resource.getResourceResolver(), relationship, true, true);
+                        boolean deep = ComponentCancellationHelper.isContainer(componentResource);
+                        liveRelationshipManager.cancelRelationship(componentResource.getResourceResolver(), relationship, deep, true);
                     } else {
-                        liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                        liveRelationshipManager.cancelPropertyRelationship(componentResource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                        AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+                        wrapper.adjustForReenableInheritance();
                     }
                     break;
                 case REENABLE:
                     if (StringUtils.isBlank(propertyName)) {
-                        liveRelationshipManager.reenableRelationship(resource.getResourceResolver(), relationship, true);
+                        liveRelationshipManager.reenableRelationship(componentResource.getResourceResolver(), relationship, true);
+                        ComponentCancellationHelper.adjustPropertiesReenableInheritance(liveRelationshipManager, componentResource);
                     } else {
-                        liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                        liveRelationshipManager.reenablePropertyRelationship(componentResource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                        AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+                        wrapper.adjustForReenableInheritance();
                     }
                     break;
             }
