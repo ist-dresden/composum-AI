@@ -21,6 +21,14 @@
     </span>
     &nbsp;&nbsp;
 </sly>
+<sly data-sly-template.maybeHTML="${@ text, richtext}">
+    <sly data-sly-test="${richtext}">
+        ${text @ context='html'}
+    </sly>
+    <sly data-sly-test="${!richtext}">
+        <p>${text}</p>
+    </sly>
+</sly>
 
 <div class="foundation-layout-panel">
     <div class="foundation-layout-panel-bodywrapper spectrum-ready">
@@ -93,6 +101,10 @@
                             </tr>
                             <sly data-sly-list.property="${pageComponent.checkableProperties}">
                                 <sly data-sly-test.cancelled="${pageComponent.cancelled}"></sly>
+                                <sly data-sly-test.isRichText="${property.wrapper.isRichText}"></sly>
+                                <sly data-sly-test.hasNewCopy="${property.wrapper.newTranslatedCopy}"></sly>
+                                <sly data-sly-test.hasAccepted="${property.wrapper.acceptedTranslation}"></sly>
+                                <sly data-sly-test.hasData="${cancelled && hasNewCopy || !cancelled && hasAccepted}"></sly>
 
                                 <!--/* Property start - title row */-->
 
@@ -107,7 +119,6 @@
                                                 <sly data-sly-call="${todoIcon}"></sly>
                                                 ${property.propertyPathInComponent}
                                             </span>
-                                            <sly data-sly-test.hasNewCopy="${property.wrapper.newTranslatedCopy}"></sly>
                                             <sly data-sly-test="${hasNewCopy}">
                                                 <span>Previously Translated Text</span>
                                                 <coral-tooltip placement="bottom" target="_prev">
@@ -226,58 +237,34 @@
                                     data-id="${pageComponentList.index}-${propertyList.index}"
                                     data-isrich="${property.wrapper.isRichText}">
                                     <td is="coral-table-cell" class="previoussrc diffscolor">
-                                        <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            <sly data-sly-test="${hasNewCopy}">
-                                                ${property.diffsSrcInsertionsMarked @ context='html'}
-                                            </sly>
-                                        </p>
+                                        <sly data-sly-test="${hasData}">
+                                            <sly data-sly-call="${maybeHTML @ text=property.diffsSrcInsertionsMarked, richtext=true}"></sly>
+                                        </sly>
                                     </td>
                                     <td is="coral-table-cell" class="newsrc diffscolor">
-                                        <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            <sly data-sly-test="${hasNewCopy}">
-                                                ${property.diffsDstInsertionsMarked @ context='html'}
-                                            </sly>
-                                            <sly data-sly-test="${!hasNewCopy}">
-                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                                    ${property.wrapper.originalCopy @ context='html'}
-                                                </sly>
-                                                <sly data-sly-test="${!isrichtext}">
-                                                    ${property.wrapper.originalCopy}
-                                                </sly>
-                                            </sly>
-                                        </p>
+                                        <sly data-sly-test="${!hasData}">
+                                            <sly data-sly-call="${maybeHTML @ text=property.wrapper.originalCopy, richtext=isRichText}"></sly>
+                                        </sly>
+                                        <sly data-sly-test="${hasData}">
+                                            <sly data-sly-call="${maybeHTML @ text=property.diffsDstInsertionsMarked, richtext=true}"></sly>
+                                        </sly>
                                     </td>
-                                    <td is="coral-table-cell"
-                                        class="srcdiffs diffscolor">
-                                        <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                            <sly data-sly-test="${hasNewCopy}">
-                                                ${property.diffsHTML @ context='html'}
-                                            </sly>
-                                            <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                                ${property.wrapper.originalCopy @ context='html'}
-                                            </sly>
-                                            <sly data-sly-test="${!isrichtext}">
-                                                <p>${property.wrapper.originalCopy}</p>
-                                            </sly>
-                                        </p>
+                                    <td is="coral-table-cell" class="srcdiffs diffscolor">
+                                        <sly data-sly-test="${!hasData}">
+                                            <sly data-sly-call="${maybeHTML @ text=property.wrapper.originalCopy, richtext=isRichText}"></sly>
+                                        </sly>
+                                        <sly data-sly-test="${hasData}">
+                                            <sly data-sly-call="${maybeHTML @ text=property.diffsHTML, richtext=true}"></sly>
+                                        </sly>
                                     </td>
-                                    <td is="coral-table-cell"
-                                        class="translation">
+                                    <td is="coral-table-cell" class="translation">
                                         <div class="translation-text">
-                                            <sly data-sly-test="${cancelled}">
-                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                                    ${property.wrapper.newTranslatedCopy @ context='html'}
+                                            <sly data-sly-test="${hasData}">
+                                                <sly data-sly-test="${!cancelled}">
+                                                    <sly data-sly-call="${maybeHTML @ text=property.wrapper.acceptedTranslation, richtext=true}"></sly>
                                                 </sly>
-                                                <sly data-sly-test="${!isrichtext}">
-                                                    <p>${property.wrapper.newTranslatedCopy}</p>
-                                                </sly>
-                                            </sly>
-                                            <sly data-sly-test="${!cancelled}">
-                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                                    ${property.wrapper.acceptedTranslation @ context='html'}
-                                                </sly>
-                                                <sly data-sly-test="${!isrichtext}">
-                                                    <p>${property.wrapper.acceptedTranslation}</p>
+                                                <sly data-sly-test="${cancelled}">
+                                                    <sly data-sly-call="${maybeHTML @ text=property.wrapper.newTranslatedCopy, richtext=true}"></sly>
                                                 </sly>
                                             </sly>
                                         </div>
@@ -334,19 +321,12 @@
                                             </div>
                                         </sly>
                                         <sly data-sly-test="${!cancelled}">
-                                            <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
-                                                ${property.wrapper.currentValue @ context='html'}
-                                            </sly>
-                                            <sly data-sly-test="${!isrichtext}">
-                                                <p>${property.wrapper.currentValue}</p>
-                                            </sly>
+                                            <sly data-sly-call="${maybeHTML @ text=property.wrapper.currentValue, richtext=isRichText}"></sly>
                                         </sly>
                                     </td>
                                     <td is="coral-table-cell" class="currenttext">
                                         <div class="current-text" data-sly-test="${cancelled}">
-                                            <p data-sly-unwrap="${property.wrapper.isRichText}">
-                                                ${property.wrapper.currentValue @ context='html'}
-                                            </p>
+                                            <sly data-sly-call="${maybeHTML @ text=property.wrapper.currentValue, richtext=isRichText}"></sly>
                                         </div>
                                     </td>
                                 </tr>
