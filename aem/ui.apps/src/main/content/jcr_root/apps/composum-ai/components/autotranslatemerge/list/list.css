@@ -12,6 +12,10 @@ tr.row-separator td.row-separator {
     background-color: lightgray;
 }
 
+tr.component-spacer {
+    height: 9px;
+}
+
 .coral--light tr.component-head td {
     background-color: lightgray;
 }
@@ -48,7 +52,7 @@ td.cancelcol {
     float: right;
 }
 
-.cancelled .onlyenabled, .inheritanceenabled .onlycancelled {
+.cancelled .onlyenabled, .inheritanceenabled .onlycancelled, .processed .accept-translation {
     display: none;
 }
 
@@ -206,6 +210,8 @@ body.hide-currenttext .currenttext {
 
 textarea {
     width: 100%;
+    resize: vertical;
+    height: fit-content;
     margin-top: 1em;
 }
 

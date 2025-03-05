@@ -94,7 +94,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                                             !StringUtils.equals(wrapper.getAcceptedTranslation(), wrapper.getCurrentValue());
                                 }
 
-                                list.add(new AutoTranslateProperty(res.getPath(), getComponentResource(res).getPath(), wrapper, getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
+                                list.add(new AutoTranslateProperty(res.getPath(), ComponentCancellationHelper.findNextHigherCancellableComponent(res).getPath(), wrapper, getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
 
                             }
                         }
@@ -116,13 +116,12 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
             AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
             wrapper.setCurrentValue(content);
+            wrapper.setTranslatedCopy(content);
             if (markAsMerged) {
-                if (wrapper.getNewOriginalCopy() == null || wrapper.getNewTranslatedCopy() == null) {
-                    LOG.warn("Already merged? Property {} on resource {} has no original or translated copy", propertyName, resource.getPath());
+                if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy())) {
                     wrapper.setOriginalCopy(wrapper.getNewOriginalCopy());
-                    wrapper.setTranslatedCopy(wrapper.getNewTranslatedCopy());
                 }
-                wrapper.setNewOriginalCopy(null); // that's the "needs merge" marker
+                wrapper.setNewOriginalCopy(null); // that resets the "needs merge" marker
                 wrapper.setNewTranslatedCopy(null);
             }
             return Collections.singletonMap("saved", wrapper.getCurrentValue());
@@ -218,21 +217,12 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 children.stream().flatMap(this::descendantsStream));
     }
 
-    @Nonnull
-    protected Resource getComponentResource(@Nonnull Resource resource) {
-        Resource componentResource = resource;
-        while (componentResource != null && componentResource.getValueMap().get("sling:resourceType") == null) {
-            componentResource = componentResource.getParent();
-        }
-        return componentResource != null ? componentResource : resource;
-    }
-
     /**
      * Determines the jcr:title of the current component, as found by sling:resourceType
      */
     protected String getComponentName(Resource resource) {
         ResourceResolver resolver = resource.getResourceResolver();
-        Resource componentResource = getComponentResource(resource);
+        Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
         String resourceType = componentResource.getValueMap().get("sling:resourceType", String.class);
         if (resourceType != null) {
             Resource componentTypeResource = resolver.getResource(resourceType);
@@ -247,7 +237,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
      * Determines the jcr:title , title or text of the component by searching upwards for such a property.
      */
     protected String getComponentTitle(@Nonnull Resource resource) {
-        Resource componentResource = getComponentResource(resource);
+        Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
         if (componentResource != null) {
             String title = componentResource.getValueMap().get("jcr:title", String.class);
             if (title == null) {

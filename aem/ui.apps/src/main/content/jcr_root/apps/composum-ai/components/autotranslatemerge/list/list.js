@@ -5,6 +5,7 @@ const PATH_CHOOSER_URL = '/mnt/overlay/cq/gui/content/linkpathfield/picker.html'
 class AITranslateMergeTool {
     constructor() {
         document.addEventListener("DOMContentLoaded", () => {
+            this.tableBody = document.querySelector(".propertiestable");
             this.initFooterButtons();
             this.reinitialize();
         });
@@ -15,17 +16,17 @@ class AITranslateMergeTool {
         this.initTableEventListeners();
         this.initNavButtons();
         document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
+        this.resizeTextAreas();
     }
 
     /** Initializes table event listeners for handling row-specific actions. */
     initTableEventListeners() {
-        const tableBody = document.querySelector(".propertiestable");
-        tableBody.querySelectorAll("tr.datarow").forEach(row => {
+        this.tableBody.querySelectorAll("tr.datarow").forEach(row => {
             if (row.initialized) return;
             this.initDatarow(row);
             row.initialized = true;
         });
-        tableBody.querySelectorAll("tr.component-head").forEach(row => {
+        this.tableBody.querySelectorAll("tr.component-head").forEach(row => {
             if (row.initialized) return;
             this.initComponentHead(row)
             row.initialized = true;
@@ -42,6 +43,14 @@ class AITranslateMergeTool {
     initComponentHead(row) {
         new AIComponentRow(this, row);
     };
+
+    /** Makes the textareas one line larger than the content. */
+    resizeTextAreas() {
+        this.tableBody.querySelectorAll('textarea').forEach(textarea => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        });
+    }
 
     /** For anchors with data-forwardid or data-backwardid set the href to #(id+1) / #(id-1). */
     initNavButtons() {

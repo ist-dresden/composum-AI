@@ -41,6 +41,8 @@
 
                             <!--/* Component start */-->
 
+                            <tr is="coral-table-row" class="component-spacer"></tr>
+
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
                                 id="component-${pageComponentList.index}"
                                 data-componentpath="${pageComponent.componentPath}"
@@ -55,9 +57,10 @@
                                     </coral-tooltip>
                                     <button class="reenableinheritance onlycancelled" is="coral-button"
                                             variant="minimal"
-                                            title="Re-enable Inheritance" icon="linkOff"></button>
+                                            title="Re-enable Inheritance and synchronize" icon="linkOff"></button>
                                     <coral-tooltip placement="right" target="_prev">
-                                        <span slot="content">Re-enables the inheritance for the whole component.</span>
+                                        <span slot="content">Re-enables the inheritance for the whole component. If
+                                        there was a new translation, this is written into the page.</span>
                                     </coral-tooltip>
                                 </td>
                                 <td is="coral-table-cell" colspan="6">
@@ -92,7 +95,7 @@
                                     id="row-${pageComponentList.index}-${propertyList.index}">
                                     <sly data-sly-test="${cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
-                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            <span class="propertyname">${property.propertyPathInComponent}</span>
                                             <sly data-sly-test.hasNewCopy="${property.wrapper.newTranslatedCopy}"></sly>
                                             <sly data-sly-test="${hasNewCopy}">
                                                 <span>Previously Translated Text</span>
@@ -108,7 +111,7 @@
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
-                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            <span class="propertyname">${property.propertyPathInComponent}</span>
                                             <sly data-sly-test="${hasNewCopy}">
                                                 <span>Original Diffs</span>
                                                 <coral-tooltip placement="bottom" target="_prev">

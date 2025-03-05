@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.removeStart;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +105,11 @@ public interface AutoTranslateMergeService {
             this.cancelled = relationship.getStatus().isCancelled() ||
                     relationship.getStatus().getCanceledProperties().contains(wrapper.getPropertyName());
             this.processingNeeded = processingNeeded;
+        }
+
+        public String getPropertyPathInComponent() {
+            String relpath = removeStart(removeStart(path, componentPath), "/");
+            return relpath.isEmpty() ? wrapper.getPropertyName() : relpath + "/" + wrapper.getPropertyName();
         }
 
         public String getPath() {
