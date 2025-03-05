@@ -145,7 +145,7 @@ public interface AutoTranslateMergeService {
         }
 
         public String processingNeededClass() {
-            return isProcessingNeeded() ? "toprocess" : "processed";
+            return isProcessingNeeded() ? "" : "processed";
         }
 
         public String getDiffsHTML() {

@@ -55,11 +55,15 @@ td.cancelcol {
     top: 5px;
 }
 
-.toprocess .done-icon, .processed .todo-icon {
+.coral--light .done-icon, .processed .todo-icon {
     display: none;
 }
 
-.done-icon {
+.processed .done-icon {
+    display: inline-flex;
+}
+
+.coral--light .done-icon {
     color: green;
 }
 

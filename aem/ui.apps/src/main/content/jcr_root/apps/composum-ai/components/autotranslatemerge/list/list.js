@@ -37,7 +37,8 @@ class AITranslateMergeTool {
     initDatarow(row) {
         const id = row.dataset.id;
         const actionrow = document.getElementById("actionrow-" + id);
-        new AITranslateMergeRow(row, actionrow, this);
+        const headerrow = document.getElementById("row-" + id);
+        new AITranslateMergeRow(row, actionrow, headerrow, this);
     };
 
     initComponentHead(row) {
@@ -243,11 +244,12 @@ class AIComponentRow {
 
 /** Handles copy, save, and intelligent merge actions for each table row. */
 class AITranslateMergeRow {
-    constructor(row, actionrow, tool) {
+    constructor(row, actionrow, headerrow, tool) {
         if (row.initialized) return;
         row.initialized = true;
         this.row = row;
         this.actionrow = actionrow;
+        this.headerrow = headerrow;
         this.tool = tool;
         this.rteContainer = row.querySelector(".rte-container");
         this.editor = this.rteContainer?.querySelector(".rte-editor") || row.querySelector(".text-editor");
@@ -319,6 +321,7 @@ class AITranslateMergeRow {
             } else {
                 this.row.classList.add("processed");
                 this.actionrow.classList.add("processed");
+                this.headerrow.classList.add("processed");
             }
         });
     }
@@ -339,6 +342,7 @@ class AITranslateMergeRow {
             } else {
                 this.row.classList.add("processed");
                 this.actionrow.classList.add("processed");
+                this.headerrow.classList.add("processed");
             }
         });
     }
