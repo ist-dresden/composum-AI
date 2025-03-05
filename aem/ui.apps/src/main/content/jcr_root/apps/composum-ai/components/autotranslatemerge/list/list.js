@@ -1,5 +1,6 @@
 const URL_MERGE_SERVLET = '/bin/cpm/ai/aitranslationmerge';
 const PATH_CHOOSER_URL = '/mnt/overlay/cq/gui/content/linkpathfield/picker.html';
+const KEY_LOCALSTORAGE = 'composum.ai.autotranslatemerge';
 
 /** Handles the general script functionality for the Translation Merge Tool. */
 class AITranslateMergeTool {
@@ -8,6 +9,7 @@ class AITranslateMergeTool {
             this.tableBody = document.querySelector(".propertiestable");
             this.initFooterButtons();
             this.reinitialize();
+            this.readStateFromHistory();
         });
     }
 
@@ -76,11 +78,32 @@ class AITranslateMergeTool {
         this.scopeSelect.addEventListener('change', this.adaptFilters.bind(this));
     }
 
+    /** We save the state of the toggleDiffs and toggleCurrent to the local storage to be able to restore it. */
+    saveStateToHistory() {
+        const state = {
+            showDiffs: document.body.classList.contains('hide-diffs'),
+            showCurrent: document.body.classList.contains('show-currenttext')
+        }
+        localStorage.setItem(KEY_LOCALSTORAGE, JSON.stringify(state));
+    }
+
+    readStateFromHistory() {
+        const stateRep = localStorage.getItem(KEY_LOCALSTORAGE);
+        const state = stateRep ? JSON.parse(stateRep) : {};
+        if (state.showDiffs) {
+            this.toggleDiffs();
+        }
+        if (state.showCurrent) {
+            this.toggleCurrent();
+        }
+    }
+
     toggleDiffs() {
         console.log(">>toggleDiffs", document.body.classList);
         document.body.classList.toggle('show-diffs');
         document.body.classList.toggle('hide-diffs');
         console.log("<<toggleDiffs", document.body.classList);
+        this.saveStateToHistory();
     }
 
     toggleCurrent() {
@@ -88,6 +111,7 @@ class AITranslateMergeTool {
         document.body.classList.toggle('show-currenttext');
         document.body.classList.toggle('hide-currenttext');
         console.log("<<toggleCurrent", document.body.classList);
+        this.saveStateToHistory();
     }
 
     /** Implements the selects for propertyfilter and scope by reloading the page with the according query parameters. */
@@ -322,15 +346,15 @@ class AITranslateMergeRow {
                 this.row.classList.add("processed");
                 this.actionrow.classList.add("processed");
                 this.headerrow.classList.add("processed");
-                this.greenFlash(this.saveButton);
+                this.simulateButtonPress(this.saveButton);
             }
         });
     }
 
     /** Makes the button green for a second. */
-    greenFlash(button) {
-        button.style.backgroundColor = 'green';
-        setTimeout(() => button.style.backgroundColor = '', 1000);
+    simulateButtonPress(button) {
+        button.disabled = true;
+        setTimeout(() => button.disabled = false, 1000);
     }
 
     /** Calls the merge servlet with operation acceptTranslation and path and propertyName as POST parameters. */
