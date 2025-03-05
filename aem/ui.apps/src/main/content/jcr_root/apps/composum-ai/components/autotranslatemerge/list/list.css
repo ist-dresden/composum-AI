@@ -42,10 +42,29 @@ td.cancelcol {
     position: absolute;
     display: inline-block;
     transform: rotate(90deg);
-    left: -19px;
-    top: 40%;
+    left: -8px;
+    top: 28%;
     transform-origin: left top;
     text-transform: none;
+}
+
+.workflow-icons {
+    transform: rotate(-90deg);
+    margin-top: 3px;
+    position: relative;
+    top: 5px;
+}
+
+.toprocess .done-icon, .processed .todo-icon {
+    display: none;
+}
+
+.done-icon {
+    color: green;
+}
+
+.todo-icon {
+    color: yellow;
 }
 
 .right-aligned {
@@ -193,7 +212,7 @@ body.hide-currenttext .currenttext {
 }
 
 .coral--light .processed td {
-    background-color: palegreen;
+    background-color: #efe;
     /* opacity: 40%; */
 }
 

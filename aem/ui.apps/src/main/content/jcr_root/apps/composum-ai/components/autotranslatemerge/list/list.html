@@ -14,6 +14,14 @@
 <sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
 <script src="${resource.path @ context='uri'}/list.js"></script>
 
+<sly data-sly-template.todoIcon>
+    <span class="workflow-frame">
+        <coral-icon icon="checkCircle" size="S" class="workflow-icons done-icon"></coral-icon>
+        <coral-icon icon="alert" size="S" class="workflow-icons todo-icon"></coral-icon>
+    </span>
+    &nbsp;&nbsp;
+</sly>
+
 <div class="foundation-layout-panel">
     <div class="foundation-layout-panel-bodywrapper spectrum-ready">
         <div class="foundation-layout-panel-body">
@@ -95,7 +103,10 @@
                                     id="row-${pageComponentList.index}-${propertyList.index}">
                                     <sly data-sly-test="${cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
-                                            <span class="propertyname">${property.propertyPathInComponent}</span>
+                                            <span class="propertyname">
+                                                <sly data-sly-call="${todoIcon}"></sly>
+                                                ${property.propertyPathInComponent}
+                                            </span>
                                             <sly data-sly-test.hasNewCopy="${property.wrapper.newTranslatedCopy}"></sly>
                                             <sly data-sly-test="${hasNewCopy}">
                                                 <span>Previously Translated Text</span>
@@ -111,7 +122,10 @@
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
-                                            <span class="propertyname">${property.propertyPathInComponent}</span>
+                                            <span class="propertyname">
+                                                <sly data-sly-call="${todoIcon}"></sly>
+                                                ${property.propertyPathInComponent}
+                                            </span>
                                             <sly data-sly-test="${hasNewCopy}">
                                                 <span>Original Diffs</span>
                                                 <coral-tooltip placement="bottom" target="_prev">
@@ -148,7 +162,10 @@
                                     </sly>
                                     <sly data-sly-test="${!cancelled}">
                                         <th is="coral-table-headercell" class="previoussrc">
-                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            <span class="propertyname">
+                                                <sly data-sly-call="${todoIcon}"></sly>
+                                                ${property.propertyPathInComponent}
+                                            </span>
                                             <span>Last accepted original text</span>
                                             <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">The original when the translation was accepted last time</span>
@@ -161,7 +178,10 @@
                                             </coral-tooltip>
                                         </th>
                                         <th is="coral-table-headercell" class="srcdiffs">
-                                            <span class="propertyname">${property.wrapper.propertyName}</span>
+                                            <span class="propertyname">
+                                                <sly data-sly-call="${todoIcon}"></sly>
+                                                ${property.propertyPathInComponent}
+                                            </span>
                                             <span>Diffs from last accepted original</span>
                                             <coral-tooltip placement="bottom" target="_prev">
                                                 <span slot="content">This shows the differences between the source text where the translation was last accepted
