@@ -58,14 +58,12 @@
                                 <td class="cancelcol" rowspan="${pageComponent.calculatedComponentRowspan}">
                                     <button class="cancelinheritance onlyenabled" is="coral-button"
                                             variant="minimal"
-                                            size="M"
-                                            title="Cancel Inheritance" icon="link"></button>
+                                            size="M" icon="link"></button>
                                     <coral-tooltip placement="right" target="_prev">
                                         <span slot="content">Cancels the inheritance for the whole component.</span>
                                     </coral-tooltip>
                                     <button class="reenableinheritance onlycancelled" is="coral-button"
-                                            variant="minimal"
-                                            title="Re-enable Inheritance and synchronize" icon="linkOff"></button>
+                                            variant="minimal" icon="linkOff"></button>
                                     <coral-tooltip placement="right" target="_prev">
                                         <span slot="content">Re-enables the inheritance for the whole component. If
                                         there was a new translation, this is written into the page.</span>
@@ -238,9 +236,13 @@
                                                 ${property.diffsDstInsertionsMarked @ context='html'}
                                             </sly>
                                             <sly data-sly-test="${!hasNewCopy}">
-                                                ${property.wrapper.originalCopy}
+                                                <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                    ${property.wrapper.originalCopy @ context='html'}
+                                                </sly>
+                                                <sly data-sly-test="${!isrichtext}">
+                                                    ${property.wrapper.originalCopy}
+                                                </sly>
                                             </sly>
-
                                         </p>
                                     </td>
                                     <td is="coral-table-cell"
@@ -249,8 +251,11 @@
                                             <sly data-sly-test="${hasNewCopy}">
                                                 ${property.diffsHTML @ context='html'}
                                             </sly>
-                                            <sly data-sly-test="${!hasNewCopy}">
-                                                ${property.wrapper.originalCopy}
+                                            <sly data-sly-test.isrichtext="${property.wrapper.isRichText}">
+                                                ${property.wrapper.originalCopy @ context='html'}
+                                            </sly>
+                                            <sly data-sly-test="${!isrichtext}">
+                                                <p>${property.wrapper.originalCopy}</p>
                                             </sly>
                                         </p>
                                     </td>
