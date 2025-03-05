@@ -322,8 +322,15 @@ class AITranslateMergeRow {
                 this.row.classList.add("processed");
                 this.actionrow.classList.add("processed");
                 this.headerrow.classList.add("processed");
+                this.greenFlash(this.saveButton);
             }
         });
+    }
+
+    /** Makes the button green for a second. */
+    greenFlash(button) {
+        button.style.backgroundColor = 'green';
+        setTimeout(() => button.style.backgroundColor = '', 1000);
     }
 
     /** Calls the merge servlet with operation acceptTranslation and path and propertyName as POST parameters. */

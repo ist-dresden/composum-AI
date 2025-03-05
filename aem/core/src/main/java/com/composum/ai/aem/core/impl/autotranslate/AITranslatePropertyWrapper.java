@@ -387,9 +387,9 @@ public class AITranslatePropertyWrapper {
     }
 
     @Nonnull
-    public List<AITranslatePropertyWrapper> allProps(@Nonnull ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap) {
+    public static List<AITranslatePropertyWrapper> allProps(@Nonnull ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap) {
         return targetValueMap.keySet().stream()
-                .filter(key -> !isAiTranslateProperty(key))
+                .filter(key -> isAiTranslateProperty(key))
                 .map(key -> decodePropertyName(AI_PREFIX, key, AI_ORIGINAL_SUFFIX, targetValueMap))
                 .filter(Objects::nonNull)
                 .map(key -> new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key))

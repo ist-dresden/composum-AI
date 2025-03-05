@@ -49,7 +49,9 @@
 
                             <!--/* Component start */-->
 
-                            <tr is="coral-table-row" class="component-spacer"></tr>
+                            <tr is="coral-table-row" class="component-spacer"
+                                data-componentpath="${pageComponent.componentPath}"
+                                data-cancelpropertyname="${pageComponent.cancelPropertyName}"></tr>
 
                             <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
                                 id="component-${pageComponentList.index}"

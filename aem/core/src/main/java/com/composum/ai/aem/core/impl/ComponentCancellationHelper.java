@@ -5,8 +5,10 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,6 +123,16 @@ public class ComponentCancellationHelper {
             LOG.warn("Bug: source resource {} not found for {}", relationship.getSourcePath(), resource.getPath());
             return;
         }
+
+        ValueMap sourceValueMap = source.getValueMap();
+        ModifiableValueMap targetValueMap = resource.adaptTo(ModifiableValueMap.class);
+        for (AITranslatePropertyWrapper wrapper : AITranslatePropertyWrapper.allProps(sourceValueMap, targetValueMap)) {
+            if (!relationship.getStatus().isCancelled() &&
+                    !relationship.getStatus().getCanceledProperties().contains(wrapper.getPropertyName())) {
+                wrapper.adjustForReenableInheritance();
+            }
+        }
+
         if (!isContainer(resource)) {
             for (Resource child : resource.getChildren()) {
                 adjustPropertiesReenableInheritance(liveRelationshipManager, child);
