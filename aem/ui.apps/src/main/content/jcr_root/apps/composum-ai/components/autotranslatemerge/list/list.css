@@ -28,10 +28,13 @@ td.cancelcol, th.cancelcol {
 
 td.cancelcol button {
     margin-top: 9px;
+    min-width: 32px;
+    padding: 5px;
 }
 
 td.cancelcol {
     border-top: 1px solid #e1e1e1;
+    width: 50px;
 }
 
 .previoussrc, .srcdiffs { /* position reference for .propertyname */
