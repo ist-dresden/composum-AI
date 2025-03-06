@@ -1,5 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.removeStart;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +15,19 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.sling.api.resource.Resource;
 
 import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
 
 /**
  * Service for handling merge operations related to auto-translation.
  * Provides methods to retrieve properties for resources in the context of translations.
  */
 public interface AutoTranslateMergeService {
+
+    /** Checks whether there are any unmerged or unaccepted properties. */
+    boolean isProcessingNeeded(Resource resource);
+
+    /** Checks whether this is an automatically translated resource. */
+    boolean isAutomaticallyTranslated(Resource resource);
 
     /**
      * Recursively finds all properties from the given resource and its children that have names starting with
@@ -27,6 +36,7 @@ public interface AutoTranslateMergeService {
      * @param resource the root resource to start property extraction from.
      * @return a list of AutoTranslateProperty instances with translation details.
      */
+    @Nonnull
     List<AutoTranslateProperty> getProperties(Resource resource);
 
     /**
@@ -39,7 +49,7 @@ public interface AutoTranslateMergeService {
      * @return a map containing "saved" and the text saved in the resource, to verify that it went OK, otherwise empty.
      */
     Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName,
-                          @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException;
+                                        @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException;
 
     /*
      * Try an intelligent merge: combine the original source, the new source, the new translation and the current text into a new text trying to keep the spirit of the translation.
@@ -55,6 +65,29 @@ public interface AutoTranslateMergeService {
                             @Nonnull String currentText);
 
     /**
+     * Approves a translation for the specified property of the given resource, marking it as accepted.
+     *
+     * @param resource     the resource containing the property to approve
+     * @param propertyName the name of the property for which the translation is to be approved
+     */
+    void approveTranslation(Resource resource, String propertyName) throws WCMException;
+
+    /**
+     * Cancels a translation for the specified property of the given resource, marking it as cancelled.
+     *
+     * @param resource     the resource containing the property to cancel
+     * @param propertyName the name of the property for which the translation is to be cancelled
+     * @param kind         whether to cancel or reenable the property
+     */
+    void changeInheritance(Resource resource, String propertyName, CancelOrReenable kind) throws WCMException;
+
+
+    enum CancelOrReenable {
+        CANCEL,
+        REENABLE
+    }
+
+    /**
      * Represents a translated property associated with a resource.
      */
     class AutoTranslateProperty {
@@ -62,12 +95,24 @@ public interface AutoTranslateMergeService {
         private final AITranslatePropertyWrapper wrapper;
         private final String componentName;
         private final String componentTitle;
+        private final String componentPath;
+        private final boolean cancelled;
+        private final boolean processingNeeded;
 
-        public AutoTranslateProperty(String path, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle) {
+        public AutoTranslateProperty(String path, String componentPath, AITranslatePropertyWrapper wrapper, String componentName, String componentTitle, @Nonnull LiveRelationship relationship, boolean processingNeeded) {
             this.path = path;
+            this.componentPath = componentPath;
             this.wrapper = wrapper;
             this.componentName = componentName;
             this.componentTitle = componentTitle;
+            this.cancelled = relationship.getStatus().isCancelled() ||
+                    relationship.getStatus().getCanceledProperties().contains(wrapper.getPropertyName());
+            this.processingNeeded = processingNeeded;
+        }
+
+        public String getPropertyPathInComponent() {
+            String relpath = removeStart(removeStart(path, componentPath), "/");
+            return relpath.isEmpty() ? wrapper.getPropertyName() : relpath + "/" + wrapper.getPropertyName();
         }
 
         public String getPath() {
@@ -78,19 +123,40 @@ public interface AutoTranslateMergeService {
             return componentName;
         }
 
+        public String getComponentPath() {
+            return componentPath;
+        }
+
         public String getComponentTitle() {
-            return StringUtils.abbreviate(StringUtils.defaultString(componentTitle), 40);
+            return StringUtils.abbreviate(StringUtils.defaultString(componentTitle), 120);
         }
 
         public AITranslatePropertyWrapper getWrapper() {
             return wrapper;
         }
 
-        public String getOriginalCopyDiffsHTML() {
-            String original = wrapper.getOriginalCopy();
-            String newOriginal = wrapper.getNewOriginalCopy();
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        public String cancelledClass() {
+            return isCancelled() ? "cancelled" : "inheritanceenabled";
+        }
+
+        public boolean isProcessingNeeded() {
+            return processingNeeded;
+        }
+
+        public String processingNeededClass() {
+            return isProcessingNeeded() ? "" : "processed";
+        }
+
+        public String getDiffsHTML() {
+            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getAcceptedSource());
+            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getOriginal());
+
             DiffMatchPatch dmp = new DiffMatchPatch();
-            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(original, newOriginal);
+            LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
 
             StringBuilder htmlBuf = new StringBuilder();
@@ -112,9 +178,10 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        public String getOriginalCopyInsertionsMarked() {
-            String src = normalizeForDiff(wrapper.getNewOriginalCopy());
-            String dst = normalizeForDiff(wrapper.getOriginalCopy());
+        public String getDiffsSrcInsertionsMarked() {
+            String src = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getOriginal());
+            String dst = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getAcceptedSource());
+
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -135,9 +202,10 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        public String getNewOriginalCopyInsertionsMarked() {
-            String src = normalizeForDiff(wrapper.getOriginalCopy());
-            String dst = normalizeForDiff(wrapper.getNewOriginalCopy());
+        public String getDiffsDstInsertionsMarked() {
+            String src = normalizeForDiff(cancelled ? wrapper.getOriginalCopy() : wrapper.getAcceptedSource());
+            String dst = normalizeForDiff(cancelled ? wrapper.getNewOriginalCopy() : wrapper.getOriginal());
+
             DiffMatchPatch dmp = new DiffMatchPatch();
             LinkedList<DiffMatchPatch.Diff> diffs = dmp.diff_main(src, dst);
             dmp.diff_cleanupSemanticLossless(diffs);
@@ -158,7 +226,9 @@ public interface AutoTranslateMergeService {
             return html;
         }
 
-        /** Remove stuff that makes trouble with diffs. Currently rel="noopener noreferrer" */
+        /**
+         * Remove stuff that makes trouble with diffs. Currently rel="noopener noreferrer"
+         */
         protected String normalizeForDiff(String text) {
             return text != null ? text.replaceAll(" rel=\"noopener noreferrer\"", " ").trim() : "";
         }

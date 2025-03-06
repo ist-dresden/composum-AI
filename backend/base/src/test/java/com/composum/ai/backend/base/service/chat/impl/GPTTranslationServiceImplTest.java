@@ -161,7 +161,7 @@ public class GPTTranslationServiceImplTest extends TestCase {
         String text = "This is a test <a href=\"https://www.composum.com\">and some Code</a>";
         String faked = fakeTranslation(text);
         assertEquals(text.toLowerCase(), faked.toLowerCase());
-        assertTrue(!text.equals(faked)); // changes in case
+        assertTrue(faked,!text.equals(faked)); // changes in case
         assertTrue(faked, faked.contains("https://www.composum.com")); // this must not be changed.
     }
 

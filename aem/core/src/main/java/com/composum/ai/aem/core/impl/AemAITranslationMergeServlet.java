@@ -72,6 +72,12 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
             handleCheck(request, response);
         } else if ("merge".equals(operation)) {
             handleMerge(request, response);
+        } else if ("acceptTranslation".equals(operation)) {
+            handleAcceptTranslation(request, response);
+        } else if ("cancelInheritance".equals(operation)) {
+            handleChangeInheritance(request, response, AutoTranslateMergeService.CancelOrReenable.CANCEL);
+        } else if ("reenableInheritance".equals(operation)) {
+            handleChangeInheritance(request, response, AutoTranslateMergeService.CancelOrReenable.REENABLE);
         } else {
             response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Invalid operation");
         }
@@ -79,7 +85,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
 
     /**
      * Handles the 'check' operation to verify if a resource has unmerged translations.
-     *
+     * <p>
      * Request parameters:
      * - `path`: the path of the resource to check for unmerged translations (required).
      *
@@ -108,7 +114,7 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
 
     /**
      * Handles the 'save' operation to save a translation.
-     *
+     * <p>
      * Request parameters:
      * - `path`: the path of the resource to save the translation to (required).
      * - `propertyName`: the name of the property to save the translation to (required).
@@ -119,38 +125,36 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void handleSave(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws IOException, ServletException {
-        String path = request.getParameter("path");
-        String propertyName = request.getParameter("propertyName");
-        String body = request.getParameter("body");
+        SaveRequest saveRequest = gson.fromJson(request.getReader(), SaveRequest.class);
 
-        if (StringUtils.isBlank(path) || StringUtils.isBlank(propertyName) || StringUtils.isBlank(body)) {
+        if (StringUtils.isBlank(saveRequest.path) || StringUtils.isBlank(saveRequest.propertyName) || StringUtils.isBlank(saveRequest.body)) {
             response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing parameters");
             return;
         }
 
         ResourceResolver resolver = request.getResourceResolver();
-        Resource resource = resolver.getResource(path);
+        Resource resource = resolver.getResource(saveRequest.path);
         if (resource == null) {
-            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + path);
+            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + saveRequest.path);
             return;
         }
 
         try {
-            Map<String, String> result = mergeService.saveTranslation(resource, propertyName, body, true);
+            Map<String, String> result = mergeService.saveTranslation(resource, saveRequest.propertyName, saveRequest.body, true);
             resolver.commit();
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().println(gson.toJson(result));
-        } catch (PersistenceException | WCMException | IllegalArgumentException e) {
-            LOG.error("Error saving property {} on {}", propertyName, path, e);
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving property " + propertyName + " on resource " + path);
+        } catch (PersistenceException | WCMException | RuntimeException e) {
+            LOG.error("Error saving property {} on {}", saveRequest.propertyName, saveRequest.path, e);
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving property " + saveRequest.propertyName + " on resource " + saveRequest.path);
             throw new ServletException(e);
         }
     }
 
     /**
      * Handles the 'merge' operation to merge translations.
-     *
+     * <p>
      * Request parameters:
      * - `path`: the path of the resource to merge the translation for (required).
      * - `propertyName`: the name of the property to merge the translation for (required).
@@ -191,6 +195,98 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         response.getWriter().println(mergedText);
     }
 
+    /**
+     * Handles the "approve" operation of the servlet.
+     * <p>
+     * Request parameters:
+     * - `path`: the path of the resource to approve the translation for (required).
+     * - `propertyName`: the name of the property to approve the translation for (required).
+     * </p>
+     *
+     * @param request  the Sling HTTP servlet request
+     * @param response the Sling HTTP servlet response
+     * @throws IOException if an I/O error occurs
+     */
+    protected void handleAcceptTranslation(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+        CancellationRequest cancellationRequest = gson.fromJson(request.getReader(), CancellationRequest.class);
+        if (cancellationRequest == null || cancellationRequest.path == null || cancellationRequest.propertyName == null) {
+            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing parameters");
+            return;
+        }
+
+        ResourceResolver resolver = request.getResourceResolver();
+        Resource resource = resolver.getResource(cancellationRequest.path);
+        if (resource == null) {
+            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + cancellationRequest.path);
+            return;
+        }
+
+        try {
+            mergeService.approveTranslation(resource, cancellationRequest.propertyName);
+            resolver.commit();
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().println(gson.toJson(Collections.singletonMap("accepted", true)));
+        } catch (PersistenceException | WCMException | RuntimeException e) {
+            LOG.error("Error approving property {} on {}", cancellationRequest.propertyName, cancellationRequest.path, e);
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error approving property " + cancellationRequest.propertyName + " on resource " + cancellationRequest.path);
+        }
+    }
+
+    /**
+     * Handles the "cancelInheritance" operation of the servlet.
+     * <p>
+     * Request parameters:
+     * - `path`: the path of the resource to cancel inheritance for (required).
+     * - `propertyName`: the name of the property to cancel inheritance for - optional, if not provided, inheritance is cancelled for the whole component. That's the normal case - normally only page properties are cancelled individually.
+     * </p>
+     *
+     * @param request  the Sling HTTP servlet request
+     * @param response the Sling HTTP servlet response
+     * @param kind     whether to cancel or re-enable inheritance
+     * @throws IOException if an I/O error occurs
+     */
+    protected void handleChangeInheritance(SlingHttpServletRequest request, SlingHttpServletResponse response, AutoTranslateMergeService.CancelOrReenable kind) throws IOException {
+        CancellationRequest cancellationRequest = gson.fromJson(request.getReader(), CancellationRequest.class);
+        if (cancellationRequest == null || cancellationRequest.path == null) {
+            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing parameters");
+            return;
+        }
+
+        ResourceResolver resolver = request.getResourceResolver();
+        Resource resource = resolver.getResource(cancellationRequest.path);
+        if (resource == null) {
+            response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "Resource not found: " + cancellationRequest.path);
+            return;
+        }
+
+        try {
+            mergeService.changeInheritance(resource, cancellationRequest.propertyName, kind);
+            resolver.commit();
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().println(gson.toJson(Collections.singletonMap("done", true)));
+        } catch (PersistenceException | RuntimeException | WCMException e) {
+            LOG.error("Error cancelling inheritance for property {} on {}", cancellationRequest.propertyName, cancellationRequest.path, e);
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error cancelling inheritance for property " + cancellationRequest.propertyName + " on resource " + cancellationRequest.path);
+        }
+    }
+
+    private static class SaveRequest {
+        String path;
+        String propertyName;
+        String body;
+
+        @Override
+        public String toString() {
+            return "SaveRequest{" +
+                    "path='" + path + '\'' +
+                    ", propertyName='" + propertyName + '\'' +
+                    ", body='" + body + '\'' +
+                    '}';
+        }
+    }
+
     private static class MergeRequest {
         String path;
         String propertyName;
@@ -229,4 +325,16 @@ public class AemAITranslationMergeServlet extends SlingAllMethodsServlet {
         }
     }
 
+    private static class CancellationRequest {
+        String path;
+        String propertyName;
+
+        @Override
+        public String toString() {
+            return "CancellationRequest{" +
+                    "path='" + path + '\'' +
+                    ", propertyName='" + propertyName + '\'' +
+                    '}';
+        }
+    }
 }

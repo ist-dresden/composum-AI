@@ -1,26 +1,59 @@
 const URL_MERGE_SERVLET = '/bin/cpm/ai/aitranslationmerge';
 const PATH_CHOOSER_URL = '/mnt/overlay/cq/gui/content/linkpathfield/picker.html';
+const KEY_LOCALSTORAGE = 'composum.ai.autotranslatemerge';
 
 /** Handles the general script functionality for the Translation Merge Tool. */
 class AITranslateMergeTool {
     constructor() {
         document.addEventListener("DOMContentLoaded", () => {
-            this.initTableEventListeners();
-            this.initNavButtons();
+            this.tableBody = document.querySelector(".propertiestable");
             this.initFooterButtons();
-            document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
+            this.reinitialize();
+            this.readStateFromHistory();
+            this.calculateWidths();
         });
+    }
+
+    reinitialize() {
+        console.log("init");
+        this.initTableEventListeners();
+        this.initNavButtons();
+        document.querySelectorAll('coral-tooltip').forEach(tooltip => tooltip.delay = 1000);
+        this.resizeTextAreas();
     }
 
     /** Initializes table event listeners for handling row-specific actions. */
     initTableEventListeners() {
-        const tableBody = document.querySelector(".propertiestable");
-        document.querySelectorAll("tbody tr.datarow").forEach(row => {
-            const id = row.dataset.id;
-            const actionrow = document.getElementById("actionrow-" + id);
-            new AITranslateMergeRow(row, actionrow, this);
+        this.tableBody.querySelectorAll("tr.datarow").forEach(row => {
+            if (row.initialized) return;
+            this.initDatarow(row);
+            row.initialized = true;
+        });
+        this.tableBody.querySelectorAll("tr.component-head").forEach(row => {
+            if (row.initialized) return;
+            this.initComponentHead(row)
+            row.initialized = true;
         });
         this.linkModal = new AITranslateLinkEditModal();
+    }
+
+    initDatarow(row) {
+        const id = row.dataset.id;
+        const actionrow = document.getElementById("actionrow-" + id);
+        const headerrow = document.getElementById("row-" + id);
+        new AITranslateMergeRow(row, actionrow, headerrow, this);
+    };
+
+    initComponentHead(row) {
+        new AIComponentRow(this, row);
+    };
+
+    /** Makes the textareas one line larger than the content. */
+    resizeTextAreas() {
+        this.tableBody.querySelectorAll('textarea').forEach(textarea => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        });
     }
 
     /** For anchors with data-forwardid or data-backwardid set the href to #(id+1) / #(id-1). */
@@ -38,16 +71,79 @@ class AITranslateMergeTool {
     initFooterButtons() {
         document.querySelector('.toggle-diffs').addEventListener('click', this.toggleDiffs.bind(this));
         document.querySelector('.toggle-current').addEventListener('click', this.toggleCurrent.bind(this));
+        this.propertySelect = document.querySelector('#propertyfilter');
+        this.scopeSelect = document.querySelector('#scope');
+        this.propertySelect.value = new URLSearchParams(window.location.search).get('propertyfilter') || 'allstati';
+        this.scopeSelect.value = new URLSearchParams(window.location.search).get('scope') || 'unfinished';
+        this.propertySelect.addEventListener('change', this.adaptFilters.bind(this));
+        this.scopeSelect.addEventListener('change', this.adaptFilters.bind(this));
+    }
+
+    /** We save the state of the toggleDiffs and toggleCurrent to the local storage to be able to restore it. */
+    saveStateToHistory() {
+        const state = {
+            showDiffs: document.body.classList.contains('hide-diffs'),
+            showCurrent: document.body.classList.contains('show-currenttext')
+        }
+        localStorage.setItem(KEY_LOCALSTORAGE, JSON.stringify(state));
+    }
+
+    readStateFromHistory() {
+        const stateRep = localStorage.getItem(KEY_LOCALSTORAGE);
+        const state = stateRep ? JSON.parse(stateRep) : {};
+        if (state.showDiffs) {
+            this.toggleDiffs();
+        }
+        if (state.showCurrent) {
+            this.toggleCurrent();
+        }
     }
 
     toggleDiffs() {
         document.body.classList.toggle('show-diffs');
         document.body.classList.toggle('hide-diffs');
+        this.saveStateToHistory();
+        this.calculateWidths();
     }
 
     toggleCurrent() {
         document.body.classList.toggle('show-currenttext');
         document.body.classList.toggle('hide-currenttext');
+        this.saveStateToHistory();
+        this.calculateWidths();
+    }
+
+    /** Compute table layout since otherwise changes in the richtext editor change the table layout.
+     * For all colgroup elements: set the width of the first col element to 50px and divide the
+     * width of the colgroup evenly between the other col elements that are visible (that is, are not assigned a
+     * display: none by some CSS rule.  */
+    calculateWidths() {
+        document.querySelectorAll('colgroup').forEach(colgroup => {
+            const cols = colgroup.querySelectorAll('col');
+            if (cols.length) {
+                const table = colgroup.closest('table');
+                const numVisibleCols = Array.from(cols)
+                    .filter(col => window.getComputedStyle(col).display !== 'none').length;
+                const width = (table.clientWidth - cols[0].clientWidth) / (numVisibleCols - 1);
+                for (let i = 1; i < cols.length; i++) {
+                    if (window.getComputedStyle(cols[i]).display !== 'none') {
+                        cols[i].style.width = width + 'px';
+                    } else {
+                        cols[i].style.width = '';
+                    }
+                }
+            }
+        });
+    }
+
+    /** Implements the selects for propertyfilter and scope by reloading the page with the according query parameters. */
+    adaptFilters() {
+        const propertyfilter = this.propertySelect.value;
+        const scope = this.scopeSelect.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('propertyfilter', propertyfilter);
+        url.searchParams.set('scope', scope);
+        window.location.href = url.href;
     }
 
     /** If the message is null, the error field is hidden. */
@@ -61,20 +157,153 @@ class AITranslateMergeTool {
             errormessage.hidden = true;
         }
     }
+
+    /** Makes a call to the AutoTranslateMergeServiceImpl */
+    callOperation(button, operation, data, onSuccess) {
+        this.showError(null);
+        Granite.csrf.refreshToken().then(token => {
+            button.disabled = true;
+            button.classList.add('activespinner');
+            fetch(URL_MERGE_SERVLET + "?operation=" + operation, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': token
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        return response.text().then(errMsg => {
+                            throw new Error(errMsg);
+                        });
+                    }
+                })
+                .then(responseText => {
+                    onSuccess(responseText);
+                    this.showError(null);
+                })
+                .catch(error => {
+                    console.error("Error in " + operation, error);
+                    this.showError(error.message);
+                }).finally(() => {
+                setTimeout(() => button.disabled = false, 300); // delay for visibility
+                button.classList.remove('activespinner');
+            });
+        });
+    }
+
+    /**
+     * Reload the component: adds parameter componentpath and propertyname to the url, loads that,
+     * puts that into a temporary space and replaces the tr tags in the table with these from that temporary space.
+     * Annoyingly we cannot replace the whole document since the editors / text areas might have unsaved changes, and
+     * it is also possible that rows vanish because of the filters.
+     * Thus, we search for the existing component header, insert the new children before that, and remove it and the
+     * other children.
+     */
+    reloadComponent(componentpath, propertyname) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('propertyfilter', 'allstati'); // make sure everything is visible.
+        url.searchParams.set('scope', 'allprops');
+        url.searchParams.set('componentpath', componentpath);
+        if (propertyname) url.searchParams.set('propertyname', propertyname);
+        console.log('reloadComponent', url.href);
+        const tableBody = document.querySelector(".propertytable tbody");
+        var selector = `tr[data-componentpath="${componentpath}"]`;
+        if (propertyname) {
+            selector += `[data-cancelpropertyname="${propertyname}"]`;
+        } else {
+            selector += ':not([data-cancelpropertyname]';
+        }
+        const trs = tableBody.querySelectorAll(selector);
+        if (!trs.length) {
+            debugger;
+        }
+        fetch(url.href)
+            .then(response => response.text())
+            .then(html => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const replacements = tempDiv.querySelectorAll(".propertytable tbody tr");
+                const firsttr = trs[0];
+                if (!firsttr) {
+                    debugger;
+                }
+                replacements.forEach(tr => {
+                    tableBody.insertBefore(tr, firsttr);
+                });
+                trs.forEach(tr => tr.remove());
+                this.reinitialize();
+            })
+            .catch(error => {
+                console.error("Error in reloadComponent", error);
+                this.showError(error.message);
+            });
+    }
+
 }
 
-/** Handles copy, append, save, and intelligent merge actions for each table row. */
+/** Handles the cancel and reinstate inheritance operation. */
+class AIComponentRow {
+    /** componentRow = first row displaying component */
+    constructor(tool, componentHead) {
+        if (componentHead.initialized) return;
+        componentHead.initialized = true;
+        this.tool = tool;
+        this.componentHead = componentHead;
+        this.cancelInheritanceButton = this.componentHead.querySelector(".cancelinheritance");
+        this.reenableInheritanceButton = this.componentHead.querySelector(".reenableinheritance");
+        this.cancelInheritanceButton.addEventListener("click", this.cancelInheritance.bind(this));
+        this.reenableInheritanceButton.addEventListener("click", this.reenableInheritance.bind(this));
+    }
+
+    /** Calls the merge servlet with operation cancelInheritance and path and propertyName as POST parameters. */
+    cancelInheritance() {
+        this.cancelOrReenable(this.cancelInheritanceButton, 'cancelInheritance');
+    }
+
+    /** Calls the merge servlet with operation reenableInheritance and path and propertyName as POST parameters. */
+    reenableInheritance() {
+        this.cancelOrReenable(this.reenableInheritanceButton, 'reenableInheritance');
+    }
+
+    cancelOrReenable(button, operation) {
+        const data = {
+            path: this.componentHead.dataset.componentpath,
+            propertyName: this.componentHead.dataset.cancelpropertyname
+        };
+        this.tool.callOperation(button, operation, data, responseText => {
+            if (!responseText || !responseText.trim()) {
+                throw new Error();
+            }
+            let result = JSON.parse(responseText);
+            if (!result.done) {
+                throw new Error(); // no error message to speak of
+            } else {
+                this.tool.reloadComponent(data.path, data.propertyName);
+            }
+        });
+    }
+
+}
+
+/** Handles copy, save, and intelligent merge actions for each table row. */
 class AITranslateMergeRow {
-    constructor(row, actionrow, tool) {
+    constructor(row, actionrow, headerrow, tool) {
+        if (row.initialized) return;
+        row.initialized = true;
         this.row = row;
         this.actionrow = actionrow;
+        this.headerrow = headerrow;
         this.tool = tool;
         this.rteContainer = row.querySelector(".rte-container");
         this.editor = this.rteContainer?.querySelector(".rte-editor") || row.querySelector(".text-editor");
 
         this.copyButton = this.actionrow.querySelector(".copy-to-editor");
-        this.appendButton = this.actionrow.querySelector(".append-to-editor");
         this.mergeButton = this.actionrow.querySelector(".intelligent-merge");
+        this.acceptButton = this.actionrow.querySelector(".accept-translation");
 
         this.resetButton = this.actionrow.querySelector(".reset-editor");
         this.saveButton = this.actionrow.querySelector(".save-editor");
@@ -83,24 +312,28 @@ class AITranslateMergeRow {
             new AITranslatorMergeRTE(this.rteContainer, tool);
         }
 
-        this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
-        if (this.appendButton) this.appendButton.addEventListener("click", this.appendToEditor.bind(this));
-        this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+        if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
+        if (this.mergeButton) this.mergeButton.addEventListener("click", this.intelligentMerge.bind(this));
+        if (this.acceptButton) this.acceptButton.addEventListener("click", this.acceptTranslation.bind(this));
 
-        this.resetButton.addEventListener("click", this.resetEditor.bind(this));
-        this.saveButton.addEventListener("click", this.saveEditor.bind(this));
+        if (this.resetButton) this.resetButton.addEventListener("click", this.resetEditor.bind(this));
+        if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
+    }
+
+    setEditorValue(value) {
+        if (this.editor.tagName === 'TEXTAREA') {
+            this.editor.value = value;
+        } else {
+            this.editor.innerHTML = value;
+        }
     }
 
     copyToEditor() {
-        this.editor.innerHTML = this.row.dataset.nt;
-    }
-
-    appendToEditor() {
-        this.editor.innerHTML += this.row.dataset.nt;
+        this.setEditorValue(this.row.dataset.nt || '');
     }
 
     resetEditor() {
-        this.editor.innerHTML = this.row.dataset.e;
+        this.setEditorValue(this.row.dataset.e || '');
     }
 
     intelligentMerge() {
@@ -113,99 +346,68 @@ class AITranslateMergeRow {
             currentText: this.editor.innerHTML,
             language: this.row.dataset.language
         };
-        const btn = this.mergeButton;
-
-        Granite.csrf.refreshToken().then(token => {
-            btn.disabled = true;
-            btn.classList.add('activespinner');
-            fetch(URL_MERGE_SERVLET + "?operation=merge", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'CSRF-Token': token
-                },
-                body: JSON.stringify({
-                    operation: 'merge',
-                    ...data
-                })
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error("Merge failed: " + errMsg);
-                        });
-                    }
-                })
-                .then(mergedText => {
-                    this.editor.innerHTML = mergedText;
-                    console.log("Merge successful");
-                    this.tool.showError(null);
-                })
-                .catch(error => {
-                    console.error("Error in intelligentMerge", error);
-                    this.tool.showError(error.message);
-                }).finally(() => {
-                btn.disabled = false;
-                btn.classList.remove('activespinner');
-            });
+        this.tool.callOperation(this.mergeButton, 'merge', data, mergedText => {
+            this.setEditorValue(mergedText);
+            console.log("Merge successful");
         });
     }
 
     saveEditor() {
-        const btn = this.saveButton;
-        const row = this.row;
-        this.tool.showError();
-        Granite.csrf.refreshToken().then(token => {
-            btn.disabled = true;
-            btn.classList.add('activespinner');
-            fetch(URL_MERGE_SERVLET + "?operation=save", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'CSRF-Token': token
-                },
-                body: new URLSearchParams({
-                    path: this.row.dataset.path,
-                    propertyName: this.row.dataset.propertyname,
-                    body: this.editor.value || this.editor.innerHTML
-                })
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    } else {
-                        return response.text().then(errMsg => {
-                            throw new Error(errMsg);
-                        });
-                    }
-                })
-                .then(responseText => {
-                    if (!responseText || !responseText.trim()) {
-                        throw new Error();
-                    }
-                    let result = JSON.parse(responseText);
-                    if (!result.saved) {
-                        throw new Error(); // no error message to speak of
-                    } else {
-                        row.classList.add("merged");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error in saveEditor", error);
-                    this.tool.showError("Save failed. " + error?.message);
-                }).finally(() => {
-                btn.disabled = false;
-                btn.classList.remove('activespinner');
-            });
+        const data = {
+            path: this.row.dataset.path,
+            propertyName: this.row.dataset.propertyname,
+            body: this.editor.value || this.editor.innerHTML
+        };
+        this.tool.callOperation(this.saveButton, 'save', data, responseText => {
+            if (!responseText || !responseText.trim()) {
+                throw new Error();
+            }
+            let result = JSON.parse(responseText);
+            if (!result.saved) {
+                throw new Error(); // no error message to speak of
+            } else {
+                this.row.classList.add("processed");
+                this.actionrow.classList.add("processed");
+                this.headerrow.classList.add("processed");
+                this.simulateButtonPress(this.saveButton);
+            }
         });
     }
+
+    /** Makes the button green for a second. */
+    simulateButtonPress(button) {
+        // button.disabled = true;
+        // setTimeout(() => button.disabled = false, 1000);
+    }
+
+    /** Calls the merge servlet with operation acceptTranslation and path and propertyName as POST parameters. */
+    acceptTranslation() {
+        const data = {
+            path: this.row.dataset.path,
+            propertyName: this.row.dataset.propertyname
+        }
+        this.tool.callOperation(this.acceptButton, 'acceptTranslation', data, responseText => {
+            if (!responseText || !responseText.trim()) {
+                throw new Error();
+            }
+            let result = JSON.parse(responseText);
+            if (!result.accepted) {
+                throw new Error(); // no error message to speak of
+            } else {
+                this.row.classList.add("processed");
+                this.actionrow.classList.add("processed");
+                this.headerrow.classList.add("processed");
+            }
+        });
+    }
+
 }
 
 /** Manages the rich text editor functionalities, including toolbar actions and link management. */
 class AITranslatorMergeRTE {
     constructor(container, tool) {
+        if (container.initialized) return;
+        container.initialized = true;
         this.tool = tool;
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
@@ -371,6 +573,9 @@ class AITranslateLinkEditModal {
         }
         if (newRel) {
             anchor.setAttribute('rel', newRel);
+        }
+        if ('_blank' === newTarget) { // general guideline or new link
+            anchor.setAttribute('rel', 'noopener noreferrer');
         } else {
             anchor.removeAttribute('rel');
         }
@@ -422,7 +627,7 @@ class AITranslationPathChooser {
     }
 
     /** Loads the column corresponding to the last element of the path. */
-    async loadPath(path, callback) {
+    async loadPath(path) {
         const url = path && path.startsWith('/') ? PATH_CHOOSER_URL + path : PATH_CHOOSER_URL;
         this.pathChooserContent.innerHTML = '';
         try {

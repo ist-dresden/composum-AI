@@ -6,6 +6,7 @@
 import {ContentCreationDialog} from './ContentCreationDialog.js';
 import {SidePanelDialog} from './SidePanelDialog.js';
 import {AIConfig} from './AIConfig.js';
+import {maybeScrollToComponent} from './editorExtensions.js';
 
 try {
     /**
@@ -26,6 +27,8 @@ try {
         const SERVICE_SIDEPANEL = 'sidepanel';
         const aiconfig = new AIConfig();
         var debug = false;
+
+        channel.on('coral-overlay:open foundation-contentloaded', maybeScrollToComponent);
 
         channel.on('cq-sidepanel-loaded', (event) => Coral.commons.ready(event.target, loadSidebarPanelDialog));
         // for AEM 6.5.7 we, strangely, don't get the cq-sidepanel-loaded event. Try something else.

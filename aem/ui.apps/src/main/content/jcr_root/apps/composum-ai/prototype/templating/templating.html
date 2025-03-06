@@ -34,8 +34,14 @@ AIGenPromptEnd(foobar) -->
 <body>
     <div class="container">
         <h1>Create a page from a template with AI</h1>
-        <p>This single page application allows you to generate a complete text for a page by replacing prompts with AI-generated content. The page structure contains various components with prompts marked by special placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts. Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'. The application interacts with the AITemplatingServlet to process the page template.</p>
-        
+        <p>This single page application allows you to generate a complete text for a page by replacing prompts with
+            AI-generated content. The page structure contains various components with prompts marked by special
+            placeholders, such as 'PROMPTFIELD: ' for individual prompts and 'PROMPTFIELD#ID: ' for referenced prompts.
+            Additionally, URLs can be included using 'SOURCEURL(https://example.com/)'.
+            'PAGEPROMPT: ' means the rest of the prompt field are general instructions for the whole page.
+            More detailed instructions are <a href="https://ai.composum.com/aiPageTemplating.html">here</a>.
+        </p>
+
         <form id="templatingForm">
             <input type="hidden" id="cq_csrf_token" name=":cq_csrf_token">
             <div class="form-group">
@@ -61,7 +67,7 @@ AIGenPromptEnd(foobar) -->
             <button type="submit" class="btn btn-primary" id="replacePromptsBtn">Replace Prompts</button>
             <button type="submit" class="btn btn-primary" id="resetPromptsBtn">Reset to Prompts</button>
         </form>
-        
+
         <div class="mt-4"><pre style="white-space: pre-wrap;" id="resultDiv"></pre></div>
     </div>
 
@@ -69,11 +75,6 @@ AIGenPromptEnd(foobar) -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Load CSRF token
-            $.getJSON('/libs/granite/csrf/token.json', function(data) {
-                $('#cq_csrf_token').val(data.token);
-            });
-
             // Restore form data from localStorage
             var formData = JSON.parse(localStorage.getItem('composum-ai-prototype-templating')) || {};
             $('#resourcePath').val(formData.resourcePath || '');
@@ -88,23 +89,31 @@ AIGenPromptEnd(foobar) -->
                     resourcePath: $('#resourcePath').val(),
                     additionalPrompt: $('#additionalPrompt').val(),
                     additionalUrls: $('#additionalUrls').val(),
-                    backgroundInformation: $('#backgroundInformation').val(),
-                    ':cq_csrf_token': $('#cq_csrf_token').val()
+                    backgroundInformation: $('#backgroundInformation').val()
                 };
                 localStorage.setItem('composum-ai-prototype-templating', JSON.stringify(formData));
 
                 $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', true);
                 $('#resultDiv').text('Contacting the AI ...');
-                $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
-                    .done(function(data) {
-                        $('#resultDiv').text(JSON.stringify(data, null, 2));
-                    })
-                    .fail(function(jqXHR, textStatus, errorThrown) {
-                        $('#resultDiv').text('Error: ' + errorThrown);
-                    })
-                    .always(function() {
-                        $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
-                    });
+
+                // Fetch CSRF token before making the POST request
+                $.getJSON('/libs/granite/csrf/token.json', function(data) {
+                    formData[':cq_csrf_token'] = data.token;
+
+                    $.post('/bin/cpm/ai/experimental/templating.' + method + '.json', formData)
+                        .done(function(data) {
+                            $('#resultDiv').text(JSON.stringify(data, null, 2));
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            $('#resultDiv').text('Error: ' + errorThrown);
+                        })
+                        .always(function() {
+                            $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
+                        });
+                }).fail(function() {
+                    $('#resultDiv').text('Error: Unable to fetch CSRF token.');
+                    $('#replacePromptsBtn, #resetPromptsBtn').prop('disabled', false);
+                });
             });
         });
     </script>

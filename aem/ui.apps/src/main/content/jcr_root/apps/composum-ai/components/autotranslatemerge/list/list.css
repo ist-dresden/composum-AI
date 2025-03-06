@@ -12,9 +12,82 @@ tr.row-separator td.row-separator {
     background-color: lightgray;
 }
 
+tr.component-spacer {
+    height: 9px;
+}
+
+.coral--light tr.component-head td {
+    background-color: lightgray;
+}
+
+td.cancelcol, th.cancelcol {
+    vertical-align: top;
+    text-align: center;
+    background-color: lightgray;
+}
+
+td.cancelcol button {
+    margin-top: 9px;
+    min-width: 32px;
+    padding: 5px;
+}
+
+td.cancelcol {
+    border-top: 1px solid #e1e1e1;
+    width: 50px;
+}
+
+.previoussrc, .srcdiffs { /* position reference for .propertyname */
+    position: relative;
+}
+
+.propertyname {
+    position: absolute;
+    display: inline-block;
+    transform: rotate(90deg);
+    left: -8px;
+    top: 28%;
+    transform-origin: left top;
+    text-transform: none;
+}
+
+.workflow-icons {
+    transform: rotate(-90deg);
+    margin-top: 3px;
+    position: relative;
+    top: 5px;
+}
+
+.coral--light .done-icon, .processed .todo-icon {
+    display: none;
+}
+
+.processed .done-icon {
+    display: inline-flex;
+}
+
+.coral--light .done-icon {
+    color: green;
+}
+
+.todo-icon {
+    color: yellow;
+}
+
+.right-aligned {
+    float: right;
+}
+
+.cancelled .onlyenabled, .inheritanceenabled .onlycancelled, .processed .accept-translation {
+    display: none;
+}
+
 tr.property-row td {
     vertical-align: top;
-    width: 15%;
+}
+
+coral-tooltip {
+    text-transform: none;
 }
 
 body.show-diffs .previoussrc, body.show-diffs .newsrc {
@@ -26,7 +99,7 @@ body.hide-diffs .srcdiffs {
 }
 
 body.hide-currenttext .currenttext {
-    display:none;
+    display: none;
 }
 
 .rte-container {
@@ -141,13 +214,13 @@ body.hide-currenttext .currenttext {
     margin: 0px;
 }
 
-.bottombar a {
-    padding-right: 14px;
+.bottombar a, .bottombar select {
+    margin-right: 14px;
 }
 
-.merged td {
-    background-color: #e6ffe6 !important;
-    opacity: 40%;
+.coral--light .processed td {
+    background-color: #efe;
+    /* opacity: 40%; */
 }
 
 .spinner {
@@ -163,6 +236,8 @@ body.hide-currenttext .currenttext {
 
 textarea {
     width: 100%;
+    resize: vertical;
+    height: fit-content;
     margin-top: 1em;
 }
 

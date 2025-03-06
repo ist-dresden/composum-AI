@@ -1,0 +1,65 @@
+<template data-sly-template.bottombarTemplate="${@ model}">
+    <section class="coral-Form-fieldset bottombar coral--light">
+        <p class="errormessage" hidden>
+            <coral-alert variant="error">
+                <coral-alert-content class="alertcontent"></coral-alert-content>
+            </coral-alert>
+        </p>
+        <a>
+            <button is="coral-button" variant="secondary" class="toggle-diffs">
+                Toggle Diffs Column
+            </button>
+            <coral-tooltip placement="top" target=".toggle-diffs">
+                <span slot="content">Toggle the visibility of the diffs column versus showing the old and new version of the source text separately.</span>
+            </coral-tooltip>
+        </a>
+        <a>
+            <button is="coral-button" variant="secondary" class="toggle-current">
+                Toggle Current Text Column
+            </button>
+            <coral-tooltip placement="top" target=".toggle-current">
+                <span slot="content">Toggle the visibility of the current text column, to compare the current status of the page.</span>
+            </coral-tooltip>
+        </a>
+        <select id="propertyfilter" class="_coral-FieldButton _coral-ActionButton">
+            <option value="allstati">All Properties</option>
+            <option value="cancelled">Inheritance Cancelled</option>
+            <option value="inheritanceenabled">Inheritance Enabled</option>
+        </select>
+        <coral-tooltip placement="top" target="#propertyfilter">
+            <span slot="content">Filter the properties by inheritance status.</span>
+        </coral-tooltip>
+        <select id="scope" class="_coral-FieldButton _coral-ActionButton">
+            <option value="unfinished">Unfinished Properties</option>
+            <option value="allprops">All Properties</option>
+        </select>
+        <coral-tooltip placement="top" target="#scope">
+            <span slot="content">Filter the properties by their status in the translation process.</span>
+        </coral-tooltip>
+        <a href="/editor.html${model.pagePath}.html" target="_blank">
+            <button is="coral-button" variant="secondary" class="open-in-editor">
+                Open in Editor
+            </button>
+            <coral-tooltip placement="top" target=".open-in-editor">
+                <span slot="content">Opens the page in the editor.</span>
+            </coral-tooltip>
+        </a>
+        <a href="${model.pagePath}.html?wcmmode=preview" target="_blank">
+            <button is="coral-button" variant="secondary" class="open-as-preview">
+                Open as Preview
+            </button>
+            <coral-tooltip placement="top" target=".open-as-preview">
+                <span slot="content">Opens the page in preview mode.</span>
+            </coral-tooltip>
+        </a>
+        <a href="/apps/composum-ai/components/tool/comparetool.html${model.pagePath}"
+           target="_blank">
+            <button is="coral-button" variant="secondary" class="open-in-compare">
+                Open in Compare Blueprint Tool
+            </button>
+            <coral-tooltip placement="top" target=".open-in-compare">
+                <span slot="content">Opens a tool to compare the blueprint and this page side by side.</span>
+            </coral-tooltip>
+        </a>
+    </section>
+</template>

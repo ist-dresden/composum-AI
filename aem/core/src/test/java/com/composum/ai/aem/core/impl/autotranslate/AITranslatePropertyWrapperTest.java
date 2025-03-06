@@ -73,7 +73,7 @@ class AITranslatePropertyWrapperTest {
     void testDecodePropertyName() {
         String encoded = "ai_exampleProperty_suffix";
         Resource resource = new MockResource("/content/example", Collections.singletonMap("exampleProperty", "Original text"), null);
-        String decoded = AITranslatePropertyWrapper.decodePropertyName("ai_", encoded, "_suffix", resource);
+        String decoded = AITranslatePropertyWrapper.decodePropertyName("ai_", encoded, "_suffix", resource.getValueMap());
         assertEquals("exampleProperty", decoded);
     }
 

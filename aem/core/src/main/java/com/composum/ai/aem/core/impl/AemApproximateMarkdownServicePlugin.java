@@ -409,7 +409,7 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
             return Collections.emptyList();
         }
         try {
-            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, false);
+            LiveRelationship liveRelationship = liveRelationshipManager.getLiveRelationship(resource, true);
             if (liveRelationship != null) {
                 String masterPath = liveRelationship.getSourcePath();
                 Resource master = masterPath != null ? resource.getResourceResolver().getResource(masterPath) : null;

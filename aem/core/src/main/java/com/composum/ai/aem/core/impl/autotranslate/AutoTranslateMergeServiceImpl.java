@@ -1,5 +1,8 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.ComponentCancellationHelper;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
@@ -53,13 +57,42 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Reference
     protected AIConfigurationService configurationService;
 
+    public boolean isProcessingNeeded(Resource pageResource) {
+        if (pageResource == null) {
+            return false;
+        }
+        List<AutoTranslateProperty> props = getProperties(pageResource);
+        return props.stream().anyMatch(AutoTranslateProperty::isProcessingNeeded);
+    }
+
     @Override
+    public boolean isAutomaticallyTranslated(Resource resource) {
+        try {
+            Resource contentResource = resource;
+            if (!contentResource.getName().equals("jcr:content")) {
+                while (contentResource != null && !contentResource.getName().equals("jcr:content")) {
+                    contentResource = contentResource.getParent();
+                }
+            }
+            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(contentResource, true);
+            if (relationship == null) {
+                return false;
+            }
+            return contentResource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_TRANSLATED_DATE) != null;
+        } catch (WCMException e) {
+            LOG.error("Could not determine relationships of " + resource.getPath(), e);
+            return false;
+        }
+    }
+
+    @Override
+    @Nonnull
     public List<AutoTranslateProperty> getProperties(Resource pageResource) {
         List<AutoTranslateProperty> list = new ArrayList<>();
         descendantsStream(pageResource).forEach(res -> {
             ModifiableValueMap properties = res.adaptTo(ModifiableValueMap.class);
             try {
-                LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(res, false);
+                LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(res, true);
                 if (relationship != null) {
                     String sourcePath = relationship.getSourcePath();
                     Resource sourceResource = res.getResourceResolver().getResource(sourcePath);
@@ -67,15 +100,21 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                         for (String key : properties.keySet()) {
                             String propertyName = AITranslatePropertyWrapper.decodePropertyName(
                                     AITranslatePropertyWrapper.AI_PREFIX, key,
-                                    AITranslatePropertyWrapper.AI_NEW_TRANSLATED_SUFFIX, res);
+                                    AITranslatePropertyWrapper.AI_ORIGINAL_SUFFIX, res.getValueMap());
                             if (propertyName != null) {
                                 LOG.debug("Found property: {}", propertyName);
                                 AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
-                                if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy()) && StringUtils.isNotBlank(wrapper.getNewTranslatedCopy())) {
-                                    list.add(new AutoTranslateProperty(res.getPath(), wrapper, getComponentName(res), getComponentTitle(res)));
-                                } else {
-                                    LOG.warn("Property {} has empty original or translated copy", propertyName);
+                                boolean processingNeeded;
+                                if (relationship.getStatus().isCancelled() || relationship.getStatus().getCanceledProperties().contains(propertyName)) {
+                                    processingNeeded = isNotBlank(wrapper.getNewOriginalCopy()) &&
+                                            isNotBlank(wrapper.getNewTranslatedCopy());
+                                } else { // not cancelled - processing needed if the current value is not the accepted translation
+                                    processingNeeded = isBlank(wrapper.getAcceptedTranslation()) ||
+                                            !StringUtils.equals(wrapper.getAcceptedTranslation(), wrapper.getCurrentValue());
                                 }
+
+                                list.add(new AutoTranslateProperty(res.getPath(), ComponentCancellationHelper.findNextHigherCancellableComponent(res).getPath(), wrapper, getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
+
                             }
                         }
                     }
@@ -90,24 +129,74 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Override
     public Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName, @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException {
         ModifiableValueMap properties = Objects.requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, false);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship != null) {
             String sourcePath = relationship.getSourcePath();
             Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
             AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
             wrapper.setCurrentValue(content);
+            wrapper.setTranslatedCopy(content);
             if (markAsMerged) {
-                if (wrapper.getNewOriginalCopy() == null || wrapper.getNewTranslatedCopy() == null) {
-                    LOG.warn("Already merged? Property {} on resource {} has no original or translated copy", propertyName, resource.getPath());
+                if (StringUtils.isNotBlank(wrapper.getNewOriginalCopy())) {
                     wrapper.setOriginalCopy(wrapper.getNewOriginalCopy());
-                    wrapper.setTranslatedCopy(wrapper.getNewTranslatedCopy());
                 }
-                wrapper.setNewOriginalCopy(null); // that's the "needs merge" marker
+                wrapper.setNewOriginalCopy(null); // that resets the "needs merge" marker
                 wrapper.setNewTranslatedCopy(null);
             }
             return Collections.singletonMap("saved", wrapper.getCurrentValue());
         }
         return Collections.emptyMap();
+    }
+
+    @Override
+    public void approveTranslation(Resource resource, String propertyName) throws WCMException {
+        ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
+        if (relationship != null) {
+            String sourcePath = relationship.getSourcePath();
+            Resource sourceResource = resource.getResourceResolver().getResource(sourcePath);
+            AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+            wrapper.setAcceptedSource(wrapper.getOriginalCopy());
+            wrapper.setAcceptedTranslation(wrapper.getCurrentValue());
+        }
+    }
+
+    @Override
+    public void changeInheritance(Resource resource, String propertyName, CancelOrReenable kind) throws WCMException {
+        Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
+        if (componentResource == null) {
+            LOG.warn("Bug: no component found for resource {}", resource.getPath());
+            return;
+        }
+        ModifiableValueMap properties = componentResource.adaptTo(ModifiableValueMap.class);
+        LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(componentResource, true);
+        if (relationship != null) {
+            String sourcePath = relationship.getSourcePath();
+            Resource sourceResource = componentResource.getResourceResolver().getResource(sourcePath);
+            switch (kind) {
+                // also reset values that have no meaning anymore.
+                case CANCEL:
+                    if (StringUtils.isBlank(propertyName)) {
+                        boolean deep = !ComponentCancellationHelper.isContainer(componentResource);
+                        liveRelationshipManager.cancelRelationship(componentResource.getResourceResolver(), relationship, deep, true);
+                    } else {
+                        liveRelationshipManager.cancelPropertyRelationship(componentResource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                        AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+                        wrapper.adjustForReenableInheritance();
+                    }
+                    break;
+                case REENABLE:
+                    if (StringUtils.isBlank(propertyName)) {
+                        liveRelationshipManager.reenableRelationship(componentResource.getResourceResolver(), relationship, true);
+                        ComponentCancellationHelper.adjustPropertiesReenableInheritance(liveRelationshipManager, componentResource);
+                    } else {
+                        liveRelationshipManager.reenablePropertyRelationship(componentResource.getResourceResolver(), relationship, new String[]{propertyName}, true);
+                        AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(sourceResource.getValueMap(), properties, propertyName);
+                        wrapper.adjustForReenableInheritance();
+                    }
+                    break;
+            }
+        }
     }
 
     @Override
@@ -151,16 +240,13 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
      * Determines the jcr:title of the current component, as found by sling:resourceType
      */
     protected String getComponentName(Resource resource) {
-        String resourceType = null;
         ResourceResolver resolver = resource.getResourceResolver();
-        while (resourceType == null && resource != null) {
-            resourceType = resource.getValueMap().get("sling:resourceType", String.class);
-            resource = resource.getParent();
-        }
+        Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
+        String resourceType = componentResource.getValueMap().get("sling:resourceType", String.class);
         if (resourceType != null) {
-            Resource componentResource = resolver.getResource(resourceType);
-            if (componentResource != null) {
-                return componentResource.getValueMap().get("jcr:title", String.class);
+            Resource componentTypeResource = resolver.getResource(resourceType);
+            if (componentTypeResource != null) {
+                return componentTypeResource.getValueMap().get("jcr:title", String.class);
             }
         }
         return null;
@@ -170,19 +256,17 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
      * Determines the jcr:title , title or text of the component by searching upwards for such a property.
      */
     protected String getComponentTitle(@Nonnull Resource resource) {
-        while (resource != null && resource.getValueMap().get("sling:resourceType") == null) {
-            resource = resource.getParent();
-        }
-        if (resource != null) {
-            String title = resource.getValueMap().get("jcr:title", String.class);
+        Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
+        if (componentResource != null) {
+            String title = componentResource.getValueMap().get("jcr:title", String.class);
             if (title == null) {
-                title = resource.getValueMap().get("title", String.class);
+                title = componentResource.getValueMap().get("title", String.class);
             }
             if (title == null) {
-                title = resource.getValueMap().get("text", String.class);
+                title = componentResource.getValueMap().get("text", String.class);
             }
             if (title == null) {
-                title = resource.getValueMap().get("jcr:description", String.class);
+                title = componentResource.getValueMap().get("jcr:description", String.class);
             }
             if (title != null) { // remove HTML tags
                 title = title.replaceAll("</?[a-zA-Z][^>]*/?>", "");
