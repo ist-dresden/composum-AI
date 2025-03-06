@@ -10,6 +10,7 @@ class AITranslateMergeTool {
             this.initFooterButtons();
             this.reinitialize();
             this.readStateFromHistory();
+            this.calculateWidths();
         });
     }
 
@@ -104,6 +105,7 @@ class AITranslateMergeTool {
         document.body.classList.toggle('hide-diffs');
         console.log("<<toggleDiffs", document.body.classList);
         this.saveStateToHistory();
+        this.calculateWidths();
     }
 
     toggleCurrent() {
@@ -112,6 +114,30 @@ class AITranslateMergeTool {
         document.body.classList.toggle('hide-currenttext');
         console.log("<<toggleCurrent", document.body.classList);
         this.saveStateToHistory();
+        this.calculateWidths();
+    }
+
+    /** Compute table layout since otherwise changes in the richtext editor change the table layout.
+     * For all colgroup elements: set the width of the first col element to 50px and divide the
+     * width of the colgroup evenly between the other col elements that are visible (that is, are not assigned a
+     * display: none by some CSS rule.  */
+    calculateWidths() {
+        document.querySelectorAll('colgroup').forEach(colgroup => {
+            const cols = colgroup.querySelectorAll('col');
+            if (cols.length) {
+                const table = colgroup.closest('table');
+                const numVisibleCols = Array.from(cols)
+                    .filter(col => window.getComputedStyle(col).display !== 'none').length;
+                const width = (table.clientWidth - cols[0].clientWidth) / (numVisibleCols - 1);
+                for (let i = 1; i < cols.length; i++) {
+                    if (window.getComputedStyle(cols[i]).display !== 'none') {
+                        cols[i].style.width = width + 'px';
+                    } else {
+                        cols[i].style.width = '';
+                    }
+                }
+            }
+        });
     }
 
     /** Implements the selects for propertyfilter and scope by reloading the page with the according query parameters. */
