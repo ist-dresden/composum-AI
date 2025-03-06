@@ -26,6 +26,9 @@ public interface AutoTranslateMergeService {
     /** Checks whether there are any unmerged or unaccepted properties. */
     boolean isProcessingNeeded(Resource resource);
 
+    /** Checks whether this is an automatically translated resource. */
+    boolean isAutomaticallyTranslated(Resource resource);
+
     /**
      * Recursively finds all properties from the given resource and its children that have names starting with
      * {@link AITranslatePropertyWrapper#AI_NEW_TRANSLATED_SUFFIX} and creates the AI Translate Property Wrapper for each.

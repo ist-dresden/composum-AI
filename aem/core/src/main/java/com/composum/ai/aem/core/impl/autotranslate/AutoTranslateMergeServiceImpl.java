@@ -65,6 +65,25 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
         return props.stream().anyMatch(AutoTranslateProperty::isProcessingNeeded);
     }
 
+    @Override
+    public boolean isAutomaticallyTranslated(Resource resource) {
+        try {
+            Resource contentResource = resource;
+            if (!contentResource.getName().equals("jcr:content")) {
+                while (contentResource != null && !contentResource.getName().equals("jcr:content")) {
+                    contentResource = contentResource.getParent();
+                }
+            }
+            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(contentResource, true);
+            if (relationship == null) {
+                return false;
+            }
+            return contentResource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_TRANSLATED_DATE) != null;
+        } catch (WCMException e) {
+            LOG.error("Could not determine relationships of " + resource.getPath(), e);
+            return false;
+        }
+    }
 
     @Override
     @Nonnull
