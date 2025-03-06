@@ -193,7 +193,7 @@ class AITranslateMergeTool {
                     console.error("Error in " + operation, error);
                     this.showError(error.message);
                 }).finally(() => {
-                button.disabled = false;
+                setTimeout(() => button.disabled = false, 300); // delay for visibility
                 button.classList.remove('activespinner');
             });
         });
@@ -379,8 +379,8 @@ class AITranslateMergeRow {
 
     /** Makes the button green for a second. */
     simulateButtonPress(button) {
-        button.disabled = true;
-        setTimeout(() => button.disabled = false, 1000);
+        // button.disabled = true;
+        // setTimeout(() => button.disabled = false, 1000);
     }
 
     /** Calls the merge servlet with operation acceptTranslation and path and propertyName as POST parameters. */
