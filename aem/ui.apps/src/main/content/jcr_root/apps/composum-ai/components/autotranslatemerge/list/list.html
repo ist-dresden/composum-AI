@@ -2,7 +2,7 @@
 <html lang="en" data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutoTranslateMergeModel">
 <head>
     <meta charset="UTF-8">
-    <title>Translation Merge UI</title>
+    <title>Translation Review UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"></sly>
     <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
@@ -36,7 +36,7 @@
             <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
                 <div class="cq-dialog-content-page">
                     <section class="coral-Form-fieldset">
-                        <h2 class="coral-Form-fieldset-legend">Translation Merge Tool for page
+                        <h2 class="coral-Form-fieldset-legend">Translation Review for page
                             <a target="_blank" href="/editor.html${model.pagePath}.html">${model.pagePath}</a>
                         </h2>
                         <!--/* <span class="coral-Form-field foundation-layout-util-breakword">
@@ -96,7 +96,7 @@
                                         <span class="linktocomponent right-aligned">
                                         <a href="${pageComponent.linkToComponent}" target="_blank"
                                            rel="noopener noreferrer">
-                                            <coral-icon icon="linkOut" size="XS"
+                                            <coral-icon icon="linkOut" size="S"
                                                         class="linktocomponent"></coral-icon></a>
                                         <coral-tooltip placement="left" target="_prev">
                                             <span slot="content">Opens the page in the editor and scrolls to this component.</span>
