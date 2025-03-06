@@ -100,19 +100,15 @@ class AITranslateMergeTool {
     }
 
     toggleDiffs() {
-        console.log(">>toggleDiffs", document.body.classList);
         document.body.classList.toggle('show-diffs');
         document.body.classList.toggle('hide-diffs');
-        console.log("<<toggleDiffs", document.body.classList);
         this.saveStateToHistory();
         this.calculateWidths();
     }
 
     toggleCurrent() {
-        console.log(">>toggleCurrent", document.body.classList);
         document.body.classList.toggle('show-currenttext');
         document.body.classList.toggle('hide-currenttext');
-        console.log("<<toggleCurrent", document.body.classList);
         this.saveStateToHistory();
         this.calculateWidths();
     }

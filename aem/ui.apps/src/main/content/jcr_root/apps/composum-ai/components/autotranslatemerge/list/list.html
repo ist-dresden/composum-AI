@@ -39,8 +39,13 @@
                         <h2 class="coral-Form-fieldset-legend">Translation Review for page
                             <a target="_blank" href="/editor.html${model.pagePath}.html">${model.pagePath}</a>
                         </h2>
-                        <!--/* <span class="coral-Form-field foundation-layout-util-breakword">
-                            </span> */-->
+                        <span class="coral-Form-field foundation-layout-util-breakword">
+                            This allows you to review the translated texts and either accept them (so that they won't shown here again until changed) or cancel inheritance for the component and edit the text manually. Inheritance can be changed
+                            usually only for the whole component at once with
+                            <coral-icon icon="link" size="XS"></coral-icon> and
+                            <coral-icon icon="linkOff" size="XS"></coral-icon>.
+                            Hover with the mouse over a buttons or headers to get more information.
+                        </span>
                     </section>
 
                     <section class="coral-Form-fieldset propertytable">
@@ -71,8 +76,7 @@
                                     data-cancelpropertyname="${pageComponent.cancelPropertyName}">
                                     <td class="cancelcol" rowspan="${pageComponent.calculatedComponentRowspan}">
                                         <button class="cancelinheritance onlyenabled" is="coral-button"
-                                                variant="secondary"
-                                                size="M" icon="link"></button>
+                                                variant="secondary" size="M" icon="link"></button>
                                         <coral-tooltip placement="right" target="_prev">
                                             <span slot="content">Cancels the inheritance for the whole component.</span>
                                         </coral-tooltip>
