@@ -103,9 +103,11 @@ public class ComponentCancellationHelper {
         }
         // if one of the children's children is a component, we assume this is a container.
         for (Resource child : children) {
-            if (IterableUtils.matchesAny(child.getChildren(), ComponentCancellationHelper::isComponent)) {
+            for (Resource gchild : child.getChildren()) {
+                if (isComponent(gchild)) {
                 return true;
             }
+        }
         }
         return false;
     }

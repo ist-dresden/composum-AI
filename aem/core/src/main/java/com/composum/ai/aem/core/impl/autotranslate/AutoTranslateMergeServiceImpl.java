@@ -97,6 +97,12 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                     String sourcePath = relationship.getSourcePath();
                     Resource sourceResource = res.getResourceResolver().getResource(sourcePath);
                     if (sourceResource != null) {
+                        Resource component = ComponentCancellationHelper.findNextHigherCancellableComponent(res);
+                        if (component == null) {
+                            LOG.warn("No component found for resource {}", res.getPath());
+                            return;
+                        }
+
                         for (String key : properties.keySet()) {
                             String propertyName = AITranslatePropertyWrapper.decodePropertyName(
                                     AITranslatePropertyWrapper.AI_PREFIX, key,
@@ -112,15 +118,13 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                                     processingNeeded = isBlank(wrapper.getAcceptedTranslation()) ||
                                             !StringUtils.equals(wrapper.getAcceptedTranslation(), wrapper.getCurrentValue());
                                 }
-
-                                list.add(new AutoTranslateProperty(res.getPath(), ComponentCancellationHelper.findNextHigherCancellableComponent(res).getPath(), wrapper, getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
-
+                                list.add(new AutoTranslateProperty(res.getPath(), component.getPath(), wrapper, getComponentName(res), getComponentTitle(res), relationship, processingNeeded));
                             }
                         }
                     }
                 }
-            } catch (WCMException e) {
-                LOG.error("Could not determine relationships of " + res.getPath(), e);
+            } catch (WCMException | RuntimeException e) {
+                LOG.error("Exception for " + res.getPath(), e);
             }
         });
         return list;
