@@ -55,7 +55,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
             throws RepositoryException {
         boolean isContentNode = source != null && target != null && BaseAction.isPage(source.adaptTo(Node.class))
                 && target.adaptTo(Node.class) != null;
-        // target != null && JcrConstants.JCR_CONTENT.equals(target.getName()) && !source.isResourceType(NT_RESOURCE);
+        // target != null && JcrConstants.JCR_CONTENT.equals(target.getName()) && !AIResourceUtil.isOfNodeType(source, NT_RESOURCE);
         if (isContentNode) {
             LOG.debug("handles({}, {}, {})", relation.getSourcePath(), relation.getTargetPath(), isResetRollout);
         } else {

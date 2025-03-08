@@ -26,8 +26,10 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.slingbase.AIResourceUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
+import com.composum.sling.core.util.ResourceUtil;
 
 /**
  * Special handling for composum/pages/components/page and components
@@ -133,7 +135,7 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
      * @return whether it was an image for which we have written a markdown reference
      */
     protected boolean handleImage(Resource resource, PrintWriter out, SlingHttpServletResponse response) {
-        if (JcrConstants.JCR_CONTENT.equals(resource.getName()) && resource.isResourceType("nt:resource")) {
+        if (JcrConstants.JCR_CONTENT.equals(resource.getName()) && AIResourceUtil.isOfNodeType(resource, "mix:lastModified")) {
             String mimeType = resource.getValueMap().get("jcr:mimeType", String.class);
             if (StringUtils.startsWith(mimeType, "image/")) {
                 String name = StringUtils.defaultString(resource.getValueMap().get("jcr:title", String.class), resource.getName());
@@ -156,10 +158,10 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
     @Override
     public String getImageUrl(@Nullable Resource imageResource) {
         Resource imageContentResource = imageResource;
-        if (imageContentResource != null && imageContentResource.isResourceType("nt:file")) {
+        if (imageContentResource != null && ResourceUtil.isResourceType(imageContentResource,"nt:file")) {
             imageContentResource = imageContentResource.getChild(JcrConstants.JCR_CONTENT);
         }
-        if (imageContentResource != null && imageContentResource.isResourceType("nt:resource")) {
+        if (imageContentResource != null && ResourceUtil.isResourceType(imageContentResource, "nt:resource")) {
             String mimeType = imageContentResource.getValueMap().get("jcr:mimeType", String.class);
             if (StringUtils.startsWith(mimeType, "image/")) {
                 try (InputStream is = imageContentResource.adaptTo(InputStream.class)) {

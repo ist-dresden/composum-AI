@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.GPTException;
+import com.composum.ai.backend.slingbase.AIResourceUtil;
 import com.day.cq.wcm.api.WCMException;
 
 /**
@@ -123,7 +124,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             int maxDepth = translationParameters.maxDepth != null ? translationParameters.maxDepth : Integer.MAX_VALUE;
             resources = collectPages(root, maxDepth);
         } else {
-            if (root.isResourceType("cq:Page")) {
+            if (AIResourceUtil.isOfNodeType(root, "cq:Page")) {
                 resources = Collections.singletonList(root.getChild("jcr:content"));
             } else if (!root.getPath().contains("/jcr:content")) {
                 throw new IllegalArgumentException("Not a page or a resource in a page: " + path);
@@ -157,7 +158,8 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
         }
         // find all jcr:content nodes below root and return a list of these
         List<Resource> pages = new ArrayList<>();
-        if (root.isResourceType("cq:PageContent") || root.isResourceType("dam:AssetContent")) {
+        if (AIResourceUtil.isOfNodeType(root, "cq:PageContent") ||
+                AIResourceUtil.isOfNodeType(root, "dam:AssetContent")) {
             pages.add(root);
         } else {
             root.getChildren().forEach(child -> pages.addAll(collectPages(child, maxDepth - 1)));

@@ -2,13 +2,10 @@ package com.composum.ai.aem.core.impl;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
+import com.composum.ai.backend.slingbase.AIResourceUtil;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
 
 /**
@@ -78,7 +76,7 @@ public class AemAIConfigurationPlugin implements AIConfigurationPlugin {
         promptsResource = promptsResource != null ? determineLanguageResource(promptsResource, languageKey) : null;
 
         // search for the child resource that has the most children - that's the most likely container for the prompts.
-        Optional<Pair<Resource, List<Resource>>> promptContainer = descendantsStream(promptsResource)
+        Optional<Pair<Resource, List<Resource>>> promptContainer = AIResourceUtil.descendantsStream(promptsResource)
                 .map(r -> Pair.of(r, IteratorUtils.toList(r.listChildren())))
                 .min((a, b) -> Integer.compare(b.getRight().size(), a.getRight().size()));
         if (!promptContainer.isPresent()) {
@@ -139,23 +137,6 @@ public class AemAIConfigurationPlugin implements AIConfigurationPlugin {
             langResource = resource.getChild(JcrConstants.JCR_CONTENT);
         }
         return langResource;
-    }
-
-    /**
-     * Returns a stream that goes through all descendants of a resource, parents come before
-     * their children.
-     *
-     * @param resource a resource or null
-     * @return a stream running through the resource and it's the descendants, not null
-     */
-    @Nonnull
-    public static Stream<Resource> descendantsStream(@Nullable Resource resource) {
-        if (resource == null) {
-            return Stream.empty();
-        }
-        return Stream.concat(Stream.of(resource),
-                StreamSupport.stream(resource.getChildren().spliterator(), false)
-                        .flatMap(AemAIConfigurationPlugin::descendantsStream));
     }
 
 }
