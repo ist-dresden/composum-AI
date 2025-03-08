@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper;
+import com.composum.ai.backend.slingbase.AIResourceUtil;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
@@ -38,15 +39,15 @@ public class ComponentCancellationHelper {
             LOG.warn("Bug: Resource type {} not found for {}", resourceType, resource.getPath());
             return false;
         }
-        return resource.getResourceResolver().isResourceType(resourceTypeResource, "cq:Component");
+        return AIResourceUtil.isOfNodeType(resourceTypeResource, "cq:Component");
     }
 
     public static boolean isPageContent(@Nonnull Resource resource) {
-        return resource.getResourceResolver().isResourceType(resource, "cq:PageContent");
+        return AIResourceUtil.isOfNodeType(resource, "cq:PageContent");
     }
 
     public static boolean isPage(@Nonnull Resource resource) {
-        return resource.getResourceResolver().isResourceType(resource, "cq:Page");
+        return AIResourceUtil.isOfNodeType(resource, "cq:Page");
     }
 
     /**
@@ -103,9 +104,11 @@ public class ComponentCancellationHelper {
         }
         // if one of the children's children is a component, we assume this is a container.
         for (Resource child : children) {
-            if (IterableUtils.matchesAny(child.getChildren(), ComponentCancellationHelper::isComponent)) {
+            for (Resource gchild : child.getChildren()) {
+                if (isComponent(gchild)) {
                 return true;
             }
+        }
         }
         return false;
     }

@@ -31,6 +31,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.slingbase.AIResourceUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 import com.composum.ai.backend.slingbase.PageCachedValueService;
@@ -172,7 +173,7 @@ public class MarkdownSlingCacheImpl implements ApproximateMarkdownServicePlugin,
             // add mix:lastModified to mixins to make it easier to track changes, and if that isn't already there
             if (createIfNotPresent && cacheResource != null) {
                 ModifiableValueMap mvm = cacheResource.adaptTo(ModifiableValueMap.class);
-                if (!cacheResource.isResourceType("mix:lastModified")) {
+                if (!AIResourceUtil.isOfNodeType(cacheResource, "mix:lastModified")) {
                     mvm.put("jcr:mixinTypes", new String[]{"mix:lastModified"});
                 }
             }

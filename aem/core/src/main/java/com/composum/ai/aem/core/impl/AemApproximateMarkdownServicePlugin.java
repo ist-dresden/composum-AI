@@ -37,6 +37,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.slingbase.AIResourceUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownServicePlugin;
 import com.day.cq.wcm.api.WCMException;
@@ -331,10 +332,10 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
      */
     protected boolean renderDamAssets(Resource resource, PrintWriter out, SlingHttpServletResponse response) {
         Resource assetNode = resource;
-        if (resource.isResourceType("dam:AssetContent")) {
+        if (AIResourceUtil.isOfNodeType(resource, "dam:AssetContent")) {
             assetNode = resource.getParent();
         }
-        if (assetNode.isResourceType("dam:Asset")) {
+        if (AIResourceUtil.isOfNodeType(assetNode, "dam:Asset")) {
             String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
             if (StringUtils.startsWith(mimeType, "image/")) {
                 String name = StringUtils.defaultString(assetNode.getValueMap().get("jcr:content/jcr:title", String.class), assetNode.getName());
@@ -357,10 +358,10 @@ public class AemApproximateMarkdownServicePlugin implements ApproximateMarkdownS
     @Override
     public String getImageUrl(@Nullable Resource imageResource) {
         Resource assetNode = imageResource;
-        if (imageResource.isResourceType("dam:AssetContent")) {
+        if (AIResourceUtil.isOfNodeType(imageResource, ("dam:AssetContent"))) {
             assetNode = imageResource.getParent();
         }
-        if (assetNode.isResourceType("dam:Asset")) {
+        if (AIResourceUtil.isOfNodeType(assetNode, "dam:Asset")) {
             String mimeType = assetNode.getValueMap().get("jcr:content/metadata/dc:format", String.class);
             Resource originalRendition = assetNode.getChild("jcr:content/renditions/original/jcr:content");
             if (StringUtils.startsWith(mimeType, "image/") && originalRendition != null) {
