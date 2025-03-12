@@ -237,7 +237,7 @@ public class AutoTranslateMergeModel {
 
         public static PropertyFilter fromValue(String value) {
             if (value == null) {
-                return INHERITANCE_CANCELLED;
+                return PropertyFilter.ALL_PROPERTIES;
             }
             for (PropertyFilter filter : values()) {
                 if (filter.value.equals(value)) {
