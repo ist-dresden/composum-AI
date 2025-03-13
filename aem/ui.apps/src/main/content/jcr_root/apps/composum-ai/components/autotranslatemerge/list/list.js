@@ -11,6 +11,7 @@ class AITranslateMergeTool {
             this.reinitialize();
             this.readStateFromHistory();
             this.calculateWidths();
+            this.linkModal = new AITranslateLinkEditModal();
         });
     }
 
@@ -34,7 +35,6 @@ class AITranslateMergeTool {
             this.initComponentHead(row)
             row.initialized = true;
         });
-        this.linkModal = new AITranslateLinkEditModal();
     }
 
     initDatarow(row) {
