@@ -108,8 +108,9 @@ Copilot IntelliJ plugin, for speeding up development. Some outcomes of that:
 
 ## More project documentation
 
-[Architecture](./Architecture.md) contains a description of the chosen project architecture and records
-architectural decisions.
+[AEM Architecture](featurespecs/AemIntegrationArchitecture.md) and
+[Composum Architecture](featurespecs/ComposumIntegrationArchitecture.md) 
+contain a description of the chosen project architecture and records architectural decisions.
 
 [Project structure](./ProjectStructure.md) describes the module structure of the project.
 
