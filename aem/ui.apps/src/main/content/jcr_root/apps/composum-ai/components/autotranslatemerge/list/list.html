@@ -87,7 +87,7 @@
                                         there was a new translation, this is written into the page.</span>
                                         </coral-tooltip>
                                     </td>
-                                    <td is="coral-table-cell" colspan="6">
+                                    <td is="coral-table-cell" colspan="6" id="componentlink-${pageComponent.componentPathInPage}+${pageComponent.cancelPropertyName}">
                                         <span class="componentName"
                                               data-sly-text="${pageComponent.componentName}"></span>
                                         <sly data-sly-test="${pageComponent.componentTitle}">
@@ -99,14 +99,22 @@
                                             </span>
                                         </sly>
                                         <span class="linktocomponent right-aligned">
-                                        <a href="${pageComponent.linkToComponent}" target="_blank"
-                                           rel="noopener noreferrer">
-                                            <coral-icon icon="linkOut" size="S"
-                                                        class="linktocomponent"></coral-icon></a>
-                                        <coral-tooltip placement="left" target="_prev">
-                                            <span slot="content">Opens the page in the editor and scrolls to this component if possible.</span>
-                                        </coral-tooltip>
-                                    </span>
+                                            <a href="#componentlink-${pageComponent.componentPathInPage}+${pageComponent.cancelPropertyName}"
+                                               rel="noopener noreferrer" class="componentlink">
+                                                <coral-icon icon="bookmark" size="S"></coral-icon>
+                                                <coral-tooltip placement="left" target="_prev">
+                                                    <span slot="content">Link to this component in this table - e.g. for sharing a link to this specific point.</span>
+                                                </coral-tooltip>
+                                            </a>
+                                            &nbsp;
+                                            <a href="${pageComponent.linkToComponent}" target="_blank"
+                                               rel="noopener noreferrer">
+                                                <coral-icon icon="linkOut" size="S"
+                                                            class="linktocomponent"></coral-icon></a>
+                                            <coral-tooltip placement="left" target="_prev">
+                                                <span slot="content">Opens the page in the editor and scrolls to this component if possible.</span>
+                                            </coral-tooltip>
+                                        </span>
                                     </td>
                                 </tr>
                                 <sly data-sly-list.property="${pageComponent.checkableProperties}">
