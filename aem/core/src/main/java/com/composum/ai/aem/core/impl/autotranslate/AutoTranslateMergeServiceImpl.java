@@ -57,6 +57,13 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     @Reference
     protected AIConfigurationService configurationService;
 
+    /**
+     * Heuristic set of properties that might give a recognizable title to the component.
+     */
+    protected static final String[] COMPONENT_TITLE_PROPERTIES = {
+            "jcr:title", "title", "text", "jcr:description", "summary", "alt"
+    };
+
     public boolean isProcessingNeeded(Resource pageResource) {
         if (pageResource == null) {
             return false;
@@ -257,23 +264,20 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     }
 
     /**
-     * Determines the jcr:title , title or text of the component by searching upwards for such a property.
+     * Determines the jcr:title , title, text etc. of the component by searching upwards for such a property.
      */
     protected String getComponentTitle(@Nonnull Resource resource) {
         Resource componentResource = ComponentCancellationHelper.findNextHigherCancellableComponent(resource);
         if (componentResource != null) {
-            String title = componentResource.getValueMap().get("jcr:title", String.class);
-            if (title == null) {
-                title = componentResource.getValueMap().get("title", String.class);
-            }
-            if (title == null) {
-                title = componentResource.getValueMap().get("text", String.class);
-            }
-            if (title == null) {
-                title = componentResource.getValueMap().get("jcr:description", String.class);
+            String title = null;
+            for (String property : COMPONENT_TITLE_PROPERTIES) {
+                title = componentResource.getValueMap().get(property, String.class);
+                if (isNotBlank(title)) {
+                    break;
+                }
             }
             if (title != null) { // remove HTML tags
-                title = title.replaceAll("</?[a-zA-Z][^>]*/?>", "");
+                title = title.replaceAll("</?[a-zA-Z][^>]*/?>", " ").replaceAll("&nbsp;", " ").replaceAll("\\s+", " ").trim();
             }
             return title;
         }
