@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -200,6 +201,13 @@ public class AutoTranslateMergeModel {
 
         public String getComponentPath() {
             return componentPath;
+        }
+
+        /**
+         * An unique id to identify the component in the HTML.
+         */
+        public int getComponentId() {
+            return Math.abs(92821 * Objects.hash(componentPath) + Objects.hash(getCancelPropertyName()));
         }
 
         /**

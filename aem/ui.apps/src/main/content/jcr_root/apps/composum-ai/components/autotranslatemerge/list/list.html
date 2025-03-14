@@ -71,7 +71,7 @@
                                     data-cancelpropertyname="${pageComponent.cancelPropertyName}"></tr>
 
                                 <tr is="coral-table-row" class="component-head ${pageComponent.cancelledClass}"
-                                    id="component-${pageComponentList.index}"
+                                    id="component-${pageComponent.componentId}"
                                     data-componentpath="${pageComponent.componentPath}"
                                     data-cancelpropertyname="${pageComponent.cancelPropertyName}">
                                     <td class="cancelcol" rowspan="${pageComponent.calculatedComponentRowspan}">
@@ -121,7 +121,7 @@
                                         class="row-separator ${property.cancelledClass} ${property.processingNeededClass}"
                                         data-componentpath="${pageComponent.componentPath}"
                                         data-cancelpropertyname="${pageComponent.cancelPropertyName}"
-                                        id="row-${pageComponentList.index}-${propertyList.index}">
+                                        id="row-${pageComponent.componentId}-${propertyList.index}">
                                         <sly data-sly-test="${cancelled}">
                                             <th is="coral-table-headercell" class="previoussrc">
                                             <span class="propertyname">
@@ -231,7 +231,7 @@
                                         class="property-row datarow ${property.cancelledClass} ${property.processingNeededClass}"
                                         data-componentpath="${pageComponent.componentPath}"
                                         data-cancelpropertyname="${pageComponent.cancelPropertyName}"
-                                        id="datarow-${pageComponentList.index}-${propertyList.index}"
+                                        id="datarow-${pageComponent.componentId}-${propertyList.index}"
                                         data-path="${property.path}"
                                         data-propertyname="${property.wrapper.propertyName}"
                                         data-language="${model.pageLanguage}"
@@ -243,7 +243,7 @@
                                         data-at="${property.wrapper.acceptedTranslation}"
                                         data-sd="${property.diffsHTML}"
                                         data-e="${property.wrapper.currentValue}"
-                                        data-id="${pageComponentList.index}-${propertyList.index}"
+                                        data-id="${pageComponent.componentId}-${propertyList.index}"
                                         data-isrich="${property.wrapper.isRichText}">
                                         <td is="coral-table-cell" class="previoussrc diffscolor">
                                             <sly data-sly-test="${hasData}">
@@ -347,7 +347,7 @@
                                         class="property-row actionrow ${property.cancelledClass} ${property.processingNeededClass}"
                                         data-componentpath="${pageComponent.componentPath}"
                                         data-cancelpropertyname="${pageComponent.cancelPropertyName}"
-                                        id="actionrow-${pageComponentList.index}-${propertyList.index}">
+                                        id="actionrow-${pageComponent.componentId}-${propertyList.index}">
                                         <td is="coral-table-cell" class="previoussrc diffscolor">
                                         </td>
                                         <td is="coral-table-cell" class="newsrc diffscolor">
@@ -377,7 +377,7 @@
                                         <td is="coral-table-cell" class="editor">
                                             <div class="editor-actions">
                                                 <sly data-sly-test="${cancelled}">
-                                                    <button is="coral-button" variant="primary" class="save-editor">
+                                                    <button is="coral-button" variant="secondary" class="save-editor">
                                                         Save and Finish
                                                         <coral-wait size="S" class="spinner"></coral-wait>
                                                     </button>
