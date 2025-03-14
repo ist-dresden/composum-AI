@@ -196,6 +196,10 @@ body.hide-currenttext .currenttext {
     border-radius: 4px;
 }
 
+.rte-container {
+    background-color: white;
+}
+
 .rte-editor {
     border: 1px solid #ccc;
     padding: 8px;

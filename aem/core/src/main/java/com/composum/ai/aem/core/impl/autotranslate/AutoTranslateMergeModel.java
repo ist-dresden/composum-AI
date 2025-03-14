@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -22,6 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class AutoTranslateMergeModel {
@@ -36,6 +40,10 @@ public class AutoTranslateMergeModel {
 
     @OSGiService
     private AutoTranslateMergeService autoTranslateMergeService;
+
+    @OSGiService
+    private LiveRelationshipManager liveRelationshipManager;
+
 
     private transient Resource pageResource;
 
@@ -61,6 +69,10 @@ public class AutoTranslateMergeModel {
      */
     protected static final String PARAM_PROPERTYNAME = "propertyname";
 
+    protected List<AutoTranslateMergeService.AutoTranslateProperty> properties;
+
+    protected int unfilteredPropertiesSize;
+
     protected PropertyFilter getPropertyFilter(SlingHttpServletRequest request) {
         return PropertyFilter.fromValue(request.getParameter(PARAM_PROPERTY_FILTER));
     }
@@ -74,35 +86,55 @@ public class AutoTranslateMergeModel {
     }
 
     public List<AutoTranslateMergeService.AutoTranslateProperty> getProperties() {
-        List<AutoTranslateMergeService.AutoTranslateProperty> properties = autoTranslateMergeService.getProperties(getPageResource());
+        if (properties != null) {
+            return properties;
+        }
+        List<AutoTranslateMergeService.AutoTranslateProperty> props = autoTranslateMergeService.getProperties(getPageResource());
+        this.unfilteredPropertiesSize = props.size();
         PropertyFilter propertyFilter = getPropertyFilter(request);
         Scope scope = getScope(request);
         switch (propertyFilter) {
             case INHERITANCE_CANCELLED:
-                properties.removeIf(property -> !property.isCancelled());
+                props.removeIf(property -> !property.isCancelled());
                 break;
             case INHERITANCE_ENABLED:
-                properties.removeIf(AutoTranslateMergeService.AutoTranslateProperty::isCancelled);
+                props.removeIf(AutoTranslateMergeService.AutoTranslateProperty::isCancelled);
                 break;
             case ALL_PROPERTIES:
                 break;
         }
         switch (scope) {
             case UNFINISHED_PROPERTIES:
-                properties.removeIf(p -> !p.isProcessingNeeded());
+                props.removeIf(p -> !p.isProcessingNeeded());
                 break;
             case ALL_PROPERTIES:
                 break;
         }
         String componentPath = request.getParameter(PARAM_COMPONENTPATH);
         if (StringUtils.isNotBlank(componentPath)) {
-            properties.removeIf(p -> !p.getComponentPath().equals(componentPath));
+            props.removeIf(p -> !p.getComponentPath().equals(componentPath));
         }
         String propertyname = request.getParameter(PARAM_PROPERTYNAME);
         if (StringUtils.isNotBlank(propertyname)) {
-            properties.removeIf(p -> !p.getWrapper().getPropertyName().equals(propertyname));
+            props.removeIf(p -> !p.getWrapper().getPropertyName().equals(propertyname));
         }
+        properties = props;
         return properties;
+    }
+
+    public int getUnfilteredPropertiesSize() {
+        getProperties();
+        return unfilteredPropertiesSize;
+    }
+
+    public boolean isBlueprintBroken() {
+        try {
+            LiveRelationship livecopy = liveRelationshipManager.getLiveRelationship(getPageResource(), true);
+            return livecopy == null || livecopy.getStatus() == null || !livecopy.getStatus().isSourceExisting();
+        } catch (WCMException e) {
+            LOG.error("For " + getPageResource(), e);
+        }
+        return true;
     }
 
     public List<AutoTranslateComponent> getPageComponents() {
@@ -172,6 +204,13 @@ public class AutoTranslateMergeModel {
         }
 
         /**
+         * An unique id to identify the component in the HTML.
+         */
+        public int getComponentId() {
+            return Math.abs(92821 * Objects.hash(componentPath) + Objects.hash(getCancelPropertyName()));
+        }
+
+        /**
          * For pages properties are cancelled individually. If it's a page we return the property name here, else nothing.
          */
         public String getCancelPropertyName() {
@@ -236,8 +275,8 @@ public class AutoTranslateMergeModel {
         }
 
         public static PropertyFilter fromValue(String value) {
-            if (value == null) {
-                return INHERITANCE_CANCELLED;
+            if (value == null) { // must be the same as the frontend default
+                return PropertyFilter.ALL_PROPERTIES;
             }
             for (PropertyFilter filter : values()) {
                 if (filter.value.equals(value)) {
@@ -263,7 +302,7 @@ public class AutoTranslateMergeModel {
         }
 
         public static Scope fromValue(String value) {
-            if (value == null) {
+            if (value == null) { // must be the same as the frontend default
                 return UNFINISHED_PROPERTIES;
             }
             for (Scope scope : values()) {

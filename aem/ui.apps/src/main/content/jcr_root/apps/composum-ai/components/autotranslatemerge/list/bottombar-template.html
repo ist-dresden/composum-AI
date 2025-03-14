@@ -1,5 +1,16 @@
 <template data-sly-template.bottombarTemplate="${@ model}">
     <section class="coral-Form-fieldset bottombar coral--light">
+        <p data-sly-test="${model.unfilteredPropertiesSize != 0 && model.properties.empty}">
+            <coral-alert variant="error">
+                <coral-alert-content class="alertcontent">No properties are matching the current filter settings.
+                </coral-alert-content>
+            </coral-alert>
+        </p>
+        <p data-sly-test="${model.blueprintBroken}">
+            <coral-alert variant="error">
+                <coral-alert-content class="alertcontent">Can't identify blueprint for this page.</coral-alert-content>
+            </coral-alert>
+        </p>
         <p class="errormessage" hidden>
             <coral-alert variant="error">
                 <coral-alert-content class="alertcontent"></coral-alert-content>
@@ -22,7 +33,7 @@
             </coral-tooltip>
         </a>
         <select id="propertyfilter" class="_coral-FieldButton _coral-ActionButton">
-            <option value="allstati">All Properties</option>
+            <option value="allstati">All Components</option>
             <option value="cancelled">Inheritance Cancelled</option>
             <option value="inheritanceenabled">Inheritance Enabled</option>
         </select>

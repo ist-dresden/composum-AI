@@ -11,6 +11,7 @@ class AITranslateMergeTool {
             this.reinitialize();
             this.readStateFromHistory();
             this.calculateWidths();
+            this.linkModal = new AITranslateLinkEditModal();
         });
     }
 
@@ -34,7 +35,6 @@ class AITranslateMergeTool {
             this.initComponentHead(row)
             row.initialized = true;
         });
-        this.linkModal = new AITranslateLinkEditModal();
     }
 
     initDatarow(row) {
@@ -209,16 +209,17 @@ class AITranslateMergeTool {
         url.searchParams.set('scope', 'allprops');
         url.searchParams.set('componentpath', componentpath);
         if (propertyname) url.searchParams.set('propertyname', propertyname);
-        console.log('reloadComponent', url.href);
+        console.log('reloadComponent', url.href, this);
         const tableBody = document.querySelector(".propertytable tbody");
         var selector = `tr[data-componentpath="${componentpath}"]`;
         if (propertyname) {
             selector += `[data-cancelpropertyname="${propertyname}"]`;
         } else {
-            selector += ':not([data-cancelpropertyname]';
+            selector += ':not([data-cancelpropertyname])';
         }
         const trs = tableBody.querySelectorAll(selector);
         if (!trs.length) {
+            console.error('Could not find elements to replace', selector, this);
             debugger;
         }
         fetch(url.href)
@@ -228,9 +229,6 @@ class AITranslateMergeTool {
                 tempDiv.innerHTML = html;
                 const replacements = tempDiv.querySelectorAll(".propertytable tbody tr");
                 const firsttr = trs[0];
-                if (!firsttr) {
-                    debugger;
-                }
                 replacements.forEach(tr => {
                     tableBody.insertBefore(tr, firsttr);
                 });
@@ -309,7 +307,7 @@ class AITranslateMergeRow {
         this.saveButton = this.actionrow.querySelector(".save-editor");
 
         if (this.rteContainer) {
-            new AITranslatorMergeRTE(this.rteContainer, tool);
+            new AITranslatorMergeRTE(this.rteContainer, tool, () => this.markSaveButton(true));
         }
 
         if (this.copyButton) this.copyButton.addEventListener("click", this.copyToEditor.bind(this));
@@ -317,7 +315,17 @@ class AITranslateMergeRow {
         if (this.acceptButton) this.acceptButton.addEventListener("click", this.acceptTranslation.bind(this));
 
         if (this.resetButton) this.resetButton.addEventListener("click", this.resetEditor.bind(this));
-        if (this.saveButton) this.saveButton.addEventListener("click", this.saveEditor.bind(this));
+        if (this.saveButton) {
+            this.saveButton.addEventListener("click", this.saveEditor.bind(this));
+            this.editor.addEventListener("change", () => this.markSaveButton(true));
+            this.editor.addEventListener("keyup", () => this.markSaveButton(true));
+            this.rteContainer?.addEventListener("input", () => this.markSaveButton(true));
+        }
+    }
+
+    /** Creates a visual alert when the editor is changed. */
+    markSaveButton(changed) {
+        this.saveButton.variant = changed ? "primary" : "secondary";
     }
 
     setEditorValue(value) {
@@ -329,14 +337,18 @@ class AITranslateMergeRow {
     }
 
     copyToEditor() {
+        console.log('copyToEditor', this);
         this.setEditorValue(this.row.dataset.nt || '');
     }
 
     resetEditor() {
+        console.log('resetEditor', this);
         this.setEditorValue(this.row.dataset.e || '');
+        this.markSaveButton(false);
     }
 
     intelligentMerge() {
+        console.log('intelligentMerge', this);
         const data = {
             path: this.row.dataset.path,
             propertyName: this.row.dataset.propertyname,
@@ -349,10 +361,12 @@ class AITranslateMergeRow {
         this.tool.callOperation(this.mergeButton, 'merge', data, mergedText => {
             this.setEditorValue(mergedText);
             console.log("Merge successful");
+            this.markSaveButton(true);
         });
     }
 
     saveEditor() {
+        console.log('saveEditor', this);
         const data = {
             path: this.row.dataset.path,
             propertyName: this.row.dataset.propertyname,
@@ -369,19 +383,14 @@ class AITranslateMergeRow {
                 this.row.classList.add("processed");
                 this.actionrow.classList.add("processed");
                 this.headerrow.classList.add("processed");
-                this.simulateButtonPress(this.saveButton);
+                this.markSaveButton(false);
             }
         });
     }
 
-    /** Makes the button green for a second. */
-    simulateButtonPress(button) {
-        // button.disabled = true;
-        // setTimeout(() => button.disabled = false, 1000);
-    }
-
     /** Calls the merge servlet with operation acceptTranslation and path and propertyName as POST parameters. */
     acceptTranslation() {
+        console.log('acceptTranslation', this);
         const data = {
             path: this.row.dataset.path,
             propertyName: this.row.dataset.propertyname
@@ -405,12 +414,13 @@ class AITranslateMergeRow {
 
 /** Manages the rich text editor functionalities, including toolbar actions and link management. */
 class AITranslatorMergeRTE {
-    constructor(container, tool) {
+    constructor(container, tool, markAsChangedCallback) {
         if (container.initialized) return;
         container.initialized = true;
         this.tool = tool;
         this.editor = container.querySelector(".rte-editor") || container.querySelector(".text-editor");
         this.toolbar = container.querySelector(".rte-toolbar");
+        this.markAsChangedCallback = markAsChangedCallback;
 
         this.toolbar?.addEventListener("click", this.handleToolbarClick.bind(this));
 
@@ -418,10 +428,12 @@ class AITranslatorMergeRTE {
     }
 
     handleToolbarClick(event) {
+        console.log("handleToolbarClick", event, this);
         const command = event.target.dataset.command;
         if (command) {
             document.execCommand(command, false, null);
             this.editor.focus(); // Refocus the editor after the action
+            this.markAsChangedCallback();
         }
     }
 
@@ -459,6 +471,7 @@ class AITranslatorMergeRTE {
     }
 
     editLink(anchor) {
+        console.log("edit link", anchor, this);
         let selectedText = undefined;
         if (!anchor) {
             // if selection is within this.editor, save it
@@ -477,6 +490,7 @@ class AITranslatorMergeRTE {
     }
 
     saveLink(anchor, linkModal) {
+        console.log("saveLink", anchor, linkModal, this);
         if (!anchor) {
             if (this.savedRange) {
                 const range = this.savedRange;
@@ -497,15 +511,18 @@ class AITranslatorMergeRTE {
         } else {
             linkModal.updateAnchor(anchor);
         }
+        this.markAsChangedCallback();
     }
 
     removeLink(anchor) {
+        console.log("removeLink", anchor, this);
         const range = document.createRange();
         const sel = window.getSelection();
         range.selectNodeContents(anchor);
         anchor.replaceWith(...anchor.childNodes);
         sel.removeAllRanges();
         sel.addRange(range);
+        this.markAsChangedCallback();
     }
 }
 
@@ -530,6 +547,7 @@ class AITranslateLinkEditModal {
     }
 
     editLink(anchor, selectedText, saveCallback) {
+        console.log("edit link", anchor, selectedText, saveCallback, this);
         this.saveCallback = saveCallback;
         this.anchor = anchor;
         // Pre-fill inputs with current anchor values if the anchor exists.
@@ -587,15 +605,18 @@ class AITranslateLinkEditModal {
     }
 
     saveLink() {
+        console.log("saveLink", this);
         this.saveCallback(this.anchor, this);
         this.hideModal();
     }
 
     hideModal() {
+        console.log("hideModal", this);
         this.modal.classList.add("hidden");
     }
 
     showModal() {
+        console.log("showModal", this);
         this.modal.classList.remove("hidden");
     }
 
@@ -628,6 +649,7 @@ class AITranslationPathChooser {
 
     /** Loads the column corresponding to the last element of the path. */
     async loadPath(path) {
+        console.log("loadPath", path, this);
         const url = path && path.startsWith('/') ? PATH_CHOOSER_URL + path : PATH_CHOOSER_URL;
         this.pathChooserContent.innerHTML = '';
         try {
@@ -655,6 +677,7 @@ class AITranslationPathChooser {
     }
 
     onSelect() {
+        console.log("onSelect", this);
         const path = this.pathDialog.querySelector('coral-checkbox[checked]')?.parentNode?.dataset?.foundationCollectionItemId;
         if (path) {
             this.pathInput.value = path;
@@ -663,6 +686,7 @@ class AITranslationPathChooser {
     }
 
     async selectItem(event) {
+        console.log("selectItem", event, this);
         const path = event?.target?.dataset?.foundationCollectionItemId;
         if (path) {
             await this.loadPath(path);
@@ -716,6 +740,7 @@ class AITranslationPathChooser {
 
     /** Finds the coral-columnview-item by the data-foundation-collection-item-id and checks that and scrolls it into view. */
     selectPath(path) {
+        console.log("selectPath", path, this);
         if (path) {
             const item = this.pathDialog.querySelector(`coral-columnview-item[data-foundation-collection-item-id="${path}"]`);
             if (item) {
