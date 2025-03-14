@@ -51,6 +51,11 @@ td.cancelcol {
     text-transform: none;
 }
 
+.componentPath {
+    font-size: 0.618em;
+    color: #666;
+}
+
 .workflow-icons {
     transform: rotate(-90deg);
     margin-top: 3px;

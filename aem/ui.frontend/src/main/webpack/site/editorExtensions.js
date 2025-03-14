@@ -28,17 +28,19 @@ function scrollToComponent() {
         console.log('scrollToComponent', anchor);
         const path = Granite.author.page.path + '/jcr:content/' +
             anchor.replace('#scrolltocomponent-', '');
-        const element = Granite?.author?.OverlayWrapper?.$el?.find(`div.cq-Overlay[data-path="${path}"]`);
-        console.log('scrollToComponent', path, element.size(), element);
-        if (element && element.size()) {
+        const set1 = Granite?.author?.OverlayWrapper?.$el?.find(`div.cq-Overlay[data-path="${path}"]`);
+        const set2 = Granite?.author?.ContentFrame?.getDocument()?.find(`cq[data-path="${path}"]`)
+        const element = set1.size() ? set1[0] : set2.size() ? set2[0] : null;
+        console.log('scrollToComponent', path, element);
+        if (element) {
             setTimeout(() =>
                     Coral.commons.ready(Granite.author.OverlayWrapper.$el, () =>
-                        element[0].scrollIntoView({behavior: 'smooth', block: 'start'})),
+                        element.scrollIntoView({behavior: 'smooth', block: 'start'})),
                 500
             );
             setTimeout(() => // sometimes that doesn't work - retry :-(
                     Coral.commons.ready(Granite.author.OverlayWrapper.$el, () =>
-                        element[0].scrollIntoView({behavior: 'smooth', block: 'start'})),
+                        element.scrollIntoView({behavior: 'smooth', block: 'start'})),
                 2500
             );
             // Remove the anchor from the URL

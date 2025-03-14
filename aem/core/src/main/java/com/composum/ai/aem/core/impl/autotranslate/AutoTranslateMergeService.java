@@ -128,7 +128,7 @@ public interface AutoTranslateMergeService {
         }
 
         public String getComponentTitle() {
-            return StringUtils.abbreviate(StringUtils.defaultString(componentTitle), 120);
+            return StringUtils.abbreviate(StringUtils.defaultString(componentTitle), 80);
         }
 
         public AITranslatePropertyWrapper getWrapper() {

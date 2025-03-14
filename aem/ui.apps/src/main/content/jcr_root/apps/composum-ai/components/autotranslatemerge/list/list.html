@@ -90,12 +90,13 @@
                                     <td is="coral-table-cell" colspan="6">
                                         <span class="componentName"
                                               data-sly-text="${pageComponent.componentName}"></span>
-                                        <sly data-sly-test="${pageComponent.componentPathInPage}">
-                                            | <span class="componentPath"
-                                                    data-sly-text="${pageComponent.componentPathInPage}"/>
-                                        </sly>
                                         <sly data-sly-test="${pageComponent.componentTitle}">
                                             | ${pageComponent.componentTitle}
+                                        </sly>
+                                        <sly data-sly-test="${pageComponent.componentPathInPage}">
+                                            <span class="componentPath">
+                                                | <sly data-sly-text="${pageComponent.componentPathInPage}"></sly>
+                                            </span>
                                         </sly>
                                         <span class="linktocomponent right-aligned">
                                         <a href="${pageComponent.linkToComponent}" target="_blank"
@@ -103,7 +104,7 @@
                                             <coral-icon icon="linkOut" size="S"
                                                         class="linktocomponent"></coral-icon></a>
                                         <coral-tooltip placement="left" target="_prev">
-                                            <span slot="content">Opens the page in the editor and scrolls to this component.</span>
+                                            <span slot="content">Opens the page in the editor and scrolls to this component if possible.</span>
                                         </coral-tooltip>
                                     </span>
                                     </td>
