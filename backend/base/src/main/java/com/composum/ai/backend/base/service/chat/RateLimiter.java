@@ -1,4 +1,4 @@
-package com.composum.ai.backend.base.impl;
+package com.composum.ai.backend.base.service.chat;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;

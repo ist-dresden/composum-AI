@@ -5,8 +5,6 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.composum.ai.backend.base.impl.RateLimiter;
-
 /**
  * A service managing the backends for {@link GPTChatCompletionService} etc.
  */

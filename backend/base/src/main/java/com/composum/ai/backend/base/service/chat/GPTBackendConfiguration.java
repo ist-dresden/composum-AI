@@ -23,10 +23,6 @@ public @interface GPTBackendConfiguration {
             description = "The base URL for the LLM API endpoint.")
     String apiEndpoint();
 
-    @AttributeDefinition(name = "API Key",
-            description = "The API key used for authentication with the LLM backend.")
-    String apiKey();
-
     @AttributeDefinition(name = "Connection Timeout",
             description = "The connection timeout in seconds.",
             defaultValue = "30")
@@ -38,15 +34,15 @@ public @interface GPTBackendConfiguration {
     int requestTimeout();
 
     @AttributeDefinition(name = "Requests Per Minute",
-            description = "The maximum number of requests allowed per minute.")
+            description = "The maximum number of requests allowed per minute. Default currently 100.")
     int requestsPerMinute();
 
     @AttributeDefinition(name = "Requests Per Hour",
-            description = "The maximum number of requests allowed per hour.")
+            description = "The maximum number of requests allowed per hour. Default currently 1000.")
     int requestsPerHour();
 
     @AttributeDefinition(name = "Requests Per Day",
-            description = "The maximum number of requests allowed per day.")
+            description = "The maximum number of requests allowed per day. Default currently 3000.")
     int requestsPerDay();
 
     @AttributeDefinition(name = "Models",
@@ -68,4 +64,12 @@ public @interface GPTBackendConfiguration {
     @AttributeDefinition(name = "Additional Header 2 Value",
             description = "The value for the second additional HTTP header.")
     String additionalHeader2Value();
+
+    @AttributeDefinition(name = "Additional Header 3 Key",
+            description = "An optional second additional HTTP header key.")
+    String additionalHeader3Key();
+
+    @AttributeDefinition(name = "Additional Header 3 Value",
+            description = "The value for the second additional HTTP header.")
+    String additionalHeader3Value();
 }

@@ -13,7 +13,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 
-import com.composum.ai.backend.base.impl.RateLimiter;
+import com.composum.ai.backend.base.service.chat.RateLimiter;
 import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTBackendsConfigurationService;
 import com.composum.ai.backend.base.service.chat.GPTBackendsService;
