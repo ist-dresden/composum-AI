@@ -26,6 +26,9 @@ public class RateLimiter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RateLimiter.class);
 
+    /** Does not limit in any way. */
+    public static final RateLimiter UNLIMITED = new RateLimiter(null, Integer.MAX_VALUE, 1, TimeUnit.SECONDS);
+
     @Nullable
     private final RateLimiter parent;
     @Nonnegative
