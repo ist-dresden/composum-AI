@@ -112,20 +112,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     protected static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
-    protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
     protected static final String OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
-
-    /**
-     * Environment variable where we take the key from, if not configured directly.
-     */
-    public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
-
-    /**
-     * System property where we take the key from, if not configured directly.
-     */
-    public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
 
     public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4o";
@@ -145,15 +134,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
      */
     public static final int MAXTRIES = 5;
 
-    /**
-     * The OpenAI Key for accessing ChatGPT; system default if not given in request.
-     */
-    protected String apiKey;
-    protected String organizationId;
     protected String defaultModel;
     protected String highIntelligenceModel;
     protected String imageModel;
-    protected String chatCompletionUrl = CHAT_COMPLETION_URL;
 
     protected CloseableHttpAsyncClient httpAsyncClient;
 
@@ -185,8 +168,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     protected final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
     protected int requestTimeout;
     protected int connectionTimeout;
-    protected Double temperature;
-    protected Integer seed;
 
     protected boolean disabled;
 
@@ -219,33 +200,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.highIntelligenceModel = config != null && config.highIntelligenceModel() != null && !config.highIntelligenceModel().trim().isEmpty() ? config.highIntelligenceModel().trim() : DEFAULT_HIGH_INTELLIGENCE_MODEL;
         this.imageModel = config != null && config.imageModel() != null && !config.imageModel().trim().isEmpty() ? config.imageModel().trim() : null;
-        this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
         this.maximumTokensPerRequest = config != null && config.maximumTokensPerRequest() > 0 ? config.maximumTokensPerRequest() : null;
         this.maximumTokensPerResponse = config != null && config.maximumTokensPerResponse() > 0 ? config.maximumTokensPerResponse() : null;
-        try {
-            this.temperature = config != null && !StringUtil.isBlank(config.temperature()) ? Double.valueOf(config.temperature()) : null;
-        } catch (NumberFormatException e) {
-            LOG.error("Cannot parse temperature {}", config.temperature(), e);
-            this.temperature = null;
-        }
-        try {
-            this.seed = config != null && !StringUtil.isBlank(config.seed()) ? Integer.valueOf(config.seed()) : null;
-        } catch (NumberFormatException e) {
-            LOG.error("Cannot parse seed {}", config.seed(), e);
-            this.seed = null;
-        }
         this.disabled = config != null && config.disabled();
-        if (!disabled) {
-            this.apiKey = retrieveOpenAIKey(config);
-            this.organizationId = config != null ? config.openAiOrganizationId() : null;
-        } else {
-            LOG.info("ChatGPT is disabled.");
-        }
-        if (config != null && config.chatCompletionUrl() != null && !config.chatCompletionUrl().trim().isEmpty()) {
-            this.chatCompletionUrl = config.chatCompletionUrl().trim();
-        }
         if (isEnabled()) {
             PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                     .setDefaultConnectionConfig(ConnectionConfig.custom()
@@ -288,52 +247,16 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             this.httpAsyncClient.close(CloseMode.IMMEDIATE);
             this.httpAsyncClient = null;
         }
-        this.apiKey = null;
         this.defaultModel = null;
         this.imageModel = null;
         this.limiter = null;
         this.gptLimiter = null;
         this.bundleContext = null;
         this.templates.clear();
-        this.temperature = null;
-        this.seed = null;
         if (scheduledExecutorService != null) {
             scheduledExecutorService.shutdownNow();
             scheduledExecutorService = null;
         }
-    }
-
-    protected static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
-        String apiKey = null;
-        if (config != null) {
-            apiKey = config.openAiApiKey();
-            if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("$[secret")) {
-                LOG.info("Using OpenAI API key from configuration.");
-                return apiKey.trim();
-            }
-            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().trim().isEmpty()) {
-                try {
-                    apiKey = new String(Files.readAllBytes(Paths.get(config.openAiApiKeyFile())));
-                } catch (IOException e) {
-                    throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
-                }
-                if (!apiKey.trim().isEmpty()) {
-                    LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
-                    return apiKey.trim();
-                }
-            }
-        }
-        apiKey = System.getenv(OPENAI_API_KEY);
-        if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from environment variable.");
-            return apiKey.trim();
-        }
-        apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
-        if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from system property.");
-            return apiKey.trim();
-        }
-        return null;
     }
 
     @Override
@@ -390,6 +313,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
     }
 
+    // XXX
     protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration, String url) {
         String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
         String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
@@ -674,8 +598,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(request.getConfiguration() != null && request.getConfiguration().getTemperature() != null ?
-                request.getConfiguration().getTemperature() : temperature);
-        externalRequest.setSeed(request.getConfiguration() != null ? request.getConfiguration().getSeed() : seed);
+                request.getConfiguration().getTemperature() : null);
+        externalRequest.setSeed(request.getConfiguration() != null ? request.getConfiguration().getSeed() : null);
         if (request.getConfiguration() != null && request.getConfiguration().getAnswerType() == GPTConfiguration.AnswerType.JSON) {
             externalRequest.setResponseFormat(ChatCompletionRequest.JSON);
         }
@@ -727,10 +651,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     @Override
     public boolean isEnabled(GPTConfiguration gptConfig) {
-        return isEnabled() && (
-                apiKey != null && !apiKey.trim().isEmpty() ||
-                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().trim().isEmpty()
-        );
+        return isEnabled(); // XXX
     }
 
     protected void checkEnabled(GPTConfiguration gptConfig) {
@@ -928,16 +849,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         @AttributeDefinition(name = "Disable", description = "Disable the GPT Chat Completion Service", required = false)
         boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
 
-        @AttributeDefinition(name = "URL of the chat completion service",
-                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
-        String chatCompletionUrl();
-
-        @AttributeDefinition(name = "OpenAI API key", description = "OpenAI API key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .", required = false)
-        String openAiApiKey();
-
-        @AttributeDefinition(name = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization .", required = false)
-        String openAiOrganizationId();
-
         // alternatively, a key file
         @AttributeDefinition(name = "OpenAI API key file", required = false,
                 description = "Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
@@ -955,14 +866,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 description = "Optional, a model that is used if an image is given as input, e.g. gpt-4o. If not given, image recognition is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel() default DEFAULT_IMAGE_MODEL;
-
-        @AttributeDefinition(name = "Temperature", required = false,
-                description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0", defaultValue = "")
-        String temperature();
-
-        @AttributeDefinition(name = "seed", description = "If specified, OpenAI will make a best effort to sample deterministically, " +
-                "such that repeated requests with the same seed and parameters should return the same result.")
-        String seed() default "";
 
         @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
                 "That's about a twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
@@ -989,10 +892,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         @AttributeDefinition(name = "Maximum requests per day", required = false,
                 description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
         int requestsPerDay();
-
-        @AttributeDefinition(name = "URL of the embeddings service",
-                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
-        String embeddingsUrl();
 
         @AttributeDefinition(name = "Embeddings model", required = false,
                 description = "Optional model to use for the embeddings. The default is " + DEFAULT_EMBEDDINGS_MODEL + ".")

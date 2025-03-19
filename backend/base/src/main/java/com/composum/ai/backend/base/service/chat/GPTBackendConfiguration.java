@@ -26,28 +26,6 @@ public @interface GPTBackendConfiguration {
             description = "The base URL for the LLM API endpoint, e.g. https://api.openai.com/v1/chat/completions")
     String apiEndpoint();
 
-    @AttributeDefinition(name = "Connection Timeout",
-            description = "The connection timeout in seconds.",
-            defaultValue = "30", required = false)
-    int connectionTimeout();
-
-    @AttributeDefinition(name = "Request Timeout",
-            description = "The request timeout in seconds.",
-            defaultValue = "300", required = false)
-    int requestTimeout();
-
-    @AttributeDefinition(name = "Requests Per Minute", required = false,
-            description = "The maximum number of requests allowed per minute. Default currently 100.")
-    int requestsPerMinute();
-
-    @AttributeDefinition(name = "Requests Per Hour", required = false,
-            description = "The maximum number of requests allowed per hour. Default currently 1000.")
-    int requestsPerHour();
-
-    @AttributeDefinition(name = "Requests Per Day", required = false,
-            description = "The maximum number of requests allowed per day. Default currently 3000.")
-    int requestsPerDay();
-
     @AttributeDefinition(name = "Models",
             description = "Comma-separated list of supported models for this backend, e.g. gpt-4o,gpt-4o-mini,gpt-4.5-preview")
     String models();

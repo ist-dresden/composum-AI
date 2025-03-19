@@ -24,8 +24,6 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE)
     protected List<GPTBackendsConfigurationService> backendsConfigurationServices;
 
-    protected Map<String, RateLimiter> rateLimiters = Collections.synchronizedMap(new java.util.HashMap<>());
-
     @Nonnull
     @Override
     public List<String> getAllModels() {
@@ -34,9 +32,9 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
         }
         List<String> allModels = new ArrayList<>();
         for (GPTBackendsConfigurationService service : backendsConfigurationServices) {
-            allModels.addAll(service.getBackends().stream()
-                    .flatMap(backend -> service.getModelsForBackend(backend.backendId()).stream())
-                    .collect(Collectors.toList()));
+            for (GPTBackendConfiguration backend : service.getBackends()) {
+                allModels.addAll(service.getModelsForBackend(backend.backendId()));
+            }
         }
         return allModels;
     }
@@ -56,24 +54,4 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
         return null;
     }
 
-
-    @Nonnull
-    @Override
-    public RateLimiter getRateLimiter(@Nonnull String backendId) {
-        return rateLimiters.computeIfAbsent(backendId, id -> {
-            GPTBackendConfiguration config = getConfiguration(id);
-            if (config == null) {
-                throw new IllegalArgumentException("But: no configuration found for backendId: " + backendId);
-            }
-
-            int limitPerDay = config.requestsPerDay() > 0 ? config.requestsPerDay() : 3000;
-            RateLimiter dayLimiter = new RateLimiter(null, limitPerDay, 1, TimeUnit.DAYS);
-
-            int limitPerHour = config.requestsPerHour() > 0 ? config.requestsPerHour() : 1000;
-            RateLimiter hourLimiter = new RateLimiter(dayLimiter, limitPerHour, 1, TimeUnit.HOURS);
-
-            int limitPerMinute = config.requestsPerMinute() > 0 ? config.requestsPerMinute() : 100;
-            return new RateLimiter(hourLimiter, limitPerMinute, 1, TimeUnit.MINUTES);
-        });
-    }
 }

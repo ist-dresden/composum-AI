@@ -45,7 +45,7 @@ public class GPTBackendsConfigurationServiceImpl implements GPTBackendsConfigura
     @Override
     public List<String> getModelsForBackend(@Nonnull String backendId) {
         if (configuration != null && configuration.backendId().equals(backendId)) {
-            return Arrays.asList(configuration.models().split(","));
+            return Arrays.asList(configuration.models().trim().split("\\s*,\\s*"));
         }
         return Collections.emptyList();
     }

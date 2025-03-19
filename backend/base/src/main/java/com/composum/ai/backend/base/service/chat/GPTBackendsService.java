@@ -16,7 +16,4 @@ public interface GPTBackendsService {
     @Nullable
     GPTBackendConfiguration getConfiguration(@Nonnull String model);
 
-    @Nonnull
-    RateLimiter getRateLimiter(@Nonnull String backendId);
-
 }
