@@ -40,7 +40,7 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
     }
 
     @Override
-    public GPTBackendConfiguration getConfiguration(@Nonnull String model) {
+    public GPTBackendConfiguration getConfigurationForModel(@Nonnull String model) {
         if (backendsConfigurationServices == null) {
             return null;
         }

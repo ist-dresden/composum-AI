@@ -63,6 +63,8 @@ public class GPTConfiguration {
 
     private final Boolean highIntelligenceNeeded;
 
+    private final String model;
+
     private final Boolean debug;
 
     private final Double temperature;
@@ -107,6 +109,10 @@ public class GPTConfiguration {
     }
 
     public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools) {
+        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contexts, tools, null);
+    }
+
+    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools, String model) {
         this.apiKey = apiKey;
         this.answerType = answerType;
         this.organizationId = organizationId;
@@ -118,6 +124,7 @@ public class GPTConfiguration {
         this.seed = seed;
         this.contexts = contexts;
         this.tools = tools;
+        this.model = model;
     }
 
     /**
@@ -168,6 +175,11 @@ public class GPTConfiguration {
      */
     public boolean highIntelligenceNeededIsUnset() {
         return highIntelligenceNeeded == null;
+    }
+
+    /** If set, this determines the model to use. */
+    public String getModel() {
+        return model;
     }
 
     /**
@@ -260,7 +272,8 @@ public class GPTConfiguration {
             tools.addAll(other.tools);
         }
         tools = tools.isEmpty() ? null : Collections.unmodifiableList(tools);
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos, tools);
+        String model = this.model != null ? this.model : other.model;
+        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos, tools, model);
     }
 
     /**
@@ -321,6 +334,10 @@ public class GPTConfiguration {
         return new GPTConfiguration(null, null, null, null, null, highIntelligenceNeeded);
     }
 
+    public static GPTConfiguration ofModel(String model) {
+        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, null, null, model);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("GPTConfiguration{");
@@ -341,6 +358,9 @@ public class GPTConfiguration {
         }
         if (highIntelligenceNeeded != null) {
             sb.append(", highIntelligenceNeeded=").append(highIntelligenceNeeded);
+        }
+        if (model != null) {
+            sb.append(", model='").append(model).append('\'');
         }
         if (debug != null) {
             sb.append(", debug=").append(debug);

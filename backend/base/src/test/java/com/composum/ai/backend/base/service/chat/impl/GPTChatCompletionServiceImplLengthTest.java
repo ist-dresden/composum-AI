@@ -45,7 +45,6 @@ public class GPTChatCompletionServiceImplLengthTest {
     public void setUp() throws NoSuchFieldException {
         String key = System.getenv("OPENAI_API_KEY");
         assumeNotNull(key); // locally that's often set and is required for the test.
-        when(config.openAiApiKey()).thenReturn(key);
         when(config.connectionTimeout()).thenReturn(2);
         when(config.requestTimeout()).thenReturn(5);
         service.activate(config, bundleContext);

@@ -29,7 +29,6 @@ public class GPTChatCompletionServiceImplTest {
 
     @Before
     public void setUp() {
-        Mockito.when(config.openAiApiKey()).thenReturn("sk-abcdefg");
         service.activate(config, bundleContext);
     }
 

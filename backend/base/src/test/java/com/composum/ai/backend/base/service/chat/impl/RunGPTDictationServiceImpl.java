@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.core5.http.message.BasicHttpRequest;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 
@@ -22,7 +23,7 @@ public class RunGPTDictationServiceImpl {
             openAIHelper = mock(GPTInternalOpenAIHelper.class);
             GPTInternalOpenAIHelper.GPTInternalOpenAIHelperInst inst = new GPTInternalOpenAIHelper.GPTInternalOpenAIHelperInst() {
                 @Override
-                void initOpenAIRequest(@Nonnull HttpPost request, @Nullable GPTConfiguration configuration) {
+                void initRequest(@Nonnull BasicHttpRequest request, @Nullable GPTConfiguration configuration) {
                     String apiKey = System.getenv("OPENAI_API_KEY");
                     request.addHeader("Authorization", "Bearer " + apiKey);
                 }

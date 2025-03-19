@@ -4,9 +4,9 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.CharBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,6 +50,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.message.BasicHttpRequest;
 import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
@@ -57,17 +58,19 @@ import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
-import org.jsoup.internal.StringUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTBackendsService;
 import com.composum.ai.backend.base.service.chat.RateLimiter;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
@@ -116,7 +119,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
 
-    public static final String DEFAULT_MODEL = "gpt-4o-mini";
+    public static final String DEFAULT_MODEL = "gpt-4o";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4o";
     public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
     public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4o";
@@ -186,6 +189,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     protected String embeddingsUrl;
     protected String embeddingsModel;
+
+    @Reference
+    protected GPTBackendsService backendsService;
 
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
@@ -272,7 +278,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             }
             LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
             GPTCompletionCallback.GPTCompletionCollector callback = new GPTCompletionCallback.GPTCompletionCollector();
             CompletableFuture<Void> finished = new CompletableFuture<>();
             performCallAsync(finished, id, httpRequest, callback, 0, 2000);
@@ -313,16 +319,10 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
     }
 
-    // XXX
-    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration, String url) {
-        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
-        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
-        SimpleHttpRequest request = new SimpleHttpRequest("POST", url);
+    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        SimpleHttpRequest request = new SimpleHttpRequest("POST", "http://will.be.reconfiugured/");
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
-        request.addHeader("Authorization", "Bearer " + actualApiKey);
-        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
-            request.addHeader("OpenAI-Organization", actualOrganizationId);
-        }
+        initRequest(request, gptConfiguration);
         return request;
     }
 
@@ -347,7 +347,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 return;
             }
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
@@ -804,10 +804,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         request.setEncodingFormat("float");
         String jsonRequest = gson.toJson(request);
         LOG.trace("Sending embeddings request {} to GPT: {}", id, jsonRequest);
-        SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration, embeddingsUrl);
-        Future<SimpleHttpResponse> call = httpAsyncClient.execute(httpRequest, null);
+        SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration);
         String bodyText = null;
         try {
+            httpRequest.setUri(URI.create(embeddingsUrl));
+            Future<SimpleHttpResponse> call = httpAsyncClient.execute(httpRequest, null);
             SimpleHttpResponse response = call.get();
             bodyText = response.getBodyText();
             if (response.getCode() != HttpStatus.SC_OK) {
@@ -849,11 +850,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         @AttributeDefinition(name = "Disable", description = "Disable the GPT Chat Completion Service", required = false)
         boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
 
-        // alternatively, a key file
-        @AttributeDefinition(name = "OpenAI API key file", required = false,
-                description = "Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
-        String openAiApiKeyFile();
-
         @AttributeDefinition(name = "Default model", required = false,
                 description = "Default model to use for the chat completion. The default if not set is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
         String defaultModel() default DEFAULT_MODEL;
@@ -892,6 +888,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         @AttributeDefinition(name = "Maximum requests per day", required = false,
                 description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
         int requestsPerDay();
+
+
+        @AttributeDefinition(name = "URL of the embeddings service",
+                description = "Optional, if not OpenAI's default " + OPENAI_EMBEDDINGS_URL, required = false)
+        String embeddingsUrl();
 
         @AttributeDefinition(name = "Embeddings model", required = false,
                 description = "Optional model to use for the embeddings. The default is " + DEFAULT_EMBEDDINGS_MODEL + ".")
@@ -1012,13 +1013,39 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return this;
     }
 
+    protected String getModel(@Nullable GPTConfiguration gptConfiguration) {
+        if (gptConfiguration == null) {
+            return defaultModel;
+        }
+        if (gptConfiguration.getModel() != null) {
+            return gptConfiguration.getModel();
+        }
+        if (gptConfiguration.highIntelligenceNeededIsSet()) {
+            return highIntelligenceModel;
+        }
+        return defaultModel;
+    }
+
     @Override
-    void initOpenAIRequest(@Nonnull HttpPost request, @Nullable GPTConfiguration gptConfiguration) {
-        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
-        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
-        request.addHeader("Authorization", "Bearer " + actualApiKey);
-        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
-            request.addHeader("OpenAI-Organization", actualOrganizationId);
+    void initRequest(@Nonnull BasicHttpRequest request, @Nullable GPTConfiguration gptConfiguration) {
+        String model = gptConfiguration != null && gptConfiguration.getModel() != null ? gptConfiguration.getModel() : DEFAULT_MODEL;
+        GPTBackendConfiguration conf = backendsService.getConfigurationForModel(model);
+        if (conf == null) {
+            throw new IllegalArgumentException("No backend configuration for model " + model);
+        }
+        try {
+            request.setUri(new URI(conf.apiEndpoint()));
+        } catch (URISyntaxException e) {
+            LOG.error("Broken API URI for " + model + ": " + conf.backendId() + " - url: " + conf.apiEndpoint(), e);
+        }
+        if (conf.additionalHeader1Key() != null && !conf.additionalHeader1Value().isEmpty() && conf.additionalHeader1Value() != null) {
+            request.addHeader(conf.additionalHeader1Key().trim(), conf.additionalHeader1Value().trim());
+        }
+        if (conf.additionalHeader2Key() != null && !conf.additionalHeader2Value().isEmpty() && conf.additionalHeader2Value() != null) {
+            request.addHeader(conf.additionalHeader2Key().trim(), conf.additionalHeader2Value().trim());
+        }
+        if (conf.additionalHeader3Key() != null && !conf.additionalHeader3Value().isEmpty() && conf.additionalHeader3Value() != null) {
+            request.addHeader(conf.additionalHeader3Key().trim(), conf.additionalHeader3Value().trim());
         }
     }
 

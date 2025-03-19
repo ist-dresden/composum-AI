@@ -14,6 +14,6 @@ public interface GPTBackendsService {
     List<String> getAllModels();
 
     @Nullable
-    GPTBackendConfiguration getConfiguration(@Nonnull String model);
+    GPTBackendConfiguration getConfigurationForModel(@Nonnull String model);
 
 }

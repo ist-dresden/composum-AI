@@ -30,20 +30,20 @@ public @interface GPTBackendConfiguration {
             description = "Comma-separated list of supported models for this backend, e.g. gpt-4o,gpt-4o-mini,gpt-4.5-preview")
     String models();
 
-    @AttributeDefinition(name = "Additional Header 1 Key, e.g. Authorization", required = false,
+    @AttributeDefinition(name = "Additional Header 1 Key, e.g. 'Authorization'", required = false,
             description = "An optional additional HTTP header key for authentication or other purposes.")
     String additionalHeader1Key();
 
     @AttributeDefinition(name = "Additional Header 1 Value", required = false,
-            description = "The value for the first additional HTTP header, e.g. Bearer sk-xyz...")
+            description = "The value for the first additional HTTP header, e.g. 'Bearer sk-xyz...'")
     String additionalHeader1Value();
 
-    @AttributeDefinition(name = "Additional Header 2 Key, e.g. OpenAI-Organization", required = false,
-            description = "An optional second additional HTTP header key.")
+    @AttributeDefinition(name = "Additional Header 2 Key", required = false,
+            description = "An optional second additional HTTP header key, e.g. 'OpenAI-Organization'")
     String additionalHeader2Key();
 
     @AttributeDefinition(name = "Additional Header 2 Value", required = false,
-            description = "The value for the second additional HTTP header. e.g. org-xyz")
+            description = "The value for the second additional HTTP header. e.g. 'org-xyz'")
     String additionalHeader2Value();
 
     @AttributeDefinition(name = "Additional Header 3 Key", required = false,

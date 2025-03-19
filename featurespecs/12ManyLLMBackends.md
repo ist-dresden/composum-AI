@@ -61,6 +61,8 @@ While having a quite different [native API](https://docs.anthropic.com/en/api/me
 [OpenAI compatibility endpoint](https://docs.anthropic.com/en/api/openai-sdk) which covers practically everything we
 use as well. So we can avoid creating an alternative backend there.
 
+`curl https://api.anthropic.com/v1/models -H "x-api-key: $ANTHROPIC_API_KEY" -H "anthropic-version: 2023-06-01" | jq`
+
 ## Azure AI Foundry
 
 https://learn.microsoft.com/en-us/rest/api/aifoundry/modelinference/ seems to be OpenAI compatible, too.
