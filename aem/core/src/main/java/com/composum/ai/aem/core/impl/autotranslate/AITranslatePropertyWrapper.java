@@ -40,11 +40,6 @@ public class AITranslatePropertyWrapper {
     public static final String PROPERTY_AI_TRANSLATED_BY = "ai_translatedBy";
 
     /**
-     * Informationally, saves the model that was used.
-     */
-    public static final String PROPERTY_AI_TRANSLATED_MODEL = "ai_translatedModel";
-
-    /**
      * Prefix for property names of saved values.
      */
     public static final String AI_PREFIX = "ai_";
@@ -294,13 +289,6 @@ public class AITranslatePropertyWrapper {
         return getCurrentValue() != null && getCurrentValue().startsWith("<") && getCurrentValue().endsWith(">");
     }
 
-    /**
-     * @see #PROPERTY_AI_TRANSLATED_MODEL
-     */
-    public void setAiTranslatedModel(String value) {
-        setValue(PROPERTY_AI_TRANSLATED_MODEL, value);
-    }
-
     public boolean hasSavedTranslation() {
         return isNotBlank(getOriginalCopy()) && isNotBlank(getTranslatedCopy());
     }
@@ -325,6 +313,7 @@ public class AITranslatePropertyWrapper {
         };
     }
 
+    /** All keys about the property. */
     public String[] allAiKeys() {
         if (propertyName.startsWith(AI_PREFIX) || propertyName.startsWith(LC_PREFIX)) {
             throw new IllegalArgumentException("Property name must not start with " + AI_PREFIX + " or " + LC_PREFIX + ": " + propertyName);
@@ -339,7 +328,8 @@ public class AITranslatePropertyWrapper {
         };
     }
 
-    public String[] allGeneralKeys() {
+    /** All general keys for storing properties on a page. */
+    public String[] allPageKeys() {
         return new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE, AI_TRANSLATION_ERRORMARKER, AI_TRANSLATION_MODEL};
     }
 
@@ -347,7 +337,7 @@ public class AITranslatePropertyWrapper {
         List<String> keys = new ArrayList<>();
         keys.addAll(Arrays.asList(allLcKeys()));
         keys.addAll(Arrays.asList(allAiKeys()));
-        keys.addAll(Arrays.asList(allGeneralKeys()));
+        keys.addAll(Arrays.asList(allPageKeys()));
         return keys.toArray(new String[0]);
     }
 

@@ -89,6 +89,8 @@ public class AutoTranslateListModel {
             String otherModel = request.getParameter("otherModel");
             if ("otherModel".equals(translationmodel)) {
                 translationmodel = otherModel;
+            } else if ("default".equals(translationmodel)) {
+                translationmodel = null;
             }
             parms.model = defaultIfBlank(translationmodel, null);
             String maxdepth = request.getParameter("maxdepth");
