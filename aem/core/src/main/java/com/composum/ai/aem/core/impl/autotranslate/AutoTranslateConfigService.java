@@ -18,10 +18,7 @@ public interface AutoTranslateConfigService {
 
     boolean isEnabled();
 
-    /**
-     * If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation.
-     */
-    boolean isUseHighIntelligenceModel();
+    String getDefaultModel();
 
     boolean isTranslatableResource(@Nullable Resource resource);
 

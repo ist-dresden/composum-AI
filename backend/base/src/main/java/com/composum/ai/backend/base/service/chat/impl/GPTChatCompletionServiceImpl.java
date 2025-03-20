@@ -68,10 +68,9 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTBackendsService;
-import com.composum.ai.backend.base.service.chat.RateLimiter;
-import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
@@ -82,6 +81,7 @@ import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.base.service.chat.GPTToolCall;
+import com.composum.ai.backend.base.service.chat.RateLimiter;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
@@ -594,8 +594,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         boolean hasImage = messages.stream().flatMap(m -> m.getContent().stream())
                 .anyMatch(m -> m.getType() == ChatCompletionMessagePart.Type.IMAGE_URL);
         ChatCompletionRequest externalRequest = new ChatCompletionRequest();
-        boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().highIntelligenceNeededIsSet();
-        externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage && imageModel != null ? imageModel : defaultModel);
+        String model = determineModel(request.getConfiguration(), hasImage);
+        externalRequest.setModel(model);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(request.getConfiguration() != null && request.getConfiguration().getTemperature() != null ?
                 request.getConfiguration().getTemperature() : null);
@@ -614,6 +614,21 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         externalRequest.setStream(Boolean.TRUE);
         externalRequest.setTools(convertTools(request.getConfiguration()));
         return externalRequest;
+    }
+
+    protected String determineModel(GPTConfiguration configuration, boolean hasImage) {
+        boolean highIntelligenceRequired = configuration != null && configuration.highIntelligenceNeededIsSet();
+        String model;
+        if (configuration != null && configuration.getModel() != null && !configuration.getModel().trim().isEmpty()) {
+            model = configuration.getModel();
+        } else if (highIntelligenceRequired) {
+            model = highIntelligenceModel;
+        } else if (hasImage && imageModel != null && !imageModel.trim().isEmpty()) {
+            model = imageModel;
+        } else {
+            model = defaultModel;
+        }
+        return backendsService.getModelName(model);
     }
 
     private List<ChatTool> convertTools(GPTConfiguration configuration) {

@@ -248,10 +248,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
             }
         }
-        if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
-            configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
-        } else if (autoTranslateCaConfig.preferStandardModel()) {
-            configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
+        if (autoTranslateCaConfig.model() != null && !autoTranslateCaConfig.model().trim().isEmpty()) {
+            configuration = GPTConfiguration.ofModel(autoTranslateCaConfig.model()).merge(configuration);
+        }
+        if (translationParameters.model != null && !translationParameters.model.trim().isEmpty()) {
+            configuration = GPTConfiguration.ofModel(translationParameters.model).merge(configuration);
         }
 
         String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");

@@ -22,6 +22,13 @@
                                     <section class="coral-Form-fieldset"><h2
                                                 class="coral-Form-fieldset-legend">Translation Testing UI</h2>
                                         <span class="foundation-field-readonly coral-Form-fieldwrapper">
+                                            <coral-alert variant="error" data-sly-test="${model.disabled}">
+                                                <coral-alert-header>NOT CONFIGURED</coral-alert-header>
+                                                <coral-alert-content>The translation service is currently not enabled in the
+                                                    OSGI configuration and thus unavailable - please consult the
+                                                    documentation for further information.
+                                                </coral-alert-content>
+                                            </coral-alert>
                                             <span class="coral-Form-field foundation-layout-util-breakword">
                                                 With this form an automatic translation of a page or page tree can be done.
                                                 It assumes the given path is a live copy of the original language
@@ -56,7 +63,7 @@
                                             <label class="coral-Form-fieldlabel" for="maxdepth">MaxDepth: optional
                                                 maximum depth for recursion</label>
                                             <input class="coral-Form-field _coral-Textfield" type="text" name="maxdepth"
-                                                   is="coral-textfield" id="maxdepth" value="2"
+                                                   is="coral-textfield" id="maxdepth" value=""
                                                    placeholder="Optional maximum depth for recursion">
                                         </div>
                                         <!-- a text area with additional instructions. -->
@@ -77,6 +84,28 @@
                                             <coral-checkbox name="copyOriginalPage">
                                                 <label for="debugaddinstructions">Make a _aitranslate_bak copy of the page before triggering the translation. (Caution: overwrites previous copy, if there is one.)</label>
                                             </coral-checkbox>
+                                        </div>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <label class="coral-Form-fieldlabel" for="selectmodel">Model</label>
+                                            <coral-select class="coral-Form-field _coral-Dropdown"
+                                                          name="translationmodel"
+                                                          placeholder="" variant="default">
+                                                <coral-select-item value="default" selected="">default
+                                                </coral-select-item>
+                                                <coral-select-item
+                                                        data-sly-repeat.translationModel="${model.availableModels}"
+                                                        value="${translationModel}"
+                                                        data-sly-text="${translationModel}"></coral-select-item>
+                                                <coral-select-item value="otherModel">Other model</coral-select-item>
+                                            </coral-select>
+                                        </div>
+                                        <!-- text input for other model - normally hidden except if otherModel is selected. -->
+                                        <div class="coral-Form-fieldwrapper otherModel" style="display: none;">
+                                            <label class="coral-Form-fieldlabel" for="otherModel">Other model</label>
+                                            <input class="coral-Form-field _coral-Textfield" type="text"
+                                                   name="otherModel"
+                                                   is="coral-textfield" id="otherModel" value=""
+                                                   placeholder="Enter the name of the other model - possibly backendId:modelname .">
                                         </div>
                                         <button type="submit" class="coral-Button coral-Button--primary">
                                             Start Translation Process
@@ -134,7 +163,7 @@
             event.preventDefault();
             const form = $(this);
             const formData = form.serializeArray().reduce((obj, item) => {
-                obj[item.name] = item.value?.trim();
+                obj[item.name] = item?.value?.trim();
                 return obj;
             }, {});
             form.find('input[type="checkbox"]').each(function () {
@@ -201,6 +230,16 @@
 
         const bookmarklet = 'javascript:' + replaceUrlWithPath.toString() + 'replaceUrlWithPath();';
         $('#bookmarklet').attr('href', bookmarklet);
+
+        // make otherModel visible if otherModel is selected
+        $('coral-select[name="translationmodel"]').on('change', function () {
+            const selectedValue = $(this).val();
+            if (selectedValue === 'otherModel') {
+                $('.otherModel').show();
+            } else {
+                $('.otherModel').hide();
+            }
+        });
     });
 </script>
 </body>

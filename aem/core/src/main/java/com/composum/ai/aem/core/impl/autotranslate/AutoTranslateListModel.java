@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.service.chat.GPTBackendsService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -41,6 +43,9 @@ public class AutoTranslateListModel {
 
     @OSGiService
     private LiveRelationshipManager liveRelationshipManager;
+
+    @OSGiService
+    private GPTBackendsService backendsService;
 
     @Self
     private SlingHttpServletRequest request;
@@ -81,13 +86,11 @@ public class AutoTranslateListModel {
             }
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");
-            if ("standard".equals(translationmodel)) {
-                parms.preferStandardModel = true;
-            } else if ("highintelligence".equals(translationmodel)) {
-                parms.preferHighIntelligenceModel = true;
-            } else {
-                parms.preferHighIntelligenceModel = autoTranslateConfigService.isUseHighIntelligenceModel();
+            String otherModel = request.getParameter("otherModel");
+            if ("otherModel".equals(translationmodel)) {
+                translationmodel = otherModel;
             }
+            parms.model = defaultIfBlank(translationmodel, null);
             String maxdepth = request.getParameter("maxdepth");
             if (StringUtils.isNotBlank(maxdepth)) {
                 parms.maxDepth = Integer.parseInt(maxdepth);
@@ -157,6 +160,10 @@ public class AutoTranslateListModel {
             LOG.error("rollback failed for " + path, e);
             return "CAUTION: rollback failed for " + path + ": " + e.getMessage();
         }
+    }
+
+    public List<String> getAvailableModels() {
+        return backendsService.getAllModels();
     }
 
 }

@@ -110,8 +110,11 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
     }
 
     @Override
-    public boolean isUseHighIntelligenceModel() {
-        return config != null && config.useHighIntelligenceModel();
+    public String getDefaultModel() {
+        if (config != null && StringUtils.isNotBlank(config.defaultModel())) {
+            return config.defaultModel();
+        }
+        return null;
     }
 
     @Override

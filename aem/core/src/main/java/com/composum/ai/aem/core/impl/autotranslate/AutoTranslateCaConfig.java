@@ -13,21 +13,17 @@ public @interface AutoTranslateCaConfig {
             description = "Additional instructions for the automatic translation. Deprecated, please use 'Rules for additional Instructions' instead - if you do not give a path regex nor a content pattern the instructions will be used everywhere.")
     String additionalInstructions();
 
-    @Property(label = "Rules for additional Instructions", order = 2,
+    @Property(label = "Rules for additional Instructions", order = 5,
             description = "Rules that give additional instructions for translation if certain words or phrases are present in the page.")
     AutoTranslateRuleConfig[] rules() default {};
 
-    @Property(label = "Translation Tables", order = 3,
+    @Property(label = "Translation Tables", order = 10,
             description = "Translation tables for the automatic translation - XLS or CSV files of terms and their translations. This is an alternative to translation rules if there are many 'Translate X as Y' rules.")
     AutoTranslateTranslationTableConfig[] translationTables() default {};
 
-    @Property(label = "Prefer High Intelligence Model", order = 10,
-            description = "If set, the high intelligence model will be used for translation.")
-    boolean preferHighIntelligenceModel();
-
-    @Property(label = "Prefer Standard Model", order = 20,
-            description = "If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'.")
-    boolean preferStandardModel();
+    @Property(label = "Model", order = 20,
+            description = "The model to use for translation, if different form the global default. ")
+    String model();
 
     // String values "true" and "false" are used for boolean properties since we have three states: true, false, and unset.
     @Property(label = "Include Full Page during Retranslation", order = 30,
