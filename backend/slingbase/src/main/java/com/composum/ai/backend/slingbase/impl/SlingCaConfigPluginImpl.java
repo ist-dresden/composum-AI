@@ -29,7 +29,6 @@ import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPermissionConfiguration;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
-import com.composum.ai.backend.slingbase.model.OpenAIConfig;
 
 /**
  * Reads configurations using Sling context aware configuration.
@@ -65,6 +64,8 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
     @Nullable
     @Override
     public GPTConfiguration getGPTConfiguration(@Nonnull ResourceResolver resourceResolver, @Nonnull String contentPath) throws IllegalArgumentException {
+        return null; // currently there is no context specific configuration, but that will likely change.
+        /*
         if (!enabled) {
             return null;
         }
@@ -75,13 +76,9 @@ public class SlingCaConfigPluginImpl implements AIConfigurationPlugin {
         }
 
         ConfigurationBuilder confBuilder = Objects.requireNonNull(resource.adaptTo(ConfigurationBuilder.class));
-        OpenAIConfig config = confBuilder.as(OpenAIConfig.class);
         GPTConfiguration result = null;
-        if (StringUtils.isNotBlank(config.openAiApiKey())) {
-            result = new GPTConfiguration(config.openAiApiKey(), config.openAiOrganizationId(), null);
-        }
-        LOG.debug("found key: {}", result);
         return result;
+        */
     }
 
     @Nullable

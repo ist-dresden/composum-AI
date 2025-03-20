@@ -122,6 +122,9 @@ For backwards compatibility we leave the `ChatCompletion*` classes in
 
 GPTPromptLibrary example OSGI configuration and Sling CA configuration
 
+- remove / replace com.composum.ai.backend.slingbase.model.OpenAIConfig traces
+- update documentation
+
 ### Questions
 
 - configuration secrets only OSGI?

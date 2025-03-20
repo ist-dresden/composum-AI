@@ -51,10 +51,6 @@ public class GPTConfiguration {
 //        REQUIRED
 //    }
 
-    private final String apiKey;
-
-    private final String organizationId;
-
     private final AnswerType answerType;
 
     private final String additionalInstructions;
@@ -76,46 +72,44 @@ public class GPTConfiguration {
     private final List<GPTTool> tools;
 
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType) {
-        this(apiKey, organizationId, answerType, null);
+    public GPTConfiguration(@Nullable AnswerType answerType) {
+        this(answerType, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions) {
-        this(apiKey, organizationId, answerType, additionalInstructions, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions) {
+        this(answerType, additionalInstructions, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode) {
+        this(answerType, additionalInstructions, mode, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded) {
+        this(answerType, additionalInstructions, mode, highIntelligenceNeeded, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug) {
+        this(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature) {
+        this(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed) {
+        this(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contexts, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts) {
+        this(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contexts, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools) {
-        this(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contexts, tools, null);
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools) {
+        this(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contexts, tools, null);
     }
 
-    public GPTConfiguration(@Nullable String apiKey, @Nullable String organizationId, @Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools, String model) {
-        this.apiKey = apiKey;
+    public GPTConfiguration(@Nullable AnswerType answerType, @Nullable String additionalInstructions, @Nullable Mode mode, @Nullable Boolean highIntelligenceNeeded, @Nullable Boolean debug, @Nullable Double temperature, @Nullable Integer seed, @Nullable List<GPTContextInfo> contexts, List<GPTTool> tools, String model) {
         this.answerType = answerType;
-        this.organizationId = organizationId;
         this.additionalInstructions = additionalInstructions;
         this.mode = mode;
         this.highIntelligenceNeeded = highIntelligenceNeeded;
@@ -125,20 +119,6 @@ public class GPTConfiguration {
         this.contexts = contexts;
         this.tools = tools;
         this.model = model;
-    }
-
-    /**
-     * The API key to use with ChatGPT or another service. If this isnot set, we will try to fall back to global configurations.
-     */
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    /**
-     * The organization id to use with ChatGPT. If this is not set, we will try to fall back to global configurations.
-     */
-    public String getOrganizationId() {
-        return organizationId;
     }
 
     /**
@@ -177,7 +157,9 @@ public class GPTConfiguration {
         return highIntelligenceNeeded == null;
     }
 
-    /** If set, this determines the model to use. */
+    /**
+     * If set, this determines the model to use.
+     */
     public String getModel() {
         return model;
     }
@@ -234,14 +216,6 @@ public class GPTConfiguration {
         if (other == null) {
             return this;
         }
-        String apiKey = this.apiKey != null ? this.apiKey : other.apiKey;
-        if (!override && this.apiKey != null && other.apiKey != null && !this.apiKey.equals(other.apiKey)) {
-            throw new IllegalArgumentException("Cannot merge conflicting API keys: " + this.apiKey + " vs. " + other.apiKey);
-        }
-        String organizationId = this.organizationId != null ? this.organizationId : other.organizationId;
-        if (!override && this.organizationId != null && other.organizationId != null && !this.organizationId.equals(other.organizationId)) {
-            throw new IllegalArgumentException("Cannot merge conflicting organization ids: " + this.organizationId + " vs. " + other.organizationId);
-        }
         AnswerType answerType = this.answerType != null ? this.answerType : other.answerType;
         if (!override && this.answerType != null && other.answerType != null && !this.answerType.equals(other.answerType)) {
             throw new IllegalArgumentException("Cannot merge conflicting answer types: " + this.answerType + " vs. " + other.answerType);
@@ -273,7 +247,7 @@ public class GPTConfiguration {
         }
         tools = tools.isEmpty() ? null : Collections.unmodifiableList(tools);
         String model = this.model != null ? this.model : other.model;
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos, tools, model);
+        return new GPTConfiguration(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, contextInfos, tools, model);
     }
 
     /**
@@ -287,7 +261,7 @@ public class GPTConfiguration {
      * Returns a copy with the contexts replaced.
      */
     public GPTConfiguration replaceContexts(List<GPTContextInfo> newContexts) {
-        return new GPTConfiguration(apiKey, organizationId, answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, newContexts);
+        return new GPTConfiguration(answerType, additionalInstructions, mode, highIntelligenceNeeded, debug, temperature, seed, newContexts);
     }
 
     /**
@@ -303,17 +277,17 @@ public class GPTConfiguration {
      */
     @Nonnull
     public static GPTConfiguration ofRichText(boolean richText) {
-        return new GPTConfiguration(null, null, richText ? AnswerType.HTML : AnswerType.MARKDOWN);
+        return new GPTConfiguration(richText ? AnswerType.HTML : AnswerType.MARKDOWN);
     }
 
     @Nonnull
     public static GPTConfiguration ofAdditionalInstructions(@Nullable String additionalInstructions) {
-        return new GPTConfiguration(null, null, null, additionalInstructions);
+        return new GPTConfiguration(null, additionalInstructions);
     }
 
     @Nonnull
     public static GPTConfiguration ofContexts(@Nullable List<GPTContextInfo> contexts) {
-        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, contexts);
+        return new GPTConfiguration(null, null, null, null, null, null, null, contexts);
     }
 
     @Nonnull
@@ -323,30 +297,24 @@ public class GPTConfiguration {
 
     @Nonnull
     public static GPTConfiguration ofTools(@Nullable List<GPTTool> tools) {
-        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, null, tools);
+        return new GPTConfiguration(null, null, null, null, null, null, null, null, tools);
     }
 
     public static GPTConfiguration ofTemperature(Double temperature) {
-        return new GPTConfiguration(null, null, null, null, null, null, null, temperature);
+        return new GPTConfiguration(null, null, null, null, null, temperature);
     }
 
     public static GPTConfiguration ofHighIntelligenceNeeded(Boolean highIntelligenceNeeded) {
-        return new GPTConfiguration(null, null, null, null, null, highIntelligenceNeeded);
+        return new GPTConfiguration(null, null, null, highIntelligenceNeeded);
     }
 
     public static GPTConfiguration ofModel(String model) {
-        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, null, null, model);
+        return new GPTConfiguration(null, null, null, null, null, null, null, null, null, model);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("GPTConfiguration{");
-        if (apiKey != null) {
-            sb.append("apiKey='").append(apiKey).append('\'');
-        }
-        if (organizationId != null) {
-            sb.append(", organizationId='").append(organizationId).append('\'');
-        }
         if (answerType != null) {
             sb.append(", answerType=").append(answerType);
         }
@@ -377,39 +345,26 @@ public class GPTConfiguration {
         return sb.append('}').toString();
     }
 
-    public static final GPTConfiguration MARKDOWN = new GPTConfiguration(null, null, AnswerType.MARKDOWN);
-    public static final GPTConfiguration HTML = new GPTConfiguration(null, null, AnswerType.HTML);
-    public static final GPTConfiguration JSON = new GPTConfiguration(null, null, AnswerType.JSON);
-    public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, null, null, Mode.CHAT);
-    public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, null, null, Mode.GENERATE);
-    public static final GPTConfiguration NULLCFG = new GPTConfiguration(null, null, null);
+    public static final GPTConfiguration MARKDOWN = new GPTConfiguration(AnswerType.MARKDOWN);
+    public static final GPTConfiguration HTML = new GPTConfiguration(AnswerType.HTML);
+    public static final GPTConfiguration JSON = new GPTConfiguration(AnswerType.JSON);
+    public static final GPTConfiguration CHAT = new GPTConfiguration(null, null, Mode.CHAT);
+    public static final GPTConfiguration GENERATE = new GPTConfiguration(null, null, Mode.GENERATE);
+    public static final GPTConfiguration NULLCFG = new GPTConfiguration(null);
 
     /**
      * Requests slower and more expensive "high intelligence" model - use sparingly.
      */
-    public static final GPTConfiguration HIGH_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, true);
+    public static final GPTConfiguration HIGH_INTELLIGENCE = new GPTConfiguration(null, null, null, true);
     /**
      * Requests faster and less expensive "normal intelligence" model.
      */
-    public static final GPTConfiguration STANDARD_INTELLIGENCE = new GPTConfiguration(null, null, null, null, null, false);
+    public static final GPTConfiguration STANDARD_INTELLIGENCE = new GPTConfiguration(null, null, null, false);
 
     /**
      * If set, the AI services will not call the AI but return the JSON request as response, for debugging purposes.
      */
-    public static final GPTConfiguration DEBUG = new GPTConfiguration(null, null, null, null, null, null, true);
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GPTConfiguration)) return false;
-        GPTConfiguration that = (GPTConfiguration) o;
-        return Objects.equals(getApiKey(), that.getApiKey()) && getAnswerType() == that.getAnswerType();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getApiKey(), getAnswerType());
-    }
+    public static final GPTConfiguration DEBUG = new GPTConfiguration(null, null, null, null, true);
 
 
     /**

@@ -371,7 +371,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     }
 
     protected GPTConfiguration getServiceConfiguration() {
-        return new GPTConfiguration(null, null, null, null, null, null, null, temperature, seed);
+        return new GPTConfiguration(null, null, null, null, null, temperature, seed);
     }
 
     /**
