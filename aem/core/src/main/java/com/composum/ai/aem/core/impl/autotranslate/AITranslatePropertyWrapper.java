@@ -106,6 +106,11 @@ public class AITranslatePropertyWrapper {
      */
     public static final String AI_TRANSLATION_ERRORMARKER = "ai_translationError";
 
+    /**
+     * Attribute that is set on jcr:content of a page on successful translation: saves the model it was translated with.
+     */
+    public static final String AI_TRANSLATION_MODEL = "ai_translationModel";
+
     private final ModifiableValueMap targetValueMap;
     private final String propertyName;
     private final ValueMap sourceValueMap;
@@ -335,7 +340,7 @@ public class AITranslatePropertyWrapper {
     }
 
     public String[] allGeneralKeys() {
-        return new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE};
+        return new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE, AI_TRANSLATION_ERRORMARKER, AI_TRANSLATION_MODEL};
     }
 
     public String[] allKeys() {
@@ -401,8 +406,10 @@ public class AITranslatePropertyWrapper {
         return "AITranslatePropertyWrapper(" + propertyName + ')';
     }
 
-    /** If there is a new original and new translation saved, we have to overwrite the property with that if the
-     * inheritance is reenabled since that is newer than the original value - basically synchronization. */
+    /**
+     * If there is a new original and new translation saved, we have to overwrite the property with that if the
+     * inheritance is reenabled since that is newer than the original value - basically synchronization.
+     */
     public void adjustForReenableInheritance() {
         if (StringUtils.isNotBlank(getNewOriginalCopy()) && StringUtils.isNotBlank(getNewTranslatedCopy())) {
             setOriginalCopy(getNewOriginalCopy());

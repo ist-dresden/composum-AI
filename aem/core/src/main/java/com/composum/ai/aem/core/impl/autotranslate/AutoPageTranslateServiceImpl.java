@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
@@ -416,12 +417,15 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
         if (configuration != null) {
             targetWrapper.setAiTranslatedModel(configuration.highIntelligenceNeededIsSet() ? "hi" : "standard");
+            if (configuration.getModel() != null) {
+                valueMap.put(AI_TRANSLATION_MODEL, configuration.getModel());
+            }
         }
         if (liveRelationship != null) {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
                     liveRelationship, targetWrapper.allGeneralKeys(), false);
         }
-        valueMap.put(AI_TRANSLATION_ERRORMARKER, Boolean.FALSE); // reset error marker if there was one.
+        valueMap.remove(AI_TRANSLATION_ERRORMARKER); // reset error marker if there was one.
     }
 
     /**
