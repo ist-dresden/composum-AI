@@ -38,7 +38,6 @@ import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
@@ -271,14 +270,16 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
-            String jsonRequest = createJsonRequest(request);
+            ChatCompletionRequest externalRequest = createExternalRequest(request);
+            String jsonRequest = gson.toJson(externalRequest);
             if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
-                LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, jsonRequest);
+                LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, externalRequest);
                 return jsonRequest;
             }
-            LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
+            LOG.debug("Sending request {} to GPT: {}", id, externalRequest);
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
+            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configWithModel);
             GPTCompletionCallback.GPTCompletionCollector callback = new GPTCompletionCallback.GPTCompletionCollector();
             CompletableFuture<Void> finished = new CompletableFuture<>();
             performCallAsync(finished, id, httpRequest, callback, 0, 2000);
@@ -320,6 +321,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     }
 
     protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        checkTokenCount(jsonRequest);
         SimpleHttpRequest request = new SimpleHttpRequest("POST", "http://will.be.reconfiugured/");
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
         initRequest(request, gptConfiguration);
@@ -332,7 +334,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
-            String jsonRequest = createJsonRequest(request);
+            ChatCompletionRequest externalRequest = createExternalRequest(request);
+            String jsonRequest = gson.toJson(externalRequest);
             callback.setRequest(jsonRequest);
             if (LOG.isDebugEnabled()) {
                 // replace data:image/jpeg;base64,{base64_image} with data:image/jpeg;base64, ...
@@ -347,7 +350,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 return;
             }
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration());
+            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configWithModel);
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
@@ -571,7 +575,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return delay * 2;
     }
 
-    protected String createJsonRequest(GPTChatRequest request) throws JsonProcessingException {
+    protected ChatCompletionRequest createExternalRequest(GPTChatRequest request) throws JsonProcessingException {
         List<ChatCompletionMessage> messages = new ArrayList<>();
         for (GPTChatMessage message : request.getMessages()) {
             messages.add(ChatCompletionMessage.make(message));
@@ -589,13 +593,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
         boolean hasImage = messages.stream().flatMap(m -> m.getContent().stream())
                 .anyMatch(m -> m.getType() == ChatCompletionMessagePart.Type.IMAGE_URL);
-        if (hasImage && imageModel == null) {
-            LOG.error("No image model configured - defaultModel {} imageModel {}", defaultModel, imageModel);
-            throw new IllegalArgumentException("Cannot use image as input, no image model configured.");
-        }
         ChatCompletionRequest externalRequest = new ChatCompletionRequest();
         boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().highIntelligenceNeededIsSet();
-        externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
+        externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage && imageModel != null ? imageModel : defaultModel);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(request.getConfiguration() != null && request.getConfiguration().getTemperature() != null ?
                 request.getConfiguration().getTemperature() : null);
@@ -613,9 +613,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
         externalRequest.setStream(Boolean.TRUE);
         externalRequest.setTools(convertTools(request.getConfiguration()));
-        String jsonRequest = gson.toJson(externalRequest);
-        checkTokenCount(jsonRequest);
-        return jsonRequest;
+        return externalRequest;
     }
 
     private List<ChatTool> convertTools(GPTConfiguration configuration) {
