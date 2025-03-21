@@ -10,12 +10,7 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.model-list {
-  list-style: none;
-  padding-left: 0;
-}
-
-.model-list li {
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #ddd;
+/* Additional styling for form groups */
+.form-group {
+  margin-bottom: 1rem;
 }

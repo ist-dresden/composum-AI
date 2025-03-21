@@ -1,21 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GPT Model List</title>
-  <link rel="stylesheet" href="${resource.path}/autotranslatemodelcompare.css">
-  <script src="${resource.path}/autotranslatemodelcompare.js" defer></script>
+    <meta charset="UTF-8">
+    <title>Autotranslate Model Comparison</title>
+    <link rel="stylesheet" href="${resource.path}/autotranslatemodelcompare.css">
+    <script src="${resource.path @ context='attribute'}/autotranslatemodelcompare.js" defer></script>
 </head>
-<body>
-  <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutotranslateModelCompareModel">
-    <div class="container">
-      <h2>Available GPT Models</h2>
-      <ul class="model-list">
-        <sly data-sly-list.modelName="${model.models}">
-          <li>${modelName}</li>
-        </sly>
-      </ul>
-    </div>
-  </sly>
+<body data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutotranslateModelCompareModel">
+<div class="container-fluid">
+    <h1>Autotranslate Model Comparison</h1>
+    <p>This page demonstrates translation of text using multiple GPT models. Select the models, specify the target
+        language, enter the text to translate, and click the button below to see the results.</p>
+    <form method="post">
+        <div class="form-group">
+            <h3>Select Models</h3>
+            <div>
+                <sly data-sly-list.modelName="${model.models}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="selectedModels" id="model-${modelName}"
+                               value="${modelName}" selected="selected">
+                        <label class="form-check-label" for="model-${modelName}">
+                            ${modelName}
+                        </label>
+                    </div>
+                </sly>
+            </div>
+            <input type="hidden" name=":cq_csrf_token">
+            <button type="button" id="select-all" class="btn btn-secondary btn-sm">Select All</button>
+            <button type="button" id="clear-all" class="btn btn-secondary btn-sm">Clear All</button>
+        </div>
+
+        <div class="form-group">
+            <h3>Target Language</h3>
+            <input type="text" id="target-language" name="targetLanguage" class="form-control"
+                   placeholder="Enter target language (e.g., en, de, French)">
+        </div>
+
+        <div class="form-group">
+            <h3>Text to Translate</h3>
+            <textarea id="translation-text" name="text" class="form-control"
+                      placeholder="Enter text to translate"></textarea>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" id="submit-button" class="btn btn-primary">Translate into All Selected Languages</button>
+        </div>
+    </form>
+
+    <sly data-sly-test="${model.results}">
+        <h2>Translation Results</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Model</th>
+                <th>Translation</th>
+            </tr>
+            </thead>
+            <tbody>
+            <sly data-sly-list.result="${model.results}">
+                <tr>
+                    <td>${result.model}</td>
+                    <td>${result.translation}</td>
+                </tr>
+            </sly>
+            </tbody>
+        </table>
+    </sly>
+</div>
 </body>
 </html>
