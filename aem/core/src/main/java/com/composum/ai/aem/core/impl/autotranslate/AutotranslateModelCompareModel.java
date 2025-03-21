@@ -54,6 +54,9 @@ public class AutotranslateModelCompareModel {
     }
 
     public String getError() {
+        if (request.getMethod().equalsIgnoreCase("GET")) {
+            return null;
+        }
         StringBuilder error = new StringBuilder();
         if (text == null || text.trim().isEmpty()) {
             error.append("Please enter some text to translate.");

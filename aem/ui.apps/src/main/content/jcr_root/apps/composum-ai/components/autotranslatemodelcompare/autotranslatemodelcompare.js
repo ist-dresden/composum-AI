@@ -63,18 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // The submit button should refresh the cq_csrf_token input and then submit the form
     submitButton.addEventListener("click", (event) => {
+        event.preventDefault();
         fetch('/libs/granite/csrf/token.json').then(response => {
-            debugger;
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            document.getElementById('loading-spinner').style.display='inline';
             return response.json();
         }).then(data => {
-            debugger;
             const csrfTokenInput = document.querySelector('input[name=":cq_csrf_token"]');
             csrfTokenInput.value = data.token;
             document.forms[0].submit();
         }).catch(error => {
+            document.getElementById('error-message').innerText = "Error: " + error.message;
             console.error('There was a problem with the fetch operation:', error);
         });
     });
