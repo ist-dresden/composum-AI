@@ -13,6 +13,7 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
+import com.adobe.granite.translation.api.TranslationResult;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
@@ -109,7 +110,11 @@ public class AutotranslateModelCompareModel {
                             tr.seconds = (int) (System.currentTimeMillis() - startTime);
                         }
                     };
-                    gptTranslationService.streamingSingleTranslation(text, null, targetLanguage, configuration, collector);
+                    try {
+                        gptTranslationService.streamingSingleTranslation(text, null, targetLanguage, configuration, collector);
+                    } catch (Exception e) {
+                        translationFuture.complete("Error: " + e);
+                    }
                     results.add(tr);
                 }
             }
@@ -132,6 +137,7 @@ public class AutotranslateModelCompareModel {
         }
 
         public int getSeconds() {
+            getTranslation(); // make sure it's already done and this is actually set.
             return seconds;
         }
 

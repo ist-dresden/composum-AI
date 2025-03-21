@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Autotranslate Model Comparison</title>
     <link rel="stylesheet" href="${resource.path}/autotranslatemodelcompare.css">
-    <script src="${resource.path}/autotranslatemodelcompare.js" defer></script>
+    <script src="${resource.path @ context='attribute'}/autotranslatemodelcompare.js" defer></script>
 </head>
 <body data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutotranslateModelCompareModel">
 <div class="container-fluid">
@@ -31,16 +31,15 @@
                             </label>
                         </div>
                     </sly>
+                    <span id="additional-models-container"></span>
                 </div>
-                <div class="ms-2">
-                </div>
-                <div id="additional-models-container" class="ms-2 d-flex flex-wrap align-items-center"></div>
             </div>
             <input type="hidden" name=":cq_csrf_token">
             <div class="mt-2 form-inline">
                 <button type="button" id="select-all" class="btn btn-secondary btn-sm">Select All</button>
                 <button type="button" id="clear-all" class="btn btn-secondary btn-sm">Clear All</button>
-                <input type="text" id="additional-models" name="additionalModels" placeholder="Additional Models: (comma separated list)">
+                <input type="text" id="additional-models" name="additionalModels" style="width: 70ex;"
+                       placeholder="Additional Models: (comma separated list)">
             </div>
         </div>
 
