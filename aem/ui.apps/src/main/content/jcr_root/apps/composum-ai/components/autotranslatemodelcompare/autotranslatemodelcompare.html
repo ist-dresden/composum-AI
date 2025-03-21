@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GPT Model List</title>
+  <link rel="stylesheet" href="${resource.path}/autotranslatemodelcompare.css">
+  <script src="${resource.path}/autotranslatemodelcompare.js" defer></script>
+</head>
+<body>
+  <sly data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutotranslateModelCompareModel">
+    <div class="container">
+      <h2>Available GPT Models</h2>
+      <ul class="model-list">
+        <sly data-sly-list.modelName="${model.models}">
+          <li>${modelName}</li>
+        </sly>
+      </ul>
+    </div>
+  </sly>
+</body>
+</html>
