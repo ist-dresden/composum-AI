@@ -14,3 +14,11 @@
 .form-group {
   margin-bottom: 1rem;
 }
+
+/* Grid layout for model checkboxes */
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}

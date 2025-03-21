@@ -19,12 +19,14 @@ The page should be as follows:
 
 - Title
 - Explanation what the page does
-- checkboxes for all available models
+- checkboxes for all available models. They should be layouted so that space is saved - several on one line.
 - buttons to select all models or clear all selections
 - textarea to input the text to translate
 - translate into all selected languages button. That triggers a POST to the page itself.
 - table with the translation results: headline with model name and then the translated text. The table is only 
   present when the page is called with parameters for models and text to translate
+
+The page width should be fully used.
 
 ## Architecture
 

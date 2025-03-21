@@ -118,7 +118,6 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         ensureEnabled();
 
         if (text == null || text.trim().isEmpty() ||
-                sourceLanguage == null || sourceLanguage.trim().isEmpty() ||
                 targetLanguage == null || targetLanguage.trim().isEmpty()) {
             throw new IllegalArgumentException("Empty text or languages");
         }
