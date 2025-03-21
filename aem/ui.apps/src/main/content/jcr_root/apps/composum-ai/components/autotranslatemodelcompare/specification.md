@@ -20,7 +20,9 @@ The page should be as follows:
 - Title
 - Explanation what the page does
 - checkboxes for all available models. They should be in a inline layout so that space is saved.
-- buttons to select all models or clear all selections
+- buttons to select all models or clear all selections. On the same line there should be a textbox with 
+  placeholder 'Additional models (comma separated list) takes a comma separated list of additional models. 
+  When changed, those are added to the checkboxes. Take care to also remove them when they disappear in the textbox.  
 - textarea to input the text to translate
 - translate into all selected languages button. That triggers a POST to the page itself.
 - table with the translation results: headline with model name and timing in milliseconds, and then the translated 

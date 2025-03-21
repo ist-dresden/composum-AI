@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Autotranslate Model Comparison</title>
     <link rel="stylesheet" href="${resource.path}/autotranslatemodelcompare.css">
-    <script src="${resource.path @ context='attribute'}/autotranslatemodelcompare.js" defer></script>
+    <script src="${resource.path}/autotranslatemodelcompare.js" defer></script>
 </head>
 <body data-sly-use.model="com.composum.ai.aem.core.impl.autotranslate.AutotranslateModelCompareModel">
 <div class="container-fluid">
@@ -19,20 +19,29 @@
     <form method="post">
         <div class="form-group">
             <h3>Select Models</h3>
-    <div>
-                <sly data-sly-list.modelName="${model.models}">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="selectedModels" id="model-${modelName}"
-                               value="${modelName}" checked>
-                        <label class="form-check-label" for="model-${modelName}">
-                            ${modelName}
-                        </label>
-                    </div>
-                </sly>
+            <div class="d-flex flex-wrap align-items-center">
+                <div id="static-models">
+                    <sly data-sly-list.modelName="${model.models}">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="selectedModels"
+                                   id="model-${modelName}"
+                                   value="${modelName}" checked>
+                            <label class="form-check-label" for="model-${modelName}">
+                                ${modelName}
+                            </label>
+                        </div>
+                    </sly>
+                </div>
+                <div class="ms-2">
+                </div>
+                <div id="additional-models-container" class="ms-2 d-flex flex-wrap align-items-center"></div>
             </div>
             <input type="hidden" name=":cq_csrf_token">
-            <button type="button" id="select-all" class="btn btn-secondary btn-sm">Select All</button>
-            <button type="button" id="clear-all" class="btn btn-secondary btn-sm">Clear All</button>
+            <div class="mt-2 form-inline">
+                <button type="button" id="select-all" class="btn btn-secondary btn-sm">Select All</button>
+                <button type="button" id="clear-all" class="btn btn-secondary btn-sm">Clear All</button>
+                <input type="text" id="additional-models" name="additionalModels" placeholder="Additional Models: (comma separated list)">
+            </div>
         </div>
 
         <div class="form-group">
@@ -48,7 +57,8 @@
         </div>
 
         <div class="form-group">
-            <button type="submit" id="submit-button" class="btn btn-primary">Translate into All Selected Languages</button>
+            <button type="submit" id="submit-button" class="btn btn-primary">Translate into All Selected Languages
+            </button>
             <span id="loading-spinner" style="display: none;">
                 (Loading, please stand by...)
             </span>

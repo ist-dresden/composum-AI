@@ -90,7 +90,8 @@ public class AutotranslateModelCompareModel {
                     GPTConfiguration configuration = GPTConfiguration.ofModel(modelName);
                     CompletableFuture<String> translationFuture = new CompletableFuture<>();
                     long startTime = System.currentTimeMillis();
-                    final TranslationResult translationResult[] = new TranslationResult[1];
+
+                    TranslationResult tr = new TranslationResult(modelName, translationFuture);
                     GPTCompletionCallback.GPTCompletionCollector collector = new GPTCompletionCallback.GPTCompletionCollector() {
                         @Override
                         public void onFinish(GPTFinishReason finishReason) {
@@ -99,17 +100,17 @@ public class AutotranslateModelCompareModel {
                             } else {
                                 translationFuture.complete(this.getResult() + "\n\nError: " + finishReason);
                             }
-                            translationResult[0].seconds = (int) (System.currentTimeMillis() - startTime);
+                            tr.seconds = (int) (System.currentTimeMillis() - startTime);
                         }
 
                         @Override
                         public void onError(Throwable throwable) {
                             translationFuture.complete(this.getResult() + "\n\nError: " + throwable);
+                            tr.seconds = (int) (System.currentTimeMillis() - startTime);
                         }
                     };
                     gptTranslationService.streamingSingleTranslation(text, null, targetLanguage, configuration, collector);
-                    translationResult[0] = new TranslationResult(modelName, translationFuture);
-                    results.add(translationResult[0]);
+                    results.add(tr);
                 }
             }
         }
