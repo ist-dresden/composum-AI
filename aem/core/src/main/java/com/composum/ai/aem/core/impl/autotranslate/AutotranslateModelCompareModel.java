@@ -13,7 +13,6 @@ import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
-import com.adobe.granite.translation.api.TranslationResult;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
@@ -90,6 +89,8 @@ public class AutotranslateModelCompareModel {
                 for (String modelName : selectedModels) {
                     GPTConfiguration configuration = GPTConfiguration.ofModel(modelName);
                     CompletableFuture<String> translationFuture = new CompletableFuture<>();
+                    long startTime = System.currentTimeMillis();
+                    final TranslationResult translationResult[] = new TranslationResult[1];
                     GPTCompletionCallback.GPTCompletionCollector collector = new GPTCompletionCallback.GPTCompletionCollector() {
                         @Override
                         public void onFinish(GPTFinishReason finishReason) {
@@ -98,6 +99,7 @@ public class AutotranslateModelCompareModel {
                             } else {
                                 translationFuture.complete(this.getResult() + "\n\nError: " + finishReason);
                             }
+                            translationResult[0].seconds = (int) (System.currentTimeMillis() - startTime);
                         }
 
                         @Override
@@ -106,7 +108,8 @@ public class AutotranslateModelCompareModel {
                         }
                     };
                     gptTranslationService.streamingSingleTranslation(text, null, targetLanguage, configuration, collector);
-                    results.add(new TranslationResult(modelName, translationFuture));
+                    translationResult[0] = new TranslationResult(modelName, translationFuture);
+                    results.add(translationResult[0]);
                 }
             }
         }
@@ -116,6 +119,7 @@ public class AutotranslateModelCompareModel {
     public static class TranslationResult {
         private final String model;
         private final CompletableFuture<String> translationFuture;
+        private int seconds;
 
         public TranslationResult(String model, CompletableFuture<String> translationFuture) {
             this.model = model;
@@ -124,6 +128,10 @@ public class AutotranslateModelCompareModel {
 
         public String getModel() {
             return model;
+        }
+
+        public int getSeconds() {
+            return seconds;
         }
 
         public String getTranslation() {
