@@ -166,6 +166,9 @@
                 obj[item.name] = item?.value?.trim();
                 return obj;
             }, {});
+            form.find('coral-select').each(function () {
+                formData[this.name] = this.value;
+            });
             form.find('input[type="checkbox"]').each(function () {
                 const field = $(this);
                 formData[field.attr('name')] = field.prop('checked');
@@ -190,6 +193,9 @@
             form.find('input, textarea, select').each(function () {
                 const field = $(this);
                 field.val(formData[field.attr('name')] || '');
+            });
+            form.find('coral-select').each(function () {
+                this.value = formData[this.name] || '';
             });
             form.find('input[type="checkbox"]').each(function () {
                 const field = $(this);
