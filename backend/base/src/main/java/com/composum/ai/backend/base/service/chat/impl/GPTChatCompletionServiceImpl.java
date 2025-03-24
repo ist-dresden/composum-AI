@@ -271,6 +271,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
             ChatCompletionRequest externalRequest = createExternalRequest(request);
+            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
+            externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
             String jsonRequest = gson.toJson(externalRequest);
             if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
                 LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, externalRequest);
@@ -278,7 +280,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             }
             LOG.debug("Sending request {} to GPT: {}", id, externalRequest);
 
-            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
             SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configWithModel);
             GPTCompletionCallback.GPTCompletionCollector callback = new GPTCompletionCallback.GPTCompletionCollector();
             CompletableFuture<Void> finished = new CompletableFuture<>();
@@ -335,6 +336,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
             ChatCompletionRequest externalRequest = createExternalRequest(request);
+            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
+            externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
             String jsonRequest = gson.toJson(externalRequest);
             callback.setRequest(jsonRequest);
             if (LOG.isDebugEnabled()) {
@@ -350,7 +353,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 return;
             }
 
-            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
             SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configWithModel);
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
@@ -578,6 +580,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return delay * 2;
     }
 
+    /**
+     * Creates the external request. Caution: the model name does have to be processed with
+     * {@link GPTBackendsService#getModelNameInBackend(String)} - the actual model can only be determined here
+     * but can have a backend prefix yet.
+     */
     protected ChatCompletionRequest createExternalRequest(GPTChatRequest request) throws JsonProcessingException {
         List<ChatCompletionMessage> messages = new ArrayList<>();
         for (GPTChatMessage message : request.getMessages()) {
@@ -631,7 +638,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         } else {
             model = defaultModel;
         }
-        return backendsService.getModelName(model);
+        return model;
     }
 
     private List<ChatTool> convertTools(GPTConfiguration configuration) {
@@ -859,7 +866,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return embeddingsModel;
     }
 
-    @ObjectClassDefinition(name = "Composum AI OpenAI Configuration",
+    @ObjectClassDefinition(name = "Composum AI Basic Configuration",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 

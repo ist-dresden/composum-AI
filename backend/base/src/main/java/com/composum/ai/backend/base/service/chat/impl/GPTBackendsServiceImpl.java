@@ -36,7 +36,7 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
 
     @Nullable
     @Override
-    public String getModelName(@Nullable String model) {
+    public String getModelNameInBackend(@Nullable String model) {
         if (model == null || model.trim().isEmpty()) {
             return null;
         }
@@ -46,15 +46,28 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
         return model.trim();
     }
 
+    protected String getBackendNameFromPrefixedModel(@Nullable String model) {
+        if (model == null || model.trim().isEmpty()) {
+            return null;
+        }
+        if (model.contains(":")) {
+            return model.substring(0, model.indexOf(':')).trim();
+        }
+        return null;
+    }
+
     @Override
     public GPTBackendConfiguration getConfigurationForModel(@Nonnull String model) {
-        String modelname = getModelName(model);
+        String backendName = getBackendNameFromPrefixedModel(model);
+        String modelname = getModelNameInBackend(model);
         if (backendsConfigurationServices == null || modelname == null) {
             return null;
         }
         for (GPTBackendsConfigurationService service : backendsConfigurationServices) {
             for (GPTBackendConfiguration backend : service.getBackends()) {
-                if (service.getModelsForBackend(backend.backendId()).contains(model)) {
+                if (backendName != null && backend.backendId().equals(backendName)) {
+                    return backend;
+                } else if (service.getModelsForBackend(backend.backendId()).contains(model)) {
                     return backend;
                 }
             }

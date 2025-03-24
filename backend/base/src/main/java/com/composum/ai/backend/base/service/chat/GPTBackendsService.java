@@ -29,6 +29,6 @@ public interface GPTBackendsService {
      * If the model is of the form <code>backendId:modelname</code> then this returns the modelname, otherwise returns the model as it is.
      */
     @Nullable
-    String getModelName(@Nullable String model);
+    String getModelNameInBackend(@Nullable String model);
 
 }
