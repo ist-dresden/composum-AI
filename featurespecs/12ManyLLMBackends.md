@@ -117,8 +117,7 @@ For backwards compatibility we leave the `ChatCompletion*` classes in
 
 ## TODO
 
-- configuration print page? model test page?
-- where should I configure the model for content creation / sidebar AI?
+- configuration print page?
 
 GPTPromptLibrary example OSGI configuration and Sling CA configuration
 
@@ -126,6 +125,11 @@ GPTPromptLibrary example OSGI configuration and Sling CA configuration
 - update documentation
 - check config syntax $[env:OPEN_AI_MODEL;default=gpt-4o-mini]
 
+- create example for search and give links
+- list providers in page
+
 ### Questions
 
 - configuration secrets only OSGI?
+
+Azure!
