@@ -47,7 +47,7 @@
         <div class="form-group">
             <h3>Target Language</h3>
             <input type="text" id="target-language" name="targetLanguage" class="form-control" required
-                   placeholder="Enter target language (e.g., en, de, French)">
+                   placeholder="Enter target language (e.g. as /content path, en, de, es-mx, French)">
         </div>
 
         <div class="form-group">
@@ -71,7 +71,7 @@
             <thead>
             <tr>
                 <th>Model</th>
-                <th>Translation</th>
+                <th>Translation to ${model.parsedTargetLanguage}</th>
             </tr>
             </thead>
             <tbody>

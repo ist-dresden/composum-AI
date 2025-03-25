@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -9,15 +10,19 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
 import com.adobe.granite.translation.api.TranslationResult;
+import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 
 /**
  * Model for the auto-translate comparison page.
@@ -41,6 +46,7 @@ public class AutotranslateModelCompareModel {
     private List<TranslationResult> results;
     private String text;
     private String targetLanguage;
+    private String targetLanguageError;
     private String[] selectedModels;
 
     @PostConstruct
@@ -58,11 +64,42 @@ public class AutotranslateModelCompareModel {
         return gptBackendsService.getActiveBackends().stream().collect(Collectors.joining(", "));
     }
 
+    /** The actual textual representation of the target language, used with the model. */
+    public String getParsedTargetLanguage() {
+        if (targetLanguage == null || targetLanguage.trim().isEmpty()) {
+            return null;
+        }
+        targetLanguage = targetLanguage.trim();
+        String parsedLanguage;
+        if (targetLanguage.startsWith("/content/")) {
+            PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+            Page page = pageManager.getPage(targetLanguage);
+            if (page == null) {
+                targetLanguageError = "Page not found: " + targetLanguage;
+                return null;
+            }
+            parsedLanguage = SelectorUtils.findLanguage(page.getContentResource());
+            parsedLanguage = SelectorUtils.getLanguageName(parsedLanguage, Locale.ENGLISH);
+        } else if (SelectorUtils.isLocaleName(targetLanguage)) {
+            parsedLanguage = SelectorUtils.getLanguageName(targetLanguage, Locale.ENGLISH);
+        } else if (targetLanguage.matches("^[a-zA-Z]{2,3}([-_][a-zA-Z]{2,3})?$")) {
+            targetLanguageError = "Target language looks like a locale name, but is not: " + targetLanguage;
+            parsedLanguage = null;
+        } else {
+            parsedLanguage = targetLanguage;
+        }
+        return parsedLanguage;
+    }
+
     public String getError() {
+        getParsedTargetLanguage(); // might generate error
         if (request.getMethod().equalsIgnoreCase("GET")) {
             return null;
         }
         StringBuilder error = new StringBuilder();
+        if (targetLanguageError != null) {
+            error.append(targetLanguageError).append("\n\n");
+        }
         if (text == null || text.trim().isEmpty()) {
             error.append("Please enter some text to translate.");
         }
@@ -70,7 +107,7 @@ public class AutotranslateModelCompareModel {
             if (error.length() > 0) {
                 error.append("\n");
             }
-            error.append("Please select a target language.");
+            error.append("Please enter a target language.");
         }
         if (selectedModels == null || selectedModels.length == 0) {
             if (error.length() > 0) {
@@ -89,7 +126,7 @@ public class AutotranslateModelCompareModel {
             results = new ArrayList<>();
 
             if (text != null && !text.trim().isEmpty() &&
-                    targetLanguage != null && !targetLanguage.trim().isEmpty() &&
+                    getParsedTargetLanguage() != null &&
                     selectedModels != null && selectedModels.length > 0 &&
                     gptTranslationService != null) {
                 for (String modelName : selectedModels) {
@@ -116,7 +153,7 @@ public class AutotranslateModelCompareModel {
                         }
                     };
                     try {
-                        gptTranslationService.streamingSingleTranslation(text, null, targetLanguage, configuration, collector);
+                        gptTranslationService.streamingSingleTranslation(text, null, getParsedTargetLanguage(), configuration, collector);
                     } catch (Exception e) {
                         translationFuture.complete("Error: " + e);
                     }
