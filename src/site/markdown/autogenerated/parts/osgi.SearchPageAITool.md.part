@@ -2,7 +2,7 @@
 
 ## Composum AI Tool Search Pages (backend/slingbase)
 
-Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration the tool is not active.
+Provides the AI with a tool to search for page paths. If there is no configuration the tool is not active.
 
 | id          | name          | type | default value | description                                                                 |
 |-------------|---------------|------|---------------|-----------------------------------------------------------------------------|

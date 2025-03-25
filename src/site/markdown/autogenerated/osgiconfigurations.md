@@ -136,7 +136,7 @@ Configuration for the basic Composum AI Translation Service
 <a name="osgi.GetPageMarkdownAITool"></a>
 # Composum AI Tool Get Page Markdown (backend/slingbase)
 
-Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+Provides the AI with a tool to search for page paths. If there is no configuration, the tool is not active.
 
 | id                     | name                     | type   | default value | description                                                                 |
 |-----------------------|--------------------------|--------|---------------|-----------------------------------------------------------------------------|
@@ -165,7 +165,7 @@ If configured, caches the calculated approximate markdown of pages. CAUTION: the
 <a name="osgi.ModifyPageReadTool"></a>
 ## Composum AI Tool Modify Page Read (backend/slingbase)
 
-Provides the AI with a tool to read properties of a page. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+Provides the AI with a tool to read properties of a page. If there is no configuration, the tool is not active.
 
 | id                     | name                  | type   | default value         | description                                                                                     |
 |-----------------------|-----------------------|--------|-----------------------|-------------------------------------------------------------------------------------------------|
@@ -174,7 +174,7 @@ Provides the AI with a tool to read properties of a page. Needs a lucene index f
 <a name="osgi.ModifyPageWriteTool"></a>
 ## Composum AI Tool Modify Page Write (backend/slingbase)
 
-Provides the AI with a tool to write properties to a page. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+Provides the AI with a tool to write properties to a page. If there is no configuration, the tool is not active.
 
 | id                     | name                     | type   | default value         | description                                                                                     |
 |-----------------------|--------------------------|--------|-----------------------|-------------------------------------------------------------------------------------------------|
@@ -183,7 +183,7 @@ Provides the AI with a tool to write properties to a page. Needs a lucene index 
 <a name="osgi.SearchPageAITool"></a>
 # Composum AI Tool Search Pages (backend/slingbase)
 
-Provides the AI with a tool to search for page paths. Needs a lucene index for all pages. If there is no configuration the tool is not active.
+Provides the AI with a tool to search for page paths. If there is no configuration the tool is not active.
 
 | id          | name          | type | default value | description                                                                 |
 |-------------|---------------|------|---------------|-----------------------------------------------------------------------------|

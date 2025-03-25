@@ -198,7 +198,7 @@ public class ModifyPageWriteTool implements AITool {
     }
 
     @ObjectClassDefinition(name = "Composum AI Tool Modify Page Write",
-            description = "Provides the AI with a tool to write properties to a page. Needs a lucene index for all pages." +
+            description = "Provides the AI with a tool to write properties to a page." +
                     "If there is no configuration, the tool is not active.")
     public @interface Config {
 

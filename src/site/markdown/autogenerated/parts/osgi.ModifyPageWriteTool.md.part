@@ -2,7 +2,7 @@
 
 ## Composum AI Tool Modify Page Write (backend/slingbase)
 
-Provides the AI with a tool to write properties to a page. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+Provides the AI with a tool to write properties to a page. If there is no configuration, the tool is not active.
 
 | id                     | name                     | type   | default value         | description                                                                                     |
 |-----------------------|--------------------------|--------|-----------------------|-------------------------------------------------------------------------------------------------|

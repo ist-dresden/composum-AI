@@ -149,7 +149,7 @@ public class SearchPageAITool implements AITool {
     }
 
     @ObjectClassDefinition(name = "Composum AI Tool Search Pages",
-            description = "Provides the AI with a tool to search for page paths. Needs a lucene index for all pages." +
+            description = "Provides the AI with a tool to search for page paths." +
                     "If there is no configuration the tool is not active.")
     public @interface Config {
 
