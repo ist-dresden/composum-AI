@@ -1,9 +1,9 @@
-/* AIGenVersion(17597f93, osgiconfigurations.prompt-1.1, SlingCaConfigPluginImpl.java-43810073) */
+/* AIGenVersion(346f692e, osgiconfigurations.prompt-1.1, SlingCaConfigPluginImpl.java-349d76db) */
 
-### Composum AI SlingCaConfig Plugin (slingbase)
+## Composum AI SlingCaConfig Plugin (backend/slingbase)
 
 Allows enabling / disabling the Sling Context Aware Configuration of the Composum AI.
 
-| id | name   | type    | default value | description                                                |
-|----|--------|---------|---------------|------------------------------------------------------------|
-| 1  | Enabled| boolean | true          | Whether the Sling Context Aware Configuration of the Composum AI is enabled. |
+| id      | name    | type  | default value | description                                                                 |
+|---------|---------|-------|---------------|-----------------------------------------------------------------------------|
+| enabled | Enabled | boolean | true          | Whether the Sling Context Aware Configuration of the Composum AI is enabled. |

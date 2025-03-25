@@ -1,0 +1,9 @@
+/* AIGenVersion(7f391aab, osgiconfigurations.prompt-1.1, ModifyPageReadTool.java-55dcbab3) */
+
+## Composum AI Tool Modify Page Read (backend/slingbase)
+
+Provides the AI with a tool to read properties of a page. Needs a lucene index for all pages. If there is no configuration, the tool is not active.
+
+| id                     | name                  | type   | default value         | description                                                                                     |
+|-----------------------|-----------------------|--------|-----------------------|-------------------------------------------------------------------------------------------------|
+| allowedPathsRegex     | Allowed paths regex    | String | /content/.*           | A regex to match the paths that this tool is allowed to be used on. Default: /content/.*      |
