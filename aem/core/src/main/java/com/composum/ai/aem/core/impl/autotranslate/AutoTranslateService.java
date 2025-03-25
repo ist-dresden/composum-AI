@@ -68,15 +68,8 @@ public interface AutoTranslateService {
          */
         String userId = null;
 
-        /**
-         * Prefer High Intelligence Model : If set, the high intelligence model will be used for translation.
-         */
-        boolean preferHighIntelligenceModel = false;
-
-        /**
-         * Prefer Standard Model : If set, the standard model will be used for translation. Opposite of 'Prefer High Intelligence Model'
-         */
-        boolean preferStandardModel = false;
+        /** If set, use this model for translating. */
+        String model = null;
 
         @Override
         public String toString() {
@@ -85,8 +78,7 @@ public interface AutoTranslateService {
                     ", maxDepth=" + maxDepth +
                     ", autoSave=" + autoSave +
                     ", userId='" + userId + '\'' +
-                    ", preferHighIntelligenceModel=" + preferHighIntelligenceModel +
-                    ", preferStandardModel=" + preferStandardModel +
+                    ", model='" + model + '\'' +
                     ", additionalInstructions='" + additionalInstructions + '\'' +
                     '}';
         }

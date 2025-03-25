@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
+import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
@@ -136,8 +137,15 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 LOG.info("Retranslating because additional instructions changed for {} : {}", resource.getPath(), additionalInstructions);
             }
 
+            String previousModel = resource.getValueMap().get(AI_TRANSLATION_MODEL, String.class);
+            boolean modelChanged = previousModel != null && configuration != null && configuration.getModel() != null &&
+                    !StringUtils.equals(previousModel, configuration.getModel());
+            if (modelChanged) {
+                LOG.info("Retranslating because model changed for {} : {} to {}", resource.getPath(), previousModel, configuration.getModel());
+            }
+
             List<PropertyToTranslate> propertiesToTranslate = new ArrayList<>();
-            boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged);
+            boolean changed = collectPropertiesToTranslate(resource, propertiesToTranslate, stats, translationParameters, additionalInstructionsChanged || modelChanged);
 
             int countPropertiesToTranslate = propertiesToTranslate.stream()
                     .filter(propertyToTranslate -> !propertyToTranslate.isAlreadyCorrectlyTranslated)
@@ -202,11 +210,15 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
 
                     liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
                             liveRelationship, targetWrapper.allAiKeys(), false);
+                    cleanupObsoleteKeys(propertyToTranslate, valueMap, liveRelationship, targetWrapper);
 
-                    markAsAiTranslated(resourceToTranslate, liveRelationship, translationParameters, configuration);
                     stats.translatedProperties++;
                     changed = true;
                 }
+            }
+
+            if (changed) {
+                markAsAiTranslated(resource, relationship, translationParameters, configuration);
             }
 
             if (additionalInstructionsChanged) {
@@ -237,6 +249,20 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
     }
 
+    /**
+     * The translator and so forth was previously saved on each property - remove that and just save it on the page.
+     */
+    protected void cleanupObsoleteKeys(PropertyToTranslate propertyToTranslate, ModifiableValueMap valueMap, LiveRelationship liveRelationship, AITranslatePropertyWrapper targetWrapper) throws WCMException {
+        if (!"jcr:content".equals(propertyToTranslate.targetResource.getName()) && valueMap.containsKey(AITranslatePropertyWrapper.PROPERTY_AI_TRANSLATED_BY)) {
+            liveRelationshipManager.reenablePropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
+                    liveRelationship, targetWrapper.allPageKeys(), false);
+            for (String pageKey : targetWrapper.allPageKeys()) {
+                valueMap.remove(pageKey);
+            }
+        }
+        valueMap.remove("ai_translatedModel"); // obsolete.
+    }
+
     protected GPTConfiguration determineConfiguration(@Nonnull Resource resource, AutoTranslateCaConfig autoTranslateCaConfig, @Nonnull AutoTranslateService.TranslationParameters translationParameters, Stats stats) throws WCMException {
         GPTConfiguration configuration = configurationService.getGPTConfiguration(resource.getResourceResolver(), resource.getPath());
 
@@ -248,10 +274,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 LOG.error("Invalid temperature value {} for path {}", autoTranslateCaConfig.temperature(), resource.getPath());
             }
         }
-        if (autoTranslateCaConfig.preferHighIntelligenceModel()) {
-            configuration = GPTConfiguration.HIGH_INTELLIGENCE.merge(configuration);
-        } else if (autoTranslateCaConfig.preferStandardModel()) {
-            configuration = GPTConfiguration.STANDARD_INTELLIGENCE.merge(configuration);
+        if (autoTranslateCaConfig.model() != null && !autoTranslateCaConfig.model().trim().isEmpty()) {
+            configuration = GPTConfiguration.ofModel(autoTranslateCaConfig.model()).merge(configuration);
+        }
+        if (translationParameters.model != null && !translationParameters.model.trim().isEmpty()) {
+            configuration = GPTConfiguration.ofModel(translationParameters.model).merge(configuration);
         }
 
         String additionalInstructions = StringUtils.defaultIfBlank(translationParameters.additionalInstructions, "");
@@ -413,14 +440,14 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         String userID = parameters.userId != null ? parameters.userId : resource.getResourceResolver().getUserID();
         targetWrapper.setAiTranslatedBy(userID);
         targetWrapper.setAiTranslatedDate(Calendar.getInstance());
-        if (configuration != null) {
-            targetWrapper.setAiTranslatedModel(configuration.highIntelligenceNeededIsSet() ? "hi" : "standard");
+        if (configuration != null && configuration.getModel() != null) {
+            valueMap.put(AI_TRANSLATION_MODEL, configuration.getModel());
         }
         if (liveRelationship != null) {
             liveRelationshipManager.cancelPropertyRelationship(resource.getResourceResolver(),
-                    liveRelationship, targetWrapper.allGeneralKeys(), false);
+                    liveRelationship, targetWrapper.allPageKeys(), false);
         }
-        valueMap.put(AI_TRANSLATION_ERRORMARKER, Boolean.FALSE); // reset error marker if there was one.
+        valueMap.remove(AI_TRANSLATION_ERRORMARKER); // reset error marker if there was one.
     }
 
     /**
@@ -562,9 +589,9 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             resetPropertyExclusionKeys.addAll(Arrays.asList(allKeys));
             targetWrapper.setAiTranslatedBy(null);
             targetWrapper.setAiTranslatedDate(null);
-            targetWrapper.setAiTranslatedModel(null);
-            resetPropertyExclusionKeys.addAll(Arrays.asList(targetWrapper.allGeneralKeys()));
+            resetPropertyExclusionKeys.addAll(Arrays.asList(targetWrapper.allPageKeys()));
         }
+        mvm.remove("ai_translatedModel"); // obsolete
         if (relationship != null) {
             liveRelationshipManager.reenablePropertyRelationship(resource.getResourceResolver(), relationship,
                     resetPropertyExclusionKeys.toArray(new String[0]), false);

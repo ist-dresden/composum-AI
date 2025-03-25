@@ -4,6 +4,7 @@ package com.composum.ai.backend.base.service.chat.impl;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +36,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.impl.RateLimiter;
+import com.composum.ai.backend.base.service.chat.RateLimiter;
 import com.composum.ai.backend.base.service.GPTException;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTDictationService;
@@ -118,9 +119,9 @@ public class GPTDictationServiceImpl implements GPTDictationService {
         limiter.waitForLimit();
 
         try {
-            String url = URL_OPENAI_TRANSCRIPTIONS;
-            HttpPost postRequest = new HttpPost(url);
-            openAIHelper.getInstance().initOpenAIRequest(postRequest, configuration);
+            HttpPost postRequest = new HttpPost(URL_OPENAI_TRANSCRIPTIONS);
+            openAIHelper.getInstance().initRequest(postRequest, configuration);
+            postRequest.setUri(URI.create(URL_OPENAI_TRANSCRIPTIONS));
             postRequest.setEntity(createEntity(audioStream, contentType, prompt, language));
 
             try (CloseableHttpResponse response = httpClient.execute(postRequest)) {

@@ -118,7 +118,6 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
         ensureEnabled();
 
         if (text == null || text.trim().isEmpty() ||
-                sourceLanguage == null || sourceLanguage.trim().isEmpty() ||
                 targetLanguage == null || targetLanguage.trim().isEmpty()) {
             throw new IllegalArgumentException("Empty text or languages");
         }
@@ -371,7 +370,7 @@ public class GPTTranslationServiceImpl implements GPTTranslationService {
     }
 
     protected GPTConfiguration getServiceConfiguration() {
-        return new GPTConfiguration(null, null, null, null, null, null, null, temperature, seed);
+        return new GPTConfiguration(null, null, null, null, null, temperature, seed);
     }
 
     /**

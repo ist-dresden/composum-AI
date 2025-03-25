@@ -167,7 +167,7 @@ public class ModifyPageReadTool implements AITool {
     }
 
     @ObjectClassDefinition(name = "Composum AI Tool Modify Page Read",
-            description = "Provides the AI with a tool to read properties of a page. Needs a lucene index for all pages." +
+            description = "Provides the AI with a tool to read properties of a page." +
                     "If there is no configuration, the tool is not active.")
     public @interface Config {
 

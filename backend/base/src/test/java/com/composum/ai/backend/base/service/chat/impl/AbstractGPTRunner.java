@@ -1,11 +1,11 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
-import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.CHAT_COMPLETION_URL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_EMBEDDINGS_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_HIGH_INTELLIGENCE_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_IMAGE_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.DEFAULT_MODEL;
 import static com.composum.ai.backend.base.service.chat.impl.GPTChatCompletionServiceImpl.OPENAI_EMBEDDINGS_URL;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -13,26 +13,45 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.mockito.Spy;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTBackendsService;
 
 public abstract class AbstractGPTRunner {
 
-    @Spy
-    protected GPTChatCompletionServiceImpl chatCompletionService;
+    @Mock
+    protected GPTBackendsService backendsService;
 
-    protected String chatCompletionUrl = CHAT_COMPLETION_URL;
+    @Mock
+    protected GPTBackendConfiguration openAIBackend;
+
+    @InjectMocks
+    protected GPTChatCompletionServiceImpl chatCompletionService = new GPTChatCompletionServiceImpl();
+
+    protected String chatCompletionUrl = "https://api.openai.com/v1/chat/completions";
 
     protected String apiKey;
 
-    protected void setup() throws IOException {
+    private AutoCloseable mocks;
 
-        chatCompletionService = new GPTChatCompletionServiceImpl();
+    protected void setup() throws IOException {
         // read key from file ~/.openai-api-key.txt
         Path filePath = Paths.get(System.getProperty("user.home"), ".openai-api-key.txt");
         apiKey = System.getenv("OPENAI_API_KEY");
         if (Files.isReadable(filePath)) {
             apiKey = new String(Files.readAllBytes(filePath));
         }
+
+        this.mocks = MockitoAnnotations.openMocks(this);
+        when(backendsService.getConfigurationForModel(DEFAULT_MODEL)).thenReturn(openAIBackend);
+        when(openAIBackend.backendId()).thenReturn("OpenAI");
+        when(openAIBackend.apiEndpoint()).thenReturn("https://api.openai.com/v1/chat/completions");
+        when(openAIBackend.additionalHeader1Key()).thenReturn("Authorization");
+        when(openAIBackend.additionalHeader1Value()).thenReturn("Bearer " + apiKey);
+        when(openAIBackend.models()).thenReturn(DEFAULT_MODEL);
 
         chatCompletionService.activate(new GPTChatCompletionServiceImpl.GPTChatCompletionServiceConfig() {
             @Override
@@ -43,26 +62,6 @@ public abstract class AbstractGPTRunner {
             @Override
             public boolean disabled() {
                 return false;
-            }
-
-            @Override
-            public String chatCompletionUrl() {
-                return chatCompletionUrl;
-            }
-
-            @Override
-            public String openAiApiKey() {
-                return apiKey;
-            }
-
-            @Override
-            public String openAiOrganizationId() {
-                return null;
-            }
-
-            @Override
-            public String openAiApiKeyFile() {
-                return null;
             }
 
             @Override
@@ -78,16 +77,6 @@ public abstract class AbstractGPTRunner {
             @Override
             public String imageModel() {
                 return DEFAULT_IMAGE_MODEL;
-            }
-
-            @Override
-            public String temperature() {
-                return null;
-            }
-
-            @Override
-            public String seed() {
-                return null;
             }
 
             @Override
@@ -137,8 +126,9 @@ public abstract class AbstractGPTRunner {
         }, null);
     }
 
-    protected void teardown() {
+    protected void teardown() throws Exception {
         chatCompletionService.deactivate();
+        mocks.close();
     }
 
 }

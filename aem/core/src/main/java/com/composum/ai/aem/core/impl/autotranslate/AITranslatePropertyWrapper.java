@@ -40,11 +40,6 @@ public class AITranslatePropertyWrapper {
     public static final String PROPERTY_AI_TRANSLATED_BY = "ai_translatedBy";
 
     /**
-     * Informationally, saves the model that was used.
-     */
-    public static final String PROPERTY_AI_TRANSLATED_MODEL = "ai_translatedModel";
-
-    /**
      * Prefix for property names of saved values.
      */
     public static final String AI_PREFIX = "ai_";
@@ -105,6 +100,11 @@ public class AITranslatePropertyWrapper {
      * Is set to the time at which the error occurred, to make it easy to find in the logs.
      */
     public static final String AI_TRANSLATION_ERRORMARKER = "ai_translationError";
+
+    /**
+     * Attribute that is set on jcr:content of a page on successful translation: saves the model it was translated with.
+     */
+    public static final String AI_TRANSLATION_MODEL = "ai_translationModel";
 
     private final ModifiableValueMap targetValueMap;
     private final String propertyName;
@@ -289,13 +289,6 @@ public class AITranslatePropertyWrapper {
         return getCurrentValue() != null && getCurrentValue().startsWith("<") && getCurrentValue().endsWith(">");
     }
 
-    /**
-     * @see #PROPERTY_AI_TRANSLATED_MODEL
-     */
-    public void setAiTranslatedModel(String value) {
-        setValue(PROPERTY_AI_TRANSLATED_MODEL, value);
-    }
-
     public boolean hasSavedTranslation() {
         return isNotBlank(getOriginalCopy()) && isNotBlank(getTranslatedCopy());
     }
@@ -320,6 +313,7 @@ public class AITranslatePropertyWrapper {
         };
     }
 
+    /** All keys about the property. */
     public String[] allAiKeys() {
         if (propertyName.startsWith(AI_PREFIX) || propertyName.startsWith(LC_PREFIX)) {
             throw new IllegalArgumentException("Property name must not start with " + AI_PREFIX + " or " + LC_PREFIX + ": " + propertyName);
@@ -334,15 +328,16 @@ public class AITranslatePropertyWrapper {
         };
     }
 
-    public String[] allGeneralKeys() {
-        return new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE};
+    /** All general keys for storing properties on a page. */
+    public String[] allPageKeys() {
+        return new String[]{PROPERTY_AI_TRANSLATED_BY, PROPERTY_AI_TRANSLATED_DATE, AI_TRANSLATION_ERRORMARKER, AI_TRANSLATION_MODEL};
     }
 
     public String[] allKeys() {
         List<String> keys = new ArrayList<>();
         keys.addAll(Arrays.asList(allLcKeys()));
         keys.addAll(Arrays.asList(allAiKeys()));
-        keys.addAll(Arrays.asList(allGeneralKeys()));
+        keys.addAll(Arrays.asList(allPageKeys()));
         return keys.toArray(new String[0]);
     }
 
@@ -401,8 +396,10 @@ public class AITranslatePropertyWrapper {
         return "AITranslatePropertyWrapper(" + propertyName + ')';
     }
 
-    /** If there is a new original and new translation saved, we have to overwrite the property with that if the
-     * inheritance is reenabled since that is newer than the original value - basically synchronization. */
+    /**
+     * If there is a new original and new translation saved, we have to overwrite the property with that if the
+     * inheritance is reenabled since that is newer than the original value - basically synchronization.
+     */
     public void adjustForReenableInheritance() {
         if (StringUtils.isNotBlank(getNewOriginalCopy()) && StringUtils.isNotBlank(getNewTranslatedCopy())) {
             setOriginalCopy(getNewOriginalCopy());

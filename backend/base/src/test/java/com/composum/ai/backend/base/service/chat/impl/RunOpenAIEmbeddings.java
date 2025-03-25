@@ -1,17 +1,11 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.junit.Assert;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
@@ -23,12 +17,12 @@ import com.composum.ai.backend.base.service.chat.GPTEmbeddingService;
 public class RunOpenAIEmbeddings extends AbstractGPTRunner {
 
     @InjectMocks
-    private GPTEmbeddingService embeddingsService = new GPTEmbeddingServiceImpl();
+    protected GPTEmbeddingServiceImpl embeddingsService = new GPTEmbeddingServiceImpl();
 
     public static void main(String[] args) throws Exception {
         RunOpenAIEmbeddings instance = new RunOpenAIEmbeddings();
         instance.setup();
-        MockitoAnnotations.openMocks(instance);
+        instance.embeddingsService.chatCompletionService = instance.chatCompletionService;
         instance.run();
         instance.teardown();
     }

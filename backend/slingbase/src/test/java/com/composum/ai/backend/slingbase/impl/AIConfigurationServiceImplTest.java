@@ -101,16 +101,4 @@ public class AIConfigurationServiceImplTest {
         assertThat(allowed, nullValue());
     }
 
-    @Test
-    public void testGetConfiguration() {
-        context.request().setResource(context.create().resource("/content/allowed/jcr:content/path"));
-        String key = "thekey";
-        // set up sling configuration for the path with key
-        context.create().resource("/conf/global/sling:configs/com.composum.ai.backend.slingbase.model.OpenAIConfig",
-                "openAiApiKey", key);
-        GPTConfiguration config = service.getGPTConfiguration(getRequest().getResourceResolver(), "/content/allowed/jcr:content/path");
-        assertThat(config, notNullValue());
-        assertThat(config.getApiKey(), is(key));
-    }
-
 }

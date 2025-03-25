@@ -1,0 +1,19 @@
+/* AIGenVersion(09cd594f, osgiconfigurations.prompt-1.1, GPTBackendConfiguration.java-15dd0780) */
+
+## Composum AI Backend Configuration (backend/base)
+
+Configuration for an LLM backend in Composum AI. Allows setting API endpoint, authentication, and request settings.
+
+| id                     | name                                   | type    | default value | description                                                                                          |
+|-----------------------|----------------------------------------|---------|---------------|------------------------------------------------------------------------------------------------------|
+| backendId             | Backend ID                             | String  |               | A unique identifier for this backend configuration, e.g. OpenAI                                     |
+| disabled              | Disable                                | boolean | false         | Disable this Backend                                                                                 |
+| apiEndpoint           | API Endpoint                           | String  |               | The base URL for the LLM API endpoint, e.g. https://api.openai.com/v1/chat/completions            |
+| models                | Models                                 | String  |               | Comma-separated list of supported models for this backend, e.g. gpt-4o,gpt-4o-mini,gpt-4.5-preview  |
+| additionalHeader1Key  | Additional Header 1 Key, e.g. 'Authorization' | String  |               | An optional additional HTTP header key for authentication or other purposes.                         |
+| additionalHeader1Value| Additional Header 1 Value             | String  |               | The value for the first additional HTTP header, e.g. 'Bearer sk-xyz...'                            |
+| additionalHeader2Key  | Additional Header 2 Key               | String  |               | An optional second additional HTTP header key, e.g. 'OpenAI-Organization'                           |
+| additionalHeader2Value| Additional Header 2 Value             | String  |               | The value for the second additional HTTP header. e.g. 'org-xyz'                                     |
+| additionalHeader3Key  | Additional Header 3 Key               | String  |               | An optional second additional HTTP header key.                                                       |
+| additionalHeader3Value| Additional Header 3 Value             | String  |               | The value for the second additional HTTP header.                                                     |
+| comment               | Comment                                | String  |               | Optional Notes (for your documentation, not used by the application)                                 |

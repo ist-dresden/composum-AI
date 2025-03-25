@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.core5.http.message.BasicHttpRequest;
 
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 
@@ -27,9 +28,9 @@ public interface GPTInternalOpenAIHelper {
     abstract class GPTInternalOpenAIHelperInst {
 
         /**
-         * Sets the request headers appropriate for OpenAI authorization.
+         * Sets the request headers appropriate for authorization.
          */
-        abstract void initOpenAIRequest(@Nonnull HttpPost request, @Nullable GPTConfiguration configuration);
+        abstract void initRequest(@Nonnull BasicHttpRequest request, @Nullable GPTConfiguration configuration);
 
     }
 }

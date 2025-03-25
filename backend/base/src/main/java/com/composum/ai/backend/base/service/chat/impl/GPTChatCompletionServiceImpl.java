@@ -4,9 +4,9 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.CharBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +38,6 @@ import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
@@ -50,6 +49,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.message.BasicHttpRequest;
 import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
@@ -57,19 +57,20 @@ import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.eclipse.mylyn.wikitext.markdown.MarkdownLanguage;
 import org.eclipse.mylyn.wikitext.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.parser.builder.HtmlDocumentBuilder;
-import org.jsoup.internal.StringUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.impl.RateLimiter;
 import com.composum.ai.backend.base.service.GPTException;
+import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTBackendsService;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
 import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
@@ -80,6 +81,7 @@ import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.base.service.chat.GPTToolCall;
+import com.composum.ai.backend.base.service.chat.RateLimiter;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
@@ -112,22 +114,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     protected static final Logger LOG = LoggerFactory.getLogger(GPTChatCompletionServiceImpl.class);
 
-    protected static final String CHAT_COMPLETION_URL = "https://api.openai.com/v1/chat/completions";
     protected static final String OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
 
-    /**
-     * Environment variable where we take the key from, if not configured directly.
-     */
-    public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
-
-    /**
-     * System property where we take the key from, if not configured directly.
-     */
-    public static final String OPENAI_API_KEY_SYSPROP = "openai.api.key";
-
-    public static final String DEFAULT_MODEL = "gpt-4o-mini";
+    public static final String DEFAULT_MODEL = "gpt-4o";
     public static final String DEFAULT_IMAGE_MODEL = "gpt-4o";
     public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
     public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4o";
@@ -145,15 +136,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
      */
     public static final int MAXTRIES = 5;
 
-    /**
-     * The OpenAI Key for accessing ChatGPT; system default if not given in request.
-     */
-    protected String apiKey;
-    protected String organizationId;
     protected String defaultModel;
     protected String highIntelligenceModel;
     protected String imageModel;
-    protected String chatCompletionUrl = CHAT_COMPLETION_URL;
 
     protected CloseableHttpAsyncClient httpAsyncClient;
 
@@ -185,8 +170,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     protected final Map<String, GPTChatMessagesTemplate> templates = new HashMap<>();
     protected int requestTimeout;
     protected int connectionTimeout;
-    protected Double temperature;
-    protected Integer seed;
 
     protected boolean disabled;
 
@@ -206,6 +189,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     protected String embeddingsUrl;
     protected String embeddingsModel;
 
+    @Reference
+    protected GPTBackendsService backendsService;
+
     @Activate
     public void activate(GPTChatCompletionServiceConfig config, BundleContext bundleContext) {
         LOG.info("Activating GPTChatCompletionService {}", config);
@@ -219,33 +205,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         this.defaultModel = config != null && config.defaultModel() != null && !config.defaultModel().trim().isEmpty() ? config.defaultModel().trim() : DEFAULT_MODEL;
         this.highIntelligenceModel = config != null && config.highIntelligenceModel() != null && !config.highIntelligenceModel().trim().isEmpty() ? config.highIntelligenceModel().trim() : DEFAULT_HIGH_INTELLIGENCE_MODEL;
         this.imageModel = config != null && config.imageModel() != null && !config.imageModel().trim().isEmpty() ? config.imageModel().trim() : null;
-        this.apiKey = null;
         this.requestTimeout = config != null && config.requestTimeout() > 0 ? config.requestTimeout() : DEFAULTVALUE_REQUESTTIMEOUT;
         this.connectionTimeout = config != null && config.connectionTimeout() > 0 ? config.connectionTimeout() : DEFAULTVALUE_CONNECTIONTIMEOUT;
         this.maximumTokensPerRequest = config != null && config.maximumTokensPerRequest() > 0 ? config.maximumTokensPerRequest() : null;
         this.maximumTokensPerResponse = config != null && config.maximumTokensPerResponse() > 0 ? config.maximumTokensPerResponse() : null;
-        try {
-            this.temperature = config != null && !StringUtil.isBlank(config.temperature()) ? Double.valueOf(config.temperature()) : null;
-        } catch (NumberFormatException e) {
-            LOG.error("Cannot parse temperature {}", config.temperature(), e);
-            this.temperature = null;
-        }
-        try {
-            this.seed = config != null && !StringUtil.isBlank(config.seed()) ? Integer.valueOf(config.seed()) : null;
-        } catch (NumberFormatException e) {
-            LOG.error("Cannot parse seed {}", config.seed(), e);
-            this.seed = null;
-        }
         this.disabled = config != null && config.disabled();
-        if (!disabled) {
-            this.apiKey = retrieveOpenAIKey(config);
-            this.organizationId = config != null ? config.openAiOrganizationId() : null;
-        } else {
-            LOG.info("ChatGPT is disabled.");
-        }
-        if (config != null && config.chatCompletionUrl() != null && !config.chatCompletionUrl().trim().isEmpty()) {
-            this.chatCompletionUrl = config.chatCompletionUrl().trim();
-        }
         if (isEnabled()) {
             PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                     .setDefaultConnectionConfig(ConnectionConfig.custom()
@@ -288,52 +252,16 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             this.httpAsyncClient.close(CloseMode.IMMEDIATE);
             this.httpAsyncClient = null;
         }
-        this.apiKey = null;
         this.defaultModel = null;
         this.imageModel = null;
         this.limiter = null;
         this.gptLimiter = null;
         this.bundleContext = null;
         this.templates.clear();
-        this.temperature = null;
-        this.seed = null;
         if (scheduledExecutorService != null) {
             scheduledExecutorService.shutdownNow();
             scheduledExecutorService = null;
         }
-    }
-
-    protected static String retrieveOpenAIKey(@Nullable GPTChatCompletionServiceConfig config) {
-        String apiKey = null;
-        if (config != null) {
-            apiKey = config.openAiApiKey();
-            if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("$[secret")) {
-                LOG.info("Using OpenAI API key from configuration.");
-                return apiKey.trim();
-            }
-            if (config.openAiApiKeyFile() != null && !config.openAiApiKeyFile().trim().isEmpty()) {
-                try {
-                    apiKey = new String(Files.readAllBytes(Paths.get(config.openAiApiKeyFile())));
-                } catch (IOException e) {
-                    throw new IllegalStateException("Could not read OpenAI API key from file " + config.openAiApiKeyFile(), e);
-                }
-                if (!apiKey.trim().isEmpty()) {
-                    LOG.info("Using OpenAI API key from file {}.", config.openAiApiKeyFile());
-                    return apiKey.trim();
-                }
-            }
-        }
-        apiKey = System.getenv(OPENAI_API_KEY);
-        if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from environment variable.");
-            return apiKey.trim();
-        }
-        apiKey = System.getProperty(OPENAI_API_KEY_SYSPROP);
-        if (apiKey != null && !apiKey.trim().isEmpty()) {
-            LOG.info("Using OpenAI API key from system property.");
-            return apiKey.trim();
-        }
-        return null;
     }
 
     @Override
@@ -342,14 +270,17 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
-            String jsonRequest = createJsonRequest(request);
+            ChatCompletionRequest externalRequest = createExternalRequest(request);
+            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
+            externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
+            String jsonRequest = gson.toJson(externalRequest);
             if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
-                LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, jsonRequest);
+                LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, externalRequest);
                 return jsonRequest;
             }
-            LOG.debug("Sending request {} to GPT: {}", id, jsonRequest);
+            LOG.debug("Sending request {} to GPT: {}", id, externalRequest);
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configWithModel);
             GPTCompletionCallback.GPTCompletionCollector callback = new GPTCompletionCallback.GPTCompletionCollector();
             CompletableFuture<Void> finished = new CompletableFuture<>();
             performCallAsync(finished, id, httpRequest, callback, 0, 2000);
@@ -390,15 +321,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
     }
 
-    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration, String url) {
-        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
-        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
-        SimpleHttpRequest request = new SimpleHttpRequest("POST", url);
+    protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        checkTokenCount(jsonRequest);
+        SimpleHttpRequest request = new SimpleHttpRequest("POST", "http://will.be.reconfiugured/");
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
-        request.addHeader("Authorization", "Bearer " + actualApiKey);
-        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
-            request.addHeader("OpenAI-Organization", actualOrganizationId);
-        }
+        initRequest(request, gptConfiguration);
         return request;
     }
 
@@ -408,7 +335,10 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         waitForLimit();
         long id = requestCounter.incrementAndGet(); // to easily correlate log messages
         try {
-            String jsonRequest = createJsonRequest(request);
+            ChatCompletionRequest externalRequest = createExternalRequest(request);
+            GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
+            externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
+            String jsonRequest = gson.toJson(externalRequest);
             callback.setRequest(jsonRequest);
             if (LOG.isDebugEnabled()) {
                 // replace data:image/jpeg;base64,{base64_image} with data:image/jpeg;base64, ...
@@ -423,7 +353,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 return;
             }
 
-            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, request.getConfiguration(), chatCompletionUrl);
+            SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configWithModel);
             performCallAsync(new CompletableFuture<>(), id, httpRequest, callback, 0, 2000);
             LOG.debug("Response {} from GPT is there and should be streaming", id);
         } catch (IOException e) {
@@ -505,6 +435,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     return;
                 }
                 ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
+                if (chunk != null && "ping".equals(chunk.getType())) {
+                    return; // Special intermediate message from Anthropic, no actual data.
+                }
                 if (chunk == null || chunk.getChoices() == null || chunk.getChoices().isEmpty()) {
                     LOG.error("No chunks - id {} Cannot deserialize {}", id, line);
                     GPTException gptException = new GPTException("No chunks - cannot deserialize " + line);
@@ -647,7 +580,12 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return delay * 2;
     }
 
-    protected String createJsonRequest(GPTChatRequest request) throws JsonProcessingException {
+    /**
+     * Creates the external request. Caution: the model name does have to be processed with
+     * {@link GPTBackendsService#getModelNameInBackend(String)} - the actual model can only be determined here
+     * but can have a backend prefix yet.
+     */
+    protected ChatCompletionRequest createExternalRequest(GPTChatRequest request) throws JsonProcessingException {
         List<ChatCompletionMessage> messages = new ArrayList<>();
         for (GPTChatMessage message : request.getMessages()) {
             messages.add(ChatCompletionMessage.make(message));
@@ -665,17 +603,13 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
         boolean hasImage = messages.stream().flatMap(m -> m.getContent().stream())
                 .anyMatch(m -> m.getType() == ChatCompletionMessagePart.Type.IMAGE_URL);
-        if (hasImage && imageModel == null) {
-            LOG.error("No image model configured - defaultModel {} imageModel {}", defaultModel, imageModel);
-            throw new IllegalArgumentException("Cannot use image as input, no image model configured.");
-        }
         ChatCompletionRequest externalRequest = new ChatCompletionRequest();
-        boolean highIntelligenceRequired = request.getConfiguration() != null && request.getConfiguration().highIntelligenceNeededIsSet();
-        externalRequest.setModel(highIntelligenceRequired ? highIntelligenceModel : hasImage ? imageModel : defaultModel);
+        String model = determineModel(request.getConfiguration(), hasImage);
+        externalRequest.setModel(model);
         externalRequest.setMessages(messages);
         externalRequest.setTemperature(request.getConfiguration() != null && request.getConfiguration().getTemperature() != null ?
-                request.getConfiguration().getTemperature() : temperature);
-        externalRequest.setSeed(request.getConfiguration() != null ? request.getConfiguration().getSeed() : seed);
+                request.getConfiguration().getTemperature() : null);
+        externalRequest.setSeed(request.getConfiguration() != null ? request.getConfiguration().getSeed() : null);
         if (request.getConfiguration() != null && request.getConfiguration().getAnswerType() == GPTConfiguration.AnswerType.JSON) {
             externalRequest.setResponseFormat(ChatCompletionRequest.JSON);
         }
@@ -689,9 +623,22 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         }
         externalRequest.setStream(Boolean.TRUE);
         externalRequest.setTools(convertTools(request.getConfiguration()));
-        String jsonRequest = gson.toJson(externalRequest);
-        checkTokenCount(jsonRequest);
-        return jsonRequest;
+        return externalRequest;
+    }
+
+    protected String determineModel(GPTConfiguration configuration, boolean hasImage) {
+        boolean highIntelligenceRequired = configuration != null && configuration.highIntelligenceNeededIsSet();
+        String model;
+        if (configuration != null && configuration.getModel() != null && !configuration.getModel().trim().isEmpty()) {
+            model = configuration.getModel();
+        } else if (highIntelligenceRequired) {
+            model = highIntelligenceModel;
+        } else if (hasImage && imageModel != null && !imageModel.trim().isEmpty()) {
+            model = imageModel;
+        } else {
+            model = defaultModel;
+        }
+        return model;
     }
 
     private List<ChatTool> convertTools(GPTConfiguration configuration) {
@@ -727,10 +674,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     @Override
     public boolean isEnabled(GPTConfiguration gptConfig) {
-        return isEnabled() && (
-                apiKey != null && !apiKey.trim().isEmpty() ||
-                        gptConfig != null && gptConfig.getApiKey() != null && !gptConfig.getApiKey().trim().isEmpty()
-        );
+        return isEnabled(); // XXX
     }
 
     protected void checkEnabled(GPTConfiguration gptConfig) {
@@ -883,10 +827,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         request.setEncodingFormat("float");
         String jsonRequest = gson.toJson(request);
         LOG.trace("Sending embeddings request {} to GPT: {}", id, jsonRequest);
-        SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration, embeddingsUrl);
-        Future<SimpleHttpResponse> call = httpAsyncClient.execute(httpRequest, null);
+        SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration);
         String bodyText = null;
         try {
+            httpRequest.setUri(URI.create(embeddingsUrl));
+            Future<SimpleHttpResponse> call = httpAsyncClient.execute(httpRequest, null);
             SimpleHttpResponse response = call.get();
             bodyText = response.getBodyText();
             if (response.getCode() != HttpStatus.SC_OK) {
@@ -921,27 +866,12 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return embeddingsModel;
     }
 
-    @ObjectClassDefinition(name = "Composum AI OpenAI Configuration",
+    @ObjectClassDefinition(name = "Composum AI Basic Configuration",
             description = "Provides rather low level access to the GPT chat completion - use the other services for more specific services.")
     public @interface GPTChatCompletionServiceConfig {
 
         @AttributeDefinition(name = "Disable", description = "Disable the GPT Chat Completion Service", required = false)
         boolean disabled() default false; // we want it to work by just deploying it. Admittedly this is a bit doubtful.
-
-        @AttributeDefinition(name = "URL of the chat completion service",
-                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
-        String chatCompletionUrl();
-
-        @AttributeDefinition(name = "OpenAI API key", description = "OpenAI API key from https://platform.openai.com/. If not given, we check the key file, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .", required = false)
-        String openAiApiKey();
-
-        @AttributeDefinition(name = "OpenAI Organization ID", description = "Optionally, OpenAI Organization ID from https://platform.openai.com/account/organization .", required = false)
-        String openAiOrganizationId();
-
-        // alternatively, a key file
-        @AttributeDefinition(name = "OpenAI API key file", required = false,
-                description = "Key File containing the API key, as an alternative to Open AKI Key configuration and the variants described there.")
-        String openAiApiKeyFile();
 
         @AttributeDefinition(name = "Default model", required = false,
                 description = "Default model to use for the chat completion. The default if not set is " + DEFAULT_MODEL + ". Please consider the varying prices https://openai.com/pricing .")
@@ -955,14 +885,6 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 description = "Optional, a model that is used if an image is given as input, e.g. gpt-4o. If not given, image recognition is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel() default DEFAULT_IMAGE_MODEL;
-
-        @AttributeDefinition(name = "Temperature", required = false,
-                description = "Optional temperature setting that determines variability and creativity as a floating point between 0.0 and 1.0", defaultValue = "")
-        String temperature();
-
-        @AttributeDefinition(name = "seed", description = "If specified, OpenAI will make a best effort to sample deterministically, " +
-                "such that repeated requests with the same seed and parameters should return the same result.")
-        String seed() default "";
 
         @AttributeDefinition(name = "Maximum Tokens per Request", description = "If > 0 limit to the maximum number of tokens per request. " +
                 "That's about a twice the word count. Caution: Compare with the pricing - on GPT-4 models a thousand tokens might cost $0.01 or more.",
@@ -990,8 +912,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 description = "Maximum count of requests to ChatGPT per day - from the second half there will be a slowdown to avoid hitting the limit. Default " + DEFAULTVALUE_REQUESTS_PER_DAY)
         int requestsPerDay();
 
+
         @AttributeDefinition(name = "URL of the embeddings service",
-                description = "Optional, if not OpenAI's default " + CHAT_COMPLETION_URL, required = false)
+                description = "Optional, if not OpenAI's default " + OPENAI_EMBEDDINGS_URL, required = false)
         String embeddingsUrl();
 
         @AttributeDefinition(name = "Embeddings model", required = false,
@@ -1113,13 +1036,39 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return this;
     }
 
+    protected String getModel(@Nullable GPTConfiguration gptConfiguration) {
+        if (gptConfiguration == null) {
+            return defaultModel;
+        }
+        if (gptConfiguration.getModel() != null) {
+            return gptConfiguration.getModel();
+        }
+        if (gptConfiguration.highIntelligenceNeededIsSet()) {
+            return highIntelligenceModel;
+        }
+        return defaultModel;
+    }
+
     @Override
-    void initOpenAIRequest(@Nonnull HttpPost request, @Nullable GPTConfiguration gptConfiguration) {
-        String actualApiKey = gptConfiguration != null && gptConfiguration.getApiKey() != null && !gptConfiguration.getApiKey().trim().isEmpty() ? gptConfiguration.getApiKey() : this.apiKey;
-        String actualOrganizationId = gptConfiguration != null && gptConfiguration.getOrganizationId() != null && !gptConfiguration.getOrganizationId().trim().isEmpty() ? gptConfiguration.getOrganizationId() : this.organizationId;
-        request.addHeader("Authorization", "Bearer " + actualApiKey);
-        if (actualOrganizationId != null && !actualOrganizationId.trim().isEmpty()) {
-            request.addHeader("OpenAI-Organization", actualOrganizationId);
+    void initRequest(@Nonnull BasicHttpRequest request, @Nullable GPTConfiguration gptConfiguration) {
+        String model = gptConfiguration != null && gptConfiguration.getModel() != null ? gptConfiguration.getModel() : DEFAULT_MODEL;
+        GPTBackendConfiguration conf = backendsService.getConfigurationForModel(model);
+        if (conf == null) {
+            throw new IllegalArgumentException("No backend configuration for model " + model);
+        }
+        try {
+            request.setUri(new URI(conf.apiEndpoint()));
+        } catch (URISyntaxException e) {
+            LOG.error("Broken API URI for " + model + ": " + conf.backendId() + " - url: " + conf.apiEndpoint(), e);
+        }
+        if (conf.additionalHeader1Key() != null && !conf.additionalHeader1Value().isEmpty() && conf.additionalHeader1Value() != null) {
+            request.addHeader(conf.additionalHeader1Key().trim(), conf.additionalHeader1Value().trim());
+        }
+        if (conf.additionalHeader2Key() != null && !conf.additionalHeader2Value().isEmpty() && conf.additionalHeader2Value() != null) {
+            request.addHeader(conf.additionalHeader2Key().trim(), conf.additionalHeader2Value().trim());
+        }
+        if (conf.additionalHeader3Key() != null && !conf.additionalHeader3Value().isEmpty() && conf.additionalHeader3Value() != null) {
+            request.addHeader(conf.additionalHeader3Key().trim(), conf.additionalHeader3Value().trim());
         }
     }
 

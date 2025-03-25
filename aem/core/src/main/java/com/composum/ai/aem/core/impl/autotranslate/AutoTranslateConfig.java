@@ -41,9 +41,10 @@ public @interface AutoTranslateConfig {
                     "(Otherwise the translator would translate metadata of images and videos.)")
     boolean ignoreAssetsExceptContentFragments() default true;
 
-    @AttributeDefinition(name = "Use High Intelligence Model",
-            description = "If true, the translator will use the 'high-intelligence model' (see OpenAI config) for translation. Default: true.")
-    boolean useHighIntelligenceModel() default true;
+    @AttributeDefinition(name = "Default model",
+            description = "The default model to use for translation, if not configured otherwise in Sling CA Configuration. " +
+                    "If not configured, the Chat Completion Service default model is used.")
+    String defaultModel();
 
     @AttributeDefinition(name = "Include Full Page during Retranslation",
             description = "If true we do not only provide changed texts to the AI during re-translating a page with some changes," +

@@ -53,6 +53,10 @@ public class ChatCompletionResponse {
     @SerializedName("usage")
     private ChatCompletionUsage usage;
 
+    /** Special response from claude that has no actual content. */
+    @SerializedName("type")
+    private String type;
+
     // Getters and setters
     public String getId() {
         return id;
@@ -108,6 +112,11 @@ public class ChatCompletionResponse {
 
     public void setUsage(ChatCompletionUsage usage) {
         this.usage = usage;
+    }
+
+    /** Special response "ping" from Anthropic Claude that has no actual content. */
+    public String getType() {
+        return type;
     }
 
     public enum FinishReason {
