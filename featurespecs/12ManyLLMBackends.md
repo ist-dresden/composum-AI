@@ -103,12 +103,6 @@ The implementation is mostly done in the `backend/base` module.
 For backwards compatibility we leave the `ChatCompletion*` classes in
 `com.composum.ai.backend.base.service.chat.impl.chatmodel` for OpenAI compatible backend as they are.
 
-### Examples for implementation details
-
-- com.composum.ai.backend.slingbase.model.OpenAIConfig is both Sling CA Config as well as OSGI configuration
-- OsgiAIConfigurationPluginFactoryImpl is an example for a factory
-- 
-
 ## Implementation decisions
 
 - We leave the current OpenAI configuration as it is as a default, with identifiers `default` and `default-hi` for the

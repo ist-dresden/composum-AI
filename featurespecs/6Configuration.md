@@ -32,43 +32,12 @@ configuration auditing, configuration validation.
 
 ## Implementation details
 
-### OpenAI key configuration
+### Backend / OpenAI key configuration
 
-package com.composum.ai.backend.slingbase.model;
-
-import org.apache.sling.caconfig.annotation.Configuration;
-import org.apache.sling.caconfig.annotation.Property;
-
-@Configuration(label = "Composum AI OpenAI Configuration", description = "Configurations for the OpenAI backend for
-Composum AI")
-// is also added to Sling-ContextAware-Configuration-Classes bnd header in pom.xml
-public @interface OpenAIConfig {
-
-    @Property(label = "OpenAI API Key", description = "OpenAI API Key from https://platform.openai.com/. If not given, this falls back to the OSGI configuration, the environment Variable OPENAI_API_KEY, and the system property openai.api.key .")
-    String openAiApiKey();
-
-}
-
-We have a fallback hierarchy for the OpenAI API key:
-
-- Sling Context Aware Configuration
-- OSGI configuration at "Composum AI OpenAI Configuration" - this is configured by default for AEMaaCS
-  as $[secret:OPENAI_API_KEY] to retrieve a value configurable in the cloud manager
-- Environment variable OPENAI_API_KEY
-
-For the sling context aware configuration, we have a configuration
-com.composum.ai.backend.slingbase.model.OpenAIConfig with the property openAiApiKey . Thus, set up configuration of
-the API key in the JCR repository has the following possibilities:
-
-- to enable it globally (even if you do not normally use Sling Context Aware Configuration), you could set up a
-  configuration node at
-  /conf/global/sling:configs/com.composum.ai.backend.slingbase.model.OpenAIConfig
-  with the property openAiApiKey set to the OpenAI API key. Caution: this requires read permissions for the users.
-- to enable it for a site or page tree that already has a sling:configRef set up (searchable with query
-  /content//*[@sling:configRef]) you could set up a configuration node
-  com.composum.ai.backend.slingbase.model.OpenAIConfig in
-  the corresponding /conf/.../sling:configs node.
-- otherwise you'd have to set up Sling Context Aware Configuration for the page tree in question.
+There needs to be at least one backend, e.g. OpenAI. See [LLM Backends](12ManyLLMBackends.md) for more details on that.
+There is the "Composum AI Backend Configuration" OSGI configuration factory which can configure one or more 
+backends as needed, e.g. the OpenAI chat completion API. It's also advisable to check and set the models used for
+different tasks in the "Composum AI Basic Configuration" (OSGI).
 
 ### Permission configuration
 
