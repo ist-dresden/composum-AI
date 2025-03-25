@@ -41,6 +41,22 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
         return allModels;
     }
 
+    @Nonnull
+    @Override
+    public List<String> getActiveBackends() {
+        List<String> activeBackends = new ArrayList<>();
+        if (backendsConfigurationServices != null) {
+            for (GPTBackendsConfigurationService service : backendsConfigurationServices) {
+                for (GPTBackendConfiguration backend : service.getBackends()) {
+                    if (!backend.disabled()) {
+                        activeBackends.add(backend.backendId());
+                    }
+                }
+            }
+        }
+        return activeBackends;
+    }
+
     @Nullable
     @Override
     public String getModelNameInBackend(@Nullable String model) {

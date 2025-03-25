@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -51,6 +52,10 @@ public class AutotranslateModelCompareModel {
 
     public List<String> getModels() {
         return gptBackendsService.getAllModels();
+    }
+
+    public String getBackendList() {
+        return gptBackendsService.getActiveBackends().stream().collect(Collectors.joining(", "));
     }
 
     public String getError() {

@@ -11,10 +11,16 @@ import javax.annotation.Nullable;
 public interface GPTBackendsService {
 
     /**
-     * List of all model names, no matter from which backend.
+     * List of all model names configured for the active backends, no matter from which backend.
      */
     @Nonnull
     List<String> getAllModels();
+
+    /**
+     * Returns a list of active backends. Those can be used as prefix for unconfigured models <code>backendId:modelname</code>.
+     */
+    @Nonnull
+    List<String> getActiveBackends();
 
     /**
      * Determines the backend a model is from.
