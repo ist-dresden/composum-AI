@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -104,7 +105,7 @@ public interface AutoTranslateService {
         public String stopTime;
         public String user;
         public String rootPath;
-        public StringBuilder messages = new StringBuilder();
+        public List<TranslationRunMessage> messages = new ArrayList<>();
 
         public abstract List<TranslationPage> getTranslatedPages();
 
@@ -132,7 +133,25 @@ public interface AutoTranslateService {
                     ", rootPath='" + rootPath + '\'' +
                     ", messages=" + messages;
         }
+    }
 
+    /** A message from the translation run, displayable in the Test UI */
+    static class TranslationRunMessage {
+        public final String description;
+        public final String payload;
+
+        public TranslationRunMessage(String description, String payload) {
+            this.description = description;
+            this.payload = payload;
+        }
+
+        @Override
+        public String toString() {
+            return "TranslationRunMessage{" +
+                    "description='" + description + '\'' +
+                    ", payload='" + payload + '\'' +
+                    '}';
+        }
     }
 
     abstract class TranslationPage {

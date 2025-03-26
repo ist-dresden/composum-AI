@@ -207,11 +207,12 @@
             form[0].submit();
         });
 
-        // reset 'recursive' if 'copyOriginalPage' is checked or debugaddinstructions is checked
+        // reset 'recursive' if 'copyOriginalPage' is checked or debugaddinstructions or debugprintrequest is checked
         $('coral-checkbox[name="copyOriginalPage"], coral-checkbox[name="debugaddinstructions"]').on('change', function () {
             const copyOriginalPage = $('coral-checkbox[name="copyOriginalPage"]').prop('checked');
             const debugaddinstructions = $('coral-checkbox[name="debugaddinstructions"]').prop('checked');
-            if (copyOriginalPage || debugaddinstructions) {
+            const debugprintrequest = $('coral-checkbox[name="debugprintrequest"]').prop('checked');
+            if (copyOriginalPage || debugaddinstructions || debugprintrequest) {
                 $('coral-checkbox[name="recursive"]').prop('checked', false);
             }
         });
@@ -230,8 +231,9 @@
             form.find('input[type="checkbox"]').each(function () {
                 const field = $(this);
                 field.prop('checked', formData[field.attr('name')] || false);
-                // reset checkboxes "recursive" and "debugaddinstructions" and copy to false
-                if (field.attr('name') === 'recursive' || field.attr('name') === 'debugaddinstructions' || field.attr('name') === 'copyOriginalPage') {
+                // reset checkboxes "recursive" and "debugaddinstructions" and "debugprintrequest" and copy to false
+                if (field.attr('name') === 'recursive' || field.attr('name') === 'debugaddinstructions' ||
+                    field.attr('name') === 'copyOriginalPage' || field.attr('name') === 'debugprintrequest') {
                     field.prop('checked', false);
                 }
             });

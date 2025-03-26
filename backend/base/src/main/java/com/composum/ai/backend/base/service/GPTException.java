@@ -63,8 +63,21 @@ public class GPTException extends RuntimeException {
      * This is used to transport information in cases where a special return value is not feasible.
      */
     public static class GPTUserNotificationException extends GPTException {
-        public GPTUserNotificationException(String message) {
-            super(message);
+        private final String description;
+        private final String payload;
+
+        public GPTUserNotificationException(String description, String payload) {
+            super(description + "\n\n" + payload);
+            this.description = description;
+            this.payload = payload;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getPayload() {
+            return payload;
         }
     }
 

@@ -124,8 +124,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             String languageName = SelectorUtils.getLanguageName(language, Locale.ENGLISH);
             String sourceLanguage = determineSourceLanguage(resource);
-            if (sourceLanguage == null || StringUtils.equals(language, sourceLanguage)) {
-                LOG.info("Skipping translation because language and source language are {} for {}", language, resource.getPath());
+            if (StringUtils.equals(language, sourceLanguage)) {
+                LOG.warn("Skipping translation because language and source language are both {} for {}", language, resource.getPath());
                 return stats;
             }
 
@@ -164,7 +164,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 LOG.info("Translating {} properties in {} using additional instructions", countPropertiesToTranslate, resource.getPath(), additionalInstructions);
                 if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
                     throw new GPTException.GPTUserNotificationException(
-                            "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):\n\n" +
+                            "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):",
                                     additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
                 }
 
