@@ -272,95 +272,104 @@ public class AICreateServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(@NotNull SlingHttpServletRequest request, @NotNull SlingHttpServletResponse response) throws ServletException, IOException {
         LOG.info("Starting content creation");
-        String prompt = getMandatoryParameter(request, response, PARAMETER_PROMPT);
-        String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
-        String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
-        String sourceText = request.getParameter(PARAMETER_SOURCE);
-        String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
-        String inputImagePath = request.getParameter(PARAMETER_INPUT_IMAGE_PATH);
-        if ("undefined".equals(inputImagePath) || "null".equals(inputImagePath) || StringUtils.isBlank(inputImagePath)) {
-            inputImagePath = null;
-        }
-
-        GPTConfiguration config = configurationService.getGPTConfiguration(request.getResourceResolver(), configBasePath);
-        String chat = request.getParameter(PARAMETER_CHAT);
-        if (Stream.of(sourcePath, sourceText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
-            LOG.warn("More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
-                    " given, only one of them is allowed");
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
-                    " given, only one of them is allowed");
-            return;
-        }
-
-        boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
-        GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
-        Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
-        if (mergedConfig.highIntelligenceNeededIsUnset()) {
-            mergedConfig = GPTConfiguration.ofHighIntelligenceNeeded(true).merge(mergedConfig);
-        }
-
-        int maxtokens = maxTokensParam != null ? maxTokensParam : 4095; // some arbitrary default.
-        // Synchronize with cutoff in GPTChatCompletionServiceImpl as it's used in the sidebar!
-        if (isNotBlank(textLength)) {
-            Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*+(.*)").matcher(textLength);
-            if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
-                maxtokens = Integer.parseInt(matcher.group(1));
-                textLength = matcher.group(2);
+        try {
+            String prompt = getMandatoryParameter(request, response, PARAMETER_PROMPT);
+            String textLength = request.getParameter(PARAMETER_TEXTLENGTH);
+            String sourcePath = request.getParameter(PARAMETER_SOURCEPATH);
+            String sourceText = request.getParameter(PARAMETER_SOURCE);
+            String configBasePath = request.getParameter(PARAMETER_CONFIGBASEPATH);
+            String inputImagePath = request.getParameter(PARAMETER_INPUT_IMAGE_PATH);
+            if ("undefined".equals(inputImagePath) || "null".equals(inputImagePath) || StringUtils.isBlank(inputImagePath)) {
+                inputImagePath = null;
             }
-        }
 
-        List<GPTTool> tools = collectTools(request.getResourceResolver().getResource(configBasePath), request, response);
-        if (tools != null && !tools.isEmpty()) {
-            mergedConfig = GPTConfiguration.ofTools(tools).merge(mergedConfig);
-        }
-
-        GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response, mergedConfig);
-
-        String fullPrompt = prompt;
-        if (isNotBlank(textLength)) {
-            fullPrompt = textLength + "\n\n" + fullPrompt;
-        }
-        if (richtext) {
-            fullPrompt = fullPrompt + "\n\n" +
-                    "Important: your response must not be Markdown but be completely in HTML and begin with <p>, lists be HTML <ul> or <ol> and so forth!";
-        }
-        if (isNotBlank(sourcePath)) {
-            Resource resource = request.getResourceResolver().getResource(sourcePath);
-            if (resource == null) {
-                LOG.warn("No resource found at {}", sourcePath);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resource found at " + sourcePath);
+            GPTConfiguration config = configurationService.getGPTConfiguration(request.getResourceResolver(), configBasePath);
+            String chat = request.getParameter(PARAMETER_CHAT);
+            if (Stream.of(sourcePath, sourceText, inputImagePath).filter(StringUtils::isNotBlank).count() > 1) {
+                LOG.warn("More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
+                        " given, only one of them is allowed");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "More than one of sourcePath and sourceText and " + PARAMETER_INPUT_IMAGE_PATH +
+                        " given, only one of them is allowed");
                 return;
-            } else {
-                sourceText = markdownService.approximateMarkdown(resource, request, response);
             }
-        }
 
-        if (isNotBlank(inputImagePath)) {
-            Resource resource = request.getResourceResolver().getResource(inputImagePath);
-            String imageUrl = markdownService.getImageUrl(resource);
-            if (imageUrl == null) {
-                LOG.warn("No image found at {}", inputImagePath);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No image found at " + inputImagePath);
-                return;
-            } else {
-                additionalParameters.addMessages(Collections.singletonList(new GPTChatMessage(GPTMessageRole.USER, null, imageUrl)));
+            boolean richtext = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(PARAMETER_RICHTEXT));
+            GPTConfiguration mergedConfig = GPTConfiguration.ofRichText(richtext).merge(config);
+            Integer maxTokensParam = getOptionalInt(request, response, PARAMETER_MAXTOKENS);
+            if (mergedConfig.highIntelligenceNeededIsUnset()) {
+                mergedConfig = GPTConfiguration.ofHighIntelligenceNeeded(true).merge(mergedConfig);
             }
-        }
 
-        EventStream callback = new EventStream();
-        String id = saveStream(callback, request);
-        LOG.info("Starting stream {}", id);
-        if (isNotBlank(sourceText)) {
-            contentCreationService.executePromptOnTextStreaming(fullPrompt, sourceText, additionalParameters, callback);
-        } else {
-            contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
-        }
+            int maxtokens = maxTokensParam != null ? maxTokensParam : 4095; // some arbitrary default.
+            // Synchronize with cutoff in GPTChatCompletionServiceImpl as it's used in the sidebar!
+            if (isNotBlank(textLength)) {
+                Matcher matcher = Pattern.compile("\\s*(\\d+)\\s*\\|\\s*+(.*)").matcher(textLength);
+                if (matcher.matches()) { // maxtokens can be encoded into textLength, e.g. "1000|Several paragraphs of text"
+                    maxtokens = Integer.parseInt(matcher.group(1));
+                    textLength = matcher.group(2);
+                }
+            }
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        // on 202 with Location header Chrome freezes in $.ajax for  AEM 6.5.7 8-{} . So we have to do it differently.
-        response.setContentType("application/json");
-        gson.toJson(Collections.singletonMap(PARAMETER_STREAMID, id), response.getWriter());
-        LOG.info("Returning stream id {}", id);
+            List<GPTTool> tools = collectTools(request.getResourceResolver().getResource(configBasePath), request, response);
+            if (tools != null && !tools.isEmpty()) {
+                mergedConfig = GPTConfiguration.ofTools(tools).merge(mergedConfig);
+            }
+
+            GPTChatRequest additionalParameters = makeAdditionalParameters(maxtokens, chat, response, mergedConfig);
+
+            String fullPrompt = prompt;
+            if (isNotBlank(textLength)) {
+                fullPrompt = textLength + "\n\n" + fullPrompt;
+            }
+            if (richtext) {
+                fullPrompt = fullPrompt + "\n\n" +
+                        "Important: your response must not be Markdown but be completely in HTML and begin with <p>, lists be HTML <ul> or <ol> and so forth!";
+            }
+            if (isNotBlank(sourcePath)) {
+                Resource resource = request.getResourceResolver().getResource(sourcePath);
+                if (resource == null) {
+                    LOG.warn("No resource found at {}", sourcePath);
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resource found at " + sourcePath);
+                    return;
+                } else {
+                    sourceText = markdownService.approximateMarkdown(resource, request, response);
+                }
+            }
+
+            if (isNotBlank(inputImagePath)) {
+                Resource resource = request.getResourceResolver().getResource(inputImagePath);
+                String imageUrl = markdownService.getImageUrl(resource);
+                if (imageUrl == null) {
+                    LOG.warn("No image found at {}", inputImagePath);
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "No image found at " + inputImagePath);
+                    return;
+                } else {
+                    additionalParameters.addMessages(Collections.singletonList(new GPTChatMessage(GPTMessageRole.USER, null, imageUrl)));
+                }
+            }
+
+            EventStream callback = new EventStream();
+            String id = saveStream(callback, request);
+            LOG.info("Starting stream {}", id);
+            if (isNotBlank(sourceText)) {
+                contentCreationService.executePromptOnTextStreaming(fullPrompt, sourceText, additionalParameters, callback);
+            } else {
+                contentCreationService.executePromptStreaming(fullPrompt, additionalParameters, callback);
+            }
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            // on 202 with Location header Chrome freezes in $.ajax for  AEM 6.5.7 8-{} . So we have to do it differently.
+            response.setContentType("application/json");
+            gson.toJson(Collections.singletonMap(PARAMETER_STREAMID, id), response.getWriter());
+            LOG.info("Returning stream id {}", id);
+        } catch (Exception e) {
+            LOG.error("Error during content creation", e);
+            response.setStatus(HttpServletResponse.SC_OK); // using an error status code could lead to an error page
+            response.setContentType("application/json");
+            gson.toJson(Collections.singletonMap("error", "Error during content creation: " + e.getMessage()), response.getWriter());
+        } finally {
+            LOG.info("Finished content creation");
+        }
     }
 
     @Nonnull

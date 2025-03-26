@@ -1,5 +1,9 @@
 package com.composum.ai.backend.base.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
 /**
  * Any kind of error when accessing GPT.
  */
@@ -67,7 +71,7 @@ public class GPTException extends RuntimeException {
         private final String payload;
 
         public GPTUserNotificationException(String description, String payload) {
-            super(description + "\n\n" + payload);
+            super(description + "\n\n" + urlEncode(payload));
             this.description = description;
             this.payload = payload;
         }
@@ -78,6 +82,14 @@ public class GPTException extends RuntimeException {
 
         public String getPayload() {
             return payload;
+        }
+
+        private static String urlEncode(String value) {
+            try {
+                return URLEncoder.encode(value, "UTF-8");
+            } catch (UnsupportedEncodingException e) { // hell froze over
+                return value;
+            }
         }
     }
 
