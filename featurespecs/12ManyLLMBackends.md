@@ -117,10 +117,8 @@ GPTPromptLibrary example OSGI configuration and Sling CA configuration
 
 - remove / replace com.composum.ai.backend.slingbase.model.OpenAIConfig traces
 - update documentation
-- check config syntax $[env:OPEN_AI_MODEL;default=gpt-4o-mini]
 
-- create example for search and give links
-- list providers in page
+- switch to output translation request
 
 ### Questions
 

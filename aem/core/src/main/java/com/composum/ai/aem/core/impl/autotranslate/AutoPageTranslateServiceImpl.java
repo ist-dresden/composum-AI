@@ -73,7 +73,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected static final Pattern PATTERN_IGNORED_SUBNODE_NAMES =
             Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*|sling:members");
 
-    public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS";
+    /**
+     * If this is embedded into the additional instructions the translation will be aborted and the additional instructions
+     * will be wrapped into an exception which is caught and the instructions printed.
+     */
+    public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS09483748";
 
     protected final String DEFAULT_TRANSLATION_RULE_PATTERN = "Translate '{0}' as '{1}'.";
 

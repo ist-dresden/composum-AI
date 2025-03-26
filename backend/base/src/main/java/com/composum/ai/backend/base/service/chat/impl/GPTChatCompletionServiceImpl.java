@@ -322,6 +322,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     }
 
     protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        if (jsonRequest.contains(MARKER_DEBUG_PRINT_REQUEST)) {
+            throw new GPTException.GPTUserNotificationException("Request that would be sent to the AI:\n\n" + jsonRequest);
+        }
         checkTokenCount(jsonRequest);
         SimpleHttpRequest request = new SimpleHttpRequest("POST", "http://will.be.reconfiugured/");
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);

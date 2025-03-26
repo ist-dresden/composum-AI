@@ -97,4 +97,11 @@ public interface GPTChatCompletionService {
     /** Returns the model used for {@link #getEmbeddings(List, GPTConfiguration)}. */
     String getEmbeddingsModel();
 
+
+    /**
+     * If this is embedded into the request the translation will be aborted and the whole request
+     * that is sent to the AI will be wrapped into an exception which is caught and the request is then printed.
+     */
+    public static final String MARKER_DEBUG_PRINT_REQUEST = "DEBUGPRINTREQUEST34856385";
+
 }
