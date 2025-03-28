@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GPTBackendsServiceImpl.class);
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE)
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected List<GPTBackendsConfigurationService> backendsConfigurationServices;
 
     @Nonnull

@@ -68,6 +68,18 @@ use as well. So we can avoid creating an alternative backend there.
 https://learn.microsoft.com/en-us/rest/api/aifoundry/modelinference/ seems to be OpenAI compatible, too.
 https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/deployments-overview : Model as a service with 
 serverless API deployment are billed per token.
+https://learn.microsoft.com/en-us/azure/ai-studio/what-is-ai-studio
+
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/deploy-models-serverless?tabs=azure-ai-studio
+
+https://portal.azure.com/?quickstart=True#browse/Microsoft.MachineLearningServices%2Faistudio
+
+Interesting models: (model catalog filtered by Serverless API deployment and inference task "chat completion")
+Deepseek-V3: en + zh
+Deepseek-R1: Testing
+Phi-4: very multilingual!
+perhaps AI21-Jamba-1.5-Large , Meta-Llama-3.1-405B-Instruct , Llama-3.2-90B-Vision-Instruct, Llama-3.3-70B-Instruct,  
+Mistral-Large-2411
 
 ## [Amazon Bedrock](https://aws.amazon.com/de/bedrock/)
 
@@ -110,6 +122,8 @@ For backwards compatibility we leave the `ChatCompletion*` classes in
 - Embeddings will only be dealt using that default configuration, as they are rarely used yet.
 
 ## TODO
+
+- Claude additional instructions???
 
 - configuration print page?
 
