@@ -10,13 +10,11 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
-import com.adobe.granite.translation.api.TranslationResult;
 import com.composum.ai.aem.core.impl.SelectorUtils;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTConfiguration;
@@ -48,12 +46,14 @@ public class AutotranslateModelCompareModel {
     private String targetLanguage;
     private String targetLanguageError;
     private String[] selectedModels;
+    private String instructions;
 
     @PostConstruct
     protected void init() {
         this.text = request.getParameter("text");
         this.targetLanguage = request.getParameter("targetLanguage");
         this.selectedModels = request.getParameterValues("selectedModels");
+        this.instructions = request.getParameter("instructions");
     }
 
     public List<String> getModels() {
@@ -64,7 +64,9 @@ public class AutotranslateModelCompareModel {
         return gptBackendsService.getActiveBackends().stream().collect(Collectors.joining(", "));
     }
 
-    /** The actual textual representation of the target language, used with the model. */
+    /**
+     * The actual textual representation of the target language, used with the model.
+     */
     public String getParsedTargetLanguage() {
         if (targetLanguage == null || targetLanguage.trim().isEmpty()) {
             return null;
@@ -131,6 +133,9 @@ public class AutotranslateModelCompareModel {
                     gptTranslationService != null) {
                 for (String modelName : selectedModels) {
                     GPTConfiguration configuration = GPTConfiguration.ofModel(modelName);
+                    if (instructions != null && !instructions.trim().isEmpty()) {
+                        configuration = GPTConfiguration.ofAdditionalInstructions(instructions).merge(configuration);
+                    }
                     CompletableFuture<String> translationFuture = new CompletableFuture<>();
                     long startTime = System.currentTimeMillis();
 

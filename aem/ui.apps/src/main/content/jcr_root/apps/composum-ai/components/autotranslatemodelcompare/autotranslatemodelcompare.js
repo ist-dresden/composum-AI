@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Prevent form submission via Enter key on non-textarea inputs
+    const formElement = document.querySelector('form');
+    formElement.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+            e.preventDefault();
+        }
+    });
+
     // Get DOM elements
     const selectAllBtn = document.getElementById("select-all");
     const clearAllBtn = document.getElementById("clear-all");
@@ -9,13 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const additionalModelsInput = document.getElementById("additional-models");
     const additionalModelsContainer = document.getElementById("additional-models-container");
 
-    // Restore textarea state from localStorage
+    // Restore translation text from localStorage
     const savedText = localStorage.getItem("composumAI-autotranslatemodelcompare-translationText");
     if (savedText !== null) {
         translationText.value = savedText;
     }
 
-    // Restore target language state from localStorage
+    // Restore target language from localStorage
     const savedTargetLanguage = localStorage.getItem("composumAI-autotranslatemodelcompare-targetLanguage");
     if (savedTargetLanguage !== null) {
         targetLanguageInput.value = savedTargetLanguage;
@@ -28,6 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
         updateAdditionalModelsCheckboxes();
     }
 
+    // Restore additional instructions from localStorage and unfold details if non-empty
+    const additionalInstructions = document.getElementById("additional-instructions");
+    const additionalInstructionsDetails = document.getElementById("additional-instructions-details");
+    const savedInstructions = localStorage.getItem("composumAI-autotranslatemodelcompare-instructions");
+    if (savedInstructions !== null) {
+        additionalInstructions.value = savedInstructions;
+        if (savedInstructions.trim() !== "") {
+            additionalInstructionsDetails.open = true;
+        }
+    }
+
     // Restore static checkbox state from localStorage
     const savedModels = localStorage.getItem("composumAI-autotranslatemodelcompare-selectedModels");
     if (savedModels) {
@@ -37,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Add event listeners for static checkboxes
+    // Event listener for static checkboxes
     checkboxes.forEach(chk => {
         chk.addEventListener("change", () => {
             const allCheckboxes = document.querySelectorAll('input[name="selectedModels"]');
@@ -48,14 +67,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Event listener for textarea input
+    // Save translation text on input
     translationText.addEventListener("input", () => {
         localStorage.setItem("composumAI-autotranslatemodelcompare-translationText", translationText.value);
     });
 
-    // Event listener for target language input
+    // Save target language on input
     targetLanguageInput.addEventListener("input", () => {
         localStorage.setItem("composumAI-autotranslatemodelcompare-targetLanguage", targetLanguageInput.value);
+    });
+
+    // Save additional instructions on input
+    additionalInstructions.addEventListener("input", () => {
+        localStorage.setItem("composumAI-autotranslatemodelcompare-instructions", additionalInstructions.value);
     });
 
     function updateAdditionalModelsCheckboxes() {
@@ -95,6 +119,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     .map(c => c.value);
                 localStorage.setItem("composumAI-autotranslatemodelcompare-selectedModels", JSON.stringify(selected));
             });
+        });
+        
+        // After updating additional models, remove any selected models that no longer exist in the checkboxes
+        const allCheckboxes = document.querySelectorAll('input[name="selectedModels"]');
+        const validModels = Array.from(allCheckboxes).map(chk => chk.value);
+        let savedSelectedModels = JSON.parse(localStorage.getItem("composumAI-autotranslatemodelcompare-selectedModels") || "[]");
+        const filteredSelectedModels = savedSelectedModels.filter(value => validModels.includes(value));
+        localStorage.setItem("composumAI-autotranslatemodelcompare-selectedModels", JSON.stringify(filteredSelectedModels));
+        
+        // Update all checkboxes to reflect the filtered selection
+        allCheckboxes.forEach(chk => {
+            chk.checked = filteredSelectedModels.includes(chk.value);
         });
     }
 
