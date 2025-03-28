@@ -163,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error('Network response was not ok');
             }
             document.getElementById('loading-spinner').style.display = 'inline';
+            // document.getElementById('results')?.remove();
             return response.json();
         }).then(data => {
             const csrfTokenInput = document.querySelector('input[name=":cq_csrf_token"]');

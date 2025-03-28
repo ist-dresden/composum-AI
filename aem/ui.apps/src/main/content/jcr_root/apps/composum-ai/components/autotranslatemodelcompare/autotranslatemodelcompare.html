@@ -16,7 +16,7 @@
     <p data-sly-test="${model.error}" class="alert alert-danger" id="error-message">
         ${model.error}
     </p>
-    <form method="post">
+    <form method="post" action="#texttotranslate">
         <div class="form-group">
             <h3>Select Models</h3>
             <div class="d-flex flex-wrap align-items-center">
@@ -58,7 +58,7 @@
         </div>
 
         <div class="form-group">
-            <h3>Text to Translate</h3>
+            <h3 id="texttotranslate">Text to Translate</h3>
             <textarea id="translation-text" name="text" class="form-control" rows="5" required title="Enter the text you want to translate"
                       placeholder="Enter text to translate"></textarea>
         </div>
@@ -72,7 +72,7 @@
         </div>
     </form>
 
-    <sly data-sly-test="${request.requestParameterMap['text']}">
+    <div data-sly-test="${request.requestParameterMap['text']}" id="results">
         <h2>Translation Results</h2>
         <table class="table table-striped">
             <thead>
@@ -90,7 +90,7 @@
             </sly>
             </tbody>
         </table>
-    </sly>
+    </div>
 </div>
 </body>
 </html>
