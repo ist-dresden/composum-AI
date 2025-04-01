@@ -24,10 +24,13 @@ The page should be as follows:
   placeholder 'Additional models (comma separated list) takes a comma separated list of additional models. 
   When changed, those are added to the checkboxes. Take care to also remove them when they disappear in the textbox.  
 - textarea to input the text to translate
+- a normally folded in text area for additional instructions, folded with a details tag. If this text area is 
+  restored with some content from localStorage, it should be unfolded.
 - translate with all selected models button. That triggers a POST to the page itself. Only the button triggers 
   form submission, not pressing enter in the textarea or textboxes.
 - table with the translation results: headline with model name and timing in milliseconds, and then the translated 
   text. The table is only present when the page is called with parameters for models and text to translate.
+- All text areas / text inputs and buttons should have tool tips.
 
 The page width should be fully used.
 

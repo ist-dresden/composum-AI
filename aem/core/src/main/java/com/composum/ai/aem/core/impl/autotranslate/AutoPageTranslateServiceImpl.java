@@ -73,7 +73,11 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
     protected static final Pattern PATTERN_IGNORED_SUBNODE_NAMES =
             Pattern.compile("i18n|rep:.*|cq:.*|xmpMM:.*|exif:.*|crs:.*|Iptc4xmpCore:.*|sling:members");
 
-    public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS";
+    /**
+     * If this is embedded into the additional instructions the translation will be aborted and the additional instructions
+     * will be wrapped into an exception which is caught and the instructions printed.
+     */
+    public static final String MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS = "DEBUGADDINSTRUCTIONS09483748";
 
     protected final String DEFAULT_TRANSLATION_RULE_PATTERN = "Translate '{0}' as '{1}'.";
 
@@ -120,8 +124,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
             }
             String languageName = SelectorUtils.getLanguageName(language, Locale.ENGLISH);
             String sourceLanguage = determineSourceLanguage(resource);
-            if (sourceLanguage == null || StringUtils.equals(language, sourceLanguage)) {
-                LOG.info("Skipping translation because language and source language are {} for {}", language, resource.getPath());
+            if (StringUtils.equals(language, sourceLanguage)) {
+                LOG.warn("Skipping translation because language and source language are both {} for {}", language, resource.getPath());
                 return stats;
             }
 
@@ -160,7 +164,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 LOG.info("Translating {} properties in {} using additional instructions", countPropertiesToTranslate, resource.getPath(), additionalInstructions);
                 if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
                     throw new GPTException.GPTUserNotificationException(
-                            "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):\n\n" +
+                            "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):",
                                     additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
                 }
 

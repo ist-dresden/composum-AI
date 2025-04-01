@@ -18,6 +18,7 @@
                         <section class="coral-Form-fieldset"><h2
                                     class="coral-Form-fieldset-legend">Translation run details for ${model.rootPath}</h2>
                             <div class="coral-Form coral-Form--vertical foundation-form">
+                                <input type="hidden" name="_charset_" value="utf-8">
                                 <coral-alert variant="error" data-sly-test="${!model}">
                                     <coral-alert-header>EXPIRED</coral-alert-header>
                                     <coral-alert-content>
@@ -112,9 +113,13 @@
                                 </p>
                                 <div class="coral-Form-fieldwrapper" data-sly-test="${model.messages.toString}">
                                     <label class="coral-Form-fieldlabel">Messages</label>
-                                    <pre>${model.messages.toString @ context='html'}</pre>
+                                    <sly data-sly-list.message="${model.messages}">
+                                        <p data-sly-text="${message.description}"></p>
+                                        <pre data-sly-test="${message.payload}" data-sly-text="${message.payload}"></pre>
+                                    </sly>
                                 </div>
                             </div>
+
                         </section>
                     </sly>
                 </div>

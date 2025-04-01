@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateServiceImpl.MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS;
+import static com.composum.ai.backend.base.service.chat.GPTChatCompletionService.MARKER_DEBUG_PRINT_REQUEST;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.util.Collections;
@@ -78,11 +79,16 @@ public class AutoTranslateListModel {
             boolean copyOriginalPage = request.getParameter("copyOriginalPage") != null;
             String additionalInstructions = request.getParameter("additionalInstructions");
             boolean debugaddinstructions = request.getParameter("debugaddinstructions") != null;
+            boolean debugprintrequest = request.getParameter("debugprintrequest") != null;
             if (debugaddinstructions) {
                 additionalInstructions = StringUtils.trim(
                         StringUtils.defaultString(additionalInstructions) + "\n\n" +
                                 MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS
                 );
+            }
+            if (debugprintrequest) {
+                additionalInstructions = StringUtils.trim(
+                        StringUtils.defaultString(additionalInstructions) + "\n\n" + MARKER_DEBUG_PRINT_REQUEST);
             }
             AutoTranslateService.TranslationParameters parms = new AutoTranslateService.TranslationParameters();
             String translationmodel = request.getParameter("translationmodel");

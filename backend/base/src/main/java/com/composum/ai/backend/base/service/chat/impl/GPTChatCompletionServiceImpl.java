@@ -274,7 +274,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
             externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
             String jsonRequest = gson.toJson(externalRequest);
-            if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
+            if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())
+                    || jsonRequest.contains(MARKER_DEBUG_OUTPUT_REQUEST)) {
                 LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, externalRequest);
                 return jsonRequest;
             }
@@ -322,6 +323,9 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
     }
 
     protected SimpleHttpRequest makeRequest(String jsonRequest, GPTConfiguration gptConfiguration) {
+        if (jsonRequest.contains(MARKER_DEBUG_PRINT_REQUEST)) {
+            throw new GPTException.GPTUserNotificationException("Request that would be sent to the AI:", jsonRequest);
+        }
         checkTokenCount(jsonRequest);
         SimpleHttpRequest request = new SimpleHttpRequest("POST", "http://will.be.reconfiugured/");
         request.setBody(jsonRequest, ContentType.APPLICATION_JSON);
@@ -346,7 +350,8 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 LOG.debug("Sending streaming request {} to GPT: {}", id, shortenedRequest);
             }
 
-            if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())) {
+            if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug()) ||
+                    jsonRequest.contains(MARKER_DEBUG_OUTPUT_REQUEST)) {
                 LOG.debug("Request not sent - debugging requested.");
                 callback.onNext(jsonRequest);
                 callback.onFinish(GPTFinishReason.STOP);

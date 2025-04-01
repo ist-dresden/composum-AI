@@ -205,7 +205,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             try {
                 AutoTranslateServiceImpl.this.doRollback(resourceResolver, this);
             } catch (PersistenceException | WCMException | RuntimeException e) {
-                messages.append("Error rolling back: ").append(e).append("\n");
+                this.messages.add(new TranslationRunMessage("Error rolling back: ", e.toString()));
                 throw e;
             }
         }
@@ -258,12 +258,13 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
                         }
                     } catch (GPTException.GPTUserNotificationException e) {
                         page.status = "cancelled - user notification";
-                        this.messages.append(e.getMessage()).append("\n\n");
+                        this.messages.add(new TranslationRunMessage("User notification during translation of " +
+                                page.pagePath + ":\n" + e.getDescription(), e.getPayload()));
                         LOG.info("User notification during translation of " + page.pagePath + ": " + e.getMessage());
                         hasErrors = true; // not quite true but we don't want an 'OK, translation done'
                     } catch (Exception e) {
                         page.status = "error";
-                        this.messages.append("Error translating ").append(page.pagePath).append(": ").append(e).append("\n");
+                        this.messages.add(new TranslationRunMessage("Error translating " + page.pagePath + ": ", e.toString()));
                         LOG.error("Error translating " + page.pagePath, e);
                         hasErrors = true;
                     }
@@ -276,7 +277,7 @@ public class AutoTranslateServiceImpl implements AutoTranslateService {
             } catch (Exception e) {
                 LOG.error("Error during " + this, e);
                 status = TranslationStatus.ERROR;
-                messages.append("Error: ").append(e).append("\n");
+                messages.add(new TranslationRunMessage("Error during " + this, e.toString()));
             } finally {
                 stopTime = new Date().toString();
                 if (status == null) {

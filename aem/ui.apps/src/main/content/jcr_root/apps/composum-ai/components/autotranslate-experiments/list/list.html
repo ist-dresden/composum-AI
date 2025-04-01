@@ -6,6 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
     <sly data-sly-call="${clientLib.css @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+    <style>
+         .native-select {
+             padding: 8px 12px;
+             font-size: 14px;
+             color: #4b4b4b;
+             border: 1px solid #ccc;
+             border-radius: 3px;
+             min-height: 36px;
+             line-height: 1.5;
+             background-color: white;
+             width: 100%;
+         }
+         .native-select:focus {
+             border-color: #66afe9;
+             outline: none;
+         }
+    </style>
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
 <div class="foundation-layout-panel">
@@ -78,7 +95,12 @@
                                         </div>
                                         <div class="coral-Form-fieldwrapper">
                                             <coral-checkbox name="debugaddinstructions">
-                                                <label for="debugaddinstructions">Instead of translating collect additional instructions for verification</label>
+                                                <label for="debugaddinstructions">Instead of translating collect additional instructions for verification and abort</label>
+                                            </coral-checkbox>
+                                        </div>
+                                        <div class="coral-Form-fieldwrapper">
+                                            <coral-checkbox name="debugprintrequest">
+                                                <label for="debugprintrequest">Instead of translating just print the request for verification and abort</label>
                                             </coral-checkbox>
                                         </div>
                                         <div class="coral-Form-fieldwrapper">
@@ -87,18 +109,12 @@
                                             </coral-checkbox>
                                         </div>
                                         <div class="coral-Form-fieldwrapper">
-                                            <label class="coral-Form-fieldlabel" for="selectmodel">Model</label>
-                                            <coral-select class="coral-Form-field _coral-Dropdown"
-                                                          name="translationmodel"
-                                                          placeholder="" variant="default">
-                                                <coral-select-item value="default" selected="">default
-                                                </coral-select-item>
-                                                <coral-select-item
-                                                        data-sly-repeat.translationModel="${model.availableModels}"
-                                                        value="${translationModel}"
-                                                        data-sly-text="${translationModel}"></coral-select-item>
-                                                <coral-select-item value="otherModel">Other model</coral-select-item>
-                                            </coral-select>
+                                            <label class="coral-Form-fieldlabel" for="translationmodel">Model</label>
+                                            <select name="translationmodel" id="translationmodel" class="native-select">
+                                                <option value="default" selected>default</option>
+                                                <option data-sly-repeat.translationModel="${model.availableModels}" value="${translationModel}" data-sly-text="${translationModel}"></option>
+                                                <option value="otherModel">Other model</option>
+                                            </select>
                                         </div>
                                         <!-- text input for other model - normally hidden except if otherModel is selected. -->
                                         <div class="coral-Form-fieldwrapper otherModel" style="display: none;">
@@ -191,7 +207,7 @@
                 obj[item.name] = item?.value?.trim();
                 return obj;
             }, {});
-            form.find('coral-select').each(function () {
+            form.find('coral-select, select[name="translationmodel"]').each(function () {
                 formData[this.name] = this.value;
             });
             form.find('input[type="checkbox"]').each(function () {
@@ -202,11 +218,12 @@
             form[0].submit();
         });
 
-        // reset 'recursive' if 'copyOriginalPage' is checked or debugaddinstructions is checked
+        // reset 'recursive' if 'copyOriginalPage' is checked or debugaddinstructions or debugprintrequest is checked
         $('coral-checkbox[name="copyOriginalPage"], coral-checkbox[name="debugaddinstructions"]').on('change', function () {
             const copyOriginalPage = $('coral-checkbox[name="copyOriginalPage"]').prop('checked');
             const debugaddinstructions = $('coral-checkbox[name="debugaddinstructions"]').prop('checked');
-            if (copyOriginalPage || debugaddinstructions) {
+            const debugprintrequest = $('coral-checkbox[name="debugprintrequest"]').prop('checked');
+            if (copyOriginalPage || debugaddinstructions || debugprintrequest) {
                 $('coral-checkbox[name="recursive"]').prop('checked', false);
             }
         });
@@ -225,8 +242,9 @@
             form.find('input[type="checkbox"]').each(function () {
                 const field = $(this);
                 field.prop('checked', formData[field.attr('name')] || false);
-                // reset checkboxes "recursive" and "debugaddinstructions" and copy to false
-                if (field.attr('name') === 'recursive' || field.attr('name') === 'debugaddinstructions' || field.attr('name') === 'copyOriginalPage') {
+                // reset checkboxes "recursive" and "debugaddinstructions" and "debugprintrequest" and copy to false
+                if (field.attr('name') === 'recursive' || field.attr('name') === 'debugaddinstructions' ||
+                    field.attr('name') === 'copyOriginalPage' || field.attr('name') === 'debugprintrequest') {
                     field.prop('checked', false);
                 }
             });
@@ -271,6 +289,7 @@
                 $('.otherModel').hide();
             }
         });
+        $('select[name="translationmodel"]').trigger('change');
     });
 </script>
 </body>

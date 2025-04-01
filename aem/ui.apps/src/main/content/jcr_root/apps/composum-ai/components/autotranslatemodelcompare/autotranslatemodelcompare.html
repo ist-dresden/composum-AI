@@ -16,7 +16,7 @@
     <p data-sly-test="${model.error}" class="alert alert-danger" id="error-message">
         ${model.error}
     </p>
-    <form method="post">
+    <form method="post" action="#texttotranslate">
         <div class="form-group">
             <h3>Select Models</h3>
             <div class="d-flex flex-wrap align-items-center">
@@ -36,28 +36,35 @@
             </div>
             <input type="hidden" name=":cq_csrf_token">
             <div class="mt-2 form-inline">
-                <button type="button" id="select-all" class="btn btn-secondary btn-sm">Select All</button>
-                <button type="button" id="clear-all" class="btn btn-secondary btn-sm">Clear All</button>
+                <button type="button" id="select-all" class="btn btn-secondary btn-sm" title="Select all translation models for trying out the translation">Select All</button>
+                <button type="button" id="clear-all" class="btn btn-secondary btn-sm" title="Clear all selections of translation models">Clear All</button>
                 <input type="text" id="additional-models" name="additionalModels" style="width: 70ex;"
-                       placeholder="Additional Models: (comma separated list)">
+                       placeholder="Additional Models: (comma separated list)" title="Enter additional translation models as a comma separated list. Use the backend ID as prefix, a colon and then the model ID.">
                 (Active backends ${model.backendList @ context='text'} )
             </div>
         </div>
 
         <div class="form-group">
             <h3>Target Language</h3>
-            <input type="text" id="target-language" name="targetLanguage" class="form-control" required
+            <input type="text" id="target-language" name="targetLanguage" class="form-control" required title="Enter target language (e.g. as /content path, en, de, es-mx, French)"
                    placeholder="Enter target language (e.g. as /content path, en, de, es-mx, French)">
         </div>
 
         <div class="form-group">
-            <h3>Text to Translate</h3>
-            <textarea id="translation-text" name="text" class="form-control" rows="5" required
+            <details id="additional-instructions-details" title="Click to expand additional instructions text area">
+                <summary title="Additional instructions (optional)">Additional Instructions (optional)</summary>
+                <textarea id="additional-instructions" name="instructions" class="form-control" rows="3" placeholder="Enter additional instructions" title="Enter additional instructions for the translation process (optional)"></textarea>
+            </details>
+        </div>
+
+        <div class="form-group">
+            <h3 id="texttotranslate">Text to Translate</h3>
+            <textarea id="translation-text" name="text" class="form-control" rows="5" required title="Enter the text you want to translate"
                       placeholder="Enter text to translate"></textarea>
         </div>
 
         <div class="form-group">
-            <button type="submit" id="submit-button" class="btn btn-primary">Translate with all selected models
+            <button type="submit" id="submit-button" class="btn btn-primary" title="Translate text using all the selected models">Translate with all selected models
             </button>
             <span id="loading-spinner" style="display: none;">
                 (Loading, please stand by...)
@@ -65,7 +72,7 @@
         </div>
     </form>
 
-    <sly data-sly-test="${request.requestParameterMap['text']}">
+    <div data-sly-test="${request.requestParameterMap['text']}" id="results">
         <h2>Translation Results</h2>
         <table class="table table-striped">
             <thead>
@@ -83,7 +90,7 @@
             </sly>
             </tbody>
         </table>
-    </sly>
+    </div>
 </div>
 </body>
 </html>

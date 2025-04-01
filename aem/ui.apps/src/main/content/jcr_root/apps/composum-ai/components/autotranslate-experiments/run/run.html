@@ -115,9 +115,12 @@
                                         Back to translation start page.
                                     </a>
                                 </p>
-                                <div class="coral-Form-fieldwrapper" data-sly-test="${model.messages.toString}">
+                                <div class="coral-Form-fieldwrapper" data-sly-test="${!model.messages.empty}">
                                     <label class="coral-Form-fieldlabel">Messages</label>
-                                    <pre>${model.messages.toString @ context='html'}</pre>
+                                    <sly data-sly-list.msg="${model.messages}">
+                                        <p data-sly-text="${msg.description}"></p>
+                                        <pre data-sly-test="${msg.payload}" data-sly-text="${msg.payload}"></pre>
+                                    </sly>
                                 </div>
                             </div>
 
