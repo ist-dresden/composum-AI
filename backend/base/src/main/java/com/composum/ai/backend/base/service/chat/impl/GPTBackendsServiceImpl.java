@@ -24,7 +24,7 @@ public class GPTBackendsServiceImpl implements GPTBackendsService {
     private static final Logger LOG = LoggerFactory.getLogger(GPTBackendsServiceImpl.class);
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected List<GPTBackendsConfigurationService> backendsConfigurationServices;
+    protected volatile List<GPTBackendsConfigurationService> backendsConfigurationServices;
 
     @Nonnull
     @Override
