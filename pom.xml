@@ -47,8 +47,8 @@
 
     <modules>
         <module>backend</module>
-        <module>composum</module>
         <module>aem</module>
+        <!-- Composum module is in composum profile since changes there are rare. -->
     </modules>
 
     <properties>
@@ -151,5 +151,14 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>composum</id>
+            <modules>
+                <module>composum</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
