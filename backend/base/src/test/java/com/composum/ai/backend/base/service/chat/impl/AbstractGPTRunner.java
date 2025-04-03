@@ -47,6 +47,7 @@ public abstract class AbstractGPTRunner {
 
         this.mocks = MockitoAnnotations.openMocks(this);
         when(backendsService.getConfigurationForModel(DEFAULT_MODEL)).thenReturn(openAIBackend);
+        when(backendsService.getModelNameInBackend(DEFAULT_MODEL)).thenReturn(DEFAULT_MODEL);
         when(openAIBackend.backendId()).thenReturn("OpenAI");
         when(openAIBackend.apiEndpoint()).thenReturn("https://api.openai.com/v1/chat/completions");
         when(openAIBackend.additionalHeader1Key()).thenReturn("Authorization");
