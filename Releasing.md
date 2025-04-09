@@ -24,6 +24,6 @@ mvn -B -ntp -P nexus-staging release:prepare -DdryRun=true -DpushChanges=false
 mvn -B -ntp -P nexus-staging release:perform -DdryRun=true -DlocalCheckout=true -DdeployAtEnd=true
 (The latter doesn't do much, though.)
 To create a release locally for testing purposes, you can use the following command lines:
-mvn -B -ntp -s .github/settings-istrepo.xml release:prepare -DpushChanges=false
+mvn -B -ntp -s .github/settings.xml release:prepare -DpushChanges=false
 mvn -B -ntp -P nexus-staging release:perform -DlocalCheckout=true -DdeployAtEnd=true "-Dgoals=clean install package source:jar javadoc:jar install"
 This does not push the release commits to upstream, and just does an install instead of deploy at the end, so nothing is uploaded. The commits can be rolled back with mvn release:rollback release:clean ; you'll want to reset the git HEAD later, though.
