@@ -3,9 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.composum.platform</groupId>
-        <artifactId>composum-platform</artifactId>
-        <version>1.7.1</version>
+        <groupId>com.composum.meta.ist</groupId>
+        <artifactId>parent-2-public</artifactId>
+        <version>1.8</version>
+        <relativePath/>
     </parent>
 
     <groupId>com.composum.ai</groupId>
