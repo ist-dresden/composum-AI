@@ -88,7 +88,7 @@ public class AutoTranslateLiveActionImpl extends BaseAction implements AutoTrans
        } catch (Exception e) {
             // Throwing an exception here will abort a whole recursive rollout, which is a problem.
             // So we rather mark failures (which should be infrequent) so that they are easy to find.
-            LOG.error("Error translating " + source.getPath(), e);
+            LOG.error("Error translating {} to {}", source.getPath(), target.getPath(), e);
             markAsError(target);
         } finally {
             LOG.info("<<<{} doExecute({}, {}, {})", id, liveRelationship.getSourcePath(), liveRelationship.getTargetPath(), autoSave);
