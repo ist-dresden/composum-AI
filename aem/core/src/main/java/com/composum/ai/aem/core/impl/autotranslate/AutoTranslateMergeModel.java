@@ -129,12 +129,30 @@ public class AutoTranslateMergeModel {
 
     public boolean isBlueprintBroken() {
         try {
-            LiveRelationship livecopy = liveRelationshipManager.getLiveRelationship(getPageResource(), true);
-            return livecopy == null || livecopy.getStatus() == null || !livecopy.getStatus().isSourceExisting();
+            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(getPageResource(), true);
+            return relationship == null || relationship.getStatus() == null || !relationship.getStatus().isSourceExisting();
         } catch (WCMException e) {
             LOG.error("For " + getPageResource(), e);
         }
         return true;
+    }
+
+    /**
+     * If a whole page is suspended as a live copy then the jcr:content node has a cancelled relationship.
+     * Otherwise, the jcr:content node itself is never cancelled - only some of it's properties.
+     */
+    public boolean isPageSuspended() {
+        try {
+            LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(getPageResource(), true);
+            return relationship != null && relationship.getStatus() != null && relationship.getStatus().isCancelled();
+        } catch (WCMException e) {
+            LOG.error("For " + getPageResource(), e);
+        }
+        return true;
+    }
+
+    public String getLinkToPageProperties() {
+        return "/mnt/overlay/wcm/core/content/sites/properties.html?item=" + getPagePath();
     }
 
     public List<AutoTranslateComponent> getPageComponents() {
@@ -179,6 +197,9 @@ public class AutoTranslateMergeModel {
         return pageResource;
     }
 
+    /**
+     * The path to the cq:Page, without jcr:content.
+     */
     public String getPagePath() {
         return getPageResource() != null ? getPageResource().getParent().getPath() : null;
     }

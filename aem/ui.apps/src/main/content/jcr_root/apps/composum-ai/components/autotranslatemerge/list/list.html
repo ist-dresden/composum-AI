@@ -40,15 +40,33 @@
                             <a target="_blank" href="/editor.html${model.pagePath}.html">${model.pagePath}</a>
                         </h2>
                         <span class="coral-Form-field foundation-layout-util-breakword">
-                            This allows you to review the translated texts and either accept them (so that they won't shown here again until changed) or cancel inheritance for the component and edit the text manually. Inheritance can be changed
+                            This allows you to review the translated texts and either accept them (so that they won't
+                            be shown here again until changed) or cancel inheritance for the component and edit the text
+                            manually. Inheritance can be changed
                             usually only for the whole component at once with
                             <coral-icon icon="link" size="XS"></coral-icon> and
                             <coral-icon icon="linkOff" size="XS"></coral-icon>.
                             Hover with the mouse over a buttons or headers to get more information.
                         </span>
+                        <span class="coral-Form-field foundation-layout-util-breakword">
+                            This tool assumes that the page has been rolled out recently: the blueprint texts shown are
+                            the texts at the point of the last rollout.
+                        </span>
+
+                        <coral-alert variant="error" data-sly-test="${model.pageSuspended}">
+                            <coral-alert-content class="alertcontent">
+                                This page is suspended as a live copy and thus this tool is not available. You can
+                                resume this page as a live copy in the
+                                <a href="${model.linkToPageProperties}">page properties</a>
+                                in the "Live Copy" tab. After doing that you might want to re-open this tool to
+                                cancel the inheritance for any components where you don't want automatically overwritten
+                                or do that in the page editor, and then roll out the page so that everything is updated.
+                                After that the tool is fully available.
+                            </coral-alert-content>
+                        </coral-alert>
                     </section>
 
-                    <section class="coral-Form-fieldset propertytable">
+                    <section class="coral-Form-fieldset propertytable" data-sly-test="${!model.pageSuspended}">
                         <table is="coral-table">
 
                             <colgroup>
@@ -87,7 +105,8 @@
                                         there was a new translation, this is written into the page.</span>
                                         </coral-tooltip>
                                     </td>
-                                    <td is="coral-table-cell" colspan="6" id="componentlink-${pageComponent.componentPathInPage}+${pageComponent.cancelPropertyName}">
+                                    <td is="coral-table-cell" colspan="6"
+                                        id="componentlink-${pageComponent.componentPathInPage}+${pageComponent.cancelPropertyName}">
                                         <span class="componentName"
                                               data-sly-text="${pageComponent.componentName}"></span>
                                         <sly data-sly-test="${pageComponent.componentTitle}">
