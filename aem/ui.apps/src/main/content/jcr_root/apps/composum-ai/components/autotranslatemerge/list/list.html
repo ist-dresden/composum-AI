@@ -39,7 +39,7 @@
                         <h2 class="coral-Form-fieldset-legend">Translation Review for page
                             <a target="_blank" href="/editor.html${model.pagePath}.html">${model.pagePath}</a>
                         </h2>
-                        <span class="coral-Form-field foundation-layout-util-breakword">
+                        <div class="coral-Form-field foundation-layout-util-breakword">
                             This allows you to review the translated texts and either accept them (so that they won't
                             be shown here again until changed) or cancel inheritance for the component and edit the text
                             manually. Inheritance can be changed
@@ -47,21 +47,35 @@
                             <coral-icon icon="link" size="XS"></coral-icon> and
                             <coral-icon icon="linkOff" size="XS"></coral-icon>.
                             Hover with the mouse over a buttons or headers to get more information.
-                        </span>
-                        <span class="coral-Form-field foundation-layout-util-breakword">
+                        </div>
+                        <div class="coral-Form-field foundation-layout-util-breakword">
                             This tool assumes that the page has been rolled out recently: the blueprint texts shown are
                             the texts at the point of the last rollout.
-                        </span>
+                        </div>
 
                         <coral-alert variant="error" data-sly-test="${model.pageSuspended}">
+                            <coral-alert-header>This page is suspended as a live copy and thus this tool is not available.</coral-alert-header>
                             <coral-alert-content class="alertcontent">
-                                This page is suspended as a live copy and thus this tool is not available. You can
-                                resume this page as a live copy in the
+                                You can resume this page as a live copy in the
                                 <a href="${model.linkToPageProperties}">page properties</a>
                                 in the "Live Copy" tab. After doing that you might want to re-open this tool to
                                 cancel the inheritance for any components where you don't want automatically overwritten
-                                or do that in the page editor, and then roll out the page so that everything is updated.
+                                or do that in the page editor, and then roll out the page so that everything is updated
+                                / synchronize the whole page.
                                 After that the tool is fully available.
+                            </coral-alert-content>
+                        </coral-alert>
+
+                        <coral-alert variant="info"
+                                     data-sly-test="${model.unfilteredPropertiesSize != 0 && model.properties.empty && !model.pageSuspended}">
+                            <coral-alert-content class="alertcontent">No properties are matching the current filter settings.
+                            </coral-alert-content>
+                        </coral-alert>
+
+                        <coral-alert variant="error"  data-sly-test="${model.blueprintBroken}">
+                            <coral-alert-header>Can't identify blueprint for this page.</coral-alert-header>
+                            <coral-alert-content class="alertcontent">
+                                This page is not a correct live copy since the blueprint cannot be determined.
                             </coral-alert-content>
                         </coral-alert>
                     </section>
