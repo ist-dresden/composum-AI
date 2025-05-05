@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +86,9 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             if (relationship == null) {
                 return false;
             }
-            return contentResource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_TRANSLATED_DATE) != null;
+            Calendar lastAiTranslation = contentResource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_TRANSLATED_DATE, Calendar.class);
+            LOG.debug("Last AI translation date: {}", lastAiTranslation != null ? lastAiTranslation.toInstant() : null);
+            return lastAiTranslation != null;
         } catch (WCMException e) {
             LOG.error("Could not determine relationships of " + resource.getPath(), e);
             return false;
