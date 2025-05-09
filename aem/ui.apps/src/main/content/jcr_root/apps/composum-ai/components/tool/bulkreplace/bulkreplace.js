@@ -20,7 +20,6 @@ class BulkReplaceApp {
     this.rootPageInput = document.getElementById("root-page");
     this.searchStringInput = document.getElementById("search-string");
     this.replacementInput = document.getElementById("replacement-string");
-    this.csrfInput = document.getElementById(":cq_csrf_token");
   }
 
   bindEvents() {
@@ -54,10 +53,7 @@ class BulkReplaceApp {
   getCSRFToken() {
     return fetch("/libs/granite/csrf/token.json")
       .then(response => response.json())
-      .then(data => {
-        this.csrfInput.value = data.token;
-        return data.token;
-      });
+      .then(data => data.token);
   }
 
   handleSearchClick() {
@@ -83,13 +79,11 @@ class BulkReplaceApp {
     
     this.getCSRFToken()
       .then(token => {
-        formData.append(":cq_csrf_token", token);
-        
         return fetch("/bin/cpm/ai/bulkreplace", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRF-Token": token
+            "CSRF-Token": token
           },
           body: formData.toString()
         });
@@ -209,13 +203,11 @@ class BulkReplaceApp {
 
     this.getCSRFToken()
       .then(token => {
-        formData.append(":cq_csrf_token", token);
-        
         return fetch("/bin/cpm/ai/bulkreplace", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRF-Token": token
+            "CSRF-Token": token
           },
           body: formData.toString()
         });

@@ -23,8 +23,7 @@
     <!-- Form zone -->
     <div id="form-zone" class="mb-5">
       <form class="form-horizontal">
-        <!-- Hidden CSRF token input - added name attribute -->
-        <input type="hidden" id=":cq_csrf_token" name=":cq_csrf_token" value="">
+        <!-- Removed hidden CSRF token input -->
         <div class="form-group row">
           <label for="root-page" class="col-sm-2 col-form-label">Root Page</label>
           <div class="col-sm-4">
@@ -46,7 +45,7 @@
         <div class="form-group row">
           <div class="col-sm-2"></div>
           <div class="col-sm-4">
-            <!-- Explicit Save Settings button removed: settings are auto-saved on any action -->
+            <!-- Settings are auto-saved on any action -->
             <button type="button" class="btn btn-primary mr-2" id="search-btn">Search</button>
             <button type="button" class="btn btn-success" id="replace-btn" disabled>Replace</button>
           </div>
