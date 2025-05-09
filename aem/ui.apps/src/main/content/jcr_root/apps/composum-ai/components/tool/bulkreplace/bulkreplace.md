@@ -17,7 +17,7 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 * **Root Page** – required text field.
 * **Search String** – required text field.
 * **Replacement String** – text field (leave empty to delete occurrences).
-* **Hidden CSRF Token** – provided via an input field with id `cq_csrf_token`.
+* **Hidden CSRF Token** – provided via an input field with id `:cq_csrf_token`.
 * **Action buttons**
   - **Search** – starts a search job.
   - **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
@@ -48,7 +48,7 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 ### 3.1 Common
 
 * **CSRF:** Granite CSRF filter is active.
-  - The CSRF token is provided in a hidden input field (`cq_csrf_token`) and must be included in the header `X-CSRF-Token` on all state‑changing (POST) requests.
+  - The CSRF token is provided in a hidden input field (`:cq_csrf_token`) and must be included in the header `X-CSRF-Token` on all state‑changing (POST) requests.
 * **Content‑Type:** `application/x-www-form-urlencoded`.
 * **operation** parameter determines the action.
 

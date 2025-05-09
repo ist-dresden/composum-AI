@@ -20,7 +20,7 @@ class BulkReplaceApp {
     this.rootPageInput = document.getElementById("root-page");
     this.searchStringInput = document.getElementById("search-string");
     this.replacementInput = document.getElementById("replacement-string");
-    this.csrfInput = document.getElementById("cq_csrf_token");
+    this.csrfInput = document.getElementById(":cq_csrf_token");
   }
 
   bindEvents() {
@@ -54,7 +54,10 @@ class BulkReplaceApp {
   getCSRFToken() {
     return fetch("/libs/granite/csrf/token.json")
       .then(response => response.json())
-      .then(data => data.token);
+      .then(data => {
+        this.csrfInput.value = data.token;
+        return data.token;
+      });
   }
 
   handleSearchClick() {
@@ -77,16 +80,20 @@ class BulkReplaceApp {
     formData.append("operation", "search");
     formData.append("rootPath", root);
     formData.append("term", term);
-
+    
     this.getCSRFToken()
-      .then(token => fetch("/bin/cpm/ai/bulkreplace", {
+      .then(token => {
+        formData.append(":cq_csrf_token", token);
+        
+        return fetch("/bin/cpm/ai/bulkreplace", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "X-CSRF-Token": token
           },
           body: formData.toString()
-        }))
+        });
+      })
       .then(this.handleJobResponse.bind(this))
       .then((data) => {
          this.currentSearchJobId = data.jobId;
@@ -201,14 +208,18 @@ class BulkReplaceApp {
     }
 
     this.getCSRFToken()
-      .then(token => fetch("/bin/cpm/ai/bulkreplace", {
+      .then(token => {
+        formData.append(":cq_csrf_token", token);
+        
+        return fetch("/bin/cpm/ai/bulkreplace", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "X-CSRF-Token": token
           },
           body: formData.toString()
-        }))
+        });
+      })
       .then(this.handleJobResponse.bind(this))
       .then((data) => {
          this.currentReplaceJobId = data.jobId;
