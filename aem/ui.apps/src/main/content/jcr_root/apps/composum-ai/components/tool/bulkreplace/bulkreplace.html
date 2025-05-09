@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bulk Replace UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"></sly>
+    <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
+    <link rel="stylesheet" href="${resource.path}/bulkreplace.css">
+</head>
+<body class="coral--light coral-Body">
+
+<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
+<script src="${resource.path @ context='uri'}/bulkreplace.js"></script>
+
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
+        <div class="foundation-layout-panel-body">
+            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
+                <div class="cq-dialog-content-page">
+                    HERE COMES THE APP
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
