@@ -5,10 +5,7 @@
   <title>Bulk Replace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <!-- Bootstrap CSS -->
-  <link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-  >
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     /* Highlight search hits */
     mark {
@@ -18,78 +15,51 @@
   </style>
 </head>
 <body>
-
   <div class="container my-4">
-
     <!-- Header bar -->
     <nav class="navbar navbar-light bg-light mb-4">
       <span class="navbar-brand h4 mb-0">Bulk Replace</span>
     </nav>
-
     <!-- Form zone -->
     <div id="form-zone" class="mb-5">
       <form class="form-horizontal">
+        <!-- Hidden CSRF token input -->
+        <input type="hidden" id="cq_csrf_token" value="">
         <div class="form-group row">
           <label for="root-page" class="col-sm-2 col-form-label">Root Page</label>
           <div class="col-sm-4">
-            <!-- Foundation-autocomplete path browser -->
-            <input
-              type="text"
-              class="form-control foundation-autocomplete"
-              id="root-page"
-              placeholder="Select root page???"
-            >
+            <input type="text" class="form-control" id="root-page" placeholder="Enter root page">
           </div>
         </div>
-
         <div class="form-group row">
           <label for="search-string" class="col-sm-2 col-form-label">Search String</label>
           <div class="col-sm-4">
-            <input
-              type="text"
-              class="form-control"
-              id="search-string"
-              placeholder="Enter search string"
-              required
-            >
+            <input type="text" class="form-control" id="search-string" placeholder="Enter search string" required>
           </div>
         </div>
-
         <div class="form-group row">
           <label for="replacement-string" class="col-sm-2 col-form-label">Replacement String</label>
           <div class="col-sm-4">
-            <input
-              type="text"
-              class="form-control"
-              id="replacement-string"
-              placeholder="Enter replacement string (leave empty to delete)"
-            >
+            <input type="text" class="form-control" id="replacement-string" placeholder="Enter replacement (empty to delete)">
           </div>
         </div>
-
         <div class="form-group row">
           <div class="col-sm-2"></div>
           <div class="col-sm-4">
+            <!-- Explicit Save Settings button removed: settings are auto-saved on any action -->
             <button type="button" class="btn btn-primary mr-2" id="search-btn">Search</button>
             <button type="button" class="btn btn-success" id="replace-btn" disabled>Replace</button>
           </div>
         </div>
       </form>
     </div>
-
-    <!-- Results & Progress zone (hidden until Search) -->
+    <!-- Results & Progress zone (initially empty) -->
     <div id="results-zone">
-
-      <!-- Progress bar (hidden until replace starts) -->
+      <!-- Progress bar -->
       <div class="progress mb-3" style="height: 1.5rem;">
-        <div
-          class="progress-bar progress-bar-striped progress-bar-animated"
-          role="progressbar"
-          style="width: 0%"
-        >0%</div>
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">0%</div>
       </div>
-
-      <!-- Grouped results table -->
+      <!-- Empty grouped results table -->
       <table class="table table-bordered">
         <thead class="thead-light">
           <tr>
@@ -100,81 +70,27 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Page 1 header -->
-          <tr class="table-secondary">
-            <td><input type="checkbox" class="select-page" aria-label="Select page /content/site/en/page1"></td>
-            <td colspan="3"><strong>/content/site/en/page1</strong> (3 matches)</td>
-          </tr>
-          <!-- Page 1 properties -->
-          <tr>
-            <td><input type="checkbox" checked></td>
-            <td>/jcr:content</td>
-            <td>jcr:title</td>
-            <td>Welcome to the <mark>page</mark> one</td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" checked></td>
-            <td>/jcr:content/paragraph</td>
-            <td>text</td>
-            <td>This is the second <mark>page</mark>'s paragraph.</td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" checked></td>
-            <td>/jcr:content/section</td>
-            <td>text</td>
-            <td>Another <mark>page</mark> content here.</td>
-          </tr>
-
-          <!-- Page 2 header -->
-          <tr class="table-secondary">
-            <td><input type="checkbox" class="select-page" aria-label="Select page /content/site/en/page2"></td>
-            <td colspan="3"><strong>/content/site/en/page2</strong> (2 matches)</td>
-          </tr>
-          <!-- Page 2 properties -->
-          <tr>
-            <td><input type="checkbox" checked></td>
-            <td>/jcr:content</td>
-            <td>jcr:description</td>
-            <td>The second <mark>page</mark> description.</td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" checked></td>
-            <td>/jcr:content/teaser</td>
-            <td>title</td>
-            <td>Teaser for <mark>page</mark> two.</td>
-          </tr>
+          <!-- Results will be appended dynamically -->
         </tbody>
       </table>
     </div>
-
-    <!-- Toast container -->
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      style="position: fixed; top: 1rem; right: 1rem; z-index: 1050;"
-    >
+    <!-- Toast container (unchanged) -->
+    <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 1050;">
       <div class="toast" data-delay="3000">
         <div class="toast-header">
           <strong class="mr-auto">Bulk Replace</strong>
           <small>Just now</small>
-          <button
-            type="button"
-            class="ml-2 mb-1 close"
-            data-dismiss="toast"
-            aria-label="Close"
-          >
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="toast-body">
-          Replacement completed: 5 changes applied.
+          Replacement completed.
         </div>
       </div>
     </div>
-
   </div>
-
-  <!-- Optional JavaScript (for Bootstrap components) -->
+  <!-- Optional JavaScript (for Bootstrap) -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

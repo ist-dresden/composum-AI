@@ -14,36 +14,32 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 
 ### 1.2 Form zone
 
-* **Root Page** – required text field.
-* **Search String** – required text field.
-* **Replacement String** – text field (leave empty to delete occurrences).
+* **Root Page** – required text field.
+* **Search String** – required text field.
+* **Replacement String** – text field (leave empty to delete occurrences).
+* **Hidden CSRF Token** – provided via an input field with id `cq_csrf_token`.
 * **Action buttons**
-  **Search** – starts a search job.
-  **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
+  - **Search** – starts a search job.
+  - **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
+  
+*Note: Whenever any action button is pressed, the current state of the input fields is automatically saved to localStorage under the key `aem-composumAI-bulkedit`. Saved settings are reloaded on subsequent page loads, restoring the form content.*
 
-### 1.3 Results & Progress zone (visible after Search)
+### 1.3 Results & Progress zone
 
-* **Grouped table**
-
-  * **Page header row** – full page path and match count (not selectable).
-  * **Property rows** – under each page header:
-
-    | Select | Component sub‑path | Property | Text excerpt containing the search string |
-    | ------ | ------------------ | -------- | ----------------------------------------- |
-  * Selection drives what **Replace** will touch.
-* **Progress bar** – client‑side determinate bar updated after each property replacement call. Table becomes read‑only while active.
+* **Grouped table (initially empty)**
+  - Page and property rows are added dynamically based on search results.
+* **Progress bar** – updated after each property replacement call.
 * **Toast notification** – pops on completion, summarising successes and skips.
 
 ---
 
 ## 2. Behaviour
 
-* Always scans **all descendant pages** and checks every string property plus RTE HTML text nodes.
+* Scans **all descendant pages** and examines every string property, including RTE HTML text nodes.
 * **Search** is a **two‑step job**:
-
-  1. Client POSTs parameters; server replies `202 Accepted` with `jobId`.
-  2. Client opens an `EventSource` (GET) with that `jobId`; receives streamed results per page.
-* **Replace** issues one POST per selected property row and updates the progress bar locally. Pages lacking write permission are skipped with per‑row warnings.
+  1. Client POSTs parameters; server replies with `202 Accepted` and a JSON payload containing a `jobId`.
+  2. Client opens an `EventSource` (GET) with that `jobId` and receives streamed results per page.
+* **Replace** issues one POST per selected property row and updates the local progress bar. Pages without modify permissions are skipped with warnings.
 
 ---
 
@@ -51,11 +47,12 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 
 ### 3.1 Common
 
-* **CSRF:** Granite token header required.
+* **CSRF:** Granite CSRF filter is active.
+  - The CSRF token is provided in a hidden input field (`cq_csrf_token`) and must be included in the header `X-CSRF-Token` on all state‑changing (POST) requests.
 * **Content‑Type:** `application/x-www-form-urlencoded`.
-* **operation** parameter decides the action.
+* **operation** parameter determines the action.
 
-### 3.2 Operation `search` (two phases)
+### 3.2 Operation `search` (two phases)
 
 #### 3.2.1 Start job – `POST`
 
@@ -63,7 +60,7 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 | ----------- | ------------- | -------------------------------------- |
 | `operation` | ✔︎ (`search`) |                                        |
 | `rootPath`  | ✔︎            | Subtree root (e.g. `/content/site/en`) |
-| `term`      | ✔︎            | Literal case‑insensitive search text   |
+| `term`      | ✔︎            | Literal, case‑insensitive search text  |
 
 *Response*
 
@@ -95,16 +92,16 @@ event: summary
 data: {"pages":12,"matches":42}
 ```
 
-### 3.3 Operation `replace` (single property per call) – `POST`
+### 3.3 Operation `replace` (single property per call) – `POST`
 
 | Field           | Required       | Notes                                                 |
 | --------------- | -------------- | ----------------------------------------------------- |
 | `operation`     | ✔︎ (`replace`) |                                                       |
-| `page`          | ✔︎             | Absolute page path                                    |
-| `componentPath` | ✔︎             | Sub‑path under page content (e.g. `jcr:content/text`) |
+| `page`          | ✔︎             | Absolute page path                                   |
+| `componentPath` | ✔︎             | Sub‑path under page content (e.g. `jcr:content/text`)  |
 | `property`      | ✔︎             | Property name (e.g. `text`)                           |
-| `term`          | ✔︎             | String to replace (case‑insensitive)                  |
-| `replacement`   | ✔︎             | New text (empty string → deletion)                    |
+| `term`          | ✔︎             | String to replace (case‑insensitive)                 |
+| `replacement`   | ✔︎             | New text (empty string → deletion)                   |
 
 *Response*
 
@@ -129,3 +126,4 @@ If the author lacks modify ACL on that property, server returns `403`.
 ---
 
 *End*
+````</file>

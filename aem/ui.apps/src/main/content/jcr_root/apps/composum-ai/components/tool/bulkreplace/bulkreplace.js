@@ -2,6 +2,7 @@ class BulkReplaceApp {
   constructor() {
     this.cacheDomElements();
     this.bindEvents();
+    this.loadSavedSettings();
     this.currentSearchJobId = null;
     this.currentReplaceJobId = null;
   }
@@ -19,6 +20,7 @@ class BulkReplaceApp {
     this.rootPageInput = document.getElementById("root-page");
     this.searchStringInput = document.getElementById("search-string");
     this.replacementInput = document.getElementById("replacement-string");
+    this.csrfInput = document.getElementById("cq_csrf_token");
   }
 
   bindEvents() {
@@ -26,14 +28,43 @@ class BulkReplaceApp {
     this.replaceBtn.addEventListener("click", this.handleReplaceClick.bind(this));
   }
 
+  loadSavedSettings() {
+    const saved = localStorage.getItem('aem-composumAI-bulkedit');
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.root) { this.rootPageInput.value = settings.root; }
+        if (settings.search) { this.searchStringInput.value = settings.search; }
+        if (settings.replacement) { this.replacementInput.value = settings.replacement; }
+      } catch (e) {
+        console.error("Error parsing saved settings", e);
+      }
+    }
+  }
+
+  saveSettings() {
+    const settings = {
+      root: this.rootPageInput.value.trim(),
+      search: this.searchStringInput.value.trim(),
+      replacement: this.replacementInput.value
+    };
+    localStorage.setItem('aem-composumAI-bulkedit', JSON.stringify(settings));
+  }
+
+  getCSRFToken() {
+    return fetch("/libs/granite/csrf/token.json")
+      .then(response => response.json())
+      .then(data => data.token);
+  }
+
   handleSearchClick() {
+    this.saveSettings();
     const root = this.rootPageInput.value.trim();
     const term = this.searchStringInput.value.trim();
     if (!root || !term) {
       alert("Please provide both root page and search string.");
       return;
     }
-    // Reset previous results and progress; disable Replace until search completes
     this.tableBody.innerHTML = "";
     this.progressBar.style.width = "0%";
     this.progressBar.textContent = "0%";
@@ -47,11 +78,15 @@ class BulkReplaceApp {
     formData.append("rootPath", root);
     formData.append("term", term);
 
-    fetch("/bin/cpm/ai/bulkreplace", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString()
-    })
+    this.getCSRFToken()
+      .then(token => fetch("/bin/cpm/ai/bulkreplace", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRF-Token": token
+          },
+          body: formData.toString()
+        }))
       .then(this.handleJobResponse.bind(this))
       .then((data) => {
          this.currentSearchJobId = data.jobId;
@@ -128,6 +163,7 @@ class BulkReplaceApp {
   }
 
   handleReplaceClick() {
+    this.saveSettings();
     const root = this.rootPageInput.value.trim();
     const term = this.searchStringInput.value.trim();
     const replacement = this.replacementInput.value;
@@ -164,11 +200,15 @@ class BulkReplaceApp {
       formData.append("target", targets[i]);
     }
 
-    fetch("/bin/cpm/ai/bulkreplace", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString()
-    })
+    this.getCSRFToken()
+      .then(token => fetch("/bin/cpm/ai/bulkreplace", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRF-Token": token
+          },
+          body: formData.toString()
+        }))
       .then(this.handleJobResponse.bind(this))
       .then((data) => {
          this.currentReplaceJobId = data.jobId;
@@ -182,10 +222,8 @@ class BulkReplaceApp {
   }
 }
 
-// Use a named function for DOMContentLoaded
 function domContentLoadedHandler() {
   BulkReplaceApp.initApp();
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
-
