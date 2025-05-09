@@ -83,7 +83,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                 }
             }
             LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(contentResource, true);
-            if (relationship == null) {
+            if (relationship == null || contentResource == null) {
                 return false;
             }
             Calendar lastAiTranslation = contentResource.getValueMap().get(AITranslatePropertyWrapper.PROPERTY_AI_TRANSLATED_DATE, Calendar.class);
@@ -103,7 +103,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             ModifiableValueMap properties = res.adaptTo(ModifiableValueMap.class);
             try {
                 LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(res, true);
-                if (relationship != null) {
+                if (relationship != null && properties != null) {
                     String sourcePath = relationship.getSourcePath();
                     Resource sourceResource = res.getResourceResolver().getResource(sourcePath);
                     if (sourceResource != null) {
@@ -141,7 +141,7 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
     }
 
     @Override
-    public Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName, @Nonnull String content, @Nonnull boolean markAsMerged) throws WCMException {
+    public Map<String, String> saveTranslation(@Nonnull Resource resource, @Nonnull String propertyName, @Nonnull String content, boolean markAsMerged) throws WCMException {
         ModifiableValueMap properties = Objects.requireNonNull(resource.adaptTo(ModifiableValueMap.class));
         LiveRelationship relationship = liveRelationshipManager.getLiveRelationship(resource, true);
         if (relationship != null) {
