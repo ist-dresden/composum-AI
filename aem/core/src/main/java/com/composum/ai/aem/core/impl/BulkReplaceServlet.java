@@ -194,7 +194,12 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     private void findMatchesInResource(Resource resource, String parentPath, String term, List<Match> matches) {
         ValueMap properties = resource.getValueMap();
-        String componentPath = StringUtils.isNotEmpty(parentPath) ? parentPath + "/" + resource.getName() : resource.getName();
+        String componentPath = StringUtils.isNotEmpty(parentPath)
+                ? parentPath + "/" + resource.getName() : resource.getName();
+        // Make the component path relative by removing any "jcr:content/" prefix
+        if (componentPath.contains("jcr:content/")) {
+            componentPath = componentPath.substring(componentPath.indexOf("jcr:content/") + "jcr:content/".length());
+        }
 
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             String propertyName = entry.getKey();
@@ -392,3 +397,4 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public String property;
     }
 }
+
