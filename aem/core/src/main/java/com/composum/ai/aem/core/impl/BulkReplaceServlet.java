@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -34,11 +36,24 @@ import com.google.gson.Gson;
 
 /**
  * Servlet with functionality for the bulk replace tool.
- * The operations are distinguished by parameter 'operation'. There are:
- * <ul>
- *     <li>search: search for a string in a page tree</li>
- *     <li>replace: replaces a string in a page tree</li>
- * </ul>
+ *
+ * Operations:
+ * 1. Search:
+ *    - POST (operation=search)
+ *       Parameters:
+ *         • rootPath: absolute page path to start search (e.g. /content/site/en)
+ *         • term: literal, case‑insensitive search text
+ *       Response: 202 Accepted with JSON payload {"jobId": "<uuid>"}.
+ *       Note: The search parameters are stored in an internal LinkedHashMap (only the last 10 operations are kept).
+ *
+ *    - GET (operation=search, jobId=<uuid>)
+ *       Streams search results as text/event-stream based on the stored parameters.
+ *
+ * 2. Replace:
+ *    - POST (operation=replace)
+ *       Parameters:
+ *         • rootPath, term, replacement, target (see bulkreplace.md)
+ *       Response: JSON indicating replace result.
  */
 @Component(service = Servlet.class,
         property = {
@@ -49,14 +64,39 @@ import com.google.gson.Gson;
 public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(BulkReplaceServlet.class);
-
     public static final Gson gson = new Gson();
+
+    // LinkedHashMap to store the last 10 search job parameters (jobId -> parameters)
+    private static final LinkedHashMap<String, Map<String, String>> jobMap = new LinkedHashMap<String, Map<String, String>>() {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Map<String, String>> eldest) {
+            return size() > 10;
+        }
+    };
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         String operation = request.getParameter("operation");
         if ("search".equals(operation)) {
-            handleSearch(request, response);
+            // Operation: search (start job)
+            // Required parameters: rootPath, term
+            String rootPath = request.getParameter("rootPath");
+            String term = request.getParameter("term");
+            if (StringUtils.isBlank(rootPath) || StringUtils.isBlank(term)) {
+                response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Required parameters: rootPath, term");
+                return;
+            }
+            // Generate a new jobId and store the parameters in the jobMap (only last 10 jobs kept)
+            String jobId = UUID.randomUUID().toString();
+            Map<String, String> params = new HashMap<>();
+            params.put("rootPath", rootPath);
+            params.put("term", term);
+            synchronized(jobMap) {
+                jobMap.put(jobId, params);
+            }
+            response.setStatus(202);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"jobId\":\"" + jobId + "\"}");
         } else if ("replace".equals(operation)) {
             handleReplace(request, response);
         } else {
@@ -64,14 +104,34 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private void handleSearch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        String rootPath = request.getParameter("rootPath");
-        String term = request.getParameter("term");
-
-        if (StringUtils.isBlank(rootPath) || StringUtils.isBlank(term)) {
-            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Required parameters: rootPath, term");
-            return;
+    // New doGet to stream search results based on jobId
+    @Override
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+        String operation = request.getParameter("operation");
+        if ("search".equals(operation)) {
+            String jobId = request.getParameter("jobId");
+            if (StringUtils.isBlank(jobId)) {
+                response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing jobId");
+                return;
+            }
+            Map<String, String> params;
+            synchronized(jobMap) {
+                params = jobMap.get(jobId);
+            }
+            if (params == null) {
+                response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "JobId not found");
+                return;
+            }
+            streamSearchResults(params, request, response);
+        } else {
+            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Invalid GET operation");
         }
+    }
+
+    // Streams search results using stored parameters
+    private void streamSearchResults(Map<String, String> params, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+        String rootPath = params.get("rootPath");
+        String term = params.get("term");
 
         ResourceResolver resolver = request.getResourceResolver();
         Resource rootResource = resolver.getResource(rootPath);

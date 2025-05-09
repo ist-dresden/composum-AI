@@ -10,28 +10,28 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 
 ### 1.1 Header bar
 
-* Console title **Bulk Replace**.
+* Console title **Bulk Replace**
 
 ### 1.2 Form zone
 
-* **Root Page** – path browser (`foundation‑autocomplete`).
-* **Search String** – required text field.
-* **Replacement String** – text field (leave empty to delete occurrences).
+* **Root Page** – path browser (`foundation‑autocomplete`).
+* **Search String** – required text field.
+* **Replacement String** – text field (leave empty to delete occurrences).
 * **Action buttons**
-  **Search** – finds all matches.
-  **Replace** – performs replacement on the rows still selected in the results table.
+  **Search** – starts a search job.
+  **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
 
 ### 1.3 Results & Progress zone (visible after Search)
 
 * **Grouped table**
 
-  * **Page header row** – shows full page path and count of matches (not selectable).
+  * **Page header row** – full page path and match count (not selectable).
   * **Property rows** – under each page header:
 
     | Select | Component sub‑path | Property | Text excerpt containing the search string |
     | ------ | ------------------ | -------- | ----------------------------------------- |
-  * Selection drives what the **Replace** action will touch.
-* **Progress bar** – appears above the table during Replace; table becomes read‑only while active.
+  * Selection drives what **Replace** will touch.
+* **Progress bar** – client‑side determinate bar updated after each property replacement call. Table becomes read‑only while active.
 * **Toast notification** – pops on completion, summarising successes and skips.
 
 ---
@@ -39,29 +39,49 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 ## 2. Behaviour
 
 * Always scans **all descendant pages** and checks every string property plus RTE HTML text nodes.
-* **Search** streams matches without modifying content.
-* **Replace** commits changes for still‑selected property rows; pages lacking write permission are skipped with per‑row warnings.
-* Progress is sent via Server‑Sent Events (SSE) and drives the progress bar and toast.
+* **Search** is a **two‑step job**:
+
+  1. Client POSTs parameters; server replies `202 Accepted` with `jobId`.
+  2. Client opens an `EventSource` (GET) with that `jobId`; receives streamed results per page.
+* **Replace** issues one POST per selected property row and updates the progress bar locally. Pages lacking write permission are skipped with per‑row warnings.
 
 ---
 
 ## 3. Servlet API (`/bin/cpm/ai/bulkreplace`)
 
-### 3.1 Common request envelope
+### 3.1 Common
 
-* **Method:** `POST`
-* **Content‑Type:** `application/x-www-form-urlencoded`
-* **Query parameter:** `operation=search` **or** `operation=replace`
-* **CSRF:** Granite token header required
+* **CSRF:** Granite token header required.
+* **Content‑Type:** `application/x-www-form-urlencoded`.
+* **operation** parameter decides the action.
 
-### 3.2 Operation `search`
+### 3.2 Operation `search` (two phases)
 
-| Form field | Type   | Required | Notes                                   |
-| ---------- | ------ | -------- | --------------------------------------- |
-| `rootPath` | string | ✔︎       | Subtree root (e.g. `/content/site/en`)  |
-| `term`     | string | ✔︎       | Case‑insensitive literal string to find |
+#### 3.2.1 Start job – `POST`
 
-**Response:** `200 text/event-stream`
+| Field       | Required      | Notes                                  |
+| ----------- | ------------- | -------------------------------------- |
+| `operation` | ✔︎ (`search`) |                                        |
+| `rootPath`  | ✔︎            | Subtree root (e.g. `/content/site/en`) |
+| `term`      | ✔︎            | Literal case‑insensitive search text   |
+
+*Response*
+
+```
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+
+{"jobId":"e7e4b9a8-3c2f-4a2f-8875-a8b1bce82c91"}
+```
+
+#### 3.2.2 Stream results – `GET`
+
+```
+GET /bin/cpm/ai/bulkreplace?operation=search&jobId=<uuid>
+Accept: text/event-stream
+```
+
+*Response (`200 text/event-stream`)*
 
 ```
 event: page
@@ -75,35 +95,35 @@ event: summary
 data: {"pages":12,"matches":42}
 ```
 
-### 3.3 Operation `replace`
+### 3.3 Operation `replace` (single property per call) – `POST`
 
-| Form field    | Type                 | Required | Notes                                                                                                                    |
-| ------------- | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `rootPath`    | string               | ✔︎       | Same as above                                                                                                            |
-| `term`        | string               | ✔︎       | String to replace (case‑insensitive)                                                                                     |
-| `replacement` | string               | ✔︎       | New text (empty string → deletion)                                                                                       |
-| `target`      | string (multi‑value) | ✔︎       | Each occurrence to modify, encoded as `page::componentPath::property`. Repeat the `target` param for every selected row. |
+| Field           | Required       | Notes                                                 |
+| --------------- | -------------- | ----------------------------------------------------- |
+| `operation`     | ✔︎ (`replace`) |                                                       |
+| `page`          | ✔︎             | Absolute page path                                    |
+| `componentPath` | ✔︎             | Sub‑path under page content (e.g. `jcr:content/text`) |
+| `property`      | ✔︎             | Property name (e.g. `text`)                           |
+| `term`          | ✔︎             | String to replace (case‑insensitive)                  |
+| `replacement`   | ✔︎             | New text (empty string → deletion)                    |
 
-**Response:** `200 text/event-stream`
+*Response*
 
 ```
-event: page
-data: {"page":"/content/site/en/about",
-       "changed":[
-         {"componentPath":"jcr:content/text","property":"text"},
-         {"componentPath":"jcr:content/header","property":"jcr:title"}
-       ]}
+HTTP/1.1 200 OK
+Content-Type: application/json
 
-event: result
-data: {"pages":10,"properties":35,"skipped":2,"durationMs":1350}
+{"replaced":true}
 ```
+
+If the author lacks modify ACL on that property, server returns `403`.
 
 ### 3.4 Error codes
 
 | Status | Meaning                                         |
 | ------ | ----------------------------------------------- |
 | `400`  | Missing/invalid parameters or unknown operation |
-| `403`  | Author lacks read/modify ACL on `rootPath`      |
+| `403`  | Author lacks read/modify ACL                    |
+| `404`  | `jobId` not found (during GET search)           |
 | `500`  | Unexpected server error                         |
 
 ---
