@@ -14,7 +14,7 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 
 ### 1.2 Form zone
 
-* **Root Page** – path browser (`foundation‑autocomplete`).
+* **Root Page** – required text field.
 * **Search String** – required text field.
 * **Replacement String** – text field (leave empty to delete occurrences).
 * **Action buttons**

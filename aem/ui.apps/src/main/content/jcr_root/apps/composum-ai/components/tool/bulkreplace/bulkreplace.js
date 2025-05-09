@@ -2,7 +2,8 @@ class BulkReplaceApp {
   constructor() {
     this.cacheDomElements();
     this.bindEvents();
-    this.currentJobId = null;
+    this.currentSearchJobId = null;
+    this.currentReplaceJobId = null;
   }
 
   static initApp() {
@@ -32,7 +33,7 @@ class BulkReplaceApp {
       alert("Please provide both root page and search string.");
       return;
     }
-    // Clear previous results and disable Replace until search completes
+    // Reset previous results and progress; disable Replace until search completes
     this.tableBody.innerHTML = "";
     this.progressBar.style.width = "0%";
     this.progressBar.textContent = "0%";
@@ -51,28 +52,43 @@ class BulkReplaceApp {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString()
     })
-      .then(this.handleSearchResponse.bind(this))
+      .then(this.handleJobResponse.bind(this))
       .then((data) => {
-         this.currentJobId = data.jobId;
-         this.attachEventSource(this.currentJobId);
+         this.currentSearchJobId = data.jobId;
+         this.attachEventSource("search", this.currentSearchJobId);
       })
       .catch(this.handleError);
   }
 
-  handleSearchResponse(response) {
+  handleJobResponse(response) {
     if (response.status === 202) {
       return response.json();
     }
-    throw new Error("Search job could not be started.");
+    throw new Error("Job could not be started.");
   }
 
-  attachEventSource(jobId) {
-    const evtSource = new EventSource("/bin/cpm/ai/bulkreplace?operation=search&jobId=" + jobId);
+  attachEventSource(operation, jobId) {
+    const evtSource = new EventSource("/bin/cpm/ai/bulkreplace?operation=" + operation + "&jobId=" + jobId);
     evtSource.addEventListener("page", this.handlePageEvent.bind(this));
-    evtSource.addEventListener("summary", (event) => {
-      this.replaceBtn.disabled = false;
-      evtSource.close();
-    });
+    if (operation === "search") {
+      evtSource.addEventListener("summary", (event) => {
+        this.replaceBtn.disabled = false;
+        evtSource.close();
+      });
+    } else if (operation === "replace") {
+      evtSource.addEventListener("result", (event) => {
+        const result = JSON.parse(event.data);
+        this.progressBar.style.width = "100%";
+        this.progressBar.textContent = "100%";
+        alert("Replacement completed.\nPages changed: " + result.pages +
+              "\nProperties updated: " + result.properties +
+              "\nSkipped: " + result.skipped);
+        evtSource.close();
+      });
+      evtSource.addEventListener("page", (event) => {
+        this.handlePageEvent(event);
+      });
+    }
     evtSource.onerror = (e) => {
       console.error("EventSource error:", e);
       evtSource.close();
@@ -80,30 +96,34 @@ class BulkReplaceApp {
   }
 
   handlePageEvent(event) {
-    const pageData = JSON.parse(event.data);
-    // Append a header row for the page
+    const data = JSON.parse(event.data);
     const headerRow = document.createElement("tr");
     headerRow.classList.add("table-secondary");
-    headerRow.innerHTML = `
-      <td><input type="checkbox" class="select-page" data-page="${pageData.page}" disabled></td>
-      <td colspan="3"><strong>${pageData.page}</strong> (${pageData.matches.length} matches)</td>
-    `;
-    this.tableBody.appendChild(headerRow);
-    // Append rows for each matching property
-    for (let i = 0; i < pageData.matches.length; i++) {
-      const match = pageData.matches[i];
-      const propRow = document.createElement("tr");
-      // Set data attributes for later use during replacement
-      propRow.setAttribute("data-page", pageData.page);
-      propRow.setAttribute("data-component", match.componentPath);
-      propRow.setAttribute("data-property", match.property);
-      propRow.innerHTML = `
-        <td><input type="checkbox" class="select-property" checked></td>
-        <td>${match.componentPath}</td>
-        <td>${match.property}</td>
-        <td>${match.excerpt}</td>
+    if (data.matches) {
+      headerRow.innerHTML = `
+        <td><input type="checkbox" class="select-page" data-page="${data.page}" disabled></td>
+        <td colspan="3"><strong>${data.page}</strong> (${data.matches.length} matches)</td>
       `;
-      this.tableBody.appendChild(propRow);
+      this.tableBody.appendChild(headerRow);
+      for (let i = 0; i < data.matches.length; i++) {
+        const match = data.matches[i];
+        const propRow = document.createElement("tr");
+        propRow.setAttribute("data-page", data.page);
+        propRow.setAttribute("data-component", match.componentPath);
+        propRow.setAttribute("data-property", match.property);
+        propRow.innerHTML = `
+          <td><input type="checkbox" class="select-property" checked></td>
+          <td>${match.componentPath}</td>
+          <td>${match.property}</td>
+          <td>${match.excerpt}</td>
+        `;
+        this.tableBody.appendChild(propRow);
+      }
+    } else if (data.changed) {
+      headerRow.innerHTML = `
+        <td colspan="4"><strong>Replaced on page:</strong> ${data.page} (${data.changed.length} properties)</td>
+      `;
+      this.tableBody.appendChild(headerRow);
     }
   }
 
@@ -131,10 +151,10 @@ class BulkReplaceApp {
     }
     this.progressBar.style.width = "0%";
     this.progressBar.textContent = "0%";
-    this.startReplace(root, term, replacement, targets);
+    this.startReplaceJob(root, term, replacement, targets);
   }
 
-  startReplace(root, term, replacement, targets) {
+  startReplaceJob(root, term, replacement, targets) {
     const formData = new URLSearchParams();
     formData.append("operation", "replace");
     formData.append("rootPath", root);
@@ -149,43 +169,12 @@ class BulkReplaceApp {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString()
     })
-      .then(this.handleReplaceStream.bind(this))
-      .then(() => {
-        this.progressBar.style.width = "100%";
-        this.progressBar.textContent = "100%";
-        alert("Replacement completed.");
+      .then(this.handleJobResponse.bind(this))
+      .then((data) => {
+         this.currentReplaceJobId = data.jobId;
+         this.attachEventSource("replace", this.currentReplaceJobId);
       })
       .catch(this.handleError);
-  }
-
-  handleReplaceStream(response) {
-    if (!response.ok) {
-      throw new Error("Replace operation failed.");
-    }
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let buffer = "";
-    let totalEvents = 0;
-    return this.readStream(reader, decoder, buffer, totalEvents);
-  }
-
-  readStream(reader, decoder, buffer, totalEvents) {
-    return reader.read().then(({ done, value }) => {
-      if (done) return;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop();
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.indexOf("event:") === 0) {
-          totalEvents++;
-          const progress = Math.min(100, (totalEvents * 10));
-          this.progressBar.style.width = progress + "%";
-          this.progressBar.textContent = progress + "%";
-        }
-      }
-      return this.readStream(reader, decoder, buffer, totalEvents);
-    });
   }
 
   handleError(error) {
@@ -199,3 +188,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+
