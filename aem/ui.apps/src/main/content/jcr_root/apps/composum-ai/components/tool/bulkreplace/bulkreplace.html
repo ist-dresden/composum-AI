@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bulk Replace Mockup</title>
+  <title>Bulk Replace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <!-- Bootstrap CSS -->
   <link
@@ -28,48 +28,60 @@
 
     <!-- Form zone -->
     <div id="form-zone" class="mb-5">
-      <form>
-        <div class="form-group">
-          <label for="root-page">Root Page</label>
-          <input
-            type="text"
-            class="form-control"
-            id="root-page"
-            placeholder="Select root page…"
-          >
+      <form class="form-horizontal">
+        <div class="form-group row">
+          <label for="root-page" class="col-sm-2 col-form-label">Root Page</label>
+          <div class="col-sm-4">
+            <!-- Foundation-autocomplete path browser -->
+            <input
+              type="text"
+              class="form-control foundation-autocomplete"
+              id="root-page"
+              placeholder="Select root page???"
+            >
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="search-string">Search String</label>
-          <input
-            type="text"
-            class="form-control"
-            id="search-string"
-            placeholder="Enter search string"
-            required
-          >
+        <div class="form-group row">
+          <label for="search-string" class="col-sm-2 col-form-label">Search String</label>
+          <div class="col-sm-4">
+            <input
+              type="text"
+              class="form-control"
+              id="search-string"
+              placeholder="Enter search string"
+              required
+            >
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="replacement-string">Replacement String</label>
-          <input
-            type="text"
-            class="form-control"
-            id="replacement-string"
-            placeholder="Enter replacement string (leave empty to delete)"
-          >
+        <div class="form-group row">
+          <label for="replacement-string" class="col-sm-2 col-form-label">Replacement String</label>
+          <div class="col-sm-4">
+            <input
+              type="text"
+              class="form-control"
+              id="replacement-string"
+              placeholder="Enter replacement string (leave empty to delete)"
+            >
+          </div>
         </div>
 
-        <button type="button" class="btn btn-primary" id="search-btn">Search</button>
-        <button type="button" class="btn btn-success" id="replace-btn" disabled>Replace</button>
+        <div class="form-group row">
+          <div class="col-sm-2"></div>
+          <div class="col-sm-4">
+            <button type="button" class="btn btn-primary mr-2" id="search-btn">Search</button>
+            <button type="button" class="btn btn-success" id="replace-btn" disabled>Replace</button>
+          </div>
+        </div>
       </form>
     </div>
 
-    <!-- Results & Progress zone -->
+    <!-- Results & Progress zone (hidden until Search) -->
     <div id="results-zone">
 
       <!-- Progress bar (hidden until replace starts) -->
-      <div class="progress mb-3" style="height: 1.5rem; display: none;">
+      <div class="progress mb-3" style="height: 1.5rem;">
         <div
           class="progress-bar progress-bar-striped progress-bar-animated"
           role="progressbar"
@@ -81,7 +93,7 @@
       <table class="table table-bordered">
         <thead class="thead-light">
           <tr>
-            <th style="width:5%;">Select</th>
+            <th style="width:5%;"><input type="checkbox" id="select-all" aria-label="Select all"></th>
             <th style="width:25%;">Component Path</th>
             <th style="width:20%;">Property</th>
             <th>Text Excerpt</th>
@@ -90,9 +102,8 @@
         <tbody>
           <!-- Page 1 header -->
           <tr class="table-secondary">
-            <td colspan="4">
-              <strong>/content/site/en/page1</strong> (3 matches)
-            </td>
+            <td><input type="checkbox" class="select-page" aria-label="Select page /content/site/en/page1"></td>
+            <td colspan="3"><strong>/content/site/en/page1</strong> (3 matches)</td>
           </tr>
           <!-- Page 1 properties -->
           <tr>
@@ -116,9 +127,8 @@
 
           <!-- Page 2 header -->
           <tr class="table-secondary">
-            <td colspan="4">
-              <strong>/content/site/en/page2</strong> (2 matches)
-            </td>
+            <td><input type="checkbox" class="select-page" aria-label="Select page /content/site/en/page2"></td>
+            <td colspan="3"><strong>/content/site/en/page2</strong> (2 matches)</td>
           </tr>
           <!-- Page 2 properties -->
           <tr>
