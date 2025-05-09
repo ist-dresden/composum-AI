@@ -3,11 +3,13 @@ package com.composum.ai.aem.core.impl;
 import static com.composum.ai.aem.core.impl.SelectorUtils.getLanguageName;
 import static com.composum.ai.aem.core.impl.SelectorUtils.getLanguageSiblings;
 import static com.composum.ai.aem.core.impl.SelectorUtils.isLocaleName;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.junit.jupiter.api.Test;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
@@ -73,6 +75,24 @@ public class SelectorUtilsTest extends TestCase {
         result = getLanguageSiblings(context.resourceResolver().getResource("/content/ai/aem/core/es_ES/foo/bar"), "de_de");
         assertEquals(1, result.size());
         assertEquals("/content/ai/aem/core/de/foo/bar", result.get(0).getPath());
+    }
+
+    @Test
+    public void testFindLanguageMockito() {
+        Resource pageResource = mock(Resource.class);
+        Resource parentResource = mock(Resource.class);
+        ValueMap valueMap = mock(ValueMap.class);
+
+        when(pageResource.getPath()).thenReturn("/content/foo/ar/es-ar/bar");
+        when(pageResource.getValueMap()).thenReturn(valueMap);
+        when(pageResource.getParent()).thenReturn(parentResource);
+
+        when(parentResource.getValueMap()).thenReturn(valueMap);
+        // Ensure parent's parent is null to finish the loop
+        when(parentResource.getParent()).thenReturn(null);
+
+        String language = SelectorUtils.findLanguage(pageResource);
+        assertEquals("es-ar", language);
     }
 
 }
