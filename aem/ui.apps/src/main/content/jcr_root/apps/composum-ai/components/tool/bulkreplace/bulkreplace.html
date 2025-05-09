@@ -1,28 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Bulk Replace UI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"></sly>
-    <sly data-sly-call="${clientLib.css @ categories='cq.authoring.editor.core'}"></sly>
-    <link rel="stylesheet" href="${resource.path}/bulkreplace.css">
+  <meta charset="UTF-8">
+  <title>Bulk Replace Mockup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap CSS -->
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+  >
+  <style>
+    /* Highlight search hits */
+    mark {
+      background-color: #fffb91;
+      padding: 0;
+    }
+  </style>
 </head>
-<body class="coral--light coral-Body">
+<body>
 
-<sly data-sly-call="${clientLib.js @ categories='coralui3,granite.ui.foundation.content'}"></sly>
-<script src="${resource.path @ context='uri'}/bulkreplace.js"></script>
+  <div class="container my-4">
 
-<div class="foundation-layout-panel">
-    <div class="foundation-layout-panel-bodywrapper spectrum-ready">
-        <div class="foundation-layout-panel-body">
-            <div class="foundation-layout-panel-content foundation-layout-form foundation-layout-form-mode-edit">
-                <div class="cq-dialog-content-page">
-                    HERE COMES THE APP
-                </div>
-            </div>
+    <!-- Header bar -->
+    <nav class="navbar navbar-light bg-light mb-4">
+      <span class="navbar-brand h4 mb-0">Bulk Replace</span>
+    </nav>
+
+    <!-- Form zone -->
+    <div id="form-zone" class="mb-5">
+      <form>
+        <div class="form-group">
+          <label for="root-page">Root Page</label>
+          <input
+            type="text"
+            class="form-control"
+            id="root-page"
+            placeholder="Select root page…"
+          >
         </div>
-    </div>
-</div>
 
+        <div class="form-group">
+          <label for="search-string">Search String</label>
+          <input
+            type="text"
+            class="form-control"
+            id="search-string"
+            placeholder="Enter search string"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="replacement-string">Replacement String</label>
+          <input
+            type="text"
+            class="form-control"
+            id="replacement-string"
+            placeholder="Enter replacement string (leave empty to delete)"
+          >
+        </div>
+
+        <button type="button" class="btn btn-primary" id="search-btn">Search</button>
+        <button type="button" class="btn btn-success" id="replace-btn" disabled>Replace</button>
+      </form>
+    </div>
+
+    <!-- Results & Progress zone -->
+    <div id="results-zone">
+
+      <!-- Progress bar (hidden until replace starts) -->
+      <div class="progress mb-3" style="height: 1.5rem; display: none;">
+        <div
+          class="progress-bar progress-bar-striped progress-bar-animated"
+          role="progressbar"
+          style="width: 0%"
+        >0%</div>
+      </div>
+
+      <!-- Grouped results table -->
+      <table class="table table-bordered">
+        <thead class="thead-light">
+          <tr>
+            <th style="width:5%;">Select</th>
+            <th style="width:25%;">Component Path</th>
+            <th style="width:20%;">Property</th>
+            <th>Text Excerpt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Page 1 header -->
+          <tr class="table-secondary">
+            <td colspan="4">
+              <strong>/content/site/en/page1</strong> (3 matches)
+            </td>
+          </tr>
+          <!-- Page 1 properties -->
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td>/jcr:content</td>
+            <td>jcr:title</td>
+            <td>Welcome to the <mark>page</mark> one</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td>/jcr:content/paragraph</td>
+            <td>text</td>
+            <td>This is the second <mark>page</mark>'s paragraph.</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td>/jcr:content/section</td>
+            <td>text</td>
+            <td>Another <mark>page</mark> content here.</td>
+          </tr>
+
+          <!-- Page 2 header -->
+          <tr class="table-secondary">
+            <td colspan="4">
+              <strong>/content/site/en/page2</strong> (2 matches)
+            </td>
+          </tr>
+          <!-- Page 2 properties -->
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td>/jcr:content</td>
+            <td>jcr:description</td>
+            <td>The second <mark>page</mark> description.</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td>/jcr:content/teaser</td>
+            <td>title</td>
+            <td>Teaser for <mark>page</mark> two.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Toast container -->
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      style="position: fixed; top: 1rem; right: 1rem; z-index: 1050;"
+    >
+      <div class="toast" data-delay="3000">
+        <div class="toast-header">
+          <strong class="mr-auto">Bulk Replace</strong>
+          <small>Just now</small>
+          <button
+            type="button"
+            class="ml-2 mb-1 close"
+            data-dismiss="toast"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          Replacement completed: 5 changes applied.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Optional JavaScript (for Bootstrap components) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+</html>

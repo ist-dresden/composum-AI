@@ -14,15 +14,19 @@ Find and replace a text string across an entire subtree of pages. All operations
 
 ### Form zone
 
+Use a bootstrap horizontal form with the following fields:
+
 * **Root Page** – *foundation‑autocomplete* path browser (single selection).
-* **Search String** – required Coral.Textfield.
-  Toggles under the field: **Regex?**, **Case‑sensitive?**
-* **Replacement String** – Coral.Textfield (leave empty to delete occurrences).
+* **Search String** – required textfield.
+* **Replacement String** – textfield (leave empty to delete occurrences).
 * **Action buttons**
   **Search** – locates all matches.
   **Replace** – executes replacement on the rows still selected in the results table.
 
 ### Results & Progress zone (appears after Search)
+
+There should be a selector with which one can select all checkboxes or none in the table. And a selector for each 
+page that selects all or none of the properties in that page (that is, the corresponding group).
 
 * **Grouped table**
 
@@ -32,11 +36,8 @@ Find and replace a text string across an entire subtree of pages. All operations
     | Select | Component sub‑path | Property | Text excerpt containing the search string |
     | ------ | ------------------ | -------- | ----------------------------------------- |
   * Authors select/deselect property rows to refine the replacement scope. All property rows under an unselected page header remain unaffected.
-* **Summary chip** – displays “*n* pages – *k* matches”.
 * **Progress bar** – appears above the table during **Replace**; determinate based on processed/total matches. The table becomes read‑only while the bar is active.
 * **Toast notification** – pops on completion, summarising successes and skips.
-
----
 
 ## Behaviour
 
@@ -45,3 +46,7 @@ Find and replace a text string across an entire subtree of pages. All operations
 * **Search** gathers and displays matches—no content is changed.
 * **Replace** commits changes for the rows still selected after review; writes occur in batches under the author’s session. Pages without write permission generate row‑level warnings and are skipped.
 * Progress events stream via Server‑Sent Events to update the bar and toast.
+
+## Technical realization
+
+The UI should be done with bootstrap loaded from CDN.
