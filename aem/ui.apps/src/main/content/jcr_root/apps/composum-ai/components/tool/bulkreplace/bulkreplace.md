@@ -39,7 +39,7 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 * **Search** is a **two‑step job**:
   1. Client POSTs parameters; server replies with `202 Accepted` and a JSON payload containing a `jobId`.
   2. Client opens an `EventSource` (GET) with that `jobId` and receives streamed results per page.
-* **Replace** issues one POST per selected property row and updates the local progress bar. Pages without modify permissions are skipped with warnings.
+* **Replace** issues one POST per page, accepting multiple replacement targets. It is **not streaming** – each call is triggered individually when the replace button is pressed, and the progress bar is advanced after each call. Additionally, the replace operation now uses a JSON request instead of a form multipart POST.
 
 ---
 
@@ -92,16 +92,33 @@ event: summary
 data: {"pages":12,"matches":42}
 ```
 
-### 3.3 Operation `replace` (single property per call) – `POST`
+### 3.3 Operation `replace` (multiple properties per page call) – `POST`
 
-| Field           | Required       | Notes                                                 |
-| --------------- | -------------- | ----------------------------------------------------- |
-| `operation`     | ✔︎ (`replace`) |                                                       |
-| `page`          | ✔︎             | Absolute page path                                   |
-| `componentPath` | ✔︎             | Sub‑path under page content relative to `jcr:content` |
-| `property`      | ✔︎             | Property name (e.g. `text`)                           |
-| `term`          | ✔︎             | String to replace (case‑insensitive)                 |
-| `replacement`   | ✔︎             | New text (empty string → deletion)                   |
+| Field           | Required       | Notes                                                  |
+| --------------- | -------------- | ------------------------------------------------------ |
+| `operation`     | ✔︎ (`replace`) |                                                        |
+| `page`          | ✔︎             | Absolute page path; all replacements on this page      |
+| `term`          | ✔︎             | String to replace (case‑insensitive)                   |
+| `replacement`   | ✔︎             | New text (empty string → deletion)                     |
+| `targets`       | ✔︎             | JSON array of target objects. Each object must have:   |
+|                 |                | • `componentPath`: Sub‑path under `jcr:content`          |
+|                 |                | • `property`: Property name (e.g. `text`)              |
+
+*Note:* This operation now expects a JSON request (with `Content-Type: application/json`) rather than a form multipart POST.
+
+*Example JSON Request:*
+```json
+{
+  "operation": "replace",
+  "page": "/content/site/en/about",
+  "term": "searchTerm",
+  "replacement": "newText",
+  "targets": [
+    { "componentPath": "text", "property": "text" },
+    { "componentPath": "header", "property": "jcr:title" }
+  ]
+}
+```
 
 *Response*
 
@@ -126,3 +143,7 @@ If the author lacks modify ACL on that property, server returns `403`.
 ---
 
 *End*
+
+`
+`
+`

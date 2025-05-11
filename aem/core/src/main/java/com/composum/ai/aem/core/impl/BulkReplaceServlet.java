@@ -1,6 +1,7 @@
 package com.composum.ai.aem.core.impl;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Servlet with functionality for the bulk replace tool.
@@ -232,67 +234,54 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         return excerpt;
     }
 
+    // New static classes for JSON replace request
+    public static class ReplaceRequest {
+        public String page;
+        public String term;
+        public String replacement;
+        public List<Target> targets;
+    }
+
+    public static class Target {
+        public String componentPath;
+        public String property;
+    }
+
+    // Updated handleReplace to support JSON requests
     private void handleReplace(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        String rootPath = request.getParameter("rootPath");
-        String term = request.getParameter("term");
-        String replacement = request.getParameter("replacement");
-        String[] targets = request.getParameterValues("target");
-
-        if (StringUtils.isBlank(rootPath) || StringUtils.isBlank(term) ||
-                replacement == null || targets == null || targets.length == 0) {
-            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST,
-                    "Required parameters: rootPath, term, replacement, target");
-            return;
-        }
-
-        response.setContentType("text/event-stream");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-
-        ResourceResolver resolver = request.getResourceResolver();
-        int pagesChanged = 0, propertiesChanged = 0, skipped = 0;
-        long startTime = System.currentTimeMillis();
-
-        try {
-            Map<String, List<String[]>> targetsByPage = new HashMap<>();
-            for (String target : targets) {
-                String[] parts = target.split("::");
-                if (parts.length != 3) {
-                    LOG.warn("Invalid target format: {}", target);
-                    skipped++;
-                    continue;
+        // Check if request is JSON
+        if (request.getContentType() != null && request.getContentType().contains("application/json")) {
+            try (Reader reader = request.getReader()) {
+                ReplaceRequest replaceRequest = gson.fromJson(reader, ReplaceRequest.class);
+                if (replaceRequest.page == null || replaceRequest.term == null ||
+                    replaceRequest.replacement == null || replaceRequest.targets == null ||
+                    replaceRequest.targets.isEmpty()) {
+                    response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST,
+                            "Required fields: page, term, replacement, targets");
+                    return;
                 }
-                String pagePath = parts[0];
-                targetsByPage.computeIfAbsent(pagePath, k -> new ArrayList<>()).add(parts);
-            }
-
-            for (Map.Entry<String, List<String[]>> entry : targetsByPage.entrySet()) {
-                String pagePath = entry.getKey();
-                List<String[]> pageTargets = entry.getValue();
-                Resource pageResource = resolver.getResource(pagePath);
+                // Process the replacement for the single page
+                ResourceResolver resolver = request.getResourceResolver();
+                Resource pageResource = resolver.getResource(replaceRequest.page);
                 if (pageResource == null) {
-                    LOG.warn("Page not found: {}", pagePath);
-                    skipped += pageTargets.size();
-                    continue;
+                    response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Page not found: " + replaceRequest.page);
+                    return;
                 }
-
+                int propertiesChanged = 0, skipped = 0;
+                long startTime = System.currentTimeMillis();
                 List<Changed> changedList = new ArrayList<>();
                 boolean pageModified = false;
-
-                for (String[] target : pageTargets) {
-                    String componentPath = target[1];
-                    String propertyName = target[2];
-                    Resource componentResource = pageResource.getChild(componentPath);
+                for (Target target : replaceRequest.targets) {
+                    Resource componentResource = pageResource.getChild(target.componentPath);
                     if (componentResource == null) {
-                        LOG.warn("Component not found: {}/{}", pagePath, componentPath);
+                        LOG.warn("Component not found: {}/{}", replaceRequest.page, target.componentPath);
                         skipped++;
                         continue;
                     }
-
-                    if (replaceInProperty(componentResource, propertyName, term, replacement)) {
+                    if (replaceInProperty(componentResource, target.property, replaceRequest.term, replaceRequest.replacement)) {
                         Changed ch = new Changed();
-                        ch.componentPath = componentPath;
-                        ch.property = propertyName;
+                        ch.componentPath = target.componentPath;
+                        ch.property = target.property;
                         changedList.add(ch);
                         propertiesChanged++;
                         pageModified = true;
@@ -300,33 +289,119 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         skipped++;
                     }
                 }
-
                 if (pageModified) {
-                    pagesChanged++;
-                    ReplacePageResponse pageResp = new ReplacePageResponse();
-                    pageResp.page = pagePath;
-                    pageResp.changed = changedList;
-                    sendEvent(response, "page", gson.toJson(pageResp));
+                    resolver.commit();
                 }
+                long duration = System.currentTimeMillis() - startTime;
+                // Return summary JSON response as per spec.
+                response.setStatus(SlingHttpServletResponse.SC_OK);
+                response.setContentType("application/json");
+                ResultResponse result = new ResultResponse();
+                result.pages = pageModified ? 1 : 0;
+                result.properties = propertiesChanged;
+                result.skipped = skipped;
+                result.durationMs = duration;
+                response.getWriter().write(gson.toJson(result));
+            } catch (JsonSyntaxException e) {
+                response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
+            }
+        } else {
+            // Existing form-based replace handling
+            String rootPath = request.getParameter("rootPath");
+            String term = request.getParameter("term");
+            String replacement = request.getParameter("replacement");
+            String[] targets = request.getParameterValues("target");
+
+            if (StringUtils.isBlank(rootPath) || StringUtils.isBlank(term) ||
+                    replacement == null || targets == null || targets.length == 0) {
+                response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST,
+                        "Required parameters: rootPath, term, replacement, target");
+                return;
             }
 
-            if (propertiesChanged > 0) {
-                resolver.commit();
-            }
+            response.setContentType("text/event-stream");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Cache-Control", "no-cache");
 
-            ResultResponse result = new ResultResponse();
-            result.pages = pagesChanged;
-            result.properties = propertiesChanged;
-            result.skipped = skipped;
-            result.durationMs = System.currentTimeMillis() - startTime;
-            sendEvent(response, "result", gson.toJson(result));
+            ResourceResolver resolver = request.getResourceResolver();
+            int pagesChanged = 0, propertiesChanged = 0, skipped = 0;
+            long startTime = System.currentTimeMillis();
 
-        } catch (Exception e) {
-            LOG.error("Error during replace operation", e);
-            if (resolver.hasChanges()) {
-                resolver.revert();
+            try {
+                Map<String, List<String[]>> targetsByPage = new HashMap<>();
+                for (String target : targets) {
+                    String[] parts = target.split("::");
+                    if (parts.length != 3) {
+                        LOG.warn("Invalid target format: {}", target);
+                        skipped++;
+                        continue;
+                    }
+                    String pagePath = parts[0];
+                    targetsByPage.computeIfAbsent(pagePath, k -> new ArrayList<>()).add(parts);
+                }
+
+                for (Map.Entry<String, List<String[]>> entry : targetsByPage.entrySet()) {
+                    String pagePath = entry.getKey();
+                    List<String[]> pageTargets = entry.getValue();
+                    Resource pageResource = resolver.getResource(pagePath);
+                    if (pageResource == null) {
+                        LOG.warn("Page not found: {}", pagePath);
+                        skipped += pageTargets.size();
+                        continue;
+                    }
+
+                    List<Changed> changedList = new ArrayList<>();
+                    boolean pageModified = false;
+
+                    for (String[] target : pageTargets) {
+                        String componentPath = target[1];
+                        String propertyName = target[2];
+                        Resource componentResource = pageResource.getChild(componentPath);
+                        if (componentResource == null) {
+                            LOG.warn("Component not found: {}/{}", pagePath, componentPath);
+                            skipped++;
+                            continue;
+                        }
+
+                        if (replaceInProperty(componentResource, propertyName, term, replacement)) {
+                            Changed ch = new Changed();
+                            ch.componentPath = componentPath;
+                            ch.property = propertyName;
+                            changedList.add(ch);
+                            propertiesChanged++;
+                            pageModified = true;
+                        } else {
+                            skipped++;
+                        }
+                    }
+
+                    if (pageModified) {
+                        pagesChanged++;
+                        ReplacePageResponse pageResp = new ReplacePageResponse();
+                        pageResp.page = pagePath;
+                        pageResp.changed = changedList;
+                        sendEvent(response, "page", gson.toJson(pageResp));
+                    }
+                }
+
+                if (propertiesChanged > 0) {
+                    resolver.commit();
+                }
+
+                ResultResponse result = new ResultResponse();
+                result.pages = pagesChanged;
+                result.properties = propertiesChanged;
+                result.skipped = skipped;
+                result.durationMs = System.currentTimeMillis() - startTime;
+                sendEvent(response, "result", gson.toJson(result));
+
+            } catch (Exception e) {
+                LOG.error("Error during replace operation", e);
+                if (resolver.hasChanges()) {
+                    resolver.revert();
+                }
+                response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             }
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -397,4 +472,3 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public String property;
     }
 }
-

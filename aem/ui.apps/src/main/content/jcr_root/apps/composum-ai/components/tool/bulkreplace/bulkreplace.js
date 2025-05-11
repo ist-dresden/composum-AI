@@ -177,47 +177,58 @@ class BulkReplaceApp {
       alert("No properties selected for replacement.");
       return;
     }
-    const targets = [];
-    for (let i = 0; i < selectedCheckboxes.length; i++) {
-      const checkbox = selectedCheckboxes[i];
+    // Group targets per page
+    const pageMap = {};
+    selectedCheckboxes.forEach(checkbox => {
       const row = checkbox.closest("tr");
       const page = row.getAttribute("data-page");
       const component = row.getAttribute("data-component");
       const property = row.getAttribute("data-property");
-      targets.push(page + "::" + component + "::" + property);
-    }
+      if (!pageMap[page]) { pageMap[page] = []; }
+      pageMap[page].push({ componentPath: component, property: property });
+    });
+    const pages = Object.keys(pageMap);
+    let completed = 0;
     this.progressBar.style.width = "0%";
     this.progressBar.textContent = "0%";
-    this.startReplaceJob(root, term, replacement, targets);
+    // Process each page replacement separately
+    pages.forEach(page => {
+      this.startReplaceJobForPage(page, term, replacement, pageMap[page])
+        .then(() => {
+          completed++;
+          const progress = Math.round((completed / pages.length) * 100);
+          this.progressBar.style.width = progress + "%";
+          this.progressBar.textContent = progress + "%";
+          if (completed === pages.length) {
+            alert("Replacement completed for all pages.");
+          }
+        })
+        .catch(this.handleError);
+    });
   }
 
-  startReplaceJob(root, term, replacement, targets) {
-    const formData = new URLSearchParams();
-    formData.append("operation", "replace");
-    formData.append("rootPath", root);
-    formData.append("term", term);
-    formData.append("replacement", replacement);
-    for (let i = 0; i < targets.length; i++) {
-      formData.append("target", targets[i]);
-    }
-
-    this.getCSRFToken()
-      .then(token => {
-        return fetch("/bin/cpm/ai/bulkreplace", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "CSRF-Token": token
-          },
-          body: formData.toString()
-        });
-      })
-      .then(this.handleJobResponse.bind(this))
-      .then((data) => {
-         this.currentReplaceJobId = data.jobId;
-         this.attachEventSource("replace", this.currentReplaceJobId);
-      })
-      .catch(this.handleError);
+  startReplaceJobForPage(page, term, replacement, targets) {
+    return this.getCSRFToken().then(token => {
+      return fetch("/bin/cpm/ai/bulkreplace", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "CSRF-Token": token
+        },
+        body: JSON.stringify({
+          operation: "replace",
+          page: page,
+          term: term,
+          replacement: replacement,
+          targets: targets
+        })
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error("Replace operation failed for " + page);
+        }
+        return response.json();
+      });
+    });
   }
 
   handleError(error) {
@@ -230,3 +241,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+
