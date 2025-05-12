@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -124,12 +125,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      *
      * @param request  the SlingHttpServletRequest, not null
      * @param response the SlingHttpServletResponse, not null
-     * @throws ServletException if a servlet error occurs
      * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         String operation = request.getParameter("operation");
         if ("search".equals(operation)) {
             String jobId = request.getParameter("jobId");
@@ -437,12 +437,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             throws IOException {
         try {
             PageManager pageManager = pageResource.getResourceResolver().adaptTo(PageManager.class);
-            if (pageManager != null) {
-                Page page = pageManager.getPage(pageResource.getPath());
-                if (page != null) {
-                    pageManager.createRevision(page, "Bulk Replace", "Replacing '" + term + "' with '" + replacement + "'");
-                }
-            }
+            Page page = pageManager.getContainingPage(pageResource.getPath());
+            pageManager.createRevision(page, "Bulk Replace", "Replacing '" + term + "' with '" + replacement + "'");
         } catch (Exception e) {
             LOG.error("Error creating version for page: {}", pageResource.getPath(), e);
             throw new IOException("Failed to create revision", e);
@@ -458,25 +454,21 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         try {
             // Get the page's content resource to check replication info
             Resource contentResource = pageResource.getChild("jcr:content");
-            if (contentResource != null) {
-                ValueMap vm = contentResource.getValueMap();
-                Calendar lastModified = vm.get("cq:lastModified", Calendar.class);
-                Calendar lastReplicated = vm.get("cq:lastReplicated", Calendar.class);
-                String lastAction = vm.get("cq:lastReplicationAction", String.class);
-                // Only auto‑publish if the page qualifies: lastModified is not after lastReplicated and replication was Activate.
-                if (lastModified != null && lastReplicated != null
-                        && !lastModified.after(lastReplicated)
-                        && "Activate".equals(lastAction)) {
-                    Replicator replicator = pageResource.getResourceResolver().adaptTo(Replicator.class);
-                    Session session = pageResource.getResourceResolver().adaptTo(Session.class);
-                    if (replicator != null && session != null) {
-                        replicator.replicate(session, ReplicationActionType.ACTIVATE, pageResource.getPath());
-                    }
-                } else {
-                    LOG.info("Page {} does not qualify for auto‑publication", pageResource.getPath());
+            ValueMap vm = Objects.requireNonNull(contentResource).getValueMap();
+            Calendar lastModified = vm.get("cq:lastModified", Calendar.class);
+            Calendar lastReplicated = vm.get("cq:lastReplicated", Calendar.class);
+            String lastAction = vm.get("cq:lastReplicationAction", String.class);
+            // Only auto‑publish if the page qualifies: lastModified is not after lastReplicated and replication was Activate.
+            if (lastModified != null && lastReplicated != null
+                    && !lastModified.after(lastReplicated)
+                    && "Activate".equals(lastAction)) {
+                Replicator replicator = pageResource.getResourceResolver().adaptTo(Replicator.class);
+                Session session = pageResource.getResourceResolver().adaptTo(Session.class);
+                if (replicator != null && session != null) {
+                    replicator.replicate(session, ReplicationActionType.ACTIVATE, pageResource.getPath());
                 }
             } else {
-                LOG.warn("No content resource found for page: {}", pageResource.getPath());
+                LOG.info("Page {} does not qualify for auto‑publication", pageResource.getPath());
             }
         } catch (Exception e) {
             LOG.error("Error auto‑publishing page: {}", pageResource.getPath(), e);

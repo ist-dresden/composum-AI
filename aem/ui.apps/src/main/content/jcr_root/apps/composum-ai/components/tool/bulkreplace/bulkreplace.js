@@ -294,6 +294,27 @@ class BulkReplaceApp {
   }
 
   /**
+   * Marks all table rows for the given page as replaced by setting a pastel green background,
+   * removing checkboxes, and updating the text excerpt with the replacement text.
+   *
+   * @param {string} page - the page path.
+   * @param {string} replacement - the text to display in the text excerpt column.
+   */
+  markPageAsReplaced(page, replacement) {
+    const rows = document.querySelectorAll(`tr[data-page="${page}"]`);
+    rows.forEach(row => {
+      row.classList.add("replaced-row");
+      // Remove any checkboxes within this row.
+      row.querySelectorAll("input[type='checkbox']").forEach(checkbox => checkbox.remove());
+      // Update the text excerpt cell (assumed to be the 4th cell) with the replacement text.
+      const cells = row.getElementsByTagName("td");
+      if (cells.length >= 4) {
+        cells[3].textContent = replacement;
+      }
+    });
+  }
+
+  /**
    * Handles the click event for the replace button, processing pages sequentially.
    */
   async handleReplaceClick() {
@@ -339,6 +360,7 @@ class BulkReplaceApp {
         const progress = Math.round((completed / pages.length) * 100);
         this.progressBar.style.width = progress + "%";
         this.progressBar.textContent = progress + "%";
+        this.markPageAsReplaced(page, replacement);
       } catch (error) {
         this.handleError(error);
       }
