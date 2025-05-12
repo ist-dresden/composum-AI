@@ -249,8 +249,7 @@ class BulkReplaceApp {
         this.progressBar.style.width = "100%";
         this.progressBar.textContent = "100%";
         this.showToast("Replacement completed.\nPages changed: " + result.pages +
-                        "\nProperties updated: " + result.properties +
-                        "\nSkipped: " + result.skipped);
+                        "\nProperties updated: " + result.properties);
         evtSource.close();
       });
       evtSource.addEventListener("page", (event) => {
