@@ -20,6 +20,8 @@ class BulkReplaceApp {
     this.rootPageInput = document.getElementById("root-page");
     this.searchStringInput = document.getElementById("search-string");
     this.replacementInput = document.getElementById("replacement-string");
+    this.createVersionCheckbox = document.getElementById("create-version");
+    this.autoPublishCheckbox = document.getElementById("auto-publish");
   }
 
   bindEvents() {
@@ -35,6 +37,8 @@ class BulkReplaceApp {
         if (settings.root) { this.rootPageInput.value = settings.root; }
         if (settings.search) { this.searchStringInput.value = settings.search; }
         if (settings.replacement) { this.replacementInput.value = settings.replacement; }
+        if (typeof settings.createVersion !== 'undefined') { this.createVersionCheckbox.checked = settings.createVersion; }
+        if (typeof settings.autoPublish !== 'undefined') { this.autoPublishCheckbox.checked = settings.autoPublish; }
       } catch (e) {
         console.error("Error parsing saved settings", e);
       }
@@ -45,7 +49,9 @@ class BulkReplaceApp {
     const settings = {
       root: this.rootPageInput.value.trim(),
       search: this.searchStringInput.value.trim(),
-      replacement: this.replacementInput.value
+      replacement: this.replacementInput.value,
+      createVersion: this.createVersionCheckbox.checked,
+      autoPublish: this.autoPublishCheckbox.checked
     };
     localStorage.setItem('aem-composumAI-bulkedit', JSON.stringify(settings));
   }
@@ -193,7 +199,7 @@ class BulkReplaceApp {
     this.progressBar.textContent = "0%";
     // Process each page replacement separately
     pages.forEach(page => {
-      this.startReplaceJobForPage(page, term, replacement, pageMap[page])
+      this.startReplaceJobForPage(page, term, replacement, pageMap[page], this.createVersionCheckbox.checked, this.autoPublishCheckbox.checked)
         .then(() => {
           completed++;
           const progress = Math.round((completed / pages.length) * 100);
@@ -207,7 +213,7 @@ class BulkReplaceApp {
     });
   }
 
-  startReplaceJobForPage(page, term, replacement, targets) {
+  startReplaceJobForPage(page, term, replacement, targets, createVersion, autoPublish) {
     return this.getCSRFToken().then(token => {
       return fetch("/bin/cpm/ai/bulkreplace", {
         method: "POST",
@@ -220,7 +226,9 @@ class BulkReplaceApp {
           page: page,
           term: term,
           replacement: replacement,
-          targets: targets
+          targets: targets,
+          createVersion: createVersion,
+          autoPublish: autoPublish
         })
       }).then(response => {
         if (!response.ok) {
@@ -241,4 +249,3 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
-

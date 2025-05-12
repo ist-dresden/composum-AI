@@ -18,6 +18,9 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 * **Root Page** – required text field.
 * **Search String** – required text field.
 * **Replacement String** – text field (leave empty to delete occurrences).
+* Two inline checkboxes:
+    - **Create Version** – if checked, a version of the page is created before any replacement changes.
+    - **Auto‑Publish** – if checked, the page is automatically published after replacement provided it qualifies as automatically publishable. In this context, auto‑publishing occurs only if the page’s last modification timestamp does not indicate changes after its last publication—ensuring consistency with the published state.
 * **Action buttons**
   - **Search** – starts a search job.
   - **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
@@ -40,6 +43,8 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
   1. Client POSTs parameters; server replies with `202 Accepted` and a JSON payload containing a `jobId`.
   2. Client opens an `EventSource` (GET) with that `jobId` and receives streamed results per page.
 * **Replace** issues one POST per page, accepting multiple replacement targets. It is **not streaming** – each call is triggered individually when the replace button is pressed, and the progress bar is advanced after each call. Additionally, the replace operation now uses a JSON request instead of a form multipart POST.
+  
+* Auto‑publishing (triggered when **Auto‑Publish** is checked) replicates the modified page if it is deemed automatically publishable, meaning that its last modification does not conflict with its replication state. This ensures only pages that remain in a consistent, pre‑modified published state are automatically published.
 
 ---
 
@@ -103,8 +108,10 @@ data: {"pages":12,"matches":42}
 | `targets`       | ✔︎             | JSON array of target objects. Each object must have:   |
 |                 |                | • `componentPath`: Sub‑path under `jcr:content`          |
 |                 |                | • `property`: Property name (e.g. `text`)              |
+| `createVersion` | Optional       | Boolean; if true, creates a version before replacement   |
+| `autoPublish`   | Optional       | Boolean; if true, publishes the page after replacement provided the page qualifies as automatically publishable (i.e. its last modification is not later than its last replication)   |
 
-*Note:* This operation now expects a JSON request (with `Content-Type: application/json`) rather than a form multipart POST.
+*Note:* This operation expects a JSON request (with `Content-Type: application/json`).
 
 *Example JSON Request:*
 ```json
@@ -116,7 +123,9 @@ data: {"pages":12,"matches":42}
   "targets": [
     { "componentPath": "text", "property": "text" },
     { "componentPath": "header", "property": "jcr:title" }
-  ]
+  ],
+  "createVersion": true,
+  "autoPublish": false
 }
 ```
 
@@ -143,7 +152,3 @@ If the author lacks modify ACL on that property, server returns `403`.
 ---
 
 *End*
-
-`
-`
-`

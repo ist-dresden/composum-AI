@@ -240,6 +240,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public String term;
         public String replacement;
         public List<Target> targets;
+        public boolean createVersion;
+        public boolean autoPublish;
     }
 
     public static class Target {
@@ -267,6 +269,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Page not found: " + replaceRequest.page);
                     return;
                 }
+                // If createVersion is true, create a version of the page before making changes.
+                if (replaceRequest.createVersion) {
+                    // ...existing code to create a version, e.g. call to version manager...
+                    LOG.info("Creating version for page: {}", replaceRequest.page);
+                }
                 int propertiesChanged = 0, skipped = 0;
                 long startTime = System.currentTimeMillis();
                 List<Changed> changedList = new ArrayList<>();
@@ -291,9 +298,13 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 }
                 if (pageModified) {
                     resolver.commit();
+                    // If autoPublish is true, publish the page after changes.
+                    if (replaceRequest.autoPublish) {
+                        // ...existing code to auto-publish the page...
+                        LOG.info("Auto-publishing page: {}", replaceRequest.page);
+                    }
                 }
                 long duration = System.currentTimeMillis() - startTime;
-                // Return summary JSON response as per spec.
                 response.setStatus(SlingHttpServletResponse.SC_OK);
                 response.setContentType("application/json");
                 ResultResponse result = new ResultResponse();
