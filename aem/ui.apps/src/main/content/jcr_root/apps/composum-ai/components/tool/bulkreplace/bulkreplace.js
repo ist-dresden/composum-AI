@@ -27,17 +27,63 @@ class BulkReplaceApp {
   bindEvents() {
     this.searchBtn.addEventListener("click", this.handleSearchClick.bind(this));
     this.replaceBtn.addEventListener("click", this.handleReplaceClick.bind(this));
-    // Bind header checkbox to select/deselect all property checkboxes.
+    // Bind header checkbox to select/deselect all property checkboxes, then update states.
     document.getElementById("select-all").addEventListener("change", (event) => {
       const checked = event.target.checked;
       document.querySelectorAll("input.select-property").forEach(cb => cb.checked = checked);
+      this.updateIndeterminateStates();
     });
-    // Delegate change event for page row checkboxes.
+    // Delegate change events within the table body.
     this.tableBody.addEventListener("change", (event) => {
       if (event.target.classList.contains("select-page")) {
+        // Toggle all property checkboxes of this page.
         const page = event.target.getAttribute("data-page");
         const checked = event.target.checked;
         document.querySelectorAll(`tr[data-page="${page}"] input.select-property`).forEach(cb => cb.checked = checked);
+      }
+      // For individual property checkbox changes.
+      if (event.target.classList.contains("select-property")) {
+         // If a page checkbox is toggled via its properties, update it.
+         const row = event.target.closest("tr");
+         const page = row.getAttribute("data-page");
+         // No additional handling needed here; state update below covers all groups.
+      }
+      this.updateIndeterminateStates();
+    });
+  }
+
+  updateIndeterminateStates() {
+    // Update global "select-all" checkbox state.
+    const allProps = document.querySelectorAll("input.select-property");
+    const total = allProps.length;
+    const checkedCount = Array.from(allProps).filter(cb => cb.checked).length;
+    const selectAll = document.getElementById("select-all");
+    if (checkedCount === 0) {
+      selectAll.checked = false;
+      selectAll.indeterminate = false;
+    } else if (checkedCount === total) {
+      selectAll.checked = true;
+      selectAll.indeterminate = false;
+    } else {
+      selectAll.checked = false;
+      selectAll.indeterminate = true;
+    }
+    
+    // Update each page header checkbox.
+    document.querySelectorAll("input.select-page").forEach(pageCb => {
+      const page = pageCb.getAttribute("data-page");
+      const props = document.querySelectorAll(`tr[data-page="${page}"] input.select-property`);
+      const totalProps = props.length;
+      const checkedProps = Array.from(props).filter(cb => cb.checked).length;
+      if (checkedProps === 0) {
+        pageCb.checked = false;
+        pageCb.indeterminate = false;
+      } else if (checkedProps === totalProps) {
+        pageCb.checked = true;
+        pageCb.indeterminate = false;
+      } else {
+        pageCb.checked = false;
+        pageCb.indeterminate = true;
       }
     });
   }
@@ -181,6 +227,7 @@ class BulkReplaceApp {
       `;
       this.tableBody.appendChild(headerRow);
     }
+    this.updateIndeterminateStates();
   }
 
   handleReplaceClick() {
@@ -219,9 +266,6 @@ class BulkReplaceApp {
           const progress = Math.round((completed / pages.length) * 100);
           this.progressBar.style.width = progress + "%";
           this.progressBar.textContent = progress + "%";
-          if (completed === pages.length) {
-            alert("Replacement completed for all pages.");
-          }
         })
         .catch(this.handleError);
     });
@@ -229,7 +273,7 @@ class BulkReplaceApp {
 
   startReplaceJobForPage(page, term, replacement, targets, createVersion, autoPublish) {
     return this.getCSRFToken().then(token => {
-      return fetch("/bin/cpm/ai/bulkreplace?operation=replace", { // URL updated here
+      return fetch("/bin/cpm/ai/bulkreplace?operation=replace", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -262,4 +306,3 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
-
