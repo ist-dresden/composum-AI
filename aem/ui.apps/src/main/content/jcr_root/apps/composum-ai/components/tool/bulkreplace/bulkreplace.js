@@ -123,12 +123,12 @@ class BulkReplaceApp {
 
   showToast(message) {
     const toastEl = document.querySelector('.toast');
-    // Update toast header time and body message.
     const headerTime = toastEl.querySelector('.toast-header small');
     const body = toastEl.querySelector('.toast-body');
     if (headerTime) { headerTime.textContent = "Now"; }
     if (body) { body.textContent = message; }
-    // Use jQuery to trigger Bootstrap toast.
+    // Initialize and show the toast using full jQuery Bootstrap plugin.
+    $(toastEl).toast({ autohide: true, delay: 3000 });
     $(toastEl).toast('show');
   }
 
@@ -319,3 +319,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+
