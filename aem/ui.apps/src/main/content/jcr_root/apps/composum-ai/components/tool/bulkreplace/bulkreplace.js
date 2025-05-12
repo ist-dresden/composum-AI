@@ -1,4 +1,10 @@
+/**
+ * Class representing the Bulk Replace application.
+ */
 class BulkReplaceApp {
+  /**
+   * Constructs the BulkReplaceApp instance and initializes DOM elements.
+   */
   constructor() {
     this.cacheDomElements();
     this.bindEvents();
@@ -8,10 +14,16 @@ class BulkReplaceApp {
     this.currentReplaceJobId = null;
   }
 
+  /**
+   * Initializes the BulkReplaceApp instance.
+   */
   static initApp() {
     new BulkReplaceApp();
   }
 
+  /**
+   * Caches frequently accessed DOM elements.
+   */
   cacheDomElements() {
     this.searchBtn = document.getElementById("search-btn");
     this.replaceBtn = document.getElementById("replace-btn");
@@ -25,6 +37,9 @@ class BulkReplaceApp {
     this.autoPublishCheckbox = document.getElementById("auto-publish");
   }
 
+  /**
+   * Binds event handlers to DOM elements.
+   */
   bindEvents() {
     this.searchBtn.addEventListener("click", this.handleSearchClick.bind(this));
     this.replaceBtn.addEventListener("click", this.handleReplaceClick.bind(this));
@@ -53,6 +68,9 @@ class BulkReplaceApp {
     });
   }
 
+  /**
+   * Updates the indeterminate state of header and page checkboxes based on selection.
+   */
   updateIndeterminateStates() {
     // Update global "select-all" checkbox state.
     const allProps = document.querySelectorAll("input.select-property");
@@ -89,6 +107,9 @@ class BulkReplaceApp {
     });
   }
 
+  /**
+   * Loads saved input settings from localStorage.
+   */
   loadSavedSettings() {
     const saved = localStorage.getItem('aem-composumAI-bulkedit');
     if (saved) {
@@ -105,6 +126,9 @@ class BulkReplaceApp {
     }
   }
 
+  /**
+   * Saves current input settings to localStorage.
+   */
   saveSettings() {
     const settings = {
       root: this.rootPageInput.value.trim(),
@@ -116,12 +140,22 @@ class BulkReplaceApp {
     localStorage.setItem('aem-composumAI-bulkedit', JSON.stringify(settings));
   }
 
+  /**
+   * Retrieves the CSRF token via a network call.
+   *
+   * @returns a Promise resolving with the CSRF token string.
+   */
   getCSRFToken() {
     return fetch("/libs/granite/csrf/token.json")
       .then(response => response.json())
       .then(data => data.token);
   }
 
+  /**
+   * Displays a toast notification with the provided message.
+   *
+   * @param message the message to display
+   */
   showToast(message) {
     const toastEl = document.querySelector('.toast');
     const headerTime = toastEl.querySelector('.toast-header small');
@@ -133,6 +167,9 @@ class BulkReplaceApp {
     $(toastEl).toast('show');
   }
 
+  /**
+   * Handles the click event for the search button.
+   */
   handleSearchClick() {
     this.saveSettings();
     const root = this.rootPageInput.value.trim();
@@ -148,6 +185,12 @@ class BulkReplaceApp {
     this.startSearchJob(root, term);
   }
 
+  /**
+   * Starts a search job by posting parameters and attaching an EventSource.
+   *
+   * @param root the root page path
+   * @param term the search term
+   */
   startSearchJob(root, term) {
     const formData = new URLSearchParams();
     formData.append("operation", "search");
@@ -173,6 +216,12 @@ class BulkReplaceApp {
       .catch(this.handleError.bind(this));
   }
 
+  /**
+   * Processes the job response.
+   *
+   * @param response the response object
+   * @returns a Promise resolving to JSON data if the response is accepted
+   */
   handleJobResponse(response) {
     if (response.status === 202) {
       return response.json();
@@ -180,6 +229,12 @@ class BulkReplaceApp {
     throw new Error("Job could not be started.");
   }
 
+  /**
+   * Attaches an EventSource to handle server-sent events for a specified job.
+   *
+   * @param operation the operation type ("search" or "replace")
+   * @param jobId     the job identifier
+   */
   attachEventSource(operation, jobId) {
     const evtSource = new EventSource("/bin/cpm/ai/bulkreplace?operation=" + operation + "&jobId=" + jobId);
     evtSource.addEventListener("page", this.handlePageEvent.bind(this));
@@ -208,6 +263,11 @@ class BulkReplaceApp {
     };
   }
 
+  /**
+   * Handles page events received via EventSource.
+   *
+   * @param event the event containing page data
+   */
   handlePageEvent(event) {
     const data = JSON.parse(event.data);
     const headerRow = document.createElement("tr");
@@ -244,6 +304,9 @@ class BulkReplaceApp {
     this.updateIndeterminateStates();
   }
 
+  /**
+   * Handles the click event for the replace button.
+   */
   handleReplaceClick() {
     this.saveSettings();
     const root = this.rootPageInput.value.trim();
@@ -285,6 +348,17 @@ class BulkReplaceApp {
     });
   }
 
+  /**
+   * Starts the replacement job for a specific page.
+   *
+   * @param page         the page path
+   * @param term         the search term
+   * @param replacement  the replacement text
+   * @param targets      an array of target objects
+   * @param createVersion whether to create a version before replacement
+   * @param autoPublish  whether to auto-publish the page after replacement
+   * @returns a Promise resolving the job response
+   */
   startReplaceJobForPage(page, term, replacement, targets, createVersion, autoPublish) {
     return this.getCSRFToken().then(token => {
       return fetch("/bin/cpm/ai/bulkreplace?operation=replace", {
@@ -310,10 +384,18 @@ class BulkReplaceApp {
     });
   }
 
+  /**
+   * Handles errors by displaying a toast notification.
+   *
+   * @param error the error object
+   */
   handleError(error) {
     this.showToast(error.message);
   }
 
+  /**
+   * Initializes Bootstrap tooltips on the page.
+   */
   initTooltips() {
     // Initialize Bootstrap tooltips for all elements with data-toggle="tooltip"
     $(function () {
@@ -322,6 +404,9 @@ class BulkReplaceApp {
   }
 }
 
+/**
+ * Handles the DOMContentLoaded event to initialize the application.
+ */
 function domContentLoadedHandler() {
   BulkReplaceApp.initApp();
 }

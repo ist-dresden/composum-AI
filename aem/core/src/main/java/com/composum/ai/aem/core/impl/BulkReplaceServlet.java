@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -79,8 +80,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     };
 
+    /**
+     * Handles POST requests for search and replace operations.
+     *
+     * @param request  the SlingHttpServletRequest, not null
+     * @param response the SlingHttpServletResponse, not null
+     * @throws ServletException if a servlet error occurs
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+            throws ServletException, IOException {
         String operation = request.getParameter("operation");
         if ("search".equals(operation)) {
             // Operation: search (start job)
@@ -109,9 +119,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    // New doGet to stream search results based on jobId
+    /**
+     * Handles GET requests to stream search results.
+     *
+     * @param request  the SlingHttpServletRequest, not null
+     * @param response the SlingHttpServletResponse, not null
+     * @throws ServletException if a servlet error occurs
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+            throws ServletException, IOException {
         String operation = request.getParameter("operation");
         if ("search".equals(operation)) {
             String jobId = request.getParameter("jobId");
@@ -133,8 +151,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    // Streams search results using stored parameters
-    private void streamSearchResults(Map<String, String> params, SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+    /**
+     * Streams search results using stored parameters.
+     *
+     * @param params   the search parameters, not null
+     * @param request  the SlingHttpServletRequest, not null
+     * @param response the SlingHttpServletResponse, not null
+     * @throws IOException if an I/O error occurs during streaming
+     */
+    private void streamSearchResults(@Nonnull Map<String, String> params,
+                                     @Nonnull SlingHttpServletRequest request,
+                                     @Nonnull SlingHttpServletResponse response) throws IOException {
         String rootPath = params.get("rootPath");
         String term = params.get("term");
 
@@ -188,7 +215,14 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private List<Match> findMatches(Page page, String term) {
+    /**
+     * Finds and returns matches for the search term within the given page.
+     *
+     * @param page the page to search, not null
+     * @param term the search term, not null
+     * @return a list of matches found in the page
+     */
+    private List<Match> findMatches(@Nonnull Page page, @Nonnull String term) {
         List<Match> matches = new ArrayList<>();
         Resource contentResource = page.getContentResource();
         if (contentResource != null) {
@@ -197,7 +231,18 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         return matches;
     }
 
-    private void findMatchesInResource(Resource resource, String parentPath, String term, List<Match> matches) {
+    /**
+     * Recursively finds matches in the given resource and its children.
+     *
+     * @param resource   the resource to search, not null
+     * @param parentPath the parent path as a string
+     * @param term       the search term, not null
+     * @param matches    the list to add found matches, not null
+     */
+    private void findMatchesInResource(@Nonnull Resource resource,
+                                       String parentPath,
+                                       @Nonnull String term,
+                                       @Nonnull List<Match> matches) {
         ValueMap properties = resource.getValueMap();
         String componentPath = StringUtils.isNotEmpty(parentPath)
                 ? parentPath + "/" + resource.getName() : resource.getName();
@@ -227,7 +272,14 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private String createExcerpt(String text, String term) {
+    /**
+     * Creates an excerpt from the given text around the search term.
+     *
+     * @param text the full text, not null
+     * @param term the search term, not null
+     * @return an excerpt of the text surrounding the term
+     */
+    private String createExcerpt(@Nonnull String text, @Nonnull String term) {
         int index = text.toLowerCase().indexOf(term);
         int start = Math.max(0, index - 20);
         int end = Math.min(text.length(), index + term.length() + 20);
@@ -237,24 +289,15 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         return excerpt;
     }
 
-    // New static classes for JSON replace request
-    public static class ReplaceRequest {
-        public String page;
-        public String term;
-        public String replacement;
-        public List<Target> targets;
-        public boolean createVersion;
-        public boolean autoPublish;
-    }
-
-    public static class Target {
-        public String componentPath;
-        public String property;
-    }
-
-    // Updated handleReplace to support JSON requests
-    private void handleReplace(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        // Check if request is JSON
+    /**
+     * Handles replacement operations, supporting both JSON and form-based requests.
+     *
+     * @param request  the SlingHttpServletRequest, not null
+     * @param response the SlingHttpServletResponse, not null
+     * @throws IOException if an I/O error occurs
+     */
+    private void handleReplace(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+            throws IOException {
         if (request.getContentType() != null && request.getContentType().contains("application/json")) {
             try (Reader reader = request.getReader()) {
                 ReplaceRequest replaceRequest = gson.fromJson(reader, ReplaceRequest.class);
@@ -419,7 +462,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private boolean replaceInProperty(Resource resource, String propertyName, String term, String replacement) {
+    /**
+     * Replaces occurrences of the specified term with the replacement in the resource property.
+     *
+     * @param resource     the resource to modify, not null
+     * @param propertyName the name of the property, not null
+     * @param term         the search term, not null
+     * @param replacement  the replacement string, not null
+     * @return true if the property is updated, false otherwise
+     */
+    private boolean replaceInProperty(@Nonnull Resource resource, @Nonnull String propertyName,
+                                      @Nonnull String term, @Nonnull String replacement) {
         try {
             ValueMap properties = resource.adaptTo(ValueMap.class);
             if (properties == null || !properties.containsKey(propertyName)) {
@@ -441,25 +494,41 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             }
             return false;
         } catch (Exception e) {
-            LOG.error("Error replacing in property: {}", resource.getPath() + "/" + propertyName, e);
+            LOG.error("Error replacing in property: {}/{}", resource.getPath(), propertyName, e);
             return false;
         }
     }
 
-    private void sendEvent(SlingHttpServletResponse response, String eventName, String data) throws IOException {
+    /**
+     * Sends a Server-Sent Event to the client.
+     *
+     * @param response  the SlingHttpServletResponse, not null
+     * @param eventName the event name, not null
+     * @param data      the event data as a JSON string, not null
+     * @throws IOException if an I/O error occurs while sending the event
+     */
+    private void sendEvent(@Nonnull SlingHttpServletResponse response, @Nonnull String eventName,
+                           @Nonnull String data) throws IOException {
         response.getWriter().write("event: " + eventName + "\n");
         response.getWriter().write("data: " + data + "\n\n");
         response.getWriter().flush();
     }
 
-    // Added missing helper method to create a version of the page.
-    private void createVersion(Resource pageResource, String term, String replacement) throws IOException {
+    /**
+     * Creates a revision of the page using the PageManager's createRevision method.
+     *
+     * @param pageResource the page resource to version, not null
+     * @param term         the search term used, not null
+     * @param replacement  the replacement text, not null
+     * @throws IOException if version creation fails
+     */
+    private void createVersion(@Nonnull Resource pageResource, @Nonnull String term, @Nonnull String replacement)
+            throws IOException {
         try {
             PageManager pageManager = pageResource.getResourceResolver().adaptTo(PageManager.class);
             if (pageManager != null) {
                 Page page = pageManager.getPage(pageResource.getPath());
                 if (page != null) {
-                    // Use the PageManager's createRevision method
                     pageManager.createRevision(page, "Bulk Replace", "Replacing '" + term + "' with '" + replacement + "'");
                 }
             }
@@ -469,8 +538,12 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    // Added missing helper method for auto‑publishing the page.
-    private void autoPublishPage(Resource pageResource) {
+    /**
+     * Automatically publishes the page if it qualifies based on modification and replication status.
+     *
+     * @param pageResource the page resource to publish, not null
+     */
+    private void autoPublishPage(@Nonnull Resource pageResource) {
         try {
             // Get the page's content resource to check replication info
             Resource contentResource = pageResource.getChild("jcr:content");
@@ -532,4 +605,20 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public String componentPath;
         public String property;
     }
+
+    public static class ReplaceRequest {
+        public String page;
+        public String term;
+        public String replacement;
+        public List<Target> targets;
+        public boolean createVersion;
+        public boolean autoPublish;
+    }
+
+    public static class Target {
+        public String componentPath;
+        public String property;
+    }
+
+
 }
