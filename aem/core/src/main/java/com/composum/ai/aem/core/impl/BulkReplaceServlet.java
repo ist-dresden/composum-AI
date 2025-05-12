@@ -308,14 +308,23 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                             "Required fields: page, term, replacement, targets");
                     return;
                 }
-                // Process the replacement for the single page
                 ResourceResolver resolver = request.getResourceResolver();
-                Resource pageResource = resolver.getResource(replaceRequest.page);
-                if (pageResource == null) {
+                // Use PageManager to retrieve the page and work on its content resource
+                PageManager pageManager = resolver.adaptTo(PageManager.class);
+                if (pageManager == null) {
+                    response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, "PageManager not available");
+                    return;
+                }
+                Page page = pageManager.getPage(replaceRequest.page);
+                if (page == null) {
                     response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Page not found: " + replaceRequest.page);
                     return;
                 }
-                // Create version if requested
+                Resource pageResource = page.getContentResource();
+                if (pageResource == null) {
+                    response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Content resource not found for page: " + replaceRequest.page);
+                    return;
+                }
                 if (replaceRequest.createVersion) {
                     LOG.info("Creating version for page: {}", replaceRequest.page);
                     createVersion(pageResource, replaceRequest.term, replaceRequest.replacement);
@@ -343,7 +352,6 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 }
                 if (pageModified) {
                     resolver.commit();
-                    // Auto‑publish if requested
                     if (replaceRequest.autoPublish) {
                         LOG.info("Auto‑publishing page: {}", replaceRequest.page);
                         autoPublishPage(pageResource);
@@ -524,3 +532,4 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
 
 }
+

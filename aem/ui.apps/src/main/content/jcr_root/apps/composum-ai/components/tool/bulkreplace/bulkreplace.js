@@ -236,30 +236,20 @@ class BulkReplaceApp {
    * @param jobId     the job identifier
    */
   attachEventSource(operation, jobId) {
-    const evtSource = new EventSource("/bin/cpm/ai/bulkreplace?operation=" + operation + "&jobId=" + jobId);
-    evtSource.addEventListener("page", this.handlePageEvent.bind(this));
+    // Only the search operation uses an event stream.
     if (operation === "search") {
+      const evtSource = new EventSource("/bin/cpm/ai/bulkreplace?operation=" + operation + "&jobId=" + jobId);
+      evtSource.addEventListener("page", this.handlePageEvent.bind(this));
       evtSource.addEventListener("summary", (event) => {
         this.replaceBtn.disabled = false;
         evtSource.close();
       });
-    } else if (operation === "replace") {
-      evtSource.addEventListener("result", (event) => {
-        const result = JSON.parse(event.data);
-        this.progressBar.style.width = "100%";
-        this.progressBar.textContent = "100%";
-        this.showToast("Replacement completed.\nPages changed: " + result.pages +
-                        "\nProperties updated: " + result.properties);
+      evtSource.onerror = (e) => {
+        console.error("EventSource error:", e);
         evtSource.close();
-      });
-      evtSource.addEventListener("page", (event) => {
-        this.handlePageEvent(event);
-      });
+      };
     }
-    evtSource.onerror = (e) => {
-      console.error("EventSource error:", e);
-      evtSource.close();
-    };
+    // Remove event stream handling for replace.
   }
 
   /**
@@ -304,9 +294,9 @@ class BulkReplaceApp {
   }
 
   /**
-   * Handles the click event for the replace button.
+   * Handles the click event for the replace button, processing pages sequentially.
    */
-  handleReplaceClick() {
+  async handleReplaceClick() {
     this.saveSettings();
     const root = this.rootPageInput.value.trim();
     const term = this.searchStringInput.value.trim();
@@ -334,17 +324,25 @@ class BulkReplaceApp {
     let completed = 0;
     this.progressBar.style.width = "0%";
     this.progressBar.textContent = "0%";
-    // Process each page replacement separately
-    pages.forEach(page => {
-      this.startReplaceJobForPage(page, term, replacement, pageMap[page], this.createVersionCheckbox.checked, this.autoPublishCheckbox.checked)
-        .then(() => {
-          completed++;
-          const progress = Math.round((completed / pages.length) * 100);
-          this.progressBar.style.width = progress + "%";
-          this.progressBar.textContent = progress + "%";
-        })
-        .catch(this.handleError.bind(this));
-    });
+    // Process each page sequentially using async/await
+    for (const page of pages) {
+      try {
+        await this.startReplaceJobForPage(
+          page,
+          term,
+          replacement,
+          pageMap[page],
+          this.createVersionCheckbox.checked,
+          this.autoPublishCheckbox.checked
+        );
+        completed++;
+        const progress = Math.round((completed / pages.length) * 100);
+        this.progressBar.style.width = progress + "%";
+        this.progressBar.textContent = progress + "%";
+      } catch (error) {
+        this.handleError(error);
+      }
+    }
   }
 
   /**
@@ -356,7 +354,7 @@ class BulkReplaceApp {
    * @param targets      an array of target objects
    * @param createVersion whether to create a version before replacement
    * @param autoPublish  whether to auto-publish the page after replacement
-   * @returns a Promise resolving the job response
+   * @returns a Promise resolving to the JSON response from the server.
    */
   startReplaceJobForPage(page, term, replacement, targets, createVersion, autoPublish) {
     return this.getCSRFToken().then(token => {
@@ -378,6 +376,7 @@ class BulkReplaceApp {
         if (!response.ok) {
           throw new Error("Replace operation failed for " + page);
         }
+        // Directly parse and return the JSON response (no event stream).
         return response.json();
       });
     });
