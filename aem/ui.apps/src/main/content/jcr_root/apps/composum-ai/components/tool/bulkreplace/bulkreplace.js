@@ -27,6 +27,19 @@ class BulkReplaceApp {
   bindEvents() {
     this.searchBtn.addEventListener("click", this.handleSearchClick.bind(this));
     this.replaceBtn.addEventListener("click", this.handleReplaceClick.bind(this));
+    // Bind header checkbox to select/deselect all property checkboxes.
+    document.getElementById("select-all").addEventListener("change", (event) => {
+      const checked = event.target.checked;
+      document.querySelectorAll("input.select-property").forEach(cb => cb.checked = checked);
+    });
+    // Delegate change event for page row checkboxes.
+    this.tableBody.addEventListener("change", (event) => {
+      if (event.target.classList.contains("select-page")) {
+        const page = event.target.getAttribute("data-page");
+        const checked = event.target.checked;
+        document.querySelectorAll(`tr[data-page="${page}"] input.select-property`).forEach(cb => cb.checked = checked);
+      }
+    });
   }
 
   loadSavedSettings() {
@@ -142,8 +155,9 @@ class BulkReplaceApp {
     const headerRow = document.createElement("tr");
     headerRow.classList.add("table-secondary");
     if (data.matches) {
+      // Create a page row with a checkbox for toggling all properties of this page.
       headerRow.innerHTML = `
-        <td><input type="checkbox" class="select-page" data-page="${data.page}" disabled></td>
+        <td><input type="checkbox" class="select-page" data-page="${data.page}"></td>
         <td colspan="3"><strong>${data.page}</strong> (${data.matches.length} matches)</td>
       `;
       this.tableBody.appendChild(headerRow);
@@ -248,3 +262,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+

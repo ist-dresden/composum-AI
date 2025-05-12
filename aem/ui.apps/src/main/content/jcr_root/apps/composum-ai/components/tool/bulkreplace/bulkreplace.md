@@ -30,7 +30,9 @@ Locate and replace a text string across an entire subtree of pages. Matching is 
 ### 1.3 Results & Progress zone
 
 * **Grouped table (initially empty)** that spans the full width of the page.
-  - Page and property rows are added dynamically based on search results.
+  - The table header includes a checkbox to select/deselect all property checkboxes across all pages.
+  - Each page row contains a checkbox to select/deselect all property checkboxes for that page.
+  - Individual property rows also have checkboxes for fine‑grained selection.
 * **Progress bar** – updated after each property replacement call.
 * **Toast notification** – pops on completion, summarising successes and skips.
 
