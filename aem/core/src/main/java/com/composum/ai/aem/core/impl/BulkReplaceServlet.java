@@ -3,6 +3,7 @@ package com.composum.ai.aem.core.impl;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -31,6 +32,8 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.google.gson.Gson;
@@ -38,24 +41,24 @@ import com.google.gson.JsonSyntaxException;
 
 /**
  * Servlet with functionality for the bulk replace tool.
- *
+ * <p>
  * Operations:
  * 1. Search:
- *    - POST (operation=search)
- *       Parameters:
- *         • rootPath: absolute page path to start search (e.g. /content/site/en)
- *         • term: literal, case‑insensitive search text
- *       Response: 202 Accepted with JSON payload {"jobId": "<uuid>"}.
- *       Note: The search parameters are stored in an internal LinkedHashMap (only the last 10 operations are kept).
- *
- *    - GET (operation=search, jobId=<uuid>)
- *       Streams search results as text/event-stream based on the stored parameters.
- *
+ * - POST (operation=search)
+ * Parameters:
+ * • rootPath: absolute page path to start search (e.g. /content/site/en)
+ * • term: literal, case‑insensitive search text
+ * Response: 202 Accepted with JSON payload {"jobId": "<uuid>"}.
+ * Note: The search parameters are stored in an internal LinkedHashMap (only the last 10 operations are kept).
+ * <p>
+ * - GET (operation=search, jobId=<uuid>)
+ * Streams search results as text/event-stream based on the stored parameters.
+ * <p>
  * 2. Replace:
- *    - POST (operation=replace)
- *       Parameters:
- *         • rootPath, term, replacement, target (see bulkreplace.md)
- *       Response: JSON indicating replace result.
+ * - POST (operation=replace)
+ * Parameters:
+ * • rootPath, term, replacement, target (see bulkreplace.md)
+ * Response: JSON indicating replace result.
  */
 @Component(service = Servlet.class,
         property = {
@@ -93,7 +96,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             Map<String, String> params = new HashMap<>();
             params.put("rootPath", rootPath);
             params.put("term", term);
-            synchronized(jobMap) {
+            synchronized (jobMap) {
                 jobMap.put(jobId, params);
             }
             response.setStatus(202);
@@ -117,7 +120,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 return;
             }
             Map<String, String> params;
-            synchronized(jobMap) {
+            synchronized (jobMap) {
                 params = jobMap.get(jobId);
             }
             if (params == null) {
@@ -256,8 +259,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             try (Reader reader = request.getReader()) {
                 ReplaceRequest replaceRequest = gson.fromJson(reader, ReplaceRequest.class);
                 if (replaceRequest.page == null || replaceRequest.term == null ||
-                    replaceRequest.replacement == null || replaceRequest.targets == null ||
-                    replaceRequest.targets.isEmpty()) {
+                        replaceRequest.replacement == null || replaceRequest.targets == null ||
+                        replaceRequest.targets.isEmpty()) {
                     response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST,
                             "Required fields: page, term, replacement, targets");
                     return;
@@ -269,10 +272,10 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Page not found: " + replaceRequest.page);
                     return;
                 }
-                // If createVersion is true, create a version of the page before making changes.
+                // Create version if requested
                 if (replaceRequest.createVersion) {
-                    // ...existing code to create a version, e.g. call to version manager...
                     LOG.info("Creating version for page: {}", replaceRequest.page);
+                    createVersion(pageResource, replaceRequest.term, replaceRequest.replacement);
                 }
                 int propertiesChanged = 0, skipped = 0;
                 long startTime = System.currentTimeMillis();
@@ -298,10 +301,10 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 }
                 if (pageModified) {
                     resolver.commit();
-                    // If autoPublish is true, publish the page after changes.
+                    // Auto‑publish if requested
                     if (replaceRequest.autoPublish) {
-                        // ...existing code to auto-publish the page...
-                        LOG.info("Auto-publishing page: {}", replaceRequest.page);
+                        LOG.info("Auto‑publishing page: {}", replaceRequest.page);
+                        autoPublishPage(pageResource);
                     }
                 }
                 long duration = System.currentTimeMillis() - startTime;
@@ -447,6 +450,53 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         response.getWriter().write("event: " + eventName + "\n");
         response.getWriter().write("data: " + data + "\n\n");
         response.getWriter().flush();
+    }
+
+    // Added missing helper method to create a version of the page.
+    private void createVersion(Resource pageResource, String term, String replacement) throws IOException {
+        try {
+            PageManager pageManager = pageResource.getResourceResolver().adaptTo(PageManager.class);
+            if (pageManager != null) {
+                Page page = pageManager.getPage(pageResource.getPath());
+                if (page != null) {
+                    // Use the PageManager's createRevision method
+                    pageManager.createRevision(page, "Bulk Replace", "Replacing '" + term + "' with '" + replacement + "'");
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error creating version for page: {}", pageResource.getPath(), e);
+            throw new IOException("Failed to create revision", e);
+        }
+    }
+
+    // Added missing helper method for auto‑publishing the page.
+    private void autoPublishPage(Resource pageResource) {
+        try {
+            // Get the page's content resource to check replication info
+            Resource contentResource = pageResource.getChild("jcr:content");
+            if (contentResource != null) {
+                ValueMap vm = contentResource.getValueMap();
+                Calendar lastModified = vm.get("cq:lastModified", Calendar.class);
+                Calendar lastReplicated = vm.get("cq:lastReplicated", Calendar.class);
+                String lastAction = vm.get("cq:lastReplicationAction", String.class);
+                // Only auto‑publish if the page qualifies: lastModified is not after lastReplicated and replication was Activate.
+                if (lastModified != null && lastReplicated != null
+                        && !lastModified.after(lastReplicated)
+                        && "Activate".equals(lastAction)) {
+                    Replicator replicator = pageResource.getResourceResolver().adaptTo(Replicator.class);
+                    Session session = pageResource.getResourceResolver().adaptTo(Session.class);
+                    if (replicator != null && session != null) {
+                        replicator.replicate(session, ReplicationActionType.ACTIVATE, pageResource.getPath());
+                    }
+                } else {
+                    LOG.info("Page {} does not qualify for auto‑publication", pageResource.getPath());
+                }
+            } else {
+                LOG.warn("No content resource found for page: {}", pageResource.getPath());
+            }
+        } catch (Exception e) {
+            LOG.error("Error auto‑publishing page: {}", pageResource.getPath(), e);
+        }
     }
 
     // --- Static inner classes for response objects ---

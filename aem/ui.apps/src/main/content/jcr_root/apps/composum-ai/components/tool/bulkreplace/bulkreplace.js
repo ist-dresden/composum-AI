@@ -215,14 +215,13 @@ class BulkReplaceApp {
 
   startReplaceJobForPage(page, term, replacement, targets, createVersion, autoPublish) {
     return this.getCSRFToken().then(token => {
-      return fetch("/bin/cpm/ai/bulkreplace", {
+      return fetch("/bin/cpm/ai/bulkreplace?operation=replace", { // URL updated here
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "CSRF-Token": token
         },
         body: JSON.stringify({
-          operation: "replace",
           page: page,
           term: term,
           replacement: replacement,
