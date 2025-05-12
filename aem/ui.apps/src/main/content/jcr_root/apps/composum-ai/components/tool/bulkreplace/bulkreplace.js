@@ -294,22 +294,26 @@ class BulkReplaceApp {
   }
 
   /**
-   * Marks all table rows for the given page as replaced by setting a pastel green background,
-   * removing checkboxes, and updating the text excerpt with the replacement text.
+   * Marks the table rows corresponding to changed properties on the given page.
+   * Updates each affected row's excerpt with the new text and removes its checkbox.
    *
-   * @param {string} page - the page path.
-   * @param {string} replacement - the text to display in the text excerpt column.
+   * @param {string} page - The page path.
+   * @param {Array} changedArr - Array of changed objects from the response.
    */
-  markPageAsReplaced(page, replacement) {
-    const rows = document.querySelectorAll(`tr[data-page="${page}"]`);
-    rows.forEach(row => {
-      row.classList.add("replaced-row");
-      // Remove any checkboxes within this row.
-      row.querySelectorAll("input[type='checkbox']").forEach(checkbox => checkbox.remove());
-      // Update the text excerpt cell (assumed to be the 4th cell) with the replacement text.
-      const cells = row.getElementsByTagName("td");
-      if (cells.length >= 4) {
-        cells[3].textContent = replacement;
+  markPageAsReplaced(page, changedArr) {
+    changedArr.forEach(changed => {
+      // Locate the row with matching page, componentPath, and property.
+      const selector = `tr[data-page="${page}"][data-component="${changed.componentPath}"][data-property="${changed.property}"]`;
+      const row = document.querySelector(selector);
+      if (row) {
+        row.classList.add("replaced-row");
+        // Remove checkbox from this row.
+        row.querySelectorAll("input[type='checkbox']").forEach(cb => cb.remove());
+        // Update the text excerpt cell (assumed to be the 4th cell) with the new excerpt.
+        const cells = row.getElementsByTagName("td");
+        if (cells.length >= 4) {
+          cells[3].textContent = changed.excerpt;
+        }
       }
     });
   }
@@ -357,9 +361,9 @@ class BulkReplaceApp {
           this.createVersionCheckbox.checked,
           this.autoPublishCheckbox.checked
         );
-        // Use the response: if changed properties reported, update the UI.
+        // Use the response: if changed properties are reported, update the UI.
         if (res && res.changed && res.changed.length > 0) {
-          this.markPageAsReplaced(page, replacement);
+          this.markPageAsReplaced(page, res.changed);
         }
         completed++;
         const progress = Math.round((completed / pages.length) * 100);
@@ -423,7 +427,7 @@ class BulkReplaceApp {
   initTooltips() {
     // Initialize Bootstrap tooltips for all elements with data-toggle="tooltip"
     $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
+      $('[data-toggle="tooltip"]').tooltip({delay: 1000});
     });
   }
 }
@@ -436,3 +440,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+

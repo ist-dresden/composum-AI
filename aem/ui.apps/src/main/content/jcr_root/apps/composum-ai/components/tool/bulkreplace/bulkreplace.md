@@ -39,7 +39,8 @@ the form content.*
     - Each page row contains a checkbox to select/deselect all property checkboxes for that page.
     - Individual property rows also have checkboxes for fine‑grained selection.
     - **Replaced rows:** Once a replacement is done for a page, the corresponding row displays a very light pastel green
-      background (#d8f7d8) to indicate success, and checkboxes for that row are no longer shown.
+      background (#d8f7d8) to indicate success, and checkboxes for that row are no longer shown. The text excerpt is 
+      changed to an excerpt with the replacement text.
 * **Progress bar** – updated after each property replacement call.
 * **Toast notification** – pops on completion, summarising successes and skips.
 
@@ -116,7 +117,7 @@ data: {"pages":12,"matches":42}
 |-----------------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `operation`     | ✔︎ (`replace`) |                                                                                                                                                                                     |
 | `page`          | ✔︎             | Absolute page path; all replacements on this page                                                                                                                                   |
-| `term`          | ✔︎             | String to replace                                                                                                                                                |
+| `term`          | ✔︎             | String to replace                                                                                                                                                                   |
 | `replacement`   | ✔︎             | New text (empty string → deletion)                                                                                                                                                  |
 | `targets`       | ✔︎             | JSON array of target objects. Each object must have:                                                                                                                                |
 |                 |                | • `componentPath`: Sub‑path under `jcr:content`                                                                                                                                     |
@@ -151,11 +152,22 @@ data: {"pages":12,"matches":42}
 
 *Response*
 
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"replaced":true}
+```json
+{
+  "page": "/content/site/en/about",
+  "changed": [
+    {
+      "componentPath": "text",
+      "property": "text",
+      "excerpt": "…context with newText…"
+    },
+    {
+      "componentPath": "header",
+      "property": "jcr:title",
+      "excerpt": "…Foo – newText…"
+    }
+  ]
+}
 ```
 
 If the author lacks modify ACL on that property, server returns `403`.
