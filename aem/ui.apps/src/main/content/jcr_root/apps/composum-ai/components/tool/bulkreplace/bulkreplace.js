@@ -348,7 +348,8 @@ class BulkReplaceApp {
     // Process each page sequentially using async/await
     for (const page of pages) {
       try {
-        await this.startReplaceJobForPage(
+        // Capture the ReplacePageResponse from the server.
+        const res = await this.startReplaceJobForPage(
           page,
           term,
           replacement,
@@ -356,11 +357,14 @@ class BulkReplaceApp {
           this.createVersionCheckbox.checked,
           this.autoPublishCheckbox.checked
         );
+        // Use the response: if changed properties reported, update the UI.
+        if (res && res.changed && res.changed.length > 0) {
+          this.markPageAsReplaced(page, replacement);
+        }
         completed++;
         const progress = Math.round((completed / pages.length) * 100);
         this.progressBar.style.width = progress + "%";
         this.progressBar.textContent = progress + "%";
-        this.markPageAsReplaced(page, replacement);
       } catch (error) {
         this.handleError(error);
       }
@@ -432,4 +436,3 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
-

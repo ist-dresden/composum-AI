@@ -49,7 +49,7 @@ import com.google.gson.JsonSyntaxException;
  * - POST (operation=search)
  * Parameters:
  * • rootPath: absolute page path to start search (e.g. /content/site/en)
- * • term: literal, case‑insensitive search text
+ * • term: literal search text
  * Response: 202 Accepted with JSON payload {"jobId": "<uuid>"}.
  * Note: The search parameters are stored in an internal LinkedHashMap (only the last 10 operations are kept).
  * <p>
@@ -86,12 +86,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      *
      * @param request  the SlingHttpServletRequest, not null
      * @param response the SlingHttpServletResponse, not null
-     * @throws ServletException if a servlet error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doPost(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         String operation = request.getParameter("operation");
         if ("search".equals(operation)) {
             // Operation: search (start job)
@@ -125,7 +124,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      *
      * @param request  the SlingHttpServletRequest, not null
      * @param response the SlingHttpServletResponse, not null
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
@@ -192,7 +191,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 Resource candidate = candidatePages.next();
                 Page candidatePage = pageManager.getPage(candidate.getPath());
                 if (candidatePage != null) {
-                    List<Match> matches = findMatches(candidatePage, term.toLowerCase());
+                    List<Match> matches = findMatches(candidatePage, term);
                     if (!matches.isEmpty()) {
                         totalPages.incrementAndGet();
                         totalMatches.addAndGet(matches.size());
@@ -257,7 +256,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
             if (value instanceof String) {
                 String stringValue = (String) value;
-                if (StringUtils.containsIgnoreCase(stringValue, term)) {
+                if (StringUtils.contains(stringValue, term)) {
                     Match m = new Match();
                     m.componentPath = componentPath;
                     m.property = propertyName;
@@ -280,7 +279,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      * @return an excerpt of the text surrounding the term
      */
     private String createExcerpt(@Nonnull String text, @Nonnull String term) {
-        int index = text.toLowerCase().indexOf(term);
+        int index = text.indexOf(term);
         int start = Math.max(0, index - 20);
         int end = Math.min(text.length(), index + term.length() + 20);
         String excerpt = text.substring(start, end);
@@ -329,8 +328,6 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     LOG.info("Creating version for page: {}", replaceRequest.page);
                     createVersion(pageResource, replaceRequest.term, replaceRequest.replacement);
                 }
-                int propertiesChanged = 0;
-                long startTime = System.currentTimeMillis();
                 List<Changed> changedList = new ArrayList<>();
                 boolean pageModified = false;
                 for (Target target : replaceRequest.targets) {
@@ -343,7 +340,6 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         ch.componentPath = target.componentPath;
                         ch.property = target.property;
                         changedList.add(ch);
-                        propertiesChanged++;
                         pageModified = true;
                     } else {
                         throw new IOException("No changes made for property: " + target.property +
@@ -357,14 +353,13 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         autoPublishPage(pageResource);
                     }
                 }
-                long duration = System.currentTimeMillis() - startTime;
+                // Send a ReplacePageResponse instead of a ResultResponse.
                 response.setStatus(SlingHttpServletResponse.SC_OK);
                 response.setContentType("application/json");
-                ResultResponse result = new ResultResponse();
-                result.pages = pageModified ? 1 : 0;
-                result.properties = propertiesChanged;
-                result.durationMs = duration;
-                response.getWriter().write(gson.toJson(result));
+                ReplacePageResponse pageResp = new ReplacePageResponse();
+                pageResp.page = replaceRequest.page;
+                pageResp.changed = changedList;
+                response.getWriter().write(gson.toJson(pageResp));
             } catch (JsonSyntaxException e) {
                 response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
             }
@@ -384,30 +379,25 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      */
     private boolean replaceInProperty(@Nonnull Resource resource, @Nonnull String propertyName,
                                       @Nonnull String term, @Nonnull String replacement) {
-        try {
-            ValueMap properties = resource.adaptTo(ValueMap.class);
-            if (properties == null || !properties.containsKey(propertyName)) {
-                return false;
-            }
-            String value = properties.get(propertyName, String.class);
-            if (value == null) {
-                return false;
-            }
-            String newValue = value.replaceAll("(?i)" + Pattern.quote(term), replacement);
-            if (!newValue.equals(value)) {
-                ModifiableValueMap modifiableProperties = resource.adaptTo(ModifiableValueMap.class);
-                if (modifiableProperties == null) {
-                    LOG.warn("Cannot get ModifiableValueMap for resource: {}", resource.getPath());
-                    return false;
-                }
-                modifiableProperties.put(propertyName, newValue);
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            LOG.error("Error replacing in property: {}/{}", resource.getPath(), propertyName, e);
+        ValueMap properties = resource.adaptTo(ValueMap.class);
+        if (properties == null || !properties.containsKey(propertyName)) {
             return false;
         }
+        String value = properties.get(propertyName, String.class);
+        if (value == null) {
+            return false;
+        }
+        String newValue = value.replaceAll(Pattern.quote(term), replacement);
+        if (!newValue.equals(value)) {
+            ModifiableValueMap modifiableProperties = resource.adaptTo(ModifiableValueMap.class);
+            if (modifiableProperties == null) {
+                LOG.warn("Cannot get ModifiableValueMap for resource: {}", resource.getPath());
+                return false;
+            }
+            modifiableProperties.put(propertyName, newValue);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -436,9 +426,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     private void createVersion(@Nonnull Resource pageResource, @Nonnull String term, @Nonnull String replacement)
             throws IOException {
         try {
-            PageManager pageManager = pageResource.getResourceResolver().adaptTo(PageManager.class);
+            PageManager pageManager = Objects.requireNonNull(pageResource.getResourceResolver().adaptTo(PageManager.class));
             Page page = pageManager.getContainingPage(pageResource.getPath());
-            pageManager.createRevision(page, "Bulk Replace", "Replacing '" + term + "' with '" + replacement + "'");
+            pageManager.createRevision(page, null, "Replacing '" + term + "' with '" + replacement + "'");
         } catch (Exception e) {
             LOG.error("Error creating version for page: {}", pageResource.getPath(), e);
             throw new IOException("Failed to create revision", e);
@@ -489,12 +479,6 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     public static class ReplacePageResponse {
         public String page;
         public List<Changed> changed;
-    }
-
-    public static class ResultResponse {
-        public int pages;
-        public int properties;
-        public long durationMs;
     }
 
     public static class Match {

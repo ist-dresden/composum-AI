@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Locate and replace a text string across an entire subtree of pages. Matching is **always literal & case‑insensitive**;
+Locate and replace a text string across an entire subtree of pages. Matching is **always literal**;
 all actions run under the permissions of the logged‑in author.
 
 ---
@@ -74,11 +74,11 @@ the form content.*
 
 #### 3.2.1 Start job – `POST`
 
-| Field       | Required      | Notes                                  |
-|-------------|---------------|----------------------------------------|
-| `operation` | ✔︎ (`search`) |                                        |
+| Field       | Required      | Notes                                 |
+|-------------|---------------|---------------------------------------|
+| `operation` | ✔︎ (`search`) |                                       |
 | `rootPath`  | ✔︎            | Subtree root (e.g. `/content/site/en`) |
-| `term`      | ✔︎            | Literal, case‑insensitive search text  |
+| `term`      | ✔︎            | Literal search text                   |
 
 *Response*
 
@@ -116,7 +116,7 @@ data: {"pages":12,"matches":42}
 |-----------------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `operation`     | ✔︎ (`replace`) |                                                                                                                                                                                     |
 | `page`          | ✔︎             | Absolute page path; all replacements on this page                                                                                                                                   |
-| `term`          | ✔︎             | String to replace (case‑insensitive)                                                                                                                                                |
+| `term`          | ✔︎             | String to replace                                                                                                                                                |
 | `replacement`   | ✔︎             | New text (empty string → deletion)                                                                                                                                                  |
 | `targets`       | ✔︎             | JSON array of target objects. Each object must have:                                                                                                                                |
 |                 |                | • `componentPath`: Sub‑path under `jcr:content`                                                                                                                                     |
