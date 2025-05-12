@@ -121,12 +121,23 @@ class BulkReplaceApp {
       .then(data => data.token);
   }
 
+  showToast(message) {
+    const toastEl = document.querySelector('.toast');
+    // Update toast header time and body message.
+    const headerTime = toastEl.querySelector('.toast-header small');
+    const body = toastEl.querySelector('.toast-body');
+    if (headerTime) { headerTime.textContent = "Now"; }
+    if (body) { body.textContent = message; }
+    // Use jQuery to trigger Bootstrap toast.
+    $(toastEl).toast('show');
+  }
+
   handleSearchClick() {
     this.saveSettings();
     const root = this.rootPageInput.value.trim();
     const term = this.searchStringInput.value.trim();
     if (!root || !term) {
-      alert("Please provide both root page and search string.");
+      this.showToast("Please provide both root page and search string.");
       return;
     }
     this.tableBody.innerHTML = "";
@@ -158,7 +169,7 @@ class BulkReplaceApp {
          this.currentSearchJobId = data.jobId;
          this.attachEventSource("search", this.currentSearchJobId);
       })
-      .catch(this.handleError);
+      .catch(this.handleError.bind(this));
   }
 
   handleJobResponse(response) {
@@ -181,9 +192,9 @@ class BulkReplaceApp {
         const result = JSON.parse(event.data);
         this.progressBar.style.width = "100%";
         this.progressBar.textContent = "100%";
-        alert("Replacement completed.\nPages changed: " + result.pages +
-              "\nProperties updated: " + result.properties +
-              "\nSkipped: " + result.skipped);
+        this.showToast("Replacement completed.\nPages changed: " + result.pages +
+                        "\nProperties updated: " + result.properties +
+                        "\nSkipped: " + result.skipped);
         evtSource.close();
       });
       evtSource.addEventListener("page", (event) => {
@@ -238,12 +249,12 @@ class BulkReplaceApp {
     const term = this.searchStringInput.value.trim();
     const replacement = this.replacementInput.value;
     if (!root || !term || replacement === null) {
-      alert("Please provide root page, search string and replacement.");
+      this.showToast("Please provide root page, search string and replacement.");
       return;
     }
     const selectedCheckboxes = document.querySelectorAll("input.select-property:checked");
     if (selectedCheckboxes.length === 0) {
-      alert("No properties selected for replacement.");
+      this.showToast("No properties selected for replacement.");
       return;
     }
     // Group targets per page
@@ -269,7 +280,7 @@ class BulkReplaceApp {
           this.progressBar.style.width = progress + "%";
           this.progressBar.textContent = progress + "%";
         })
-        .catch(this.handleError);
+        .catch(this.handleError.bind(this));
     });
   }
 
@@ -299,7 +310,7 @@ class BulkReplaceApp {
   }
 
   handleError(error) {
-    alert(error.message);
+    this.showToast(error.message);
   }
 }
 
@@ -308,4 +319,3 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
-
