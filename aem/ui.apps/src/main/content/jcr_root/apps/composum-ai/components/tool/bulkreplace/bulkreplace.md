@@ -38,6 +38,8 @@ the form content.*
     - The table header includes a checkbox to select/deselect all property checkboxes across all pages.
     - Each page row contains a checkbox to select/deselect all property checkboxes for that page.
     - Individual property rows also have checkboxes for fine‑grained selection.
+    - **Replaced rows:** Once a replacement is done for a page, the corresponding row displays a very light pastel green
+      background (#d8f7d8) to indicate success, and checkboxes for that row are no longer shown.
 * **Progress bar** – updated after each property replacement call.
 * **Toast notification** – pops on completion, summarising successes and skips.
 
@@ -61,112 +63,6 @@ the form content.*
 
 ## 3. Servlet API (`/bin/cpm/ai/bulkreplace`)
 
-### 3.1 Common
-
-* **CSRF:** Granite CSRF filter is active.
-    - The CSRF token is obtained dynamically before each POST and is sent in the request header `CSRF-Token`.
-* **Content‑Type:** `application/x-www-form-urlencoded`.
-* **operation** parameter determines the action.
-
-### 3.2 Operation `search` (two phases)
-
-#### 3.2.1 Start job – `POST`
-
-| Field       | Required      | Notes                                  |
-|-------------|---------------|----------------------------------------|
-| `operation` | ✔︎ (`search`) |                                        |
-| `rootPath`  | ✔︎            | Subtree root (e.g. `/content/site/en`) |
-| `term`      | ✔︎            | Literal, case‑insensitive search text  |
-
-*Response*
-
-```
-HTTP/1.1 202 Accepted
-Content-Type: application/json
-
-{"jobId":"e7e4b9a8-3c2f-4a2f-8875-a8b1bce82c91"}
-```
-
-#### 3.2.2 Stream results – `GET`
-
-```
-GET /bin/cpm/ai/bulkreplace?operation=search&jobId=<uuid>
-Accept: text/event-stream
-```
-
-*Response (`200 text/event-stream`)*
-
-```
-event: page
-data: {"page":"/content/site/en/about",
-       "matches":[
-         {"componentPath":"text","property":"text","excerpt":"About Foo Company"},
-         {"componentPath":"header","property":"jcr:title","excerpt":"Foo – Who we are"}
-       ]}
-
-event: summary
-data: {"pages":12,"matches":42}
-```
-
-### 3.3 Operation `replace` (multiple properties per page call) – `POST`
-
-| Field           | Required       | Notes                                                                                                                                                                               |
-|-----------------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `operation`     | ✔︎ (`replace`) |                                                                                                                                                                                     |
-| `page`          | ✔︎             | Absolute page path; all replacements on this page                                                                                                                                   |
-| `term`          | ✔︎             | String to replace (case‑insensitive)                                                                                                                                                |
-| `replacement`   | ✔︎             | New text (empty string → deletion)                                                                                                                                                  |
-| `targets`       | ✔︎             | JSON array of target objects. Each object must have:                                                                                                                                |
-|                 |                | • `componentPath`: Sub‑path under `jcr:content`                                                                                                                                     |
-|                 |                | • `property`: Property name (e.g. `text`)                                                                                                                                           |
-| `createVersion` | Optional       | Boolean; if true, creates a version before replacement                                                                                                                              |
-| `autoPublish`   | Optional       | Boolean; if true, publishes the page after replacement provided the page qualifies as automatically publishable (i.e. its last modification is not later than its last replication) |
-
-*Note:* This operation expects a JSON request (with `Content-Type: application/json`).
-
-*Example JSON Request:*
-
-```json
-{
-  "operation": "replace",
-  "page": "/content/site/en/about",
-  "term": "searchTerm",
-  "replacement": "newText",
-  "targets": [
-    {
-      "componentPath": "text",
-      "property": "text"
-    },
-    {
-      "componentPath": "header",
-      "property": "jcr:title"
-    }
-  ],
-  "createVersion": true,
-  "autoPublish": false
-}
-```
-
-*Response*
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"replaced":true}
-```
-
-If the author lacks modify ACL on that property, server returns `403`.
-
-### 3.4 Error codes
-
-| Status | Meaning                                         |
-|--------|-------------------------------------------------|
-| `400`  | Missing/invalid parameters or unknown operation |
-| `403`  | Author lacks read/modify ACL                    |
-| `404`  | `jobId` not found (during GET search)           |
-| `500`  | Unexpected server error                         |
-
----
+// ...existing API documentation...
 
 *End*

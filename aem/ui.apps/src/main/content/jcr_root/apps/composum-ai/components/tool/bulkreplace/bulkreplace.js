@@ -222,6 +222,8 @@ class BulkReplaceApp {
         this.tableBody.appendChild(propRow);
       }
     } else if (data.changed) {
+      // Create a replaced row without checkboxes.
+      headerRow.classList.add("replaced-row");
       headerRow.innerHTML = `
         <td colspan="4"><strong>Replaced on page:</strong> ${data.page} (${data.changed.length} properties)</td>
       `;
@@ -306,3 +308,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+
