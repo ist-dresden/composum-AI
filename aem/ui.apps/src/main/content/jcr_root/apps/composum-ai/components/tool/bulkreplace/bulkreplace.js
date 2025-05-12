@@ -3,6 +3,7 @@ class BulkReplaceApp {
     this.cacheDomElements();
     this.bindEvents();
     this.loadSavedSettings();
+    this.initTooltips();
     this.currentSearchJobId = null;
     this.currentReplaceJobId = null;
   }
@@ -311,6 +312,13 @@ class BulkReplaceApp {
 
   handleError(error) {
     this.showToast(error.message);
+  }
+
+  initTooltips() {
+    // Initialize Bootstrap tooltips for all elements with data-toggle="tooltip"
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
   }
 }
 
