@@ -276,11 +276,10 @@ class BulkReplaceApp {
         const headerRow = document.createElement("tr");
         headerRow.classList.add("table-secondary");
         if (data.matches) {
-            // Create a page row with a checkbox for toggling all properties of this page.
             headerRow.innerHTML = `
-        <td><input type="checkbox" class="select-page" data-page="${data.page}"></td>
-        <td colspan="3"><strong>${data.page}</strong> (${data.matches.length} matches)</td>
-      `;
+                <td><input type="checkbox" class="select-page" data-page="${data.page}"></td>
+                <td colspan="3"><strong><a href="/editor.html${data.page}.html" target="_blank">${data.page}</a></strong> (${data.matches.length} matches)</td>
+            `;
             this.tableBody.appendChild(headerRow);
             for (let i = 0; i < data.matches.length; i++) {
                 const match = data.matches[i];
@@ -288,20 +287,25 @@ class BulkReplaceApp {
                 propRow.setAttribute("data-page", data.page);
                 propRow.setAttribute("data-component", match.componentPath);
                 propRow.setAttribute("data-property", match.property);
+                let componentLink = '';
+                if (match.componentPath === 'jcr:content') {
+                    componentLink = `<a href="/mnt/overlay/wcm/core/content/sites/properties.html?item=${data.page}" target="_blank">${match.componentPath}</a>`;
+                } else {
+                    componentLink = `<a href="/editor.html${data.page}.html#scrolltocomponent-${match.componentPath}" target="_blank">${match.componentPath}</a>`;
+                }
                 propRow.innerHTML = `
-          <td><input type="checkbox" class="select-property" checked></td>
-          <td>${match.componentPath}</td>
-          <td>${match.property}</td>
-          <td>${match.excerpt}</td>
-        `;
+                    <td><input type="checkbox" class="select-property" checked></td>
+                    <td>${componentLink}</td>
+                    <td>${match.property}</td>
+                    <td>${match.excerpt}</td>
+                `;
                 this.tableBody.appendChild(propRow);
             }
         } else if (data.changed) {
-            // Create a replaced row without checkboxes.
             headerRow.classList.add("replaced-row");
             headerRow.innerHTML = `
-        <td colspan="4"><strong>Replaced on page:</strong> ${data.page} (${data.changed.length} properties)</td>
-      `;
+                <td colspan="4"><strong>Replaced on page:</strong> ${data.page} (${data.changed.length} properties)</td>
+            `;
             this.tableBody.appendChild(headerRow);
         }
         this.updateIndeterminateStates();

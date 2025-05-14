@@ -42,7 +42,12 @@ restoring the form content.*
 * **Error alert** – a danger‑style bootstrap alert that is displayed on errors (the error message returned in the response) and hidden on the next search/replace.
 * **Grouped table (initially empty)** that spans the full width of the page.
     - The table header includes a checkbox to select/deselect all property checkboxes across all pages.
+    - The shown page path is a link to the page in the editor (`/editor.html` + path + `.html`).
     - Each page row contains a checkbox to select/deselect all property checkboxes for that page.
+    - The componentPath is small and a link to the editor with anchor `#scrolltocomponent-` + componentPath if it's 
+      not jcr:content, if jcr:content it's a link to the page properties 
+      `/mnt/overlay/wcm/core/content/sites/properties.html?item=` and the 
+      path.
     - Individual property rows also have checkboxes for fine‑grained selection.
     - **Replaced rows:** Once a replacement is done for a page, the corresponding row displays a very light pastel green
       background (#d8f7d8) to indicate success, and checkboxes for that row are no longer shown. The text excerpt is
