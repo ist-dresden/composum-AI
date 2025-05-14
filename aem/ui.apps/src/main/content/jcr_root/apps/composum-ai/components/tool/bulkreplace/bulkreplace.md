@@ -26,9 +26,9 @@ all actions run under the permissions of the logged‑in author.
       automatically publishable. In this context, auto‑publishing occurs only if the page’s last modification timestamp
       does not indicate changes after its last publication—ensuring consistency with the published state.
 * **Action buttons**
-    - **Clear Form** - clears the form. The localStorage `aem-composumAI-bulkedit-formstate` is cleared as well.
     - **Search** – starts a search job.
     - **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
+    - **Clear Form** - clears the form. The localStorage `aem-composumAI-bulkedit-formstate` is cleared as well.
     - **Export History** - if pressed, exports the last changes (from localStorage `aem-composumAI-bulkedit-replaced`) 
       into a CSV.
     - **Clear History** - clears the history of last changes.

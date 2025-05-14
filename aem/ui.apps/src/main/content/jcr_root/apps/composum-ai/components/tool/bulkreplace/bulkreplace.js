@@ -1,7 +1,11 @@
+
 /**
  * Class representing the Bulk Replace application.
  */
 class BulkReplaceApp {
+
+  static formStateKey = 'aem-composumAI-bulkedit-formstate';
+  static replacementHistoryKey = 'aem-composumAI-bulkedit-replaced';
   /**
    * Constructs the BulkReplaceApp instance and initializes DOM elements.
    */
@@ -11,7 +15,6 @@ class BulkReplaceApp {
     this.loadSavedSettings();
     this.initTooltips();
     this.currentSearchJobId = null;
-    this.currentReplaceJobId = null;
   }
 
   /**
@@ -27,7 +30,6 @@ class BulkReplaceApp {
   cacheDomElements() {
     this.searchBtn = document.getElementById("search-btn");
     this.replaceBtn = document.getElementById("replace-btn");
-    this.resultsZone = document.getElementById("results-zone");
     this.progressBar = document.querySelector(".progress-bar");
     this.tableBody = document.querySelector("table tbody");
     this.rootPageInput = document.getElementById("root-page");
@@ -63,13 +65,6 @@ class BulkReplaceApp {
         const checked = event.target.checked;
         document.querySelectorAll(`tr[data-page="${page}"] input.select-property`).forEach(cb => cb.checked = checked);
       }
-      // For individual property checkbox changes.
-      if (event.target.classList.contains("select-property")) {
-         // If a page checkbox is toggled via its properties, update it.
-         const row = event.target.closest("tr");
-         const page = row.getAttribute("data-page");
-         // No additional handling needed here; state update below covers all groups.
-      }
       this.updateIndeterminateStates();
     });
   }
@@ -93,7 +88,7 @@ class BulkReplaceApp {
       selectAll.checked = false;
       selectAll.indeterminate = true;
     }
-    
+
     // Update each page header checkbox.
     document.querySelectorAll("input.select-page").forEach(pageCb => {
       const page = pageCb.getAttribute("data-page");
@@ -117,7 +112,7 @@ class BulkReplaceApp {
    * Loads saved input settings from localStorage.
    */
   loadSavedSettings() {
-    const saved = localStorage.getItem('aem-composumAI-bulkedit-formstate');
+    const saved = localStorage.getItem(BulkReplaceApp.formStateKey);
     if (saved) {
       try {
         const settings = JSON.parse(saved);
@@ -143,7 +138,7 @@ class BulkReplaceApp {
       createVersion: this.createVersionCheckbox.checked,
       autoPublish: this.autoPublishCheckbox.checked
     };
-    localStorage.setItem('aem-composumAI-bulkedit-formstate', JSON.stringify(settings));
+    localStorage.setItem(BulkReplaceApp.formStateKey, JSON.stringify(settings));
   }
 
   /**
@@ -169,7 +164,7 @@ class BulkReplaceApp {
     if (headerTime) { headerTime.textContent = "Now"; }
     if (body) { body.textContent = message; }
     // Initialize and show the toast using full jQuery Bootstrap plugin.
-    $(toastEl).toast({ autohide: true, delay: 3000 });
+    $(toastEl).toast({ autohide: true, delay: 10000 });
     $(toastEl).toast('show');
   }
 
@@ -202,7 +197,7 @@ class BulkReplaceApp {
     formData.append("operation", "search");
     formData.append("rootPath", root);
     formData.append("term", term);
-    
+
     this.getCSRFToken()
       .then(token => {
         return fetch("/bin/cpm/ai/bulkreplace", {
@@ -361,7 +356,7 @@ class BulkReplaceApp {
     for (const page of pages) {
       try {
         // Capture the ReplacePageResponse from the server.
-        const res = await this.startReplaceJobForPage(
+        const res = await this.replaceForPage(
           page,
           term,
           replacement,
@@ -369,6 +364,13 @@ class BulkReplaceApp {
           this.createVersionCheckbox.checked,
           this.autoPublishCheckbox.checked
         );
+        console.log("Replace response for page:", page, res);
+
+        // append data to history
+        const history = JSON.parse(localStorage.getItem(BulkReplaceApp.replacementHistoryKey) || "[]");
+        history.push(res);
+        localStorage.setItem(BulkReplaceApp.replacementHistoryKey, JSON.stringify(history));
+
         // Use the response: if changed properties are reported, update the UI.
         if (res && res.changed && res.changed.length > 0) {
           this.markPageAsReplaced(page, res.changed);
@@ -394,7 +396,7 @@ class BulkReplaceApp {
    * @param autoPublish  whether to auto-publish the page after replacement
    * @returns a Promise resolving to the JSON response from the server.
    */
-  startReplaceJobForPage(page, term, replacement, targets, createVersion, autoPublish) {
+  replaceForPage(page, term, replacement, targets, createVersion, autoPublish) {
     return this.getCSRFToken().then(token => {
       return fetch("/bin/cpm/ai/bulkreplace?operation=replace", {
         method: "POST",
@@ -448,7 +450,7 @@ class BulkReplaceApp {
     this.replacementInput.value = "";
     this.createVersionCheckbox.checked = true;
     this.autoPublishCheckbox.checked = false;
-    localStorage.removeItem('aem-composumAI-bulkedit-formstate');
+    localStorage.removeItem(BulkReplaceApp.formStateKey);
     this.showToast("Form cleared.");
   }
 
@@ -456,7 +458,7 @@ class BulkReplaceApp {
    * Exports the replacement history stored in localStorage as CSV.
    */
   handleExportHistory() {
-    const history = JSON.parse(localStorage.getItem('aem-composumAI-bulkedit-replaced') || "[]");
+    const history = JSON.parse(localStorage.getItem(BulkReplaceApp.replacementHistoryKey) || "[]");
     if (history.length === 0) {
       this.showToast("No history to export.");
       return;
@@ -465,7 +467,9 @@ class BulkReplaceApp {
     // Helper to escape double quotes in CSV field values.
     const escapeCSV = (value) => {
       if (value == null) return "";
-      return String(value).replace(/"/g, '""');
+      var escapedVal = String(value).replace(/"/g, '""');
+      escapedVal = escapedVal.replace(/\n/g, '\\n');
+      return escapedVal;
     };
     history.forEach(entry => {
       if (entry.page && entry.changed) {
@@ -488,7 +492,7 @@ class BulkReplaceApp {
    * Clears the replacement history from localStorage.
    */
   handleClearHistory() {
-    localStorage.removeItem('aem-composumAI-bulkedit-replaced');
+    localStorage.removeItem(BulkReplaceApp.replacementHistoryKey);
     this.showToast("History cleared.");
   }
 }
