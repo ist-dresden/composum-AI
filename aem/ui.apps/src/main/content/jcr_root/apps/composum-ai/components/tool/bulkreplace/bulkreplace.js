@@ -461,11 +461,16 @@ class BulkReplaceApp {
       this.showToast("No history to export.");
       return;
     }
-    let csvContent = "Page,ComponentPath,Property,Excerpt\n";
+    let csvContent = `"Page","ComponentPath","Property","Excerpt","OldValue","NewValue"\n`;
+    // Helper to escape double quotes in CSV field values.
+    const escapeCSV = (value) => {
+      if (value == null) return "";
+      return String(value).replace(/"/g, '""');
+    };
     history.forEach(entry => {
-      if(entry.page && entry.changed) {
+      if (entry.page && entry.changed) {
         entry.changed.forEach(ch => {
-          csvContent += `"${entry.page}","${ch.componentPath}","${ch.property}","${ch.excerpt}"\n`;
+          csvContent += `"${escapeCSV(entry.page)}","${escapeCSV(ch.componentPath)}","${escapeCSV(ch.property)}","${escapeCSV(ch.excerpt)}","${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}"\n`;
         });
       }
     });
@@ -496,4 +501,3 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
-
