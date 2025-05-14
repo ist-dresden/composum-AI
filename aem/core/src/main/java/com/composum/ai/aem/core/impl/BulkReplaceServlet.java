@@ -245,7 +245,6 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         ValueMap properties = resource.getValueMap();
         String componentPath = StringUtils.isNotEmpty(parentPath)
                 ? parentPath + "/" + resource.getName() : resource.getName();
-        // Make the component path relative by removing any "jcr:content/" prefix
         if (componentPath.contains("jcr:content/")) {
             componentPath = componentPath.substring(componentPath.indexOf("jcr:content/") + "jcr:content/".length());
         }
@@ -256,6 +255,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
             if (value instanceof String) {
                 String stringValue = (String) value;
+                String trimmed = stringValue.trim();
+                // Skip values that seem like paths or URLs.
+                if (trimmed.startsWith("/") || trimmed.startsWith("http:") || trimmed.startsWith("https:")) {
+                    continue;
+                }
                 if (StringUtils.contains(stringValue, term)) {
                     Match m = new Match();
                     m.componentPath = componentPath;

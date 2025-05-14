@@ -35,6 +35,9 @@ class BulkReplaceApp {
     this.replacementInput = document.getElementById("replacement-string");
     this.createVersionCheckbox = document.getElementById("create-version");
     this.autoPublishCheckbox = document.getElementById("auto-publish");
+    this.clearFormBtn = document.getElementById("clear-form-btn");
+    this.exportHistoryBtn = document.getElementById("export-history-btn");
+    this.clearHistoryBtn = document.getElementById("clear-history-btn");
   }
 
   /**
@@ -43,6 +46,9 @@ class BulkReplaceApp {
   bindEvents() {
     this.searchBtn.addEventListener("click", this.handleSearchClick.bind(this));
     this.replaceBtn.addEventListener("click", this.handleReplaceClick.bind(this));
+    this.clearFormBtn.addEventListener("click", this.handleClearForm.bind(this));
+    this.exportHistoryBtn.addEventListener("click", this.handleExportHistory.bind(this));
+    this.clearHistoryBtn.addEventListener("click", this.handleClearHistory.bind(this));
     // Bind header checkbox to select/deselect all property checkboxes, then update states.
     document.getElementById("select-all").addEventListener("change", (event) => {
       const checked = event.target.checked;
@@ -111,7 +117,7 @@ class BulkReplaceApp {
    * Loads saved input settings from localStorage.
    */
   loadSavedSettings() {
-    const saved = localStorage.getItem('aem-composumAI-bulkedit');
+    const saved = localStorage.getItem('aem-composumAI-bulkedit-formstate');
     if (saved) {
       try {
         const settings = JSON.parse(saved);
@@ -137,7 +143,7 @@ class BulkReplaceApp {
       createVersion: this.createVersionCheckbox.checked,
       autoPublish: this.autoPublishCheckbox.checked
     };
-    localStorage.setItem('aem-composumAI-bulkedit', JSON.stringify(settings));
+    localStorage.setItem('aem-composumAI-bulkedit-formstate', JSON.stringify(settings));
   }
 
   /**
@@ -179,8 +185,8 @@ class BulkReplaceApp {
       return;
     }
     this.tableBody.innerHTML = "";
-    this.progressBar.style.width = "0%";
-    this.progressBar.textContent = "0%";
+    this.progressBar.style.width = "50%";
+    this.progressBar.textContent = "50%";
     this.replaceBtn.disabled = true;
     this.startSearchJob(root, term);
   }
@@ -241,6 +247,8 @@ class BulkReplaceApp {
       const evtSource = new EventSource("/bin/cpm/ai/bulkreplace?operation=" + operation + "&jobId=" + jobId);
       evtSource.addEventListener("page", this.handlePageEvent.bind(this));
       evtSource.addEventListener("summary", (event) => {
+        this.progressBar.style.width = "100%";
+        this.progressBar.textContent = "100%";
         this.replaceBtn.disabled = false;
         evtSource.close();
       });
@@ -429,6 +437,54 @@ class BulkReplaceApp {
     $(function () {
       $('[data-toggle="tooltip"]').tooltip({delay: 1000});
     });
+  }
+
+  /**
+   * Clears the form and removes saved form state.
+   */
+  handleClearForm() {
+    this.rootPageInput.value = "";
+    this.searchStringInput.value = "";
+    this.replacementInput.value = "";
+    this.createVersionCheckbox.checked = true;
+    this.autoPublishCheckbox.checked = false;
+    localStorage.removeItem('aem-composumAI-bulkedit-formstate');
+    this.showToast("Form cleared.");
+  }
+
+  /**
+   * Exports the replacement history stored in localStorage as CSV.
+   */
+  handleExportHistory() {
+    const history = JSON.parse(localStorage.getItem('aem-composumAI-bulkedit-replaced') || "[]");
+    if (history.length === 0) {
+      this.showToast("No history to export.");
+      return;
+    }
+    let csvContent = "Page,ComponentPath,Property,Excerpt\n";
+    history.forEach(entry => {
+      if(entry.page && entry.changed) {
+        entry.changed.forEach(ch => {
+          csvContent += `"${entry.page}","${ch.componentPath}","${ch.property}","${ch.excerpt}"\n`;
+        });
+      }
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "bulkreplace_history.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  /**
+   * Clears the replacement history from localStorage.
+   */
+  handleClearHistory() {
+    localStorage.removeItem('aem-composumAI-bulkedit-replaced');
+    this.showToast("History cleared.");
   }
 }
 
