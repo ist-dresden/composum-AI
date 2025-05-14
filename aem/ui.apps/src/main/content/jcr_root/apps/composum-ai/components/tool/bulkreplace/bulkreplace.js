@@ -278,7 +278,9 @@ class BulkReplaceApp {
         if (data.matches) {
             headerRow.innerHTML = `
                 <td><input type="checkbox" class="select-page" data-page="${data.page}"></td>
-                <td colspan="3"><strong><a href="/editor.html${data.page}.html" target="_blank">${data.page}</a></strong> (${data.matches.length} matches)</td>
+                <td colspan="3">
+                  <strong><a href="/editor.html${data.page}.html" target="_blank">${data.page}</a></strong> (${data.matches.length} matches)
+                </td>
             `;
             this.tableBody.appendChild(headerRow);
             for (let i = 0; i < data.matches.length; i++) {
@@ -291,13 +293,13 @@ class BulkReplaceApp {
                 if (match.componentPath === 'jcr:content') {
                     componentLink = `<a href="/mnt/overlay/wcm/core/content/sites/properties.html?item=${data.page}" target="_blank">${match.componentPath}</a>`;
                 } else {
-                    componentLink = `<a href="/editor.html${data.page}.html#scrolltocomponent-${match.componentPath}" target="_blank">${match.componentPath}</a>`;
+                    componentLink = `<a class="small-component" href="/editor.html${data.page}.html#scrolltocomponent-${match.componentPath}" target="_blank">${match.componentPath}</a>`;
                 }
                 propRow.innerHTML = `
                     <td><input type="checkbox" class="select-property" checked></td>
                     <td>${componentLink}</td>
                     <td>${match.property}</td>
-                    <td>${match.excerpt}</td>
+                    <td class="fill-excerpt">${match.excerpt}</td>
                 `;
                 this.tableBody.appendChild(propRow);
             }

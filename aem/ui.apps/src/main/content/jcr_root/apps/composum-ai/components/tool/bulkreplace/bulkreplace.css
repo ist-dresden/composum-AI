@@ -13,3 +13,13 @@ mark {
 .replaced-row input[type="checkbox"] {
   display: none;
 }
+
+/* Make component path links display in a smaller font using a class */
+.small-component {
+  font-size: 0.8em;
+}
+
+/* Ensure the text excerpt column takes all remaining space */
+.fill-excerpt {
+  width: 100%;
+}
