@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.jcr.Node;
 import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -40,6 +41,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.WCMException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -323,8 +325,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     private void handleReplace(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
             throws IOException {
         if (request.getContentType() != null && request.getContentType().contains("application/json")) {
+            ReplaceRequest replaceRequest = null;
             try (Reader reader = request.getReader()) {
-                ReplaceRequest replaceRequest = gson.fromJson(reader, ReplaceRequest.class);
+                replaceRequest = gson.fromJson(reader, ReplaceRequest.class);
                 if (replaceRequest.page == null || replaceRequest.term == null ||
                         replaceRequest.replacement == null || replaceRequest.targets == null ||
                         replaceRequest.targets.isEmpty()) {
@@ -380,6 +383,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     }
                 }
                 if (pageModified) {
+                    pageManager.touch(page.adaptTo(Node.class), true, Calendar.getInstance(), false);
                     resolver.commit();
                     if (replaceRequest.autoPublish) {
                         LOG.info("Auto‑publishing page: {}", replaceRequest.page);
@@ -394,6 +398,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 response.getWriter().write(gson.toJson(pageResp));
             } catch (JsonSyntaxException e) {
                 response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
+            } catch (WCMException e) {
+                LOG.error("" + e + " on " + replaceRequest, e);
+                throw new IOException("Error during replace operation", e);
             }
         } else {
             throw new IOException("Unsupported content type: " + request.getContentType());
@@ -536,6 +543,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public List<Target> targets;
         public boolean createVersion;
         public boolean autoPublish;
+
+        @Override
+        public String toString() {
+            return "ReplaceRequest{" +
+                    "page='" + page + '\'' +
+                    ", term='" + term + '\'' +
+                    ", replacement='" + replacement + '\'' +
+                    ", createVersion=" + createVersion +
+                    ", autoPublish=" + autoPublish +
+                    '}';
+        }
     }
 
     public static class Target {
