@@ -163,23 +163,16 @@ class BulkReplaceApp {
     }
 
     /**
-     * Displays a toast notification with the provided message.
+     * Displays a bootstrap error alert with the provided message.
      *
-     * @param message the message to display
+     * @param message the error message to display
      */
-    showToast(message) {
-        const toastEl = document.querySelector('.toast');
-        const headerTime = toastEl.querySelector('.toast-header small');
-        const body = toastEl.querySelector('.toast-body');
-        if (headerTime) {
-            headerTime.textContent = "Now";
+    showErrorAlert(message) {
+        const errorAlert = document.getElementById("error-alert");
+        if (errorAlert) {
+            errorAlert.textContent = message;
+            errorAlert.style.display = "block";
         }
-        if (body) {
-            body.textContent = message;
-        }
-        // Initialize and show the toast using full jQuery Bootstrap plugin.
-        $(toastEl).toast({autohide: true, delay: 10000});
-        $(toastEl).toast('show');
     }
 
     /**
@@ -187,10 +180,13 @@ class BulkReplaceApp {
      */
     handleSearchClick() {
         this.saveSettings();
+        // Hide any existing error alert.
+        const errorAlert = document.getElementById("error-alert");
+        if (errorAlert) { errorAlert.style.display = "none"; }
         const root = this.rootPageInput.value.trim();
         const term = this.searchStringInput.value.trim();
         if (!root || !term) {
-            this.showToast("Please provide both root page and search string.");
+            this.showErrorAlert("Please provide both root page and search string.");
             return;
         }
         this.tableBody.innerHTML = "";
@@ -340,16 +336,19 @@ class BulkReplaceApp {
      */
     async handleReplaceClick() {
         this.saveSettings();
+        // Hide any existing error alert.
+        const errorAlert = document.getElementById("error-alert");
+        if (errorAlert) { errorAlert.style.display = "none"; }
         const root = this.rootPageInput.value.trim();
         const term = this.searchStringInput.value.trim();
         const replacement = this.replacementInput.value;
         if (!root || !term || replacement === null) {
-            this.showToast("Please provide root page, search string and replacement.");
+            this.showErrorAlert("Please provide root page, search string and replacement.");
             return;
         }
         const selectedCheckboxes = document.querySelectorAll("input.select-property:checked");
         if (selectedCheckboxes.length === 0) {
-            this.showToast("No properties selected for replacement.");
+            this.showErrorAlert("No properties selected for replacement.");
             return;
         }
         // Group targets per page
@@ -439,12 +438,12 @@ class BulkReplaceApp {
     }
 
     /**
-     * Handles errors by displaying a toast notification.
+     * Processes errors by displaying a bootstrap error alert.
      *
      * @param error the error object
      */
     handleError(error) {
-        this.showToast(error.message);
+        this.showErrorAlert(error.message);
     }
 
     /**
@@ -467,7 +466,6 @@ class BulkReplaceApp {
         this.createVersionCheckbox.checked = true;
         this.autoPublishCheckbox.checked = false;
         localStorage.removeItem(BulkReplaceApp.formStateKey);
-        this.showToast("Form cleared.");
     }
 
     /**
@@ -476,7 +474,7 @@ class BulkReplaceApp {
     handleExportHistory() {
         const history = JSON.parse(localStorage.getItem(BulkReplaceApp.replacementHistoryKey) || "[]");
         if (history.length === 0) {
-            this.showToast("No history to export.");
+            this.showErrorAlert("No history to export.");
             return;
         }
         let csvContent = `"Page","ComponentPath","Property","Excerpt","OldValue","NewValue"\n`;
@@ -509,7 +507,6 @@ class BulkReplaceApp {
      */
     handleClearHistory() {
         localStorage.removeItem(BulkReplaceApp.replacementHistoryKey);
-        this.showToast("History cleared.");
     }
 }
 
@@ -521,3 +518,4 @@ function domContentLoadedHandler() {
 }
 
 document.addEventListener("DOMContentLoaded", domContentLoadedHandler);
+

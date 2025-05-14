@@ -39,8 +39,7 @@ restoring the form content.*
 
 ### 1.3 Results & Progress zone
 
-* **Error alert** – 'danger' alert that is only shown on errors with the message and hidden on the next search /
-  replace.
+* **Error alert** – a danger‑style bootstrap alert that is displayed on errors (the error message returned in the response) and hidden on the next search/replace.
 * **Grouped table (initially empty)** that spans the full width of the page.
     - The table header includes a checkbox to select/deselect all property checkboxes across all pages.
     - Each page row contains a checkbox to select/deselect all property checkboxes for that page.
@@ -68,7 +67,7 @@ restoring the form content.*
   automatically publishable, meaning that its last modification does not conflict with its replication state. This
   ensures only pages that remain in a consistent, pre‑modified published state are automatically published.
 
-* If any exception occurs in one of the requests, the error is transmitted in the reponse and shown in the toast.
+* If any exception occurs in one of the requests, the error is transmitted in the response and shown in the error alert.
 
 ---
 

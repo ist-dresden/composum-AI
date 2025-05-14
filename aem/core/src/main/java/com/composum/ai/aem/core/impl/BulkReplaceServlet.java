@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -122,12 +123,15 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         // Operation: search (start job)
         // Required parameters: rootPath, term
         String rootPath = request.getParameter("rootPath");
-        if (!rootPath.startsWith("/content") && rootPath.matches("/content/.*/.*/.*")) {
-            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Invalid rootPath - should be /content and at least level 4: " + rootPath);
+        if (!rootPath.startsWith("/content") || !rootPath.matches("/content/.*/.*/.*")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("Invalid rootPath - should be /content and at least level 4: " + rootPath);
+            return;
         }
         String term = request.getParameter("term");
         if (StringUtils.isBlank(rootPath) || StringUtils.isBlank(term)) {
-            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Required parameters: rootPath, term");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("Required parameters: rootPath, term");
             return;
         }
         // Generate a new jobId and store the parameters in the jobMap (only last 10 jobs kept)
@@ -156,21 +160,25 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             if ("search".equals(operation)) {
                 String jobId = request.getParameter("jobId");
                 if (StringUtils.isBlank(jobId)) {
-                    response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Missing jobId");
+                    response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("Missing jobId");
                     return;
                 }
                 Map<String, String> params = jobMap.get(jobId);
                 if (params == null) {
-                    response.sendError(SlingHttpServletResponse.SC_NOT_FOUND, "JobId not found");
+                    response.sendError(SlingHttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().println("JobId not found: " + jobId);
                     return;
                 }
                 streamSearchResults(params, request, response);
             } else {
-                response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Invalid GET operation");
+                response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("Invalid operation: " + operation);
             }
         } catch (Exception e) {
             LOG.error("Error during GET operation", e);
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().println("Error during GET operation: " + e.getMessage());
         }
     }
 
@@ -191,7 +199,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         ResourceResolver resolver = request.getResourceResolver();
         Resource rootResource = resolver.getResource(rootPath);
         if (rootResource == null) {
-            response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Root path not found: " + rootPath);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("Root path not found: " + rootPath);
             return;
         }
 
@@ -238,7 +247,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
         } catch (Exception e) {
             LOG.error("Error during search operation", e);
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().println("Error during search operation: " + e.getMessage());
         }
     }
 
@@ -317,8 +327,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 if (replaceRequest.page == null || replaceRequest.term == null ||
                         replaceRequest.replacement == null || replaceRequest.targets == null ||
                         replaceRequest.targets.isEmpty()) {
-                    response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST,
-                            "Required fields: page, term, replacement, targets");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("Required fields: page, term, replacement, targets");
                     return;
                 }
                 ResourceResolver resolver = request.getResourceResolver();
