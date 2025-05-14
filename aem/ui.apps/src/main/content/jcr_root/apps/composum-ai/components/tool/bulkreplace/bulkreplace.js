@@ -259,6 +259,7 @@ class BulkReplaceApp {
             });
             evtSource.onerror = (e) => {
                 console.error("EventSource error:", e);
+                this.showErrorAlert('Error during replacement: ' + e.message);
                 evtSource.close();
             };
         }
@@ -427,12 +428,16 @@ class BulkReplaceApp {
                     createVersion: createVersion,
                     autoPublish: autoPublish
                 })
-            }).then(response => {
+            }).then(async response => {
                 if (!response.ok) {
-                    throw new Error("Replace operation failed for " + page);
+                    throw new Error("Replace operation failed for " + page + ": " + await response.text());
                 }
-                // Directly parse and return the JSON response (no event stream).
-                return response.json();
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error("Error during replacement: " + text);
+                }
             });
         });
     }
