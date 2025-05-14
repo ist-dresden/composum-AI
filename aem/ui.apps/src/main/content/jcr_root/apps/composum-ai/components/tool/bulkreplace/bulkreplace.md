@@ -20,17 +20,22 @@ all actions run under the permissions of the logged‑in author.
 * **Search String** – required text field.
 * **Replacement String** – text field (leave empty to delete occurrences).
 * Two inline checkboxes:
-    - **Create Version** – if checked, a version of the page is created before any replacement changes.
+    - **Create Version** – if checked, a version of the page is created before any replacement changes. (Selected by 
+      default).
     - **Auto‑Publish** – if checked, the page is automatically published after replacement provided it qualifies as
       automatically publishable. In this context, auto‑publishing occurs only if the page’s last modification timestamp
       does not indicate changes after its last publication—ensuring consistency with the published state.
 * **Action buttons**
+    - **Clear Form** - clears the form. The localStorage `aem-composumAI-bulkedit-formstate` is cleared as well.
     - **Search** – starts a search job.
     - **Replace** – iterates over still‑selected property rows and replaces each one via individual calls.
+    - **Export History** - if pressed, exports the last changes (from localStorage `aem-composumAI-bulkedit-replaced`) 
+      into a CSV.
+    - **Clear History** - clears the history of last changes.
 
 *Note: Whenever any action button is pressed, the current state of the input fields is automatically saved to
-localStorage under the key `aem-composumAI-bulkedit`. Saved settings are reloaded on subsequent page loads, restoring
-the form content.*
+localStorage under the key `aem-composumAI-bulkedit-formstate`. Saved settings are reloaded on subsequent page loads, 
+restoring the form content.*
 
 ### 1.3 Results & Progress zone
 
@@ -48,10 +53,12 @@ the form content.*
 
 ## 2. Behaviour
 
-* Scans **all descendant pages** and examines every string property, including RTE HTML text nodes.
+* Scans **all descendant pages** and examines every string property, including RTE HTML text nodes. Properties 
+  starting with / or http:: or https:: are ignored (paths and URLs).
 * **Search** is a **two‑step job**:
     1. Client POSTs parameters; server replies with `202 Accepted` and a JSON payload containing a `jobId`.
     2. Client opens an `EventSource` (GET) with that `jobId` and receives streamed results per page.
+  When search is running, the progress bar is set to 50% and when it ends the progress bar is set to 100%
 * **Replace** issues one POST per page, accepting multiple replacement targets. It is **not streaming** – each call is
   triggered individually when the replace button is pressed, and the progress bar is advanced after each call.
   Additionally, the replace operation now uses a JSON request instead of a form multipart POST.
@@ -59,6 +66,8 @@ the form content.*
 * Auto‑publishing (triggered when **Auto‑Publish** is checked) replicates the modified page if it is deemed
   automatically publishable, meaning that its last modification does not conflict with its replication state. This
   ensures only pages that remain in a consistent, pre‑modified published state are automatically published.
+
+* If any exception occurs in one of the requests, the error is transmitted in the reponse and shown in the toast.
 
 ---
 
@@ -155,31 +164,27 @@ data: {"pages":12,"matches":42}
 ```json
 {
   "page": "/content/site/en/about",
+  "time": "1747220524396",
   "changed": [
     {
       "componentPath": "text",
       "property": "text",
-      "excerpt": "…context with newText…"
+      "excerpt": "…context with newText…",
+      "oldValue": "…context with searchTerm…",
+      "newValue": "…context with newText…"
     },
     {
       "componentPath": "header",
       "property": "jcr:title",
-      "excerpt": "…Foo – newText…"
+      "excerpt": "…Foo – newText…",
+      "oldValue": "…Foo – searchTerm…",
+      "newValue": "…Foo – newText…"
     }
   ]
 }
 ```
 
-If the author lacks modify ACL on that property, server returns `403`.
-
-### 3.4 Error codes
-
-| Status | Meaning                                         |
-|--------|-------------------------------------------------|
-| `400`  | Missing/invalid parameters or unknown operation |
-| `403`  | Author lacks read/modify ACL                    |
-| `404`  | `jobId` not found (during GET search)           |
-| `500`  | Unexpected server error                         |
+The changes are collected in localStorage in an array at key `aem-composumAI-bulkedit-replaced`
 
 ---
 
