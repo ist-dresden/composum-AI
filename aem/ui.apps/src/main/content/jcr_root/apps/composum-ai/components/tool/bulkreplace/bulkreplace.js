@@ -233,11 +233,11 @@ class BulkReplaceApp {
      * @param response the response object
      * @returns a Promise resolving to JSON data if the response is accepted
      */
-    handleJobResponse(response) {
+    async handleJobResponse(response) {
         if (response.status === 202) {
             return response.json();
         }
-        throw new Error("Job could not be started.");
+        throw new Error("Search could not be started. " + await response.text());
     }
 
     /**

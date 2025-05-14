@@ -108,7 +108,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             }
         } catch (Exception e) {
             LOG.error("Error during POST operation", e);
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().println("Error during POST operation: " + e.getMessage());
         }
     }
 
