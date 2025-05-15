@@ -34,9 +34,11 @@ import org.apache.sling.api.servlets.ServletResolverConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.Page;
@@ -76,6 +78,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(BulkReplaceServlet.class);
     public static final Gson gson = new Gson();
+
+    @Reference
+    private AutoTranslateConfigService configService;
 
     /**
      * HashMap to store the last 10 search job parameters (jobId -> parameters)
@@ -274,22 +279,16 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             componentPath = componentPath.substring(componentPath.indexOf("jcr:content/") + "jcr:content/".length());
         }
 
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String propertyName = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value instanceof String) {
-                String stringValue = (String) value;
-                if (stringValue.startsWith("/") || stringValue.startsWith("http:") || stringValue.startsWith("https:")) {
-                    continue;
-                }
-                if (StringUtils.contains(stringValue, term)) {
-                    Match m = new Match();
-                    m.componentPath = componentPath;
-                    m.property = propertyName;
-                    m.excerpt = createExcerpt(stringValue, term);
-                    matches.add(m);
-                }
+        // we re-use the recognition of translateable attributes from the AI translation since this is
+        // very much what we want for search and replace, though that's not entirely without risk in case of future changes.
+        for (String propertyName : configService.translateableAttributes(resource)) {
+            String stringValue = (String) properties.get(propertyName); // if that's not a string there is something very off.
+            if (StringUtils.contains(stringValue, term)) {
+                Match m = new Match();
+                m.componentPath = componentPath;
+                m.property = propertyName;
+                m.excerpt = createExcerpt(stringValue, term);
+                matches.add(m);
             }
         }
 
