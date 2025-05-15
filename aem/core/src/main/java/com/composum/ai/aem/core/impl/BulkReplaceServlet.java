@@ -131,9 +131,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         // Operation: search (start job)
         // Required parameters: rootPath, term
         String rootPath = request.getParameter("rootPath");
-        if (!rootPath.startsWith("/content") || !rootPath.matches("/content/.*/.*/.*")) {
+        if (!rootPath.startsWith("/content") || !rootPath.matches("/content/.*/.*")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("Invalid rootPath - should be /content and at least level 4: " + rootPath);
+            response.getWriter().println("Invalid rootPath - should be /content and at least level 3: " + rootPath);
             return;
         }
         String term = request.getParameter("term");
