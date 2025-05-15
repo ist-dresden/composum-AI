@@ -32,6 +32,9 @@ all actions run under the permissions of the logged‑in author.
     - **Export History** - if pressed, exports the last changes (from localStorage `aem-composumAI-bulkedit-replaced`)
       into a CSV.
     - **Clear History** - clears the history of last changes.
+* Additionally, Bootstrap Icons are loaded from a CDN. When **Auto‑Publish** is checked and a page is processed for replacement, an icon is appended (floated to the right) within the same cell as the page link:
+    - A **check‑circle** icon indicates that the page was auto‑published.
+    - A **dash‑circle** icon indicates that the page did not qualify for auto‑publication.
 
 *Note: Whenever any action button is pressed, the current state of the input fields is automatically saved to
 localStorage under the key `aem-composumAI-bulkedit-formstate`. Saved settings are reloaded on subsequent page loads,
@@ -72,7 +75,9 @@ restoring the form content.*
   automatically publishable, meaning that its last modification does not conflict with its replication state. This
   ensures only pages that remain in a consistent, pre‑modified published state are automatically published.
 
-* If any exception occurs in one of the requests, the error is transmitted in the response and shown in the error alert.
+* After a successful replacement on a page, the page row is updated with an icon (using Bootstrap Icons) at the very right showing the publication status according to auto‑publishing.
+
+* After a successful replacement on a page, the page row’s cell (showing the page link and match info) is updated with a publication status icon (using Bootstrap Icons) aligned to the right. The response JSON now includes a boolean field `published` indicating the publication outcome.
 
 ---
 
@@ -170,6 +175,7 @@ data: {"pages":12,"matches":42}
 {
   "page": "/content/site/en/about",
   "time": "1747220524396",
+  "published": true,
   "changed": [
     {
       "componentPath": "text",
@@ -194,3 +200,4 @@ The changes are collected in localStorage in an array at key `aem-composumAI-bul
 ---
 
 *End*
+

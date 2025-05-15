@@ -91,7 +91,7 @@ class BulkReplaceApp {
 
         // Update each page header checkbox.
         document.querySelectorAll("input.select-page").forEach(pageCb => {
-            const page = pageCb.getAttribute("data-page");
+            const page = pageCb.closest('tr').getAttribute("data-page");
             const props = document.querySelectorAll(`tr[data-page="${page}"] input.select-property`);
             const totalProps = props.length;
             const checkedProps = Array.from(props).filter(cb => cb.checked).length;
@@ -267,7 +267,7 @@ class BulkReplaceApp {
     }
 
     /**
-     * Handles page events received via EventSource.
+     * Handles page events received via EventSource. This is called when a page is found.
      *
      * @param event the event containing page data
      */
@@ -275,10 +275,12 @@ class BulkReplaceApp {
         const data = JSON.parse(event.data);
         const headerRow = document.createElement("tr");
         headerRow.classList.add("table-secondary");
+        headerRow.setAttribute("data-page", data.page);
         if (data.matches) {
             headerRow.innerHTML = `
-                <td><input type="checkbox" class="select-page" data-page="${data.page}"></td>
+                <td><input type="checkbox" class="select-page"></td>
                 <td colspan="3">
+                    <i class="bi publishicon"></i>
                   <strong><a href="/editor.html${data.page}.html" target="_blank">${data.page}</a></strong> (${data.matches.length} matches)
                 </td>
             `;
@@ -291,7 +293,7 @@ class BulkReplaceApp {
                 propRow.setAttribute("data-property", match.property);
                 let componentLink = '';
                 if (match.componentPath === 'jcr:content') {
-                    componentLink = `<a href="/mnt/overlay/wcm/core/content/sites/properties.html?item=${data.page}" target="_blank">${match.componentPath}</a>`;
+                    componentLink = `<a class="small-component" href="/mnt/overlay/wcm/core/content/sites/properties.html?item=${data.page}" target="_blank">${match.componentPath}</a>`;
                 } else {
                     componentLink = `<a class="small-component" href="/editor.html${data.page}.html#scrolltocomponent-${match.componentPath}" target="_blank">${match.componentPath}</a>`;
                 }
@@ -320,7 +322,15 @@ class BulkReplaceApp {
      * @param {string} page - The page path.
      * @param {Array} changedArr - Array of changed objects from the response.
      */
-    markPageAsReplaced(page, changedArr) {
+    markPageAsReplaced(page, changedArr, published) {
+        document.querySelectorAll(`tr[data-page="${page}"] .publishicon`).forEach( publishicon => {
+            if (published) {
+                publishicon.classList.add("bi-check-circle");
+            } else if (published === false) {
+                publishicon.classList.add("bi-dash-circle");
+            }
+        })
+
         changedArr.forEach(changed => {
             // Locate the row with matching page, componentPath, and property.
             const selector = `tr[data-page="${page}"][data-component="${changed.componentPath}"][data-property="${changed.property}"]`;
@@ -395,7 +405,7 @@ class BulkReplaceApp {
 
                 // Use the response: if changed properties are reported, update the UI.
                 if (res && res.changed && res.changed.length > 0) {
-                    this.markPageAsReplaced(page, res.changed);
+                    this.markPageAsReplaced(page, res.changed, res.published);
                 }
                 completed++;
                 const progress = Math.round((completed / pages.length) * 100);
@@ -454,6 +464,7 @@ class BulkReplaceApp {
      * @param error the error object
      */
     handleError(error) {
+        console.log("Error:", error);
         this.showErrorAlert(error.message);
     }
 
@@ -488,7 +499,7 @@ class BulkReplaceApp {
             this.showErrorAlert("No history to export.");
             return;
         }
-        let csvContent = `"Page","ComponentPath","Property","Excerpt","OldValue","NewValue"\n`;
+        let csvContent = `"Page","ComponentPath","Property","Published","Excerpt","OldValue","NewValue"\n`;
         // Helper to escape double quotes in CSV field values.
         const escapeCSV = (value) => {
             if (value == null) return "";
@@ -498,8 +509,11 @@ class BulkReplaceApp {
         };
         history.forEach(entry => {
             if (entry.page && entry.changed) {
+                const published = entry.published ? "true" : entry.published === false ? "false" : "";
                 entry.changed.forEach(ch => {
-                    csvContent += `"${escapeCSV(entry.page)}","${escapeCSV(ch.componentPath)}","${escapeCSV(ch.property)}","${escapeCSV(ch.excerpt)}","${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}"\n`;
+                    csvContent += `"${escapeCSV(entry.page)}","${escapeCSV(ch.componentPath)}",` +
+                    `"${escapeCSV(ch.property)}",${published},"${escapeCSV(ch.excerpt)}",` +
+                    `"${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}"\n`;
                 });
             }
         });

@@ -82,6 +82,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     @Reference
     private AutoTranslateConfigService configService;
 
+    @Reference
+    private Replicator replicator;
+
     /**
      * HashMap to store the last 10 search job parameters (jobId -> parameters)
      */
@@ -255,7 +258,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
         } catch (Exception e) {
             LOG.error("Error during search operation", e);
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().println("Error during search operation: " + e.getMessage());
         }
     }
@@ -381,12 +384,13 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                                 " in " + target.componentPath + " of " + replaceRequest.page);
                     }
                 }
+                Boolean published = null;
                 if (pageModified) {
                     pageManager.touch(page.adaptTo(Node.class), true, Calendar.getInstance(), false);
                     resolver.commit();
                     if (replaceRequest.autoPublish) {
                         LOG.info("Auto‑publishing page: {}", replaceRequest.page);
-                        autoPublishPage(pageContentResource);
+                        published = autoPublishPage(pageContentResource);
                     }
                 }
                 response.setStatus(SlingHttpServletResponse.SC_OK);
@@ -394,6 +398,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 ReplacePageResponse pageResp = new ReplacePageResponse();
                 pageResp.page = replaceRequest.page;
                 pageResp.changed = changedList;
+                pageResp.published = published;
                 response.getWriter().write(gson.toJson(pageResp));
             } catch (JsonSyntaxException e) {
                 response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
@@ -477,12 +482,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * Automatically publishes the page if it qualifies based on modification and replication status.
      *
-     * @param pageResource the page resource to publish, not null
+     * @param contentResource the page resource to publish, not null
+     * @return true if the page was published, false otherwise
      */
-    private void autoPublishPage(@Nonnull Resource pageResource) throws IOException {
+    private boolean autoPublishPage(@Nonnull Resource contentResource) throws IOException {
         try {
-            // Get the page's content resource to check replication info
-            Resource contentResource = pageResource.getChild("jcr:content");
             ValueMap vm = Objects.requireNonNull(contentResource).getValueMap();
             Calendar lastModified = vm.get("cq:lastModified", Calendar.class);
             Calendar lastReplicated = vm.get("cq:lastReplicated", Calendar.class);
@@ -491,16 +495,15 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             if (lastModified != null && lastReplicated != null
                     && !lastModified.after(lastReplicated)
                     && "Activate".equals(lastAction)) {
-                Replicator replicator = pageResource.getResourceResolver().adaptTo(Replicator.class);
-                Session session = pageResource.getResourceResolver().adaptTo(Session.class);
-                if (replicator != null && session != null) {
-                    replicator.replicate(session, ReplicationActionType.ACTIVATE, pageResource.getPath());
-                }
+                Session session = Objects.requireNonNull(contentResource.getResourceResolver().adaptTo(Session.class));
+                replicator.replicate(session, ReplicationActionType.ACTIVATE, contentResource.getPath());
+                return true;
             } else {
-                LOG.info("Page {} does not qualify for auto‑publication", pageResource.getPath());
+                LOG.info("Page {} does not qualify for auto‑publication", contentResource.getPath());
             }
+            return false;
         } catch (Exception e) {
-            LOG.error("Error auto‑publishing page: {}", pageResource.getPath(), e);
+            LOG.error("Error auto‑publishing page: {}", contentResource.getPath(), e);
             throw new IOException("Failed to auto‑publish page", e);
         }
     }
@@ -519,6 +522,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     public static class ReplacePageResponse {
         public String page;
         public List<Changed> changed;
+        public Boolean published;
     }
 
     public static class Match {
@@ -562,4 +566,3 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
 
 }
-
