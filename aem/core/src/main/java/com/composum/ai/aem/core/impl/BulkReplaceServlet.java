@@ -5,7 +5,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,11 +87,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * HashMap to store the last 10 search job parameters (jobId -> parameters)
      */
-    private static final Map<String, Map<String, String>> jobMap =
+    private static final Map<String, SearchParams> jobMap =
             Collections.synchronizedMap(
-                    new LinkedHashMap<String, Map<String, String>>() {
+                    new LinkedHashMap<String, SearchParams>() {
                         @Override
-                        protected boolean removeEldestEntry(Map.Entry<String, Map<String, String>> eldest) {
+                        protected boolean removeEldestEntry(Map.Entry<String, SearchParams> eldest) {
                             return size() > 10;
                         }
                     });
@@ -133,23 +132,22 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     private void handleSearchPOST(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         // Operation: search (start job)
         // Required parameters: rootPath, term
-        String rootPath = request.getParameter("rootPath");
-        if (!rootPath.startsWith("/content") || !rootPath.matches("/content/.*/.*")) {
+        SearchParams params = new SearchParams();
+        params.rootPath = request.getParameter("rootPath");
+        params.term = request.getParameter("term");
+
+        if (!params.rootPath.startsWith("/content") || !params.rootPath.matches("/content/.*/.*")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("Invalid rootPath - should be /content and at least level 3: " + rootPath);
+            response.getWriter().println("Invalid rootPath - should be /content and at least level 3: " + params.rootPath);
             return;
         }
-        String term = request.getParameter("term");
-        if (StringUtils.isBlank(rootPath) || StringUtils.isBlank(term)) {
+        if (StringUtils.isBlank(params.rootPath) || StringUtils.isBlank(params.term)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("Required parameters: rootPath, term");
             return;
         }
         // Generate a new jobId and store the parameters in the jobMap (only last 10 jobs kept)
         String jobId = UUID.randomUUID().toString();
-        Map<String, String> params = new HashMap<>();
-        params.put("rootPath", rootPath);
-        params.put("term", term);
         jobMap.put(jobId, params);
         response.setStatus(202);
         response.setContentType("application/json");
@@ -175,7 +173,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     response.getWriter().println("Missing jobId");
                     return;
                 }
-                Map<String, String> params = jobMap.get(jobId);
+                SearchParams params = jobMap.get(jobId);
                 if (params == null) {
                     response.sendError(SlingHttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().println("JobId not found: " + jobId);
@@ -201,17 +199,16 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      * @param response the SlingHttpServletResponse, not null
      * @throws IOException if an I/O error occurs during streaming
      */
-    private void streamSearchResults(@Nonnull Map<String, String> params,
+    private void streamSearchResults(@Nonnull SearchParams params,
                                      @Nonnull SlingHttpServletRequest request,
                                      @Nonnull SlingHttpServletResponse response) throws IOException {
-        String rootPath = params.get("rootPath");
-        String term = params.get("term");
+        Pattern termsPattern = whitespaceLenientPattern(params.term);
 
         ResourceResolver resolver = request.getResourceResolver();
-        Resource rootResource = resolver.getResource(rootPath);
+        Resource rootResource = resolver.getResource(params.rootPath);
         if (rootResource == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("Root path not found: " + rootPath);
+            response.getWriter().println("Root path not found: " + params.rootPath);
             return;
         }
 
@@ -228,7 +225,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 throw new ServletException("Could not get PageManager");
             }
             // Use findResources with an XPath query for candidate pages
-            String xpath = "/jcr:root" + rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + term + "*')]";
+            String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term + "*')]";
             Iterator<Resource> candidatePages = resolver.findResources(xpath, "xpath");
 
             while (candidatePages.hasNext()) {
@@ -238,7 +235,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     List<Match> matches = new ArrayList<>();
                     Resource contentResource = candidatePage.getContentResource();
                     if (contentResource != null) {
-                        findMatchesInResource(contentResource, "", term, matches);
+                        findMatchesInResource(contentResource, "", termsPattern, matches);
                     }
                     if (!matches.isEmpty()) {
                         totalPages.incrementAndGet();
@@ -268,12 +265,12 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      *
      * @param resource   the resource to search, not null
      * @param parentPath the parent path as a string
-     * @param term       the search term, not null
+     * @param termPattern the pattern to replace, not null
      * @param matches    the list to add found matches, not null
      */
     private void findMatchesInResource(@Nonnull Resource resource,
                                        String parentPath,
-                                       @Nonnull String term,
+                                       @Nonnull Pattern termPattern,
                                        @Nonnull List<Match> matches) {
         ValueMap properties = resource.getValueMap();
         String componentPath = StringUtils.isNotEmpty(parentPath)
@@ -286,17 +283,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         // very much what we want for search and replace, though that's not entirely without risk in case of future changes.
         for (String propertyName : configService.translateableAttributes(resource)) {
             String stringValue = (String) properties.get(propertyName); // if that's not a string there is something very off.
-            if (StringUtils.contains(stringValue, term)) {
+            if (termPattern.matcher(stringValue).find()) {
                 Match m = new Match();
                 m.componentPath = componentPath;
                 m.property = propertyName;
-                m.excerpt = createExcerpt(stringValue, term);
+                m.excerpt = createExcerpt(stringValue, termPattern.pattern());
                 matches.add(m);
             }
         }
 
         for (Resource child : resource.getChildren()) {
-            findMatchesInResource(child, componentPath, term, matches);
+            findMatchesInResource(child, componentPath, termPattern, matches);
         }
     }
 
@@ -315,6 +312,22 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         if (start > 0) excerpt = "... " + excerpt;
         if (end < text.length()) excerpt = excerpt + " ...";
         return excerpt;
+    }
+
+    /**
+     * A pattern that matches the search String case sensitively but being lenient on whitespaces:
+     * the pattern made from "a b c" should also match "a  b\nc".
+     */
+    protected Pattern whitespaceLenientPattern(@Nonnull String searchString) {
+        String[] words = searchString.split("\\s+");
+        StringBuilder patternBuilder = new StringBuilder();
+        for (String word : words) {
+            if (patternBuilder.length() > 0) {
+                patternBuilder.append("\\s+");
+            }
+            patternBuilder.append(Pattern.quote(word));
+        }
+        return Pattern.compile(patternBuilder.toString());
     }
 
     /**
@@ -403,7 +416,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             } catch (JsonSyntaxException e) {
                 response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
             } catch (WCMException e) {
-                LOG.error("" + e + " on " + replaceRequest, e);
+                LOG.error("{} on {}", e, replaceRequest, e);
                 throw new IOException("Error during replace operation", e);
             }
         } else {
@@ -508,30 +521,36 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    // --- Static inner classes for response objects ---
-    public static class SearchPageResponse {
+    // --- Static inner classes for various objects ---
+
+    protected static class SearchParams {
+        public String rootPath;
+        public String term;
+    }
+
+    protected static class SearchPageResponse {
         public String page;
         public List<Match> matches;
     }
 
-    public static class SummaryResponse {
+    protected static class SummaryResponse {
         public int pages;
         public int matches;
     }
 
-    public static class ReplacePageResponse {
+    protected static class ReplacePageResponse {
         public String page;
         public List<Changed> changed;
         public Boolean published;
     }
 
-    public static class Match {
+    protected static class Match {
         public String componentPath;
         public String property;
         public String excerpt;
     }
 
-    public static class Changed {
+    protected static class Changed {
         public String componentPath;
         public String property;
         public String excerpt;
@@ -539,7 +558,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public String newValue;
     }
 
-    public static class ReplaceRequest {
+    protected static class ReplaceRequest {
         public String page;
         public String term;
         public String replacement;
@@ -559,10 +578,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         }
     }
 
-    public static class Target {
+    protected static class Target {
         public String componentPath;
         public String property;
     }
-
 
 }
