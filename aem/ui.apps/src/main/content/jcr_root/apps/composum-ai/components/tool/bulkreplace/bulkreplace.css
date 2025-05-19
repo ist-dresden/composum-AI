@@ -33,3 +33,7 @@ mark {
     color: darkgoldenrod;
     margin-right: 5px;
 }
+
+span.foundsearchstringmarker {
+    background-color: #fffb91;
+}

@@ -23,10 +23,10 @@ class BulkReplaceServletTest {
     }
 
     @Test
-    public void testcreateAbbreviateSurroundings() {
+    public void testAbbreviateSurroundings() {
         assertAll(
-                () -> assertEquals(null, abbreviateSurroundings("", "notcontained")),
-                () -> assertEquals(null, abbreviateSurroundings("foo", "notcontained")),
+                () -> assertEquals("", abbreviateSurroundings("", "notcontained")),
+                () -> assertEquals("", abbreviateSurroundings("foo", "notcontained")),
                 // Single occurrence at the start
                 () -> assertEquals("foobar", abbreviateSurroundings("foobar", "foo")),
                 () -> assertEquals("foobaran...", abbreviateSurroundings("foobarandlong", "foo")),
@@ -42,6 +42,16 @@ class BulkReplaceServletTest {
                 () -> assertEquals("foo bar foo", abbreviateSurroundings("foo bar foo", "foo")),
                 () -> assertEquals("foo bar ...\n...baz foo",
                         abbreviateSurroundings("foo bar long intermediate baz foo", "foo"))
+        );
+    }
+
+    @Test
+    public void testCreateExcerpt() {
+        assertAll(
+                () -> assertEquals("... you <span class=\"foundsearchstringmarker\">foo</span>!",
+                        servlet.createExcerpt("<p>hallo <i>you</i> foo!", Pattern.compile("foo"), 8)),
+                () -> assertEquals("... the <span class=\"foundsearchstringmarker\">foo</span> that...",
+                        servlet.createExcerpt("this is the foo that is found", Pattern.compile("foo"), 8))
         );
     }
 

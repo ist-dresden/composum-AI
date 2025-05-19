@@ -77,11 +77,22 @@ import com.google.gson.JsonSyntaxException;
 public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(BulkReplaceServlet.class);
-    public static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
     /**
      * The number of characters surrounding the match that are put into an excerpt.
      */
-    protected static final int SURROUNDING_CHARS = 40;
+    private static final int SURROUNDING_CHARS = 40;
+    /**
+     * Random marker for start of found string, will be replaced by span tag later.
+     */
+    private static final String STARTMARKER = "kASDjkSD";
+    private static final String STARTMARKER_REPLACEMENT = "<span class=\"foundsearchstringmarker\">";
+    /**
+     * Random marker for end of found string, will be replaced by span tag later.
+     */
+    private static final String ENDMARKER = "cAkE8LkHJG";
+    private static final String ENDMARKER_REPLACEMENT = "</span>";
+
 
     @Reference
     private AutoTranslateConfigService configService;
@@ -309,8 +320,15 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      * @param termPattern a pattern matching the search term, not null
      * @return an excerpt of the text surrounding the term
      */
+    @Nonnull
     protected String createExcerpt(@Nonnull String text, @Nonnull Pattern termPattern, int surroundingChars) {
-        return abbreviateSurroundings(text, termPattern, surroundingChars);
+        String textWithMarkers = text.replaceAll(termPattern.pattern(), STARTMARKER + "$0" + ENDMARKER);
+        textWithMarkers = toPlaintext(textWithMarkers);
+        Pattern textWithMarkersPattern = Pattern.compile(
+                Pattern.quote(STARTMARKER) + termPattern.pattern() + Pattern.quote(ENDMARKER));
+        String result = abbreviateSurroundings(textWithMarkers, textWithMarkersPattern, surroundingChars);
+        return result.replace(STARTMARKER, STARTMARKER_REPLACEMENT)
+                .replace(ENDMARKER, ENDMARKER_REPLACEMENT);
     }
 
     /**
@@ -320,6 +338,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      * @param termPattern a pattern matching the search term, not null
      * @return an excerpt of the text surrounding the term
      */
+    @Nonnull
     protected String abbreviateSurroundings(@Nonnull String text, @Nonnull Pattern termPattern, int surroundingChars) {
         Matcher m = termPattern.matcher(text);
         if (m.find()) {
@@ -338,19 +357,23 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             buf.append(StringUtils.abbreviate(text.substring(lastEnd), surroundingChars));
             return buf.toString();
         } else {
-            return null;
+            return "";
         }
     }
 
     /**
+     * Opening or closing HTML tag inclusive attributes.
+     */
+    private static final String HTML_TAG_PATTERN = "</?[a-zA-Z][a-zA-Z0-9-]*(\\s+[^>]*)?>";
+
+    /**
      * Use Jsoup to create plaintext from HTML. We assume it's HTML if it starts with < and ends with > , trimmed.
      */
-    protected String toPlaintext(String html) {
-        String trimmed = StringUtils.trimToEmpty(html);
-        if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
-            return org.jsoup.Jsoup.parse(html).text();
+    protected String toPlaintext(String text) {
+        if (text.contains("<") && text.contains(">")) {
+            return StringUtils.strip(text.replaceAll(HTML_TAG_PATTERN, ""));
         }
-        return html;
+        return text;
     }
 
     /**
