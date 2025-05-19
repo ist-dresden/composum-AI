@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -77,6 +78,10 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(BulkReplaceServlet.class);
     public static final Gson gson = new Gson();
+    /**
+     * The number of characters surrounding the match that are put into an excerpt.
+     */
+    protected static final int SURROUNDING_CHARS = 40;
 
     @Reference
     private AutoTranslateConfigService configService;
@@ -263,10 +268,10 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * Recursively finds matches in the given resource and its children.
      *
-     * @param resource   the resource to search, not null
-     * @param parentPath the parent path as a string
+     * @param resource    the resource to search, not null
+     * @param parentPath  the parent path as a string
      * @param termPattern the pattern to replace, not null
-     * @param matches    the list to add found matches, not null
+     * @param matches     the list to add found matches, not null
      */
     private void findMatchesInResource(@Nonnull Resource resource,
                                        String parentPath,
@@ -287,7 +292,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 Match m = new Match();
                 m.componentPath = componentPath;
                 m.property = propertyName;
-                m.excerpt = createExcerpt(stringValue, termPattern.pattern());
+                m.excerpt = createExcerpt(stringValue, termPattern, SURROUNDING_CHARS);
                 matches.add(m);
             }
         }
@@ -300,18 +305,52 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * Creates an excerpt from the given text around the search term.
      *
-     * @param text the full text, not null
-     * @param term the search term, not null
+     * @param text        the full text, not null
+     * @param termPattern a pattern matching the search term, not null
      * @return an excerpt of the text surrounding the term
      */
-    protected String createExcerpt(@Nonnull String text, @Nonnull String term) {
-        int index = text.indexOf(term);
-        int start = Math.max(0, index - 40);
-        int end = Math.min(text.length(), index + term.length() + 40);
-        String excerpt = text.substring(start, end);
-        if (start > 0) excerpt = "... " + excerpt;
-        if (end < text.length()) excerpt = excerpt + " ...";
-        return excerpt;
+    protected String createExcerpt(@Nonnull String text, @Nonnull Pattern termPattern, int surroundingChars) {
+        return abbreviateSurroundings(text, termPattern, surroundingChars);
+    }
+
+    /**
+     * Creates an excerpt from the given text around the search term.
+     *
+     * @param text        the full text, not null
+     * @param termPattern a pattern matching the search term, not null
+     * @return an excerpt of the text surrounding the term
+     */
+    protected String abbreviateSurroundings(@Nonnull String text, @Nonnull Pattern termPattern, int surroundingChars) {
+        Matcher m = termPattern.matcher(text);
+        if (m.find()) {
+            StringBuilder buf = new StringBuilder();
+            int lastEnd = 0;
+            do {
+                int start = m.start();
+                if (buf.length() == 0) {
+                    buf.append(StringUtils.abbreviate(text.substring(0, start), start - 1, surroundingChars));
+                } else {
+                    buf.append(StringUtils.abbreviateMiddle(text.substring(lastEnd, start), "...\n...", 2 * surroundingChars));
+                }
+                buf.append(text, start, m.end());
+                lastEnd = m.end();
+            } while (m.find());
+            buf.append(StringUtils.abbreviate(text.substring(lastEnd), surroundingChars));
+            return buf.toString();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Use Jsoup to create plaintext from HTML. We assume it's HTML if it starts with < and ends with > , trimmed.
+     */
+    protected String toPlaintext(String html) {
+        String trimmed = StringUtils.trimToEmpty(html);
+        if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
+            return org.jsoup.Jsoup.parse(html).text();
+        }
+        return html;
     }
 
     /**
@@ -387,7 +426,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         Changed ch = new Changed();
                         ch.componentPath = target.componentPath;
                         ch.property = target.property;
-                        ch.excerpt = createExcerpt(newVal, replaceRequest.replacement);
+                        ch.excerpt = createExcerpt(newVal,
+                                Pattern.compile(Pattern.quote(replaceRequest.replacement)),
+                                SURROUNDING_CHARS);
                         ch.oldValue = oldVal;
                         ch.newValue = newVal;
                         changedList.add(ch);
