@@ -477,7 +477,9 @@ class AITranslatorMergeRTE {
             // if selection is within this.editor, save it
             const selection = window.getSelection();
             if (selection.rangeCount) {
-                if (selection.baseNode.parentElement.closest('.rte-editor') === this.editor) {
+                // Firefox uses anchorNode while Chrome uses baseNode
+                const selectionNode = selection.anchorNode || selection.baseNode;
+                if (selectionNode && selectionNode.parentElement && selectionNode.parentElement.closest('.rte-editor') === this.editor) {
                     this.savedRange = selection.getRangeAt(0);
                     selectedText = this.savedRange.toString();
                 } else {
