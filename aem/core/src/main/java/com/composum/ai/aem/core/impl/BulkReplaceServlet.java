@@ -307,7 +307,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      * @param term the search term, not null
      * @return an excerpt of the text surrounding the term
      */
-    private String createExcerpt(@Nonnull String text, @Nonnull String term) {
+    protected String createExcerpt(@Nonnull String text, @Nonnull String term) {
         int index = text.indexOf(term);
         int start = Math.max(0, index - 40);
         int end = Math.min(text.length(), index + term.length() + 40);

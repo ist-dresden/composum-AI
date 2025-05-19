@@ -94,3 +94,8 @@ https://chat.openai.com/share/c095d1db-4e72-4abe-8794-c1fe9e01fbf7
 
 Reason was that I'd like to place the sidebar prompt json and the content creation prompt json at the same place, if need
 be at /apps / /libs , but that'd mean I'd have to create a new /apps/composum/ai/ just for that.
+
+
+### TODO
+
+README.md -> move Composum into the background.
