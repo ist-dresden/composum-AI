@@ -19,6 +19,7 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.adobe.granite.ui.components.ds.ValueMapResource;
+import com.day.cq.commons.LanguageUtil;
 
 /**
  * Some utility methods for this.
@@ -93,12 +95,14 @@ public class SelectorUtils {
             }
             candidate = candidate.getParent();
         }
-        if (language == null) {
-            String[] pathElements = pageResource.getPath().split("/");
-            for (String element : pathElements) {
-                if (isLocaleName(element)) {
-                    language = element;
-                    break;
+        if (language == null) { // try to find it out from path
+            String languageRoot = LanguageUtil.getLanguageRoot(pageResource.getPath());
+            if (languageRoot != null) {
+                String localeName = ResourceUtil.getName(languageRoot);
+                if (isLocaleName(localeName)) {
+                    language = localeName;
+                } else { // impossible, give up.
+                    LOG.error("Bug: really strange language code found. Configure jcr:language for this path: {}", languageRoot);
                 }
             }
         } else {
@@ -133,6 +137,7 @@ public class SelectorUtils {
         return languageName;
     }
 
+    /** Checks whether this is the name of an existing locale. We recognize both '-' and '_' as separator. */
     public static boolean isLocaleName(String name) {
         return name != null && LOCALE_NAMES.contains(name.replace('-', '_').toLowerCase());
     }
