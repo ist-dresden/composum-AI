@@ -477,7 +477,7 @@ class AITranslatorMergeRTE {
             // if selection is within this.editor, save it
             const selection = window.getSelection();
             if (selection.rangeCount) {
-                if (selection.baseNode.parentElement.closest('.rte-editor') === this.editor) {
+                if (selection.anchorNode.parentElement.closest('.rte-editor') === this.editor) {
                     this.savedRange = selection.getRangeAt(0);
                     selectedText = this.savedRange.toString();
                 } else {
