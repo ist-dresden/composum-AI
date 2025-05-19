@@ -3,8 +3,6 @@ package com.composum.ai.aem.core.impl;
 import static com.composum.ai.aem.core.impl.SelectorUtils.getLanguageName;
 import static com.composum.ai.aem.core.impl.SelectorUtils.getLanguageSiblings;
 import static com.composum.ai.aem.core.impl.SelectorUtils.isLocaleName;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
