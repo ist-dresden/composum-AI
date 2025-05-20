@@ -243,7 +243,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 throw new ServletException("Could not get PageManager");
             }
             // Use findResources with an XPath query for candidate pages
-            String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term + "*')]";
+            String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
             Iterator<Resource> candidatePages = resolver.findResources(xpath, "xpath");
 
             while (candidatePages.hasNext()) {

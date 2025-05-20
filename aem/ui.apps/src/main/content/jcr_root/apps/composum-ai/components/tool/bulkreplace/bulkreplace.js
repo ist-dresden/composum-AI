@@ -61,7 +61,7 @@ class BulkReplaceApp {
         this.tableBody.addEventListener("change", (event) => {
             if (event.target.classList.contains("select-page")) {
                 // Toggle all property checkboxes of this page.
-                const page = event.target.getAttribute("data-page");
+                const page = event.target.closest("tr").getAttribute("data-page");
                 const checked = event.target.checked;
                 document.querySelectorAll(`tr[data-page="${page}"] input.select-property`).forEach(cb => cb.checked = checked);
             }
