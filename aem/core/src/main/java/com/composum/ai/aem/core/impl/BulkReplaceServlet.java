@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -442,7 +443,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 List<Changed> changedList = new ArrayList<>();
                 boolean pageModified = false;
                 for (Target target : replaceRequest.targets) {
-                    Resource componentResource = pageContentResource.getChild(target.componentPath);
+                    Resource componentResource = JcrConstants.JCR_CONTENT.equals(target.componentPath) ? pageContentResource :
+                            pageContentResource.getChild(target.componentPath);
                     if (componentResource == null) {
                         throw new IOException("Component not found: " + target.componentPath);
                     }
