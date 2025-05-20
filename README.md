@@ -55,15 +55,13 @@ into the rollout process for live copies - see
 
 ## Functionality
 
-For a quick view of the Composum Pages variant, please compare the 
-[Composum blog entry](https://www.composum.com/home/blog/pages/composumAI.html) about it and the more detailed
-[documentation](https://www.composum.com/home/pages/editing/Composum-AI.html); for the AEM variant there is also a
-[blog entry](https://www.composum.com/home/blog/AEM/composumAI-AEM.html)
-presenting the functionality.
+For a quick view over the functionality of the Adobe AEM variant and Composum Pages variant you can consult the
+[project homepage](https://ai.composum.com/) - there are also some videos showing the functionality.
 
 There are the following dialogs that help with editing in Composum Pages. For the AEM version we omit the translation
-dialog (as AEM has it's own frequently used mechanisms) and the page
-category dialog, as AEM tags work quite differently.
+dialog as there is a 
+[transparent translation integrated into live copies](https://ai.composum.com/aem-variant/automaticTranslation.html)
+and the also page category dialog, as AEM tags work quite differently.
 
 - a translation dialog that can be opened on any edited textfield in multilingual websites and suggests translations
   of the text of a component into other languages the text of page descriptions and summaries, keywords, navigation
@@ -78,8 +76,17 @@ category dialog, as AEM tags work quite differently.
 
 ## Try it out!
 
-The easiest way to try it is the [Composum Cloud](https://cloud.composum.com) where Composum-AI is deployed. You can
-get a free account there, create a site and test it.
+### Try AEM with Composum AI
+
+For AEM, there is a
+[package on maven central](https://central.sonatype.com/artifact/com.composum.ai.aem/composum-ai.all) to deploy. You 
+will need to configure an OpenAI API key as well. Please consult the
+[AEM installation instructions](https://ai.composum.com/aem-variant/installation.html) for more details.
+
+### Try Composum Pages with Composum AI (currently no longer under active development)
+
+The easiest way to try the Composum Pages variant is the [Composum Cloud](https://cloud.composum.com) where Composum-AI
+is deployed. You can get a free account there, create a site and test it.
 Second there is the Composum Sling starter (a JAR you can execute locally) or the docker image
 [composum/featurelauncher-composum](https://hub.docker.com/r/composum/featurelauncher-composum)
 available through the
@@ -87,13 +94,6 @@ available through the
 You will need an [OpenAI API key](https://platform.openai.com/account/api-keys) secret key to run it, and configure
 that in the [Felix Console configuration tab](http://localhost:8080/system/console/configMgr) at "GPT Chat
 Completion Service".
-
-For AEM, there is a
-[package on maven central](https://central.sonatype.com/artifact/com.composum.ai.aem/composum-ai.all) to deploy. You 
-will need to configure an OpenAI API key as well.
-
-Please compare the release notes of the 
-[latest release](https://github.com/ist-dresden/composum-AI/releases/) for more instructions.
 
 ## Development with ChatGPT and Github Copilot
 
@@ -107,6 +107,9 @@ Copilot IntelliJ plugin, for speeding up development. Some outcomes of that:
 [speed up a lot of things](http://www.stoerr.net/blog/2023-05-25-developmentWithChatGPTAndCopilot.html).
 
 ## More project documentation
+
+[Composum AI homepage](https://ai.composum.com/) contains the user documentation for the project, as well as the 
+maven site.
 
 [AEM Architecture](featurespecs/AemIntegrationArchitecture.md) and
 [Composum Architecture](featurespecs/ComposumIntegrationArchitecture.md) 
