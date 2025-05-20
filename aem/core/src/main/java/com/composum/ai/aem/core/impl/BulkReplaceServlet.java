@@ -135,7 +135,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         } catch (Exception e) {
             LOG.error("Error during POST operation", e);
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("Error during POST operation: " + e.getMessage());
+            response.getWriter().println("Error during POST operation: " + e);
         }
     }
 
@@ -153,9 +153,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         params.rootPath = request.getParameter("rootPath");
         params.term = request.getParameter("term");
 
-        if (!params.rootPath.startsWith("/content") || !params.rootPath.matches("/content/.*/.*")) {
+        if (!params.rootPath.startsWith("/content") || !params.rootPath.matches("/content/[^/]+/.*")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("Invalid rootPath - should be /content and at least level 3: " + params.rootPath);
+            response.getWriter().println("Invalid rootPath - should be /content and at least level 3.");
             return;
         }
         if (StringUtils.isBlank(params.rootPath) || StringUtils.isBlank(params.term)) {
@@ -193,18 +193,18 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 SearchParams params = jobMap.get(jobId);
                 if (params == null) {
                     response.sendError(SlingHttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().println("JobId not found: " + jobId);
+                    response.getWriter().println("JobId not found.");
                     return;
                 }
                 streamSearchResults(params, request, response);
             } else {
                 response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("Invalid operation: " + operation);
+                response.getWriter().println("Invalid operation.");
             }
         } catch (Exception e) {
             LOG.error("Error during GET operation", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("Error during GET operation: " + e.getMessage());
+            response.getWriter().println("Error during GET operation: " + e);
         }
     }
 
@@ -225,7 +225,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         Resource rootResource = resolver.getResource(params.rootPath);
         if (rootResource == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("Root path not found: " + params.rootPath);
+            response.getWriter().println("Root path not found.");
             return;
         }
 
@@ -365,7 +365,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * Opening or closing HTML tag inclusive attributes.
      */
-    private static final String HTML_TAG_PATTERN = "</?[a-zA-Z][a-zA-Z0-9-]*(\\s+[^>]*)?>";
+    private static final String HTML_TAG_PATTERN = "</?[a-zA-Z][a-zA-Z0-9-]*(\\s+[^>]+)*\\s+>";
 
     /**
      * Use Jsoup to create plaintext from HTML. We assume it's HTML if it starts with < and ends with > , trimmed.
