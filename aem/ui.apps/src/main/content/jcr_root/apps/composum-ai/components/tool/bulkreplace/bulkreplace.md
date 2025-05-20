@@ -36,9 +36,10 @@ all actions run under the permissions of the logged‑in author.
   replacement, an icon is appended (floated to the right) within the same cell as the page link:
     - A **check‑circle** icon indicates that the page was auto‑published.
     - A **dash‑circle** icon indicates that the page did not qualify for auto‑publication.
-
-*Note: Whenever any action button is pressed, the current state of the input fields is automatically saved to
-localStorage under the key `aem-composumAI-bulkedit-formstate`. Saved settings are reloaded on subsequent page loads,
+    
+*Note: Whenever any action button is pressed, the current state of the input fields except the "create version" and "
+auto publish" checkboxes is automatically saved to localStorage under the key `aem-composumAI-bulkedit-formstate`. Saved
+settings are reloaded on subsequent page loads,
 restoring the form content.*
 
 ### 1.3 Results & Progress zone

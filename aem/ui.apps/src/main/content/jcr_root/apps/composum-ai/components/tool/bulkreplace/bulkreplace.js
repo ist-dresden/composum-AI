@@ -125,12 +125,6 @@ class BulkReplaceApp {
                 if (settings.replacement) {
                     this.replacementInput.value = settings.replacement;
                 }
-                if (typeof settings.createVersion !== 'undefined') {
-                    this.createVersionCheckbox.checked = settings.createVersion;
-                }
-                if (typeof settings.autoPublish !== 'undefined') {
-                    this.autoPublishCheckbox.checked = settings.autoPublish;
-                }
             } catch (e) {
                 console.error("Error parsing saved settings", e);
             }
@@ -144,9 +138,8 @@ class BulkReplaceApp {
         const settings = {
             root: this.rootPageInput.value.trim(),
             search: this.searchStringInput.value.trim(),
-            replacement: this.replacementInput.value,
-            createVersion: this.createVersionCheckbox.checked,
-            autoPublish: this.autoPublishCheckbox.checked
+            replacement: this.replacementInput.value
+            // Do not save createVersion and autoPublish
         };
         localStorage.setItem(BulkReplaceApp.formStateKey, JSON.stringify(settings));
     }
