@@ -32,7 +32,8 @@ all actions run under the permissions of the logged‑in author.
     - **Export History** - if pressed, exports the last changes (from localStorage `aem-composumAI-bulkedit-replaced`)
       into a CSV.
     - **Clear History** - clears the history of last changes.
-* Additionally, Bootstrap Icons are loaded from a CDN. When **Auto‑Publish** is checked and a page is processed for replacement, an icon is appended (floated to the right) within the same cell as the page link:
+* Additionally, Bootstrap Icons are loaded from a CDN. When **Auto‑Publish** is checked and a page is processed for
+  replacement, an icon is appended (floated to the right) within the same cell as the page link:
     - A **check‑circle** icon indicates that the page was auto‑published.
     - A **dash‑circle** icon indicates that the page did not qualify for auto‑publication.
 
@@ -42,14 +43,15 @@ restoring the form content.*
 
 ### 1.3 Results & Progress zone
 
-* **Error alert** – a danger‑style bootstrap alert that is displayed on errors (the error message returned in the response) and hidden on the next search/replace.
+* **Error alert** – a danger‑style bootstrap alert that is displayed on errors (the error message returned in the
+  response) and hidden on the next search/replace.
 * **Grouped table (initially empty)** that spans the full width of the page.
     - The table header includes a checkbox to select/deselect all property checkboxes across all pages.
     - The shown page path is a link to the page in the editor (`/editor.html` + path + `.html`).
     - Each page row contains a checkbox to select/deselect all property checkboxes for that page.
-    - The componentPath is small and a link to the editor with anchor `#scrolltocomponent-` + componentPath if it's 
-      not jcr:content, if jcr:content it's a link to the page properties 
-      `/mnt/overlay/wcm/core/content/sites/properties.html?item=` and the 
+    - The componentPath is small and a link to the editor with anchor `#scrolltocomponent-` + componentPath if it's
+      not jcr:content, if jcr:content it's a link to the page properties
+      `/mnt/overlay/wcm/core/content/sites/properties.html?item=` and the
       path.
     - Individual property rows also have checkboxes for fine‑grained selection.
     - **Replaced rows:** Once a replacement is done for a page, the corresponding row displays a very light pastel green
@@ -75,9 +77,12 @@ restoring the form content.*
   automatically publishable, meaning that its last modification does not conflict with its replication state. This
   ensures only pages that remain in a consistent, pre‑modified published state are automatically published.
 
-* After a successful replacement on a page, the page row is updated with an icon (using Bootstrap Icons) at the very right showing the publication status according to auto‑publishing.
+* After a successful replacement on a page, the page row is updated with an icon (using Bootstrap Icons) at the very
+  right showing the publication status according to auto‑publishing.
 
-* After a successful replacement on a page, the page row’s cell (showing the page link and match info) is updated with a publication status icon (using Bootstrap Icons) aligned to the right. The response JSON now includes a boolean field `published` indicating the publication outcome.
+* After a successful replacement on a page, the page row’s cell (showing the page link and match info) is updated with a
+  publication status icon (using Bootstrap Icons) aligned to the right. The response JSON now includes a boolean field
+  `published` indicating the publication outcome.
 
 ---
 
@@ -196,6 +201,22 @@ data: {"pages":12,"matches":42}
 ```
 
 The changes are collected in localStorage in an array at key `aem-composumAI-bulkedit-replaced`
+
+## 4. Interaction with AI Translation
+
+Unfortunately it is not quite clear what to do with the saved values used by the AI translation, like
+`ai_translated_{propertyName}` (compare 8.3AutomaticTranslationCheckTool.md ). That would depend on the usecase.
+Here are two likely usecases:
+
+- replace a translation of a term with a better translation
+- change in official naming of a term
+
+In both cases it seems best to change the saved values as well. So we'll also do a replacement in
+`ai_translated_{propertyName}`, `ai_new_translated_{propertyName}` and `ai_accepted_translation_{propertyName}` .
+Since we don't want to leak out the internal details about this to the user, these are not shown in the UI.
+A replacement triggered for `propertyName` will automatically do the replacements in those values as well.
+That carries some risk but the translations are always meant to be reviewed by the user anyway, so that
+should be manageable.
 
 ---
 

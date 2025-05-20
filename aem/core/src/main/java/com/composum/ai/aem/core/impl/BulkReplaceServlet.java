@@ -38,6 +38,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.Replicator;
@@ -412,6 +413,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     response.getWriter().println("Required fields: page, term, replacement, targets");
                     return;
                 }
+
                 ResourceResolver resolver = request.getResourceResolver();
                 // Use PageManager to retrieve the page and work on its content resource
                 PageManager pageManager = resolver.adaptTo(PageManager.class);
@@ -429,10 +431,14 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Content resource not found for page: " + replaceRequest.page);
                     return;
                 }
+
                 if (replaceRequest.createVersion) {
                     LOG.info("Creating version for page: {}", replaceRequest.page);
                     createVersion(pageContentResource, replaceRequest.term, replaceRequest.replacement);
                 }
+
+                Pattern replacePattern = whitespaceLenientPattern(replaceRequest.term);
+
                 List<Changed> changedList = new ArrayList<>();
                 boolean pageModified = false;
                 for (Target target : replaceRequest.targets) {
@@ -444,7 +450,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     ValueMap props = componentResource.adaptTo(ValueMap.class);
                     String oldVal = props != null ? props.get(target.property, String.class) : null;
                     // Replace and capture new value.
-                    String newVal = replaceInProperty(componentResource, target.property, replaceRequest.term, replaceRequest.replacement);
+                    String newVal = replaceInProperty(componentResource, target.property, replacePattern, replaceRequest.replacement);
                     if (newVal != null) {
                         Changed ch = new Changed();
                         ch.componentPath = target.componentPath;
@@ -461,6 +467,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                                 " in " + target.componentPath + " of " + replaceRequest.page);
                     }
                 }
+
                 Boolean published = null;
                 if (pageModified) {
                     pageManager.touch(page.adaptTo(Node.class), true, Calendar.getInstance(), false);
@@ -470,6 +477,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         published = autoPublishPage(pageContentResource);
                     }
                 }
+
                 response.setStatus(SlingHttpServletResponse.SC_OK);
                 response.setContentType("application/json");
                 ReplacePageResponse pageResp = new ReplacePageResponse();
@@ -494,12 +502,12 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      *
      * @param resource     the resource to modify, not null
      * @param propertyName the name of the property, not null
-     * @param term         the search term, not null
+     * @param termPattern  a pattern for the search term, not null
      * @param replacement  the replacement string, not null
      * @return the new property value if a change was made; null otherwise
      */
     private String replaceInProperty(@Nonnull Resource resource, @Nonnull String propertyName,
-                                     @Nonnull String term, @Nonnull String replacement) {
+                                     @Nonnull Pattern termPattern, @Nonnull String replacement) {
         ValueMap properties = resource.adaptTo(ValueMap.class);
         if (properties == null || !properties.containsKey(propertyName)) {
             return null;
@@ -508,7 +516,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         if (value == null) {
             return null;
         }
-        String newValue = value.replaceAll(Pattern.quote(term), replacement);
+        String newValue = termPattern.matcher(value).replaceAll(replacement);
         if (!newValue.equals(value)) {
             ModifiableValueMap modifiableProperties = resource.adaptTo(ModifiableValueMap.class);
             if (modifiableProperties == null) {
@@ -516,6 +524,20 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 return null;
             }
             modifiableProperties.put(propertyName, newValue);
+
+            // Also replace pattern in target language saved values for the property to make it consistent.
+            // This is not entirely without doubt, though, but probably the best way.
+            AITranslatePropertyWrapper wrapper = new AITranslatePropertyWrapper(null, modifiableProperties, propertyName);
+            if (wrapper.getTranslatedCopy() != null) {
+                wrapper.setTranslatedCopy(termPattern.matcher(wrapper.getTranslatedCopy()).replaceAll(replacement));
+            }
+            if (wrapper.getNewTranslatedCopy() != null) {
+                wrapper.setNewTranslatedCopy(termPattern.matcher(wrapper.getNewTranslatedCopy()).replaceAll(replacement));
+            }
+            if (wrapper.getAcceptedTranslation() != null) {
+                wrapper.setAcceptedTranslation(termPattern.matcher(wrapper.getAcceptedTranslation()).replaceAll(replacement));
+            }
+
             return newValue;
         }
         return null;

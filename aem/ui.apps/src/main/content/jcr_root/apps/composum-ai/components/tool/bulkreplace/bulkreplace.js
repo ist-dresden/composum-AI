@@ -341,9 +341,7 @@ class BulkReplaceApp {
                 row.querySelectorAll("input[type='checkbox']").forEach(cb => cb.remove());
                 // Update the text excerpt cell (assumed to be the 4th cell) with the new excerpt.
                 const cells = row.getElementsByTagName("td");
-                if (cells.length >= 4) {
-                    cells[3].textContent = changed.excerpt;
-                }
+                cells[3].innerHTML = changed.excerpt;
             }
         });
     }

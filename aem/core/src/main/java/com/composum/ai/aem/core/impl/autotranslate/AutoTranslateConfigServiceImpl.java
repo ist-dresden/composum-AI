@@ -158,7 +158,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
 
         List<String> result = new ArrayList<>();
         for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
-            if (!(entry.getValue() instanceof String)) {
+            if (!(entry.getValue() instanceof String) || AITranslatePropertyWrapper.isAiTranslateProperty(entry.getKey())) {
                 continue;
             }
             String attributeDescription = slingResourceType + "%" + attributeAdditionalPath + entry.getKey();
