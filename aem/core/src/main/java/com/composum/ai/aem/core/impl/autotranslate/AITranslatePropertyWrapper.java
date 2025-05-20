@@ -110,15 +110,16 @@ public class AITranslatePropertyWrapper {
     private final String propertyName;
     private final ValueMap sourceValueMap;
 
-    public AITranslatePropertyWrapper(@Nonnull ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap,
+    public AITranslatePropertyWrapper(@Nullable ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap,
                                       @Nonnull String propertyName) {
         this.targetValueMap = targetValueMap;
         this.propertyName = propertyName;
         this.sourceValueMap = sourceValueMap;
     }
 
+    @Nullable
     public String getOriginal() {
-        return sourceValueMap.get(propertyName, String.class);
+        return sourceValueMap != null ? sourceValueMap.get(propertyName, String.class) : null;
     }
 
     public String getCurrentValue() {
@@ -384,7 +385,7 @@ public class AITranslatePropertyWrapper {
     @Nonnull
     public static List<AITranslatePropertyWrapper> allProps(@Nonnull ValueMap sourceValueMap, @Nonnull ModifiableValueMap targetValueMap) {
         return targetValueMap.keySet().stream()
-                .filter(key -> isAiTranslateProperty(key))
+                .filter(AITranslatePropertyWrapper::isAiTranslateProperty)
                 .map(key -> decodePropertyName(AI_PREFIX, key, AI_ORIGINAL_SUFFIX, targetValueMap))
                 .filter(Objects::nonNull)
                 .map(key -> new AITranslatePropertyWrapper(sourceValueMap, targetValueMap, key))

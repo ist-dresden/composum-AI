@@ -2,6 +2,7 @@ package com.composum.ai.aem.core.impl.autotranslate;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.sling.api.resource.Resource;
@@ -25,6 +26,7 @@ public interface AutoTranslateConfigService {
     /**
      * Returns those attributes that should be translated. (Of the resource, not children.)
      */
+    @Nonnull
     List<String> translateableAttributes(@Nullable Resource resource);
 
     /**

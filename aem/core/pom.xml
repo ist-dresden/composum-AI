@@ -178,5 +178,12 @@ Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotran
             <artifactId>fastexcel-reader</artifactId>
             <version>0.18.4</version>
         </dependency>
+        <!-- Some Gson internal packages are missing in the uber-jar :-( -->
+        <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+          <version>2.8.5</version>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

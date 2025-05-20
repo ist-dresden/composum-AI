@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -124,7 +125,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
         }
         final String resourceType = resource.getResourceType();
         if (resourceType.equals("dam:AssetContent") && config.ignoreAssetsExceptContentFragments()
-                && !Boolean.TRUE.equals(resource.getValueMap().get("contentFragment", Boolean.class))){
+                && !Boolean.TRUE.equals(resource.getValueMap().get("contentFragment", Boolean.class))) {
             LOG.debug("Ignoring asset that is not content fragment: ", resource.getPath());
             return false;
         }
@@ -137,6 +138,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
     }
 
     @Override
+    @Nonnull
     public List<String> translateableAttributes(@Nullable Resource resource) {
         if (resource == null || !isTranslatableResource(resource)) {
             return Collections.emptyList();
@@ -156,6 +158,9 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
 
         List<String> result = new ArrayList<>();
         for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+            if (!(entry.getValue() instanceof String) || AITranslatePropertyWrapper.isAiTranslateProperty(entry.getKey())) {
+                continue;
+            }
             String attributeDescription = slingResourceType + "%" + attributeAdditionalPath + entry.getKey();
             boolean allowed = allowedAttributeRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
             if (!allowed) {
@@ -191,7 +196,9 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
             String stringValue = (String) value;
             if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
                     stringValue.startsWith("/libs/") || stringValue.startsWith("/mnt/") ||
-                    stringValue.equals("true") || stringValue.equals("false")) {
+                    stringValue.equals("true") || stringValue.equals("false") ||
+                    stringValue.startsWith("https:") || stringValue.startsWith("http:")
+            ) {
                 return false; // looks like path or boolean
             }
 

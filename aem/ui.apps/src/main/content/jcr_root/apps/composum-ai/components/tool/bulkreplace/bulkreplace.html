@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bulk Replace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="${resource.path @ context='uri'}/bulkreplace.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+</head>
+<body>
+<!-- Use container-fluid for full width -->
+<div class="container-fluid my-4">
+    <!-- Header bar -->
+    <nav class="navbar navbar-light bg-light mb-4">
+        <span class="navbar-brand h4 mb-0">Bulk Replace</span>
+    </nav>
+    <!-- Visible description before the form -->
+    <p class="mb-4">
+        Use the form below to search for a text string within the desired root page and subpages and replace it with new
+        text. All text fields are mandatory. Downloading a CSV with the history of the replacements is recommended for
+        traceability.
+        Many elements have tooltips that explain their purpose.
+        If automatic publication is selected, an icon <i class="publishicon bi bi-check-circle"></i> will appear for
+        successfully published pages,
+        <i class="publishicon bi bi-dash-circle"></i> for pages that were not published automatically because they
+        either were modified or not published before.
+        <strong>Caution:</strong> Please use this tool with care since it can change many pages at once.
+    </p>
+    <!-- Form zone with horizontal layout -->
+    <div id="form-zone" class="mb-5">
+        <form class="form-horizontal">
+            <div class="form-group row">
+                <label for="root-page" class="col-sm-2 col-form-label" data-toggle="tooltip"
+                       title="Enter the root page path (e.g. /content/site/en)">Root Page (*)</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="root-page" placeholder="Enter root page"
+                           data-toggle="tooltip"
+                           title="Type the absolute path where the search should start. Only content paths of at least level 3 are permitted to restrict accidental replacements.">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="search-string" class="col-sm-2 col-form-label" data-toggle="tooltip"
+                       title="Enter a case-sensitive search text">Search String (*)</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="search-string" placeholder="Enter search string"
+                           required data-toggle="tooltip"
+                           title="Search for a literal text string. The case is important since that might influence the replacement - if needed you could use two searches with different cases.">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="replacement-string" class="col-sm-2 col-form-label" data-toggle="tooltip"
+                       title="Enter new text to replace the search string.">Replacement
+                    String (*)</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="replacement-string"
+                           placeholder="Enter replacement" data-toggle="tooltip"
+                           title="Text that will replace each match">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2"></label>
+                <div class="col-sm-10 d-flex justify-content-end align-items-center">
+                    <div class="mr-auto">
+                        <label class="mr-3" data-toggle="tooltip"
+                               title="If checked, a version is created before replacement. Recommended for safety and traceability.">
+                            <input type="checkbox" id="create-version" checked> Create Version
+                        </label>
+                        <label class="mr-3" data-toggle="tooltip"
+                               title="If checked, page is automatically published if it was already published and was not modified since the last publication. Use with care!">
+                            <input type="checkbox" id="auto-publish"> Auto‑Publish
+                        </label>
+                    </div>
+                    <span class="mx-2"></span>
+                    <div>
+                        <button type="button" class="btn btn-primary mr-2" id="search-btn" data-toggle="tooltip"
+                                title="Click to search pages for the text (1st step).">Search
+                        </button>
+                        <button type="button" class="btn btn-success mr-2" id="replace-btn" disabled
+                                data-toggle="tooltip" title="Click to replace the text in selected pages (2nd step).">
+                            Replace
+                        </button>
+                        <span class="mx-2"></span>
+                        <button type="button" class="btn btn-secondary mr-2" id="clear-form-btn" data-toggle="tooltip"
+                                title="Resets the form to the initial state.">Clear Form
+                        </button>
+                        <button type="button" class="btn btn-info mr-2" id="export-history-btn" data-toggle="tooltip"
+                                title="Export replacement history as a CSV. This contains all successful replacements done in this browser since the last 'Clear History'. This is not persistent, just kept in the browser.">
+                            Export History
+                        </button>
+                        <button type="button" class="btn btn-warning" id="clear-history-btn" data-toggle="tooltip"
+                                title="Clear replacement history for the CSV. Suggested after exporting the CSV.">Clear
+                            History
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- Results & Progress zone -->
+    <div id="results-zone">
+        <!-- Error alert container added (hidden by default) -->
+        <div id="error-alert" class="alert alert-danger" style="display:none;" role="alert"></div>
+        <!-- Progress bar -->
+        <div class="progress mb-3" style="height: 1.5rem;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">
+                0%
+            </div>
+        </div>
+        <!-- Grouped results table spans full width -->
+        <table class="table table-bordered w-100">
+            <thead class="thead-light">
+            <tr>
+                <th data-toggle="tooltip" title="Select/Deselect all properties in the table."><input type="checkbox"
+                                                                                                      id="select-all"
+                                                                                                      aria-label="Select all">
+                </th>
+                <th data-toggle="tooltip" title="Component path within the page">Component Path</th>
+                <th data-toggle="tooltip" title="Property name to be replaced">Property</th>
+                <th data-toggle="tooltip" title="Extract from the text where the match occurred" class="fill-excerpt">
+                    Text Excerpt
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Results will be appended dynamically -->
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Optional JavaScript (for Bootstrap) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha512-ubuT8Z88WxezgSqf3RLuNi5lmjstiJcyezx34yIU2gAHonIi27Na7atqzUZCOoY4CExaoFumzOsFQ2Ch+I/HCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+<script src="${resource.path @ context='uri'}/bulkreplace.js"></script>
+</body>
+</html>

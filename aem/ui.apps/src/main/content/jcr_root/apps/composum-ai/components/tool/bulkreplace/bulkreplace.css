@@ -1,0 +1,39 @@
+/* Highlight search hits */
+mark {
+    background-color: #fffb91;
+    padding: 0;
+}
+
+/* Apply a very light pastel green background for replaced rows */
+.replaced-row {
+    background-color: #d8f7d8 !important;
+}
+
+/* Hide checkboxes inside replaced rows */
+.replaced-row input[type="checkbox"] {
+    display: none;
+}
+
+/* Make component path links display in a smaller font using a class */
+.small-component {
+    font-size: 0.8em;
+}
+
+/* Ensure the text excerpt column takes all remaining space */
+.fill-excerpt {
+    width: 100%;
+}
+
+.publishicon.bi-check-circle {
+    color: green;
+    margin-right: 5px;
+}
+
+.publishicon.bi-dash-circle {
+    color: darkgoldenrod;
+    margin-right: 5px;
+}
+
+span.foundsearchstringmarker {
+    background-color: #fffb91;
+}
