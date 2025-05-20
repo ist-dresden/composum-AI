@@ -117,6 +117,7 @@ public class AITranslatePropertyWrapper {
         this.sourceValueMap = sourceValueMap;
     }
 
+    @Nullable
     public String getOriginal() {
         return sourceValueMap != null ? sourceValueMap.get(propertyName, String.class) : null;
     }

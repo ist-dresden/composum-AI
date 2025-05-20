@@ -197,7 +197,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
             if (stringValue.startsWith("/content/") || stringValue.startsWith("/apps/") ||
                     stringValue.startsWith("/libs/") || stringValue.startsWith("/mnt/") ||
                     stringValue.equals("true") || stringValue.equals("false") ||
-                    stringValue.startsWith("https::") || stringValue.startsWith("http::")
+                    stringValue.startsWith("https:") || stringValue.startsWith("http:")
             ) {
                 return false; // looks like path or boolean
             }

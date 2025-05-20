@@ -18,7 +18,7 @@ all actions run under the permissions of the logged‑in author.
 * Uses a horizontal form layout, with labels on the left and fields on the right, spanning full width.
 * **Root Page** – required text field.
 * **Search String** – required text field.
-* **Replacement String** – text field (leave empty to delete occurrences).
+* **Replacement String** – required text field
 * Two inline checkboxes:
     - **Create Version** – if checked, a version of the page is created before any replacement changes. (Selected by
       default).
@@ -64,7 +64,7 @@ restoring the form content.*
 ## 2. Behaviour
 
 * Scans **all descendant pages** and examines every string property, including RTE HTML text nodes. Properties
-  starting with / or http:: or https:: are ignored (paths and URLs).
+  starting with / or http: or https: are ignored (paths and URLs).
 * **Search** is a **two‑step job**:
     1. Client POSTs parameters; server replies with `202 Accepted` and a JSON payload containing a `jobId`.
     2. Client opens an `EventSource` (GET) with that `jobId` and receives streamed results per page.
