@@ -98,4 +98,4 @@ be at /apps / /libs , but that'd mean I'd have to create a new /apps/composum/ai
 
 ### TODO
 
-README.md -> move Composum into the background.
+README.md -> move Composum Pages into the background.
