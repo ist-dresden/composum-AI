@@ -365,7 +365,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * Opening or closing HTML tag inclusive attributes.
      */
-    private static final String HTML_TAG_PATTERN = "</?[a-zA-Z][a-zA-Z0-9-]*(\\s+[^>]+)*\\s*>";
+    private static final String HTML_TAG_PATTERN = "</?[a-zA-Z][^>]*>";
 
     /**
      * Use Jsoup to create plaintext from HTML. We assume it's HTML if it starts with < and ends with > , trimmed.
