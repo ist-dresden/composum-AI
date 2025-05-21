@@ -327,7 +327,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         String textWithMarkers = text.replaceAll(termPattern.pattern(), STARTMARKER + "$0" + ENDMARKER);
         textWithMarkers = toPlaintext(textWithMarkers);
         Pattern textWithMarkersPattern = Pattern.compile(
-                Pattern.quote(STARTMARKER) + termPattern.pattern() + Pattern.quote(ENDMARKER));
+                Pattern.quote(STARTMARKER) + ".*?" + Pattern.quote(ENDMARKER), Pattern.DOTALL);
         String result = abbreviateSurroundings(textWithMarkers, textWithMarkersPattern, surroundingChars);
         return result.replace(STARTMARKER, STARTMARKER_REPLACEMENT)
                 .replace(ENDMARKER, ENDMARKER_REPLACEMENT);
