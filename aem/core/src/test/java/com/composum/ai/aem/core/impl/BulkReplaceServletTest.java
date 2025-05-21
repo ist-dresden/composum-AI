@@ -57,6 +57,7 @@ class BulkReplaceServletTest {
 
     @Test
     public void testWhitespaceLenientPattern() {
+        Pattern pp = servlet.whitespaceLenientPattern(" a");
         assertAll(
                 () -> assertTrue(servlet.whitespaceLenientPattern("a b c").matcher("a b c").matches()),
                 () -> assertTrue(servlet.whitespaceLenientPattern("a b c").matcher("a   b    c").matches()),
@@ -66,8 +67,16 @@ class BulkReplaceServletTest {
                 () -> assertFalse(servlet.whitespaceLenientPattern("a b c").matcher("b a c").matches()),
                 () -> assertTrue(servlet.whitespaceLenientPattern("abc").matcher("abc").matches()),
                 () -> assertTrue(servlet.whitespaceLenientPattern("a.b c?").matcher("a.b   c?").matches()),
-                () -> assertTrue(servlet.whitespaceLenientPattern("").matcher("").matches()),
-                () -> assertEquals("\\Q\\E", servlet.whitespaceLenientPattern("").pattern())
+
+                () -> assertTrue(servlet.whitespaceLenientPattern("a").matcher("ba").find()),
+                () -> assertFalse(pp.matcher("ba").find()),
+                () -> assertTrue(pp.matcher("b a").find()),
+
+                () -> assertFalse(servlet.whitespaceLenientPattern("a ").matcher("ab").find()),
+                () -> assertTrue(servlet.whitespaceLenientPattern("a ").matcher("a").find()),
+                () -> assertTrue(servlet.whitespaceLenientPattern("a ").matcher("a ").find()),
+
+                () -> assertEquals("", servlet.whitespaceLenientPattern("").pattern())
         );
     }
 

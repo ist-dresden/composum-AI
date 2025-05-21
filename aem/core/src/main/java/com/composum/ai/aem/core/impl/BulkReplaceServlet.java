@@ -381,15 +381,27 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * A pattern that matches the search String case sensitively but being lenient on whitespaces:
      * the pattern made from "a b c" should also match "a  b\nc".
+     * If there is a whitespace at the beginning or the end we treat it as word boundary.
      */
     protected Pattern whitespaceLenientPattern(@Nonnull String searchString) {
-        String[] words = searchString.split("\\s+");
         StringBuilder patternBuilder = new StringBuilder();
+        if (searchString.matches("(?s)^\\s.*")) {
+            patternBuilder.append("(?<=\\s|^|<)");
+        }
+        String[] words = searchString.split("\\s+");
+        boolean first = true;
         for (String word : words) {
-            if (patternBuilder.length() > 0) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            if (!first) {
                 patternBuilder.append("\\s+");
             }
+            first = false;
             patternBuilder.append(Pattern.quote(word));
+        }
+        if (searchString.matches("(?s).*\\s$")) {
+            patternBuilder.append("(?=\\s|$|>)");
         }
         return Pattern.compile(patternBuilder.toString());
     }
