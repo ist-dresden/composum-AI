@@ -25,7 +25,7 @@
     <groupId>com.composum.ai.aem</groupId>
     <artifactId>composum-ai</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>3.1.1</version>
     <name>Composum AI::AEM</name>
     <description>Composum AI AEM variant</description>
     <url>${siteurl}</url>
@@ -33,7 +33,7 @@
         <connection>scm:git:${giturl}</connection>
         <developerConnection>scm:git:${giturl}</developerConnection>
         <url>${giturl}</url>
-        <tag>HEAD</tag>
+        <tag>composum-ai-integration-3.1.1</tag>
     </scm>
     <distributionManagement>
         <site>
