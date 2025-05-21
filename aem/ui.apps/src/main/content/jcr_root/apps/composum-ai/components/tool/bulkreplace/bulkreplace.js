@@ -137,7 +137,7 @@ class BulkReplaceApp {
     saveSettings() {
         const settings = {
             root: this.rootPageInput.value.trim(),
-            search: this.searchStringInput.value.trim(),
+            search: this.searchStringInput.value,
             replacement: this.replacementInput.value
             // Do not save createVersion and autoPublish
         };
@@ -177,7 +177,7 @@ class BulkReplaceApp {
         const errorAlert = document.getElementById("error-alert");
         if (errorAlert) { errorAlert.style.display = "none"; }
         const root = this.rootPageInput.value.trim();
-        const term = this.searchStringInput.value.trim();
+        const term = this.searchStringInput.value;
         if (!root || !term) {
             this.showErrorAlert("Please provide both root page and search string.");
             return;
@@ -348,7 +348,7 @@ class BulkReplaceApp {
         const errorAlert = document.getElementById("error-alert");
         if (errorAlert) { errorAlert.style.display = "none"; }
         const root = this.rootPageInput.value.trim();
-        const term = this.searchStringInput.value.trim();
+        const term = this.searchStringInput.value;
         const replacement = this.replacementInput.value;
         if (!root || !term || replacement === null) {
             this.showErrorAlert("Please provide root page, search string and replacement.");
