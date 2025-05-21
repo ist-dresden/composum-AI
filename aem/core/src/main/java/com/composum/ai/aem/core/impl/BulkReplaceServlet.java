@@ -454,6 +454,9 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
                 List<Changed> changedList = new ArrayList<>();
                 boolean pageModified = false;
+                // publishability has to be checked before changing a page - otherwise it's always false.
+                boolean autoPublishable = replaceRequest.autoPublish && isAutoPublishable(pageContentResource);
+
                 for (Target target : replaceRequest.targets) {
                     Resource componentResource = JcrConstants.JCR_CONTENT.equals(target.componentPath) ? pageContentResource :
                             pageContentResource.getChild(target.componentPath);
@@ -487,8 +490,13 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     pageManager.touch(page.adaptTo(Node.class), true, Calendar.getInstance(), false);
                     resolver.commit();
                     if (replaceRequest.autoPublish) {
-                        LOG.info("Auto‑publishing page: {}", replaceRequest.page);
-                        published = autoPublishPage(pageContentResource);
+                        if (autoPublishable) {
+                            LOG.info("Auto‑publishing page: {}", replaceRequest.page);
+                            publishPage(pageContentResource);
+                            published = true;
+                        } else {
+                            published = false;
+                        }
                     }
                 }
 
@@ -593,30 +601,38 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     }
 
     /**
-     * Automatically publishes the page if it qualifies based on modification and replication status.
+     * New method to determine if the page qualifies for auto‑publication.
      *
-     * @param contentResource the page resource to publish, not null
-     * @return true if the page was published, false otherwise
+     * @param contentResource the page resource to check, not null
+     * @return true if the page qualifies for auto‑publication, false otherwise
      */
-    private boolean autoPublishPage(@Nonnull Resource contentResource) throws IOException {
+    private boolean isAutoPublishable(@Nonnull Resource contentResource) throws IOException {
         try {
-            ValueMap vm = Objects.requireNonNull(contentResource).getValueMap();
+            ValueMap vm = contentResource.getValueMap();
             Calendar lastModified = vm.get("cq:lastModified", Calendar.class);
             Calendar lastReplicated = vm.get("cq:lastReplicated", Calendar.class);
             String lastAction = vm.get("cq:lastReplicationAction", String.class);
-            // Only auto‑publish if the page qualifies: lastModified is not after lastReplicated and replication was Activate.
-            if (lastModified != null && lastReplicated != null
+            return lastModified != null && lastReplicated != null
                     && !lastModified.after(lastReplicated)
-                    && "Activate".equals(lastAction)) {
-                Session session = Objects.requireNonNull(contentResource.getResourceResolver().adaptTo(Session.class));
-                replicator.replicate(session, ReplicationActionType.ACTIVATE, contentResource.getPath());
-                return true;
-            } else {
-                LOG.info("Page {} does not qualify for auto‑publication", contentResource.getPath());
-            }
-            return false;
+                    && "Activate".equals(lastAction);
         } catch (Exception e) {
-            LOG.error("Error auto‑publishing page: {}", contentResource.getPath(), e);
+            LOG.error("Error checking auto‑publish eligibility for page: {}", contentResource.getPath(), e);
+            throw new IOException("Failed to check auto‑publish eligibility", e);
+        }
+    }
+
+    /**
+     * New method to publish the page.
+     *
+     * @param contentResource the page resource to publish, not null
+     * @throws IOException if publishing fails
+     */
+    private void publishPage(@Nonnull Resource contentResource) throws IOException {
+        try {
+            Session session = Objects.requireNonNull(contentResource.getResourceResolver().adaptTo(Session.class));
+            replicator.replicate(session, ReplicationActionType.ACTIVATE, contentResource.getPath());
+        } catch (Exception e) {
+            LOG.error("Error publishing page: {}", contentResource.getPath(), e);
             throw new IOException("Failed to auto‑publish page", e);
         }
     }
