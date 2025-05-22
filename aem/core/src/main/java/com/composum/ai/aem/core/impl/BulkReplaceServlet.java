@@ -22,6 +22,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -245,6 +246,10 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             // Use findResources with an XPath query for candidate pages
             String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
             Iterator<Resource> candidatePages = resolver.findResources(xpath, "xpath");
+            // That Xpath doesn't find the root page, so add it explicitly.
+            // Also: caution - the /oak:index/cqPageLucene is just to depth 4, so this might actually fail to find some pages. :-(
+            // But the speed is hugely better, so we risk that.
+            candidatePages = IteratorUtils.chainedIterator(IteratorUtils.singletonIterator(rootResource), candidatePages);
 
             while (candidatePages.hasNext()) {
                 Resource candidate = candidatePages.next();
