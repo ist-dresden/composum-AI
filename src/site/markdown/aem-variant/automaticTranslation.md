@@ -221,6 +221,10 @@ Only component properties where the inheritance has been cancelled and where
 the blueprint was modified after cancelling inheritance or the last merging are displayed
 - until they are saved and marked as merged.
 
+`/apps/composum-ai/components/tool/bulkreplace.html` allows a bulk search and replace through a page tree, incl.
+optionally creating page versions before replacement and automatic publishing. This omits internal properties that are
+used for the AI translation (see it's specifications) but also replaces the text in those for the target language.
+
 ## Notes about the implementation
 
 - To have a painless startup, the identification of properties that need translation is heuristic. Standard
