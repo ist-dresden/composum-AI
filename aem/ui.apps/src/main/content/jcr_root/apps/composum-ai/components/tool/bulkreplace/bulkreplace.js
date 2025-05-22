@@ -175,7 +175,9 @@ class BulkReplaceApp {
         this.saveSettings();
         // Hide any existing error alert.
         const errorAlert = document.getElementById("error-alert");
-        if (errorAlert) { errorAlert.style.display = "none"; }
+        if (errorAlert) {
+            errorAlert.style.display = "none";
+        }
         const root = this.rootPageInput.value.trim();
         const term = this.searchStringInput.value;
         if (!root || !term) {
@@ -316,7 +318,7 @@ class BulkReplaceApp {
      * @param {Array} changedArr - Array of changed objects from the response.
      */
     markPageAsReplaced(page, changedArr, published) {
-        document.querySelectorAll(`tr[data-page="${page}"] .publishicon`).forEach( publishicon => {
+        document.querySelectorAll(`tr[data-page="${page}"] .publishicon`).forEach(publishicon => {
             if (published) {
                 publishicon.classList.add("bi-check-circle");
             } else if (published === false) {
@@ -346,7 +348,9 @@ class BulkReplaceApp {
         this.saveSettings();
         // Hide any existing error alert.
         const errorAlert = document.getElementById("error-alert");
-        if (errorAlert) { errorAlert.style.display = "none"; }
+        if (errorAlert) {
+            errorAlert.style.display = "none";
+        }
         const root = this.rootPageInput.value.trim();
         const term = this.searchStringInput.value;
         const replacement = this.replacementInput.value;
@@ -387,6 +391,7 @@ class BulkReplaceApp {
                     this.createVersionCheckbox.checked,
                     this.autoPublishCheckbox.checked
                 );
+                res.date = new Date().toISOString();
                 console.log("Replace response for page:", page, res);
 
                 // append data to history
@@ -490,21 +495,25 @@ class BulkReplaceApp {
             this.showErrorAlert("No history to export.");
             return;
         }
-        let csvContent = `"Page","ComponentPath","Property","Published","Excerpt","OldValue","NewValue"\n`;
+        let csvContent = `"Date","Page","ComponentPath","Property","Published","Excerpt","OldValue","NewValue","Editor"\n`;
         // Helper to escape double quotes in CSV field values.
         const escapeCSV = (value) => {
             if (value == null) return "";
-            var escapedVal = String(value).replace(/"/g, '""');
+            var escapedVal = String(value).replace(/"/g, '\\"');
             escapedVal = escapedVal.replace(/\n/g, '\\n');
             return escapedVal;
         };
         history.forEach(entry => {
             if (entry.page && entry.changed) {
                 const published = entry.published ? "true" : entry.published === false ? "false" : "";
+                const editorUrl = location.href.replace(/\/apps.*/, '/editor.html') +
+                    entry.page + '.html';
                 entry.changed.forEach(ch => {
-                    csvContent += `"${escapeCSV(entry.page)}","${escapeCSV(ch.componentPath)}",` +
-                    `"${escapeCSV(ch.property)}",${published},"${escapeCSV(ch.excerpt)}",` +
-                    `"${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}"\n`;
+                    csvContent += `"${entry.date.replace('T', ' ').slice(0, 19)}",` +
+                        `"${escapeCSV(entry.page)}","${escapeCSV(ch.componentPath)}",` +
+                        `"${escapeCSV(ch.property)}",${published},"${escapeCSV(ch.excerpt)}",` +
+                        `"${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}",` +
+                        `"${escapeCSV(editorUrl)}"\n`;
                 });
             }
         });
@@ -512,7 +521,7 @@ class BulkReplaceApp {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "bulkreplace_history.csv";
+        a.download = `bulkreplace_history_${new Date().toISOString().replace('T', ' ').slice(0, 19)}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
