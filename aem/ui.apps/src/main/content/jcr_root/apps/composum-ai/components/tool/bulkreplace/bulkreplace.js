@@ -40,6 +40,7 @@ class BulkReplaceApp {
         this.clearFormBtn = document.getElementById("clear-form-btn");
         this.exportHistoryBtn = document.getElementById("export-history-btn");
         this.clearHistoryBtn = document.getElementById("clear-history-btn");
+        this.continueMsg = document.getElementById('continue-msg');
     }
 
     /**
@@ -188,6 +189,7 @@ class BulkReplaceApp {
         this.progressBar.style.width = "50%";
         this.progressBar.textContent = "50%";
         this.replaceBtn.disabled = true;
+        this.toggleContinueMsg(true);
         this.startSearchJob(root, term);
     }
 
@@ -346,6 +348,7 @@ class BulkReplaceApp {
      */
     async handleReplaceClick() {
         this.saveSettings();
+        this.toggleContinueMsg(false);
         // Hide any existing error alert.
         const errorAlert = document.getElementById("error-alert");
         if (errorAlert) {
@@ -533,6 +536,15 @@ class BulkReplaceApp {
     handleClearHistory() {
         localStorage.removeItem(BulkReplaceApp.replacementHistoryKey);
     }
+
+    toggleContinueMsg(status) {
+        if (status) { // show it
+            this.continueMsg.style.display = 'block';
+        } else { // hide it
+            this.continueMsg.style.display = 'none';
+        }
+    }
+
 }
 
 /**

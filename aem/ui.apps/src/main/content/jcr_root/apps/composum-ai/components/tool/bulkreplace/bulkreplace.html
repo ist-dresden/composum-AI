@@ -47,7 +47,7 @@
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="search-string" placeholder="Enter search string (case sensitive)"
                            required data-toggle="tooltip"
-                           title="Search for a literal text string. The case is important since that might influence the replacement - if needed you could use two searches with different cases. Whitespace at the beginning and/or the end requires a word boundary there.">
+                           title="Search for a literal text string. The case is important since that might influence the replacement - if needed you could use two searches with different cases. Whitespace at the beginning and/or the end require a word boundary there.">
                 </div>
             </div>
             <div class="form-group row">
@@ -101,6 +101,10 @@
     </div>
     <!-- Results & Progress zone -->
     <div id="results-zone">
+        <div id="continue-msg" class="alert alert-info" style="display:none;" role="alert">
+            No changes have been done yet - please select the occurrences in the page(s) which you want to replace and
+            then press "Replace".
+        </div>
         <!-- Error alert container added (hidden by default) -->
         <div id="error-alert" class="alert alert-danger" style="display:none;" role="alert"></div>
         <!-- Progress bar -->
