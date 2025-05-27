@@ -118,10 +118,10 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     protected static final Pattern PATTERN_TRY_AGAIN = Pattern.compile("Please try again in (\\d+)s.");
 
-    public static final String DEFAULT_MODEL = "gpt-4o";
-    public static final String DEFAULT_IMAGE_MODEL = "gpt-4o";
+    public static final String DEFAULT_MODEL = "gpt-4.1";
+    public static final String DEFAULT_IMAGE_MODEL = "gpt-4.1";
     public static final String DEFAULT_EMBEDDINGS_MODEL = "text-embedding-3-small";
-    public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4o";
+    public static final String DEFAULT_HIGH_INTELLIGENCE_MODEL = "gpt-4.1";
 
     protected static final int DEFAULTVALUE_CONNECTIONTIMEOUT = 30;
     protected static final int DEFAULTVALUE_REQUESTTIMEOUT = 300;
@@ -887,7 +887,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         String highIntelligenceModel() default DEFAULT_HIGH_INTELLIGENCE_MODEL;
 
         @AttributeDefinition(name = "Vision model", required = false,
-                description = "Optional, a model that is used if an image is given as input, e.g. gpt-4o. If not given, image recognition is rejected.",
+                description = "Optional, a model that is used if an image is given as input, e.g. gpt-4.1. If not given, image recognition is rejected.",
                 defaultValue = DEFAULT_IMAGE_MODEL)
         String imageModel() default DEFAULT_IMAGE_MODEL;
 

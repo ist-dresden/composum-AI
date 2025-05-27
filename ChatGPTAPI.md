@@ -1,7 +1,7 @@
 # Analysis of about the ChatGPT API wrt. our needs
 
 At least initially we will restrict ourselves to the [ChatGPT chat API](https://platform.openai.com/docs/guides/chat) 
-with gpt-4o-mini , since that model is likely appropriate and sufficient for our purposes, and rather 
+with gpt-4.1 , since that model is likely appropriate and sufficient for our purposes, and rather 
 [competitively priced](https://openai.com/pricing) at
 $0.15 / 1M tokens (= about 600000-700000 words), as of 8/2024.
 
