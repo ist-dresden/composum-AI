@@ -63,9 +63,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <nexus.url>https://ossrh-staging-api.central.sonatype.com/service/local/</nexus.url>
+        <nexus.url>https://ossrh-staging-api.central.sonatype.com/</nexus.url>
         <release.repository.id>ossrh</release.repository.id>
-        <release.repository.url>https://ossrh-staging-api.central.sonatype.com/</release.repository.url>
+        <release.repository.url>https://ossrh-staging-api.central.sonatype.com/service/local/</release.repository.url>
         <release.autoReleaseAfterClose>false</release.autoReleaseAfterClose>
         <release.keyname>info@composum.com</release.keyname>
     </properties>
