@@ -311,6 +311,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 m.componentPath = componentPath;
                 m.property = propertyName;
                 m.excerpt = createExcerpt(stringValue, termPattern, SURROUNDING_CHARS);
+                // Count the number of occurrences in this property
+                m.occurrenceCount = countMatches(stringValue, termPattern);
                 matches.add(m);
             }
         }
@@ -381,6 +383,26 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             return StringUtils.strip(text.replaceAll(HTML_TAG_PATTERN, ""));
         }
         return text;
+    }
+
+    /**
+     * Counts the number of matches of a pattern in the given text.
+     * 
+     * @param text the text to search in
+     * @param pattern the pattern to count matches for
+     * @return the number of matches found
+     */
+    private int countMatches(String text, Pattern pattern) {
+        if (text == null || pattern == null) {
+            return 0;
+        }
+        
+        int count = 0;
+        Matcher matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            count++;
+        }
+        return count;
     }
 
     /**
@@ -458,6 +480,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 Pattern replacePattern = whitespaceLenientPattern(replaceRequest.term);
 
                 List<Changed> changedList = new ArrayList<>();
+                List<Changed> skippedTargets = new ArrayList<>();  // Changed to List<Changed> to capture details
                 boolean pageModified = false;
                 // publishability has to be checked before changing a page - otherwise it's always false.
                 boolean autoPublishable = replaceRequest.autoPublish && isAutoPublishable(pageContentResource);
@@ -466,11 +489,59 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     Resource componentResource = JcrConstants.JCR_CONTENT.equals(target.componentPath) ? pageContentResource :
                             pageContentResource.getChild(target.componentPath);
                     if (componentResource == null) {
-                        throw new IOException("Component not found: " + target.componentPath);
+                        LOG.warn("Component not found (may have been deleted): {} in page {}",
+                                target.componentPath, replaceRequest.page);
+                        // Create a Changed object for skipped item to preserve details
+                        Changed skipped = new Changed();
+                        skipped.componentPath = target.componentPath;
+                        skipped.property = target.property;
+                        skipped.excerpt = "";
+                        skipped.oldValue = "";
+                        skipped.newValue = null;
+                        skippedTargets.add(skipped);
+                        continue; // Skip instead of failing
                     }
+                    
                     // Capture the original value
                     ValueMap props = componentResource.adaptTo(ValueMap.class);
                     String oldVal = props != null ? props.get(target.property, String.class) : null;
+                    
+                    // Check if content still matches the search pattern
+                    if (oldVal == null || !replacePattern.matcher(oldVal).find()) {
+                        // Content has changed since search - skip this property
+                        LOG.info("Content already modified or doesn't match search pattern: {} in {} of page {}",
+                                target.property, target.componentPath, replaceRequest.page);
+                        // Create a Changed object for skipped item with details
+                        Changed skipped = new Changed();
+                        skipped.componentPath = target.componentPath;
+                        skipped.property = target.property;
+                        skipped.excerpt = oldVal != null ? createExcerpt(oldVal, replacePattern, SURROUNDING_CHARS) : "";
+                        skipped.oldValue = oldVal != null ? oldVal : "";
+                        skipped.newValue = null;
+                        skippedTargets.add(skipped);
+                        continue; // Skip but continue with other properties
+                    }
+                    
+                    // Validate occurrence count matches what was found during search
+                    // Only validate if expectedOccurrences was actually set (>= 0 means it was set during search)
+                    if (target.expectedOccurrences >= 0) {
+                        int currentOccurrences = countMatches(oldVal, replacePattern);
+                        if (currentOccurrences != target.expectedOccurrences) {
+                            LOG.info("Occurrence count mismatch (expected {}, found {}) for property {} in {} of page {}",
+                                    target.expectedOccurrences, currentOccurrences, 
+                                    target.property, target.componentPath, replaceRequest.page);
+                            // Create a Changed object for skipped item with details
+                            Changed skipped = new Changed();
+                            skipped.componentPath = target.componentPath;
+                            skipped.property = target.property;
+                            skipped.excerpt = createExcerpt(oldVal, replacePattern, SURROUNDING_CHARS);
+                            skipped.oldValue = oldVal;
+                            skipped.newValue = null;
+                            skippedTargets.add(skipped);
+                            continue; // Skip due to occurrence count mismatch
+                        }
+                    }
+                    
                     // Replace and capture new value.
                     String newVal = replaceInProperty(componentResource, target.property, replacePattern, replaceRequest.replacement);
                     if (newVal != null) {
@@ -485,8 +556,17 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         changedList.add(ch);
                         pageModified = true;
                     } else {
-                        throw new IOException("No changes made for property: " + target.property +
-                                " in " + target.componentPath + " of " + replaceRequest.page);
+                        // No changes made - likely because the content format is different
+                        LOG.warn("Could not replace in property: {} in {} of page {}",
+                                target.property, target.componentPath, replaceRequest.page);
+                        // Create a Changed object for skipped item with details
+                        Changed skipped = new Changed();
+                        skipped.componentPath = target.componentPath;
+                        skipped.property = target.property;
+                        skipped.excerpt = createExcerpt(oldVal, replacePattern, SURROUNDING_CHARS);
+                        skipped.oldValue = oldVal;
+                        skipped.newValue = null;
+                        skippedTargets.add(skipped);
                     }
                 }
 
@@ -510,6 +590,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 ReplacePageResponse pageResp = new ReplacePageResponse();
                 pageResp.page = replaceRequest.page;
                 pageResp.changed = changedList;
+                pageResp.skipped = skippedTargets;
                 pageResp.published = published;
                 response.getWriter().write(gson.toJson(pageResp));
             } catch (JsonSyntaxException e) {
@@ -662,6 +743,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     protected static class ReplacePageResponse {
         public String page;
         public List<Changed> changed;
+        public List<Changed> skipped;
         public Boolean published;
     }
 
@@ -669,6 +751,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         public String componentPath;
         public String property;
         public String excerpt;
+        public int occurrenceCount; // Number of matches found in this property
     }
 
     protected static class Changed {
@@ -702,6 +785,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     protected static class Target {
         public String componentPath;
         public String property;
+        public int expectedOccurrences = -1; // Expected number of occurrences from search phase (-1 means not set)
     }
 
 }
