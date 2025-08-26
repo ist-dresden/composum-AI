@@ -225,6 +225,10 @@ the blueprint was modified after cancelling inheritance or the last merging are 
 optionally creating page versions before replacement and automatic publishing. This omits internal properties that are
 used for the AI translation (see it's specifications) but also replaces the text in those for the target language.
 
+`/apps/composum-ai/components/autotranslatemodelcompare.html` is a mini application that can be used to compare
+the translations different LLM provide for the same text - mostly for a pre-evaluation of the support different
+language models provide for different languages.
+
 ## Notes about the implementation
 
 - To have a painless startup, the identification of properties that need translation is heuristic. Standard

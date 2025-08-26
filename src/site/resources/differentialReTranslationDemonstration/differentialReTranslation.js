@@ -10,7 +10,7 @@ async function handleTranslate() {
   }
 
   const requestBody = {
-    model: "gpt-4o-mini",
+    model: "gpt-4.1",
     messages: [
       {
         role: "system",
