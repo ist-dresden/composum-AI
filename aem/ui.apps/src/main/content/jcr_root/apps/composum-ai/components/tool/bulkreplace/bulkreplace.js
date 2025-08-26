@@ -1,10 +1,201 @@
 /**
+ * IndexedDB wrapper for managing bulk replace history.
+ * Provides better storage capacity than localStorage (50MB+ vs 5-10MB).
+ */
+class BulkReplaceDB {
+    constructor() {
+        this.dbName = 'BulkReplaceDB';
+        this.version = 1;
+        this.storeName = 'replacementHistory';
+        this.db = null;
+        this.isAvailable = false;
+    }
+
+    /**
+     * Initialize the database connection and create schema if needed.
+     * @returns {Promise} Resolves when database is ready
+     */
+    async init() {
+        if (!window.indexedDB) {
+            return Promise.reject('IndexedDB not supported');
+        }
+
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => {
+                console.error('Failed to open IndexedDB:', request.error);
+                reject(request.error);
+            };
+            
+            request.onsuccess = (event) => {
+                this.db = event.target.result;
+                this.isAvailable = true;
+                resolve(this.db);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                
+                // Create object store if it doesn't exist
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    const store = db.createObjectStore(this.storeName, { 
+                        keyPath: 'id', 
+                        autoIncrement: true 
+                    });
+                    
+                    // Create indexes for efficient queries
+                    store.createIndex('date', 'date', { unique: false });
+                    store.createIndex('page', 'page', { unique: false });
+                }
+            };
+        });
+    }
+
+    /**
+     * Add a replacement record to the database.
+     * @param {Object} data - The replacement data to store
+     * @returns {Promise} Resolves when data is stored
+     */
+    async addRecord(data) {
+        if (!this.isAvailable) {
+            throw new Error('Database not available');
+        }
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.add(data);
+            
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Get all records from the database.
+     * @returns {Promise<Array>} Array of all stored records
+     */
+    async getAllRecords() {
+        if (!this.isAvailable) {
+            return [];
+        }
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll();
+            
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Clear all records from the database.
+     * @returns {Promise} Resolves when all records are cleared
+     */
+    async clearAll() {
+        if (!this.isAvailable) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.clear();
+            
+            request.onsuccess = () => {
+                console.log('IndexedDB history cleared');
+                resolve();
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Get the approximate size of stored data.
+     * @returns {Promise<number>} Size in bytes
+     */
+    async getStorageSize() {
+        if (!this.isAvailable) {
+            return 0;
+        }
+
+        const records = await this.getAllRecords();
+        const blob = new Blob([JSON.stringify(records)]);
+        return blob.size;
+    }
+
+    /**
+     * Check if storage is approaching 150MB limit and cleanup oldest records if needed.
+     * Called after bulk replacement operations complete.
+     * @returns {Promise<boolean>} Returns true if cleanup was performed
+     */
+    async maintainStorageLimits() {
+        if (!this.isAvailable) {
+            return false;
+        }
+
+        const maxSizeBytes = 150 * 1024 * 1024; // 150MB limit
+        const targetSizeAfterCleanup = 120 * 1024 * 1024; // Clean down to 120MB to leave room
+        
+        const currentSize = await this.getStorageSize();
+        
+        console.log(`IndexedDB storage: ${(currentSize / 1024 / 1024).toFixed(2)}MB used of ${(maxSizeBytes / 1024 / 1024).toFixed(0)}MB limit`);
+        
+        if (currentSize >= maxSizeBytes) {
+            console.warn(`Storage limit reached (${(currentSize / 1024 / 1024).toFixed(2)}MB), performing cleanup...`);
+            
+            const records = await this.getAllRecords();
+            if (records.length === 0) {
+                console.warn('No records to clean up');
+                return false;
+            }
+            
+            // Sort by date (oldest first)
+            records.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Calculate how many records to remove to get below target size
+            let sizeRemoved = 0;
+            let recordsToRemove = [];
+            
+            for (const record of records) {
+                const recordSize = new Blob([JSON.stringify(record)]).size;
+                sizeRemoved += recordSize;
+                recordsToRemove.push(record.id);
+                
+                // Stop when we've removed enough to get below target
+                if (currentSize - sizeRemoved <= targetSizeAfterCleanup) {
+                    break;
+                }
+            }
+            
+            // Remove the oldest records
+            if (recordsToRemove.length > 0) {
+                const transaction = this.db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                
+                for (const id of recordsToRemove) {
+                    store.delete(id);
+                }
+                
+                console.log(`Removed ${recordsToRemove.length} oldest records to free up ${(sizeRemoved / 1024 / 1024).toFixed(2)}MB`);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+}
+
+/**
  * Class representing the Bulk Replace application.
  */
 class BulkReplaceApp {
 
     static formStateKey = 'aem-composumAI-bulkedit-formstate';
-    static replacementHistoryKey = 'aem-composumAI-bulkedit-replaced';
+    // Removed replacementHistoryKey - no longer using localStorage for history
 
     /**
      * Constructs the BulkReplaceApp instance and initializes DOM elements.
@@ -15,13 +206,25 @@ class BulkReplaceApp {
         this.loadSavedSettings();
         this.initTooltips();
         this.currentSearchJobId = null;
+        
+        // Initialize IndexedDB for history storage
+        this.historyDB = new BulkReplaceDB();
+        this.historyDB.init().then(() => {
+            // Update storage status after DB is ready
+            this.updateStorageStatus();
+        }).catch(error => {
+            console.error('IndexedDB initialization failed, history will be disabled:', error);
+            this.historyDB = null; // History disabled if IndexedDB not available
+            this.updateStorageStatus(); // Will hide the storage status
+        });
     }
 
     /**
      * Initializes the BulkReplaceApp instance.
      */
     static initApp() {
-        new BulkReplaceApp();
+        const app = new BulkReplaceApp();
+        return app;
     }
 
     /**
@@ -41,6 +244,8 @@ class BulkReplaceApp {
         this.exportHistoryBtn = document.getElementById("export-history-btn");
         this.clearHistoryBtn = document.getElementById("clear-history-btn");
         this.continueMsg = document.getElementById('continue-msg');
+        this.storageStatusDiv = document.getElementById('storage-status');
+        this.storageStatusText = document.getElementById('storage-status-text');
     }
 
     /**
@@ -50,8 +255,8 @@ class BulkReplaceApp {
         this.searchBtn.addEventListener("click", this.handleSearchClick.bind(this));
         this.replaceBtn.addEventListener("click", this.handleReplaceClick.bind(this));
         this.clearFormBtn.addEventListener("click", this.handleClearForm.bind(this));
-        this.exportHistoryBtn.addEventListener("click", this.handleExportHistory.bind(this));
-        this.clearHistoryBtn.addEventListener("click", this.handleClearHistory.bind(this));
+        this.exportHistoryBtn.addEventListener("click", () => this.handleExportHistory());
+        this.clearHistoryBtn.addEventListener("click", () => this.handleClearHistory());
         // Bind header checkbox to select/deselect all property checkboxes, then update states.
         document.getElementById("select-all").addEventListener("change", (event) => {
             const checked = event.target.checked;
@@ -288,6 +493,8 @@ class BulkReplaceApp {
                 propRow.setAttribute("data-page", data.page);
                 propRow.setAttribute("data-component", match.componentPath);
                 propRow.setAttribute("data-property", match.property);
+                // Store occurrence count for validation during replace (-1 means not set)
+                propRow.setAttribute("data-occurrences", match.occurrenceCount !== undefined ? match.occurrenceCount : -1);
                 let componentLink = '';
                 if (match.componentPath === 'jcr:content') {
                     componentLink = `<a class="small-component" href="/mnt/overlay/wcm/core/content/sites/properties.html?item=${data.page}" target="_blank">${match.componentPath}</a>`;
@@ -344,6 +551,24 @@ class BulkReplaceApp {
     }
 
     /**
+     * Marks rows as skipped with yellow background for properties that couldn't be replaced.
+     * @param {string} page - The page path.
+     * @param {Array} skippedArr - Array of skipped target objects from the response.
+     */
+    markAsSkipped(page, skippedArr) {
+        skippedArr.forEach(skipped => {
+            // Locate the row with matching page, componentPath, and property.
+            const selector = `tr[data-page="${page}"][data-component="${skipped.componentPath}"][data-property="${skipped.property}"]`;
+            const row = document.querySelector(selector);
+            if (row) {
+                row.classList.add("skipped-row");
+                // Remove checkbox from skipped rows (like replaced rows)
+                row.querySelectorAll("input[type='checkbox']").forEach(cb => cb.remove());
+            }
+        });
+    }
+
+    /**
      * Handles the click event for the replace button, processing pages sequentially.
      */
     async handleReplaceClick() {
@@ -373,10 +598,15 @@ class BulkReplaceApp {
             const page = row.getAttribute("data-page");
             const component = row.getAttribute("data-component");
             const property = row.getAttribute("data-property");
+            const occurrences = parseInt(row.getAttribute("data-occurrences") || "-1", 10);
             if (!pageMap[page]) {
                 pageMap[page] = [];
             }
-            pageMap[page].push({componentPath: component, property: property});
+            pageMap[page].push({
+                componentPath: component, 
+                property: property,
+                expectedOccurrences: occurrences
+            });
         });
         const pages = Object.keys(pageMap);
         let completed = 0;
@@ -395,16 +625,23 @@ class BulkReplaceApp {
                     this.autoPublishCheckbox.checked
                 );
                 res.date = new Date().toISOString();
-                console.log("Replace response for page:", page, res);
 
-                // append data to history
-                const history = JSON.parse(localStorage.getItem(BulkReplaceApp.replacementHistoryKey) || "[]");
-                history.push(res);
-                localStorage.setItem(BulkReplaceApp.replacementHistoryKey, JSON.stringify(history));
+                // Save to IndexedDB if available
+                if (this.historyDB && this.historyDB.isAvailable) {
+                    try {
+                        await this.historyDB.addRecord(res);
+                    } catch (dbError) {
+                        console.error("Failed to save to IndexedDB:", dbError);
+                    }
+                }
 
                 // Use the response: if changed properties are reported, update the UI.
                 if (res && res.changed && res.changed.length > 0) {
                     this.markPageAsReplaced(page, res.changed, res.published);
+                }
+                // Mark skipped properties with yellow background
+                if (res && res.skipped && res.skipped.length > 0) {
+                    this.markAsSkipped(page, res.skipped);
                 }
                 completed++;
                 const progress = Math.round((completed / pages.length) * 100);
@@ -413,6 +650,14 @@ class BulkReplaceApp {
             } catch (error) {
                 this.handleError(error);
             }
+        }
+        
+        // Check storage limits after bulk operation completes
+        if (completed > 0 && this.historyDB && this.historyDB.isAvailable) {
+            await this.historyDB.maintainStorageLimits();
+            
+            // Update storage status display
+            await this.updateStorageStatus();
         }
     }
 
@@ -463,7 +708,6 @@ class BulkReplaceApp {
      * @param error the error object
      */
     handleError(error) {
-        console.log("Error:", error);
         this.showErrorAlert(error.message);
     }
 
@@ -490,32 +734,50 @@ class BulkReplaceApp {
     }
 
     /**
-     * Exports the replacement history stored in localStorage as CSV.
+     * Exports the replacement history stored in IndexedDB as CSV.
      */
-    handleExportHistory() {
-        const history = JSON.parse(localStorage.getItem(BulkReplaceApp.replacementHistoryKey) || "[]");
+    async handleExportHistory() {
+        if (!this.historyDB || !this.historyDB.isAvailable) {
+            this.showErrorAlert("History is not available (IndexedDB not supported).");
+            return;
+        }
+        
+        const history = await this.historyDB.getAllRecords();
         if (history.length === 0) {
             this.showErrorAlert("No history to export.");
             return;
         }
-        let csvContent = `"Date","Page","ComponentPath","Property","Published","Excerpt","OldValue","NewValue","Editor"\n`;
-        // Helper to escape double quotes in CSV field values.
+        let csvContent = `"Date","Page","ComponentPath","Property","Published","Excerpt","OldValue","NewValue","Skipped","Editor"\n`;
+        // Helper to escape double quotes and newlines in CSV field values.
         const escapeCSV = (value) => {
             if (value == null) return "";
-            var escapedVal = String(value).replace(/"/g, '\\"');
-            escapedVal = escapedVal.replace(/\n/g, '\\n');
+            var escapedVal = String(value).replace(/"/g, '""');
+            escapedVal = escapedVal.replace(/\r?\n/g, ' ');
             return escapedVal;
         };
         history.forEach(entry => {
+            const published = entry.published ? "true" : entry.published === false ? "false" : "";
+            const editorUrl = location.href.replace(/\/apps.*/, '/editor.html') +
+                entry.page + '.html';
+            
+            // Export changed items (not skipped)
             if (entry.page && entry.changed) {
-                const published = entry.published ? "true" : entry.published === false ? "false" : "";
-                const editorUrl = location.href.replace(/\/apps.*/, '/editor.html') +
-                    entry.page + '.html';
                 entry.changed.forEach(ch => {
                     csvContent += `"${entry.date.replace('T', ' ').slice(0, 19)}",` +
                         `"${escapeCSV(entry.page)}","${escapeCSV(ch.componentPath)}",` +
                         `"${escapeCSV(ch.property)}",${published},"${escapeCSV(ch.excerpt)}",` +
-                        `"${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}",` +
+                        `"${escapeCSV(ch.oldValue)}","${escapeCSV(ch.newValue)}","",` +  // Empty skipped column
+                        `"${escapeCSV(editorUrl)}"\n`;
+                });
+            }
+            
+            // Export skipped items
+            if (entry.page && entry.skipped) {
+                entry.skipped.forEach(sk => {
+                    csvContent += `"${entry.date.replace('T', ' ').slice(0, 19)}",` +
+                        `"${escapeCSV(entry.page)}","${escapeCSV(sk.componentPath)}",` +
+                        `"${escapeCSV(sk.property)}",${published},"${escapeCSV(sk.excerpt || "")}",` +
+                        `"${escapeCSV(sk.oldValue || "")}","","skipped",` +  // oldValue filled, newValue empty, marked as skipped
                         `"${escapeCSV(editorUrl)}"\n`;
                 });
             }
@@ -531,10 +793,17 @@ class BulkReplaceApp {
     }
 
     /**
-     * Clears the replacement history from localStorage.
+     * Clears the replacement history from IndexedDB.
      */
-    handleClearHistory() {
-        localStorage.removeItem(BulkReplaceApp.replacementHistoryKey);
+    async handleClearHistory() {
+        if (!this.historyDB || !this.historyDB.isAvailable) {
+            return;
+        }
+        
+        await this.historyDB.clearAll();
+        
+        // Update storage status after clearing
+        await this.updateStorageStatus();
     }
 
     toggleContinueMsg(status) {
@@ -542,6 +811,41 @@ class BulkReplaceApp {
             this.continueMsg.style.display = 'block';
         } else { // hide it
             this.continueMsg.style.display = 'none';
+        }
+    }
+
+    /**
+     * Updates the storage status display with current usage and warnings.
+     */
+    async updateStorageStatus() {
+        if (!this.historyDB || !this.historyDB.isAvailable) {
+            this.storageStatusDiv.style.display = 'none';
+            return;
+        }
+        
+        try {
+            const sizeBytes = await this.historyDB.getStorageSize();
+            const sizeMB = sizeBytes / 1024 / 1024;
+            const sizeMBFormatted = sizeMB.toFixed(2);
+            
+            if (sizeMB >= 130) {
+                // Critical - approaching cleanup threshold
+                this.storageStatusDiv.className = 'alert alert-danger';
+                this.storageStatusText.innerHTML = `<strong>Current storage: ${sizeMBFormatted} MB</strong> - Automatic history cleanup will occur at 150 MB. Please export history and clear it manually.`;
+            } else if (sizeMB >= 100) {
+                // Warning - getting full
+                this.storageStatusDiv.className = 'alert alert-warning';
+                this.storageStatusText.innerHTML = `<strong>Current storage: ${sizeMBFormatted} MB</strong> - History will be cleaned when it reaches 150 MB. Consider exporting your history and clearing it manually.`;
+            } else {
+                // Normal - show storage info
+                this.storageStatusDiv.className = 'alert alert-info';
+                this.storageStatusText.innerHTML = `Current storage: ${sizeMBFormatted} MB`;
+            }
+            
+            this.storageStatusDiv.style.display = 'block';
+        } catch (error) {
+            console.error('Failed to update storage status:', error);
+            this.storageStatusDiv.style.display = 'none';
         }
     }
 
