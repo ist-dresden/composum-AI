@@ -9,6 +9,11 @@ mark {
     background-color: #d8f7d8 !important;
 }
 
+/* Apply a light yellow background for skipped rows */
+.skipped-row {
+    background-color: #fff3cd !important;
+}
+
 /* Hide checkboxes inside replaced rows */
 .replaced-row input[type="checkbox"] {
     display: none;
