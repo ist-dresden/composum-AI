@@ -165,7 +165,7 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                 if (StringUtils.contains(additionalInstructions, MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS)) {
                     throw new GPTException.GPTUserNotificationException(
                             "As requested: the additional instructions for " + resource.getPath() + " are as follows (translation is aborted):",
-                                    additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
+                            additionalInstructions.replaceAll(MARKER_DEBUG_ADDITIONAL_INSTRUCTIONS, "").trim());
                 }
 
                 configuration = maybeIncludeAlreadyTranslatedTextAsExample(propertiesToTranslate, autoTranslateCaConfig, configuration);
@@ -212,8 +212,13 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
                         relationships.put(propertyToTranslate.targetResource.getPath(), liveRelationship);
                     }
 
-                    liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
-                            liveRelationship, targetWrapper.allAiKeys(), false);
+                    try {
+                        liveRelationshipManager.cancelPropertyRelationship(propertyToTranslate.targetResource.getResourceResolver(),
+                                liveRelationship, targetWrapper.allAiKeys(), false);
+                    } catch (IllegalStateException ex) {
+                        LOG.error("Exception while cancelling property relationship for '{}'",
+                                propertyToTranslate.targetResource.getPath(), ex);
+                    }
                     cleanupObsoleteKeys(propertyToTranslate, valueMap, liveRelationship, targetWrapper);
 
                     stats.translatedProperties++;
