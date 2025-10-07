@@ -243,13 +243,20 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             if (pageManager == null) {
                 throw new ServletException("Could not get PageManager");
             }
-            // Use findResources with an XPath query for candidate pages
-            String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
-            Iterator<Resource> candidatePages = resolver.findResources(xpath, "xpath");
-            // That Xpath doesn't find the root page, so add it explicitly.
-            // Also: caution - the /oak:index/cqPageLucene is just to depth 4, so this might actually fail to find some pages. :-(
-            // But the speed is hugely better, so we risk that.
-            candidatePages = IteratorUtils.chainedIterator(IteratorUtils.singletonIterator(rootResource), candidatePages);
+            // For CJK languages, jcr:contains may not tokenize properly, so get all pages and filter in Java
+            Iterator<Resource> candidatePages;
+            if (containsCJKCharacters(params.term)) {
+                String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)";
+                candidatePages = resolver.findResources(xpath, "xpath");
+                candidatePages = IteratorUtils.chainedIterator(IteratorUtils.singletonIterator(rootResource), candidatePages);
+            } else {
+                String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
+                candidatePages = resolver.findResources(xpath, "xpath");
+                // That Xpath doesn't find the root page, so add it explicitly.
+                // Also: caution - the /oak:index/cqPageLucene is just to depth 4, so this might actually fail to find some pages. :-(
+                // But the speed is hugely better, so we risk that.
+                candidatePages = IteratorUtils.chainedIterator(IteratorUtils.singletonIterator(rootResource), candidatePages);
+            }
 
             while (candidatePages.hasNext()) {
                 Resource candidate = candidatePages.next();
@@ -403,6 +410,24 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             count++;
         }
         return count;
+    }
+
+    /**
+     * Checks if a string contains non-Latin characters that may not be properly tokenized by Lucene.
+     * Includes: CJK (Chinese, Japanese, Korean), Arabic, Hebrew, Thai, and other languages.
+     */
+    protected boolean containsCJKCharacters(@Nonnull String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if ((c >= 0x4E00 && c <= 0x9FFF) ||  // CJK Unified Ideographs
+                (c >= 0x3040 && c <= 0x30FF) ||
+                (c >= 0x0600 && c <= 0x06FF) ||
+                (c >= 0x0590 && c <= 0x05FF) ||
+                (c >= 0x0E00 && c <= 0x0E7F)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
