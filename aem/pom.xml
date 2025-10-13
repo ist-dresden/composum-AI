@@ -25,7 +25,7 @@
     <groupId>com.composum.ai.aem</groupId>
     <artifactId>composum-ai</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.4</version>
+    <version>3.1.5</version>
     <name>Composum AI::AEM</name>
     <description>Composum AI AEM variant</description>
     <url>${siteurl}</url>
