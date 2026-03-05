@@ -11,7 +11,7 @@
 
     <groupId>com.composum.ai</groupId>
     <artifactId>composum-ai-integration</artifactId>
-    <version>3.1.6-SNAPSHOT</version>
+    <version>3.1.6</version>
     <packaging>pom</packaging>
 
     <name>Composum AI</name>
@@ -63,10 +63,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <nexus.url>https://ossrh-staging-api.central.sonatype.com/</nexus.url>
-        <release.repository.id>ossrh</release.repository.id>
-        <release.repository.url>https://ossrh-staging-api.central.sonatype.com/service/local/</release.repository.url>
-        <release.autoReleaseAfterClose>false</release.autoReleaseAfterClose>
+        <release.repository.id>central</release.repository.id>
+        <release.repository.url>https://central.sonatype.com/</release.repository.url>
+        <release.autoPublish>false</release.autoPublish>
         <release.keyname>info@composum.com</release.keyname>
     </properties>
 
@@ -79,6 +78,21 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>3.21.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.10.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>${release.repository.id}</publishingServerId>
+                        <autoPublish>${release.autoPublish}</autoPublish>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -168,25 +182,12 @@
         </profile>
 
         <profile>
-            <!-- profile to release the artifacts for the public repository -->
-            <id>nexus-staging</id>
+            <id>deploy-central</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>${release.repository.id}</serverId>
-                            <nexusUrl>${nexus.url}</nexusUrl>
-                            <!--
-                                As we switch to releasing via Github, we do not want the stuff to be immediately released, since
-                                we want things to be as resilient as possible: the git push of the release commits
-                                happens only after things are successfully uploaded to sonatype and the release happens only after the git push.
-                                A release can then be triggered by mvn nexus-staging:release in target/checkout , or in the Nexus UI.
-                            -->
-                            <autoReleaseAfterClose>${release.autoReleaseAfterClose}</autoReleaseAfterClose>
-                        </configuration>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -211,9 +212,26 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>deploy-local</id>
+            <properties>
+                <central.publishing.skip>true</central.publishing.skip>
+                <deploy.local.path>./offlinedependencies</deploy.local.path>
+            </properties>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>local-snapshots</id>
+                    <url>file:${deploy.local.path}</url>
+                </snapshotRepository>
+                <repository>
+                    <id>local-releases</id>
+                    <url>file:${deploy.local.path}</url>
+                </repository>
+            </distributionManagement>
         </profile>
     </profiles>
 

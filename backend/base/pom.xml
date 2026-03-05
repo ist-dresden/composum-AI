@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.composum.ai</groupId>
         <artifactId>composum-ai-integration-backend</artifactId>
-        <version>3.1.6-SNAPSHOT</version>
+        <version>3.1.6</version>
     </parent>
 
     <artifactId>composum-ai-integration-backend-base</artifactId>
@@ -19,7 +19,8 @@
 
     <properties>
         <!-- Do not upgrade to 3.0.48 etc. since this doesn't work with the Java version in AEM. -->
-        <wikitext.version>3.0.42</wikitext.version>
+        <wikitext.version>3.0.48.202308291007</wikitext.version>
+        <wikitext.guava.version>33.5.0-jre</wikitext.guava.version>
         <httpcomponents.client5.version>5.3.1</httpcomponents.client5.version>
         <httpcomponents.core5.version>5.2.5</httpcomponents.core5.version>
     </properties>
@@ -82,11 +83,31 @@
             <groupId>org.eclipse.mylyn.docs</groupId>
             <artifactId>org.eclipse.mylyn.wikitext</artifactId>
             <version>${wikitext.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.mylyn.docs</groupId>
             <artifactId>org.eclipse.mylyn.wikitext.markdown</artifactId>
             <version>${wikitext.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${wikitext.guava.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
@@ -151,12 +172,16 @@
                         <Import-Package>
                             javax.annotation;version="[1,4)",
                             !javax.annotation.meta,
+                            com.google.gson.*,
+                            !com.google.*,
+                            !android.*,
                             !org.apache.hc.*,
                             !org.conscrypt.*,
                             !org.brotli.dec.*,
                             *
                         </Import-Package>
                         <Export-Package>
+                            !com.google.*,
                             !com.composum.ai.backend.base.impl,
                             !com.composum.ai.backend.base.*.impl,
                             com.composum.ai.backend.base.*
@@ -165,6 +190,7 @@
                             jtokkit*;groupId=com.knuddels,
                             jsoup*,
                             org.eclipse.mylyn.wikitext*,
+                            guava;groupId=com.google.guava,
                             http*;groupId=org.apache.httpcomponents.client5,
                             http*;groupId=org.apache.httpcomponents.core5,
                         </Embed-Dependency>
