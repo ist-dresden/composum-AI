@@ -11,7 +11,7 @@
 
     <groupId>com.composum.ai</groupId>
     <artifactId>composum-ai-integration</artifactId>
-    <version>3.1.6</version>
+    <version>3.1.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Composum AI</name>
@@ -63,6 +63,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
+        <release.repository.name>Composum AI</release.repository.name>
         <release.repository.id>central</release.repository.id>
         <release.repository.url>https://central.sonatype.com/</release.repository.url>
         <release.autoPublish>false</release.autoPublish>
@@ -92,6 +93,7 @@
                     <configuration>
                         <publishingServerId>${release.repository.id}</publishingServerId>
                         <autoPublish>${release.autoPublish}</autoPublish>
+                        <deploymentName>${release.repository.name}</deploymentName>
                     </configuration>
                 </plugin>
             </plugins>

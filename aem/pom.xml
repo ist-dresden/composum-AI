@@ -27,7 +27,7 @@
     <groupId>com.composum.ai.aem</groupId>
     <artifactId>composum-ai</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.6</version>
+    <version>3.1.7-SNAPSHOT</version>
     <name>Composum AI::AEM</name>
     <description>Composum AI AEM variant</description>
     <url>${siteurl}</url>
@@ -89,9 +89,10 @@
         <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
         <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
 
+        <release.repository.name>Composum AI AEM</release.repository.name>
         <release.repository.id>central</release.repository.id>
         <release.repository.url>https://central.sonatype.com/</release.repository.url>
-        <release.autoReleaseAfterClose>false</release.autoReleaseAfterClose>
+        <release.autoPublish>false</release.autoPublish>
         <release.keyname>info@composum.com</release.keyname>
 
         <!-- for AEM 6.5.x backwards compatibility until the bronze age -->
@@ -103,6 +104,25 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.10.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>${release.repository.id}</publishingServerId>
+                    <autoPublish>${release.autoPublish}</autoPublish>
+                    <deploymentName>${release.repository.name}</deploymentName>
+                    <excludeArtifacts>
+                        <excludeArtifact>
+                            <groupId>org.apache.sling</groupId>
+                            <artifactId>org.apache.sling.commons.osgi</artifactId>
+                        </excludeArtifact>
+                    </excludeArtifacts>
+                </configuration>
+            </plugin>
+
             <!-- Maven Release Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
