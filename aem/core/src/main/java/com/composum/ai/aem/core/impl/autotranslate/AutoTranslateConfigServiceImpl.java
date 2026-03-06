@@ -1,18 +1,7 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.StringEscapeUtils;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -26,7 +15,16 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Serves the configurations for the automatic translation service.
@@ -237,7 +235,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
                 !text.contains(">") && !text.contains("&gt;") || !text.contains("/")) {
             return false;
         }
-        text = StringEscapeUtils.unescapeHtml(text);
+        text = StringEscapeUtils.unescapeHtml4(text);
         int textLength = text.length();
         int tagcount = 0;
         int textInTags = 0;

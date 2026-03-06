@@ -6,24 +6,21 @@ import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWra
 import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.LC_PREFIX;
 import static com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigServiceImpl.isHeuristicallyTranslatableProperty;
 import static com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigServiceImpl.isHtmlButNotRichtext;
+import io.wcm.testing.mock.aem.junit5.AemContext;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import io.wcm.testing.mock.aem.junit5.AemContext;
 
 public class AutoTranslateConfigServiceImplTest {
 
@@ -152,7 +149,7 @@ public class AutoTranslateConfigServiceImplTest {
                 "\n";
         assertTrue(isHtmlButNotRichtext("something", someHTML));
         assertTrue(isHtmlButNotRichtext("something", someHTML.replaceAll("<", "&lt;")));
-        assertTrue(isHtmlButNotRichtext("something", StringEscapeUtils.escapeHtml(someHTML)));
+        assertTrue(isHtmlButNotRichtext("something", StringEscapeUtils.escapeHtml4(someHTML)));
     }
 
 }
