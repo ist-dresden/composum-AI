@@ -18,16 +18,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.composum.meta.ist</groupId>
-        <artifactId>parent-root</artifactId>
-        <version>1.7.1</version>
-        <relativePath />
+        <groupId>com.composum.ai</groupId>
+        <artifactId>composum-ai-integration</artifactId>
+        <version>3.1.7-SNAPSHOT</version>
     </parent>
 
     <groupId>com.composum.ai.aem</groupId>
     <artifactId>composum-ai</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.7-SNAPSHOT</version>
+
     <name>Composum AI::AEM</name>
     <description>Composum AI AEM variant</description>
     <url>${siteurl}</url>
@@ -64,6 +63,16 @@
     </modules>
 
     <properties>
+        <release.repository.name>Composum AI AEM</release.repository.name>
+
+        <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
+        <bnd.version>6.4.0</bnd.version>
+
+        <aemanalyser.version>1.6.16</aemanalyser.version>
+        <aem.sdk.api>2026.2.24288.20260204T121510Z-260100</aem.sdk.api>
+        <aem.uber.jar.version>6.5.7</aem.uber.jar.version>
+        <osgi.version>6.0.0</osgi.version>
+
         <aem.host>localhost</aem.host>
         <aem.port>4502</aem.port>
         <aem.publish.host>localhost</aem.publish.host>
@@ -72,129 +81,12 @@
         <sling.password>admin</sling.password>
         <vault.user>admin</vault.user>
         <vault.password>admin</vault.password>
-
-        <!-- https://mvnrepository.com/artifact/com.github.eirslett/frontend-maven-plugin -->
-        <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
-        <bnd.version>6.4.0</bnd.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <componentGroupName>Composum AI</componentGroupName>
-
-        <!-- https://mvnrepository.com/artifact/com.adobe.aem/aemanalyser-maven-plugin -->
-        <aemanalyser.version>1.6.16</aemanalyser.version>
-        <aem.sdk.api>2026.2.24288.20260204T121510Z-260100</aem.sdk.api>
-        <aem.uber.jar.version>6.5.7</aem.uber.jar.version>
-        <osgi.version>6.0.0</osgi.version>
-
-        <siteurl>https://github.com/ist-dresden/composum-AI</siteurl>
-        <giturl>https://github.com/ist-dresden/composum-AI.git</giturl>
-
-        <release.repository.name>Composum AI AEM</release.repository.name>
-        <release.repository.id>central</release.repository.id>
-        <release.repository.url>https://central.sonatype.com/</release.repository.url>
-        <release.autoPublish>false</release.autoPublish>
-        <release.keyname>info@composum.com</release.keyname>
-
-        <!-- for AEM 6.5.x backwards compatibility until the bronze age -->
-        <java.source>1.8</java.source>
-        <java.target>1.8</java.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.10.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>${release.repository.id}</publishingServerId>
-                    <autoPublish>${release.autoPublish}</autoPublish>
-                    <deploymentName>${release.repository.name}</deploymentName>
-                    <excludeArtifacts>
-                        <excludeArtifact>
-                            <groupId>org.apache.sling</groupId>
-                            <artifactId>org.apache.sling.commons.osgi</artifactId>
-                        </excludeArtifact>
-                    </excludeArtifacts>
-                </configuration>
-            </plugin>
-
-            <!-- Maven Release Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
-                <configuration>
-                    <scmCommentPrefix>[maven-scm] :</scmCommentPrefix>
-                    <preparationGoals>clean install</preparationGoals>
-                    <goals>install</goals>
-                    <releaseProfiles>release</releaseProfiles>
-                </configuration>
-            </plugin>
-            <!-- Maven Source Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <!-- 3.3.1 fails with "We have duplicated artifacts attached." during release creation. -->
-                <version>3.2.1</version>
-                <inherited>true</inherited>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Maven Enforcer Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.3.9,)</version>
-                                </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <message>Maven must be executed with a Java 8 JRE or higher.</message>
-                                    <version>1.8.0</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Maven Compiler Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.7.1</version>
-                    <configuration>
-                        <tarLongFileMode>posix</tarLongFileMode>
-                    </configuration>
-                </plugin>
+
                 <plugin>
                     <groupId>com.github.eirslett</groupId>
                     <artifactId>frontend-maven-plugin</artifactId>
@@ -218,19 +110,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!-- Maven Jar Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.1</version>
-                </plugin>
-                <!-- Maven Clean Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.0</version>
-                </plugin>
-                <!-- BND Maven Plugin -->
+
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
@@ -279,6 +159,7 @@ Bundle-DocURL:
                         </dependency>
                     </dependencies>
                 </plugin>
+
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-baseline-maven-plugin</artifactId>
@@ -287,37 +168,11 @@ Bundle-DocURL:
                         <continueOnError>true</continueOnError>
                     </configuration>
                 </plugin>
-                <!-- Maven Resources Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.1</version>
-                    <configuration>
-                        <encoding>${source.encoding}</encoding>
-                    </configuration>
-                </plugin>
-                <!-- Maven Compiler Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
-                    <configuration>
-                        <encoding>${source.encoding}</encoding>
-                        <source>${java.source}</source>
-                        <target>${java.target}</target>
-                    </configuration>
-                </plugin>
-                <!-- Maven Installer Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.3</version>
-                </plugin>
+
                 <!-- Maven Surefire Plugin -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.0</version>
                     <configuration>
                         <useSystemClassLoader>false</useSystemClassLoader>
                         <systemProperties>
@@ -326,29 +181,16 @@ Bundle-DocURL:
                         </systemProperties>
                     </configuration>
                 </plugin>
-                <!-- Maven Failsafe Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.0</version>
-                </plugin>
-                <!-- Maven Deploy Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.3</version>
-                </plugin>
-                <!-- Apache Sling Plugin -->
+
                 <plugin>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>sling-maven-plugin</artifactId>
-                    <version>2.4.2</version>
                     <configuration>
                         <slingUrl>http://${aem.host}:${aem.port}/system/console</slingUrl>
                         <deploymentMethod>WebConsole</deploymentMethod>
                     </configuration>
                 </plugin>
-                <!-- HTL Maven Plugin -->
+
                 <plugin>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>htl-maven-plugin</artifactId>
@@ -357,7 +199,7 @@ Bundle-DocURL:
                         <failOnWarnings>true</failOnWarnings>
                     </configuration>
                 </plugin>
-                <!-- Jackrabbit FileVault Package Plugin -->
+
                 <plugin>
                     <groupId>org.apache.jackrabbit</groupId>
                     <artifactId>filevault-package-maven-plugin</artifactId>
@@ -382,14 +224,14 @@ Bundle-DocURL:
                         </dependency>
                     </dependencies>
                 </plugin>
-                <!-- AEM Analyser Plugin -->
+
                 <plugin>
                     <groupId>com.adobe.aem</groupId>
                     <artifactId>aemanalyser-maven-plugin</artifactId>
                     <version>${aemanalyser.version}</version>
                     <extensions>true</extensions>
                 </plugin>
-                <!-- Content Package Plugin -->
+
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
@@ -401,24 +243,7 @@ Bundle-DocURL:
                         <password>${vault.password}</password>
                     </configuration>
                 </plugin>
-                <!-- Maven Enforcer Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.4.1</version>
-                </plugin>
-                <!-- Maven Dependency Plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.0</version>
-                </plugin>
-                <!-- Build Helper Maven Plugin -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.0</version>
-                </plugin>
+
                 <!--This plugin's configuration is used to store Eclipse
                             m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
@@ -487,91 +312,71 @@ Bundle-DocURL:
                     </configuration>
                 </plugin>
 
-
-                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.10.1</version>
-                    <executions>
-                        <execution>
-                            <id>attach-javadocs</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <charset>${source.encoding}</charset>
-                        <encoding>${source.encoding}</encoding>
-                        <failOnError>false</failOnError>
-                        <quiet>true</quiet>
-                        <notimestamp>true</notimestamp>
-                    </configuration>
-                </plugin>
-
-                <!-- https://mvnrepository.com/artifact/pl.project13.maven/git-commit-id-plugin -->
-                <plugin>
-                    <groupId>pl.project13.maven</groupId>
-                    <artifactId>git-commit-id-plugin</artifactId>
-                    <version>4.9.10</version>
-                    <executions>
-                        <execution>
-                            <id>get-the-git-infos</id>
-                            <goals>
-                                <goal>revision</goal>
-                            </goals>
-                            <phase>initialize</phase>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <offline>true</offline>
-                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                        <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
-                        </generateGitPropertiesFilename>
-                        <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                        <includeOnlyProperties>
-                            <includeOnlyProperty>^git.branch$</includeOnlyProperty>
-                            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
-                            <includeOnlyProperty>^git.commit.id.(abbrev|full|describe|time)$</includeOnlyProperty>
-                            <includeOnlyProperty>^git.dirty$</includeOnlyProperty>
-                        </includeOnlyProperties>
-                        <commitIdGenerationMode>full</commitIdGenerationMode>
-                    </configuration>
-                </plugin>
-
-                <!-- === For generating the site === -->
-                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.20.0</version>
-                </plugin>
-
-                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-project-info-reports-plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.5.0</version>
-                </plugin>
-
-                <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.4.1</version>
-                </plugin>
-
-                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-gpg-plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.2.7</version>
-                </plugin>
-
-                <!-- XXX -->
             </plugins>
         </pluginManagement>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <scmCommentPrefix>[maven-scm] :</scmCommentPrefix>
+                    <preparationGoals>clean install</preparationGoals>
+                    <goals>install</goals>
+                    <releaseProfiles>release</releaseProfiles>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <!-- 3.3.1 fails with "We have duplicated artifacts attached." during release creation. -->
+                <version>3.2.1</version>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.3.9,)</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <message>Maven must be executed with a Java 8 JRE or higher.</message>
+                                    <version>1.8.0</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
     <!-- ====================================================================== -->
     <!-- D E P E N D E N C I E S -->
