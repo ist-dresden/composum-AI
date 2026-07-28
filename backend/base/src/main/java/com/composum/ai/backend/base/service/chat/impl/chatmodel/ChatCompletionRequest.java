@@ -1,9 +1,9 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
-import java.util.List;
-
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 /**
  * Represents a request to the OpenAI chat completion API, including model, messages,
@@ -23,10 +23,15 @@ public class ChatCompletionRequest {
     @SerializedName("messages")
     private List<ChatCompletionMessage> messages;
     /**
-     * The maximum number of tokens to generate in the completion.
+     * The maximum number of tokens to generate in the completion (before gpt-5).
      */
     @SerializedName("max_tokens")
     private Integer maxTokens;
+    /**
+     * The maximum number of tokens to generate in the completion (since gpt-5).
+     */
+    @SerializedName("max_completion_tokens")
+    private Integer maxCompletionTokens;
     /**
      * Whether to stream the response incrementally.
      */
@@ -82,6 +87,14 @@ public class ChatCompletionRequest {
 
     public void setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
+    }
+
+    public Integer getMaxCompletionTokens() {
+        return maxCompletionTokens;
+    }
+
+    public void setMaxCompletionTokens(Integer maxTokens) {
+        this.maxCompletionTokens = maxTokens;
     }
 
     public Boolean isStream() {
