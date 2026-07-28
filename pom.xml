@@ -15,6 +15,14 @@
     </description>
     <url>${siteurl}</url>
 
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <package.group>com/composum/ai</package.group>
         <componentGroupName>Composum AI</componentGroupName>
