@@ -1,39 +1,37 @@
 package com.composum.ai.backend.base.service.chat.impl;
 
-import static java.util.Collections.singletonList;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import com.composum.ai.backend.base.service.GPTException;
+import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTBackendsService;
+import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.service.chat.GPTChatMessage;
+import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
+import com.composum.ai.backend.base.service.chat.GPTChatRequest;
+import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.service.chat.GPTMessageRole;
+import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.base.service.chat.GPTToolCall;
+import com.composum.ai.backend.base.service.chat.RateLimiter;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
+import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.knuddels.jtokkit.Encodings;
+import com.knuddels.jtokkit.api.Encoding;
+import com.knuddels.jtokkit.api.EncodingRegistry;
+import com.knuddels.jtokkit.api.EncodingType;
+import com.knuddels.jtokkit.api.IntArrayList;
 import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
@@ -68,38 +66,37 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.backend.base.service.GPTException;
-import com.composum.ai.backend.base.service.chat.GPTBackendConfiguration;
-import com.composum.ai.backend.base.service.chat.GPTBackendsService;
-import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
-import com.composum.ai.backend.base.service.chat.GPTChatMessage;
-import com.composum.ai.backend.base.service.chat.GPTChatMessagesTemplate;
-import com.composum.ai.backend.base.service.chat.GPTChatRequest;
-import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.base.service.chat.GPTFinishReason;
-import com.composum.ai.backend.base.service.chat.GPTMessageRole;
-import com.composum.ai.backend.base.service.chat.GPTTool;
-import com.composum.ai.backend.base.service.chat.GPTToolCall;
-import com.composum.ai.backend.base.service.chat.RateLimiter;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionChoice;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionFunctionDetails;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessage;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionMessagePart;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRequest;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionResponse;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
-import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.knuddels.jtokkit.Encodings;
-import com.knuddels.jtokkit.api.Encoding;
-import com.knuddels.jtokkit.api.EncodingRegistry;
-import com.knuddels.jtokkit.api.EncodingType;
-import com.knuddels.jtokkit.api.IntArrayList;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import static java.util.Collections.singletonList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements the actual access to the ChatGPT chat API.
@@ -625,6 +622,11 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 maxTokens = maximumTokensPerResponse;
             }
             externalRequest.setMaxTokens(maxTokens);
+        }
+        if (maxTokens != null && maxTokens > 0 &&
+                model.startsWith("gpt-") && !model.matches("^gpt-[34].*")) {
+            externalRequest.setMaxCompletionTokens(maxTokens);
+            externalRequest.setMaxTokens(null);
         }
         externalRequest.setStream(Boolean.TRUE);
         externalRequest.setTools(convertTools(request.getConfiguration()));
