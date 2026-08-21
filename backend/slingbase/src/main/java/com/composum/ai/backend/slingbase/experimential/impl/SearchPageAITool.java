@@ -25,17 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.RAGService;
 import com.composum.ai.backend.slingbase.experimential.AITool;
 import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component(service = AITool.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = SearchPageAITool.Config.class)
 public class SearchPageAITool implements AITool {
     private static final Logger LOG = LoggerFactory.getLogger(SearchPageAITool.class);
     private Config config;
-    private final Gson gson = new Gson();
+    private final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Reference
     private RAGService ragService;
@@ -92,7 +93,7 @@ public class SearchPageAITool implements AITool {
         try {
             SlingHttpServletRequest request = ((SlingGPTExecutionContext) context).getRequest();
             SlingHttpServletResponse response = ((SlingGPTExecutionContext) context).getResponse();
-            Map parsedArguments = gson.fromJson(arguments, Map.class);
+            Map parsedArguments = objectMapper.readValue(arguments, Map.class);
             String query = (String) parsedArguments.get("query");
             if (query == null || query.isEmpty()) {
                 return "Missing query parameter";

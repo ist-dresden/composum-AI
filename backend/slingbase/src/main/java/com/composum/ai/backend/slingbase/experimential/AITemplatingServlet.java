@@ -24,10 +24,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Servlet providing services related to templating.
@@ -72,7 +72,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
     @Reference
     private ApproximateMarkdownService approximateMarkdownService;
 
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     protected enum Method {
         replacePromptsInResource, resetToPrompts
@@ -101,7 +101,7 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
                 .flatMap(s -> Stream.of(s.split("\\s+")))
                 .map(URI::create)
                 .collect(Collectors.toList()));
-        try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
+        try (JsonGenerator writer = objectMapper.createGenerator(response.getWriter())) {
             try {
                 String backgroundInformation = collectBackgroundInfoPaths(request, response, additionalUrls);
                 if (request.getParameter(PARAM_BACKGROUND_INFORMATION) != null) {
@@ -150,22 +150,22 @@ public class AITemplatingServlet extends SlingAllMethodsServlet {
         return backgroundInformation.toString();
     }
 
-    protected void writeToResponse(JsonWriter writer, SlingHttpServletResponse response, boolean success,
+    protected void writeToResponse(JsonGenerator writer, SlingHttpServletResponse response, boolean success,
                                    boolean changes, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        writer.beginObject();
-        writer.name("success").value(success);
-        writer.name("changes").value(changes);
-        writer.name("message").value(message);
-        writer.endObject();
+        writer.writeStartObject();
+        writer.writeBooleanField("success", success);
+        writer.writeBooleanField("changes", changes);
+        writer.writeStringField("message", message);
+        writer.writeEndObject();
         writer.flush();
     }
 
     protected void resetToPrompts(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             IOException {
         String resourcePath = request.getParameter(PARAM_RESOURCE_PATH);
-        try (JsonWriter writer = gson.newJsonWriter(response.getWriter())) {
+        try (JsonGenerator writer = objectMapper.createGenerator(response.getWriter())) {
             try {
                 Resource resource = request.getResourceResolver().getResource(resourcePath);
                 boolean changed = aiTemplatingService.resetToPrompts(resource);

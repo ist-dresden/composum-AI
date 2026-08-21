@@ -24,17 +24,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.experimential.AITool;
 import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component(service = AITool.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = GetPageMarkdownAITool.Config.class)
 public class GetPageMarkdownAITool implements AITool {
     private static final Logger LOG = LoggerFactory.getLogger(GetPageMarkdownAITool.class);
     private Config config;
-    private Gson gson = new Gson();
+    private ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Reference
     private ApproximateMarkdownService markdownService;
@@ -92,7 +93,7 @@ public class GetPageMarkdownAITool implements AITool {
         try {
             SlingHttpServletRequest request = ((SlingGPTExecutionContext) context).getRequest();
             SlingHttpServletResponse response = ((SlingGPTExecutionContext) context).getResponse();
-            Map parsedArguments = gson.fromJson(arguments, Map.class);
+            Map parsedArguments = objectMapper.readValue(arguments, Map.class);
             String path = (String) parsedArguments.get("path");
             if (path == null || path.isEmpty()) {
                 return "Missing path parameter";

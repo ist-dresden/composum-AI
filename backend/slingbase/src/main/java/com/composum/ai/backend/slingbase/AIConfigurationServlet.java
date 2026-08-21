@@ -18,9 +18,9 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.model.GPTPermissionInfo;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * AIConfigurationServlet provides access to AI configurations.
@@ -72,7 +72,7 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
     @Reference
     private AIConfigurationService aiConfigurationService;
 
-    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
@@ -99,7 +99,7 @@ public class AIConfigurationServlet extends SlingSafeMethodsServlet {
         if (allowedServices != null) {
             jsonResponse.put("allowedServices", allowedServices);
         }
-        response.getWriter().write(gson.toJson(jsonResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(jsonResponse));
     }
 
 }

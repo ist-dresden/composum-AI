@@ -25,13 +25,13 @@ import com.adobe.granite.workflow.exec.WorkflowProcess;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.model.ValidationException;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.day.cq.wcm.msm.api.RolloutManager;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Translates the page that is given as payload from it's blueprint. The page has to be a live copy of the page it's translated from.
@@ -59,7 +59,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
     @Reference
     protected AutoTranslateConfigService autoTranslateConfigService;
 
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -102,8 +102,8 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
         LOG.info("TriggerRollout workflow receiver {} , args {}", payload, processArguments);
         if (StringUtils.isNotBlank(processArguments)) {
             try {
-                triggerRolloutParameters = gson.fromJson(processArguments, TriggerRolloutParameters.class);
-            } catch (JsonSyntaxException e) {
+                triggerRolloutParameters = objectMapper.readValue(processArguments, TriggerRolloutParameters.class);
+            } catch (JsonProcessingException e) {
                 LOG.error("Failed to parse process arguments: {} , ", processArguments, e);
                 throw new ValidationException("Failed to parse process arguments " + processArguments, e);
             }
@@ -170,7 +170,7 @@ public class TriggerRolloutWorkflowProcess implements WorkflowProcess {
     }
 
 
-    public class TriggerRolloutParameters {
+    public static class TriggerRolloutParameters {
         public boolean recursive = false;
 
         @Override

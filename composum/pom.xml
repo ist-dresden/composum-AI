@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -27,12 +28,146 @@
         <java.target>11</java.target>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+
+        <!-- Defaults for the content-package-maven-plugin / sling-maven-plugin deployment target properties below,
+             formerly inherited from com.composum.meta.ist:parent-2's "cpmLocal" profile. Override in settings.xml
+             for a different target instance. -->
+        <sling.scheme>http</sling.scheme>
+        <sling.host>localhost</sling.host>
+        <sling.port>9090</sling.port>
+        <sling.context></sling.context>
+        <sling.user>admin</sling.user>
+        <sling.password>admin</sling.password>
+        <package.install>/system/console/install</package.install>
     </properties>
 
     <modules>
         <module>bundle</module>
         <module>package</module>
     </modules>
+
+    <!-- Needed to resolve com.day.jcr.vault:content-package-maven-plugin and its parent POM, which were never
+         published to Maven Central. Formerly inherited from com.composum.meta.ist:parent-root's activeByDefault
+         "adobe-public" profile, restored here since that parent was decoupled without checking this. -->
+    <repositories>
+        <repository>
+            <id>adobe-public</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>adobe-public-releases</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Versions formerly inherited from com.composum.meta.ist:parent-2 (via the sling-starter-dependencies-11 BOM),
+                 restored here since that parent was decoupled without checking all transitively-provided versions. -->
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.tenant</artifactId>
+                <version>1.1.4</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet.jsp</groupId>
+                <artifactId>jsp-api</artifactId>
+                <version>2.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>jstl</artifactId>
+                <version>1.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                <version>1.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.scripting.jsp.taglib</artifactId>
+                <version>2.3.0</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <!-- Not present anymore in Sling Starter 12, so we don't want to have that in the classpath of other modules. -->
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Versions formerly inherited from com.composum.meta.ist:parent-2, restored here since that
+                     parent was decoupled without checking all transitively-provided plugin versions. -->
+                <plugin>
+                    <groupId>com.day.jcr.vault</groupId>
+                    <artifactId>content-package-maven-plugin</artifactId>
+                    <version>0.0.24</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <failOnError>true</failOnError>
+                        <targetURL>${sling.scheme}://${sling.host}:${sling.port}${sling.context}${package.install}
+                        </targetURL>
+                        <userId>${sling.user}</userId>
+                        <password>${sling.password}</password>
+                        <useProxy>false</useProxy>
+                        <failOnMissingEmbed>true</failOnMissingEmbed>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>nl.geodienstencentrum.maven</groupId>
+                    <artifactId>sass-maven-plugin</artifactId>
+                    <version>3.7.2</version>
+                    <configuration>
+                        <sassSourceDirectory>src/main/content</sassSourceDirectory>
+                        <destination>${project.build.directory}/generated-css</destination>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.samaxes.maven</groupId>
+                    <artifactId>minify-maven-plugin</artifactId>
+                    <version>1.7.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.sling</groupId>
+                    <artifactId>sling-maven-plugin</artifactId>
+                    <version>2.4.2</version>
+                    <configuration>
+                        <user>${sling.user}</user>
+                        <password>${sling.password}</password>
+                        <failOnError>true</failOnError>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <profiles>
         <profile>

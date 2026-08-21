@@ -25,16 +25,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.experimential.AITool;
 import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component(service = AITool.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = ModifyPageWriteTool.Config.class)
 public class ModifyPageWriteTool implements AITool {
     private static final Logger LOG = LoggerFactory.getLogger(ModifyPageWriteTool.class);
     private Config config;
-    private Gson gson = new Gson();
+    private ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Override
     public @Nonnull String getName(@Nullable Locale locale) {
@@ -123,7 +124,7 @@ public class ModifyPageWriteTool implements AITool {
                 return "Path not allowed";
             }
 
-            ModifyPageReadTool.PageProperties pageProperties = gson.fromJson(arguments, ModifyPageReadTool.PageProperties.class);
+            ModifyPageReadTool.PageProperties pageProperties = objectMapper.readValue(arguments, ModifyPageReadTool.PageProperties.class);
             LOG.debug("Page properties for {}: {}", resource.getPath(), arguments);
             if (pageProperties == null || pageProperties.components.isEmpty()) {
                 return "Invalid arguments: no 'components' found.";

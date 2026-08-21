@@ -1,7 +1,7 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -15,47 +15,47 @@ public class ChatCompletionRequest {
     /**
      * The AI model to use for the chat completion request, e.g., "gpt-4".
      */
-    @SerializedName("model")
+    @JsonProperty("model")
     private String model;
     /**
      * The list of messages in the conversation, each with a role (user, assistant, system) and content.
      */
-    @SerializedName("messages")
+    @JsonProperty("messages")
     private List<ChatCompletionMessage> messages;
     /**
      * The maximum number of tokens to generate in the completion (before gpt-5).
      */
-    @SerializedName("max_tokens")
+    @JsonProperty("max_tokens")
     private Integer maxTokens;
     /**
      * The maximum number of tokens to generate in the completion (since gpt-5).
      */
-    @SerializedName("max_completion_tokens")
+    @JsonProperty("max_completion_tokens")
     private Integer maxCompletionTokens;
     /**
      * Whether to stream the response incrementally.
      */
-    @SerializedName("stream")
+    @JsonProperty("stream")
     private Boolean stream;
     /**
      * The sampling temperature, used to control randomness. Values closer to 0 make the output more deterministic.
      */
-    @SerializedName("temperature")
+    @JsonProperty("temperature")
     private Double temperature;
     /**
      * The format of the response. Possible values are "text" or "json_object".
      */
-    @SerializedName("response_format")
+    @JsonProperty("response_format")
     private ResponseFormat responseFormat;
     /**
      * A seed for deterministic generation, useful for testing or reproducible results.
      */
-    @SerializedName("seed")
+    @JsonProperty("seed")
     private Integer seed;
     /**
      * A list of tools (functions) the model can call during the chat. Each tool contains a type and function details.
      */
-    @SerializedName("tools")
+    @JsonProperty("tools")
     private List<ChatTool> tools;
 
     {
@@ -138,13 +138,13 @@ public class ChatCompletionRequest {
     }
 
     public enum Role {
-        @SerializedName("user")
+        @JsonProperty("user")
         USER,
-        @SerializedName("assistant")
+        @JsonProperty("assistant")
         ASSISTANT,
-        @SerializedName("system")
+        @JsonProperty("system")
         SYSTEM,
-        @SerializedName("tool")
+        @JsonProperty("tool")
         TOOL;
 
         public static Role make(GPTMessageRole role) {
@@ -164,9 +164,9 @@ public class ChatCompletionRequest {
     }
 
     public enum ResponseFormatType {
-        @SerializedName("text")
+        @JsonProperty("text")
         TEXT,
-        @SerializedName("json_object")
+        @JsonProperty("json_object")
         JSON_OBJECT;
 
         public static ResponseFormatType make(String type) {
@@ -182,7 +182,7 @@ public class ChatCompletionRequest {
     }
 
     public static class ResponseFormat {
-        @SerializedName("type")
+        @JsonProperty("type")
         private ResponseFormatType type;
 
         public ResponseFormatType getType() {

@@ -26,9 +26,9 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Servlet that reads the content selectors from a JSON file, adds links in the content and provides that to the dialog.
@@ -40,7 +40,7 @@ import com.google.gson.GsonBuilder;
         })
 public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet {
 
-    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     /**
      * JCR path to a JSON with the basic content selectors supported by the dialog.
@@ -87,7 +87,7 @@ public class AemContentCreationSelectorsServlet extends SlingSafeMethodsServlet 
         Map<String, String> contentSelectors;
         try (InputStream in = resource.adaptTo(InputStream.class);
              Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-            contentSelectors = gson.fromJson(reader, Map.class);
+            contentSelectors = objectMapper.readValue(reader, Map.class);
         }
         return contentSelectors;
     }

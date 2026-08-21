@@ -6,6 +6,9 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * A chat message in a dialog with ChatGPT. Currently limited to at most a text message and an image.
  *
@@ -31,7 +34,12 @@ public class GPTChatMessage {
         this(role, content, imageUrl, tool_call_id, null);
     }
 
-    public GPTChatMessage(@Nonnull GPTMessageRole role, @Nullable String content, @Nullable String imageUrl, String tool_call_id, List<GPTToolCall> tool_calls) {
+    @JsonCreator
+    public GPTChatMessage(@JsonProperty("role") @Nonnull GPTMessageRole role,
+                           @JsonProperty("content") @Nullable String content,
+                           @JsonProperty("imageUrl") @Nullable String imageUrl,
+                           @JsonProperty("tool_call_id") String tool_call_id,
+                           @JsonProperty("tool_calls") List<GPTToolCall> tool_calls) {
         this.role = role;
         this.content = content;
         this.imageUrl = imageUrl;

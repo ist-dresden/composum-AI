@@ -3,7 +3,7 @@ package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 import java.util.List;
 
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents the response from the OpenAI chat completion API, containing details
@@ -14,47 +14,47 @@ public class ChatCompletionResponse {
     /**
      * The unique identifier for this chat completion response.
      */
-    @SerializedName("id")
+    @JsonProperty("id")
     private String id;
 
     /**
      * The type of object returned, typically 'chat.completion'.
      */
-    @SerializedName("object")
+    @JsonProperty("object")
     private String object;
 
     /**
      * The timestamp (in epoch seconds) when this response was created.
      */
-    @SerializedName("created")
+    @JsonProperty("created")
     private long created;
 
     /**
      * The model used for this chat completion, e.g., 'gpt-4'.
      */
-    @SerializedName("model")
+    @JsonProperty("model")
     private String model;
 
     /**
      * An optional fingerprint of the system that generated this response.
      */
-    @SerializedName("system_fingerprint")
+    @JsonProperty("system_fingerprint")
     private String systemFingerprint;
 
     /**
      * The list of choices the model generated, each with a message and finish reason.
      */
-    @SerializedName("choices")
+    @JsonProperty("choices")
     private List<ChatCompletionChoice> choices;
 
     /**
      * Token usage information for this completion, including total, prompt, and completion tokens.
      */
-    @SerializedName("usage")
+    @JsonProperty("usage")
     private ChatCompletionUsage usage;
 
     /** Special response from claude that has no actual content. */
-    @SerializedName("type")
+    @JsonProperty("type")
     private String type;
 
     // Getters and setters
@@ -120,16 +120,16 @@ public class ChatCompletionResponse {
     }
 
     public enum FinishReason {
-        @SerializedName("stop")
+        @JsonProperty("stop")
         STOP,
-        @SerializedName("length")
+        @JsonProperty("length")
         LENGTH,
-        @SerializedName("content_filter")
+        @JsonProperty("content_filter")
         CONTENT_FILTER,
-        @SerializedName("tool_calls")
+        @JsonProperty("tool_calls")
         TOOL_CALLS,
         @Deprecated
-        @SerializedName("function_call")
+        @JsonProperty("function_call")
         FUNCTION_CALL,
         ;
 

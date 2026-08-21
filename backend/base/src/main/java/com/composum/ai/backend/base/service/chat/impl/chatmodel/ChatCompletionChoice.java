@@ -1,6 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents a choice in the chat completion response. Each choice may include a message,
@@ -11,25 +11,25 @@ public class ChatCompletionChoice {
     /**
      * The position of this choice in the list of choices returned by the API.
      */
-    @SerializedName("index")
+    @JsonProperty("index")
     private int index;
 
     /**
      * The message content associated with this choice.
      */
-    @SerializedName("message")
+    @JsonProperty("message")
     private ChatCompletionChoiceMessage message;
 
     /**
      * Used for incremental updates (streaming responses), represents partial message content.
      */
-    @SerializedName("delta")
+    @JsonProperty("delta")
     private ChatCompletionChoiceMessage delta;
 
     /**
      * The reason why the completion stopped (e.g., length, stop signal).
      */
-    @SerializedName("finish_reason")
+    @JsonProperty("finish_reason")
     private ChatCompletionResponse.FinishReason finishReason;
 
     // Getters and setters

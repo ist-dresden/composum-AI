@@ -8,7 +8,7 @@ import static com.composum.ai.composum.bundle.WritePredefinedPromptsInAEMFormat.
  */
 public class WriteTextLengthsInAEMFormat {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         final String jsonfile = "/create/textlengths.json";
         jsonListToXML(WriteTextLengthsInAEMFormat.class, jsonfile, false);
     }

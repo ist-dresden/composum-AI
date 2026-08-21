@@ -75,11 +75,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.eclipse.mylyn.docs</groupId>
             <artifactId>org.eclipse.mylyn.wikitext</artifactId>
             <version>${wikitext.version}</version>
@@ -172,7 +167,6 @@
                         <Import-Package>
                             javax.annotation;version="[1,4)",
                             !javax.annotation.meta,
-                            com.google.gson.*,
                             !com.google.*,
                             !android.*,
                             !org.apache.hc.*,

@@ -19,12 +19,10 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.AIConfigurationPlugin;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This implementation sources the global GPTPromptLibrary configuration from the OSGI environment.
@@ -42,7 +40,7 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
 
     private GPTPromptLibrary config;
 
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Activate
     @Modified
@@ -81,8 +79,8 @@ public class OsgiAIPromptlibConfigurationPluginImpl implements AIConfigurationPl
             if (stream == null) {
                 return null;
             }
-            return gson.fromJson(new InputStreamReader(stream), Map.class);
-        } catch (IOException | JsonSyntaxException | JsonIOException e) {
+            return objectMapper.readValue(new InputStreamReader(stream), Map.class);
+        } catch (IOException e) {
             LOG.error("Error reading map from {}", mapPath, e);
             return null;
         }

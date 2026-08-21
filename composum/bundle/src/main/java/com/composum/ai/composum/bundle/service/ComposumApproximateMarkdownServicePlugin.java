@@ -100,11 +100,11 @@ public class ComposumApproximateMarkdownServicePlugin implements ApproximateMark
                 out.println("#### " + helper.getMarkdown(title) + "\n");
             }
             // for each child of type "row" we print a line with the values of the children of type "cell"
-            StreamSupport.stream(resource.getChildren().spliterator(), true)
+            StreamSupport.stream(resource.getChildren().spliterator(), false)
                     .filter(row -> row.getResourceType().equals("composum/pages/components/composed/table/row"))
                     .forEach(row -> {
                         out.print("| ");
-                        StreamSupport.stream(row.getChildren().spliterator(), true)
+                        StreamSupport.stream(row.getChildren().spliterator(), false)
                                 .filter(cell -> cell.getResourceType().equals("composum/pages/components/composed/table/cell"))
                                 .map(cell -> cell.getValueMap().get("text", String.class))
                                 .forEach(text -> out.print(helper.getMarkdown(text) + " | "));
