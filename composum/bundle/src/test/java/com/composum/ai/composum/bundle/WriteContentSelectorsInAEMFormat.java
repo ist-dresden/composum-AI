@@ -8,7 +8,7 @@ import static com.composum.ai.composum.bundle.WritePredefinedPromptsInAEMFormat.
  */
 public class WriteContentSelectorsInAEMFormat {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         final String jsonfile = "/create/contentselectors.json";
         jsonListToXML(WriteContentSelectorsInAEMFormat.class, jsonfile, true);
         System.out.println("CAUTION: the 'no content' is different (directly from source content)");

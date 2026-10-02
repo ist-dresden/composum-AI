@@ -18,10 +18,10 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.exec.WorkflowProcess;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.model.ValidationException;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.experimential.AITemplatingService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Triggers a call of the {@link AITemplatingService} on the current page.
@@ -38,7 +38,7 @@ public class PageTemplatingWorkflowProcess implements WorkflowProcess {
     @Reference
     protected AITemplatingService aiTemplatingService;
 
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -78,9 +78,9 @@ public class PageTemplatingWorkflowProcess implements WorkflowProcess {
         LOG.info("TriggerRollout workflow receiver {} , args {}", payload, processArguments);
         if (StringUtils.isNotBlank(processArguments)) {
             try {
-                Map parameters = gson.fromJson(processArguments, Map.class);
+                Map parameters = objectMapper.readValue(processArguments, Map.class);
                 return parameters.containsKey("reset") && (Boolean) parameters.get("reset");
-            } catch (JsonSyntaxException | ClassCastException | IllegalArgumentException e) {
+            } catch (JsonProcessingException | ClassCastException | IllegalArgumentException e) {
                 LOG.error("Failed to parse process arguments: {} , ", processArguments, e);
                 throw new ValidationException("Failed to parse process arguments " + processArguments, e);
             }

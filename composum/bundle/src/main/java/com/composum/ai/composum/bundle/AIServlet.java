@@ -9,7 +9,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,11 +60,11 @@ import com.composum.sling.core.servlet.AbstractServiceServlet;
 import com.composum.sling.core.servlet.ServletOperation;
 import com.composum.sling.core.servlet.ServletOperationSet;
 import com.composum.sling.core.servlet.Status;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.sling.core.util.XSS;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Servlet providing the various services from the backend as servlet, which are useable for the authors.
@@ -205,7 +204,7 @@ public class AIServlet extends AbstractServiceServlet {
 
     protected BundleContext bundleContext;
 
-    protected Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     public enum Extension {json, sse}
 
@@ -579,13 +578,11 @@ public class AIServlet extends AbstractServiceServlet {
             if (isNotBlank(chat)) {
                 additionalParameters.setConfiguration(GPTConfiguration.CHAT.merge(config));
                 try {
-                    final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
+                    List<GPTChatMessage> messages = objectMapper.readValue(chat, new TypeReference<ArrayList<GPTChatMessage>>() {
                         // empty
-                    }.getType();
-
-                    List<GPTChatMessage> messages = gson.fromJson(chat, listOfMyClassObject);
+                    });
                     additionalParameters.addMessages(messages);
-                } catch (IllegalArgumentException | JsonSyntaxException e) {
+                } catch (IllegalArgumentException | JsonProcessingException e) {
                     status.error("Invalid chat parameter " + chat, e);
                 }
             }

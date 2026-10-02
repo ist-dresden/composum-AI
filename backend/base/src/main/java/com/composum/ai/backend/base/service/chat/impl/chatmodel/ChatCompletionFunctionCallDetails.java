@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.composum.ai.backend.base.service.chat.GPTFunctionCallDetails;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents the a call of a function used as a tool in the chat completion request.
@@ -14,13 +14,13 @@ public class ChatCompletionFunctionCallDetails {
     /**
      * The name of the function to be called. This must be unique and can only contain a-z, A-Z, 0-9, underscores, and dashes.
      */
-    @SerializedName("name")
+    @JsonProperty("name")
     private String name;
 
     /**
      * A JSON for the arguments the function is called with.
      */
-    @SerializedName("arguments")
+    @JsonProperty("arguments")
     private String arguments;
 
     public String getName() {

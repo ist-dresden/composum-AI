@@ -27,9 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.experimential.AITool;
 import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component(service = AITool.class, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = ModifyPageReadTool.Config.class)
@@ -42,7 +45,7 @@ public class ModifyPageReadTool implements AITool {
     public static final Pattern PATTERN_TWO_SEPARATE_WHITESPACE = Pattern.compile("\\s\\S+\\s+");
 
     private Config config;
-    private Gson gson = new Gson();
+    private ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Override
     public @Nonnull String getName(@Nullable Locale locale) {
@@ -108,7 +111,7 @@ public class ModifyPageReadTool implements AITool {
             PageProperties pageProperties = new PageProperties();
             String removePrefix = contentResource.getPath();
             descendantsStream(contentResource).forEach(r -> collectProperties(removePrefix,r, pageProperties));
-            String json = gson.toJson(pageProperties);
+            String json = objectMapper.writeValueAsString(pageProperties);
             LOG.debug("Page properties for {}: {}", resource.getPath(), json);
             return json;
         } catch (Exception e) {
@@ -192,7 +195,9 @@ public class ModifyPageReadTool implements AITool {
         String key;
         String value;
 
-        public ComponentProperty(String key, String value) {
+        @JsonCreator
+        public ComponentProperty(@JsonProperty("key") String key,
+                                  @JsonProperty("value") String value) {
             this.key = key;
             this.value = value;
         }

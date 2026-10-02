@@ -2,7 +2,7 @@ package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
 import java.util.List;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request and response for OpenAI embeddings API.
@@ -16,19 +16,19 @@ public interface OpenAIEmbeddings {
 
     class EmbeddingRequest {
 
-        @SerializedName("input")
+        @JsonProperty("input")
         private List<String> input;
 
-        @SerializedName("model")
+        @JsonProperty("model")
         private String model;
 
-        @SerializedName("encoding_format")
+        @JsonProperty("encoding_format")
         private String encodingFormat;
 
-        @SerializedName("dimensions")
+        @JsonProperty("dimensions")
         private Integer dimensions;
 
-        @SerializedName("user")
+        @JsonProperty("user")
         private String user;
 
         // Getters and setters
@@ -75,7 +75,7 @@ public interface OpenAIEmbeddings {
 
     class EmbeddingResponse {
 
-        @SerializedName("data")
+        @JsonProperty("data")
         private List<EmbeddingObject> data;
 
         // Getters and setters
@@ -91,10 +91,10 @@ public interface OpenAIEmbeddings {
 
     class EmbeddingObject {
 
-        @SerializedName("index")
+        @JsonProperty("index")
         private Integer index;
 
-        @SerializedName("embedding")
+        @JsonProperty("embedding")
         private float[] embedding;
 
         // Getters and setters

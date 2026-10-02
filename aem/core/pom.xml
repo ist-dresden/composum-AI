@@ -19,7 +19,7 @@
     <parent>
         <groupId>com.composum.ai.aem</groupId>
         <artifactId>composum-ai</artifactId>
-        <version>3.2.0</version>
+        <version>3.3.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>composum-ai.core</artifactId>
@@ -178,12 +178,9 @@ Sling-ContextAware-Configuration-Classes: com.composum.ai.aem.core.impl.autotran
             <artifactId>fastexcel-reader</artifactId>
             <version>0.18.4</version>
         </dependency>
-        <!-- Some Gson internal packages are missing in the uber-jar :-( -->
         <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>2.8.5</version>
-          <scope>test</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
     </dependencies>
 </project>

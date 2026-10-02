@@ -2,6 +2,7 @@ package com.composum.ai.composum.bundle.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -16,11 +17,9 @@ import com.composum.ai.backend.base.service.chat.GPTChatCompletionService;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.model.GPTPromptLibrary;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.pages.commons.model.AbstractModel;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CreateDialogModel extends AbstractModel {
 
@@ -80,13 +79,13 @@ public class CreateDialogModel extends AbstractModel {
         return readJsonFile("create/textlengths.json");
     }
 
-    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private static final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     static Map<String, String> readJsonFile(String filePath) {
         try {
             InputStream inputStream = CreateDialogModel.class.getClassLoader().getResourceAsStream(filePath);
-            return gson.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Map.class);
-        } catch (JsonSyntaxException | JsonIOException e) {
+            return objectMapper.readValue(new InputStreamReader(inputStream, StandardCharsets.UTF_8), Map.class);
+        } catch (IOException e) {
             LOG.error("Cannot read {}", filePath, e);
             return null;
         }

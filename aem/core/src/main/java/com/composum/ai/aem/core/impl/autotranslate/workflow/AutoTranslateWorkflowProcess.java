@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -25,10 +26,10 @@ import com.composum.ai.aem.core.impl.autotranslate.AutoPageTranslateService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateListModel;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateService.TranslationParameters;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.day.cq.wcm.api.WCMException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Autotranslate workflow. This triggers a automatic translation of a live copy from it's blueprint. As process
@@ -51,7 +52,7 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
     @Reference
     protected AutoTranslateConfigService autoTranslateConfigService;
 
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -92,7 +93,8 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
     protected TranslationParameters getTranslationParameters(String processArguments) throws WorkflowException {
         TranslationParameters parameters;
         try {
-            parameters = gson.fromJson(processArguments, TranslationParameters.class);
+            parameters = StringUtils.isNotBlank(processArguments) ?
+                    objectMapper.readValue(processArguments, TranslationParameters.class) : null;
             if (parameters == null) {
                 parameters = new TranslationParameters();
                 parameters.autoSave = true;
@@ -100,7 +102,7 @@ public class AutoTranslateWorkflowProcess implements WorkflowProcess {
             } else {
                 LOG.debug("Using parameters {}", parameters);
             }
-        } catch (JsonSyntaxException e) {
+        } catch (JsonProcessingException e) {
             LOG.error("Failed to parse process arguments: {}", processArguments, e);
             throw new WorkflowException("Failed to parse process arguments", e);
         }

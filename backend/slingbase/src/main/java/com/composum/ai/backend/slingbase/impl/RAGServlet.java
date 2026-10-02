@@ -32,9 +32,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.RAGService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Servlet providing various RAG supported services.
@@ -49,7 +49,7 @@ public class RAGServlet extends SlingSafeMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(RAGServlet.class);
 
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     /**
      * The actual search query.
@@ -140,7 +140,7 @@ public class RAGServlet extends SlingSafeMethodsServlet {
             LOG.error("Error in RAG servlet for query {} limit {} location {}", query, limit, searchLocation, e);
             throw new ServletException(e);
         }
-        String json = gson.toJson(result);
+        String json = objectMapper.writeValueAsString(result);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(json);

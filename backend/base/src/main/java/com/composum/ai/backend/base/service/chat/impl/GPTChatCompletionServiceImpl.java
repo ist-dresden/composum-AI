@@ -23,10 +23,10 @@ import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionRe
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatCompletionToolCall;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.ChatTool;
 import com.composum.ai.backend.base.service.chat.impl.chatmodel.OpenAIEmbeddings;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
@@ -139,7 +139,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
 
     protected CloseableHttpAsyncClient httpAsyncClient;
 
-    protected static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected static final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     protected final AtomicLong requestCounter = new AtomicLong(System.currentTimeMillis());
 
@@ -270,7 +270,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             ChatCompletionRequest externalRequest = createExternalRequest(request);
             GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
             externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
-            String jsonRequest = gson.toJson(externalRequest);
+            String jsonRequest = objectMapper.writeValueAsString(externalRequest);
             if (request.getConfiguration() != null && Boolean.TRUE.equals(request.getConfiguration().getDebug())
                     || jsonRequest.contains(MARKER_DEBUG_OUTPUT_REQUEST)) {
                 LOG.debug("Not sending request {} to GPT - debugging mode: {}", id, externalRequest);
@@ -339,7 +339,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             ChatCompletionRequest externalRequest = createExternalRequest(request);
             GPTConfiguration configWithModel = GPTConfiguration.ofModel(externalRequest.getModel()).merge(request.getConfiguration());
             externalRequest.setModel(backendsService.getModelNameInBackend(externalRequest.getModel()));
-            String jsonRequest = gson.toJson(externalRequest);
+            String jsonRequest = objectMapper.writeValueAsString(externalRequest);
             callback.setRequest(jsonRequest);
             if (LOG.isDebugEnabled()) {
                 // replace data:image/jpeg;base64,{base64_image} with data:image/jpeg;base64, ...
@@ -436,7 +436,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     callback.close();
                     return;
                 }
-                ChatCompletionResponse chunk = gson.fromJson(line, ChatCompletionResponse.class);
+                ChatCompletionResponse chunk = objectMapper.readValue(line, ChatCompletionResponse.class);
                 if (chunk != null && "ping".equals(chunk.getType())) {
                     return; // Special intermediate message from Anthropic, no actual data.
                 }
@@ -463,7 +463,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                     LOG.debug("Response {} from GPT finished with reason {}", id, finishReason);
                     callback.onFinish(finishReason);
                 }
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | IOException e) {
                 LOG.error("Id {} Cannot deserialize {}", id, line, e);
                 GPTException gptException = new GPTException("Cannot deserialize " + line, e);
                 callback.onError(gptException);
@@ -648,7 +648,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         return model;
     }
 
-    private List<ChatTool> convertTools(GPTConfiguration configuration) {
+    private List<ChatTool> convertTools(GPTConfiguration configuration) throws JsonProcessingException {
         if (configuration == null || configuration.getTools() == null || configuration.getTools().isEmpty()) {
             return null;
         }
@@ -658,7 +658,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             ChatCompletionFunctionDetails details = new ChatCompletionFunctionDetails();
             details.setName(tool.getName());
             details.setStrict(true);
-            Map declaration = gson.fromJson(tool.getToolDeclaration(), Map.class);
+            Map declaration = objectMapper.readValue(tool.getToolDeclaration(), Map.class);
             Map function = (Map) declaration.get("function");
             details.setParameters(function.get("parameters"));
             details.setDescription((String) function.get("description"));
@@ -832,7 +832,12 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
         request.setInput(texts);
         request.setModel(embeddingsModel);
         request.setEncodingFormat("float");
-        String jsonRequest = gson.toJson(request);
+        String jsonRequest;
+        try {
+            jsonRequest = objectMapper.writeValueAsString(request);
+        } catch (JsonProcessingException e) {
+            throw new GPTException("Cannot serialize embeddings request", e);
+        }
         LOG.trace("Sending embeddings request {} to GPT: {}", id, jsonRequest);
         SimpleHttpRequest httpRequest = makeRequest(jsonRequest, configuration);
         String bodyText = null;
@@ -847,7 +852,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
                 throw GPTException.buildException(response.getCode(), bodyText);
             }
             LOG.trace("Response {} from GPT: {}", id, bodyText);
-            OpenAIEmbeddings.EmbeddingResponse entity = gson.fromJson(bodyText, OpenAIEmbeddings.EmbeddingResponse.class);
+            OpenAIEmbeddings.EmbeddingResponse entity = objectMapper.readValue(bodyText, OpenAIEmbeddings.EmbeddingResponse.class);
             if (entity.getData() == null) {
                 LOG.error("No data in embeddings response {}", bodyText);
                 throw new GPTException("No data in embeddings response");
@@ -858,7 +863,7 @@ public class GPTChatCompletionServiceImpl extends GPTInternalOpenAIHelper.GPTInt
             }
             Arrays.stream(result).forEach(Objects::requireNonNull);
             return Arrays.asList(result);
-        } catch (JsonSyntaxException e) {
+        } catch (JsonProcessingException e) {
             LOG.error("Cannot parse embeddings response because of {}", bodyText, e);
             throw new GPTException("Cannot parse embeddings response", e);
         } catch (InterruptedException e) {

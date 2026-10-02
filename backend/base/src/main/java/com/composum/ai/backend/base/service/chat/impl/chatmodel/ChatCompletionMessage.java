@@ -4,8 +4,10 @@ import java.util.Collections;
 import java.util.List;
 
 import com.composum.ai.backend.base.service.chat.GPTChatMessage;
-import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Represents a message in a chat completion request, containing the role of the speaker
@@ -16,25 +18,27 @@ public class ChatCompletionMessage {
     /**
      * The role of the speaker for this message, such as 'user', 'assistant', 'system', or 'tool'.
      */
-    @SerializedName("role")
+    @JsonProperty("role")
     private ChatCompletionRequest.Role role;
 
     /**
      * The content of the message, which may include text or other parts (like images).
      */
-    @SerializedName("content")
-    @JsonAdapter(ChatCompletionMessagePart.ChatCompletionMessagePartListDeSerializer.class)
+    @JsonProperty("content")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSerialize(using = ChatCompletionMessagePart.ChatCompletionMessagePartListSerializer.class)
+    @JsonDeserialize(using = ChatCompletionMessagePart.ChatCompletionMessagePartListDeserializer.class)
     private List<ChatCompletionMessagePart> content;
 
     /**
      * The ID of the tool call that this message is responding to.
      * Only applicable when the role is 'tool'.
      */
-    @SerializedName("tool_call_id")
+    @JsonProperty("tool_call_id")
     private String toolCallId;
 
     /** List of tool calls that should be executed. */
-    @SerializedName("tool_calls")
+    @JsonProperty("tool_calls")
     private List<ChatCompletionToolCall> toolCalls;
 
     public static ChatCompletionMessage make(GPTChatMessage message) {

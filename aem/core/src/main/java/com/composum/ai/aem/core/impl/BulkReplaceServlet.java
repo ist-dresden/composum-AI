@@ -42,13 +42,14 @@ import org.slf4j.LoggerFactory;
 
 import com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper;
 import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMException;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Servlet with functionality for the bulk replace tool.
@@ -80,7 +81,7 @@ import com.google.gson.JsonSyntaxException;
 public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(BulkReplaceServlet.class);
-    private static final Gson gson = new Gson();
+    private static final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
     /**
      * The number of characters surrounding the match that are put into an excerpt.
      */
@@ -273,7 +274,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         SearchPageResponse pageEvent = new SearchPageResponse();
                         pageEvent.page = candidatePage.getPath();
                         pageEvent.matches = matches;
-                        sendEvent(response, "page", gson.toJson(pageEvent));
+                        sendEvent(response, "page", objectMapper.writeValueAsString(pageEvent));
                     }
                 }
             }
@@ -281,7 +282,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             SummaryResponse summary = new SummaryResponse();
             summary.pages = totalPages.get();
             summary.matches = totalMatches.get();
-            sendEvent(response, "summary", gson.toJson(summary));
+            sendEvent(response, "summary", objectMapper.writeValueAsString(summary));
 
         } catch (Exception e) {
             LOG.error("Error during search operation", e);
@@ -470,7 +471,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         if (request.getContentType() != null && request.getContentType().contains("application/json")) {
             ReplaceRequest replaceRequest = null;
             try (Reader reader = request.getReader()) {
-                replaceRequest = gson.fromJson(reader, ReplaceRequest.class);
+                replaceRequest = objectMapper.readValue(reader, ReplaceRequest.class);
                 if (replaceRequest.page == null || replaceRequest.term == null ||
                         replaceRequest.replacement == null || replaceRequest.targets == null ||
                         replaceRequest.targets.isEmpty()) {
@@ -617,8 +618,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                 pageResp.changed = changedList;
                 pageResp.skipped = skippedTargets;
                 pageResp.published = published;
-                response.getWriter().write(gson.toJson(pageResp));
-            } catch (JsonSyntaxException e) {
+                response.getWriter().write(objectMapper.writeValueAsString(pageResp));
+            } catch (JsonProcessingException e) {
                 response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
             } catch (WCMException e) {
                 LOG.error("{} on {}", e, replaceRequest, e);

@@ -1,15 +1,17 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
  * Represents a part of a chat completion message, which may be a text or an image URL.
@@ -33,17 +35,17 @@ public class ChatCompletionMessagePart {
     /**
      * The type of this message part, either 'text' or 'image_url'.
      */
-    @SerializedName("type")
+    @JsonProperty("type")
     private Type type;
     /**
      * The text content of this message part, used when the type is 'text'.
      */
-    @SerializedName("text")
+    @JsonProperty("text")
     private String text;
     /**
      * The image URL content of this message part, used when the type is 'image_url'.
      */
-    @SerializedName("image_url")
+    @JsonProperty("image_url")
     private ChatCompletionMessageUrlPart imageUrl;
 
     public static ChatCompletionMessagePart text(String text) {
@@ -94,16 +96,16 @@ public class ChatCompletionMessagePart {
     }
 
     public enum Type {
-        @SerializedName("text")
+        @JsonProperty("text")
         TEXT,
-        @SerializedName("image_url")
+        @JsonProperty("image_url")
         IMAGE_URL
     }
 
     public enum ImageDetail {
-        @SerializedName("low")
+        @JsonProperty("low")
         LOW,
-        @SerializedName("high")
+        @JsonProperty("high")
         HIGH
     }
 
@@ -112,10 +114,10 @@ public class ChatCompletionMessagePart {
      */
     public static class ChatCompletionMessageUrlPart {
 
-        @SerializedName("url")
+        @JsonProperty("url")
         private String url;
 
-        @SerializedName("detail")
+        @JsonProperty("detail")
         private ImageDetail detail = ImageDetail.LOW;
 
         // Getters and setters
@@ -138,26 +140,25 @@ public class ChatCompletionMessagePart {
 
     }
 
-    public static class ChatCompletionMessagePartListDeSerializer implements JsonDeserializer<List<ChatCompletionMessagePart>>,
-            JsonSerializer<List<ChatCompletionMessagePart>> {
+    public static class ChatCompletionMessagePartListDeserializer extends JsonDeserializer<List<ChatCompletionMessagePart>> {
 
         @Override
-        public List<ChatCompletionMessagePart> deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        public List<ChatCompletionMessagePart> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             List<ChatCompletionMessagePart> content = new ArrayList<>();
+            JsonNode json = p.getCodec().readTree(p);
 
-            if (json.isJsonArray()) {
-                for (JsonElement element : json.getAsJsonArray()) {
+            if (json.isArray()) {
+                for (JsonNode element : json) {
                     try {
-                        content.add(context.deserialize(element, ChatCompletionMessagePart.class));
+                        content.add(p.getCodec().treeToValue(element, ChatCompletionMessagePart.class));
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                         throw e;
                     }
-
                 }
-            } else if (json.isJsonPrimitive()) {
+            } else if (json.isTextual()) {
                 ChatCompletionMessagePart part = new ChatCompletionMessagePart();
-                part.setText(json.getAsString());
+                part.setText(json.asText());
                 part.setType(Type.TEXT);
                 content.add(part);
             }
@@ -165,19 +166,26 @@ public class ChatCompletionMessagePart {
             return content;
         }
 
-        /**
-         * To save space: if there is only one element in src that also is a text message, we serialize it as a string,
-         * otherwise as object list.
-         */
+    }
+
+    /**
+     * To save space: if there is only one element in the list that also is a text message, we serialize it as a
+     * string, otherwise as object list. An empty or null list is omitted entirely, like the other null fields.
+     */
+    public static class ChatCompletionMessagePartListSerializer extends JsonSerializer<List<ChatCompletionMessagePart>> {
+
         @Override
-        public JsonElement serialize(List<ChatCompletionMessagePart> src, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {
-            if (src == null || src.isEmpty()) {
-                return null;
+        public boolean isEmpty(SerializerProvider provider, List<ChatCompletionMessagePart> value) {
+            return value == null || value.isEmpty();
+        }
+
+        @Override
+        public void serialize(List<ChatCompletionMessagePart> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            if (value.size() == 1 && value.get(0).getType() == Type.TEXT) {
+                gen.writeString(value.get(0).getText());
+            } else {
+                serializers.defaultSerializeValue(value, gen);
             }
-            if (src.size() == 1 && src.get(0).getType() == Type.TEXT) {
-                return context.serialize(src.get(0).getText(), String.class);
-            }
-            return context.serialize(src);
         }
 
     }

@@ -16,9 +16,10 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.sling.core.servlet.Status;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @deprecated use slingbase EventStream
@@ -46,7 +47,7 @@ public class EventStream implements GPTCompletionCallback {
 
     private volatile GPTFinishReason finishReason;
 
-    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 250);
 
@@ -131,7 +132,13 @@ public class EventStream implements GPTCompletionCallback {
     protected void writeData(String data) {
         // data = XSS.filter(data); // OUCH - that breaks things sometimes and doesn't really work as the troublesome
         // stuff could be spread out... TODO: find a better way to filter the output
-        queue.add("data: " + gson.toJson(data));
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        queue.add("data: " + json);
         queue.add(""); // empty line to separate events and force processing of this event
         wholeResponse.append(data);
     }
