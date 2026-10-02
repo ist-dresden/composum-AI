@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.composum.ai</groupId>
         <artifactId>composum-ai-integration</artifactId>
-        <version>3.3.0-rc</version>
+        <version>3.3.0</version>
     </parent>
 
     <groupId>com.composum.ai.aem</groupId>
