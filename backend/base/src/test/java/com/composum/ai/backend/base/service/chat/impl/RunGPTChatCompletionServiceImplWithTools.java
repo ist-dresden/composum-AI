@@ -11,8 +11,9 @@ import com.composum.ai.backend.base.service.chat.GPTFinishReason;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
 import com.composum.ai.backend.base.service.chat.GPTToolCall;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.composum.ai.backend.base.util.JsonUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tries an actual call to ChatGPT with the streaming interface. Since that costs money (though much less than a cent),
@@ -21,7 +22,7 @@ import com.google.gson.GsonBuilder;
 public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner implements GPTCompletionCallback {
 
     StringBuilder buffer = new StringBuilder();
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    ObjectMapper objectMapper = JsonUtil.newObjectMapper();
     private boolean isFinished;
     List<GPTToolCall> toolCalls;
 
@@ -42,7 +43,7 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
         System.out.println("######################### Done. ######################### ");
     }
 
-    private void runWithoutAutomaticCall() throws InterruptedException {
+    private void runWithoutAutomaticCall() throws InterruptedException, JsonProcessingException {
         GPTChatRequest request = makeRequest();
         chatCompletionService.streamingChatCompletion(request, this);
         System.out.println("Call returned.");
@@ -50,7 +51,7 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
         System.out.println("Complete response:");
         System.out.println(buffer);
         System.out.println("Tool calls:");
-        System.out.println(gson.toJson(toolCalls));
+        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(toolCalls));
     }
 
     private void runWithAutomaticCall() throws InterruptedException {
@@ -134,7 +135,12 @@ public class RunGPTChatCompletionServiceImplWithTools extends AbstractGPTRunner 
 
         @Override
         public String execute(String arguments, GPTToolExecutionContext context) {
-            Map parsedArguments = gson.fromJson(arguments, Map.class);
+            Map parsedArguments;
+            try {
+                parsedArguments = objectMapper.readValue(arguments, Map.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             String towobble = (String) parsedArguments.get("towobble");
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < towobble.length(); i++) {

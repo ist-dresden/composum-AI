@@ -1,7 +1,6 @@
 package com.composum.ai.backend.slingbase.experimential.impl;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -37,9 +36,6 @@ import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.slingbase.AIConfigurationService;
 import com.composum.ai.backend.slingbase.ApproximateMarkdownService;
 import com.composum.ai.backend.slingbase.experimential.AITemplatingService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 
 /**
@@ -107,11 +103,6 @@ public class AITemplatingServiceImpl implements AITemplatingService {
      */
     protected static final Pattern THE_END_PATTERN = Pattern.compile("\\(\\s*end of page\\s*\\)");
 
-
-    protected static final Type TYPE_MAP_STRING_STRING = new TypeToken<Map<String, String>>() {
-    }.getType();
-
-    protected final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     protected static final Logger LOG = LoggerFactory.getLogger(AITemplatingServiceImpl.class);
 

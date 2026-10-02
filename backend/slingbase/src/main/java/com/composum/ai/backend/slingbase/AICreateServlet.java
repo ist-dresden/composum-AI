@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -45,12 +44,12 @@ import com.composum.ai.backend.base.service.chat.GPTConfiguration;
 import com.composum.ai.backend.base.service.chat.GPTContentCreationService;
 import com.composum.ai.backend.base.service.chat.GPTMessageRole;
 import com.composum.ai.backend.base.service.chat.GPTTool;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.experimential.AITool;
 import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Servlet providing the various services from the backend as servlet, which are useable for the authors.
@@ -140,7 +139,7 @@ public class AICreateServlet extends SlingAllMethodsServlet {
 
     protected BundleContext bundleContext;
 
-    protected Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    protected ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     @Reference(service = AITool.class, policy = ReferencePolicy.DYNAMIC,
             cardinality = ReferenceCardinality.MULTIPLE)
@@ -360,13 +359,13 @@ public class AICreateServlet extends SlingAllMethodsServlet {
             response.setStatus(HttpServletResponse.SC_OK);
             // on 202 with Location header Chrome freezes in $.ajax for  AEM 6.5.7 8-{} . So we have to do it differently.
             response.setContentType("application/json");
-            gson.toJson(Collections.singletonMap(PARAMETER_STREAMID, id), response.getWriter());
+            objectMapper.writeValue(response.getWriter(), Collections.singletonMap(PARAMETER_STREAMID, id));
             LOG.info("Returning stream id {}", id);
         } catch (Exception e) {
             LOG.error("Error during content creation", e);
             response.setStatus(HttpServletResponse.SC_OK); // using an error status code could lead to an error page
             response.setContentType("application/json");
-            gson.toJson(Collections.singletonMap("error", "Error during content creation: " + e.getMessage()), response.getWriter());
+            objectMapper.writeValue(response.getWriter(), Collections.singletonMap("error", "Error during content creation: " + e.getMessage()));
         } finally {
             LOG.info("Finished content creation");
         }
@@ -378,13 +377,11 @@ public class AICreateServlet extends SlingAllMethodsServlet {
         if (isNotBlank(chat)) {
             additionalParameters.setConfiguration(GPTConfiguration.CHAT.merge(config));
             try {
-                final Type listOfMyClassObject = new TypeToken<ArrayList<GPTChatMessage>>() {
+                List<GPTChatMessage> messages = objectMapper.readValue(chat, new TypeReference<ArrayList<GPTChatMessage>>() {
                     // empty
-                }.getType();
-
-                List<GPTChatMessage> messages = gson.fromJson(chat, listOfMyClassObject);
+                });
                 additionalParameters.addMessages(messages);
-            } catch (IllegalArgumentException | JsonSyntaxException e) {
+            } catch (IllegalArgumentException | JsonProcessingException e) {
                 LOG.warn("Invalid chat parameter: {}", chat, e);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid chat parameter: " + chat);
                 throw e;

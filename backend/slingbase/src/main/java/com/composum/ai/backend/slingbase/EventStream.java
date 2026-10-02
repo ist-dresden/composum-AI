@@ -20,9 +20,10 @@ import org.slf4j.LoggerFactory;
 import com.composum.ai.backend.base.service.StringstreamSlowdown;
 import com.composum.ai.backend.base.service.chat.GPTCompletionCallback;
 import com.composum.ai.backend.base.service.chat.GPTFinishReason;
+import com.composum.ai.backend.base.util.JsonUtil;
 import com.composum.ai.backend.slingbase.model.SlingGPTExecutionContext;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class EventStream implements GPTCompletionCallback {
 
@@ -46,7 +47,7 @@ public class EventStream implements GPTCompletionCallback {
 
     private volatile GPTFinishReason finishReason;
 
-    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     private final StringstreamSlowdown slowdown = new StringstreamSlowdown(this::writeData, 250);
 
@@ -54,6 +55,14 @@ public class EventStream implements GPTCompletionCallback {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    private String toJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void writeTo(PrintWriter writer) throws InterruptedException {
@@ -100,7 +109,7 @@ public class EventStream implements GPTCompletionCallback {
                 Collections.singletonMap("finishreason", finishReason.name())));
         queue.add("");
         queue.add("event: finished");
-        queue.add("data: " + gson.toJson(status));
+        queue.add("data: " + toJson(status));
         queue.add("");
         queue.add("");
         queue.add(QUEUEEND);
@@ -140,7 +149,7 @@ public class EventStream implements GPTCompletionCallback {
         // data = XSS.filter(data); // OUCH - that breaks things sometimes and doesn't really work as the troublesome
         // stuff could be spread out...
         // TODO: find a better way to filter the output
-        queue.add("data: " + gson.toJson(data));
+        queue.add("data: " + toJson(data));
         queue.add(""); // empty line to separate events and force processing of this event
         wholeResponse.append(data);
     }
@@ -161,7 +170,7 @@ public class EventStream implements GPTCompletionCallback {
         status.put("messages", Collections.singletonList(messages));
         queue.add("");
         queue.add("event: exception"); // do not use 'error' as event name as that is received when the connection is closed.
-        queue.add("data: " + gson.toJson(status));
+        queue.add("data: " + toJson(status));
         queue.add("");
         queue.add("");
         queue.add(QUEUEEND);

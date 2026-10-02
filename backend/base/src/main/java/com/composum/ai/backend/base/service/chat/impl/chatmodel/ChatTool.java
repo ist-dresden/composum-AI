@@ -1,6 +1,6 @@
 package com.composum.ai.backend.base.service.chat.impl.chatmodel;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents a tool in the OpenAI chat completion request, currently limited to functions.
@@ -11,13 +11,13 @@ public class ChatTool {
     /**
      * The type of the tool, currently fixed as "function".
      */
-    @SerializedName("type")
+    @JsonProperty("type")
     private String type = "function";  // currently Always "function"
 
     /**
      * The details of the function, such as its name, description, and parameters.
      */
-    @SerializedName("function")
+    @JsonProperty("function")
     private ChatCompletionFunctionDetails function;  // Function details object
 
     // Getters and setters

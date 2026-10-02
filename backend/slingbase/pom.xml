@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.composum.ai</groupId>
         <artifactId>composum-ai-integration-backend</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>3.3.0-rc</version>
     </parent>
 
     <artifactId>composum-ai-integration-backend-slingbase</artifactId>
@@ -64,8 +64,8 @@
 
         <!-- JSON -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- Java Annotations -->

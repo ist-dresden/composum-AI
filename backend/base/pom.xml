@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.composum.ai</groupId>
         <artifactId>composum-ai-integration-backend</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>3.3.0-rc</version>
     </parent>
 
     <artifactId>composum-ai-integration-backend-base</artifactId>
@@ -72,11 +72,6 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.commons.threads</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
         </dependency>
 
         <dependency>
@@ -172,7 +167,6 @@
                         <Import-Package>
                             javax.annotation;version="[1,4)",
                             !javax.annotation.meta,
-                            com.google.gson.*,
                             !com.google.*,
                             !android.*,
                             !org.apache.hc.*,

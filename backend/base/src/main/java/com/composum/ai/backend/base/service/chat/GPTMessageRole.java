@@ -1,6 +1,6 @@
 package com.composum.ai.backend.base.service.chat;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Role of a {@link GPTChatMessage} in a dialog with ChatGPT.
@@ -12,23 +12,23 @@ public enum GPTMessageRole {
     /**
      * The system message helps set the behavior of the assistant.
      */
-    @SerializedName("system")
+    @JsonProperty("system")
     SYSTEM("system"),
     /**
      * The user messages help instruct the assistant.
      */
-    @SerializedName("user")
+    @JsonProperty("user")
     USER("user"),
     /**
      * The assistant messages help store prior responses. It can also serve as an example of desired behavior.
      */
-    @SerializedName("assistant")
+    @JsonProperty("assistant")
     ASSISTANT("assistant"),
 
     /**
      * A result of a tool call the assistant made.
      */
-    @SerializedName("tool")
+    @JsonProperty("tool")
     TOOL("tool");
 
     private final String externalRepresentation;

@@ -4,6 +4,9 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents the a call of a function used as a tool in the chat completion request.
  */
@@ -18,7 +21,8 @@ public class GPTFunctionCallDetails {
      * @param name      The name of the function to be called. This must be unique and can only contain a-z, A-Z, 0-9, underscores, and dashes.
      * @param arguments A JSON for the arguments the function is called with.
      */
-    public GPTFunctionCallDetails(String name, String arguments) {
+    @JsonCreator
+    public GPTFunctionCallDetails(@JsonProperty("name") String name, @JsonProperty("arguments") String arguments) {
         this.name = name;
         this.arguments = arguments;
     }

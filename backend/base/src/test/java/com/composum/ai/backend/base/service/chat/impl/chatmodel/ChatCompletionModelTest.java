@@ -4,19 +4,19 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.composum.ai.backend.base.util.JsonUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ChatCompletionModelTest {
 
-    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private static final ObjectMapper objectMapper = JsonUtil.newObjectMapper();
 
     private String removeWhitespaceAndNewlines(String str) {
         return str.replaceAll("\\s+", "");
     }
 
     @Test
-    public void testRequestSerializationDeserialization() {
+    public void testRequestSerializationDeserialization() throws Exception {
         String originalRequestJson =
                 "{\n" +
                         "  \"model\": \"gpt-3.5-turbo\",\n" +
@@ -31,13 +31,13 @@ public class ChatCompletionModelTest {
                         "  \"max_tokens\": 300,\n" +
                         "  \"stream\": true\n" +
                         "}";
-        ChatCompletionRequest request = gson.fromJson(originalRequestJson, ChatCompletionRequest.class);
-        String serializedRequestJson = gson.toJson(request);
+        ChatCompletionRequest request = objectMapper.readValue(originalRequestJson, ChatCompletionRequest.class);
+        String serializedRequestJson = objectMapper.writeValueAsString(request);
         assertEquals(removeWhitespaceAndNewlines(originalRequestJson), removeWhitespaceAndNewlines(serializedRequestJson));
     }
 
     @Test
-    public void testResponseSerializationDeserialization() {
+    public void testResponseSerializationDeserialization() throws Exception {
         String originalResponseJson =
                 "{\n" +
                         "  \"id\": \"chatcmpl-123\",\n" +
@@ -50,13 +50,13 @@ public class ChatCompletionModelTest {
                         "  ],\n" +
                         "  \"usage\": {\"prompt_tokens\": 9, \"completion_tokens\": 12, \"total_tokens\": 21}\n" +
                         "}";
-        ChatCompletionResponse response = gson.fromJson(originalResponseJson, ChatCompletionResponse.class);
-        String serializedResponseJson = gson.toJson(response);
+        ChatCompletionResponse response = objectMapper.readValue(originalResponseJson, ChatCompletionResponse.class);
+        String serializedResponseJson = objectMapper.writeValueAsString(response);
         assertEquals(removeWhitespaceAndNewlines(originalResponseJson), removeWhitespaceAndNewlines(serializedResponseJson));
     }
 
     @Test
-    public void testChunkSerializationDeserialization() {
+    public void testChunkSerializationDeserialization() throws Exception {
         String originalChunkJson = "{\n" +
                 "  \"id\": \"chatcmpl-8YBAbKcTCwOzh6EklnSCJE2k44NOU\",\n" +
                 "  \"object\": \"chat.completion.chunk\",\n" +
@@ -90,8 +90,8 @@ public class ChatCompletionModelTest {
                 "    }\n" +
                 "  ]\n" +
                 "}"; // without the null values
-        ChatCompletionResponse response = gson.fromJson(originalChunkJson, ChatCompletionResponse.class);
-        String serializedChunkJson = gson.toJson(response);
+        ChatCompletionResponse response = objectMapper.readValue(originalChunkJson, ChatCompletionResponse.class);
+        String serializedChunkJson = objectMapper.writeValueAsString(response);
         assertEquals(removeWhitespaceAndNewlines(expectedChunkJson), removeWhitespaceAndNewlines(serializedChunkJson));
     }
 }
