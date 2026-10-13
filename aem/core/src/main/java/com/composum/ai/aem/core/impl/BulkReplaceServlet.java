@@ -1,28 +1,17 @@
 package com.composum.ai.aem.core.impl;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
-import javax.jcr.Node;
-import javax.jcr.Session;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
-
+import com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper;
+import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
+import com.composum.ai.backend.base.util.JsonUtil;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.Replicator;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.WCMException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.IteratorUtils;
+import org.apache.commons.collections4.iterators.IteratorChain;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -40,16 +29,26 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper;
-import com.composum.ai.aem.core.impl.autotranslate.AutoTranslateConfigService;
-import com.composum.ai.backend.base.util.JsonUtil;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.Replicator;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.wcm.api.WCMException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.annotation.Nonnull;
+import javax.jcr.Node;
+import javax.jcr.Session;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Servlet with functionality for the bulk replace tool.
@@ -154,9 +153,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         // Required parameters: rootPath, term
         SearchParams params = new SearchParams();
         params.rootPath = request.getParameter("rootPath");
+        params.multiRoot = request.getParameter("multiRoot");
         params.term = request.getParameter("term");
 
-        if (!params.rootPath.startsWith("/content") || !params.rootPath.matches("/content/[^/]+/.*")) {
+        if (!params.rootPath.startsWith("/content") ||
+                (!params.rootPath.matches("/content/[^/]+/.*") && StringUtils.isBlank(params.multiRoot))) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("Invalid rootPath - should be /content and at least level 3.");
             return;
@@ -212,6 +213,42 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     }
 
     /**
+     * Determines the search roots based on the provided root path and multi-root pattern.
+     * If a multi-root pattern is specified, resources matching the pattern within the root path
+     * are added to the collection. Otherwise, the root resource itself is added.
+     *
+     * @param resolver the resource resolver used to access resources
+     * @param params the search parameters containing the root path and multi-root pattern
+     * @return a collection of resources that represent the determined search roots
+     */
+    protected Collection<Resource> determineSearchRoots(@Nonnull final ResourceResolver resolver,
+                                                        @Nonnull final SearchParams params) {
+        final List<Resource> resources = new ArrayList<>();
+        Resource rootResource = resolver.getResource(params.rootPath);
+        if (rootResource != null) {
+            if (StringUtils.isNotBlank(params.multiRoot)) {
+                final Pattern pattern = Pattern.compile(params.multiRoot);
+                for (Resource resource : rootResource.getChildren()) {
+                    Matcher matcher = pattern.matcher(resource.getPath());
+                    if (matcher.find()) {
+                        resources.add(resource);
+                    } else {
+                        for (Resource child : resource.getChildren()) {
+                            matcher = pattern.matcher(child.getPath());
+                            if (matcher.find()) {
+                                resources.add(child);
+                            }
+                        }
+                    }
+                }
+            } else {
+                resources.add(rootResource);
+            }
+        }
+        return resources;
+    }
+
+    /**
      * Streams search results using stored parameters.
      *
      * @param params   the search parameters, not null
@@ -225,8 +262,8 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         Pattern termsPattern = whitespaceLenientPattern(params.term);
 
         ResourceResolver resolver = request.getResourceResolver();
-        Resource rootResource = resolver.getResource(params.rootPath);
-        if (rootResource == null) {
+        Collection<Resource> rootResources = determineSearchRoots(resolver, params);
+        if (rootResources.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("Root path not found.");
             return;
@@ -244,19 +281,22 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             if (pageManager == null) {
                 throw new ServletException("Could not get PageManager");
             }
-            // For CJK languages, jcr:contains may not tokenize properly, so get all pages and filter in Java
-            Iterator<Resource> candidatePages;
-            if (containsCJKCharacters(params.term)) {
-                String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)";
-                candidatePages = resolver.findResources(xpath, "xpath");
-                candidatePages = IteratorUtils.chainedIterator(IteratorUtils.singletonIterator(rootResource), candidatePages);
-            } else {
-                String xpath = "/jcr:root" + params.rootPath + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
-                candidatePages = resolver.findResources(xpath, "xpath");
-                // That Xpath doesn't find the root page, so add it explicitly.
-                // Also: caution - the /oak:index/cqPageLucene is just to depth 4, so this might actually fail to find some pages. :-(
-                // But the speed is hugely better, so we risk that.
-                candidatePages = IteratorUtils.chainedIterator(IteratorUtils.singletonIterator(rootResource), candidatePages);
+
+            IteratorChain<Resource> candidatePages = new IteratorChain<>();
+
+            for (Resource rootResource : rootResources) {
+                candidatePages.addIterator(IteratorUtils.singletonIterator(rootResource));
+                // For CJK languages, jcr:contains may not tokenize properly, so get all pages and filter in Java
+                if (containsCJKCharacters(params.term)) {
+                    String xpath = "/jcr:root" + rootResource.getPath() + "//element(*, cq:Page)";
+                    candidatePages.addIterator(resolver.findResources(xpath, "xpath"));
+                } else {
+                    String xpath = "/jcr:root" + rootResource.getPath() + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
+                    candidatePages.addIterator(resolver.findResources(xpath, "xpath"));
+                    // That Xpath doesn't find the root page, so add it explicitly.
+                    // Also: caution - the /oak:index/cqPageLucene is just to depth 4, so this might actually fail to find some pages. :-(
+                    // But the speed is hugely better, so we risk that.
+                }
             }
 
             while (candidatePages.hasNext()) {
@@ -395,7 +435,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     /**
      * Counts the number of matches of a pattern in the given text.
-     * 
+     *
      * @param text the text to search in
      * @param pattern the pattern to count matches for
      * @return the number of matches found
@@ -404,7 +444,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
         if (text == null || pattern == null) {
             return 0;
         }
-        
+
         int count = 0;
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
@@ -527,11 +567,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         skippedTargets.add(skipped);
                         continue; // Skip instead of failing
                     }
-                    
+
                     // Capture the original value
                     ValueMap props = componentResource.adaptTo(ValueMap.class);
                     String oldVal = props != null ? props.get(target.property, String.class) : null;
-                    
+
                     // Check if content still matches the search pattern
                     if (oldVal == null || !replacePattern.matcher(oldVal).find()) {
                         // Content has changed since search - skip this property
@@ -547,14 +587,14 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                         skippedTargets.add(skipped);
                         continue; // Skip but continue with other properties
                     }
-                    
+
                     // Validate occurrence count matches what was found during search
                     // Only validate if expectedOccurrences was actually set (>= 0 means it was set during search)
                     if (target.expectedOccurrences >= 0) {
                         int currentOccurrences = countMatches(oldVal, replacePattern);
                         if (currentOccurrences != target.expectedOccurrences) {
                             LOG.info("Occurrence count mismatch (expected {}, found {}) for property {} in {} of page {}",
-                                    target.expectedOccurrences, currentOccurrences, 
+                                    target.expectedOccurrences, currentOccurrences,
                                     target.property, target.componentPath, replaceRequest.page);
                             // Create a Changed object for skipped item with details
                             Changed skipped = new Changed();
@@ -567,7 +607,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                             continue; // Skip due to occurrence count mismatch
                         }
                     }
-                    
+
                     // Replace and capture new value.
                     String newVal = replaceInProperty(componentResource, target.property, replacePattern, replaceRequest.replacement);
                     if (newVal != null) {
@@ -753,6 +793,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
 
     protected static class SearchParams {
         public String rootPath;
+        public String multiRoot;
         public String term;
     }
 
