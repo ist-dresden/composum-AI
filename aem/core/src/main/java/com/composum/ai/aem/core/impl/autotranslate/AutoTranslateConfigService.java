@@ -1,11 +1,11 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
-import java.util.List;
+import org.apache.sling.api.resource.Resource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.apache.sling.api.resource.Resource;
+import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * Serves the configurations for the automatic translation.
@@ -27,7 +27,8 @@ public interface AutoTranslateConfigService {
      * Returns those attributes that should be translated. (Of the resource, not children.)
      */
     @Nonnull
-    List<String> translateableAttributes(@Nullable Resource resource);
+    List<String> translateableAttributes(@Nullable Resource resource,
+                                         @Nonnull BiFunction<String, Object, Boolean> isAppropriateProperty);
 
     /**
      * If true, we do not only provide changed texts to the AI during re-translating a page with some changes,

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -137,7 +138,8 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
 
     @Override
     @Nonnull
-    public List<String> translateableAttributes(@Nullable Resource resource) {
+    public List<String> translateableAttributes(@Nullable Resource resource,
+                                                @Nonnull BiFunction<String, Object, Boolean> isAppropriateProperty) {
         if (resource == null || !isTranslatableResource(resource)) {
             return Collections.emptyList();
         }
@@ -163,7 +165,7 @@ public class AutoTranslateConfigServiceImpl implements AutoTranslateConfigServic
             boolean allowed = allowedAttributeRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
             if (!allowed) {
                 boolean denied = deniedAttributesRegexes.stream().anyMatch(p -> p.matcher(attributeDescription).matches());
-                if (denied || !isHeuristicallyTranslatableProperty(entry.getKey(), entry.getValue())
+                if (denied || !isAppropriateProperty.apply(entry.getKey(), entry.getValue())
                         || isHuge(entry.getKey(), entry.getValue())) {
                     continue;
                 }

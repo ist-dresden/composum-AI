@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.jcr.Node;
 import javax.jcr.Session;
 import javax.servlet.Servlet;
@@ -95,6 +96,11 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      */
     private static final String ENDMARKER = "cAkE8LkHJG";
     private static final String ENDMARKER_REPLACEMENT = "</span>";
+    /**
+     * pattern of non-replaceable property names
+     */
+    public static final Pattern NON_REPLACEABLE_PATTERN = Pattern
+            .compile("^(rep:|sling:|cq:|jcr:(primary|mixin|create|last|.*[Vv]ersion|uuid)).*");
 
 
     @Reference
@@ -218,7 +224,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
      * are added to the collection. Otherwise, the root resource itself is added.
      *
      * @param resolver the resource resolver used to access resources
-     * @param params the search parameters containing the root path and multi-root pattern
+     * @param params   the search parameters containing the root path and multi-root pattern
      * @return a collection of resources that represent the determined search roots
      */
     protected Collection<Resource> determineSearchRoots(@Nonnull final ResourceResolver resolver,
@@ -291,7 +297,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
                     String xpath = "/jcr:root" + rootResource.getPath() + "//element(*, cq:Page)";
                     candidatePages.addIterator(resolver.findResources(xpath, "xpath"));
                 } else {
-                    String xpath = "/jcr:root" + rootResource.getPath() + "//element(*, cq:Page)[jcr:contains(., '*" + params.term.replaceAll("['\"]", "") + "*')]";
+                    String xpath = "/jcr:root" + rootResource.getPath() + "//element(*, cq:Page)[jcr:contains(., '" + params.term.replaceAll("['\"]", "") + "')]";
                     candidatePages.addIterator(resolver.findResources(xpath, "xpath"));
                     // That Xpath doesn't find the root page, so add it explicitly.
                     // Also: caution - the /oak:index/cqPageLucene is just to depth 4, so this might actually fail to find some pages. :-(
@@ -350,23 +356,58 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
             componentPath = componentPath.substring(componentPath.indexOf("jcr:content/") + "jcr:content/".length());
         }
 
-        // we re-use the recognition of translateable attributes from the AI translation since this is
-        // very much what we want for search and replace, though that's not entirely without risk in case of future changes.
-        for (String propertyName : configService.translateableAttributes(resource)) {
-            String stringValue = (String) properties.get(propertyName); // if that's not a string there is something very off.
-            if (termPattern.matcher(stringValue).find()) {
-                Match m = new Match();
-                m.componentPath = componentPath;
-                m.property = propertyName;
-                m.excerpt = createExcerpt(stringValue, termPattern, SURROUNDING_CHARS);
-                // Count the number of occurrences in this property
-                m.occurrenceCount = countMatches(stringValue, termPattern);
-                matches.add(m);
+        for (String propertyName : replaceableAttributes(resource)) {
+            Object value = properties.get(propertyName);
+            if (value instanceof String) {
+                findMatchesInString(componentPath, propertyName, (String) value, termPattern, matches);
             }
         }
 
         for (Resource child : resource.getChildren()) {
             findMatchesInResource(child, componentPath, termPattern, matches);
+        }
+    }
+
+    /**
+     * Identifies and returns a list of replaceable attributes for a given resource.
+     * The method utilizes the translation attribute recognition from the AI translation
+     * service to determine attributes suitable for search and replace operations.
+     *
+     * @param resource the resource whose attributes are to be evaluated for replacement;
+     *                 accepts null if the resource is not applicable
+     * @return a list of attributes deemed replaceable, never null
+     */
+    private @Nonnull List<String> replaceableAttributes(@Nullable Resource resource) {
+        // we re-use the recognition of translateable attributes from the AI translation since this is
+        // very much what we want for search and replace, though that's not entirely without risk in case of future changes.
+        return configService.translateableAttributes(resource,
+                /* AutoTranslateConfigServiceImpl::isHeuristicallyTranslatableProperty // is filtering links and paths */
+                (key, value) -> !NON_REPLACEABLE_PATTERN.matcher(key).matches()
+                        && !AITranslatePropertyWrapper.isAiTranslateProperty(key));
+    }
+
+    /**
+     * Searches for matches of the specified pattern within a given string and adds them to the list of matches.
+     *
+     * @param componentPath the path of the component being searched
+     * @param propertyName  the name of the property being evaluated
+     * @param stringValue   the string value in which to search for matches
+     * @param termPattern   the pattern used to identify matches in the string
+     * @param matches       the list that will contain the matches found
+     */
+    private void findMatchesInString(@Nonnull String componentPath,
+                                     @Nonnull String propertyName,
+                                     @Nonnull String stringValue,
+                                     @Nonnull Pattern termPattern,
+                                     @Nonnull List<Match> matches) {
+        if (termPattern.matcher(stringValue).find()) {
+            Match m = new Match();
+            m.componentPath = componentPath;
+            m.property = propertyName;
+            m.excerpt = createExcerpt(stringValue, termPattern, SURROUNDING_CHARS);
+            // Count the number of occurrences in this property
+            m.occurrenceCount = countMatches(stringValue, termPattern);
+            matches.add(m);
         }
     }
 
@@ -436,7 +477,7 @@ public class BulkReplaceServlet extends SlingAllMethodsServlet {
     /**
      * Counts the number of matches of a pattern in the given text.
      *
-     * @param text the text to search in
+     * @param text    the text to search in
      * @param pattern the pattern to count matches for
      * @return the number of matches found
      */

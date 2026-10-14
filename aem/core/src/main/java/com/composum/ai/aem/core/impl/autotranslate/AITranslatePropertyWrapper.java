@@ -1,23 +1,21 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
 import static com.day.cq.commons.jcr.JcrConstants.JCR_DESCRIPTION;
+import org.apache.commons.lang3.StringUtils;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.ValueMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.ValueMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AITranslatePropertyWrapper {
 
@@ -345,7 +343,7 @@ public class AITranslatePropertyWrapper {
     /**
      * Checks whether a property was created by us and must not be translated etc.
      */
-    protected static boolean isAiTranslateProperty(String name) {
+    public static boolean isAiTranslateProperty(String name) {
         return name.startsWith(AI_PREFIX) || name.startsWith(LC_PREFIX);
     }
 
