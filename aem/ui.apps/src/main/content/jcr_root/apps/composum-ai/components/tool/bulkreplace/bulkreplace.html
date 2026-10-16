@@ -33,12 +33,19 @@
     <div id="form-zone" class="mb-5">
         <form class="form-horizontal">
             <div class="form-group row">
-                <label for="root-page" class="col-sm-2 col-form-label" data-toggle="tooltip"
+                <label for="root-page" class="col-sm-2 col-form-label text-nowrap" data-toggle="tooltip"
                        title="Enter the root page path (e.g. /content/site/en)">Root Page (*)</label>
-                <div class="col-sm-10">
+                <div class="col-sm-6">
                     <input type="text" class="form-control" id="root-page" placeholder="Enter root page"
                            data-toggle="tooltip"
                            title="Type the absolute path where the search should start. Only content paths of at least level 3 are permitted to restrict accidental replacements.">
+                </div>
+                <label for="multi-root" class="col-sm-1 col-form-label text-nowrap" data-toggle="tooltip"
+                       title="Enter the root page path (e.g. /content/site/en)">Multi Root</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="multi-root" placeholder="optional pattern for multi root loop"
+                           data-toggle="tooltip"
+                           title="Type a path pattern that's used to find matching root elements in the next two levels of the given root path.">
                 </div>
             </div>
             <div class="form-group row">

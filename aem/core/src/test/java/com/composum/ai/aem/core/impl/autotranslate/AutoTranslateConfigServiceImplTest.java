@@ -39,10 +39,12 @@ public class AutoTranslateConfigServiceImplTest {
         when(config.deniedAttributesRegexes()).thenReturn(
                 new String[]{".*%deniedAttr", "wknd/components/page%bar/subDeniedAttr"});
         service.activate(config);
-        List<String> translateable = service.translateableAttributes(res);
+        List<String> translateable = service.translateableAttributes(res,
+                AutoTranslateConfigServiceImpl::isHeuristicallyTranslatableProperty);
         Collections.sort(translateable);
         assertEquals(Arrays.asList("allowedAttr", "heuristicAttr"), translateable);
-        translateable = service.translateableAttributes(sub);
+        translateable = service.translateableAttributes(sub,
+                AutoTranslateConfigServiceImpl::isHeuristicallyTranslatableProperty);
         Collections.sort(translateable);
         assertEquals(Arrays.asList("subAllowedAttr", "subHeuristicAttr"), translateable);
     }

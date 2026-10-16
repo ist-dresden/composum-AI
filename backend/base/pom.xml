@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.composum.ai</groupId>
         <artifactId>composum-ai-integration-backend</artifactId>
-        <version>3.3.1</version>
+        <version>3.4.0</version>
     </parent>
 
     <artifactId>composum-ai-integration-backend-base</artifactId>
@@ -21,8 +21,8 @@
         <!-- Do not upgrade to 3.0.48 etc. since this doesn't work with the Java version in AEM. -->
         <wikitext.version>3.0.48.202308291007</wikitext.version>
         <wikitext.guava.version>33.5.0-jre</wikitext.guava.version>
-        <httpcomponents.client5.version>5.3.1</httpcomponents.client5.version>
-        <httpcomponents.core5.version>5.2.5</httpcomponents.core5.version>
+        <httpcomponents.client5.version>5.6.5</httpcomponents.client5.version>
+        <httpcomponents.core5.version>5.4.4</httpcomponents.core5.version>
     </properties>
 
     <dependencies>
@@ -109,8 +109,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.16.2</version>
-            <!-- 1.17.2 leads to weird error about META-INF/versions/9/module-info.class=module-info -->
+            <version>1.23.2</version>
         </dependency>
 
         <!-- Logging -->
@@ -172,6 +171,12 @@
                             !org.apache.hc.*,
                             !org.conscrypt.*,
                             !org.brotli.dec.*,
+                            !com.aayushatharva.brotli4j.*,
+                            !com.github.luben.zstd.*,
+                            !org.apache.commons.compress.*,
+                            !org.newsclub.*,
+                            <!-- AEM does not export jdk.net; the bundle uses its own fallback in src/main/java/jdk/net -->
+                            !jdk.net,
                             *
                         </Import-Package>
                         <Export-Package>

@@ -1,13 +1,35 @@
 package com.composum.ai.aem.core.impl.autotranslate;
 
+import com.composum.ai.aem.core.impl.SelectorUtils;
 import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_ERRORMARKER;
 import static com.composum.ai.aem.core.impl.autotranslate.AITranslatePropertyWrapper.AI_TRANSLATION_MODEL;
+import com.composum.ai.backend.base.service.GPTException;
+import com.composum.ai.backend.base.service.chat.GPTConfiguration;
+import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
+import com.composum.ai.backend.base.service.chat.GPTTranslationService;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.LASTID;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_END;
 import static com.composum.ai.backend.base.service.chat.impl.GPTTranslationServiceImpl.MULTITRANSLATION_SEPARATOR_START;
-import static java.util.Objects.requireNonNull;
+import com.composum.ai.backend.slingbase.AIConfigurationService;
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationship;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
+import org.apache.commons.lang3.StringUtils;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.caconfig.ConfigurationBuilder;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.time.LocalDateTime;
@@ -21,37 +43,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.caconfig.ConfigurationBuilder;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.composum.ai.aem.core.impl.SelectorUtils;
-import com.composum.ai.backend.base.service.GPTException;
-import com.composum.ai.backend.base.service.chat.GPTConfiguration;
-import com.composum.ai.backend.base.service.chat.GPTResponseCheck;
-import com.composum.ai.backend.base.service.chat.GPTTranslationService;
-import com.composum.ai.backend.slingbase.AIConfigurationService;
-import com.day.cq.wcm.api.WCMException;
-import com.day.cq.wcm.msm.api.LiveRelationship;
-import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 
 /**
  * <p>
@@ -639,7 +636,8 @@ public class AutoPageTranslateServiceImpl implements AutoPageTranslateService {
         }
         ValueMap sourceValueMap = sourceResource.getValueMap();
         ModifiableValueMap targetValueMap = requireNonNull(resource.adaptTo(ModifiableValueMap.class));
-        for (String key : autoTranslateConfigService.translateableAttributes(sourceResource)) {
+        for (String key : autoTranslateConfigService.translateableAttributes(sourceResource,
+                AutoTranslateConfigServiceImpl::isHeuristicallyTranslatableProperty)) {
             if (AITranslatePropertyWrapper.isAiTranslateProperty(key)) {
                 continue;
             }

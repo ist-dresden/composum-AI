@@ -236,6 +236,7 @@ class BulkReplaceApp {
         this.progressBar = document.querySelector(".progress-bar");
         this.tableBody = document.querySelector("table tbody");
         this.rootPageInput = document.getElementById("root-page");
+        this.multiRootInput = document.getElementById("multi-root");
         this.searchStringInput = document.getElementById("search-string");
         this.replacementInput = document.getElementById("replacement-string");
         this.createVersionCheckbox = document.getElementById("create-version");
@@ -325,6 +326,9 @@ class BulkReplaceApp {
                 if (settings.root) {
                     this.rootPageInput.value = settings.root;
                 }
+                if (settings.multiRoot) {
+                    this.multiRootInput.value = settings.multiRoot;
+                }
                 if (settings.search) {
                     this.searchStringInput.value = settings.search;
                 }
@@ -343,6 +347,7 @@ class BulkReplaceApp {
     saveSettings() {
         const settings = {
             root: this.rootPageInput.value.trim(),
+            multiRoot: this.multiRootInput.value.trim(),
             search: this.searchStringInput.value,
             replacement: this.replacementInput.value
             // Do not save createVersion and autoPublish
@@ -385,6 +390,7 @@ class BulkReplaceApp {
             errorAlert.style.display = "none";
         }
         const root = this.rootPageInput.value.trim();
+        const multi = this.multiRootInput.value.trim();
         const term = this.searchStringInput.value;
         if (!root || !term) {
             this.showErrorAlert("Please provide both root page and search string.");
@@ -395,7 +401,7 @@ class BulkReplaceApp {
         this.progressBar.textContent = "50%";
         this.replaceBtn.disabled = true;
         this.toggleContinueMsg(true);
-        this.startSearchJob(root, term);
+        this.startSearchJob(root, term, multi);
     }
 
     /**
@@ -403,11 +409,15 @@ class BulkReplaceApp {
      *
      * @param root the root page path
      * @param term the search term
+     * @param multi optional path pattern for multi root loop
      */
-    startSearchJob(root, term) {
+    startSearchJob(root, term, multi = undefined) {
         const formData = new URLSearchParams();
         formData.append("operation", "search");
         formData.append("rootPath", root);
+        if (multi) {
+            formData.append("multiRoot", multi);
+        }
         formData.append("term", term);
 
         this.getCSRFToken()
@@ -726,6 +736,7 @@ class BulkReplaceApp {
      */
     handleClearForm() {
         this.rootPageInput.value = "";
+        this.multiRootInput.value = "";
         this.searchStringInput.value = "";
         this.replacementInput.value = "";
         this.createVersionCheckbox.checked = true;
