@@ -190,7 +190,18 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
             switch (kind) {
                 // also reset values that have no meaning anymore.
                 case CANCEL:
-                    if (StringUtils.isBlank(propertyName)) {
+                    if (StringUtils.isBlank(propertyName) && ComponentCancellationHelper.isPageContent(componentResource)) {
+                        // Never cancel the relationship of the jcr:content itself: AEM then creates a stray
+                        // jcr:content/jcr:content node (cq:lastReenabled) in the LiveCopy that blocks rollouts.
+                        // Cancel the AI translated properties individually instead.
+                        List<String> names = new ArrayList<>();
+                        for (AITranslatePropertyWrapper w : AITranslatePropertyWrapper.allProps(sourceResource.getValueMap(), properties)) {
+                            names.add(w.getPropertyName());
+                        }
+                        if (!names.isEmpty()) {
+                            liveRelationshipManager.cancelPropertyRelationship(componentResource.getResourceResolver(), relationship, names.toArray(new String[0]), true);
+                        }
+                    } else if (StringUtils.isBlank(propertyName)) {
                         boolean deep = !ComponentCancellationHelper.isContainer(componentResource);
                         liveRelationshipManager.cancelRelationship(componentResource.getResourceResolver(), relationship, deep, true);
                     } else {
@@ -200,7 +211,14 @@ public class AutoTranslateMergeServiceImpl implements AutoTranslateMergeService 
                     }
                     break;
                 case REENABLE:
-                    if (StringUtils.isBlank(propertyName)) {
+                    if (StringUtils.isBlank(propertyName) && ComponentCancellationHelper.isPageContent(componentResource)) {
+                        // see CANCEL: reenableRelationship on jcr:content creates a stray jcr:content/jcr:content node.
+                        java.util.Collection<String> cancelled = relationship.getStatus().getCanceledProperties();
+                        if (cancelled != null && !cancelled.isEmpty()) {
+                            liveRelationshipManager.reenablePropertyRelationship(componentResource.getResourceResolver(), relationship, cancelled.toArray(new String[0]), true);
+                        }
+                        ComponentCancellationHelper.adjustPropertiesReenableInheritance(liveRelationshipManager, componentResource);
+                    } else if (StringUtils.isBlank(propertyName)) {
                         liveRelationshipManager.reenableRelationship(componentResource.getResourceResolver(), relationship, true);
                         ComponentCancellationHelper.adjustPropertiesReenableInheritance(liveRelationshipManager, componentResource);
                     } else {
