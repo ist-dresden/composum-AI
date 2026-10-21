@@ -54,16 +54,19 @@
 			<groupId>com.composum.nodes</groupId>
 			<artifactId>composum-nodes-commons</artifactId>
 			<version>${composum.nodes.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.composum.pages</groupId>
 			<artifactId>composum-pages-commons-bundle</artifactId>
 			<version>${composum.pages.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.composum.pages</groupId>
 			<artifactId>composum-pages-stage-bundle</artifactId>
 			<version>${composum.pages.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Other libraries -->
